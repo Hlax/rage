@@ -1,0 +1,46 @@
+{
+  "id": "ticket-014",
+  "title": "Add public card export with safety filtering (Golden Test 11)",
+  "problem": "ticket-013 enforces contract drift but public export remains a Phase 0 placeholder. Golden Test 11 requires curated public card JSON with only whitelisted fields and no raw source text, prompts, or private paths.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 11: public card export contains only curated public fields.",
+    "docs/agents/10_SAFETY_MODEL.md public export boundaries.",
+    "docs/agents/08_REPORTING_SPEC.md public card shape.",
+    "agent_reports/2026-06-11_phase-1_ticket-013_research-contract-drift.md section 15–16.",
+    "rge/modules/card_exporter.py: NotImplementedError stub; research export-public returns not_implemented."
+  ],
+  "affected_modules": [
+    "rge/modules/card_exporter.py",
+    "rge/safety/public_export_policy.py",
+    "rge/db/repositories.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/card_exporter.py",
+    "rge/safety/public_export_policy.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "tests/golden/test_11_public_card_export.py",
+    "tests/golden/test_00_scaffold.py"
+  ],
+  "acceptance_criteria": [
+    "research export-public --limit N writes public-safe card JSON without Ollama.",
+    "Export excludes raw source text, prompts, secrets, and local paths; includes whitelisted card fields per Golden Test 11.",
+    "pytest tests/golden/test_11_public_card_export.py passes without Ollama.",
+    "Existing golden tests still pass (55+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_11_public_card_export.py",
+    "pytest tests/golden",
+    "pytest",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not implement LangGraph, theory generation, or live web discovery.",
+    "Do not add public write routes."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert branch phase-1/ticket-014-public-card-export. Delete generated public JSON artifacts from apps/public-site/public/data if needed.",
+  "status": "proposed"
+}
