@@ -44,7 +44,7 @@ If documents conflict, follow the higher-priority document.
 
 ## Expected Agent Workflow
 
-1. Read the active ticket or create the smallest next ticket.
+1. Read the active ticket from `tickets/TICKET_QUEUE.md` or create the smallest next ticket in `tickets/`.
 2. Confirm the phase and scope.
 3. Identify expected files.
 4. Implement only the ticket scope.
@@ -87,4 +87,18 @@ Example:
 
 ```txt
 agent_reports/2026-06-11_phase-0_ticket-001_repo-scaffold-model-runtime.md
+```
+
+## Ticket Queue Location
+
+Read the active queue from:
+
+```txt
+tickets/TICKET_QUEUE.md
+```
+
+Save new ticket JSON files to:
+
+```txt
+tickets/
 ```

@@ -69,6 +69,8 @@ Responsible for:
 
 ## Ticket Rules
 
+Read the queue from `tickets/TICKET_QUEUE.md`. Save ticket JSON files to `tickets/`.
+
 Every ticket must include:
 
 - `title`
