@@ -116,7 +116,7 @@ Revert branch `phase-1/ticket-008-mock-concept-linking` (or merge revert on `mai
 - Instruction source: new `AGENTS.md` step 9 (temporary).
 - Pre-merge `main` tip: `bce08be`
 - Branch merged: `phase-1/ticket-008-mock-concept-linking` (includes tickets 001, 006, 007, 008 commits)
-- Merge commit hash: _(filled after merge below)_
+- Merge result: fast-forward to `1c59d14`; pushed `origin/main` successfully.
 
 ## 14. Recommended Next Ticket
 
