@@ -118,7 +118,7 @@ Revert branch `phase-1/ticket-010-score-reconciliation`. Delete `score_events` r
 - Instruction source: `AGENTS.md` step 9 (temporary).
 - Pre-merge `main` tip: `a086d6c`
 - Branch: `phase-1/ticket-010-score-reconciliation`
-- Merge result: pending (record hash below after merge/push).
+- Merge result: `--no-ff` merge commit `011441f5586acb1e3755fd43af675251b17cda82`; pushed `origin/main`.
 
 ## 15. Recommended Next Ticket
 
