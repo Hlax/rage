@@ -1,0 +1,49 @@
+{
+  "id": "ticket-011",
+  "title": "Add mock contradiction detection (Golden Test 7)",
+  "problem": "ticket-009 and ticket-010 build support edges and reconcile scores, but no module detects or preserves contradictions between claims. Golden Test 7 requires that opposing claims about AI and diversity remain distinct and are linked with qualifies or apparent_contradiction_metric_or_condition_difference rather than being flattened.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 7: contradiction detection preserves disagreement.",
+    "docs/agents/07_MVP_ACCEPTANCE_TESTS.md Test 7 pass criteria: opposing edges preserved; inter-claim relationship marked qualifies or apparent_contradiction_metric_or_condition_difference.",
+    "docs/agents/05_DATA_MODEL.md relationships and relationship_evidence with stance values.",
+    "agent_reports/2026-06-11_phase-1_ticket-010_score-reconciliation.md section 15–16: recommends ticket-011 as smallest next step.",
+    "fixtures/sources/creativity_ai_diversity_contradiction.txt exists; referenced in scaffold and run contract.",
+    "No contradiction_detector module or Golden Test 7 test file yet."
+  ],
+  "affected_modules": [
+    "rge/modules/contradiction_detector.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "rge/llm/mock_client.py"
+  ],
+  "expected_files": [
+    "rge/modules/contradiction_detector.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "rge/llm/mock_client.py",
+    "fixtures/llm_outputs/contradiction_detection_creativity_diversity.json",
+    "tests/golden/test_07_contradiction_detection.py",
+    "tests/golden/test_00_scaffold.py"
+  ],
+  "acceptance_criteria": [
+    "research detect-contradictions --source <source_id> (or equivalent scoped CLI) identifies opposing claims/relationships from mock fixtures without Ollama.",
+    "Given base diversity-reduction edge and contradiction fixture source, system preserves both may_reduce and may_increase edges and marks inter-claim or inter-relationship stance as qualifies or apparent_contradiction_metric_or_condition_difference per Golden Test 7.",
+    "Neither opposing claim is deleted or overwritten; no vague averaged summary replaces distinct claims.",
+    "pytest tests/golden/test_07_contradiction_detection.py passes without Ollama.",
+    "Existing golden tests still pass (45+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_07_contradiction_detection.py",
+    "pytest tests/golden",
+    "pytest",
+    "Manual: full spine on fresh --db plus ingest contradiction fixture, run detect-contradictions, verify both edges and qualification/contradiction link"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not implement research queue (Golden Test 9), public export, LangGraph, or theory generation.",
+    "Do not implement full skeptic agent or automated resolution of contradictions."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert branch phase-1/ticket-011-mock-contradiction-detection. Delete contradiction/qualification relationship_evidence rows from local SQLite test DBs if needed.",
+  "status": "proposed"
+}

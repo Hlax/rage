@@ -791,6 +791,22 @@ class RelationshipRepository:
         assert record is not None
         return record
 
+    def list_active(self) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT r.id, r.subject_concept_id, r.predicate, r.object_concept_id,
+                   r.scope, r.confidence, r.evidence_strength, r.domain,
+                   r.domain_metadata_json, r.status, r.created_at, r.updated_at,
+                   sub.label AS subject_label, obj.label AS object_label
+            FROM relationships r
+            JOIN concepts sub ON sub.id = r.subject_concept_id
+            JOIN concepts obj ON obj.id = r.object_concept_id
+            WHERE r.status = 'active'
+            ORDER BY r.created_at
+            """
+        ).fetchall()
+        return [_row_to_relationship(row) for row in rows]
+
 
 class RelationshipEvidenceRepository:
     """Persist and read ``relationship_evidence`` rows."""
@@ -861,6 +877,162 @@ class RelationshipEvidenceRepository:
         ).fetchone()
         assert row is not None
         return dict(row)
+
+    def has_link(
+        self, *, relationship_id: str, claim_id: str, stance: str
+    ) -> bool:
+        row = self._conn.execute(
+            """
+            SELECT 1 FROM relationship_evidence
+            WHERE relationship_id = ? AND claim_id = ? AND stance = ?
+            """,
+            (relationship_id, claim_id, stance),
+        ).fetchone()
+        return row is not None
+
+
+def make_score_event_id(
+    entity_type: str,
+    entity_id: str,
+    triggering_claim_id: str,
+    old_score: float,
+    new_score: float,
+) -> str:
+    digest = sha256_hex(
+        f"{entity_type}:{entity_id}:{triggering_claim_id}:{old_score}:{new_score}"
+    )
+    return f"sce_{digest[:16]}"
+
+
+class ScoreEventRepository:
+    """Persist and read append-only ``score_events`` rows."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def has_triggering_claim(
+        self, *, entity_type: str, entity_id: str, triggering_claim_id: str
+    ) -> bool:
+        row = self._conn.execute(
+            """
+            SELECT 1 FROM score_events
+            WHERE entity_type = ? AND entity_id = ? AND triggering_claim_id = ?
+            """,
+            (entity_type, entity_id, triggering_claim_id),
+        ).fetchone()
+        return row is not None
+
+    def list_for_entity(self, entity_type: str, entity_id: str) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT id, entity_type, entity_id, old_score, new_score,
+                   triggering_claim_id, triggering_source_id, reason,
+                   formula_version, created_at
+            FROM score_events
+            WHERE entity_type = ? AND entity_id = ?
+            ORDER BY created_at
+            """,
+            (entity_type, entity_id),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def list_for_source(self, source_id: str) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT id, entity_type, entity_id, old_score, new_score,
+                   triggering_claim_id, triggering_source_id, reason,
+                   formula_version, created_at
+            FROM score_events
+            WHERE triggering_source_id = ?
+            ORDER BY created_at
+            """,
+            (source_id,),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def persist_relationship_score_update(
+    conn: sqlite3.Connection,
+    *,
+    relationship_id: str,
+    old_score: float,
+    new_score: float,
+    triggering_claim_id: str,
+    triggering_source_id: str,
+    reason: str,
+    formula_version: str,
+    add_evidence: bool,
+    evidence_relevance_score: float | None = None,
+) -> dict[str, Any]:
+    """Atomically append score history and update relationship confidence."""
+    now = utc_now_iso()
+    event_id = make_score_event_id(
+        "relationship",
+        relationship_id,
+        triggering_claim_id,
+        old_score,
+        new_score,
+    )
+    conn.execute(
+        """
+        INSERT INTO score_events (
+            id, entity_type, entity_id, old_score, new_score,
+            triggering_claim_id, triggering_source_id, reason,
+            formula_version, created_at
+        ) VALUES (?, 'relationship', ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            event_id,
+            relationship_id,
+            old_score,
+            new_score,
+            triggering_claim_id,
+            triggering_source_id,
+            reason,
+            formula_version,
+            now,
+        ),
+    )
+    conn.execute(
+        """
+        UPDATE relationships
+        SET confidence = ?, updated_at = ?
+        WHERE id = ?
+        """,
+        (new_score, now, relationship_id),
+    )
+    if add_evidence:
+        evidence_id = make_relationship_evidence_id(
+            relationship_id, triggering_claim_id, "supports"
+        )
+        conn.execute(
+            """
+            INSERT INTO relationship_evidence (
+                id, relationship_id, claim_id, stance, relevance_score, created_at
+            ) VALUES (?, ?, ?, 'supports', ?, ?)
+            ON CONFLICT(relationship_id, claim_id, stance) DO NOTHING
+            """,
+            (
+                evidence_id,
+                relationship_id,
+                triggering_claim_id,
+                evidence_relevance_score,
+                now,
+            ),
+        )
+    conn.commit()
+    row = conn.execute(
+        """
+        SELECT id, entity_type, entity_id, old_score, new_score,
+               triggering_claim_id, triggering_source_id, reason,
+               formula_version, created_at
+        FROM score_events
+        WHERE id = ?
+        """,
+        (event_id,),
+    ).fetchone()
+    assert row is not None
+    return dict(row)
 
 
 def _row_to_relationship(row: sqlite3.Row) -> dict[str, Any]:

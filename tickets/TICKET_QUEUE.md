@@ -36,7 +36,16 @@ superseded
 | 7 | ticket-007 | done | Add mock claim extraction (Golden Test 2) | `phase-1/ticket-007-mock-claim-extraction` | `agent_reports/2026-06-11_phase-1_ticket-007_mock-claim-extraction.md` |
 | 8 | ticket-008 | done | Add mock concept linking (Golden Test 5) | `phase-1/ticket-008-mock-concept-linking` | `agent_reports/2026-06-11_phase-1_ticket-008_mock-concept-linking.md` |
 | 9 | ticket-009 | done | Add mock relationship builder (Golden Test 6) | `phase-1/ticket-009-mock-relationship-builder` | `agent_reports/2026-06-11_phase-1_ticket-009_mock-relationship-builder.md` |
-| 10 | ticket-010 | proposed | Add score reconciliation with history (Golden Test 8) | | |
+| 10 | ticket-010 | done | Add score reconciliation with history (Golden Test 8) | `phase-1/ticket-010-score-reconciliation` | `agent_reports/2026-06-11_phase-1_ticket-010_score-reconciliation.md` |
+| 11 | ticket-011 | proposed | Add mock contradiction detection (Golden Test 7) | | |
+
+## Queue Notes (2026-06-11, ticket-010 agent)
+
+- ticket-010 implemented `research reconcile-scores` with deterministic score boost
+  (`golden_v0.1.0`, +0.12 when claim confidence ≥ 0.8), append-only `score_events`
+  via `persist_relationship_score_update`, and follow-up source/fixture for Golden Test 8.
+  Golden Test 8 passes (4 tests); all 45 golden tests pass without Ollama.
+- ticket-011 proposes mock contradiction detection for Golden Test 7.
 
 ## Queue Notes (2026-06-11, ticket-009 agent)
 
@@ -76,7 +85,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-010 (proposed; awaiting review)
+ticket-011 (proposed; awaiting review)
 ```
 
 ## Queue Rules

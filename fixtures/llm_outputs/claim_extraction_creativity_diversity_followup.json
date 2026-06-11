@@ -1,0 +1,27 @@
+{
+  "task_name": "claim_extraction",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "claim_text": "AI-assisted brainstorming reduced semantic diversity in short-form writing tasks in a peer-reviewed replication study.",
+      "source_id": "src_placeholder",
+      "chunk_id": "chk_placeholder",
+      "quote_span": "AI-assisted brainstorming reduced semantic diversity across submitted ideas",
+      "subject": "AI-assisted brainstorming",
+      "predicate": "reduced",
+      "object": "semantic diversity",
+      "scope": "short-form writing tasks",
+      "evidence_type": "empirical",
+      "confidence": 0.85,
+      "limitations": [
+        "Tasks remained short-form writing only.",
+        "Generalization to other creative domains is uncertain."
+      ],
+      "domain": "creativity",
+      "domain_metadata": {
+        "measured_dimension": "semantic diversity",
+        "source_credibility_tier": "high"
+      }
+    }
+  ]
+}
