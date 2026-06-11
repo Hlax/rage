@@ -45,5 +45,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert branch phase-1/ticket-011-mock-contradiction-detection. Delete contradiction/qualification relationship_evidence rows from local SQLite test DBs if needed.",
-  "status": "proposed"
+  "status": "done"
 }

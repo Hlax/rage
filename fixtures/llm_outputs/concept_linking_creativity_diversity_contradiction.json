@@ -1,0 +1,50 @@
+{
+  "task_name": "concept_linking",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "claim_id": "placeholder",
+      "concept_label": "AI assistance",
+      "role": "subject",
+      "confidence": 0.85,
+      "domain_metadata": {
+        "track": "human-AI",
+        "creative_phase": "ideation",
+        "measured_dimension": "idea diversity"
+      }
+    },
+    {
+      "claim_id": "placeholder",
+      "concept_label": "brainstorming",
+      "role": "method",
+      "confidence": 0.8,
+      "domain_metadata": {
+        "track": "human-AI",
+        "creative_phase": "ideation",
+        "measured_dimension": "idea diversity"
+      }
+    },
+    {
+      "claim_id": "placeholder",
+      "concept_label": "diversity",
+      "role": "object",
+      "confidence": 0.9,
+      "domain_metadata": {
+        "track": "human-AI",
+        "creative_phase": "ideation",
+        "measured_dimension": "idea diversity"
+      }
+    },
+    {
+      "claim_id": "placeholder",
+      "concept_label": "ideation",
+      "role": "context",
+      "confidence": 0.75,
+      "domain_metadata": {
+        "track": "human-AI",
+        "creative_phase": "ideation",
+        "measured_dimension": "idea diversity"
+      }
+    }
+  ]
+}

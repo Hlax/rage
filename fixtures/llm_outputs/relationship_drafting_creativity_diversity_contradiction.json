@@ -1,0 +1,15 @@
+{
+  "task_name": "relationship_drafting",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "subject_concept": "AI assistance",
+      "predicate": "may_increase",
+      "object_concept": "diversity",
+      "stance": "supports",
+      "scope": "under divergent prompting when participants generate multiple divergent directions",
+      "confidence": "medium",
+      "supporting_claim_ids": ["placeholder"]
+    }
+  ]
+}

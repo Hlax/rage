@@ -85,6 +85,7 @@ def test_cli_top_level_help() -> None:
         "link-concepts",
         "build-relationships",
         "reconcile-scores",
+        "detect-contradictions",
         "export-public",
         "verify",
     ):

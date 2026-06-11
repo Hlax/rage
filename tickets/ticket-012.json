@@ -1,0 +1,43 @@
+{
+  "id": "ticket-012",
+  "title": "Add mock research queue ranking (Golden Test 9)",
+  "problem": "ticket-011 preserves contradictions but no module ranks candidate sources by relevance, credibility, and gap value. Golden Test 9 requires a research queue that ranks fixture sources deterministically with machine-readable reasons and rejects low-credibility marketing pages.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 9: research queue ranks sources by relevance, credibility, and gap value.",
+    "docs/agents/07_MVP_ACCEPTANCE_TESTS.md Test 9 pass criteria.",
+    "fixtures/candidate_sources/source_ranking_fixture.json exists in scaffold expected files.",
+    "agent_reports/2026-06-11_phase-1_ticket-011_mock-contradiction-detection.md section 15–16.",
+    "rge/modules/research_queue.py: NotImplementedError stub."
+  ],
+  "affected_modules": [
+    "rge/modules/research_queue.py",
+    "rge/db/repositories.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/research_queue.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "tests/golden/test_09_research_queue.py",
+    "tests/golden/test_00_scaffold.py"
+  ],
+  "acceptance_criteria": [
+    "research queue (or equivalent scoped CLI) ranks fixture candidate sources deterministically without Ollama.",
+    "Empirical paper ranks above marketing page; each queue item has reason, status, source type, relevance, credibility, and gap value per Golden Test 9.",
+    "pytest tests/golden/test_09_research_queue.py passes without Ollama.",
+    "Existing golden tests still pass (48+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_09_research_queue.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not implement public export, LangGraph, theory generation, or live source discovery.",
+    "Do not implement full research run contract orchestration."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert branch phase-1/ticket-012-mock-research-queue. Delete candidate queue rows from local SQLite test DBs if needed.",
+  "status": "proposed"
+}

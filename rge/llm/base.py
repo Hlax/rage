@@ -16,6 +16,7 @@ from typing import Any
 from rge.llm.schemas import (
     CandidateClaimBatch_v0_1,
     CandidateConceptLinkBatch_v0_1,
+    CandidateContradictionBatch_v0_1,
     CandidateImprovementTicket_v0_1,
     CandidateRelationshipBatch_v0_1,
     CandidateRunSummary_v0_1,
@@ -79,6 +80,16 @@ class ModelClient(ABC):
         schema_version: str,
     ) -> CandidateRelationshipBatch_v0_1:
         """Propose relationship drafts between concepts."""
+
+    @abstractmethod
+    def detect_contradictions(
+        self,
+        claims: list[dict[str, Any]],
+        relationships: list[dict[str, Any]],
+        domain_pack: str,
+        schema_version: str,
+    ) -> CandidateContradictionBatch_v0_1:
+        """Propose contradiction/qualification links between evidence edges."""
 
     @abstractmethod
     def draft_run_summary(
