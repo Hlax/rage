@@ -52,6 +52,13 @@ If documents conflict, follow the higher-priority document.
 6. Run safety audit if relevant.
 7. Write an agent report.
 8. Recommend the next smallest ticket.
+9. **Temporary merge checkpoint (until safety evaluator agent is live):** after a
+   ticket is marked `done` and the agent report is written, merge the ticket
+   branch into `main` and push `origin main`. Document the merge commit hash in
+   the agent report. Do not force-push. If merge or push fails, leave the ticket
+   `in_progress` or `blocked` and document the failure honestly.
+   When the safety evaluator agent owns merge gating, remove this step and
+   restore human/checkpoint merge per `docs/agents/04_CURSOR_BUILD_LOOP.md`.
 
 ## Default Verification Commands
 

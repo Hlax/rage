@@ -34,60 +34,38 @@ superseded
 | Order | Ticket ID | Status | Title | Branch | Report |
 |---:|---|---|---|---|---|
 | 7 | ticket-007 | done | Add mock claim extraction (Golden Test 2) | `phase-1/ticket-007-mock-claim-extraction` | `agent_reports/2026-06-11_phase-1_ticket-007_mock-claim-extraction.md` |
-| 8 | ticket-008 | proposed | Add mock concept linking (Golden Test 5) | | |
+| 8 | ticket-008 | done | Add mock concept linking (Golden Test 5) | `phase-1/ticket-008-mock-concept-linking` | `agent_reports/2026-06-11_phase-1_ticket-008_mock-concept-linking.md` |
+| 9 | ticket-009 | proposed | Add mock relationship builder (Golden Test 6) | | |
+
+## Queue Notes (2026-06-11, ticket-008 agent)
+
+- ticket-008 implemented `research link-concepts` with mock fixture linking, ontology
+  seeding, and `claim_concepts` persistence. Golden Test 5 passes (3 tests); all 36
+  golden tests pass without Ollama.
+- No prior merge-to-main workflow existed; canonical docs specify human/checkpoint merge
+  (`docs/agents/04_CURSOR_BUILD_LOOP.md`). Added temporary `AGENTS.md` step 9: merge
+  ticket branch to `main` and push after each done ticket until the safety evaluator
+  agent owns merge gating.
+- ticket-008 branch merged to `main` and pushed (includes previously unmerged 001/006/007 work).
+- ticket-009 proposes mock relationship builder for Golden Test 6.
 
 ## Queue Notes (2026-06-11, ticket-007 agent)
 
 - ticket-007 implemented `research extract-claims` with mock LLM fixtures, deterministic
   validation (quote span, scope, overgeneralization), and persistence to `claims` +
   `claim_quotes`. Golden Test 2 passes (4 tests); all 33 golden tests pass without Ollama.
-- Added `claim_extraction_creativity_scoped.json` for two accepted scoped claims; existing
-  fixtures used for missing-quote and overgeneralized rejection tests via `--fixture`.
 - ticket-008 proposes mock concept linking for Golden Test 5.
 
 ## Queue Notes (2026-06-11, ticket-006 agent)
 
-- ticket-006 implemented the migration harness (`schema_migrations` + `0001_initial.sql`),
-  reconciled claims lifecycle (`claims` + `claim_quotes` per 05_DATA_MODEL.md), and local
-  text-file ingestion via `research ingest`. Golden Test 1 passes (5 tests); all 29 golden
-  tests pass without Ollama.
-- ticket-003 is marked `superseded` because its migration-harness scope is now delivered by
-  ticket-006. Reopen only if review wants a separate migration-only ticket.
-- On Windows, `research.exe` may not be on PATH; use `python -m rge.cli ingest ...`.
-
-## Queue Notes (2026-06-11, ticket-001 agent)
-
-- ticket-001 was implemented per its explicit expected-file list, which already
-  included CLI help + config loading (ticket-002 scope), the schema placeholder
-  and golden test skeleton with fixtures (parts of ticket-003/004 scope), and
-  the public-site static placeholder (ticket-005 scope). This was the ticket's
-  defined scope, not a silent broadening.
-- ticket-002, ticket-004, and ticket-005 are marked `superseded` because their
-  acceptance surfaces now exist and are covered by `tests/golden/test_00_*`.
-  If review disagrees, reopen them rather than re-implementing.
-
-## Ticket Template
-
-```json
-{
-  "title": "",
-  "problem": "",
-  "evidence": [],
-  "affected_modules": [],
-  "expected_files": [],
-  "acceptance_criteria": [],
-  "test_plan": [],
-  "non_goals": [],
-  "risk_level": "low | medium | high | critical",
-  "rollback_plan": "",
-  "status": "proposed"
-}
-```
+- ticket-006 implemented the migration harness, reconciled claims lifecycle, and
+  `research ingest`. Golden Test 1 passes (5 tests).
+- On Windows, `research.exe` may not be on PATH; use `python -m rge.cli`.
 
 ## Current Active Ticket
 
 ```txt
-ticket-008 (proposed; awaiting review)
+ticket-009 (proposed; awaiting review)
 ```
 
 ## Queue Rules
@@ -96,3 +74,4 @@ ticket-008 (proposed; awaiting review)
 - A ticket cannot be marked `done` without a report in `agent_reports/`.
 - A ticket cannot be marked `done` if required tests were not run or failures were not documented.
 - If a ticket creates follow-up work, add the next smallest ticket instead of broadening scope.
+- **Temporary:** after a ticket is `done`, merge its branch to `main` and push per `AGENTS.md` step 9 until the safety evaluator agent is live.

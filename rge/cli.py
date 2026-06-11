@@ -87,6 +87,38 @@ def _cmd_extract_claims(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_link_concepts(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import ClaimConceptRepository
+    from rge.modules.concept_linker import link_concepts_for_source
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        result = link_concepts_for_source(
+            conn,
+            args.source,
+            fixture_name=args.fixture,
+        )
+        links = ClaimConceptRepository(conn).list_for_source(args.source)
+        payload = {
+            "status": result["status"],
+            "command": "link-concepts",
+            "source_id": args.source,
+            "link_count": result["link_count"],
+            "links": links,
+            "rejected_link_count": result.get("rejected_link_count", 0),
+        }
+        print(json.dumps(payload, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {"status": "error", "command": "link-concepts", "detail": str(exc)}
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_ingest(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.db.repositories import (
@@ -201,6 +233,29 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional mock LLM fixture filename for deterministic extraction tests.",
     )
     extract_parser.set_defaults(func=_cmd_extract_claims)
+
+    link_parser = subparsers.add_parser(
+        "link-concepts",
+        help="Link accepted claims to domain concepts (mock LLM).",
+        description=(
+            "Propose concept links via the mock model client, validate them "
+            "deterministically, and persist claim_concepts rows."
+        ),
+    )
+    link_parser.add_argument(
+        "--source",
+        required=True,
+        help="Stable source ID whose accepted claims should be linked.",
+    )
+    link_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    link_parser.add_argument(
+        "--fixture",
+        help="Optional mock LLM fixture filename for deterministic linking tests.",
+    )
+    link_parser.set_defaults(func=_cmd_link_concepts)
 
     export_parser = subparsers.add_parser(
         "export-public",

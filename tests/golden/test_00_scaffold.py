@@ -77,7 +77,14 @@ def test_cli_top_level_help() -> None:
     parser = build_parser()
     help_text = parser.format_help()
     assert "research" in help_text
-    for command in ("run", "ingest", "extract-claims", "export-public", "verify"):
+    for command in (
+        "run",
+        "ingest",
+        "extract-claims",
+        "link-concepts",
+        "export-public",
+        "verify",
+    ):
         assert command in help_text
 
 

@@ -497,6 +497,184 @@ class ClaimRepository:
         return record
 
 
+def ontology_id_to_concept_id(ontology_id: str) -> str:
+    return f"cpt_{ontology_id.removeprefix('concept_')}"
+
+
+def make_claim_concept_link_id(claim_id: str, concept_id: str, role: str) -> str:
+    digest = sha256_hex(f"{claim_id}:{concept_id}:{role}")
+    return f"ccl_{digest[:16]}"
+
+
+@dataclass(frozen=True)
+class ConceptRecord:
+    id: str
+    label: str
+    definition: str
+    domain: str
+    status: str
+    created_at: str
+    updated_at: str
+    domain_metadata_json: str = "{}"
+
+
+class ConceptRepository:
+    """Persist and read ``concepts`` rows seeded from domain packs."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def get_by_label(self, domain: str, label: str) -> ConceptRecord | None:
+        normalized = label.strip().casefold()
+        rows = self._conn.execute(
+            """
+            SELECT id, label, definition, domain, status, domain_metadata_json,
+                   created_at, updated_at
+            FROM concepts
+            WHERE domain = ?
+            """,
+            (domain,),
+        ).fetchall()
+        for row in rows:
+            if row["label"].strip().casefold() == normalized:
+                return _row_to_concept(row)
+        return None
+
+    def ensure_domain_concepts(self, domain_pack: str) -> list[ConceptRecord]:
+        from rge.modules.concept_linker import load_domain_pack_concepts
+
+        now = utc_now_iso()
+        ensured: list[ConceptRecord] = []
+        for concept in load_domain_pack_concepts(domain_pack):
+            concept_id = ontology_id_to_concept_id(concept["id"])
+            existing = self._conn.execute(
+                "SELECT id FROM concepts WHERE id = ?",
+                (concept_id,),
+            ).fetchone()
+            if existing is None:
+                self._conn.execute(
+                    """
+                    INSERT INTO concepts (
+                        id, label, definition, domain, domain_metadata_json,
+                        status, parent_concept_id, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, '{}', ?, NULL, ?, ?)
+                    """,
+                    (
+                        concept_id,
+                        concept["label"],
+                        concept.get("definition", ""),
+                        domain_pack,
+                        concept.get("status", "candidate"),
+                        now,
+                        now,
+                    ),
+                )
+            record = self.get_by_label(domain_pack, concept["label"])
+            if record is not None:
+                ensured.append(record)
+        self._conn.commit()
+        return ensured
+
+
+class ClaimConceptRepository:
+    """Persist and read ``claim_concepts`` rows."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def count_for_source(self, source_id: str) -> int:
+        row = self._conn.execute(
+            """
+            SELECT COUNT(*)
+            FROM claim_concepts cc
+            JOIN claims c ON c.id = cc.claim_id
+            WHERE c.source_id = ?
+            """,
+            (source_id,),
+        ).fetchone()
+        return int(row[0]) if row else 0
+
+    def list_for_source(self, source_id: str) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT cc.id, cc.claim_id, cc.concept_id, cc.role, cc.confidence,
+                   cc.domain_metadata_json, cc.created_at, concepts.label AS concept_label
+            FROM claim_concepts cc
+            JOIN claims c ON c.id = cc.claim_id
+            JOIN concepts ON concepts.id = cc.concept_id
+            WHERE c.source_id = ?
+            ORDER BY cc.created_at
+            """,
+            (source_id,),
+        ).fetchall()
+        return [
+            {
+                "id": row["id"],
+                "claim_id": row["claim_id"],
+                "concept_id": row["concept_id"],
+                "concept_label": row["concept_label"],
+                "role": row["role"],
+                "confidence": row["confidence"],
+                "domain_metadata": json.loads(row["domain_metadata_json"] or "{}"),
+                "created_at": row["created_at"],
+            }
+            for row in rows
+        ]
+
+    def insert(
+        self,
+        *,
+        claim_id: str,
+        concept_id: str,
+        role: str,
+        confidence: float,
+        domain_metadata: dict[str, Any],
+    ) -> dict[str, Any]:
+        now = utc_now_iso()
+        link_id = make_claim_concept_link_id(claim_id, concept_id, role)
+        self._conn.execute(
+            """
+            INSERT INTO claim_concepts (
+                id, claim_id, concept_id, role, confidence,
+                domain_metadata_json, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(claim_id, concept_id, role) DO NOTHING
+            """,
+            (
+                link_id,
+                claim_id,
+                concept_id,
+                role,
+                confidence,
+                json.dumps(domain_metadata),
+                now,
+            ),
+        )
+        self._conn.commit()
+        return {
+            "id": link_id,
+            "claim_id": claim_id,
+            "concept_id": concept_id,
+            "role": role,
+            "confidence": confidence,
+            "domain_metadata": domain_metadata,
+            "created_at": now,
+        }
+
+
+def _row_to_concept(row: sqlite3.Row) -> ConceptRecord:
+    return ConceptRecord(
+        id=row["id"],
+        label=row["label"],
+        definition=row["definition"] or "",
+        domain=row["domain"],
+        status=row["status"],
+        domain_metadata_json=row["domain_metadata_json"] or "{}",
+        created_at=row["created_at"],
+        updated_at=row["updated_at"],
+    )
+
+
 def _row_to_claim(row: sqlite3.Row) -> ClaimRecord:
     return ClaimRecord(
         id=row["id"],

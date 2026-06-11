@@ -1,0 +1,40 @@
+{
+  "id": "ticket-009",
+  "title": "Add mock relationship builder (Golden Test 6)",
+  "problem": "Accepted claims are linked to concepts but no evidence relationships exist. Golden Test 6 requires turning the semantic-diversity claim into a support edge between AI assistance and semantic diversity.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 6: relationship builder creates support edges.",
+    "agent_reports/2026-06-11_phase-1_ticket-008_mock-concept-linking.md",
+    "rge/modules/relationship_builder.py"
+  ],
+  "affected_modules": [
+    "rge/modules/relationship_builder.py",
+    "rge/db/repositories.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/relationship_builder.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "tests/golden/test_06_relationship_builder.py"
+  ],
+  "acceptance_criteria": [
+    "research build-relationships --source <source_id> creates at least one active relationship with evidence link.",
+    "Semantic-diversity claim supports AI assistance may_reduce semantic diversity edge per Golden Test 6.",
+    "relationship_evidence rows include stance supports and claim_id.",
+    "pytest tests/golden/test_06_relationship_builder.py passes without Ollama.",
+    "Existing golden tests still pass."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_06_relationship_builder.py",
+    "pytest tests/golden"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not implement scoring or public export.",
+    "Do not build full graph reconciliation yet."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert the ticket branch; delete relationships and relationship_evidence rows from local SQLite.",
+  "status": "proposed"
+}
