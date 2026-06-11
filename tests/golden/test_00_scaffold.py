@@ -22,6 +22,7 @@ EXPECTED_SCHEMA_TABLES = [
     "concepts",
     "claim_concepts",
     "relationships",
+    "relationship_evidence",
     "score_events",
     "research_runs",
     "node_reports",
@@ -82,6 +83,7 @@ def test_cli_top_level_help() -> None:
         "ingest",
         "extract-claims",
         "link-concepts",
+        "build-relationships",
         "export-public",
         "verify",
     ):

@@ -119,6 +119,54 @@ def _cmd_link_concepts(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_build_relationships(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import (
+        RelationshipEvidenceRepository,
+        RelationshipRepository,
+    )
+    from rge.modules.relationship_builder import build_relationships_for_source
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        result = build_relationships_for_source(
+            conn,
+            args.source,
+            fixture_name=args.fixture,
+        )
+        relationships = RelationshipRepository(conn).list_for_source(args.source)
+        evidence = RelationshipEvidenceRepository(conn).list_for_source(args.source)
+        payload = {
+            "status": result["status"],
+            "command": "build-relationships",
+            "source_id": args.source,
+            "relationship_count": result.get(
+                "relationship_count", len(relationships)
+            ),
+            "relationships": relationships,
+            "evidence_count": len(evidence),
+            "evidence": evidence,
+            "rejected_relationship_count": result.get(
+                "rejected_relationship_count", 0
+            ),
+        }
+        if result.get("rejected_relationships"):
+            payload["rejected_relationships"] = result["rejected_relationships"]
+        print(json.dumps(payload, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "build-relationships",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_ingest(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.db.repositories import (
@@ -256,6 +304,29 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional mock LLM fixture filename for deterministic linking tests.",
     )
     link_parser.set_defaults(func=_cmd_link_concepts)
+
+    build_parser = subparsers.add_parser(
+        "build-relationships",
+        help="Build evidence relationships from linked claims (mock LLM).",
+        description=(
+            "Propose concept relationships via the mock model client, validate them "
+            "deterministically, and persist relationships plus relationship_evidence rows."
+        ),
+    )
+    build_parser.add_argument(
+        "--source",
+        required=True,
+        help="Stable source ID whose accepted claims should drive relationships.",
+    )
+    build_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    build_parser.add_argument(
+        "--fixture",
+        help="Optional mock LLM fixture filename for deterministic relationship tests.",
+    )
+    build_parser.set_defaults(func=_cmd_build_relationships)
 
     export_parser = subparsers.add_parser(
         "export-public",

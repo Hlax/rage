@@ -23,7 +23,7 @@ def test_migration_harness_creates_schema(temp_db: Path) -> None:
     conn = connect(temp_db)
     try:
         applied = apply_migrations(conn)
-        assert applied == ["0001_initial"]
+        assert applied == ["0001_initial", "0002_relationship_evidence"]
         tables = {
             row[0]
             for row in conn.execute(
@@ -34,6 +34,7 @@ def test_migration_harness_creates_schema(temp_db: Path) -> None:
         assert "chunks" in tables
         assert "claims" in tables
         assert "claim_quotes" in tables
+        assert "relationship_evidence" in tables
         assert "claims_staged" not in tables
         assert "claims_accepted" not in tables
         assert "claim_rejections" not in tables

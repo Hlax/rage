@@ -575,6 +575,19 @@ class ConceptRepository:
         self._conn.commit()
         return ensured
 
+    def list_for_domain(self, domain: str) -> list[ConceptRecord]:
+        rows = self._conn.execute(
+            """
+            SELECT id, label, definition, domain, status, domain_metadata_json,
+                   created_at, updated_at
+            FROM concepts
+            WHERE domain = ?
+            ORDER BY label
+            """,
+            (domain,),
+        ).fetchall()
+        return [_row_to_concept(row) for row in rows]
+
 
 class ClaimConceptRepository:
     """Persist and read ``claim_concepts`` rows."""
@@ -660,6 +673,213 @@ class ClaimConceptRepository:
             "domain_metadata": domain_metadata,
             "created_at": now,
         }
+
+
+def make_relationship_id(
+    subject_concept_id: str, predicate: str, object_concept_id: str, scope: str
+) -> str:
+    digest = sha256_hex(
+        f"{subject_concept_id}:{predicate}:{object_concept_id}:{scope}"
+    )
+    return f"rel_{digest[:16]}"
+
+
+def make_relationship_evidence_id(
+    relationship_id: str, claim_id: str, stance: str
+) -> str:
+    digest = sha256_hex(f"{relationship_id}:{claim_id}:{stance}")
+    return f"rev_{digest[:16]}"
+
+
+class RelationshipRepository:
+    """Persist and read ``relationships`` rows."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def count_for_source(self, source_id: str) -> int:
+        row = self._conn.execute(
+            """
+            SELECT COUNT(DISTINCT re.relationship_id)
+            FROM relationship_evidence re
+            JOIN claims c ON c.id = re.claim_id
+            WHERE c.source_id = ?
+            """,
+            (source_id,),
+        ).fetchone()
+        return int(row[0]) if row else 0
+
+    def list_for_source(self, source_id: str) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT DISTINCT r.id, r.subject_concept_id, r.predicate,
+                   r.object_concept_id, r.scope, r.confidence,
+                   r.evidence_strength, r.domain, r.domain_metadata_json,
+                   r.status, r.created_at, r.updated_at,
+                   sub.label AS subject_label, obj.label AS object_label
+            FROM relationships r
+            JOIN relationship_evidence re ON re.relationship_id = r.id
+            JOIN claims c ON c.id = re.claim_id
+            JOIN concepts sub ON sub.id = r.subject_concept_id
+            JOIN concepts obj ON obj.id = r.object_concept_id
+            WHERE c.source_id = ?
+            ORDER BY r.created_at
+            """,
+            (source_id,),
+        ).fetchall()
+        return [_row_to_relationship(row) for row in rows]
+
+    def get_by_id(self, relationship_id: str) -> dict[str, Any] | None:
+        row = self._conn.execute(
+            """
+            SELECT r.id, r.subject_concept_id, r.predicate, r.object_concept_id,
+                   r.scope, r.confidence, r.evidence_strength, r.domain,
+                   r.domain_metadata_json, r.status, r.created_at, r.updated_at,
+                   sub.label AS subject_label, obj.label AS object_label
+            FROM relationships r
+            JOIN concepts sub ON sub.id = r.subject_concept_id
+            JOIN concepts obj ON obj.id = r.object_concept_id
+            WHERE r.id = ?
+            """,
+            (relationship_id,),
+        ).fetchone()
+        return _row_to_relationship(row) if row else None
+
+    def insert(
+        self,
+        *,
+        subject_concept_id: str,
+        predicate: str,
+        object_concept_id: str,
+        scope: str,
+        confidence: float,
+        domain: str,
+        status: str,
+        evidence_strength: float | None = None,
+        domain_metadata: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        now = utc_now_iso()
+        relationship_id = make_relationship_id(
+            subject_concept_id, predicate, object_concept_id, scope
+        )
+        self._conn.execute(
+            """
+            INSERT INTO relationships (
+                id, subject_concept_id, predicate, object_concept_id, scope,
+                confidence, evidence_strength, domain, domain_metadata_json,
+                status, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO NOTHING
+            """,
+            (
+                relationship_id,
+                subject_concept_id,
+                predicate,
+                object_concept_id,
+                scope,
+                confidence,
+                evidence_strength,
+                domain,
+                json.dumps(domain_metadata or {}),
+                status,
+                now,
+                now,
+            ),
+        )
+        self._conn.commit()
+        record = self.get_by_id(relationship_id)
+        assert record is not None
+        return record
+
+
+class RelationshipEvidenceRepository:
+    """Persist and read ``relationship_evidence`` rows."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def list_for_relationship(self, relationship_id: str) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT id, relationship_id, claim_id, stance, relevance_score, created_at
+            FROM relationship_evidence
+            WHERE relationship_id = ?
+            ORDER BY created_at
+            """,
+            (relationship_id,),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def list_for_source(self, source_id: str) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT re.id, re.relationship_id, re.claim_id, re.stance,
+                   re.relevance_score, re.created_at
+            FROM relationship_evidence re
+            JOIN claims c ON c.id = re.claim_id
+            WHERE c.source_id = ?
+            ORDER BY re.created_at
+            """,
+            (source_id,),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def insert(
+        self,
+        *,
+        relationship_id: str,
+        claim_id: str,
+        stance: str,
+        relevance_score: float | None = None,
+    ) -> dict[str, Any]:
+        now = utc_now_iso()
+        evidence_id = make_relationship_evidence_id(relationship_id, claim_id, stance)
+        self._conn.execute(
+            """
+            INSERT INTO relationship_evidence (
+                id, relationship_id, claim_id, stance, relevance_score, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(relationship_id, claim_id, stance) DO NOTHING
+            """,
+            (
+                evidence_id,
+                relationship_id,
+                claim_id,
+                stance,
+                relevance_score,
+                now,
+            ),
+        )
+        self._conn.commit()
+        row = self._conn.execute(
+            """
+            SELECT id, relationship_id, claim_id, stance, relevance_score, created_at
+            FROM relationship_evidence
+            WHERE id = ?
+            """,
+            (evidence_id,),
+        ).fetchone()
+        assert row is not None
+        return dict(row)
+
+
+def _row_to_relationship(row: sqlite3.Row) -> dict[str, Any]:
+    return {
+        "id": row["id"],
+        "subject_concept_id": row["subject_concept_id"],
+        "object_concept_id": row["object_concept_id"],
+        "subject_concept": row["subject_label"],
+        "object_concept": row["object_label"],
+        "predicate": row["predicate"],
+        "scope": row["scope"],
+        "confidence": row["confidence"],
+        "evidence_strength": row["evidence_strength"],
+        "domain": row["domain"],
+        "domain_metadata": json.loads(row["domain_metadata_json"] or "{}"),
+        "status": row["status"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+    }
 
 
 def _row_to_concept(row: sqlite3.Row) -> ConceptRecord:

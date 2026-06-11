@@ -1,0 +1,15 @@
+{
+  "task_name": "relationship_drafting",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "subject_concept": "nonexistent concept label",
+      "predicate": "may_reduce",
+      "object_concept": "semantic diversity",
+      "stance": "supports",
+      "scope": "short-form writing tasks",
+      "confidence": "medium",
+      "supporting_claim_ids": ["placeholder"]
+    }
+  ]
+}

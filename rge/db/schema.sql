@@ -152,6 +152,16 @@ CREATE TABLE IF NOT EXISTS relationships (
     updated_at TEXT
 );
 
+CREATE TABLE IF NOT EXISTS relationship_evidence (
+    id TEXT PRIMARY KEY,
+    relationship_id TEXT REFERENCES relationships(id),
+    claim_id TEXT REFERENCES claims(id),
+    stance TEXT,
+    relevance_score REAL,
+    created_at TEXT,
+    UNIQUE (relationship_id, claim_id, stance)
+);
+
 CREATE TABLE IF NOT EXISTS score_events (
     id TEXT PRIMARY KEY,
     entity_type TEXT,

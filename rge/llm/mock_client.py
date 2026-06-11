@@ -32,6 +32,7 @@ DEFAULT_FIXTURES_DIR = Path(__file__).resolve().parents[2] / "fixtures" / "llm_o
 
 DEFAULT_CLAIM_EXTRACTION_FIXTURE = "claim_extraction_valid_and_missing_quote.json"
 DEFAULT_CONCEPT_LINKING_FIXTURE = "concept_linking_creativity_diversity.json"
+DEFAULT_RELATIONSHIP_DRAFTING_FIXTURE = "relationship_drafting_creativity_diversity.json"
 
 
 class MockModelClient(ModelClient):
@@ -85,10 +86,11 @@ class MockModelClient(ModelClient):
         concepts: list[dict[str, Any]],
         domain_pack: str,
         schema_version: str,
+        fixture_name: str = DEFAULT_RELATIONSHIP_DRAFTING_FIXTURE,
     ) -> CandidateRelationshipBatch_v0_1:
-        batch = CandidateRelationshipBatch_v0_1()
-        validate_schema_version(batch.schema_version, schema_version)
-        return batch
+        raw = self._load_fixture(fixture_name)
+        validate_schema_version(raw.get("schema_version", ""), schema_version)
+        return CandidateRelationshipBatch_v0_1.model_validate(raw)
 
     def draft_run_summary(
         self,
