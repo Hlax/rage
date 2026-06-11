@@ -126,7 +126,7 @@ Revert branch `phase-1/ticket-011-mock-contradiction-detection`. Delete qualifie
 - Instruction source: `AGENTS.md` step 9 (temporary).
 - Pre-merge `main` tip: `0d5673291cce2ec6f620f7abceabfd1c9dfed0e8`
 - Branch: `phase-1/ticket-011-mock-contradiction-detection`
-- Merge result: pending (record hash below after merge/push).
+- Merge result: `--no-ff` merge commit `4d8e900f7eb2b2a9583e73648137827a0324af97`; pushed `origin/main`.
 
 ## 15. Recommended Next Ticket
 
