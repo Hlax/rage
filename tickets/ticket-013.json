@@ -1,0 +1,43 @@
+{
+  "id": "ticket-013",
+  "title": "Add research contract drift gating (Golden Test 10)",
+  "problem": "ticket-012 ranks candidate sources but no module enforces research contract scope. Golden Test 10 requires that out-of-scope follow-up questions are rejected or parked with out_of_scope_topic_drift while on-scope follow-ups are accepted.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 10: research contract prevents topic drift.",
+    "docs/agents/07_MVP_ACCEPTANCE_TESTS.md Test 10 pass criteria.",
+    "docs/agents/09_RESEARCH_RUN_CONTRACT.md concept scope and drift rules.",
+    "agent_reports/2026-06-11_phase-1_ticket-012_mock-research-queue.md section 15–16.",
+    "research_contracts table exists in 0001_initial.sql but no drift validator module yet."
+  ],
+  "affected_modules": [
+    "rge/modules/research_planner.py",
+    "rge/db/repositories.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/research_planner.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "tests/golden/test_10_research_contract_drift.py",
+    "tests/golden/test_00_scaffold.py"
+  ],
+  "acceptance_criteria": [
+    "research validate-contract or equivalent scoped CLI evaluates follow-up questions against an active contract without Ollama.",
+    "Out-of-scope question (e.g. AI consciousness) is rejected or parked with out_of_scope_topic_drift; on-scope divergent prompting question is accepted.",
+    "pytest tests/golden/test_10_research_contract_drift.py passes without Ollama.",
+    "Existing golden tests still pass (51+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_10_research_contract_drift.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not implement public export, LangGraph, theory generation, or live search discovery.",
+    "Do not implement full research run orchestration."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert branch phase-1/ticket-013-research-contract-drift. Delete contract validation rows from local SQLite test DBs if needed.",
+  "status": "proposed"
+}

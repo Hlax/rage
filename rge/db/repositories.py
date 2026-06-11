@@ -1183,3 +1183,183 @@ def source_record_to_public_dict(source: SourceRecord) -> dict[str, Any]:
         "updated_at": source.updated_at,
         "authors": json.loads(source.authors_json),
     }
+
+
+def make_research_queue_id(
+    candidate_source_id: str, research_question_id: str
+) -> str:
+    digest = sha256_hex(f"{candidate_source_id}:{research_question_id}")
+    return f"que_{digest[:16]}"
+
+
+class CandidateSourceRepository:
+    """Persist and read ``candidate_sources`` rows."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def insert(
+        self,
+        *,
+        candidate_id: str,
+        research_question_id: str,
+        contract_id: str | None,
+        title: str,
+        source_type: str,
+        reason: str,
+        relevance_score: float,
+        credibility_prior: float,
+        gap_fill_score: float,
+        recency_score: float,
+        source_diversity_score: float,
+        novelty_score: float,
+        drift_risk: float,
+        priority_score: float,
+        status: str,
+        url: str | None = None,
+    ) -> dict[str, Any]:
+        now = utc_now_iso()
+        self._conn.execute(
+            """
+            INSERT INTO candidate_sources (
+                id, research_question_id, contract_id, title, url, source_type,
+                reason, relevance_score, credibility_prior, gap_fill_score,
+                recency_score, source_diversity_score, novelty_score, drift_risk,
+                priority_score, status, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO NOTHING
+            """,
+            (
+                candidate_id,
+                research_question_id,
+                contract_id,
+                title,
+                url,
+                source_type,
+                reason,
+                relevance_score,
+                credibility_prior,
+                gap_fill_score,
+                recency_score,
+                source_diversity_score,
+                novelty_score,
+                drift_risk,
+                priority_score,
+                status,
+                now,
+            ),
+        )
+        self._conn.commit()
+        row = self._conn.execute(
+            "SELECT * FROM candidate_sources WHERE id = ?",
+            (candidate_id,),
+        ).fetchone()
+        assert row is not None
+        return dict(row)
+
+    def list_for_question(self, research_question_id: str) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT *
+            FROM candidate_sources
+            WHERE research_question_id = ?
+            ORDER BY priority_score DESC
+            """,
+            (research_question_id,),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+class ResearchQueueRepository:
+    """Persist and read ``research_queue`` rows."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def count_for_question(self, research_question_id: str) -> int:
+        row = self._conn.execute(
+            "SELECT COUNT(*) FROM research_queue WHERE research_question_id = ?",
+            (research_question_id,),
+        ).fetchone()
+        return int(row[0]) if row else 0
+
+    def insert(
+        self,
+        *,
+        candidate_source_id: str,
+        research_question_id: str,
+        contract_id: str | None,
+        priority_score: float,
+        reason: str,
+        status: str,
+        item_type: str = "source",
+    ) -> dict[str, Any]:
+        now = utc_now_iso()
+        queue_id = make_research_queue_id(candidate_source_id, research_question_id)
+        self._conn.execute(
+            """
+            INSERT INTO research_queue (
+                id, candidate_source_id, research_question_id, contract_id,
+                item_type, priority_score, reason, status, attempt_count,
+                last_error, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, NULL, ?, ?)
+            ON CONFLICT(id) DO NOTHING
+            """,
+            (
+                queue_id,
+                candidate_source_id,
+                research_question_id,
+                contract_id,
+                item_type,
+                priority_score,
+                reason,
+                status,
+                now,
+                now,
+            ),
+        )
+        self._conn.commit()
+        row = self._conn.execute(
+            "SELECT * FROM research_queue WHERE id = ?",
+            (queue_id,),
+        ).fetchone()
+        assert row is not None
+        return dict(row)
+
+    def list_for_question(self, research_question_id: str) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT q.id, q.candidate_source_id, q.research_question_id,
+                   q.contract_id, q.item_type, q.priority_score, q.reason,
+                   q.status, q.attempt_count, q.last_error, q.created_at,
+                   q.updated_at, c.source_type, c.relevance_score,
+                   c.credibility_prior, c.gap_fill_score, c.title
+            FROM research_queue q
+            JOIN candidate_sources c ON c.id = q.candidate_source_id
+            WHERE q.research_question_id = ?
+            ORDER BY q.priority_score DESC
+            """,
+            (research_question_id,),
+        ).fetchall()
+        return [
+            {
+                "id": row["id"],
+                "candidate_source_id": row["candidate_source_id"],
+                "research_question_id": row["research_question_id"],
+                "contract_id": row["contract_id"],
+                "item_type": row["item_type"],
+                "priority_score": row["priority_score"],
+                "reason": row["reason"],
+                "status": row["status"],
+                "attempt_count": row["attempt_count"],
+                "last_error": row["last_error"],
+                "created_at": row["created_at"],
+                "updated_at": row["updated_at"],
+                "source_type": row["source_type"],
+                "relevance_score": row["relevance_score"],
+                "credibility_prior": row["credibility_prior"],
+                "gap_fill_score": row["gap_fill_score"],
+                "title": row["title"],
+            }
+            for row in rows
+        ]

@@ -24,6 +24,8 @@ EXPECTED_SCHEMA_TABLES = [
     "relationships",
     "relationship_evidence",
     "score_events",
+    "candidate_sources",
+    "research_queue",
     "research_runs",
     "node_reports",
     "run_reports",
@@ -86,6 +88,7 @@ def test_cli_top_level_help() -> None:
         "build-relationships",
         "reconcile-scores",
         "detect-contradictions",
+        "queue-sources",
         "export-public",
         "verify",
     ):
