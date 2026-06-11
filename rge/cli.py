@@ -210,6 +210,51 @@ def _cmd_detect_contradictions(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_validate_contract(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import ResearchQueueRepository
+    from rge.modules.research_planner import (
+        GOLDEN_CONTRACT_ID,
+        ensure_golden_contract,
+        validate_followup_for_contract,
+    )
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        contract_id = args.contract or GOLDEN_CONTRACT_ID
+        ensure_golden_contract(conn)
+        result = validate_followup_for_contract(
+            conn,
+            contract_id,
+            args.follow_up,
+        )
+        followups = ResearchQueueRepository(conn).list_followups_for_contract(
+            contract_id
+        )
+        payload = {
+            "status": result["status"],
+            "command": "validate-contract",
+            "contract_id": contract_id,
+            "follow_up": args.follow_up,
+            "evaluation": result.get("evaluation"),
+            "queue_item": result.get("queue_item"),
+            "followups": followups,
+        }
+        print(json.dumps(payload, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "validate-contract",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_queue_sources(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.db.repositories import CandidateSourceRepository, ResearchQueueRepository
@@ -526,6 +571,29 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
     )
     queue_parser.set_defaults(func=_cmd_queue_sources)
+
+    validate_parser = subparsers.add_parser(
+        "validate-contract",
+        help="Validate follow-up questions against a research contract.",
+        description=(
+            "Evaluate a follow-up question against an active research contract, "
+            "persisting parked or queued follow-up items with machine-readable reasons."
+        ),
+    )
+    validate_parser.add_argument(
+        "--follow-up",
+        required=True,
+        help="Follow-up question text to evaluate against the contract.",
+    )
+    validate_parser.add_argument(
+        "--contract",
+        help="Research contract ID (defaults to Golden Test 10 contract).",
+    )
+    validate_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    validate_parser.set_defaults(func=_cmd_validate_contract)
 
     export_parser = subparsers.add_parser(
         "export-public",

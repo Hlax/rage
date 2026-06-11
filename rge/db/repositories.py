@@ -1192,6 +1192,104 @@ def make_research_queue_id(
     return f"que_{digest[:16]}"
 
 
+def make_followup_queue_id(contract_id: str, question_text: str) -> str:
+    digest = sha256_hex(f"{contract_id}:{question_text.strip().casefold()}")
+    return f"que_{digest[:16]}"
+
+
+class ResearchContractRepository:
+    """Persist and read ``research_contracts`` rows."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def get_by_id(self, contract_id: str) -> dict[str, Any] | None:
+        row = self._conn.execute(
+            """
+            SELECT id, root_topic, primary_question, domain_pack,
+                   allowed_concepts_json, adjacent_concepts_json,
+                   out_of_scope_concepts_json, source_budget, search_budget,
+                   follow_up_depth, drift_threshold, success_criteria_json,
+                   source_strategy_json, evidence_requirements_json,
+                   queue_priority_formula, topic_drift_formula, status,
+                   created_at, updated_at
+            FROM research_contracts
+            WHERE id = ?
+            """,
+            (contract_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return {
+            "id": row["id"],
+            "root_topic": row["root_topic"],
+            "primary_question": row["primary_question"],
+            "domain_pack": row["domain_pack"],
+            "allowed_concepts": json.loads(row["allowed_concepts_json"] or "[]"),
+            "adjacent_concepts": json.loads(row["adjacent_concepts_json"] or "[]"),
+            "out_of_scope_concepts": json.loads(
+                row["out_of_scope_concepts_json"] or "[]"
+            ),
+            "source_budget": row["source_budget"],
+            "search_budget": row["search_budget"],
+            "follow_up_depth": row["follow_up_depth"],
+            "drift_threshold": row["drift_threshold"],
+            "success_criteria": json.loads(row["success_criteria_json"] or "[]"),
+            "source_strategy": json.loads(row["source_strategy_json"] or "{}"),
+            "evidence_requirements": json.loads(
+                row["evidence_requirements_json"] or "{}"
+            ),
+            "queue_priority_formula": row["queue_priority_formula"],
+            "topic_drift_formula": row["topic_drift_formula"],
+            "status": row["status"],
+            "created_at": row["created_at"],
+            "updated_at": row["updated_at"],
+        }
+
+    def insert(self, contract: dict[str, Any]) -> dict[str, Any]:
+        now = utc_now_iso()
+        contract_id = contract["id"]
+        self._conn.execute(
+            """
+            INSERT INTO research_contracts (
+                id, root_topic, primary_question, domain_pack,
+                allowed_concepts_json, adjacent_concepts_json,
+                out_of_scope_concepts_json, source_budget, search_budget,
+                follow_up_depth, drift_threshold, success_criteria_json,
+                source_strategy_json, evidence_requirements_json,
+                queue_priority_formula, topic_drift_formula, status,
+                created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO NOTHING
+            """,
+            (
+                contract_id,
+                contract.get("root_topic"),
+                contract.get("primary_question"),
+                contract.get("domain_pack"),
+                json.dumps(contract.get("allowed_concepts", [])),
+                json.dumps(contract.get("adjacent_concepts", [])),
+                json.dumps(contract.get("out_of_scope_concepts", [])),
+                contract.get("source_budget", 5),
+                contract.get("search_budget", 10),
+                contract.get("follow_up_depth", 1),
+                contract.get("drift_threshold", 0.35),
+                json.dumps(contract.get("success_criteria", [])),
+                json.dumps(contract.get("source_strategy", {})),
+                json.dumps(contract.get("evidence_requirements", {})),
+                contract.get("queue_priority_formula", "golden_v0.1.0"),
+                contract.get("topic_drift_formula", "golden_v0.1.0"),
+                contract.get("status", "active"),
+                now,
+                now,
+            ),
+        )
+        self._conn.commit()
+        record = self.get_by_id(contract_id)
+        assert record is not None
+        return record
+
+
 class CandidateSourceRepository:
     """Persist and read ``candidate_sources`` rows."""
 
@@ -1325,6 +1423,87 @@ class ResearchQueueRepository:
         ).fetchone()
         assert row is not None
         return dict(row)
+
+    def get_followup(
+        self, contract_id: str, question_text: str
+    ) -> dict[str, Any] | None:
+        queue_id = make_followup_queue_id(contract_id, question_text)
+        row = self._conn.execute(
+            "SELECT * FROM research_queue WHERE id = ?",
+            (queue_id,),
+        ).fetchone()
+        return dict(row) if row else None
+
+    def insert_followup(
+        self,
+        *,
+        contract_id: str,
+        question_text: str,
+        priority_score: float,
+        reason: str,
+        status: str,
+        research_question_id: str,
+    ) -> dict[str, Any]:
+        now = utc_now_iso()
+        queue_id = make_followup_queue_id(contract_id, question_text)
+        self._conn.execute(
+            """
+            INSERT INTO research_queue (
+                id, candidate_source_id, research_question_id, contract_id,
+                item_type, priority_score, reason, status, attempt_count,
+                last_error, created_at, updated_at
+            ) VALUES (?, NULL, ?, ?, 'question', ?, ?, ?, 0, ?, ?, ?)
+            ON CONFLICT(id) DO NOTHING
+            """,
+            (
+                queue_id,
+                research_question_id,
+                contract_id,
+                priority_score,
+                reason,
+                status,
+                question_text,
+                now,
+                now,
+            ),
+        )
+        self._conn.commit()
+        row = self._conn.execute(
+            "SELECT * FROM research_queue WHERE id = ?",
+            (queue_id,),
+        ).fetchone()
+        assert row is not None
+        return dict(row)
+
+    def list_followups_for_contract(self, contract_id: str) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT id, candidate_source_id, research_question_id, contract_id,
+                   item_type, priority_score, reason, status, attempt_count,
+                   last_error, created_at, updated_at
+            FROM research_queue
+            WHERE contract_id = ? AND item_type = 'question'
+            ORDER BY priority_score DESC, created_at
+            """,
+            (contract_id,),
+        ).fetchall()
+        return [
+            {
+                "id": row["id"],
+                "candidate_source_id": row["candidate_source_id"],
+                "research_question_id": row["research_question_id"],
+                "contract_id": row["contract_id"],
+                "item_type": row["item_type"],
+                "priority_score": row["priority_score"],
+                "reason": row["reason"],
+                "status": row["status"],
+                "attempt_count": row["attempt_count"],
+                "question_text": row["last_error"],
+                "created_at": row["created_at"],
+                "updated_at": row["updated_at"],
+            }
+            for row in rows
+        ]
 
     def list_for_question(self, research_question_id: str) -> list[dict[str, Any]]:
         rows = self._conn.execute(

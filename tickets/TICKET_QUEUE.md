@@ -39,7 +39,15 @@ superseded
 | 10 | ticket-010 | done | Add score reconciliation with history (Golden Test 8) | `phase-1/ticket-010-score-reconciliation` | `agent_reports/2026-06-11_phase-1_ticket-010_score-reconciliation.md` |
 | 11 | ticket-011 | done | Add mock contradiction detection (Golden Test 7) | `phase-1/ticket-011-mock-contradiction-detection` | `agent_reports/2026-06-11_phase-1_ticket-011_mock-contradiction-detection.md` |
 | 12 | ticket-012 | done | Add mock research queue ranking (Golden Test 9) | `phase-1/ticket-012-mock-research-queue` | `agent_reports/2026-06-11_phase-1_ticket-012_mock-research-queue.md` |
-| 13 | ticket-013 | proposed | Add research contract drift gating (Golden Test 10) | | |
+| 13 | ticket-013 | done | Add research contract drift gating (Golden Test 10) | `phase-1/ticket-013-research-contract-drift` | `agent_reports/2026-06-11_phase-1_ticket-013_research-contract-drift.md` |
+| 14 | ticket-014 | proposed | Add public card export with safety filtering (Golden Test 11) | | |
+
+## Queue Notes (2026-06-11, ticket-013 agent)
+
+- ticket-013 implemented `research validate-contract` with golden contract seeding,
+  deterministic out-of-scope parking (`out_of_scope_topic_drift`), and on-scope follow-up
+  queueing. Golden Test 10 passes (4 tests); all 55 golden tests pass without Ollama.
+- ticket-014 proposes public card export for Golden Test 11.
 
 ## Queue Notes (2026-06-11, ticket-012 agent)
 
@@ -103,7 +111,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-013 (proposed; awaiting review)
+ticket-014 (proposed; awaiting review)
 ```
 
 ## Queue Rules

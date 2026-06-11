@@ -89,6 +89,7 @@ def test_cli_top_level_help() -> None:
         "reconcile-scores",
         "detect-contradictions",
         "queue-sources",
+        "validate-contract",
         "export-public",
         "verify",
     ):
