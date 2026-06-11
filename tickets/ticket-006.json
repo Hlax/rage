@@ -46,5 +46,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert the ticket branch; delete any locally created data/db/*.sqlite file. Schema changes live only in migration files, so reverting the branch restores the previous schema state.",
-  "status": "proposed"
+  "status": "done"
 }

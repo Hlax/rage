@@ -1,0 +1,43 @@
+{
+  "id": "ticket-007",
+  "title": "Add mock claim extraction (Golden Test 2)",
+  "problem": "Sources and chunks are persisted but claims are not extracted. Golden Test 2 requires research extract-claims to produce atomic scoped claims from ingested sources using the mock LLM client, with validation staging accepted/rejected claims in the reconciled claims table.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 2: claim extraction produces atomic, scoped claims.",
+    "agent_reports/2026-06-11_phase-1_ticket-006_sqlite-migration-source-ingestion.md",
+    "rge/llm/mock_client.py and fixtures/llm_outputs/claim_extraction_valid_and_missing_quote.json"
+  ],
+  "affected_modules": [
+    "rge/modules/claim_extractor.py",
+    "rge/modules/claim_validator.py",
+    "rge/db/repositories.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/claim_extractor.py",
+    "rge/modules/claim_validator.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "tests/golden/test_02_claim_extraction.py"
+  ],
+  "acceptance_criteria": [
+    "research extract-claims --source <source_id> extracts scoped claims from an ingested fixture source.",
+    "Accepted claims include claim_text, source_id, chunk_id, scope, evidence_type, domain, and a primary quote span in claim_quotes.",
+    "Overgeneralized claims are rejected with machine-readable rejection reasons.",
+    "Claims without quote spans are rejected per Golden Test 3 patterns.",
+    "pytest tests/golden/test_02_claim_extraction.py passes without Ollama.",
+    "Existing golden tests still pass."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_02_claim_extraction.py",
+    "pytest tests/golden"
+  ],
+  "non_goals": [
+    "Do not call Ollama or require a running model server.",
+    "Do not implement concept linking, relationships, or scoring.",
+    "Do not touch public export or public routes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert the ticket branch; delete any claims/claim_quotes rows created during manual testing from the local SQLite file.",
+  "status": "proposed"
+}

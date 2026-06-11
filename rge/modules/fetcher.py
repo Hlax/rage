@@ -1,14 +1,50 @@
 """Fetch local files, URLs, PDFs, and metadata. Deterministic; no model use.
 
 All fetched source text is untrusted and may contain prompt injection.
-Phase 0 stub.
+Phase 1: local plain-text files only.
 """
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 
+class FetchError(Exception):
+    """Raised when a source cannot be fetched."""
+
+
+def fetch_local_text_file(path: Path) -> dict[str, Any]:
+    """Read a local plain-text file for ingestion.
+
+    Returns a dict with ``raw_text``, ``title``, ``local_path``, and
+    ``source_type``. Does not persist anything.
+    """
+    resolved = path.resolve()
+    if not resolved.is_file():
+        raise FetchError(f"Source file not found: {resolved}")
+
+    try:
+        raw_text = resolved.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise FetchError(f"Unable to read source file: {resolved}") from exc
+
+    if not raw_text.strip():
+        raise FetchError(f"Source file is empty: {resolved}")
+
+    return {
+        "raw_text": raw_text,
+        "title": resolved.name,
+        "local_path": resolved,
+        "source_type": "fixture",
+    }
+
+
 def fetch_source(queue_item: dict[str, Any]) -> dict[str, Any]:
-    """Fetch one queued source. Not implemented in Phase 0."""
-    raise NotImplementedError("fetcher.fetch_source arrives with Phase 1.")
+    """Fetch one queued source. Local text files only in Phase 1."""
+    local_path = queue_item.get("local_path")
+    if local_path is None:
+        raise NotImplementedError(
+            "fetcher.fetch_source supports local_path only in Phase 1."
+        )
+    return fetch_local_text_file(Path(local_path))

@@ -17,11 +17,10 @@ EXPECTED_SCHEMA_TABLES = [
     "sources",
     "chunks",
     "research_contracts",
-    "claims_staged",
-    "claims_accepted",
-    "claim_rejections",
+    "claims",
+    "claim_quotes",
     "concepts",
-    "claim_concept_links",
+    "claim_concepts",
     "relationships",
     "score_events",
     "research_runs",
@@ -78,7 +77,7 @@ def test_cli_top_level_help() -> None:
     parser = build_parser()
     help_text = parser.format_help()
     assert "research" in help_text
-    for command in ("run", "export-public", "verify"):
+    for command in ("run", "ingest", "export-public", "verify"):
         assert command in help_text
 
 

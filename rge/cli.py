@@ -1,19 +1,11 @@
-"""``research`` CLI entry point.
-
-Phase 0 scaffold: subcommands exist, import cleanly, and show help, but the
-pipeline behavior behind them is not implemented yet. Placeholders print a
-machine-readable status and exit non-zero so nothing can mistake them for a
-working pipeline.
-
-Constraints honored here: no network calls, no database requirement, no live
-Ollama requirement, and no public-data writes.
-"""
+"""``research`` CLI entry point."""
 
 from __future__ import annotations
 
 import argparse
 import json
 import sys
+from pathlib import Path
 
 from rge import __version__
 
@@ -56,6 +48,52 @@ def _cmd_verify(_args: argparse.Namespace) -> int:
     )
 
 
+def _cmd_ingest(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import (
+        ChunkRepository,
+        SourceRepository,
+        ingest_local_source,
+        source_record_to_public_dict,
+    )
+    from rge.modules.fetcher import FetchError, fetch_local_text_file
+
+    source_path = Path(args.source_path)
+    db_path = Path(args.db) if args.db else None
+
+    try:
+        fetched = fetch_local_text_file(source_path)
+    except FetchError as exc:
+        payload = {"status": "error", "command": "ingest", "detail": str(exc)}
+        print(json.dumps(payload, indent=2))
+        return 1
+
+    conn = ensure_database(db_path)
+    try:
+        result = ingest_local_source(
+            conn,
+            local_path=fetched["local_path"],
+            domain=args.domain,
+            raw_text=fetched["raw_text"],
+            title=fetched["title"],
+            source_type=fetched["source_type"],
+        )
+        source = SourceRepository(conn).get_by_id(result["source_id"])
+        chunks = ChunkRepository(conn).list_for_source(result["source_id"])
+        payload = {
+            "status": result["status"],
+            "command": "ingest",
+            "source": source_record_to_public_dict(source) if source else None,
+            "chunk_count": len(chunks),
+            "chunk_ids": [chunk.id for chunk in chunks],
+            "raw_text_checksum": result["raw_text_checksum"],
+        }
+        print(json.dumps(payload, indent=2))
+        return 0
+    finally:
+        conn.close()
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="research",
@@ -81,6 +119,26 @@ def build_parser() -> argparse.ArgumentParser:
         help="Use deterministic fixture sources instead of live discovery.",
     )
     run_parser.set_defaults(func=_cmd_run)
+
+    ingest_parser = subparsers.add_parser(
+        "ingest",
+        help="Ingest a local text source into SQLite.",
+        description="Ingest a local plain-text source and persist source + chunk records.",
+    )
+    ingest_parser.add_argument(
+        "source_path",
+        help="Path to a local plain-text source file.",
+    )
+    ingest_parser.add_argument(
+        "--domain",
+        required=True,
+        help="Primary domain pack ID (e.g. creativity).",
+    )
+    ingest_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    ingest_parser.set_defaults(func=_cmd_ingest)
 
     export_parser = subparsers.add_parser(
         "export-public",

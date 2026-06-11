@@ -24,10 +24,27 @@ superseded
 |---:|---|---|---|---|---|
 | 1 | ticket-001 | done | Scaffold repo and model runtime adapter | `phase-0/ticket-001-repo-scaffold-model-runtime` | `agent_reports/2026-06-11_phase-0_ticket-001_repo-scaffold-model-runtime.md` |
 | 2 | ticket-002 | superseded | Add CLI help and config loading | | |
-| 3 | ticket-003 | proposed | Add SQLite schema and migration harness | | |
+| 3 | ticket-003 | superseded | Add SQLite schema and migration harness | | |
 | 4 | ticket-004 | superseded | Add golden test skeleton and fixtures | | |
 | 5 | ticket-005 | superseded | Add public-site placeholder static build | | |
-| 6 | ticket-006 | proposed | Add SQLite migration harness and source ingestion | | |
+| 6 | ticket-006 | done | Add SQLite migration harness and source ingestion | `phase-1/ticket-006-sqlite-migration-source-ingestion` | `agent_reports/2026-06-11_phase-1_ticket-006_sqlite-migration-source-ingestion.md` |
+
+## Phase 1 Queue
+
+| Order | Ticket ID | Status | Title | Branch | Report |
+|---:|---|---|---|---|---|
+| 7 | ticket-007 | proposed | Add mock claim extraction (Golden Test 2) | | |
+
+## Queue Notes (2026-06-11, ticket-006 agent)
+
+- ticket-006 implemented the migration harness (`schema_migrations` + `0001_initial.sql`),
+  reconciled claims lifecycle (`claims` + `claim_quotes` per 05_DATA_MODEL.md), and local
+  text-file ingestion via `research ingest`. Golden Test 1 passes (5 tests); all 29 golden
+  tests pass without Ollama.
+- ticket-003 is marked `superseded` because its migration-harness scope is now delivered by
+  ticket-006. Reopen only if review wants a separate migration-only ticket.
+- On Windows, `research.exe` may not be on PATH; use `python -m rge.cli ingest ...`.
+- ticket-007 proposes the smallest next step: mock claim extraction for Golden Test 2.
 
 ## Queue Notes (2026-06-11, ticket-001 agent)
 
@@ -39,10 +56,6 @@ superseded
 - ticket-002, ticket-004, and ticket-005 are marked `superseded` because their
   acceptance surfaces now exist and are covered by `tests/golden/test_00_*`.
   If review disagrees, reopen them rather than re-implementing.
-- ticket-003 remains open: the migration harness was NOT built in Phase 0
-  (schema.sql is a placeholder only). ticket-006 (`tickets/ticket-006.json`)
-  proposes the smallest next step combining the migration harness with Golden
-  Test 1 source ingestion; ticket-003 may be folded into it at review time.
 
 ## Ticket Template
 
@@ -65,7 +78,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-006 (proposed; awaiting review)
+ticket-007 (proposed; awaiting review)
 ```
 
 ## Queue Rules

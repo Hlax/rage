@@ -1,49 +1,48 @@
--- Research Graph Engine: SQLite schema reference (Phase 1).
---
--- Authoritative DDL is applied through versioned migrations in
--- ``rge/db/migrations/``. This file documents the intended shape from
--- ``docs/agents/05_DATA_MODEL.md`` for reviewers and golden tests.
---
--- Claim lifecycle is reconciled: a single ``claims`` table with a ``status``
--- column (draft, staged, accepted, rejected) plus ``claim_quotes`` for
--- provenance. Rejection reasons live on ``claims.rejection_reason`` and
--- ``claims.rejection_details_json``; rejected rows are never discarded.
+-- Migration 0001: initial Research Graph Engine schema (Phase 1).
+-- Reconciles claim lifecycle with docs/agents/05_DATA_MODEL.md:
+--   single `claims` table with status column + `claim_quotes` for provenance.
 
 -- Source library -------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS sources (
-    id TEXT PRIMARY KEY,                -- src_...
+    id TEXT PRIMARY KEY,
     title TEXT,
-    authors_json TEXT,
+    authors_json TEXT DEFAULT '[]',
     year INTEGER,
-    source_type TEXT,                   -- paper, webpage, fixture, manual_note, ...
+    source_type TEXT,
     domain TEXT,
-    domain_metadata_json TEXT,
+    domain_metadata_json TEXT DEFAULT '{}',
     url TEXT,
-    local_path TEXT,                    -- PRIVATE: never public-exported
+    local_path TEXT,
     publisher TEXT,
     abstract TEXT,
     raw_text_checksum TEXT,
     quality_score REAL,
     credibility_notes TEXT,
-    status TEXT,                        -- candidate, ingested, parsed, failed, archived
-    created_at TEXT,
-    updated_at TEXT
+    status TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
 );
 
+CREATE INDEX IF NOT EXISTS idx_sources_domain_status ON sources(domain, status);
+CREATE INDEX IF NOT EXISTS idx_sources_checksum ON sources(raw_text_checksum);
+
 CREATE TABLE IF NOT EXISTS chunks (
-    id TEXT PRIMARY KEY,                -- chk_...
-    source_id TEXT REFERENCES sources(id),
-    chunk_index INTEGER,
-    chunk_text TEXT,                    -- PRIVATE raw chunk text
+    id TEXT PRIMARY KEY,
+    source_id TEXT NOT NULL REFERENCES sources(id),
+    chunk_index INTEGER NOT NULL,
+    chunk_text TEXT,
     page TEXT,
     section TEXT,
     token_count INTEGER,
     embedding_id TEXT,
     embedding_model TEXT,
     text_checksum TEXT,
-    created_at TEXT
+    created_at TEXT NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_chunks_source ON chunks(source_id);
+CREATE INDEX IF NOT EXISTS idx_chunks_checksum ON chunks(text_checksum);
 
 -- Research scoping -----------------------------------------------------------
 
@@ -69,10 +68,10 @@ CREATE TABLE IF NOT EXISTS research_contracts (
     updated_at TEXT
 );
 
--- Claim lifecycle (reconciled with 05_DATA_MODEL.md) -------------------------
+-- Claim lifecycle (reconciled) -----------------------------------------------
 
 CREATE TABLE IF NOT EXISTS claims (
-    id TEXT PRIMARY KEY,                -- clm_...
+    id TEXT PRIMARY KEY,
     source_id TEXT REFERENCES sources(id),
     chunk_id TEXT REFERENCES chunks(id),
     claim_text TEXT,
@@ -86,35 +85,40 @@ CREATE TABLE IF NOT EXISTS claims (
     limitations_json TEXT,
     domain TEXT,
     domain_metadata_json TEXT,
-    status TEXT,                        -- draft, staged, accepted, rejected
-    rejection_reason TEXT,              -- required when status = rejected
+    status TEXT,
+    rejection_reason TEXT,
     rejection_details_json TEXT,
     extractor_model TEXT,
     extractor_provider TEXT,
     llm_schema_version TEXT,
     prompt_template_version TEXT,
     validator_version TEXT,
-    created_at TEXT,
-    updated_at TEXT
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_claims_status_domain ON claims(status, domain);
+CREATE INDEX IF NOT EXISTS idx_claims_source ON claims(source_id);
+CREATE INDEX IF NOT EXISTS idx_claims_chunk ON claims(chunk_id);
+CREATE INDEX IF NOT EXISTS idx_claims_statement_type ON claims(statement_type);
 
 CREATE TABLE IF NOT EXISTS claim_quotes (
     id TEXT PRIMARY KEY,
-    claim_id TEXT REFERENCES claims(id),
-    source_id TEXT REFERENCES sources(id),
-    chunk_id TEXT REFERENCES chunks(id),
+    claim_id TEXT NOT NULL REFERENCES claims(id),
+    source_id TEXT NOT NULL REFERENCES sources(id),
+    chunk_id TEXT NOT NULL REFERENCES chunks(id),
     quote_text TEXT,
     char_start INTEGER,
     char_end INTEGER,
     page TEXT,
-    is_primary INTEGER,
-    created_at TEXT
+    is_primary INTEGER DEFAULT 0,
+    created_at TEXT NOT NULL
 );
 
 -- Concept graph --------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS concepts (
-    id TEXT PRIMARY KEY,                -- cpt_...
+    id TEXT PRIMARY KEY,
     label TEXT,
     definition TEXT,
     domain TEXT,
@@ -125,20 +129,23 @@ CREATE TABLE IF NOT EXISTS concepts (
     updated_at TEXT
 );
 
+CREATE INDEX IF NOT EXISTS idx_concepts_domain_status ON concepts(domain, status);
+
 CREATE TABLE IF NOT EXISTS claim_concepts (
     id TEXT PRIMARY KEY,
-    claim_id TEXT REFERENCES claims(id),
-    concept_id TEXT REFERENCES concepts(id),
+    claim_id TEXT NOT NULL REFERENCES claims(id),
+    concept_id TEXT NOT NULL REFERENCES concepts(id),
     role TEXT,
     confidence REAL,
     domain_metadata_json TEXT,
-    created_at TEXT
+    created_at TEXT NOT NULL,
+    UNIQUE (claim_id, concept_id, role)
 );
 
 -- Evidence graph -------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS relationships (
-    id TEXT PRIMARY KEY,                -- rel_...
+    id TEXT PRIMARY KEY,
     subject_concept_id TEXT REFERENCES concepts(id),
     predicate TEXT,
     object_concept_id TEXT REFERENCES concepts(id),
@@ -152,6 +159,10 @@ CREATE TABLE IF NOT EXISTS relationships (
     updated_at TEXT
 );
 
+CREATE INDEX IF NOT EXISTS idx_relationships_subject ON relationships(subject_concept_id);
+CREATE INDEX IF NOT EXISTS idx_relationships_object ON relationships(object_concept_id);
+CREATE INDEX IF NOT EXISTS idx_relationships_domain ON relationships(domain);
+
 CREATE TABLE IF NOT EXISTS score_events (
     id TEXT PRIMARY KEY,
     entity_type TEXT,
@@ -162,13 +173,13 @@ CREATE TABLE IF NOT EXISTS score_events (
     triggering_source_id TEXT,
     reason TEXT,
     formula_version TEXT,
-    created_at TEXT
+    created_at TEXT NOT NULL
 );
 
 -- Runs and reports -----------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS research_runs (
-    id TEXT PRIMARY KEY,                -- run_...
+    id TEXT PRIMARY KEY,
     contract_id TEXT REFERENCES research_contracts(id),
     topic TEXT,
     domain_pack TEXT,
@@ -180,7 +191,7 @@ CREATE TABLE IF NOT EXISTS research_runs (
 );
 
 CREATE TABLE IF NOT EXISTS node_reports (
-    id TEXT PRIMARY KEY,                -- rep_...
+    id TEXT PRIMARY KEY,
     run_id TEXT REFERENCES research_runs(id),
     node_name TEXT,
     status TEXT,
@@ -205,7 +216,7 @@ CREATE TABLE IF NOT EXISTS run_reports (
 -- Public surface and improvement loop ----------------------------------------
 
 CREATE TABLE IF NOT EXISTS public_cards (
-    id TEXT PRIMARY KEY,                -- card_...
+    id TEXT PRIMARY KEY,
     type TEXT,
     title TEXT,
     summary TEXT,
@@ -221,7 +232,7 @@ CREATE TABLE IF NOT EXISTS public_cards (
 );
 
 CREATE TABLE IF NOT EXISTS improvement_tickets (
-    id TEXT PRIMARY KEY,                -- ticket_...
+    id TEXT PRIMARY KEY,
     run_id TEXT,
     priority TEXT,
     title TEXT,
