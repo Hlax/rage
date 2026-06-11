@@ -38,7 +38,16 @@ superseded
 | 9 | ticket-009 | done | Add mock relationship builder (Golden Test 6) | `phase-1/ticket-009-mock-relationship-builder` | `agent_reports/2026-06-11_phase-1_ticket-009_mock-relationship-builder.md` |
 | 10 | ticket-010 | done | Add score reconciliation with history (Golden Test 8) | `phase-1/ticket-010-score-reconciliation` | `agent_reports/2026-06-11_phase-1_ticket-010_score-reconciliation.md` |
 | 11 | ticket-011 | done | Add mock contradiction detection (Golden Test 7) | `phase-1/ticket-011-mock-contradiction-detection` | `agent_reports/2026-06-11_phase-1_ticket-011_mock-contradiction-detection.md` |
-| 12 | ticket-012 | proposed | Add mock research queue ranking (Golden Test 9) | | |
+| 12 | ticket-012 | done | Add mock research queue ranking (Golden Test 9) | `phase-1/ticket-012-mock-research-queue` | `agent_reports/2026-06-11_phase-1_ticket-012_mock-research-queue.md` |
+| 13 | ticket-013 | proposed | Add research contract drift gating (Golden Test 10) | | |
+
+## Queue Notes (2026-06-11, ticket-012 agent)
+
+- ticket-012 implemented `research queue-sources` with migration `0003`,
+  deterministic fixture ranking (`golden_v0.1.0`), and persistence to
+  `candidate_sources` + `research_queue`. Golden Test 9 passes (3 tests); all
+  51 golden tests pass without Ollama.
+- ticket-013 proposes research contract drift gating for Golden Test 10.
 
 ## Queue Notes (2026-06-11, ticket-011 agent)
 
@@ -94,7 +103,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-012 (proposed; awaiting review)
+ticket-013 (proposed; awaiting review)
 ```
 
 ## Queue Rules

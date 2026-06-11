@@ -210,6 +210,52 @@ def _cmd_detect_contradictions(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_queue_sources(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import CandidateSourceRepository, ResearchQueueRepository
+    from rge.modules.research_queue import (
+        DEFAULT_RESEARCH_QUESTION_ID,
+        queue_sources_from_fixture,
+    )
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        fixture_path = Path(args.fixture) if args.fixture else None
+        if fixture_path is not None and not fixture_path.is_absolute():
+            fixture_path = Path(__file__).resolve().parents[2] / fixture_path
+        question_id = args.question or DEFAULT_RESEARCH_QUESTION_ID
+        result = queue_sources_from_fixture(
+            conn,
+            fixture_path=fixture_path,
+            research_question_id=question_id,
+        )
+        queue_items = ResearchQueueRepository(conn).list_for_question(question_id)
+        candidates = CandidateSourceRepository(conn).list_for_question(question_id)
+        payload = {
+            "status": result["status"],
+            "command": "queue-sources",
+            "research_question_id": question_id,
+            "queue_count": result.get("queue_count", len(queue_items)),
+            "queue_items": queue_items,
+            "candidate_sources": candidates,
+        }
+        if result.get("ranked_candidates"):
+            payload["ranked_candidates"] = result["ranked_candidates"]
+        print(json.dumps(payload, indent=2))
+        return 0
+    except (ValueError, FileNotFoundError) as exc:
+        payload = {
+            "status": "error",
+            "command": "queue-sources",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_reconcile_scores(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.db.repositories import RelationshipRepository, ScoreEventRepository
@@ -449,6 +495,37 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional mock LLM fixture filename for deterministic contradiction tests.",
     )
     detect_parser.set_defaults(func=_cmd_detect_contradictions)
+
+    queue_parser = subparsers.add_parser(
+        "queue-sources",
+        help="Rank and queue fixture candidate sources (deterministic).",
+        description=(
+            "Load fixture candidate sources, rank them with a deterministic "
+            "queue-priority formula, and persist candidate_sources plus "
+            "research_queue rows."
+        ),
+    )
+    queue_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack ID used for queue context (default: creativity).",
+    )
+    queue_parser.add_argument(
+        "--question",
+        help="Research question ID for queue grouping.",
+    )
+    queue_parser.add_argument(
+        "--fixture",
+        help=(
+            "Optional candidate-source fixture path "
+            "(defaults to fixtures/candidate_sources/source_ranking_fixture.json)."
+        ),
+    )
+    queue_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    queue_parser.set_defaults(func=_cmd_queue_sources)
 
     export_parser = subparsers.add_parser(
         "export-public",
