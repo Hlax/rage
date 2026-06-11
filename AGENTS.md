@@ -1,0 +1,90 @@
+# AGENTS.md
+
+## Purpose
+
+This file is the root operating guide for AI builder agents working in the Research Graph Engine repo.
+
+The repo implements a local-first Research Graph Engine. The system turns sources into scoped claims, concept links, evidence relationships, reports, public cards, and improvement tickets.
+
+Agents must follow the implementation specs in `docs/agents/`.
+
+## Source Priority
+
+Read sources in this order:
+
+1. `docs/agents/01_RESEARCH_GRAPH_ENGINE_CANONICAL_CONTEXT_v1.md`
+2. `docs/agents/00_GOLDEN_TESTS.md`
+3. `docs/agents/02_ARCHITECTURE.md`
+4. `docs/agents/03_MODEL_RUNTIME_SPEC.md`
+5. `docs/agents/04_CURSOR_BUILD_LOOP.md`
+6. `docs/agents/05_DATA_MODEL.md`
+7. `docs/agents/06_DOMAIN_PACK_SPEC.md`
+8. `docs/agents/07_MVP_ACCEPTANCE_TESTS.md`
+9. `docs/agents/08_REPORTING_SPEC.md`
+10. `docs/agents/09_RESEARCH_RUN_CONTRACT.md`
+11. `docs/agents/10_SAFETY_MODEL.md`
+12. `docs/agents/000_init.md` only as historical seed context
+
+If documents conflict, follow the higher-priority document.
+
+## Non-Negotiable Rules
+
+- One ticket per branch.
+- Do not broaden implementation scope without creating a new ticket.
+- Do not hardcode creativity-specific fields into the core engine.
+- Qwen/Ollama proposes candidate JSON only; Python validates and writes.
+- Golden tests must support mock LLM mode and must not require Ollama to be running.
+- No model output may write directly to accepted DB tables.
+- No public write routes.
+- No public source ingestion routes.
+- No public agent execution routes.
+- No raw prompts, local paths, secrets, private notes, or raw source text in public exports.
+- Every implementation run must end with an agent report in `agent_reports/`.
+- Never claim success unless required commands were run, or failures are explicitly documented.
+
+## Expected Agent Workflow
+
+1. Read the active ticket or create the smallest next ticket.
+2. Confirm the phase and scope.
+3. Identify expected files.
+4. Implement only the ticket scope.
+5. Run the required tests.
+6. Run safety audit if relevant.
+7. Write an agent report.
+8. Recommend the next smallest ticket.
+
+## Default Verification Commands
+
+Use the strongest available verification for the current phase:
+
+```bash
+pytest
+pytest tests/golden
+research --help
+research run --topic "Does AI improve creative output while reducing diversity?" --domain creativity --fixture-mode
+research export-public --limit 100
+python -m rge.modules.safety_auditor --audit full
+cd apps/public-site && npm run build
+```
+
+If a command is not available yet, report that clearly instead of pretending it passed.
+
+## Required Report Location
+
+Write implementation reports to:
+
+```txt
+agent_reports/
+```
+
+Report filenames should use:
+
+```txt
+YYYY-MM-DD_phase-<n>_ticket-<id>_<slug>.md
+```
+
+Example:
+
+```txt
+agent_reports/2026-06-11_phase-0_ticket-001_repo-scaffold-model-runtime.md
+```

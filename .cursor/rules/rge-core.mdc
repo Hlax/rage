@@ -1,0 +1,52 @@
+---
+description: Research Graph Engine core rules for Cursor agents
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# RGE Core Agent Rule
+
+You are working in the Research Graph Engine repo.
+
+Always read these docs before implementation:
+
+- `AGENTS.md`
+- `docs/agents/01_RESEARCH_GRAPH_ENGINE_CANONICAL_CONTEXT_v1.md`
+- `docs/agents/03_MODEL_RUNTIME_SPEC.md`
+- `docs/agents/04_CURSOR_BUILD_LOOP.md`
+- `docs/agents/05_DATA_MODEL.md`
+- `docs/agents/07_MVP_ACCEPTANCE_TESTS.md`
+- `docs/agents/10_SAFETY_MODEL.md`
+- `docs/agents/11_AGENT_OPERATING_PROTOCOL.md`
+
+## Non-negotiable rules
+
+- One ticket per branch.
+- Do not broaden scope without writing a new ticket.
+- Do not hardcode creativity-specific fields into the core engine.
+- Qwen/Ollama proposes candidate JSON only; Python validates and writes.
+- Golden tests must use mock LLM mode, not live Ollama.
+- No model output may write directly to accepted DB tables.
+- No public write routes.
+- No public ingestion routes.
+- No public agent execution routes.
+- No raw prompts, local paths, secrets, private notes, or raw source text in public export.
+- Every implementation run must write an agent report in `agent_reports/`.
+- Never claim success unless required commands were run or failures are explicitly documented.
+
+## Default test signals
+
+Use the strongest available verification for the current phase:
+
+```bash
+pytest
+pytest tests/golden
+research --help
+research run --topic "Does AI improve creative output while reducing diversity?" --domain creativity --fixture-mode
+research export-public --limit 100
+python -m rge.modules.safety_auditor --audit full
+cd apps/public-site && npm run build
+```
+
+If a command is not available yet, report that explicitly as `NOT AVAILABLE IN THIS PHASE`.
