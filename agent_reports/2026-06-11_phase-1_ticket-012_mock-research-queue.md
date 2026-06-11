@@ -113,7 +113,7 @@ Revert branch `phase-1/ticket-012-mock-research-queue`. Delete candidate/queue r
 - Instruction source: `AGENTS.md` step 9 (temporary).
 - Pre-merge `main` tip: `f4188174e0e707377e64ac091cbb186ac393638b`
 - Branch: `phase-1/ticket-012-mock-research-queue`
-- Merge result: pending (record hash below after merge/push).
+- Merge result: `--no-ff` merge commit `c384cb79723f47bf452ab43d170c8b4049c04260`; pushed `origin/main`.
 
 ## 15. Recommended Next Ticket
 
