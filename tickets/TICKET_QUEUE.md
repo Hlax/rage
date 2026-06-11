@@ -33,7 +33,17 @@ superseded
 
 | Order | Ticket ID | Status | Title | Branch | Report |
 |---:|---|---|---|---|---|
-| 7 | ticket-007 | proposed | Add mock claim extraction (Golden Test 2) | | |
+| 7 | ticket-007 | done | Add mock claim extraction (Golden Test 2) | `phase-1/ticket-007-mock-claim-extraction` | `agent_reports/2026-06-11_phase-1_ticket-007_mock-claim-extraction.md` |
+| 8 | ticket-008 | proposed | Add mock concept linking (Golden Test 5) | | |
+
+## Queue Notes (2026-06-11, ticket-007 agent)
+
+- ticket-007 implemented `research extract-claims` with mock LLM fixtures, deterministic
+  validation (quote span, scope, overgeneralization), and persistence to `claims` +
+  `claim_quotes`. Golden Test 2 passes (4 tests); all 33 golden tests pass without Ollama.
+- Added `claim_extraction_creativity_scoped.json` for two accepted scoped claims; existing
+  fixtures used for missing-quote and overgeneralized rejection tests via `--fixture`.
+- ticket-008 proposes mock concept linking for Golden Test 5.
 
 ## Queue Notes (2026-06-11, ticket-006 agent)
 
@@ -44,7 +54,6 @@ superseded
 - ticket-003 is marked `superseded` because its migration-harness scope is now delivered by
   ticket-006. Reopen only if review wants a separate migration-only ticket.
 - On Windows, `research.exe` may not be on PATH; use `python -m rge.cli ingest ...`.
-- ticket-007 proposes the smallest next step: mock claim extraction for Golden Test 2.
 
 ## Queue Notes (2026-06-11, ticket-001 agent)
 
@@ -78,7 +87,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-007 (proposed; awaiting review)
+ticket-008 (proposed; awaiting review)
 ```
 
 ## Queue Rules

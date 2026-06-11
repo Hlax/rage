@@ -1,0 +1,40 @@
+{
+  "id": "ticket-008",
+  "title": "Add mock concept linking (Golden Test 5)",
+  "problem": "Accepted claims exist but are not linked to domain concepts. Golden Test 5 requires linking claims to creativity ontology concepts via deterministic mock output and validated claim_concepts rows.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 5: concept linking maps claims to domain concepts.",
+    "agent_reports/2026-06-11_phase-1_ticket-007_mock-claim-extraction.md",
+    "domain_packs/creativity/ontology.yaml"
+  ],
+  "affected_modules": [
+    "rge/modules/concept_linker.py",
+    "rge/db/repositories.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/concept_linker.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "tests/golden/test_05_concept_linking.py"
+  ],
+  "acceptance_criteria": [
+    "research link-concepts --source <source_id> links accepted claims to at least one creativity domain concept.",
+    "claim_concepts rows include claim_id, concept_id, role, and confidence.",
+    "Links are persisted and re-readable after process restart.",
+    "pytest tests/golden/test_05_concept_linking.py passes without Ollama.",
+    "Existing golden tests still pass."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_05_concept_linking.py",
+    "pytest tests/golden"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not implement relationships, scoring, or public export.",
+    "Do not promote concepts to active status automatically."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert the ticket branch; delete claim_concepts rows created during manual testing from the local SQLite file.",
+  "status": "proposed"
+}

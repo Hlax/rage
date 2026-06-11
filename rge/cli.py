@@ -48,6 +48,45 @@ def _cmd_verify(_args: argparse.Namespace) -> int:
     )
 
 
+def _cmd_extract_claims(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import ClaimRepository, claim_record_to_public_dict
+    from rge.modules.claim_extractor import extract_claims_for_source
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        result = extract_claims_for_source(
+            conn,
+            args.source,
+            fixture_name=args.fixture,
+        )
+        claim_repo = ClaimRepository(conn)
+        accepted = claim_repo.list_for_source(args.source, status="accepted")
+        rejected = claim_repo.list_for_source(args.source, status="rejected")
+        payload = {
+            "status": result["status"],
+            "command": "extract-claims",
+            "source_id": args.source,
+            "accepted_count": result["accepted_count"],
+            "rejected_count": result["rejected_count"],
+            "accepted_claims": [
+                claim_record_to_public_dict(claim) for claim in accepted
+            ],
+            "rejected_claims": [
+                claim_record_to_public_dict(claim) for claim in rejected
+            ],
+        }
+        print(json.dumps(payload, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {"status": "error", "command": "extract-claims", "detail": str(exc)}
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_ingest(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.db.repositories import (
@@ -139,6 +178,29 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
     )
     ingest_parser.set_defaults(func=_cmd_ingest)
+
+    extract_parser = subparsers.add_parser(
+        "extract-claims",
+        help="Extract scoped claims from an ingested source (mock LLM).",
+        description=(
+            "Extract candidate claims via the mock model client, validate them "
+            "deterministically, and persist accepted/rejected claim records."
+        ),
+    )
+    extract_parser.add_argument(
+        "--source",
+        required=True,
+        help="Stable source ID to extract claims from.",
+    )
+    extract_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    extract_parser.add_argument(
+        "--fixture",
+        help="Optional mock LLM fixture filename for deterministic extraction tests.",
+    )
+    extract_parser.set_defaults(func=_cmd_extract_claims)
 
     export_parser = subparsers.add_parser(
         "export-public",

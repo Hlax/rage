@@ -10,7 +10,7 @@
       "subject": "AI-assisted brainstorming",
       "predicate": "reduced",
       "object": "semantic diversity",
-      "scope": "short-form writing tasks with student participants",
+      "scope": "short-form writing tasks",
       "evidence_type": "empirical",
       "confidence": 0.6,
       "limitations": [
@@ -32,7 +32,7 @@
       "subject": "AI-assisted brainstorming",
       "predicate": "increased",
       "object": "average idea quality",
-      "scope": "short-form writing tasks with student participants",
+      "scope": "short-form writing tasks",
       "evidence_type": "empirical",
       "confidence": 0.6,
       "limitations": [

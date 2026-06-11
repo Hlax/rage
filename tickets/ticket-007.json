@@ -39,5 +39,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert the ticket branch; delete any claims/claim_quotes rows created during manual testing from the local SQLite file.",
-  "status": "proposed"
+  "status": "done"
 }
