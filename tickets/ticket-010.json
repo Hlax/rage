@@ -1,0 +1,40 @@
+{
+  "id": "ticket-010",
+  "title": "Add score reconciliation with history (Golden Test 8)",
+  "problem": "Relationships have initial confidence values but no score_events history. Golden Test 8 requires that new supporting evidence can adjust relationship confidence with an append-only audit trail.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 8: score reconciliation updates relationship confidence with history.",
+    "docs/agents/05_DATA_MODEL.md section 4.19 score_events",
+    "agent_reports/2026-06-11_phase-1_ticket-009_mock-relationship-builder.md"
+  ],
+  "affected_modules": [
+    "rge/modules/score_reconciler.py",
+    "rge/db/repositories.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/score_reconciler.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "tests/golden/test_08_score_reconciliation.py"
+  ],
+  "acceptance_criteria": [
+    "New supporting evidence for an existing relationship increases confidence and writes a score_events row.",
+    "score_events preserve old_score, new_score, triggering_claim_id, and machine-readable reason.",
+    "pytest tests/golden/test_08_score_reconciliation.py passes without Ollama.",
+    "Existing golden tests still pass."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_08_score_reconciliation.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not implement contradiction detection (Golden Test 7).",
+    "Do not implement public export or LangGraph orchestration."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert the ticket branch; delete score_events rows created during manual testing from local SQLite.",
+  "status": "proposed"
+}

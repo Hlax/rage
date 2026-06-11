@@ -4,19 +4,29 @@
   "problem": "Accepted claims are linked to concepts but no evidence relationships exist. Golden Test 6 requires turning the semantic-diversity claim into a support edge between AI assistance and semantic diversity.",
   "evidence": [
     "docs/agents/00_GOLDEN_TESTS.md Test 6: relationship builder creates support edges.",
+    "agent_reports/2026-06-11_pre-ticket-009_relationship-builder-readiness-audit.md",
     "agent_reports/2026-06-11_phase-1_ticket-008_mock-concept-linking.md",
     "rge/modules/relationship_builder.py"
   ],
   "affected_modules": [
     "rge/modules/relationship_builder.py",
     "rge/db/repositories.py",
-    "rge/cli.py"
+    "rge/db/migrations/0002_relationship_evidence.sql",
+    "rge/cli.py",
+    "rge/llm/mock_client.py"
   ],
   "expected_files": [
+    "rge/db/migrations/0002_relationship_evidence.sql",
+    "rge/db/schema.sql",
     "rge/modules/relationship_builder.py",
     "rge/db/repositories.py",
     "rge/cli.py",
-    "tests/golden/test_06_relationship_builder.py"
+    "rge/llm/mock_client.py",
+    "fixtures/llm_outputs/relationship_drafting_creativity_diversity.json",
+    "fixtures/llm_outputs/relationship_drafting_unknown_concept.json",
+    "tests/golden/test_06_relationship_builder.py",
+    "tests/golden/test_00_scaffold.py",
+    "tests/golden/test_01_ingestion.py"
   ],
   "acceptance_criteria": [
     "research build-relationships --source <source_id> creates at least one active relationship with evidence link.",
@@ -27,7 +37,8 @@
   ],
   "test_plan": [
     "pytest tests/golden/test_06_relationship_builder.py",
-    "pytest tests/golden"
+    "pytest tests/golden",
+    "pytest"
   ],
   "non_goals": [
     "Do not call Ollama.",
@@ -36,5 +47,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert the ticket branch; delete relationships and relationship_evidence rows from local SQLite.",
-  "status": "proposed"
+  "status": "done"
 }
