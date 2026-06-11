@@ -1,0 +1,49 @@
+{
+  "task_name": "claim_extraction",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "claim_text": "AI-assisted brainstorming reduced semantic diversity in short-form writing tasks.",
+      "source_id": "src_fixture_creativity_ai_diversity_short",
+      "chunk_id": "chk_fixture_creativity_ai_diversity_short_0001",
+      "quote_span": "AI-assisted brainstorming reduced semantic diversity across submitted ideas.",
+      "subject": "AI-assisted brainstorming",
+      "predicate": "reduced",
+      "object": "semantic diversity",
+      "scope": "short-form writing tasks with student participants",
+      "evidence_type": "empirical",
+      "confidence": 0.6,
+      "limitations": [
+        "Only tested short-form writing tasks.",
+        "Student participants; may not generalize to professional creative work."
+      ],
+      "domain": "creativity",
+      "domain_metadata": {
+        "track": "human-AI",
+        "creative_phase": "ideation",
+        "measured_dimension": "semantic diversity"
+      }
+    },
+    {
+      "claim_text": "AI-assisted brainstorming increased average idea quality in short-form writing tasks.",
+      "source_id": "src_fixture_creativity_ai_diversity_short",
+      "chunk_id": "chk_fixture_creativity_ai_diversity_short_0001",
+      "quote_span": null,
+      "subject": "AI-assisted brainstorming",
+      "predicate": "increased",
+      "object": "average idea quality",
+      "scope": "short-form writing tasks with student participants",
+      "evidence_type": "empirical",
+      "confidence": 0.6,
+      "limitations": [
+        "Only tested short-form writing tasks."
+      ],
+      "domain": "creativity",
+      "domain_metadata": {
+        "track": "human-AI",
+        "creative_phase": "ideation",
+        "measured_dimension": "quality"
+      }
+    }
+  ]
+}

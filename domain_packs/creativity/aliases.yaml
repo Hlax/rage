@@ -1,0 +1,22 @@
+# Alias map: recurring terms -> canonical concepts.
+# Spec: docs/agents/06_DOMAIN_PACK_SPEC.md section 7.
+# Alias matching proposes links; validation prevents duplicate concepts.
+aliases:
+  AI assistance:
+    - AI-assisted brainstorming
+    - generative AI support
+    - AI suggestion
+    - AI co-pilot
+  semantic diversity:
+    - idea diversity
+    - semantic spread
+    - diversity of ideas
+    - semantic variance
+  taste:
+    - aesthetic judgment
+    - creative judgment
+    - selection ability
+  selection burden:
+    - curation load
+    - choice overload
+    - taste bottleneck

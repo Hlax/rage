@@ -1,0 +1,23 @@
+# Creativity domain pack identity and lifecycle.
+# Spec: docs/agents/06_DOMAIN_PACK_SPEC.md section 4.
+id: creativity
+name: Creativity
+version: 0.1.0
+status: active
+summary: >
+  Domain pack for human creativity, AI creativity, and human-AI co-creativity.
+primary_domains:
+  - creativity
+overlap_domains:
+  - art
+  - design
+  - film
+  - music
+  - digital_media
+lifecycle_states:
+  - candidate
+  - draft
+  - experimental
+  - active
+  - deprecated
+  - merged

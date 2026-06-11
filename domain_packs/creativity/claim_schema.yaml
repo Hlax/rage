@@ -1,0 +1,36 @@
+# Creativity claim extraction extensions.
+# Spec: docs/agents/06_DOMAIN_PACK_SPEC.md section 11.
+# Core engine validates that domain_metadata exists and is JSON; this pack
+# validates the domain-specific allowed values below.
+required_domain_metadata_for_creativity_claims:
+  - track
+  - creative_phase
+  - measured_dimension
+
+allowed_tracks:
+  - human
+  - AI
+  - human-AI
+
+allowed_creative_phases:
+  - ideation
+  - divergence
+  - selection
+  - iteration
+  - execution
+  - critique
+  - publishing
+  - audience_interpretation
+
+allowed_measured_dimensions:
+  - novelty
+  - usefulness
+  - diversity
+  - semantic diversity
+  - quality
+  - speed
+  - agency
+  - ownership
+  - originality
+  - coherence
+  - resonance

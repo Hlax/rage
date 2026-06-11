@@ -1,0 +1,17 @@
+# Creativity scoring overlays. Versioned; applied by the score reconciler.
+# Spec: docs/agents/06_DOMAIN_PACK_SPEC.md section 10.
+# Scores are derived, never manually overwritten; changes require score_events.
+overlay_version: 0.1.0
+
+claim_scoring_overlay:
+  domain_match:
+    writing_task_to_general_creativity_penalty: 0.15
+    student_sample_to_professional_work_penalty: 0.10
+  scope_clarity:
+    requires_creative_phase: true
+    requires_measured_dimension_when_empirical: true
+  evidence_bonus:
+    cross_domain_replication: 0.10
+    mixed_methods_support: 0.05
+  contradiction_handling:
+    metric_difference_should_qualify_not_flatten: true

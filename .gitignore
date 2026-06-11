@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+
+# Secrets / local config
+.env
+
+# Local data (durable private memory; never committed)
+data/db/*.sqlite
+data/db/*.sqlite3
+data/backups/
+
+# Node / Next.js
+node_modules/
+apps/public-site/.next/
+apps/public-site/out/
+apps/public-site/next-env.d.ts
+*.tsbuildinfo
+
+# OS noise
+.DS_Store
+Thumbs.db

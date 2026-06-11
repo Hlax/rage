@@ -1,0 +1,116 @@
+# Creativity v1 ontology stub.
+# Spec: docs/agents/06_DOMAIN_PACK_SPEC.md sections 5-6.
+# Phase 0: required v1 concepts are listed; full definitions/groups are
+# completed by the Phase 2 domain pack ticket. New concepts proposed by model
+# output start as draft/candidate, never active.
+
+concepts:
+  - id: concept_taste
+    label: taste
+    status: active
+    definition: The ability to evaluate and select creative options well.
+    groups: [Selection]
+  - id: concept_novelty
+    label: novelty
+    status: active
+    definition: The degree to which creative output is new relative to prior work.
+    groups: [Evaluation]
+  - id: concept_originality
+    label: originality
+    status: active
+    definition: The degree to which creative output is distinctive and non-derivative.
+    groups: [Evaluation]
+  - id: concept_diversity
+    label: diversity
+    status: active
+    definition: The variety across a set of creative outputs.
+    groups: [Evaluation]
+  - id: concept_semantic_diversity
+    label: semantic diversity
+    status: active
+    definition: The degree to which generated ideas differ meaningfully from one another in semantic content.
+    groups: [Evaluation]
+    domain_metadata:
+      measured_dimension: diversity
+  - id: concept_constraint
+    label: constraint
+    status: active
+    definition: Limits that shape or focus creative work.
+    groups: [Generation]
+  - id: concept_agency
+    label: agency
+    status: active
+    definition: The capacity to make meaningful creative decisions.
+    groups: [Co-Creation]
+  - id: concept_authorship
+    label: authorship
+    status: active
+    definition: Attribution of creative work to its makers.
+    groups: [Co-Creation]
+  - id: concept_ownership
+    label: ownership
+    status: active
+    definition: The felt and formal possession of creative work.
+    groups: [Co-Creation]
+  - id: concept_intention
+    label: intention
+    status: active
+    definition: The purpose or meaning a creator aims to express.
+    groups: [Meaning]
+  - id: concept_meaning
+    label: meaning
+    status: active
+    definition: The significance carried by creative work for creators and audiences.
+    groups: [Meaning]
+  - id: concept_iteration
+    label: iteration
+    status: active
+    definition: Repeated cycles of revising and refining creative work.
+    groups: [Execution]
+  - id: concept_curation
+    label: curation
+    status: active
+    definition: Selecting and arranging creative options into a coherent result.
+    groups: [Selection]
+  - id: concept_human_control
+    label: human control
+    status: active
+    definition: The degree to which humans retain decision authority in creative workflows.
+    groups: [Co-Creation]
+  - id: concept_ai_assistance
+    label: AI assistance
+    status: active
+    definition: Use of AI systems to support ideation, variation, execution, selection, or critique in creative work.
+    groups: [Co-Creation, Generation]
+    domain_metadata:
+      track: human-AI
+  - id: concept_co_creation
+    label: co-creation
+    status: active
+    definition: Creative work produced through interleaved human and AI contributions.
+    groups: [Co-Creation]
+  - id: concept_style_collapse
+    label: style collapse
+    status: active
+    definition: Convergence of creative outputs toward similar styles, reducing variety.
+    groups: [Co-Creation, Evaluation]
+  - id: concept_prompt_engineering
+    label: prompt engineering
+    status: active
+    definition: Crafting model inputs to steer AI-generated creative output.
+    groups: [Co-Creation]
+  - id: concept_selection_burden
+    label: selection burden
+    status: active
+    definition: The cognitive and creative load created by needing to evaluate and choose among many generated options.
+    groups: [Selection]
+  - id: concept_variation_volume
+    label: variation volume
+    status: active
+    definition: The quantity of creative variations generated for consideration.
+    groups: [Generation]
+  - id: concept_creative_phase
+    label: creative phase
+    status: active
+    definition: The stage of the creative process a claim or observation concerns.
+    groups: [Generation, Selection, Execution]

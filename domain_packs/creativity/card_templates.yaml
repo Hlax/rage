@@ -1,0 +1,32 @@
+# Public card templates for the creativity domain.
+# Spec: docs/agents/06_DOMAIN_PACK_SPEC.md section 12.
+# Templates must never request raw private notes, full source text, raw
+# prompts, hidden evaluator notes, local paths, API keys, or unsafe HTML.
+cards:
+  claim_card:
+    required_fields:
+      - title
+      - summary
+      - confidence
+      - concepts
+      - source_count
+      - public_caveats
+  cluster_card:
+    required_fields:
+      - title
+      - summary
+      - confidence
+      - concepts
+      - source_count
+      - strongest_support
+      - strongest_qualification
+      - open_gaps
+  theory_card:
+    required_fields:
+      - title
+      - summary
+      - confidence
+      - supporting_claim_count
+      - weakening_evidence
+      - boundary_conditions
+      - status

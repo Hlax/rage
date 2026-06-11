@@ -1,0 +1,19 @@
+Effects of AI-Assisted Brainstorming on Idea Quality and Semantic Diversity
+(Fixture: fake academic-style passage for golden tests.)
+
+In a controlled study of short-form writing tasks, we examined how AI-assisted
+brainstorming affects the ideas that participants submit. Participants were
+undergraduate students recruited from introductory writing courses.
+
+We found that AI-assisted brainstorming increased average idea quality across
+submitted ideas. Independent raters scored ideas produced with AI assistance
+higher on usefulness and coherence than ideas produced without assistance.
+
+However, AI-assisted brainstorming reduced semantic diversity across submitted
+ideas. Ideas generated with AI support clustered around fewer distinct semantic
+directions, even when individual idea quality improved.
+
+Limitations: the study only tested short-form writing tasks, and the sample
+consisted of student participants. The results may not generalize to film,
+music, or professional creative work, where task structure, expertise, and
+incentives differ substantially.

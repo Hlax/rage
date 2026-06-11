@@ -1,0 +1,47 @@
+{
+  "fixture_id": "source_ranking_fixture",
+  "schema_version": "0.1.0",
+  "description": "Five fake candidate sources for queue ranking golden tests (Golden Test 9).",
+  "candidates": [
+    {
+      "id": "cand_empirical_paper",
+      "title": "Generative AI Brainstorming and Semantic Diversity: A Controlled Study",
+      "source_type": "peer_reviewed_empirical",
+      "year": 2025,
+      "summary": "Peer-reviewed empirical paper directly about AI assistance and semantic diversity in ideation tasks.",
+      "expected_rank_hint": "near_top"
+    },
+    {
+      "id": "cand_generic_blog",
+      "title": "10 Ways AI Will Supercharge Your Creativity",
+      "source_type": "blog_post",
+      "year": 2026,
+      "summary": "Generic AI creativity blog post with no cited evidence.",
+      "expected_rank_hint": "low"
+    },
+    {
+      "id": "cand_expert_interview",
+      "title": "Interview: A Creative Director on Taste in the Age of AI",
+      "source_type": "expert_interview",
+      "year": 2025,
+      "summary": "Expert interview about creative taste and selection judgment.",
+      "expected_rank_hint": "useful_but_below_empirical"
+    },
+    {
+      "id": "cand_marketing_page",
+      "title": "MuseForge AI: The Only Creativity Tool You Will Ever Need",
+      "source_type": "marketing_page",
+      "year": 2026,
+      "summary": "Marketing page for an AI creativity tool.",
+      "expected_rank_hint": "bottom_or_rejected"
+    },
+    {
+      "id": "cand_theory_paper",
+      "title": "Originality as Constraint Navigation: A Theoretical Framework",
+      "source_type": "theory_essay",
+      "year": 2012,
+      "summary": "Older but highly relevant theory paper about originality.",
+      "expected_rank_hint": "mid_relevant_despite_age"
+    }
+  ]
+}

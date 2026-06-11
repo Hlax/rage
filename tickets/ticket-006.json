@@ -1,0 +1,50 @@
+{
+  "id": "ticket-006",
+  "title": "Add SQLite migration harness and source ingestion",
+  "problem": "The scaffold has a schema placeholder but no way to create the database or persist sources. Phase 1 needs a migration harness that applies rge/db/schema.sql (reconciled with the claims-lifecycle representation in docs/agents/05_DATA_MODEL.md) and a 'research ingest' command that persists a fixture source with chunks, checksum, and status per Golden Test 1.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 1: source ingestion creates durable source records.",
+    "docs/agents/02_ARCHITECTURE.md section 11 Phase 1 scope.",
+    "agent_reports/2026-06-11_phase-0_ticket-001_repo-scaffold-model-runtime.md: schema placeholder uses claims_staged/claims_accepted/claim_rejections while 05_DATA_MODEL.md models a single claims table with status; reconciliation needed before ingestion lands."
+  ],
+  "affected_modules": [
+    "rge/db/connection.py",
+    "rge/db/migrations",
+    "rge/db/schema.sql",
+    "rge/db/repositories.py",
+    "rge/modules/fetcher.py",
+    "rge/modules/parser.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/db/migrations/0001_initial.sql",
+    "rge/db/connection.py",
+    "rge/db/repositories.py",
+    "rge/db/schema.sql",
+    "rge/modules/fetcher.py",
+    "rge/modules/parser.py",
+    "rge/cli.py",
+    "tests/golden/test_01_ingestion.py"
+  ],
+  "acceptance_criteria": [
+    "A migration harness creates the SQLite database from versioned migration files.",
+    "Schema reconciles the claim lifecycle with 05_DATA_MODEL.md (single claims table with status, plus claim_quotes), preserving rejection reasons.",
+    "research ingest fixtures/sources/creativity_ai_diversity_short.txt --domain creativity persists one sources record and at least one chunks record with stable IDs, checksum, timestamps, and status 'ingested'.",
+    "The source can be re-read after process restart.",
+    "pytest tests/golden/test_01_ingestion.py passes without Ollama.",
+    "Existing golden scaffold tests still pass."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_01_ingestion.py",
+    "pytest tests/golden"
+  ],
+  "non_goals": [
+    "Do not implement claim extraction or validation.",
+    "Do not implement concept linking, relationships, or scoring.",
+    "Do not implement URL/PDF fetching beyond local text files.",
+    "Do not touch the public site or export logic."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert the ticket branch; delete any locally created data/db/*.sqlite file. Schema changes live only in migration files, so reverting the branch restores the previous schema state.",
+  "status": "proposed"
+}

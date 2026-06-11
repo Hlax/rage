@@ -1,0 +1,22 @@
+Divergent Prompting and Idea Diversity in AI-Assisted Ideation
+(Fixture: fake academic-style passage for golden tests; provides qualifying
+counter-evidence to the short-form writing fixture.)
+
+We studied whether instruction strategy changes how AI assistance affects the
+diversity of generated ideas. Participants completed ideation tasks with an
+AI brainstorming assistant under two conditions: a default condition and a
+divergent condition in which participants were instructed to generate multiple
+divergent directions before elaborating any single idea.
+
+In the divergent condition, AI-assisted brainstorming increased idea diversity
+when participants were instructed to generate multiple divergent directions.
+Idea sets in this condition spanned more distinct semantic directions than
+idea sets from unassisted participants.
+
+In the default condition, results were consistent with prior findings that AI
+assistance narrows semantic spread.
+
+Limitations: diversity was measured as rated idea diversity rather than
+embedding-based semantic diversity, and tasks were limited to general ideation
+prompts. Differences in metric and elicitation conditions may explain apparent
+contradictions with earlier studies rather than a true conflict.

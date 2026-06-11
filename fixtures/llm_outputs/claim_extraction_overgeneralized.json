@@ -1,0 +1,21 @@
+{
+  "task_name": "claim_extraction",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "claim_text": "AI reduces creativity.",
+      "source_id": "src_fixture_creativity_ai_diversity_short",
+      "chunk_id": "chk_fixture_creativity_ai_diversity_short_0001",
+      "quote_span": "AI-assisted brainstorming reduced semantic diversity across submitted ideas.",
+      "subject": "AI",
+      "predicate": "reduces",
+      "object": "creativity",
+      "scope": null,
+      "evidence_type": "empirical",
+      "confidence": 0.9,
+      "limitations": [],
+      "domain": "creativity",
+      "domain_metadata": {}
+    }
+  ]
+}

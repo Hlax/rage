@@ -1,0 +1,14 @@
+# Reusable query patterns for the creativity domain.
+# Spec: docs/agents/06_DOMAIN_PACK_SPEC.md section 13.
+# Search templates are query drafts only; candidate ranking decides what
+# enters the queue.
+queries:
+  ai_diversity_empirical:
+    template: "generative AI brainstorming semantic diversity empirical study creativity"
+    preferred_source_types: [peer_reviewed_empirical, meta_analysis, benchmark_paper]
+  human_control_ownership:
+    template: "human control creative ownership AI co-creation study"
+    preferred_source_types: [empirical, interview, theory]
+  divergent_prompting:
+    template: "divergent prompting AI ideation originality diversity"
+    preferred_source_types: [empirical, benchmark_paper]

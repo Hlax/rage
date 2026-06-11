@@ -1,0 +1,25 @@
+# Source ranking priors for the creativity domain.
+# Spec: docs/agents/06_DOMAIN_PACK_SPEC.md section 8.
+# Preferences influence queue priority; they do not determine truth.
+source_type_weights:
+  meta_analysis: 0.95
+  peer_reviewed_empirical: 0.90
+  benchmark_paper: 0.80
+  expert_interview: 0.70
+  case_study: 0.65
+  theory_essay: 0.60
+  product_docs: 0.45
+  marketing_page: 0.20
+
+preferred_sources:
+  - Semantic Scholar
+  - OpenAlex
+  - Crossref
+  - arXiv
+  - manual PDFs
+  - expert interviews
+
+avoid_as_primary:
+  - marketing landing pages
+  - uncited hot takes
+  - SEO summaries

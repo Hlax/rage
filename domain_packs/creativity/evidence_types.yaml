@@ -1,0 +1,21 @@
+# Evidence categories and relative priors for the creativity domain.
+# Spec: docs/agents/06_DOMAIN_PACK_SPEC.md section 9.
+evidence_types:
+  empirical:
+    base_strength: 0.80
+    notes: Controlled or observational study with method details.
+  meta_analysis:
+    base_strength: 0.90
+    notes: Aggregates multiple studies.
+  case_study:
+    base_strength: 0.55
+    notes: Useful for practice context, weaker for general claims.
+  theory:
+    base_strength: 0.45
+    notes: Useful for conceptual framing, not empirical proof.
+  interview:
+    base_strength: 0.50
+    notes: Valuable practitioner evidence, not generalized population evidence.
+  benchmark:
+    base_strength: 0.65
+    notes: Strong for model behavior if metrics match question.

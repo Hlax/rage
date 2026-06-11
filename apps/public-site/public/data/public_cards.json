@@ -1,0 +1,16 @@
+[
+  {
+    "id": "card_placeholder_0001",
+    "type": "claim_card",
+    "title": "Placeholder: public export surface is live",
+    "summary": "This is a Phase 0 placeholder card. Real research cards arrive when the local engine exports public-safe JSON snapshots.",
+    "confidence": "low",
+    "concepts": [],
+    "source_count": 0,
+    "public_caveats": ["Placeholder data only; no research has been exported yet."],
+    "public_source_metadata": [],
+    "related_cards": [],
+    "public_detail_level": "summary",
+    "updated_at": "2026-06-11T00:00:00Z"
+  }
+]
