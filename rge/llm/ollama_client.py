@@ -25,6 +25,7 @@ from rge.llm.base import ModelCallMetadata, ModelClient
 from rge.llm.schemas import (
     CandidateClaimBatch_v0_1,
     CandidateConceptLinkBatch_v0_1,
+    CandidateContradictionBatch_v0_1,
     CandidateImprovementTicket_v0_1,
     CandidateRelationshipBatch_v0_1,
     CandidateRunSummary_v0_1,
@@ -124,6 +125,15 @@ class OllamaModelClient(ModelClient):
         schema_version: str,
     ) -> CandidateRelationshipBatch_v0_1:
         raise OllamaNotAvailableInPhase0("relationship_drafting")
+
+    def detect_contradictions(
+        self,
+        claims: list[dict[str, Any]],
+        relationships: list[dict[str, Any]],
+        domain_pack: str,
+        schema_version: str,
+    ) -> CandidateContradictionBatch_v0_1:
+        raise OllamaNotAvailableInPhase0("contradiction_detection")
 
     def draft_run_summary(
         self,

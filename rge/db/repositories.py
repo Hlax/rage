@@ -340,6 +340,21 @@ class ClaimRepository:
             ).fetchall()
         return [_row_to_claim(row) for row in rows]
 
+    def list_accepted_for_domain(self, domain: str) -> list[ClaimRecord]:
+        rows = self._conn.execute(
+            """
+            SELECT id, source_id, chunk_id, claim_text, statement_type, subject,
+                   predicate, object, scope, evidence_type, confidence,
+                   limitations_json, domain, domain_metadata_json, status,
+                   rejection_reason, created_at, updated_at
+            FROM claims
+            WHERE domain = ? AND status = 'accepted'
+            ORDER BY created_at
+            """,
+            (domain,),
+        ).fetchall()
+        return [_row_to_claim(row) for row in rows]
+
     def count_for_source(self, source_id: str) -> int:
         row = self._conn.execute(
             "SELECT COUNT(*) FROM claims WHERE source_id = ?",
@@ -806,6 +821,49 @@ class RelationshipRepository:
             """
         ).fetchall()
         return [_row_to_relationship(row) for row in rows]
+
+    def merge_domain_metadata(
+        self,
+        relationship_id: str,
+        patch: dict[str, Any],
+    ) -> dict[str, Any]:
+        existing = self.get_by_id(relationship_id)
+        if existing is None:
+            raise ValueError(f"Relationship not found: {relationship_id}")
+        metadata = json.loads(existing.get("domain_metadata_json") or "{}")
+        metadata.update(patch)
+        now = utc_now_iso()
+        self._conn.execute(
+            """
+            UPDATE relationships
+            SET domain_metadata_json = ?, updated_at = ?
+            WHERE id = ?
+            """,
+            (json.dumps(metadata), now, relationship_id),
+        )
+        self._conn.commit()
+        updated = self.get_by_id(relationship_id)
+        assert updated is not None
+        return updated
+
+    def find_active_by_triple(
+        self,
+        *,
+        subject_concept: str,
+        predicate: str,
+        object_concept: str,
+    ) -> dict[str, Any] | None:
+        subject_norm = subject_concept.strip().casefold()
+        predicate_norm = predicate.strip().casefold()
+        object_norm = object_concept.strip().casefold()
+        for relationship in self.list_active():
+            if (
+                relationship["subject_concept"].strip().casefold() == subject_norm
+                and relationship["predicate"].strip().casefold() == predicate_norm
+                and relationship["object_concept"].strip().casefold() == object_norm
+            ):
+                return relationship
+        return None
 
 
 class RelationshipEvidenceRepository:

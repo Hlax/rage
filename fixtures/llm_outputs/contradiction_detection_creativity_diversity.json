@@ -1,0 +1,18 @@
+{
+  "task_name": "contradiction_detection",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "base_subject_concept": "AI assistance",
+      "base_predicate": "may_reduce",
+      "base_object_concept": "semantic diversity",
+      "new_subject_concept": "AI assistance",
+      "new_predicate": "may_increase",
+      "new_object_concept": "diversity",
+      "qualifying_claim_id": "placeholder",
+      "opposing_claim_id": "placeholder",
+      "qualification_stance": "qualifies",
+      "contradiction_classification": "apparent_contradiction_metric_or_condition_difference"
+    }
+  ]
+}

@@ -167,6 +167,49 @@ def _cmd_build_relationships(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_detect_contradictions(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import RelationshipEvidenceRepository, RelationshipRepository
+    from rge.modules.contradiction_detector import detect_contradictions_for_source
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        result = detect_contradictions_for_source(
+            conn,
+            args.source,
+            fixture_name=args.fixture,
+        )
+        relationships = RelationshipRepository(conn).list_active()
+        qualifications = [
+            row
+            for row in RelationshipEvidenceRepository(conn).list_for_source(args.source)
+            if row["stance"] == "qualifies"
+        ]
+        payload = {
+            "status": result["status"],
+            "command": "detect-contradictions",
+            "source_id": args.source,
+            "qualification_count": result.get("qualification_count", 0),
+            "qualifications": qualifications,
+            "active_relationships": relationships,
+        }
+        if result.get("rejected"):
+            payload["rejected"] = result["rejected"]
+        print(json.dumps(payload, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "detect-contradictions",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_reconcile_scores(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.db.repositories import RelationshipRepository, ScoreEventRepository
@@ -382,6 +425,30 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
     )
     reconcile_parser.set_defaults(func=_cmd_reconcile_scores)
+
+    detect_parser = subparsers.add_parser(
+        "detect-contradictions",
+        help="Detect contradictions and preserve qualification links (mock LLM).",
+        description=(
+            "Propose contradiction/qualification links via the mock model client, "
+            "validate them deterministically, and persist qualifies evidence without "
+            "deleting or flattening opposing claims."
+        ),
+    )
+    detect_parser.add_argument(
+        "--source",
+        required=True,
+        help="Stable source ID whose accepted claims should trigger contradiction detection.",
+    )
+    detect_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    detect_parser.add_argument(
+        "--fixture",
+        help="Optional mock LLM fixture filename for deterministic contradiction tests.",
+    )
+    detect_parser.set_defaults(func=_cmd_detect_contradictions)
 
     export_parser = subparsers.add_parser(
         "export-public",

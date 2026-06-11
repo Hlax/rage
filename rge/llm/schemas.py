@@ -84,6 +84,29 @@ class CandidateRelationshipBatch_v0_1(BaseModel):
     items: list[CandidateRelationship_v0_1] = Field(default_factory=list)
 
 
+class CandidateContradiction_v0_1(BaseModel):
+    """One candidate contradiction/qualification link. Untrusted until validated."""
+
+    base_subject_concept: str
+    base_predicate: str
+    base_object_concept: str
+    new_subject_concept: str
+    new_predicate: str
+    new_object_concept: str
+    qualifying_claim_id: str | None = None
+    opposing_claim_id: str | None = None
+    qualification_stance: str = "qualifies"
+    contradiction_classification: str = (
+        "apparent_contradiction_metric_or_condition_difference"
+    )
+
+
+class CandidateContradictionBatch_v0_1(BaseModel):
+    task_name: Literal["contradiction_detection"] = "contradiction_detection"
+    schema_version: str = SCHEMA_VERSION_0_1_0
+    items: list[CandidateContradiction_v0_1] = Field(default_factory=list)
+
+
 class CandidateRunSummary_v0_1(BaseModel):
     task_name: Literal["run_summary"] = "run_summary"
     schema_version: str = SCHEMA_VERSION_0_1_0

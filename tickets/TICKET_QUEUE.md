@@ -37,7 +37,16 @@ superseded
 | 8 | ticket-008 | done | Add mock concept linking (Golden Test 5) | `phase-1/ticket-008-mock-concept-linking` | `agent_reports/2026-06-11_phase-1_ticket-008_mock-concept-linking.md` |
 | 9 | ticket-009 | done | Add mock relationship builder (Golden Test 6) | `phase-1/ticket-009-mock-relationship-builder` | `agent_reports/2026-06-11_phase-1_ticket-009_mock-relationship-builder.md` |
 | 10 | ticket-010 | done | Add score reconciliation with history (Golden Test 8) | `phase-1/ticket-010-score-reconciliation` | `agent_reports/2026-06-11_phase-1_ticket-010_score-reconciliation.md` |
-| 11 | ticket-011 | proposed | Add mock contradiction detection (Golden Test 7) | | |
+| 11 | ticket-011 | done | Add mock contradiction detection (Golden Test 7) | `phase-1/ticket-011-mock-contradiction-detection` | `agent_reports/2026-06-11_phase-1_ticket-011_mock-contradiction-detection.md` |
+| 12 | ticket-012 | proposed | Add mock research queue ranking (Golden Test 9) | | |
+
+## Queue Notes (2026-06-11, ticket-011 agent)
+
+- ticket-011 implemented `research detect-contradictions` with mock fixture detection,
+  cross-source qualification links (`qualifies` stance), and
+  `contradiction_classification` metadata on relationships. Golden Test 7 passes
+  (3 tests); all 48 golden tests pass without Ollama.
+- ticket-012 proposes mock research queue ranking for Golden Test 9.
 
 ## Queue Notes (2026-06-11, ticket-010 agent)
 
@@ -85,7 +94,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-011 (proposed; awaiting review)
+ticket-012 (proposed; awaiting review)
 ```
 
 ## Queue Rules
