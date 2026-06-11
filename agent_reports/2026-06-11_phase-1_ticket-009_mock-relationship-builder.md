@@ -129,7 +129,7 @@ Revert branch `phase-1/ticket-009-mock-relationship-builder` (or merge revert on
 - Instruction source: `AGENTS.md` step 9 (temporary).
 - Pre-merge `main` tip: `f69e49b`
 - Branch: `phase-1/ticket-009-mock-relationship-builder`
-- Merge result: _(documented after merge)_
+- Merge result: `--no-ff` merge commit `705ff64492f0fc11f7f2e8ac5e5157a0bd9aea1a`; pushed `origin/main`.
 
 ## 15. Recommended Next Ticket
 
