@@ -167,6 +167,42 @@ def _cmd_build_relationships(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_reconcile_scores(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import RelationshipRepository, ScoreEventRepository
+    from rge.modules.score_reconciler import reconcile_scores_for_source
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        result = reconcile_scores_for_source(conn, args.source)
+        relationships = RelationshipRepository(conn).list_active()
+        score_events = ScoreEventRepository(conn).list_for_source(args.source)
+        payload = {
+            "status": result["status"],
+            "command": "reconcile-scores",
+            "source_id": args.source,
+            "score_events_created": result.get("score_events_created", 0),
+            "relationships_updated": result.get("relationships_updated", 0),
+            "score_events": score_events,
+            "active_relationships": relationships,
+        }
+        if result.get("skipped"):
+            payload["skipped"] = result["skipped"]
+        print(json.dumps(payload, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "reconcile-scores",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_ingest(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.db.repositories import (
@@ -327,6 +363,25 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional mock LLM fixture filename for deterministic relationship tests.",
     )
     build_parser.set_defaults(func=_cmd_build_relationships)
+
+    reconcile_parser = subparsers.add_parser(
+        "reconcile-scores",
+        help="Reconcile relationship scores from new supporting evidence.",
+        description=(
+            "Apply deterministic score updates when new accepted claims support "
+            "existing relationships, writing append-only score_events history."
+        ),
+    )
+    reconcile_parser.add_argument(
+        "--source",
+        required=True,
+        help="Stable source ID whose accepted claims may trigger score updates.",
+    )
+    reconcile_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    reconcile_parser.set_defaults(func=_cmd_reconcile_scores)
 
     export_parser = subparsers.add_parser(
         "export-public",

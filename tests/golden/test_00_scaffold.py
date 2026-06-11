@@ -84,6 +84,7 @@ def test_cli_top_level_help() -> None:
         "extract-claims",
         "link-concepts",
         "build-relationships",
+        "reconcile-scores",
         "export-public",
         "verify",
     ):

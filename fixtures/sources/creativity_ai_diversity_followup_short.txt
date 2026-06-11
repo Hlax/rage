@@ -1,0 +1,8 @@
+In a peer-reviewed replication of short-form writing tasks with a pre-registered
+protocol, AI-assisted brainstorming reduced semantic diversity across submitted
+ideas while maintaining comparable task completion rates. The study used a larger
+sample than prior student-only pilots and reported effect sizes consistent with
+earlier findings.
+
+Limitations: tasks remained short-form writing only; generalization to other
+creative domains is uncertain.
