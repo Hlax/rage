@@ -1,0 +1,33 @@
+{
+  "id": "ticket-031",
+  "title": "Extend builder golden gate for public-site debug details (Golden Test 25)",
+  "problem": "ticket-030 adds safety and prompt-injection to the builder merge gate map, but Golden Test 25 public-site debug details are not yet listed in REQUIRED_GOLDEN_AREAS.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 25.",
+    "tests/golden/test_22_builder_golden_gate.py REQUIRED_GOLDEN_AREAS map.",
+    "agent_reports/2026-06-12_phase-1_ticket-030_builder-golden-gate-safety.md sections 10-11."
+  ],
+  "affected_modules": [
+    "tests/golden/test_22_builder_golden_gate.py"
+  ],
+  "expected_files": [
+    "tests/golden/test_22_builder_golden_gate.py"
+  ],
+  "acceptance_criteria": [
+    "REQUIRED_GOLDEN_AREAS includes public_site_debug mapped to test_25_public_site_debug_details.py.",
+    "pytest tests/golden/test_22_builder_golden_gate.py passes.",
+    "Existing golden tests still pass (118+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_22_builder_golden_gate.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not change public-site display or export behavior.",
+    "Do not add Ollama or live discovery."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert branch phase-1/ticket-031-builder-golden-gate-public-site.",
+  "status": "proposed"
+}
