@@ -1,0 +1,80 @@
+{
+
+  "id": "ticket-056",
+
+  "title": "Windows-safe npm subprocess for operator execute-safe",
+
+  "problem": "operator_loop --mode execute-safe fails on Windows with FileNotFoundError when spawning bare argv ['npm', 'run', 'build'] because npm is a .cmd shim. verify inherits the same command list.",
+
+  "evidence": [
+
+    "agent_reports/2026-06-12_pre-ticket-055_export-snapshot-versioning-readiness-audit.md",
+
+    "agent_reports/2026-06-12_phase-2_ticket-055_export-snapshot-history.md",
+
+    "rge/modules/operator_loop.py"
+
+  ],
+
+  "affected_modules": [
+
+    "rge/modules/operator_loop.py",
+
+    "AGENTS.md"
+
+  ],
+
+  "expected_files": [
+
+    "rge/modules/operator_loop.py",
+
+    "tests/unit/test_operator_loop.py",
+
+    "AGENTS.md",
+
+    "tickets/ticket-056.json",
+
+    "agent_reports/2026-06-12_phase-2_ticket-056_windows-npm-subprocess.md"
+
+  ],
+
+  "acceptance_criteria": [
+
+    "safe_verification_commands uses shutil.which('npm') for public_site_build argv on Windows.",
+
+    "public_site_build omitted when npm is not on PATH.",
+
+    "execute-safe completes site build on Windows when npm is installed.",
+
+    "verify without --skip-site uses the same resolved npm path via safe_verification_commands."
+
+  ],
+
+  "test_plan": [
+
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_operator_loop.py -q",
+
+    "RGE_LLM_MODE=mock python -m pytest -q",
+
+    "RGE_LLM_MODE=mock python -m rge.modules.operator_loop --mode execute-safe"
+
+  ],
+
+  "non_goals": [
+
+    "Do not change verify_runner subprocess capture separately.",
+
+    "Do not add shell=True globally.",
+
+    "Do not change CI workflow."
+
+  ],
+
+  "risk_level": "low",
+
+  "rollback_plan": "Revert operator_loop resolve_npm_executable and restore bare npm argv.",
+
+  "status": "done"
+
+}
+

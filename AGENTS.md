@@ -102,6 +102,10 @@ On Windows, `research` may not be on PATH after `pip install -e ".[dev]"`. Use
 `python -m rge.cli` for all CLI commands (including `verify`); do not treat a
 missing `research` command as a verification failure when the module form works.
 
+`operator_loop --mode execute-safe` resolves `npm` via `shutil.which` for the
+public-site build step. If Node.js is not installed, use `verify --skip-site` or
+rely on CI Golden Gate for the site build.
+
 Individual checks (same gates, decomposed):
 
 ```bash

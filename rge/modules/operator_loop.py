@@ -10,6 +10,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -85,6 +86,11 @@ def public_site_applicable(root: Path | None = None) -> bool:
     return site.is_dir() and (site / "package.json").is_file()
 
 
+def resolve_npm_executable() -> str | None:
+    """Return the npm executable path for subprocess argv (Windows-safe)."""
+    return shutil.which("npm")
+
+
 def safe_verification_commands(root: Path | None = None) -> list[dict[str, Any]]:
     """Deterministic commands allowed in execute-safe mode."""
     project_root = root or repo_root()
@@ -117,12 +123,13 @@ def safe_verification_commands(root: Path | None = None) -> list[dict[str, Any]]
             "env": dict(_MOCK_ENV),
         },
     ]
-    if public_site_applicable(project_root):
+    npm_executable = resolve_npm_executable()
+    if public_site_applicable(project_root) and npm_executable:
         commands.append(
             {
                 "name": "public_site_build",
                 "shell": "cd apps/public-site && npm run build",
-                "argv": ["npm", "run", "build"],
+                "argv": [npm_executable, "run", "build"],
                 "cwd": str(project_root / "apps" / "public-site"),
                 "env": dict(_MOCK_ENV),
             }

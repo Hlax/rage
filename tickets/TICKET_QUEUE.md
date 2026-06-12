@@ -87,6 +87,12 @@ superseded
 | 53 | ticket-053 | done | Loop rehearsal — stale draft hygiene and actionable improvement draft drill | `phase-2/ticket-053-loop-rehearsal` | `agent_reports/2026-06-12_phase-2_ticket-053_loop-rehearsal.md` |
 | 54 | ticket-054 | done | Operator verify docs and Windows local verify reliability | `phase-2/ticket-054-operator-verify-docs` | `agent_reports/2026-06-12_phase-2_ticket-054_operator-verify-docs.md` |
 | 55 | ticket-055 | done | Export snapshot manifest and scratch history for operator review | `phase-2/ticket-055-export-snapshot-history` | `agent_reports/2026-06-12_phase-2_ticket-055_export-snapshot-history.md` |
+| 56 | ticket-056 | done | Windows-safe npm subprocess for operator execute-safe | `phase-2/ticket-056-windows-npm-subprocess` | `agent_reports/2026-06-12_phase-2_ticket-056_windows-npm-subprocess.md` |
+
+## Queue Notes (2026-06-12, ticket-056 agent)
+
+- `resolve_npm_executable()` uses `shutil.which('npm')` for execute-safe/verify site build.
+- Omits `public_site_build` when npm is missing; AGENTS.md notes Windows behavior.
 
 ## Queue Notes (2026-06-12, ticket-055 agent)
 
@@ -524,7 +530,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-(none — seed next ticket from Post-Phase-2 roadmap or operator follow-up)
+(none — principal audit cadence may be due; pause for human review)
 ```
 
 ## Queue Rules

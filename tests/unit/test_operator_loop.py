@@ -13,6 +13,8 @@ from rge.modules.operator_loop import (
     execute_safe_checks,
     is_audit_only_ticket,
     pending_improvement_tickets,
+    resolve_npm_executable,
+    safe_verification_commands,
     ticket_has_implementation_commit,
 )
 from rge.modules.principal_audit_gate import QueueTicketRow
@@ -543,3 +545,56 @@ def test_plan_mode_is_read_only(tmp_path: Path) -> None:
     queue_after = (tmp_path / "tickets" / "TICKET_QUEUE.md").read_text(encoding="utf-8")
 
     assert queue_before == queue_after
+
+
+def test_safe_verification_commands_use_resolved_npm_executable(
+    monkeypatch, tmp_path: Path
+) -> None:
+    site = tmp_path / "apps" / "public-site"
+    site.mkdir(parents=True)
+    (site / "package.json").write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(
+        "rge.modules.operator_loop.resolve_npm_executable",
+        lambda: r"C:\Program Files\nodejs\npm.CMD",
+    )
+
+    commands = safe_verification_commands(tmp_path)
+    site_build = [item for item in commands if item["name"] == "public_site_build"]
+    assert len(site_build) == 1
+    assert site_build[0]["argv"] == [
+        r"C:\Program Files\nodejs\npm.CMD",
+        "run",
+        "build",
+    ]
+
+
+def test_safe_verification_commands_omit_site_build_when_npm_missing(
+    monkeypatch, tmp_path: Path
+) -> None:
+    site = tmp_path / "apps" / "public-site"
+    site.mkdir(parents=True)
+    (site / "package.json").write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(
+        "rge.modules.operator_loop.resolve_npm_executable",
+        lambda: None,
+    )
+
+    commands = safe_verification_commands(tmp_path)
+    assert all(item["name"] != "public_site_build" for item in commands)
+
+
+def test_resolved_npm_executable_runs_subprocess() -> None:
+    npm_executable = resolve_npm_executable()
+    if npm_executable is None:
+        import pytest
+
+        pytest.skip("npm not on PATH in this environment")
+
+    completed = subprocess.run(
+        [npm_executable, "--version"],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    assert completed.returncode == 0
