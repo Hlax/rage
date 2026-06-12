@@ -8,12 +8,26 @@ suggestions; Python validates and persists the durable contract
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any
 
 REASON_OUT_OF_SCOPE = "out_of_scope_topic_drift"
 REASON_ON_SCOPE = "On-scope follow-up aligned with contract concepts."
+REASON_ADJACENT_OUT_OF_SCOPE = "adjacent_out_of_scope_topic"
 GOLDEN_CONTRACT_ID = "contract_golden_test_10"
 DEFAULT_RESEARCH_QUESTION_ID = "rq_creativity_originality"
+DEFAULT_FOLLOWUP_FIXTURE = "followup_question_generation_golden_test_16.json"
+
+GOLDEN_GT16_ACTIVE_QUESTIONS = (
+    "Does divergent prompting reduce semantic convergence in AI-assisted ideation?",
+    "Does AI improve originality more when humans retain final selection control?",
+    "Do AI-assisted workflows affect originality differently in writing versus design?",
+)
+GOLDEN_GT16_PARKED_QUESTIONS = (
+    "Will AI replace all creative jobs?",
+    "Is AI conscious?",
+    "Who owns copyright for AI-generated work?",
+)
 
 GOLDEN_CONTRACT: dict[str, Any] = {
     "id": GOLDEN_CONTRACT_ID,
@@ -66,7 +80,10 @@ def _matches_out_of_scope(question_text: str, out_of_scope_concepts: list[str]) 
     question = _normalize(question_text)
     rules: dict[str, Any] = {
         "ai consciousness": lambda: "conscious" in question,
-        "general labor displacement": lambda: "labor displacement" in question,
+        "general labor displacement": lambda: (
+            "labor displacement" in question
+            or ("replace" in question and "job" in question)
+        ),
         "military ai": lambda: "military" in question and "ai" in question,
     }
     for concept in out_of_scope_concepts:
@@ -134,6 +151,19 @@ def validate_followup_question(
             "topic_fit": 0.18,
             "evidence_fit": 0.10,
             "drift_risk": 0.88,
+            "priority_score": 0.0,
+        }
+
+    question = _normalize(question_text)
+    if "copyright" in question or "authorship" in question:
+        return {
+            "question_text": question_text,
+            "decision": "parked",
+            "status": "parked",
+            "reason": REASON_ADJACENT_OUT_OF_SCOPE,
+            "topic_fit": 0.32,
+            "evidence_fit": 0.28,
+            "drift_risk": 0.62,
             "priority_score": 0.0,
         }
 
@@ -225,3 +255,118 @@ def create_research_contract(topic: str, domain_pack: str) -> dict[str, Any]:
     contract["primary_question"] = topic
     contract["domain_pack"] = domain_pack
     return contract
+
+
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def _load_followup_fixture(fixture_name: str) -> list[str]:
+    path = _repo_root() / "fixtures" / "llm_outputs" / fixture_name
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    return [
+        str(item["question_text"]).strip()
+        for item in raw.get("items") or []
+        if str(item.get("question_text", "")).strip()
+    ]
+
+
+def _questions_from_cluster_context(
+    conn: Any, *, cluster_report_id: str | None
+) -> list[str]:
+    from rge.db.repositories import ClusterReportRepository, TheoryCandidateRepository
+    from rge.modules.cluster_reporter import GOLDEN_CLUSTER_LABEL
+
+    questions: list[str] = []
+    cluster_repo = ClusterReportRepository(conn)
+    if cluster_report_id:
+        record = cluster_repo.get_by_id(cluster_report_id)
+    else:
+        record = cluster_repo.get_latest_for_label(GOLDEN_CLUSTER_LABEL)
+    if record is None:
+        return questions
+
+    cluster_report = json.loads(record.report_json)
+    questions.extend(cluster_report.get("candidate_next_questions") or [])
+
+    for theory in TheoryCandidateRepository(conn).list_for_cluster_report(record.id):
+        report = json.loads(theory.report_json)
+        questions.extend(report.get("next_questions") or [])
+    return questions
+
+
+def propose_followup_questions(
+    conn: Any,
+    *,
+    cluster_report_id: str | None = None,
+    fixture_name: str | None = DEFAULT_FOLLOWUP_FIXTURE,
+    include_golden_batch: bool = True,
+) -> list[str]:
+    """Collect deterministic follow-up question candidates from context sources."""
+    proposed: list[str] = []
+    proposed.extend(_questions_from_cluster_context(conn, cluster_report_id=cluster_report_id))
+    if fixture_name:
+        proposed.extend(_load_followup_fixture(fixture_name))
+    if include_golden_batch:
+        proposed.extend(GOLDEN_GT16_ACTIVE_QUESTIONS)
+        proposed.extend(GOLDEN_GT16_PARKED_QUESTIONS)
+
+    seen: set[str] = set()
+    unique: list[str] = []
+    for question in proposed:
+        key = _normalize(question)
+        if key and key not in seen:
+            seen.add(key)
+            unique.append(question.strip())
+    return unique
+
+
+def generate_followup_questions(
+    conn: Any,
+    *,
+    contract_id: str | None = None,
+    cluster_report_id: str | None = None,
+    fixture_name: str | None = DEFAULT_FOLLOWUP_FIXTURE,
+    include_golden_batch: bool = True,
+) -> dict[str, Any]:
+    """Generate follow-up questions from cluster/theory context and contract-gate them."""
+    ensure_golden_contract(conn)
+    resolved_contract_id = contract_id or GOLDEN_CONTRACT_ID
+    candidates = propose_followup_questions(
+        conn,
+        cluster_report_id=cluster_report_id,
+        fixture_name=fixture_name,
+        include_golden_batch=include_golden_batch,
+    )
+    if not candidates:
+        raise ValueError("No follow-up question candidates available.")
+
+    evaluations: list[dict[str, Any]] = []
+    for question_text in candidates:
+        result = validate_followup_for_contract(
+            conn,
+            resolved_contract_id,
+            question_text,
+        )
+        evaluation = result.get("evaluation") or {}
+        evaluations.append(evaluation)
+
+    from rge.db.repositories import ResearchQueueRepository
+
+    followups = ResearchQueueRepository(conn).list_followups_for_contract(
+        resolved_contract_id
+    )
+    status_counts = ResearchQueueRepository(conn).count_followups_by_status(
+        resolved_contract_id
+    )
+    return {
+        "status": "completed",
+        "contract_id": resolved_contract_id,
+        "candidate_count": len(candidates),
+        "queued_count": status_counts.get("queued", 0),
+        "parked_count": status_counts.get("parked", 0),
+        "queued": [item for item in followups if item["status"] == "queued"],
+        "parked": [item for item in followups if item["status"] == "parked"],
+        "evaluations": evaluations,
+        "followups": followups,
+    }

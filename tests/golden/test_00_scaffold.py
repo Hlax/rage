@@ -95,6 +95,7 @@ def test_cli_top_level_help() -> None:
         "validate-contract",
         "generate-cluster-report",
         "generate-theory-candidates",
+        "generate-followup-questions",
         "export-public",
         "verify",
     ):
