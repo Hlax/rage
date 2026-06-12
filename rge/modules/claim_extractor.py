@@ -11,10 +11,11 @@ Flow:
 
 from __future__ import annotations
 
-import os
 from typing import Any
 
 from rge.config import load_config
+from rge.llm.mock_client import MockModelClient
+from rge.llm.mode import effective_llm_mode
 from rge.llm.registry import get_model_client
 from rge.llm.schemas import CandidateClaimBatch_v0_1
 from rge.modules.claim_validator import validate_candidate_claims
@@ -34,31 +35,33 @@ def _is_creativity_diversity_chunk(chunk_text: str) -> bool:
     )
 
 
+def _pipeline_model_client(config=None):
+    cfg = config if config is not None else load_config()
+    return get_model_client(cfg, mode=effective_llm_mode(cfg))
+
+
 def extract_candidate_claims(
     chunk: dict[str, Any],
     contract: dict[str, Any],
     domain_pack: str,
     *,
     fixture_name: str | None = None,
+    client=None,
 ) -> list[dict[str, Any]]:
     """Extract candidate claims from one chunk via the configured model client."""
-    prior_mode = os.environ.get("RGE_LLM_MODE")
-    os.environ["RGE_LLM_MODE"] = "mock"
-    try:
-        config = load_config()
-        client = get_model_client(config)
-        batch: CandidateClaimBatch_v0_1 = client.extract_claims(
-            chunk=chunk,
-            contract=contract,
-            domain_pack=domain_pack,
-            schema_version=config.llm_schema_version,
-            fixture_name=fixture_name or _default_fixture_for_chunk(chunk),
+    config = load_config()
+    model_client = client or _pipeline_model_client(config)
+    extract_kwargs: dict[str, Any] = {
+        "chunk": chunk,
+        "contract": contract,
+        "domain_pack": domain_pack,
+        "schema_version": config.llm_schema_version,
+    }
+    if isinstance(model_client, MockModelClient):
+        extract_kwargs["fixture_name"] = (
+            fixture_name or _default_fixture_for_chunk(chunk)
         )
-    finally:
-        if prior_mode is None:
-            os.environ.pop("RGE_LLM_MODE", None)
-        else:
-            os.environ["RGE_LLM_MODE"] = prior_mode
+    batch: CandidateClaimBatch_v0_1 = model_client.extract_claims(**extract_kwargs)
 
     candidates: list[dict[str, Any]] = []
     for item in batch.items:
@@ -83,6 +86,7 @@ def extract_and_validate_for_chunk(
     *,
     domain_pack: str,
     fixture_name: str | None = None,
+    client=None,
 ) -> dict[str, list[dict[str, Any]]]:
     """Extract candidates for one chunk and validate them deterministically."""
     contract: dict[str, Any] = {"domain_pack": domain_pack}
@@ -91,6 +95,7 @@ def extract_and_validate_for_chunk(
         contract,
         domain_pack,
         fixture_name=fixture_name,
+        client=client,
     )
     return validate_candidate_claims(
         candidates,
@@ -130,6 +135,10 @@ def extract_claims_for_source(
 
     accepted_ids: list[str] = []
     rejected_ids: list[str] = []
+    config = load_config()
+    model_client = _pipeline_model_client(config)
+    extractor_provider = model_client.provider
+    extractor_model = getattr(model_client, "model", "unknown")
 
     for chunk in chunks:
         chunk_dict = {
@@ -142,22 +151,23 @@ def extract_claims_for_source(
             chunk_dict,
             domain_pack=source.domain,
             fixture_name=fixture_name,
+            client=model_client,
         )
         for claim in result["accepted"]:
             record = claim_repo.insert_accepted(
                 claim,
-                extractor_provider="mock",
-                extractor_model="mock",
-                llm_schema_version=load_config().llm_schema_version,
+                extractor_provider=extractor_provider,
+                extractor_model=extractor_model,
+                llm_schema_version=config.llm_schema_version,
             )
             accepted_ids.append(record.id)
         for claim in result["rejected"]:
             record = claim_repo.insert_rejected(
                 claim,
                 rejection_reason=claim["rejection_reason"],
-                extractor_provider="mock",
-                extractor_model="mock",
-                llm_schema_version=load_config().llm_schema_version,
+                extractor_provider=extractor_provider,
+                extractor_model=extractor_model,
+                llm_schema_version=config.llm_schema_version,
             )
             rejected_ids.append(record.id)
 

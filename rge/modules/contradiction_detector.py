@@ -7,10 +7,11 @@ without deleting or flattening opposing claims.
 
 from __future__ import annotations
 
-import os
 from typing import Any
 
 from rge.config import load_config
+from rge.llm.mock_client import MockModelClient
+from rge.llm.mode import effective_llm_mode
 from rge.llm.registry import get_model_client
 from rge.modules.relationship_builder import VALID_STANCES
 
@@ -117,6 +118,11 @@ def validate_contradiction_candidates(
     return {"accepted": accepted, "rejected": rejected}
 
 
+def _pipeline_model_client(config=None):
+    cfg = config if config is not None else load_config()
+    return get_model_client(cfg, mode=effective_llm_mode(cfg))
+
+
 def propose_contradictions(
     claim_dicts: list[dict[str, Any]],
     relationships: list[dict[str, Any]],
@@ -124,25 +130,20 @@ def propose_contradictions(
     *,
     fixture_name: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Propose contradiction/qualification links via the mock model client."""
-    prior_mode = os.environ.get("RGE_LLM_MODE")
-    os.environ["RGE_LLM_MODE"] = "mock"
-    try:
-        config = load_config()
-        client = get_model_client(config)
-        batch = client.detect_contradictions(
-            claims=claim_dicts,
-            relationships=relationships,
-            domain_pack=domain_pack,
-            schema_version=config.llm_schema_version,
-            fixture_name=fixture_name
-            or "contradiction_detection_creativity_diversity.json",
+    """Propose contradiction/qualification links via the configured model client."""
+    config = load_config()
+    client = _pipeline_model_client(config)
+    detect_kwargs: dict[str, Any] = {
+        "claims": claim_dicts,
+        "relationships": relationships,
+        "domain_pack": domain_pack,
+        "schema_version": config.llm_schema_version,
+    }
+    if isinstance(client, MockModelClient):
+        detect_kwargs["fixture_name"] = (
+            fixture_name or "contradiction_detection_creativity_diversity.json"
         )
-    finally:
-        if prior_mode is None:
-            os.environ.pop("RGE_LLM_MODE", None)
-        else:
-            os.environ["RGE_LLM_MODE"] = prior_mode
+    batch = client.detect_contradictions(**detect_kwargs)
 
     return [item.model_dump() for item in batch.items]
 

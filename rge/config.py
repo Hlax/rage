@@ -26,6 +26,7 @@ _DEFAULTS = {
     "RGE_LOCAL_LLM": "qwen2.5:7b",
     "RGE_LLM_MODE": "ollama",
     "RGE_TEST_LLM_MODE": "mock",
+    "RGE_ALLOW_LIVE_LLM": "0",
     "RGE_LLM_TIMEOUT_SECONDS": "60",
     "RGE_LLM_TEMPERATURE": "0",
     "RGE_LLM_SCHEMA_VERSION": "0.1.0",
@@ -56,6 +57,7 @@ class RgeConfig:
     local_llm: str
     llm_mode: str
     test_llm_mode: str
+    allow_live_llm: bool
     llm_timeout_seconds: int
     llm_temperature: float
     llm_schema_version: str
@@ -82,11 +84,23 @@ def load_config(env_file: Path | None = None) -> RgeConfig:
     except ValueError as exc:
         raise ConfigError(f"Invalid numeric config value: {exc}") from exc
 
+    allow_raw = merged.get("RGE_ALLOW_LIVE_LLM", "0").strip().casefold()
+    if allow_raw in ("1", "true", "yes"):
+        allow_live_llm = True
+    elif allow_raw in ("0", "false", "no", ""):
+        allow_live_llm = False
+    else:
+        raise ConfigError(
+            f"Invalid RGE_ALLOW_LIVE_LLM={merged.get('RGE_ALLOW_LIVE_LLM')!r}. "
+            "Use 1/true/yes to enable live structured calls or 0/false/no."
+        )
+
     return RgeConfig(
         ollama_base_url=merged["OLLAMA_BASE_URL"],
         local_llm=merged["RGE_LOCAL_LLM"],
         llm_mode=merged["RGE_LLM_MODE"],
         test_llm_mode=merged["RGE_TEST_LLM_MODE"],
+        allow_live_llm=allow_live_llm,
         llm_timeout_seconds=timeout,
         llm_temperature=temperature,
         llm_schema_version=merged["RGE_LLM_SCHEMA_VERSION"],

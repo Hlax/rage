@@ -68,7 +68,17 @@ superseded
 | 34 | ticket-034 | done | Make fixture-mode run repo-clean and export serialization deterministic | `phase-2/ticket-034-fixture-run-artifact-hygiene` | `agent_reports/2026-06-12_phase-2_ticket-034_fixture-run-artifact-hygiene.md` |
 | 35 | ticket-035 | done | Refresh README for Phase 1 reality and operator quickstart | `phase-2/ticket-035-readme-operator-refresh` | `agent_reports/2026-06-12_phase-2_ticket-035_readme-operator-refresh.md` |
 | 36 | ticket-036 | done | Public-site presentation polish and about page (no data surface changes) | `phase-2/ticket-036-public-site-polish` | `agent_reports/2026-06-12_phase-2_ticket-036_public-site-polish.md` |
-| 37 | ticket-037 | proposed | Implement Ollama structured tasks behind explicit live-mode opt-in | | |
+| 37 | ticket-037 | done | Implement Ollama structured tasks behind explicit live-mode opt-in | `phase-2/ticket-037-ollama-live-structured-tasks` | `agent_reports/2026-06-12_phase-2_ticket-037_ollama-live-structured-tasks.md` |
+| 38 | ticket-038 | proposed | Gate live smoke tests behind env opt-in and add model-health command | | |
+
+## Queue Notes (2026-06-12, ticket-037 agent)
+
+- ticket-037 implemented Ollama structured tasks behind `RGE_ALLOW_LIVE_LLM=1`
+  opt-in: effective-mode resolver, four pipeline Ollama tasks, 8 canned unit
+  tests, safety audit live-LLM evidence check. Golden/fixture runs stay
+  mock-only. 137 tests pass; safety audit passes. Live Ollama extract-claims
+  manual smoke not run in agent environment (documented in report).
+- ticket-038 (live smoke gating + model-health CLI) seeded as next proposed.
 
 ## Queue Notes (2026-06-12, ticket-037 seed)
 
@@ -364,7 +374,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-037 proposed (Ollama structured tasks behind explicit live opt-in — pre-ticket audit complete)
+ticket-038 proposed (live smoke gating + model-health CLI)
 ```
 
 ## Queue Rules
