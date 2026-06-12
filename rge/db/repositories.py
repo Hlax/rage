@@ -1692,6 +1692,198 @@ def _row_to_run_report(row: sqlite3.Row) -> RunReportRecord:
     )
 
 
+def make_improvement_ticket_id(run_id: str, failure_reason: str) -> str:
+    digest = sha256_hex(f"{run_id}:{failure_reason}")
+    return f"imp_{digest[:16]}"
+
+
+@dataclass(frozen=True)
+class ImprovementTicketRecord:
+    id: str
+    run_id: str | None
+    priority: str
+    title: str
+    problem: str
+    evidence_json: str
+    affected_modules_json: str
+    expected_files_json: str
+    acceptance_criteria_json: str
+    test_plan_json: str
+    non_goals_json: str
+    risk_level: str
+    rollback_plan: str
+    status: str
+    ticket_json: str
+    created_at: str
+    updated_at: str
+
+
+class ImprovementTicketRepository:
+    """Persist and read ``improvement_tickets`` rows."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def get_by_id(self, ticket_id: str) -> ImprovementTicketRecord | None:
+        row = self._conn.execute(
+            """
+            SELECT id, run_id, priority, title, problem, evidence_json,
+                   affected_modules_json, expected_files_json,
+                   acceptance_criteria_json, test_plan_json, non_goals_json,
+                   risk_level, rollback_plan, status, created_at, updated_at
+            FROM improvement_tickets
+            WHERE id = ?
+            """,
+            (ticket_id,),
+        ).fetchone()
+        return _row_to_improvement_ticket(row) if row else None
+
+    def get_for_run_and_reason(
+        self, *, run_id: str, failure_reason: str
+    ) -> ImprovementTicketRecord | None:
+        ticket_id = make_improvement_ticket_id(run_id, failure_reason)
+        return self.get_by_id(ticket_id)
+
+    def count(self) -> int:
+        row = self._conn.execute("SELECT COUNT(*) FROM improvement_tickets").fetchone()
+        return int(row[0]) if row else 0
+
+    def count_for_run(self, run_id: str) -> int:
+        row = self._conn.execute(
+            "SELECT COUNT(*) FROM improvement_tickets WHERE run_id = ?",
+            (run_id,),
+        ).fetchone()
+        return int(row[0]) if row else 0
+
+    def list_for_run(self, run_id: str) -> list[ImprovementTicketRecord]:
+        rows = self._conn.execute(
+            """
+            SELECT id, run_id, priority, title, problem, evidence_json,
+                   affected_modules_json, expected_files_json,
+                   acceptance_criteria_json, test_plan_json, non_goals_json,
+                   risk_level, rollback_plan, status, created_at, updated_at
+            FROM improvement_tickets
+            WHERE run_id = ?
+            ORDER BY created_at
+            """,
+            (run_id,),
+        ).fetchall()
+        return [_row_to_improvement_ticket(row) for row in rows]
+
+    def insert(
+        self,
+        *,
+        run_id: str,
+        failure_reason: str,
+        priority: str,
+        title: str,
+        problem: str,
+        evidence: list[str],
+        affected_modules: list[str],
+        expected_files: list[str],
+        acceptance_criteria: list[str],
+        test_plan: list[str],
+        non_goals: list[str],
+        risk_level: str,
+        rollback_plan: str,
+        ticket: dict[str, Any],
+        status: str = "draft",
+    ) -> ImprovementTicketRecord:
+        now = utc_now_iso()
+        ticket_id = make_improvement_ticket_id(run_id, failure_reason)
+        self._conn.execute(
+            """
+            INSERT INTO improvement_tickets (
+                id, run_id, priority, title, problem, evidence_json,
+                affected_modules_json, expected_files_json,
+                acceptance_criteria_json, test_plan_json, non_goals_json,
+                risk_level, rollback_plan, status, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO NOTHING
+            """,
+            (
+                ticket_id,
+                run_id,
+                priority,
+                title,
+                problem,
+                json.dumps(evidence),
+                json.dumps(affected_modules),
+                json.dumps(expected_files),
+                json.dumps(acceptance_criteria),
+                json.dumps(test_plan),
+                json.dumps(non_goals),
+                risk_level,
+                rollback_plan,
+                status,
+                now,
+                now,
+            ),
+        )
+        self._conn.commit()
+        record = self.get_by_id(ticket_id)
+        assert record is not None
+        return ImprovementTicketRecord(
+            id=record.id,
+            run_id=record.run_id,
+            priority=record.priority,
+            title=record.title,
+            problem=record.problem,
+            evidence_json=record.evidence_json,
+            affected_modules_json=record.affected_modules_json,
+            expected_files_json=record.expected_files_json,
+            acceptance_criteria_json=record.acceptance_criteria_json,
+            test_plan_json=record.test_plan_json,
+            non_goals_json=record.non_goals_json,
+            risk_level=record.risk_level,
+            rollback_plan=record.rollback_plan,
+            status=record.status,
+            ticket_json=json.dumps(ticket),
+            created_at=record.created_at,
+            updated_at=record.updated_at,
+        )
+
+
+def _row_to_improvement_ticket(row: sqlite3.Row) -> ImprovementTicketRecord:
+    ticket = {
+        "report_type": "improvement_ticket_report",
+        "type": "improvement_ticket",
+        "id": row["id"],
+        "run_id": row["run_id"],
+        "priority": row["priority"],
+        "title": row["title"],
+        "problem": row["problem"],
+        "status": row["status"],
+        "evidence": json.loads(row["evidence_json"]),
+        "affected_modules": json.loads(row["affected_modules_json"]),
+        "expected_files": json.loads(row["expected_files_json"]),
+        "acceptance_criteria": json.loads(row["acceptance_criteria_json"]),
+        "test_plan": json.loads(row["test_plan_json"]),
+        "non_goals": json.loads(row["non_goals_json"]),
+        "risk_level": row["risk_level"],
+        "rollback_plan": row["rollback_plan"],
+    }
+    return ImprovementTicketRecord(
+        id=row["id"],
+        run_id=row["run_id"],
+        priority=row["priority"],
+        title=row["title"],
+        problem=row["problem"],
+        evidence_json=row["evidence_json"],
+        affected_modules_json=row["affected_modules_json"],
+        expected_files_json=row["expected_files_json"],
+        acceptance_criteria_json=row["acceptance_criteria_json"],
+        test_plan_json=row["test_plan_json"],
+        non_goals_json=row["non_goals_json"],
+        risk_level=row["risk_level"],
+        rollback_plan=row["rollback_plan"],
+        status=row["status"],
+        ticket_json=json.dumps(ticket),
+        created_at=row["created_at"],
+        updated_at=row["updated_at"],
+    )
+
+
 def persist_relationship_score_update(
     conn: sqlite3.Connection,
     *,

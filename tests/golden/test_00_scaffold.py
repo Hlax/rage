@@ -101,6 +101,7 @@ def test_cli_top_level_help() -> None:
         "generate-ontology-pressure",
         "generate-domain-proposal",
         "generate-run-report",
+        "generate-improvement-tickets",
         "export-public",
         "verify",
     ):
