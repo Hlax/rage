@@ -29,6 +29,9 @@ jobs:
           python-version: "3.11"
           cache: pip
 
+      - name: Validate packaging metadata UTF-8
+        run: python scripts/validate_packaging_utf8.py
+
       - name: Install Python package (dev extras)
         run: python -m pip install -e ".[dev]"
 
