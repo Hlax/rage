@@ -117,6 +117,50 @@ def _cmd_generate_theory_candidates(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_generate_followup_questions(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.modules.research_planner import (
+        GOLDEN_CONTRACT_ID,
+        generate_followup_questions,
+    )
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        contract_id = args.contract or GOLDEN_CONTRACT_ID
+        result = generate_followup_questions(
+            conn,
+            contract_id=contract_id,
+            cluster_report_id=args.cluster_report,
+            fixture_name=args.fixture,
+            include_golden_batch=not args.no_golden_batch,
+        )
+        payload = {
+            "status": result["status"],
+            "command": "generate-followup-questions",
+            "contract_id": contract_id,
+            "candidate_count": result.get("candidate_count", 0),
+            "queued_count": result.get("queued_count", 0),
+            "parked_count": result.get("parked_count", 0),
+            "queued": result.get("queued"),
+            "parked": result.get("parked"),
+            "evaluations": result.get("evaluations"),
+            "followups": result.get("followups"),
+        }
+        print(json.dumps(payload, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "generate-followup-questions",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_export_public(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.modules.card_exporter import export_public_cards
@@ -758,6 +802,38 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional output directory for theory_candidate_latest.json (for tests).",
     )
     theory_parser.set_defaults(func=_cmd_generate_theory_candidates)
+
+    followup_parser = subparsers.add_parser(
+        "generate-followup-questions",
+        help="Generate contract-gated follow-up questions from cluster context.",
+        description=(
+            "Propose follow-up questions from cluster/theory context, validate "
+            "each against the research contract, and queue or park with reasons."
+        ),
+    )
+    followup_parser.add_argument(
+        "--contract",
+        help="Research contract ID (defaults to Golden Test 10 contract).",
+    )
+    followup_parser.add_argument(
+        "--cluster-report",
+        help="Optional cluster report ID (defaults to latest golden cluster report).",
+    )
+    followup_parser.add_argument(
+        "--fixture",
+        default="followup_question_generation_golden_test_16.json",
+        help="Mock follow-up question fixture filename.",
+    )
+    followup_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    followup_parser.add_argument(
+        "--no-golden-batch",
+        action="store_true",
+        help="Skip built-in Golden Test 16 question batch.",
+    )
+    followup_parser.set_defaults(func=_cmd_generate_followup_questions)
 
     export_parser = subparsers.add_parser(
         "export-public",

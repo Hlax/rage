@@ -44,7 +44,16 @@ superseded
 | 15 | ticket-015 | done | Add public site card and concept detail pages (Golden Test 12) | `phase-1/ticket-015-public-site-detail-pages` | `agent_reports/2026-06-12_phase-1_ticket-015_public-site-detail-pages.md` |
 | 16 | ticket-016 | done | Add cluster report threshold trigger (Golden Test 13) | `phase-1/ticket-016-cluster-report` | `agent_reports/2026-06-12_phase-1_ticket-016_cluster-report.md` |
 | 17 | ticket-017 | done | Add mock theory generator (Golden Test 15) | `phase-1/ticket-017-theory-generator` | `agent_reports/2026-06-12_phase-1_ticket-017_theory-generator.md` |
-| 18 | ticket-018 | proposed | Add contract-respecting question generation (Golden Test 16) | | |
+| 18 | ticket-018 | done | Add contract-respecting question generation (Golden Test 16) | `phase-1/ticket-018-question-generation` | `agent_reports/2026-06-12_phase-1_ticket-018_question-generation.md` |
+| 19 | ticket-019 | proposed | Add ontology pressure report (Golden Test 17) | | |
+
+## Queue Notes (2026-06-12, ticket-018 agent)
+
+- ticket-018 implemented `generate-followup-questions` with cluster/theory context
+  proposal, extended contract validation, and Golden Test 16 (4 tests). All 77
+  golden tests pass without Ollama.
+- Pre-ticket-018 audit report included in merge.
+- ticket-019 proposes ontology pressure report for Golden Test 17.
 
 ## Queue Notes (2026-06-12, ticket-017 agent)
 
@@ -148,7 +157,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-018 (proposed; awaiting review)
+ticket-019 (proposed; awaiting review)
 ```
 
 ## Queue Rules

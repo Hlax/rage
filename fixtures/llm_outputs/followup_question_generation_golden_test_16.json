@@ -1,0 +1,24 @@
+{
+  "task_name": "followup_question_generation",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "question_text": "Does divergent prompting reduce semantic convergence in AI-assisted ideation?"
+    },
+    {
+      "question_text": "Does AI improve originality more when humans retain final selection control?"
+    },
+    {
+      "question_text": "Do AI-assisted workflows affect originality differently in writing versus design?"
+    },
+    {
+      "question_text": "Will AI replace all creative jobs?"
+    },
+    {
+      "question_text": "Is AI conscious?"
+    },
+    {
+      "question_text": "Who owns copyright for AI-generated work?"
+    }
+  ]
+}

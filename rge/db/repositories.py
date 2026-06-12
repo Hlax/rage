@@ -1756,6 +1756,18 @@ class ResearchQueueRepository:
             for row in rows
         ]
 
+    def count_followups_by_status(self, contract_id: str) -> dict[str, int]:
+        rows = self._conn.execute(
+            """
+            SELECT status, COUNT(*) AS count
+            FROM research_queue
+            WHERE contract_id = ? AND item_type = 'question'
+            GROUP BY status
+            """,
+            (contract_id,),
+        ).fetchall()
+        return {row["status"]: int(row["count"]) for row in rows}
+
     def list_for_question(self, research_question_id: str) -> list[dict[str, Any]]:
         rows = self._conn.execute(
             """

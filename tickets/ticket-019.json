@@ -1,0 +1,40 @@
+{
+  "id": "ticket-019",
+  "title": "Add ontology pressure report (Golden Test 17)",
+  "problem": "ticket-018 completes contract-gated follow-up generation, but ontology pressure detection is not yet implemented. Golden Test 17 requires draft ontology proposals with evidence claims and no auto-activation.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 17: ontology pressure report proposes but does not auto-activate new concepts.",
+    "docs/agents/08_REPORTING_SPEC.md section 11: ontology pressure reports.",
+    "agent_reports/2026-06-12_phase-1_ticket-018_question-generation.md sections 11–13."
+  ],
+  "affected_modules": [
+    "rge/modules/ontology_pressure.py",
+    "rge/db/repositories.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/ontology_pressure.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "tests/golden/test_17_ontology_pressure.py"
+  ],
+  "acceptance_criteria": [
+    "Deterministic ontology pressure report when golden claim thresholds are met without Ollama.",
+    "Report proposes concepts in draft status with evidence claim IDs and aliases; no auto-activation.",
+    "pytest tests/golden/test_17_ontology_pressure.py passes.",
+    "Existing golden tests still pass (77+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_17_ontology_pressure.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not implement LangGraph or live web discovery.",
+    "Do not add public write routes."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert branch phase-1/ticket-019-ontology-pressure.",
+  "status": "proposed"
+}
