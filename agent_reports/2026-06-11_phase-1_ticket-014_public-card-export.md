@@ -113,7 +113,7 @@ Revert branch `phase-1/ticket-014-public-card-export`. Restore placeholder JSON 
 - Instruction source: `AGENTS.md` step 9 (temporary).
 - Pre-merge `main` tip: `69befe6304412ed33442f8a65a17d91ad6a69bad`
 - Branch: `phase-1/ticket-014-public-card-export`
-- Merge result: pending (record hash below after merge/push).
+- Merge result: `--no-ff` merge commit `eb4c3ea`; pushed `origin/main`.
 
 ## 15. Recommended Next Ticket
 
