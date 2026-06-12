@@ -1,0 +1,31 @@
+{
+  "id": "ticket-033",
+  "title": "Pre-phase-2 principal audit checkpoint",
+  "problem": "Phase 1 MVP golden gate is complete (ticket-032). Before Phase 2 work (live Ollama paths, expanded intelligence, or new public surfaces), a principal audit must confirm safety boundaries, env/config posture, and queue priorities.",
+  "evidence": [
+    "agent_reports/2026-06-12_phase-1_ticket-032_builder-golden-gate-completion.md",
+    "docs/agents/10_SAFETY_MODEL.md",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "AGENTS.md audit gate table"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-12_pre-phase-2_principal-audit.md"
+  ],
+  "acceptance_criteria": [
+    "Read-only audit report in agent_reports/ covering safety model, public export boundary, env/secrets posture, and Phase 2 risk priorities.",
+    "Explicit go/no-go for first Phase 2 implementation ticket.",
+    "No runtime or schema changes in the audit ticket itself."
+  ],
+  "test_plan": [
+    "python -m rge.modules.safety_auditor --audit full",
+    "pytest tests/golden"
+  ],
+  "non_goals": [
+    "Do not implement Phase 2 features in the audit ticket.",
+    "Do not enable live Ollama in golden tests."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "N/A (read-only audit).",
+  "status": "proposed"
+}

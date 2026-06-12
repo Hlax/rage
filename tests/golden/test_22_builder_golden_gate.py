@@ -17,8 +17,11 @@ REQUIRED_GOLDEN_AREAS: dict[str, tuple[str, ...]] = {
     "claim_validation": ("tests/golden/test_02_claim_extraction.py",),
     "concept_linking": ("tests/golden/test_05_concept_linking.py",),
     "relationship_building": ("tests/golden/test_06_relationship_builder.py",),
+    "contradiction_detection": ("tests/golden/test_07_contradiction_detection.py",),
     "scoring_history": ("tests/golden/test_08_score_reconciliation.py",),
+    "research_queue": ("tests/golden/test_09_research_queue.py",),
     "public_export": ("tests/golden/test_11_public_card_export.py",),
+    "public_site_static_render": ("tests/golden/test_12_public_site_static_render.py",),
     "cluster_report": ("tests/golden/test_13_cluster_report.py",),
     "ticket_generation": (
         "tests/golden/test_20_improvement_tickets.py",
@@ -29,6 +32,41 @@ REQUIRED_GOLDEN_AREAS: dict[str, tuple[str, ...]] = {
     "public_site_debug": ("tests/golden/test_25_public_site_debug_details.py",),
     "full_mvp_run": ("tests/golden/test_26_full_mvp_run.py",),
 }
+
+# Phase 1 golden tests intentionally outside REQUIRED_GOLDEN_AREAS. The full
+# merge gate still runs them via `pytest tests/golden`; they are not separate
+# merge-blocker capability areas for builder branches.
+INTENTIONALLY_OPTIONAL_GOLDEN_TESTS: dict[str, str] = {
+    "tests/golden/test_00_scaffold.py": (
+        "Phase 0 scaffold/CLI/schema smoke; covered by the full golden suite."
+    ),
+    "tests/golden/test_00_model_runtime.py": (
+        "Model adapter boundary smoke; mock mode enforced across the suite."
+    ),
+    "tests/golden/test_00_public_site_static.py": (
+        "Lightweight static JSON policy checks; GT12/GT25 cover public-site gates."
+    ),
+    "tests/golden/test_10_research_contract_drift.py": (
+        "Contract drift gating; exercised inside fixture-mode full MVP run."
+    ),
+    "tests/golden/test_15_theory_generator.py": (
+        "Theory candidate generation; orchestrated by GT26 full MVP run."
+    ),
+    "tests/golden/test_16_question_generation.py": (
+        "Follow-up question generation; orchestrated by GT26 full MVP run."
+    ),
+    "tests/golden/test_17_ontology_pressure.py": (
+        "Ontology pressure threshold report; Phase 1 intelligence extension, not core merge gate."
+    ),
+    "tests/golden/test_18_domain_proposal.py": (
+        "Domain proposal threshold report; Phase 1 intelligence extension, not core merge gate."
+    ),
+    "tests/golden/test_19_run_report.py": (
+        "Run report aggregation; orchestrated by GT26 and improvement ticket spine."
+    ),
+}
+
+META_GOLDEN_TEST_FILES = frozenset({"tests/golden/test_22_builder_golden_gate.py"})
 
 
 def _collect_test_count(relative_path: str) -> int:
@@ -84,8 +122,11 @@ def test_golden_directory_covers_all_required_areas() -> None:
         "claim_validation",
         "concept_linking",
         "relationship_building",
+        "contradiction_detection",
         "scoring_history",
+        "research_queue",
         "public_export",
+        "public_site_static_render",
         "cluster_report",
         "ticket_generation",
         "safety_audit_gate",
@@ -98,3 +139,27 @@ def test_golden_directory_covers_all_required_areas() -> None:
     for paths in REQUIRED_GOLDEN_AREAS.values():
         for relative_path in paths:
             assert Path(relative_path).name in golden_files
+
+
+def test_phase1_optional_golden_tests_are_documented() -> None:
+    golden_files = {
+        f"tests/golden/{path.name}" for path in GOLDEN_DIR.glob("test_*.py")
+    }
+    required_files = {
+        relative_path
+        for paths in REQUIRED_GOLDEN_AREAS.values()
+        for relative_path in paths
+    }
+    accounted = (
+        required_files
+        | META_GOLDEN_TEST_FILES
+        | set(INTENTIONALLY_OPTIONAL_GOLDEN_TESTS)
+    )
+    unaccounted = sorted(golden_files - accounted)
+    assert unaccounted == [], (
+        "golden tests missing from Phase 1 merge gate inventory: "
+        + ", ".join(unaccounted)
+    )
+    for relative_path, reason in INTENTIONALLY_OPTIONAL_GOLDEN_TESTS.items():
+        assert reason.strip(), f"missing omission reason for {relative_path}"
+        assert (REPO_ROOT / relative_path).is_file()
