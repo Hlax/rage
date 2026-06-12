@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from rge.modules.operator_loop import safe_verification_commands
+from rge.subprocess_capture import run_captured
 
 _MOCK_ENV = {
     "RGE_LLM_MODE": "mock",
@@ -29,7 +30,7 @@ def run_verification(
 ) -> dict[str, Any]:
     """Run mock-only verification commands and return a JSON-serializable report."""
     project_root = root or Path(__file__).resolve().parents[2]
-    runner = command_runner or subprocess.run
+    runner = command_runner or run_captured
     commands = safe_verification_commands(project_root)
     if skip_site:
         commands = [cmd for cmd in commands if cmd["name"] != "public_site_build"]
@@ -49,9 +50,6 @@ def run_verification(
             command["argv"],
             cwd=command["cwd"],
             env=env,
-            capture_output=True,
-            text=True,
-            check=False,
         )
         passed = completed.returncode == 0
         all_passed = all_passed and passed

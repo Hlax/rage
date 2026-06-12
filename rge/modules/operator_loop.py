@@ -24,6 +24,7 @@ from rge.modules.principal_audit_gate import (
     repo_root,
 )
 from rge.modules.ticket_writer import improvement_draft_is_actionable
+from rge.subprocess_capture import run_captured
 
 _REPO_ROOT = repo_root()
 _QUEUE_PATH = _REPO_ROOT / "tickets" / "TICKET_QUEUE.md"
@@ -144,15 +145,7 @@ def inspect_working_tree(
 ) -> WorkingTreeStatus:
     """Return git branch and cleanliness (read-only)."""
     project_root = root or repo_root()
-    runner = status_runner or (
-        lambda argv, cwd: subprocess.run(
-            argv,
-            cwd=cwd,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    )
+    runner = status_runner or (lambda argv, cwd: run_captured(argv, cwd=cwd))
     porcelain = runner(["git", "status", "--porcelain"], project_root)
     dirty_paths = [
         line for line in porcelain.stdout.splitlines() if line.strip()
@@ -283,15 +276,7 @@ def ticket_has_implementation_commit(
     whose messages omit the ticket id, e.g. ticket-043 on cc1c17c).
     """
     project_root = root or repo_root()
-    runner = log_runner or (
-        lambda argv, cwd: subprocess.run(
-            argv,
-            cwd=cwd,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    )
+    runner = log_runner or (lambda argv, cwd: run_captured(argv, cwd=cwd))
     ticket_json_rel = f"tickets/{ticket_id}.json"
     ticket_json_on_disk = (project_root / ticket_json_rel).is_file()
     for ref in ("main", "HEAD"):
@@ -368,12 +353,10 @@ def detect_documentation_git_drift(
                     }
                 )
         if _report_claims_positive_merge_to_main(report_text):
-            merge_check = (log_runner or subprocess.run)(
-                ["git", "branch", "--show-current"],
-                cwd=root,
-                capture_output=True,
-                text=True,
-                check=False,
+            merge_check = (
+                log_runner(["git", "branch", "--show-current"], root)
+                if log_runner is not None
+                else run_captured(["git", "branch", "--show-current"], cwd=root)
             )
             current = merge_check.stdout.strip()
             if current and current != "main":
@@ -785,7 +768,7 @@ def execute_safe_checks(
         plan["execution_status"] = "blocked"
         return plan
 
-    runner = command_runner or subprocess.run
+    runner = command_runner or run_captured
     results: list[dict[str, Any]] = []
     all_passed = True
     for command in plan["safe_verification_commands"]:
@@ -796,9 +779,6 @@ def execute_safe_checks(
             command["argv"],
             cwd=command["cwd"],
             env=env,
-            capture_output=True,
-            text=True,
-            check=False,
         )
         passed = completed.returncode == 0
         all_passed = all_passed and passed

@@ -1,0 +1,45 @@
+{
+  "id": "ticket-057",
+  "title": "Windows subprocess UTF-8 decode for operator/verify npm capture",
+  "problem": "operator_loop --mode execute-safe and verify capture npm/Next.js subprocess output with text=True, which on Windows defaults to cp1252 decoding. UTF-8 output can raise UnicodeDecodeError in background reader threads even when exit code is 0.",
+  "evidence": [
+    "agent_reports/2026-06-12_principal-audit-post-ticket-056.md",
+    "rge/modules/operator_loop.py",
+    "rge/modules/verify_runner.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "rge/modules/verify_runner.py"
+  ],
+  "expected_files": [
+    "rge/subprocess_capture.py",
+    "rge/modules/operator_loop.py",
+    "rge/modules/verify_runner.py",
+    "tests/unit/test_subprocess_capture.py",
+    "tests/unit/test_operator_loop.py",
+    "tests/unit/test_verify_runner.py",
+    "tickets/ticket-057.json",
+    "agent_reports/2026-06-12_phase-2_ticket-057_windows-subprocess-utf8-decode.md"
+  ],
+  "acceptance_criteria": [
+    "Subprocess stdout/stderr capture uses UTF-8 with errors=replace for operator execute-safe and verify.",
+    "Non-UTF-8 or mixed binary subprocess output does not crash output capture.",
+    "Failing subprocess exit codes still fail verification/operator results.",
+    "Output tails remain available in execution/verification reports."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_subprocess_capture.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_operator_loop.py tests/unit/test_verify_runner.py -q",
+    "RGE_LLM_MODE=mock python -m pytest -q",
+    "RGE_LLM_MODE=mock python -m rge.modules.operator_loop --mode execute-safe"
+  ],
+  "non_goals": [
+    "Do not change which verification commands are run.",
+    "Do not add shell=True.",
+    "Do not change CI workflow steps.",
+    "Do not start cloud provider, embeddings, or concept graph work."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert subprocess_capture helper and restore text=True defaults.",
+  "status": "done"
+}

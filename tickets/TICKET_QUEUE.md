@@ -88,6 +88,12 @@ superseded
 | 54 | ticket-054 | done | Operator verify docs and Windows local verify reliability | `phase-2/ticket-054-operator-verify-docs` | `agent_reports/2026-06-12_phase-2_ticket-054_operator-verify-docs.md` |
 | 55 | ticket-055 | done | Export snapshot manifest and scratch history for operator review | `phase-2/ticket-055-export-snapshot-history` | `agent_reports/2026-06-12_phase-2_ticket-055_export-snapshot-history.md` |
 | 56 | ticket-056 | done | Windows-safe npm subprocess for operator execute-safe | `phase-2/ticket-056-windows-npm-subprocess` | `agent_reports/2026-06-12_phase-2_ticket-056_windows-npm-subprocess.md` |
+| 57 | ticket-057 | done | Windows subprocess UTF-8 decode for operator/verify npm capture | `phase-2/ticket-057-windows-subprocess-utf8-decode` | `agent_reports/2026-06-12_phase-2_ticket-057_windows-subprocess-utf8-decode.md` |
+
+## Queue Notes (2026-06-12, ticket-057 agent)
+
+- Post-ticket-056 audit: execute-safe passed but background UnicodeDecodeError on Windows cp1252 vs UTF-8 npm output.
+- ticket-057 adds `rge/subprocess_capture.run_captured` with UTF-8 `errors=replace` for operator/verify subprocess capture.
 
 ## Queue Notes (2026-06-12, ticket-056 agent)
 
@@ -530,7 +536,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-(none — principal audit cadence may be due; pause for human review)
+(none — seed next Post-Phase-2 ticket after human review)
 ```
 
 ## Queue Rules
