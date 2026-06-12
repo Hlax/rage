@@ -120,9 +120,7 @@ def test_cli_subcommand_help_exits_cleanly(command: str) -> None:
 def test_cli_placeholders_do_not_pretend_to_work() -> None:
     from rge.cli import main
 
-    exit_code = main(
-        ["run", "--topic", "test", "--domain", "creativity", "--fixture-mode"]
-    )
+    exit_code = main(["run", "--topic", "test", "--domain", "creativity"])
     assert exit_code != 0
 
 

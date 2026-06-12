@@ -4,12 +4,52 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
+from typing import Any
 
 from rge import __version__
 
 _NOT_IMPLEMENTED_EXIT_CODE = 2
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+
+FIXTURE_RUN_ID = "run_golden_fixture_mvp"
+GOLDEN_MVP_TOPIC = (
+    "Does AI improve creative output while reducing diversity?"
+)
+
+_FIXTURE_SOURCE_PATHS = {
+    "base": _REPO_ROOT
+    / "fixtures"
+    / "sources"
+    / "creativity_ai_diversity_short.txt",
+    "followup": _REPO_ROOT
+    / "fixtures"
+    / "sources"
+    / "creativity_ai_diversity_followup_short.txt",
+    "contradiction": _REPO_ROOT
+    / "fixtures"
+    / "sources"
+    / "creativity_ai_diversity_contradiction.txt",
+}
+
+_FIXTURE_LLM = {
+    "base_extract": "claim_extraction_valid_and_missing_quote.json",
+    "followup_extract": "claim_extraction_creativity_diversity_followup.json",
+    "contradiction_extract": "claim_extraction_creativity_diversity_contradiction.json",
+    "contradiction_link": "concept_linking_creativity_diversity_contradiction.json",
+    "contradiction_relationship": (
+        "relationship_drafting_creativity_diversity_contradiction.json"
+    ),
+    "contradiction_detect": "contradiction_detection_creativity_diversity.json",
+}
+
+_SOURCE_TITLE_BY_KEY = {
+    "base": "creativity_ai_diversity_short.txt",
+    "followup": "creativity_ai_diversity_followup_short.txt",
+    "contradiction": "creativity_ai_diversity_contradiction.txt",
+}
 
 
 def _not_implemented(command: str, phase_hint: str) -> int:
@@ -23,13 +63,392 @@ def _not_implemented(command: str, phase_hint: str) -> int:
     return _NOT_IMPLEMENTED_EXIT_CODE
 
 
-def _cmd_run(args: argparse.Namespace) -> int:
-    return _not_implemented(
-        "run",
-        "Fixture-mode research runs arrive with the Phase 3 local research MVP "
-        f"(requested topic={args.topic!r}, domain={args.domain!r}, "
-        f"fixture_mode={args.fixture_mode}).",
+def _db_cli_args(db_path: Path | None) -> list[str]:
+    return ["--db", str(db_path)] if db_path is not None else []
+
+
+def _run_cli_step(argv: list[str]) -> None:
+    exit_code = main(argv)
+    if exit_code != 0:
+        raise RuntimeError(
+            f"research CLI step failed (exit {exit_code}): {' '.join(argv)}"
+        )
+
+
+def _source_id_by_title(conn: Any, title: str) -> str:
+    row = conn.execute(
+        "SELECT id FROM sources WHERE title = ?",
+        (title,),
+    ).fetchone()
+    if row is None:
+        raise ValueError(f"ingested source not found for title: {title}")
+    return row[0]
+
+
+def execute_fixture_mode_run(
+    *,
+    topic: str,
+    domain: str,
+    db_path: Path | None = None,
+    run_id: str = FIXTURE_RUN_ID,
+    report_dir: Path | None = None,
+    ticket_dir: Path | None = None,
+    export_dirs: list[Path] | None = None,
+) -> dict[str, Any]:
+    """Run the deterministic fixture-mode MVP pipeline end to end."""
+    from rge.db.connection import ensure_database, get_db_path
+    from rge.modules.card_exporter import default_export_dirs, export_public_cards
+    from rge.modules.cluster_reporter import generate_cluster_report
+    from rge.modules.research_planner import ensure_golden_contract, generate_followup_questions
+    from rge.modules.research_queue import queue_sources_from_fixture
+    from rge.modules.run_evaluator import generate_run_report
+    from rge.modules.safety_auditor import run_safety_audit
+    from rge.modules.theory_generator import generate_theory_candidates
+    from rge.modules.ticket_writer import generate_improvement_tickets
+
+    prior_mode = os.environ.get("RGE_LLM_MODE")
+    os.environ["RGE_LLM_MODE"] = "mock"
+    root = _REPO_ROOT
+    resolved_db = get_db_path(db_path)
+    resolved_reports = report_dir or (root / "data" / "reports")
+    resolved_tickets = ticket_dir or (root / "tickets")
+    resolved_exports = (
+        export_dirs if export_dirs is not None else default_export_dirs(root)
     )
+    db_args = _db_cli_args(db_path)
+    steps_completed: list[str] = []
+
+    try:
+        conn = ensure_database(db_path)
+        try:
+            contract = ensure_golden_contract(conn)
+            steps_completed.append("create_research_contract")
+
+            queue_result = queue_sources_from_fixture(conn)
+            queue_count = int(queue_result.get("queue_count", 0))
+            if queue_count < 3:
+                raise ValueError(
+                    f"fixture queue must include at least three sources; got {queue_count}"
+                )
+            steps_completed.append("queue_fixture_sources")
+
+            _run_cli_step(
+                [
+                    "ingest",
+                    str(_FIXTURE_SOURCE_PATHS["base"]),
+                    "--domain",
+                    domain,
+                    *db_args,
+                ]
+            )
+            base_id = _source_id_by_title(conn, _SOURCE_TITLE_BY_KEY["base"])
+            _run_cli_step(
+                [
+                    "extract-claims",
+                    "--source",
+                    base_id,
+                    "--fixture",
+                    _FIXTURE_LLM["base_extract"],
+                    *db_args,
+                ]
+            )
+            _run_cli_step(["link-concepts", "--source", base_id, *db_args])
+            _run_cli_step(
+                ["build-relationships", "--source", base_id, *db_args]
+            )
+            _run_cli_step(["reconcile-scores", "--source", base_id, *db_args])
+            steps_completed.append("process_base_source")
+
+            _run_cli_step(
+                [
+                    "ingest",
+                    str(_FIXTURE_SOURCE_PATHS["followup"]),
+                    "--domain",
+                    domain,
+                    *db_args,
+                ]
+            )
+            followup_id = _source_id_by_title(conn, _SOURCE_TITLE_BY_KEY["followup"])
+            _run_cli_step(
+                [
+                    "extract-claims",
+                    "--source",
+                    followup_id,
+                    "--fixture",
+                    _FIXTURE_LLM["followup_extract"],
+                    *db_args,
+                ]
+            )
+            _run_cli_step(["link-concepts", "--source", followup_id, *db_args])
+            _run_cli_step(
+                ["build-relationships", "--source", followup_id, *db_args]
+            )
+            _run_cli_step(
+                ["reconcile-scores", "--source", followup_id, *db_args]
+            )
+            steps_completed.append("process_followup_source")
+
+            _run_cli_step(
+                [
+                    "ingest",
+                    str(_FIXTURE_SOURCE_PATHS["contradiction"]),
+                    "--domain",
+                    domain,
+                    *db_args,
+                ]
+            )
+            contradiction_id = _source_id_by_title(
+                conn, _SOURCE_TITLE_BY_KEY["contradiction"]
+            )
+            _run_cli_step(
+                [
+                    "extract-claims",
+                    "--source",
+                    contradiction_id,
+                    "--fixture",
+                    _FIXTURE_LLM["contradiction_extract"],
+                    *db_args,
+                ]
+            )
+            _run_cli_step(
+                [
+                    "link-concepts",
+                    "--source",
+                    contradiction_id,
+                    "--fixture",
+                    _FIXTURE_LLM["contradiction_link"],
+                    *db_args,
+                ]
+            )
+            _run_cli_step(
+                [
+                    "build-relationships",
+                    "--source",
+                    contradiction_id,
+                    "--fixture",
+                    _FIXTURE_LLM["contradiction_relationship"],
+                    *db_args,
+                ]
+            )
+            _run_cli_step(
+                [
+                    "detect-contradictions",
+                    "--source",
+                    contradiction_id,
+                    "--fixture",
+                    _FIXTURE_LLM["contradiction_detect"],
+                    *db_args,
+                ]
+            )
+            _run_cli_step(
+                ["reconcile-scores", "--source", contradiction_id, *db_args]
+            )
+            steps_completed.append("process_contradiction_source")
+
+            generate_followup_questions(conn)
+            steps_completed.append("generate_followup_questions")
+
+            cluster_result = generate_cluster_report(
+                conn,
+                domain=domain,
+                output_dir=resolved_reports,
+                pad_golden=True,
+            )
+            steps_completed.append("generate_cluster_report")
+
+            theory_result = generate_theory_candidates(
+                conn,
+                domain=domain,
+                output_dir=resolved_reports,
+            )
+            steps_completed.append("generate_theory_candidates")
+
+            export_result = export_public_cards(
+                conn,
+                output_dirs=resolved_exports,
+                repo_root=root,
+            )
+            steps_completed.append("export_public_cards")
+
+            generate_run_report(
+                conn,
+                run_id=run_id,
+                topic=topic,
+                domain_pack=domain,
+                output_dir=resolved_reports,
+            )
+            steps_completed.append("generate_run_report")
+
+            ticket_result = generate_improvement_tickets(
+                conn,
+                run_id=run_id,
+                output_dir=resolved_tickets,
+            )
+            steps_completed.append("generate_improvement_tickets")
+
+            safety_report = run_safety_audit("full", root=root)
+            if safety_report["status"] != "pass":
+                blocked = safety_report.get("blocked_reasons", [])
+                raise ValueError(
+                    "safety audit failed after fixture run: "
+                    + "; ".join(blocked[:3])
+                    + (f"; and {len(blocked) - 3} more" if len(blocked) > 3 else "")
+                )
+            steps_completed.append("safety_audit_full")
+
+            accepted = int(
+                conn.execute(
+                    "SELECT COUNT(*) FROM claims WHERE status = 'accepted'"
+                ).fetchone()[0]
+            )
+            rejected = int(
+                conn.execute(
+                    "SELECT COUNT(*) FROM claims WHERE status = 'rejected'"
+                ).fetchone()[0]
+            )
+            relationships = int(
+                conn.execute(
+                    "SELECT COUNT(*) FROM relationships WHERE status = 'active'"
+                ).fetchone()[0]
+            )
+            score_events = int(
+                conn.execute("SELECT COUNT(*) FROM score_events").fetchone()[0]
+            )
+            tickets = int(
+                conn.execute("SELECT COUNT(*) FROM improvement_tickets").fetchone()[0]
+            )
+            qualifies = int(
+                conn.execute(
+                    """
+                    SELECT COUNT(*) FROM relationship_evidence
+                    WHERE stance = 'qualifies'
+                    """
+                ).fetchone()[0]
+            )
+            supports = int(
+                conn.execute(
+                    """
+                    SELECT COUNT(*) FROM relationship_evidence
+                    WHERE stance = 'supports'
+                    """
+                ).fetchone()[0]
+            )
+
+            if accepted < 1 or rejected < 1:
+                raise ValueError("fixture run requires accepted and rejected claims")
+            if relationships < 1:
+                raise ValueError("fixture run requires active relationships")
+            if score_events < 1:
+                raise ValueError("fixture run requires score events")
+            if export_result.get("card_count", 0) < 2:
+                raise ValueError("fixture run requires at least two public cards")
+            if tickets < 1:
+                raise ValueError("fixture run requires at least one improvement ticket")
+            if qualifies < 1 or supports < 1:
+                raise ValueError(
+                    "fixture run requires support and qualification evidence"
+                )
+
+            export_primary = resolved_exports[0] / "public_cards.json"
+            return {
+                "status": "completed",
+                "command": "run",
+                "mode": "fixture",
+                "topic": topic,
+                "domain": domain,
+                "run_id": run_id,
+                "contract_id": contract["id"],
+                "database_path": str(resolved_db),
+                "steps_completed": steps_completed,
+                "queue_count": queue_count,
+                "sources_ingested": int(
+                    conn.execute("SELECT COUNT(*) FROM sources").fetchone()[0]
+                ),
+                "claims_accepted": accepted,
+                "claims_rejected": rejected,
+                "relationships_active": relationships,
+                "score_events": score_events,
+                "card_count": export_result.get("card_count"),
+                "cluster_report_id": cluster_result.get("cluster_report_id"),
+                "theory_candidate_ids": theory_result.get("theory_candidate_ids"),
+                "ticket_ids": ticket_result.get("ticket_ids"),
+                "artifacts": {
+                    "database": str(resolved_db),
+                    "run_report": str(resolved_reports / "run_report_latest.json"),
+                    "cluster_report": str(
+                        resolved_reports / "cluster_report_latest.json"
+                    ),
+                    "public_cards_export": str(export_primary),
+                    "public_memos_export": str(
+                        resolved_exports[0] / "public_memos.json"
+                    ),
+                    "improvement_tickets": str(
+                        resolved_tickets / "improvement_ticket_latest.json"
+                    ),
+                },
+                "safety_audit_status": safety_report["status"],
+            }
+        finally:
+            conn.close()
+    finally:
+        if prior_mode is None:
+            os.environ.pop("RGE_LLM_MODE", None)
+        else:
+            os.environ["RGE_LLM_MODE"] = prior_mode
+
+
+def _cmd_run(args: argparse.Namespace) -> int:
+    if not args.fixture_mode:
+        return _not_implemented(
+            "run",
+            "Live discovery runs are not implemented. Use --fixture-mode for the "
+            "deterministic MVP pipeline.",
+        )
+    if not args.topic:
+        payload = {
+            "status": "error",
+            "command": "run",
+            "detail": "--topic is required for fixture-mode runs.",
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    if not args.domain:
+        payload = {
+            "status": "error",
+            "command": "run",
+            "detail": "--domain is required for fixture-mode runs.",
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+    try:
+        db_path = Path(args.db) if args.db else None
+        report_dir = Path(args.output_dir) if args.output_dir else None
+        ticket_dir = Path(args.ticket_dir) if args.ticket_dir else None
+        export_dirs = (
+            [Path(args.export_dir)]
+            if getattr(args, "export_dir", None)
+            else None
+        )
+        result = execute_fixture_mode_run(
+            topic=args.topic,
+            domain=args.domain,
+            db_path=db_path,
+            run_id=args.run_id or FIXTURE_RUN_ID,
+            report_dir=report_dir,
+            ticket_dir=ticket_dir,
+            export_dirs=export_dirs,
+        )
+        print(json.dumps(result, indent=2))
+        return 0
+    except (ValueError, RuntimeError, FileNotFoundError) as exc:
+        payload = {
+            "status": "error",
+            "command": "run",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
 
 
 def _cmd_generate_cluster_report(args: argparse.Namespace) -> int:
@@ -705,8 +1124,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     run_parser = subparsers.add_parser(
         "run",
-        help="Run a research workflow for a topic (placeholder in Phase 0).",
-        description="Run a research workflow for a topic. Placeholder in Phase 0.",
+        help="Run a research workflow for a topic.",
+        description=(
+            "Run a fixture-mode research workflow from contract through public "
+            "export and improvement tickets. Live discovery is not implemented."
+        ),
     )
     run_parser.add_argument("--topic", help="Root research topic.")
     run_parser.add_argument("--domain", help="Domain pack ID (e.g. creativity).")
@@ -714,6 +1136,26 @@ def build_parser() -> argparse.ArgumentParser:
         "--fixture-mode",
         action="store_true",
         help="Use deterministic fixture sources instead of live discovery.",
+    )
+    run_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    run_parser.add_argument(
+        "--run-id",
+        help=f"Research run ID (defaults to {FIXTURE_RUN_ID}).",
+    )
+    run_parser.add_argument(
+        "--output-dir",
+        help="Optional report output directory (defaults to data/reports/).",
+    )
+    run_parser.add_argument(
+        "--ticket-dir",
+        help="Optional improvement ticket output directory (defaults to tickets/).",
+    )
+    run_parser.add_argument(
+        "--export-dir",
+        help="Optional single export directory (for tests; skips default export paths).",
     )
     run_parser.set_defaults(func=_cmd_run)
 

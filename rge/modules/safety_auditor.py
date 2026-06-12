@@ -235,6 +235,26 @@ def _audit_public_site_debug_policy(root: Path) -> tuple[list[str], list[str]]:
     return checked, blocked
 
 
+def _audit_full_mvp_run_policy(root: Path) -> tuple[list[str], list[str]]:
+    """Verify fixture-mode full MVP run policy and deterministic GT26 evidence exist."""
+    checked = [
+        "rge/cli.py",
+        "tests/golden/test_26_full_mvp_run.py",
+    ]
+    blocked: list[str] = []
+    for relative_path in checked:
+        if not (root / relative_path).is_file():
+            blocked.append(
+                f"missing full MVP fixture run protection evidence: {relative_path}"
+            )
+    cli_path = root / "rge" / "cli.py"
+    if cli_path.is_file():
+        source = cli_path.read_text(encoding="utf-8")
+        if "execute_fixture_mode_run" not in source:
+            blocked.append("missing execute_fixture_mode_run in rge/cli.py")
+    return checked, blocked
+
+
 def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> dict[str, Any]:
     """Run deterministic safety checks and return a machine-readable report."""
     if audit_type not in AUDIT_TYPES:
@@ -257,6 +277,7 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             "model_tool_permissions",
             "prompt_injection",
             "public_site_debug",
+            "full_mvp_run",
         ]
     else:
         checks = [audit_type]
@@ -291,6 +312,10 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             blocked_reasons.extend(blocked)
         elif check == "public_site_debug":
             files, blocked = _audit_public_site_debug_policy(project_root)
+            checked_files.extend(files)
+            blocked_reasons.extend(blocked)
+        elif check == "full_mvp_run":
+            files, blocked = _audit_full_mvp_run_policy(project_root)
             checked_files.extend(files)
             blocked_reasons.extend(blocked)
 
