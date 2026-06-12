@@ -82,6 +82,12 @@ superseded
 | 48 | ticket-048 | rejected | Improve claim quote span validation | | `agent_reports/2026-06-12_pre-ticket-048_claim-quote-span-readiness-audit.md` |
 | 49 | ticket-049 | done | Skip improvement tickets for golden-covered rejection modes | `phase-2/ticket-049-improvement-generator-filter` | `agent_reports/2026-06-12_phase-2_ticket-049_improvement-generator-filter.md` |
 | 50 | ticket-050 | done | CI Golden Gate: opt into Node 24 for GitHub Actions | `phase-2/ticket-050-ci-node24-actions` | `agent_reports/2026-06-12_phase-2_ticket-050_ci-node24-actions.md` |
+| 51 | ticket-051 | done | Implement research verify mock-only verification suite | `phase-2/ticket-051-research-verify` | `agent_reports/2026-06-12_phase-2_ticket-051_research-verify.md` |
+
+## Queue Notes (2026-06-12, ticket-051 agent)
+
+- ticket-051 implements `research verify` (mock-only golden/pytest/safety/site build).
+  `--skip-site` for Python-only checks; 3 unit tests pass.
 
 ## Queue Notes (2026-06-12, ticket-050 agent)
 
@@ -490,7 +496,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-051 (proposed — research verify mock-only verification suite)
+ticket-052 (proposed — quote span char offsets for accepted claims)
 ```
 
 ## Queue Rules

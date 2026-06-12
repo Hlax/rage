@@ -832,12 +832,15 @@ def _cmd_model_health(_args: argparse.Namespace) -> int:
     return 0
 
 
-def _cmd_verify(_args: argparse.Namespace) -> int:
-    return _not_implemented(
-        "verify",
-        "Deterministic verification suite arrives with later phases; "
-        "use 'pytest tests/golden' for the current scaffold checks.",
+def _cmd_verify(args: argparse.Namespace) -> int:
+    from rge.modules.verify_runner import run_verification
+
+    result = run_verification(
+        root=_REPO_ROOT,
+        skip_site=bool(getattr(args, "skip_site", False)),
     )
+    print(json.dumps(result, indent=2))
+    return 0 if result["status"] == "pass" else 1
 
 
 def _cmd_extract_claims(args: argparse.Namespace) -> int:
@@ -1702,8 +1705,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     verify_parser = subparsers.add_parser(
         "verify",
-        help="Run deterministic verification checks (placeholder in Phase 0).",
-        description="Run deterministic verification checks. Placeholder in Phase 0.",
+        help="Run deterministic mock-only verification checks.",
+        description=(
+            "Run mock-only golden tests, pytest, safety audit, and public-site "
+            "build. Does not require Ollama or a clean git tree."
+        ),
+    )
+    verify_parser.add_argument(
+        "--skip-site",
+        action="store_true",
+        help="Skip npm public-site build (Python checks only).",
     )
     verify_parser.set_defaults(func=_cmd_verify)
 

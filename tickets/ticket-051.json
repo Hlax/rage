@@ -1,0 +1,40 @@
+{
+  "id": "ticket-051",
+  "title": "Implement research verify mock-only verification suite",
+  "problem": "research verify is a placeholder returning not_implemented. Operators and AGENTS.md expect a single command that runs golden tests, pytest, safety audit, and public-site build in mock mode.",
+  "evidence": [
+    "rge/cli.py _cmd_verify placeholder",
+    ".cursor/commands/rge-verify.md",
+    "agent_reports/2026-06-12_phase-2_ticket-roadmap.md Post-Phase-2"
+  ],
+  "affected_modules": [
+    "rge/modules/verify_runner.py",
+    "rge/cli.py",
+    "tests/unit/test_verify_runner.py"
+  ],
+  "expected_files": [
+    "rge/modules/verify_runner.py",
+    "rge/cli.py",
+    "tests/unit/test_verify_runner.py",
+    "tickets/ticket-051.json",
+    "agent_reports/2026-06-12_phase-2_ticket-051_research-verify.md"
+  ],
+  "acceptance_criteria": [
+    "research verify runs mock-only golden, pytest, safety audit, and npm build.",
+    "research verify --skip-site skips public-site build.",
+    "Exits 0 on pass, 1 on failure; emits machine-readable JSON.",
+    "Does not require clean git tree or Ollama."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_verify_runner.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden/test_00_scaffold.py -q"
+  ],
+  "non_goals": [
+    "Do not merge or push.",
+    "Do not run live_smoke tests.",
+    "Do not duplicate operator loop plan/execute-safe queue logic."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert verify_runner and restore verify placeholder.",
+  "status": "done"
+}
