@@ -52,7 +52,20 @@ superseded
 | 23 | ticket-023 | done | Validate improvement tickets for builder consumption (Golden Test 21) | `phase-1/ticket-023-builder-ticket-consumption` | `agent_reports/2026-06-12_phase-1_ticket-023_builder-ticket-consumption.md` |
 | 24 | ticket-024 | done | Add builder golden merge gate (Golden Test 22) | `phase-1/ticket-024-builder-golden-gate` | `agent_reports/2026-06-12_phase-1_ticket-024_builder-golden-gate.md` |
 | 25 | ticket-025 | done | Add safety audit merge gate (Golden Test 23) | `phase-1/ticket-025-safety-audit-gate` | `agent_reports/2026-06-12_phase-1_ticket-025_safety-audit-gate.md` |
-| 26 | ticket-026 | proposed | Add prompt-injection golden fixture handling (Golden Test 24) | | |
+| 26 | ticket-026 | done | Add prompt-injection golden fixture handling (Golden Test 24) | `phase-1/ticket-026-prompt-injection` | `agent_reports/2026-06-12_phase-1_ticket-026_prompt-injection.md` |
+| 27 | ticket-027 | proposed | Add public-site debug details without private data exposure (Golden Test 25) | | |
+
+## Queue Notes (2026-06-12, ticket-026 agent)
+
+- ticket-026 implemented deterministic prompt-injection fixture handling with
+  `unsafe_or_injected_content` rejection, prompt-injection source/LLM fixtures,
+  Golden Test 24 (4 tests), and full safety audit prompt-injection evidence.
+  All 110 golden tests pass; `python -m rge.modules.safety_auditor --audit full`
+  returns `pass`.
+- Pre-ticket-026 audit report included in branch base; generated export artifacts
+  were cleaned before implementation.
+- ticket-027 proposes public-site debug details without private data exposure for
+  Golden Test 25 (medium risk; pre-ticket audit recommended).
 
 ## Queue Notes (2026-06-12, ticket-025 agent)
 
@@ -226,7 +239,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-026 (proposed; awaiting review — pre-ticket audit recommended)
+ticket-027 (proposed; awaiting review — pre-ticket audit recommended)
 ```
 
 ## Queue Rules
