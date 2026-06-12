@@ -96,8 +96,10 @@ Full safety audit passes and now includes GT26 evidence in `checked_files`:
 
 ## 11. Merge to Main
 
-- Merge commit: _(recorded after merge)_
+- Merge commit: `5d0c214`
 - Branch: `phase-1/ticket-028-full-mvp-run` merged to `main`.
+- Post-merge pytest on `main`: 118 passed.
+- Post-merge safety audit on `main`: `pass`.
 
 ## 12. Recommended Next Ticket
 
