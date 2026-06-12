@@ -65,6 +65,7 @@ Require a current pre-ticket audit report (`agent_reports/*pre-ticket-*` or expl
 | **Public export** | First or changed `export-public`, `card_exporter`, `public_export_policy` | Public data boundary; fail-closed export must be reviewed |
 | **Public site changes** | `apps/public-site/**`, static JSON consumed by the site | Read-only surface, routing, HTML safety |
 | **Schema migrations** | New/edited `rge/db/migrations/*.sql` | Irreversible graph shape changes |
+| **Theory / inference generation** | First or changed `theory_generator`, candidate-theory CLI, `theory_candidates` persistence, theory report artifacts | Higher-level semantic synthesis must not present speculation as fact or bypass validation |
 | **Live Ollama** | Removing mock-only constraints, live model paths in tests | Non-deterministic / environment-dependent behavior |
 | **Overdue checkpoint** | ≥3 consecutive `done` tickets since last principal audit | Loop outran intended review cadence |
 
