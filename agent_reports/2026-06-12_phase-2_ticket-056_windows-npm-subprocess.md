@@ -37,7 +37,11 @@ python -m rge.modules.operator_loop --mode execute-safe  # pass (post-commit, cl
 
 ## Merge
 
-Pending commit hash after merge to `main` and push.
+- Commit: `bbb3414` on `phase-2/ticket-056-windows-npm-subprocess`
+- Merged to `main` via fast-forward from `3325027`
+- Pushed to `origin/main`
+- Golden Gate run **27431097396** → success
+- `operator_loop --mode execute-safe` → `execution_status: pass` (includes `public_site_build`)
 
 ## Recommended next ticket
 
