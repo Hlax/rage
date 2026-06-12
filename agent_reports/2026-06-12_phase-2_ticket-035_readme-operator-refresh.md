@@ -79,7 +79,7 @@ Full safety audit passes; no export or route changes.
 
 ## 10. Merge to Main
 
-- Merge commit: (recorded after merge)
+- Merge commit: `27fdae7`
 
 ## 11. Recommended Next Ticket
 
