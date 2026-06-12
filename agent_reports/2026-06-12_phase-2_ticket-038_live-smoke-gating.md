@@ -91,7 +91,9 @@ None.
 
 ## 10. Merge to Main
 
-Placeholder — updated after merge.
+- Merge commit: `8a26b8d`
+- Branch: `phase-2/ticket-038-live-smoke-gating` merged to `main` with `--no-ff`
+- Post-merge pytest on `main`: PASS — 140 passed, 1 deselected
 
 ## 11. Recommended Next Ticket
 
