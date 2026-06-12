@@ -384,6 +384,31 @@ def test_multi_ticket_dirty_paths_block(tmp_path: Path) -> None:
     assert plan["next_recommended_action"]["gate"] == "blocked"
 
 
+def test_operator_loop_uses_corrected_principal_audit_cadence(tmp_path: Path) -> None:
+    _seed_queue(
+        tmp_path,
+        """
+| 42 | ticket-042 | done | prev | | |
+| 43 | ticket-043 | done | latest | | |
+| 44 | ticket-044 | proposed | next | | |
+""",
+    )
+    (tmp_path / "agent_reports" / "2026-06-12_principal-audit-post-ticket-042.md").write_text(
+        "# audit", encoding="utf-8"
+    )
+    (tmp_path / "tickets" / "ticket-044.json").write_text(
+        json.dumps({"id": "ticket-044", "risk_level": "low", "status": "proposed"}),
+        encoding="utf-8",
+    )
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+
+    assert plan["audit_cadence"]["cadence_status"] == "satisfied"
+    assert plan["audit_cadence"]["done_tickets_since_latest_checkpoint"] == 1
+    assert plan["next_recommended_action"]["action_id"] != "run_principal_audit"
+
+
 def test_plan_mode_is_read_only(tmp_path: Path) -> None:
     _seed_queue(tmp_path, "| 40 | ticket-040 | done | prev | | |\n")
     queue_before = (tmp_path / "tickets" / "TICKET_QUEUE.md").read_text(encoding="utf-8")

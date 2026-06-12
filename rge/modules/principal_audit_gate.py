@@ -23,6 +23,13 @@ _PRINCIPAL_AUDIT_RE = re.compile(
     re.IGNORECASE,
 )
 _PRE_TICKET_RE = re.compile(r"pre-ticket-(\d{3})", re.IGNORECASE)
+_POST_TICKET_RE = re.compile(r"post-ticket-(\d{3})", re.IGNORECASE)
+_PRE_PHASE_RE = re.compile(r"pre-phase-(\d+)[-_]principal-audit", re.IGNORECASE)
+
+# Phase boundary ticket numbers: principal audits at phase start reference this ticket.
+_PHASE_BOUNDARY_TICKET = {2: 33}
+
+_LEGACY_PRINCIPAL_ORDER_CUTOFF = 33
 
 
 @dataclass(frozen=True)
@@ -56,36 +63,73 @@ def parse_queue_rows(queue_text: str) -> list[QueueTicketRow]:
     return rows
 
 
+def _ticket_number_from_id(ticket_id: str) -> int:
+    return int(ticket_id.split("-")[1])
+
+
+def _parse_checkpoint_report(path: Path) -> CheckpointReport | None:
+    name = path.name.lower()
+    pre_match = _PRE_TICKET_RE.search(name)
+    if pre_match:
+        return CheckpointReport(
+            path=path,
+            kind="pre_ticket",
+            ticket_number=int(pre_match.group(1)),
+        )
+    if not _PRINCIPAL_AUDIT_RE.search(name):
+        return None
+
+    post_match = _POST_TICKET_RE.search(name)
+    if post_match:
+        return CheckpointReport(
+            path=path,
+            kind="principal",
+            ticket_number=int(post_match.group(1)),
+        )
+
+    phase_match = _PRE_PHASE_RE.search(name)
+    if phase_match:
+        phase = int(phase_match.group(1))
+        return CheckpointReport(
+            path=path,
+            kind="principal",
+            ticket_number=_PHASE_BOUNDARY_TICKET.get(phase),
+        )
+
+    return CheckpointReport(path=path, kind="principal", ticket_number=None)
+
+
 def _checkpoint_reports(root: Path) -> list[CheckpointReport]:
     reports: list[CheckpointReport] = []
     if not (root / "agent_reports").is_dir():
         return reports
     for path in sorted((root / "agent_reports").glob("*.md")):
-        name = path.name.lower()
-        pre_match = _PRE_TICKET_RE.search(name)
-        if pre_match:
-            reports.append(
-                CheckpointReport(
-                    path=path,
-                    kind="pre_ticket",
-                    ticket_number=int(pre_match.group(1)),
-                )
-            )
-            continue
-        if _PRINCIPAL_AUDIT_RE.search(name):
-            reports.append(
-                CheckpointReport(
-                    path=path,
-                    kind="principal",
-                    ticket_number=None,
-                )
-            )
+        parsed = _parse_checkpoint_report(path)
+        if parsed is not None:
+            reports.append(parsed)
     reports.sort(key=lambda item: item.path.name)
     return reports
 
 
-def _latest_checkpoint(reports: list[CheckpointReport]) -> CheckpointReport | None:
-    return reports[-1] if reports else None
+def _checkpoint_is_valid(
+    checkpoint: CheckpointReport, rows: list[QueueTicketRow]
+) -> bool:
+    """Reject premature principal audits that reference tickets not yet done."""
+    if checkpoint.ticket_number is None:
+        return True
+    if checkpoint.kind == "pre_ticket":
+        return True
+
+    ticket_id = f"ticket-{checkpoint.ticket_number:03d}"
+    status_by_id = {row.ticket_id: row.status for row in rows}
+    return status_by_id.get(ticket_id) == "done"
+
+
+def _latest_checkpoint(
+    reports: list[CheckpointReport], rows: list[QueueTicketRow]
+) -> CheckpointReport | None:
+    valid = [report for report in reports if _checkpoint_is_valid(report, rows)]
+    return valid[-1] if valid else None
 
 
 def _done_since_checkpoint(
@@ -94,16 +138,18 @@ def _done_since_checkpoint(
 ) -> list[QueueTicketRow]:
     if checkpoint is None:
         return [row for row in rows if row.status == "done"]
-    if checkpoint.kind == "pre_ticket" and checkpoint.ticket_number is not None:
+    if checkpoint.ticket_number is not None:
         cutoff = checkpoint.ticket_number
         return [
             row
             for row in rows
-            if row.status == "done"
-            and int(row.ticket_id.split("-")[1]) > cutoff
+            if row.status == "done" and _ticket_number_from_id(row.ticket_id) > cutoff
         ]
-    # Principal audit: count all implementation tickets done after ticket-033.
-    return [row for row in rows if row.status == "done" and row.order > 33]
+    return [
+        row
+        for row in rows
+        if row.status == "done" and row.order > _LEGACY_PRINCIPAL_ORDER_CUTOFF
+    ]
 
 
 def _pre_ticket_report_for(
@@ -128,7 +174,7 @@ def checkpoint_status(
     queue_text = queue_path.read_text(encoding="utf-8") if queue_path.is_file() else ""
     rows = parse_queue_rows(queue_text)
     reports = _checkpoint_reports(project_root)
-    latest = _latest_checkpoint(reports)
+    latest = _latest_checkpoint(reports, rows)
     done_since = _done_since_checkpoint(rows, latest)
     done_count = len(done_since)
 
@@ -196,6 +242,9 @@ def checkpoint_status(
             str(latest.path.relative_to(project_root)) if latest else None
         ),
         "latest_checkpoint_kind": latest.kind if latest else None,
+        "latest_checkpoint_ticket_number": (
+            latest.ticket_number if latest else None
+        ),
         "next_ticket_id": next_ticket_id,
         "next_ticket_risk_level": next_ticket_risk,
         "implementation_gate": implementation_gate,

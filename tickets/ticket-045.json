@@ -1,0 +1,35 @@
+{
+  "id": "ticket-045",
+  "title": "Promote improvement draft with explicit review gate",
+  "problem": "A medium-risk improvement draft exists in data/tickets/improvement_ticket_latest.json (claim quote span validation) but has not been promoted to the builder queue. The operator loop surfaces it as a review-gated action.",
+  "evidence": [
+    "data/tickets/improvement_ticket_latest.json",
+    "agent_reports/2026-06-12_phase-2_ticket-044_principal-audit-gate-fix.md",
+    "rge/modules/ticket_writer.py promote_improvement_ticket"
+  ],
+  "affected_modules": [
+    "rge/modules/ticket_writer.py",
+    "tickets/"
+  ],
+  "expected_files": [
+    "tickets/ticket-046.json",
+    "agent_reports/2026-06-12_phase-2_ticket-045_improvement-draft-promotion.md"
+  ],
+  "acceptance_criteria": [
+    "Operator runs promote-improvement-ticket with --confirm after human review.",
+    "Promoted ticket JSON passes validate_builder_ticket.",
+    "No auto-edit of TICKET_QUEUE.md without explicit review.",
+    "Pre-ticket audit written if risk_level medium requires it before implementation."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden/test_21_builder_ticket_consumption.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Do not implement claim validation changes in the same ticket as promotion.",
+    "Do not auto-promote during fixture-mode run."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Delete promoted tickets/ticket-046.json and revert queue notes.",
+  "status": "proposed"
+}

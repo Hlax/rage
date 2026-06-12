@@ -1,0 +1,46 @@
+{
+  "id": "ticket-044",
+  "title": "Fix principal audit gate false overdue cadence counting",
+  "problem": "principal_audit_gate counts all Phase 2 done tickets (order > 33) after any principal audit, ignoring post-ticket checkpoint reports. This produces false overdue signals in the operator loop even when a valid principal audit exists after ticket-042.",
+  "evidence": [
+    "agent_reports/2026-06-12_principal-audit-post-ticket-042.md",
+    "agent_reports/2026-06-12_phase-2_ticket-043_safety-auditor-exports.md",
+    "rge/modules/principal_audit_gate.py _done_since_checkpoint principal branch"
+  ],
+  "affected_modules": [
+    "rge/modules/principal_audit_gate.py",
+    "tests/unit/test_principal_audit_gate.py",
+    "tests/unit/test_operator_loop.py"
+  ],
+  "expected_files": [
+    "rge/modules/principal_audit_gate.py",
+    "tests/unit/test_principal_audit_gate.py",
+    "tests/unit/test_operator_loop.py",
+    "tickets/ticket-044.json",
+    "agent_reports/2026-06-12_phase-2_ticket-044_principal-audit-gate-fix.md"
+  ],
+  "acceptance_criteria": [
+    "post-ticket-NNN principal audit reports count only done tickets after ticket-NNN.",
+    "pre-phase-N principal audits count only done tickets after the phase boundary ticket.",
+    "Premature post-ticket principal audits (referenced ticket not done) are ignored.",
+    "Three done tickets after the latest valid checkpoint still triggers overdue.",
+    "Medium/high-risk tickets without pre-ticket audit remain blocked.",
+    "Operator loop reflects corrected cadence status.",
+    "Golden tests and default pytest pass without Ollama."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_principal_audit_gate.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_operator_loop.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q",
+    "RGE_LLM_MODE=mock python -m pytest -q",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not weaken medium/high-risk pre-ticket audit requirements.",
+    "Do not change live smoke, LLM mode, ticket promotion, or export behavior.",
+    "Do not implement ticket-045 improvement draft promotion."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert the ticket-044 branch; gate reverts to legacy order>33 principal counting.",
+  "status": "done"
+}
