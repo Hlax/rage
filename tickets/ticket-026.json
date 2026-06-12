@@ -1,0 +1,40 @@
+{
+  "id": "ticket-026",
+  "title": "Add prompt-injection golden fixture handling (Golden Test 24)",
+  "problem": "ticket-025 implements the safety audit merge gate, but Golden Test 24 requires malicious instructions embedded in fixture source text to be ignored — only actual research claims extracted, with no credibility changes or destructive actions.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 24: prompt-injection fixture is treated as untrusted source text.",
+    "docs/agents/10_SAFETY_MODEL.md sections 4-5: prompt injection policy.",
+    "agent_reports/2026-06-12_phase-1_ticket-025_safety-audit-gate.md sections 11–13."
+  ],
+  "affected_modules": [
+    "rge/modules/claim_extractor.py",
+    "rge/modules/claim_validator.py",
+    "rge/safety/prompt_injection.py"
+  ],
+  "expected_files": [
+    "fixtures/sources/prompt_injection_creativity_short.txt",
+    "fixtures/llm_outputs/claim_extraction_prompt_injection.json",
+    "rge/safety/prompt_injection.py",
+    "tests/golden/test_24_prompt_injection.py"
+  ],
+  "acceptance_criteria": [
+    "Malicious instructions in fixture source text do not change extraction behavior or source credibility.",
+    "Only the actual research claim is extracted; injected commands are rejected or ignored.",
+    "pytest tests/golden/test_24_prompt_injection.py passes.",
+    "Existing golden tests still pass (106+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_24_prompt_injection.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not add public write routes.",
+    "Do not implement full runtime injection sandbox beyond fixture-mode validation."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert branch phase-1/ticket-026-prompt-injection.",
+  "status": "proposed"
+}
