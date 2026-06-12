@@ -42,6 +42,21 @@ If documents conflict, follow the higher-priority document.
 - Every implementation run must end with an agent report in `agent_reports/`.
 - Never claim success unless required commands were run, or failures are explicitly documented.
 
+## Operator Loop (human default)
+
+Before coordinating the next ticket manually, run the bounded operator loop:
+
+```bash
+python -m rge.modules.operator_loop --mode plan
+python -m rge.modules.operator_loop --mode execute-safe
+```
+
+Plan mode is read-only and recommends the next action with gate classification
+(`safe_autonomous`, `review_gated`, `blocked`). Execute-safe runs mock-only
+golden tests, pytest, safety audit, and public-site build when the working
+tree is clean. It never merges, pushes, promotes tickets, or edits the queue.
+See `docs/agents/11_AGENT_OPERATING_PROTOCOL.md` for the full workflow.
+
 ## Expected Agent Workflow
 
 1. Read the active ticket from `tickets/TICKET_QUEUE.md` or create the smallest next ticket in `tickets/`.

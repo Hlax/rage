@@ -1,0 +1,45 @@
+{
+  "id": "ticket-041",
+  "title": "Bounded RGE operator loop runner",
+  "problem": "The human operator still coordinates every loop step manually despite deterministic golden gates, safety audit checks, live smoke gating, improvement-ticket promotion review, and principal audit checkpoints. Gates exist but no mock-only operator loop runner inspects repo state and recommends or executes the next safe step.",
+  "evidence": [
+    "agent_reports/2026-06-12_phase-2_ticket-040_ci-golden-gate.md",
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md",
+    ".cursor/commands/rge-run-next-ticket.md step 3.5 audit gate"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md",
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop.py",
+    "tickets/ticket-041.json",
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md",
+    "agent_reports/2026-06-12_phase-2_ticket-041_operator-loop-runner.md"
+  ],
+  "acceptance_criteria": [
+    "python -m rge.modules.operator_loop --mode plan outputs machine-readable JSON with ticket state, audit cadence, next action, gate classification, and commands.",
+    "python -m rge.modules.operator_loop --mode execute-safe runs only allowlisted mock-only checks when working tree is clean.",
+    "Operator loop never merges, pushes, promotes tickets, edits TICKET_QUEUE.md, enables live LLM, or runs live smoke.",
+    "Unit tests cover next-ticket-ready, audit-overdue, pre-audit-required, pending improvement ticket, safe-check pass, and dirty-tree blocked cases.",
+    "Operating docs describe plan → execute-safe → approve review-gated as default operator workflow.",
+    "Operator loop reports blocked on documentation-ahead-of-git drift: branch mismatch, report mismatch, done-without-commit, or multi-ticket dirty tree."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden",
+    "RGE_LLM_MODE=mock python -m pytest",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full",
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_operator_loop.py"
+  ],
+  "non_goals": [
+    "Do not merge to main or push from the operator loop.",
+    "Do not auto-promote improvement tickets or edit TICKET_QUEUE.md.",
+    "Do not enable live LLM mode or run live smoke tests.",
+    "Do not implement ticket-042 deployment docs in this ticket."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert the ticket-041 branch and remove operator_loop module.",
+  "status": "done"
+}

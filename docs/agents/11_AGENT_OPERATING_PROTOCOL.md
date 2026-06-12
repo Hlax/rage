@@ -202,6 +202,53 @@ NOT AVAILABLE IN THIS PHASE
 
 Do not mark unavailable commands as passing.
 
+## Operator Loop (default workflow)
+
+Reduce human-in-the-loop coordination burden without removing safety gates.
+Use the bounded operator loop runner before manual handoffs:
+
+```bash
+python -m rge.modules.operator_loop --mode plan
+python -m rge.modules.operator_loop --mode execute-safe
+```
+
+**Plan mode** is read-only. It inspects `tickets/TICKET_QUEUE.md`, ticket JSON
+files, the latest `agent_reports/` entry, principal audit cadence via
+`principal_audit_gate`, pending draft improvement tickets, git working-tree
+cleanliness, and documentation-ahead-of-git drift. It emits machine-readable JSON
+with:
+
+- current ticket state
+- audit cadence state
+- documentation/git drift findings
+- next recommended action
+- gate classification: `safe_autonomous`, `review_gated`, or `blocked`
+- exact commands to run next
+
+**Execute-safe mode** runs only deterministic mock-only checks when the working
+tree is clean:
+
+```bash
+RGE_LLM_MODE=mock python -m pytest tests/golden
+RGE_LLM_MODE=mock python -m pytest
+RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full
+cd apps/public-site && npm run build   # when applicable
+```
+
+The operator loop must **never** merge to main, push, publish public-site data,
+promote improvement tickets, edit `TICKET_QUEUE.md`, enable live LLM mode, or
+run live smoke tests. It must report `blocked` when branch, report, queue, or
+dirty-path state indicates documentation-ahead-of-git drift.
+
+Default operator workflow:
+
+1. Run `--mode plan` and read the JSON recommendation.
+2. Let `--mode execute-safe` run deterministic checks when eligible.
+3. Approve only `review_gated` actions (implementation, principal audit,
+   improvement-ticket promotion, merge checkpoint).
+4. Resolve `blocked` states (dirty tree, branch mismatch, report drift) before
+   continuing.
+
 ## Human Checkpoints
 
 Human review is required before:
