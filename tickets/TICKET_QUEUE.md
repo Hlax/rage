@@ -47,7 +47,17 @@ superseded
 | 18 | ticket-018 | done | Add contract-respecting question generation (Golden Test 16) | `phase-1/ticket-018-question-generation` | `agent_reports/2026-06-12_phase-1_ticket-018_question-generation.md` |
 | 19 | ticket-019 | done | Add ontology pressure report (Golden Test 17) | `phase-1/ticket-019-ontology-pressure` | `agent_reports/2026-06-12_phase-1_ticket-019_ontology-pressure.md` |
 | 20 | ticket-020 | done | Add domain proposal threshold trigger (Golden Test 18) | `phase-1/ticket-020-domain-proposal` | `agent_reports/2026-06-12_phase-1_ticket-020_domain-proposal.md` |
-| 21 | ticket-021 | proposed | Add research run report (Golden Test 19) | | |
+| 21 | ticket-021 | done | Add research run report (Golden Test 19) | `phase-1/ticket-021-run-report` | `agent_reports/2026-06-12_phase-1_ticket-021_run-report.md` |
+| 22 | ticket-022 | proposed | Add improvement ticket generation (Golden Test 20) | | |
+
+## Queue Notes (2026-06-12, ticket-021 agent)
+
+- ticket-021 implemented `generate-run-report` with `ResearchRunRepository` /
+  `RunReportRepository`, deterministic metric aggregation, machine-readable
+  `top_failure_modes`, and Golden Test 19 (4 tests). All 89 golden tests pass
+  without Ollama.
+- Pre-ticket-021 audit report included in merge.
+- ticket-022 proposes improvement ticket generation for Golden Test 20.
 
 ## Queue Notes (2026-06-12, ticket-020 agent)
 
@@ -177,7 +187,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-021 (proposed; awaiting review)
+ticket-022 (proposed; awaiting review)
 ```
 
 ## Queue Rules

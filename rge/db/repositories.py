@@ -1509,6 +1509,189 @@ def _row_to_domain_proposal(row: sqlite3.Row) -> DomainProposalRecord:
     )
 
 
+def make_run_report_id(run_id: str) -> str:
+    digest = sha256_hex(run_id)
+    return f"rrpt_{digest[:16]}"
+
+
+@dataclass(frozen=True)
+class ResearchRunRecord:
+    id: str
+    contract_id: str | None
+    topic: str | None
+    domain_pack: str | None
+    mode: str | None
+    status: str | None
+    started_at: str | None
+    finished_at: str | None
+    summary_json: str | None
+
+
+@dataclass(frozen=True)
+class RunReportRecord:
+    id: str
+    run_id: str
+    topic: str
+    domain_pack: str
+    report_json: str
+    prose_summary: str | None
+    created_at: str
+
+
+class ResearchRunRepository:
+    """Persist and read ``research_runs`` rows."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def get_by_id(self, run_id: str) -> ResearchRunRecord | None:
+        row = self._conn.execute(
+            """
+            SELECT id, contract_id, topic, domain_pack, mode, status,
+                   started_at, finished_at, summary_json
+            FROM research_runs
+            WHERE id = ?
+            """,
+            (run_id,),
+        ).fetchone()
+        return _row_to_research_run(row) if row else None
+
+    def ensure(
+        self,
+        *,
+        run_id: str,
+        topic: str,
+        domain_pack: str,
+        contract_id: str | None = None,
+        mode: str = "fixture",
+        status: str = "completed",
+    ) -> ResearchRunRecord:
+        existing = self.get_by_id(run_id)
+        if existing is not None:
+            return existing
+        now = utc_now_iso()
+        self._conn.execute(
+            """
+            INSERT INTO research_runs (
+                id, contract_id, topic, domain_pack, mode, status,
+                started_at, finished_at, summary_json
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                run_id,
+                contract_id,
+                topic,
+                domain_pack,
+                mode,
+                status,
+                now,
+                now,
+                json.dumps({"fixture_mode": True}),
+            ),
+        )
+        self._conn.commit()
+        record = self.get_by_id(run_id)
+        assert record is not None
+        return record
+
+
+class RunReportRepository:
+    """Persist and read ``run_reports`` rows."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def get_by_id(self, report_id: str) -> RunReportRecord | None:
+        row = self._conn.execute(
+            """
+            SELECT id, run_id, topic, domain_pack, report_json,
+                   prose_summary, created_at
+            FROM run_reports
+            WHERE id = ?
+            """,
+            (report_id,),
+        ).fetchone()
+        return _row_to_run_report(row) if row else None
+
+    def get_by_run_id(self, run_id: str) -> RunReportRecord | None:
+        row = self._conn.execute(
+            """
+            SELECT id, run_id, topic, domain_pack, report_json,
+                   prose_summary, created_at
+            FROM run_reports
+            WHERE run_id = ?
+            ORDER BY created_at DESC
+            LIMIT 1
+            """,
+            (run_id,),
+        ).fetchone()
+        return _row_to_run_report(row) if row else None
+
+    def count(self) -> int:
+        row = self._conn.execute("SELECT COUNT(*) FROM run_reports").fetchone()
+        return int(row[0]) if row else 0
+
+    def insert(
+        self,
+        *,
+        run_id: str,
+        topic: str,
+        domain_pack: str,
+        report: dict[str, Any],
+        prose_summary: str | None = None,
+    ) -> RunReportRecord:
+        now = utc_now_iso()
+        report_id = make_run_report_id(run_id)
+        self._conn.execute(
+            """
+            INSERT INTO run_reports (
+                id, run_id, topic, domain_pack, report_json,
+                prose_summary, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO NOTHING
+            """,
+            (
+                report_id,
+                run_id,
+                topic,
+                domain_pack,
+                json.dumps(report),
+                prose_summary,
+                now,
+            ),
+        )
+        self._conn.commit()
+        record = self.get_by_id(report_id)
+        assert record is not None
+        return record
+
+
+def _row_to_research_run(row: sqlite3.Row) -> ResearchRunRecord:
+    return ResearchRunRecord(
+        id=row["id"],
+        contract_id=row["contract_id"],
+        topic=row["topic"],
+        domain_pack=row["domain_pack"],
+        mode=row["mode"],
+        status=row["status"],
+        started_at=row["started_at"],
+        finished_at=row["finished_at"],
+        summary_json=row["summary_json"],
+    )
+
+
+def _row_to_run_report(row: sqlite3.Row) -> RunReportRecord:
+    return RunReportRecord(
+        id=row["id"],
+        run_id=row["run_id"],
+        topic=row["topic"],
+        domain_pack=row["domain_pack"],
+        report_json=row["report_json"],
+        prose_summary=row["prose_summary"],
+        created_at=row["created_at"],
+    )
+
+
 def persist_relationship_score_update(
     conn: sqlite3.Connection,
     *,
