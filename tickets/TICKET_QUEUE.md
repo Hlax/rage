@@ -100,7 +100,13 @@ superseded
 | 66 | ticket-066 | done | Multi-fixture local live mini-run repeatability | `phase-2/ticket-066-multi-fixture-mini-run-repeatability` | `agent_reports/2026-06-12_phase-2_ticket-066_multi-fixture-mini-run-repeatability.md` |
 | 67 | ticket-067 | done | Multi-fixture prompt calibration for local live mini-run suite | `phase-2/ticket-067-multi-fixture-prompt-calibration` | `agent_reports/2026-06-12_phase-2_ticket-067_multi-fixture-prompt-calibration.md` |
 | 68 | ticket-068 | done | Scratch DB persistence for reviewed live mini-run reports | `phase-2/ticket-068-scratch-db-reviewed-live-probe-persistence` | `agent_reports/2026-06-12_phase-2_ticket-068_scratch-db-reviewed-live-probe-persistence.md` |
-| 69 | ticket-069 | in_progress | Followup contradiction calibration | `phase-2/ticket-069-followup-contradiction-calibration` | |
+| 69 | ticket-069 | done | Followup contradiction calibration | `phase-2/ticket-069-followup-contradiction-calibration` | `agent_reports/2026-06-12_phase-2_ticket-069_followup-contradiction-calibration.md` |
+
+## Queue Notes (2026-06-12, ticket-069 agent)
+
+- Opposing-only hybrid overlay handoff + contradiction prompt claim-id rules.
+- Live suite: **4/4** floors (`probe_mini_run_suite_2026-06-12T231236Z.json`).
+- Validators unchanged; still report-only; ticket-059 OpenAI deferred.
 
 ## Queue Notes (2026-06-12, ticket-069 seed)
 

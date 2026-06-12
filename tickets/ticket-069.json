@@ -47,5 +47,5 @@
   ],
   "risk_level": "low-medium",
   "rollback_plan": "Revert handoff and prompt changes; suite returns to 3/4 on followup contradiction.",
-  "status": "in_progress"
+  "status": "done"
 }
