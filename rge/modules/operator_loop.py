@@ -268,7 +268,12 @@ def ticket_has_implementation_commit(
     root: Path | None = None,
     log_runner: Callable[[list[str], Path], subprocess.CompletedProcess[str]] | None = None,
 ) -> bool:
-    """Return whether main contains a commit message referencing the ticket id."""
+    """Return whether main contains evidence the ticket was implemented.
+
+    Checks commit messages for the ticket id and, when ``tickets/{id}.json``
+    exists, whether that file appears in git history on main (covers commits
+    whose messages omit the ticket id, e.g. ticket-043 on cc1c17c).
+    """
     project_root = root or repo_root()
     runner = log_runner or (
         lambda argv, cwd: subprocess.run(
@@ -279,6 +284,8 @@ def ticket_has_implementation_commit(
             check=False,
         )
     )
+    ticket_json_rel = f"tickets/{ticket_id}.json"
+    ticket_json_on_disk = (project_root / ticket_json_rel).is_file()
     for ref in ("main", "HEAD"):
         result = runner(
             ["git", "log", ref, "--oneline", f"--grep={ticket_id}"],
@@ -286,6 +293,13 @@ def ticket_has_implementation_commit(
         )
         if ticket_id in result.stdout:
             return True
+        if ticket_json_on_disk:
+            json_log = runner(
+                ["git", "log", ref, "--oneline", "-1", "--", ticket_json_rel],
+                project_root,
+            )
+            if json_log.stdout.strip():
+                return True
     return False
 
 

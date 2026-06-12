@@ -77,6 +77,13 @@ superseded
 | 43 | ticket-043 | done | Extend safety auditor to data/exports and tighten evidence checks | `phase-2/ticket-043-safety-auditor-exports` | `agent_reports/2026-06-12_phase-2_ticket-043_safety-auditor-exports.md` |
 | 44 | ticket-044 | done | Fix principal audit gate false overdue cadence counting | `phase-2/ticket-044-principal-audit-gate-fix` | `agent_reports/2026-06-12_phase-2_ticket-044_principal-audit-gate-fix.md` |
 | 45 | ticket-045 | proposed | Promote improvement draft with explicit review gate | | |
+| 46 | ticket-046 | done | Fix operator loop done-without-commit false positive | `phase-2/ticket-046-operator-loop-drift-fix` | `agent_reports/2026-06-12_phase-2_ticket-046_operator-loop-drift-fix.md` |
+
+## Queue Notes (2026-06-12, ticket-046 agent)
+
+- ticket-046 extends `ticket_has_implementation_commit` to accept `tickets/{id}.json`
+  in git history on main when commit messages omit the ticket id (ticket-043/cc1c17c).
+  +2 operator loop unit tests; 19 operator loop tests pass; 177 total pytest pass.
 
 ## Queue Notes (2026-06-12, ticket-044 agent)
 
@@ -447,7 +454,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-045 (proposed — improvement draft promotion with review gate)
+ticket-047 (proposed — export-public publish-only guard for committed public JSON)
 ```
 
 ## Queue Rules

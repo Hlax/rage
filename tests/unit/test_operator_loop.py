@@ -13,6 +13,7 @@ from rge.modules.operator_loop import (
     execute_safe_checks,
     is_audit_only_ticket,
     pending_improvement_tickets,
+    ticket_has_implementation_commit,
 )
 from rge.modules.principal_audit_gate import QueueTicketRow
 
@@ -367,6 +368,78 @@ def test_done_without_commit_blocks(tmp_path: Path) -> None:
     kinds = {item["kind"] for item in violations}
     assert "done_without_implementation_commit" in kinds
     assert "json_done_without_implementation_commit" in kinds
+
+
+def test_ticket_json_on_main_satisfies_implementation_check(tmp_path: Path) -> None:
+    (tmp_path / ".git").mkdir()
+    tickets = tmp_path / "tickets"
+    tickets.mkdir(parents=True)
+    (tickets / "ticket-043.json").write_text(
+        json.dumps({"id": "ticket-043", "status": "done"}),
+        encoding="utf-8",
+    )
+
+    def log_without_message_grep(
+        argv: list[str], cwd: Path
+    ) -> subprocess.CompletedProcess[str]:
+        joined = " ".join(argv)
+        if "--grep=ticket-043" in joined:
+            return subprocess.CompletedProcess(argv, 0, stdout="", stderr="")
+        if "-- tickets/ticket-043.json" in joined or joined.endswith(
+            "tickets/ticket-043.json"
+        ):
+            return subprocess.CompletedProcess(
+                argv,
+                0,
+                stdout="cc1c17c Extend safety auditor to validate data exports\n",
+                stderr="",
+            )
+        return subprocess.CompletedProcess(argv, 0, stdout="", stderr="")
+
+    assert ticket_has_implementation_commit(
+        "ticket-043",
+        root=tmp_path,
+        log_runner=log_without_message_grep,
+    )
+
+
+def test_done_ticket_with_json_on_main_not_flagged(tmp_path: Path) -> None:
+    (tmp_path / ".git").mkdir()
+    tickets = tmp_path / "tickets"
+    tickets.mkdir(parents=True)
+    (tickets / "ticket-043.json").write_text(
+        json.dumps({"id": "ticket-043", "status": "done"}),
+        encoding="utf-8",
+    )
+    rows = [QueueTicketRow(order=43, ticket_id="ticket-043", status="done")]
+
+    def log_without_message_grep(
+        argv: list[str], cwd: Path
+    ) -> subprocess.CompletedProcess[str]:
+        joined = " ".join(argv)
+        if "--grep=ticket-043" in joined:
+            return subprocess.CompletedProcess(argv, 0, stdout="", stderr="")
+        if "tickets/ticket-043.json" in joined:
+            return subprocess.CompletedProcess(
+                argv,
+                0,
+                stdout="cc1c17c Extend safety auditor to validate data exports\n",
+                stderr="",
+            )
+        return subprocess.CompletedProcess(argv, 0, stdout="", stderr="")
+
+    violations = detect_documentation_git_drift(
+        root=tmp_path,
+        working_tree=WorkingTreeStatus(clean=True, branch="main", dirty_paths=[]),
+        rows=rows,
+        active_row=None,
+        active_ticket_json={"id": "ticket-043", "status": "done"},
+        latest_report_path=None,
+        log_runner=log_without_message_grep,
+    )
+    assert not any(
+        item["kind"] == "done_without_implementation_commit" for item in violations
+    )
 
 
 def test_multi_ticket_dirty_paths_block(tmp_path: Path) -> None:

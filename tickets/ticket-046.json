@@ -1,0 +1,37 @@
+{
+  "id": "ticket-046",
+  "title": "Fix operator loop done-without-commit false positive",
+  "problem": "operator_loop.ticket_has_implementation_commit only greps commit messages for the ticket id. ticket-043 landed on main as cc1c17c with message 'Extend safety auditor to validate data exports' (no ticket-043 substring), so plan mode falsely reports done_without_implementation_commit drift.",
+  "evidence": [
+    "agent_reports/2026-06-12_principal-repo-state-drift-ci-audit.md",
+    "git log main --oneline cc1c17c",
+    "rge/modules/operator_loop.py ticket_has_implementation_commit"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop.py"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop.py",
+    "tickets/ticket-046.json",
+    "agent_reports/2026-06-12_phase-2_ticket-046_operator-loop-drift-fix.md"
+  ],
+  "acceptance_criteria": [
+    "ticket_has_implementation_commit returns true when tickets/{id}.json exists on main even if the commit message omits the ticket id.",
+    "Existing grep-by-ticket-id behavior preserved.",
+    "ticket-043 no longer triggers done_without_implementation_commit on a clean main tree.",
+    "Unit tests cover both message-grep and ticket-json-on-main paths."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_operator_loop.py -q",
+    "RGE_LLM_MODE=mock python -m pytest -q"
+  ],
+  "non_goals": [
+    "Do not auto-merge, push, or edit TICKET_QUEUE beyond this ticket row.",
+    "Do not change principal audit gate cadence logic."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert ticket-046 branch; operator loop reverts to message-only grep.",
+  "status": "done"
+}
