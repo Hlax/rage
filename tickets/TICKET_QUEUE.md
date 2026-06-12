@@ -49,7 +49,15 @@ superseded
 | 20 | ticket-020 | done | Add domain proposal threshold trigger (Golden Test 18) | `phase-1/ticket-020-domain-proposal` | `agent_reports/2026-06-12_phase-1_ticket-020_domain-proposal.md` |
 | 21 | ticket-021 | done | Add research run report (Golden Test 19) | `phase-1/ticket-021-run-report` | `agent_reports/2026-06-12_phase-1_ticket-021_run-report.md` |
 | 22 | ticket-022 | done | Add improvement ticket generation (Golden Test 20) | `phase-1/ticket-022-improvement-tickets` | `agent_reports/2026-06-12_phase-1_ticket-022_improvement-tickets.md` |
-| 23 | ticket-023 | proposed | Validate improvement tickets for builder consumption (Golden Test 21) | | |
+| 23 | ticket-023 | done | Validate improvement tickets for builder consumption (Golden Test 21) | `phase-1/ticket-023-builder-ticket-consumption` | `agent_reports/2026-06-12_phase-1_ticket-023_builder-ticket-consumption.md` |
+| 24 | ticket-024 | proposed | Add builder golden merge gate (Golden Test 22) | | |
+
+## Queue Notes (2026-06-12, ticket-023 agent)
+
+- ticket-023 implemented `validate_builder_ticket()` with GT21 required-field and
+  vagueness checks, pre-insert validation in `generate_improvement_tickets`, and
+  Golden Test 21 (4 tests). All 97 golden tests pass without Ollama.
+- ticket-024 proposes builder golden merge gate for Golden Test 22.
 
 ## Queue Notes (2026-06-12, ticket-022 agent)
 
@@ -198,7 +206,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-023 (proposed; awaiting review)
+ticket-024 (proposed; awaiting review)
 ```
 
 ## Queue Rules

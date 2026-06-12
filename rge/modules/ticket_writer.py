@@ -18,6 +18,29 @@ from rge.modules.run_evaluator import GOLDEN_RUN_ID, default_report_dir
 
 GOLDEN_MIN_FAILURE_COUNT = 1
 
+BUILDER_REQUIRED_TICKET_FIELDS: tuple[str, ...] = (
+    "title",
+    "problem",
+    "evidence",
+    "affected_modules",
+    "expected_files",
+    "acceptance_criteria",
+    "test_plan",
+    "non_goals",
+    "risk_level",
+    "rollback_plan",
+)
+
+BUILDER_RISK_LEVELS: frozenset[str] = frozenset({"low", "medium", "high"})
+
+VAGUE_TICKET_PHRASES: tuple[str, ...] = (
+    "make it better",
+    "improve things",
+    "fix issues",
+    "do better",
+    "make improvements",
+)
+
 GOLDEN_FAILURE_TEMPLATES: dict[str, dict[str, Any]] = {
     "overgeneralized_scope": {
         "priority": "high",
@@ -84,6 +107,73 @@ GOLDEN_FAILURE_TEMPLATES: dict[str, dict[str, Any]] = {
         "rollback_plan": "Revert concept linker validation rules.",
     },
 }
+
+
+def validate_builder_ticket(ticket: dict[str, Any]) -> list[str]:
+    """Return machine-readable violations when a ticket is not builder-consumable."""
+    violations: list[str] = []
+
+    for field in BUILDER_REQUIRED_TICKET_FIELDS:
+        if field not in ticket:
+            violations.append(f"missing required field: {field}")
+            continue
+        value = ticket[field]
+        if isinstance(value, str):
+            if not value.strip():
+                violations.append(f"empty required field: {field}")
+        elif isinstance(value, list):
+            if not value:
+                violations.append(f"empty required list: {field}")
+            elif not all(isinstance(item, str) and item.strip() for item in value):
+                violations.append(f"non-string or blank entries in: {field}")
+        else:
+            violations.append(f"invalid type for field: {field}")
+
+    title = ticket.get("title", "")
+    if isinstance(title, str) and title.strip() and len(title.strip()) < 10:
+        violations.append("title too short to convert into a branch task")
+
+    problem = ticket.get("problem", "")
+    if isinstance(problem, str) and problem.strip():
+        lowered = problem.lower()
+        if len(problem.strip()) < 20:
+            violations.append("problem statement too vague")
+        for phrase in VAGUE_TICKET_PHRASES:
+            if phrase in lowered:
+                violations.append(f"vague problem phrase: {phrase}")
+
+    acceptance = ticket.get("acceptance_criteria", [])
+    if isinstance(acceptance, list) and acceptance:
+        for item in acceptance:
+            if not isinstance(item, str):
+                continue
+            lowered = item.lower()
+            if any(phrase in lowered for phrase in VAGUE_TICKET_PHRASES):
+                violations.append(f"vague acceptance criterion: {item}")
+            if len(item.strip()) < 10:
+                violations.append(f"acceptance criterion not testable: {item}")
+
+    test_plan = ticket.get("test_plan", [])
+    if isinstance(test_plan, list) and test_plan:
+        if not any(
+            isinstance(item, str) and ("pytest" in item or "python -m" in item)
+            for item in test_plan
+        ):
+            violations.append("test_plan lacks executable pytest command")
+
+    expected_files = ticket.get("expected_files", [])
+    if isinstance(expected_files, list) and expected_files:
+        if not all(
+            isinstance(item, str) and ("/" in item or item.endswith(".py"))
+            for item in expected_files
+        ):
+            violations.append("expected_files must name concrete repo paths")
+
+    risk_level = ticket.get("risk_level")
+    if isinstance(risk_level, str) and risk_level not in BUILDER_RISK_LEVELS:
+        violations.append(f"invalid risk_level: {risk_level}")
+
+    return violations
 
 
 def _build_ticket_report(
@@ -163,6 +253,12 @@ def generate_improvement_tickets(
 
     for ticket in proposed:
         reason = ticket["failure_reason"]
+        violations = validate_builder_ticket(ticket)
+        if violations:
+            raise ValueError(
+                f"Improvement ticket for {reason} is not builder-consumable: "
+                + "; ".join(violations)
+            )
         existing = ticket_repo.get_for_run_and_reason(run_id=run_id, failure_reason=reason)
         if existing is not None:
             ticket_reports.append(json.loads(existing.ticket_json))

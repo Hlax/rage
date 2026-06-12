@@ -34,5 +34,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert branch phase-1/ticket-023-builder-ticket-consumption.",
-  "status": "proposed"
+  "status": "done"
 }
