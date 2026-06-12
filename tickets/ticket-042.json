@@ -1,0 +1,37 @@
+{
+  "id": "ticket-042",
+  "title": "Public-site deployment readiness: static hosting docs and pre-deploy safety checklist",
+  "problem": "The public site is a static export but nothing documents how to deploy it, what the pre-deploy checklist is, or how snapshot refreshes reach production safely. Public-facing currently means localhost only.",
+  "evidence": [
+    "agent_reports/2026-06-12_phase-2_ticket-roadmap.md (deployment-readiness item)",
+    "agent_reports/2026-06-12_phase-2_ticket-041_operator-loop-runner.md recommended next ticket",
+    "apps/public-site/out/ exists after npm run build"
+  ],
+  "affected_modules": [
+    "docs/",
+    "apps/public-site/package.json"
+  ],
+  "expected_files": [
+    "docs/deployment/public-site-static-hosting.md",
+    "agent_reports/2026-06-12_phase-2_ticket-042_public-site-deployment-readiness.md"
+  ],
+  "acceptance_criteria": [
+    "An operator can deploy the static export from apps/public-site/out/ following docs alone.",
+    "Pre-deploy checklist requires passing safety_auditor --audit full and reviewed snapshot diff.",
+    "No new public routes or server-side surface added.",
+    "Golden tests and default pytest pass without Ollama."
+  ],
+  "test_plan": [
+    "cd apps/public-site && npm run build",
+    "python -m rge.modules.safety_auditor --audit full",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Do not add cloud provider adapters or live deployment automation.",
+    "Do not change public export schema or committed public JSON in this ticket.",
+    "Do not implement ticket-043 safety gate expansion."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert the ticket-042 branch (docs-only).",
+  "status": "proposed"
+}

@@ -73,6 +73,13 @@ superseded
 | 39 | ticket-039 | done | Validate improvement-ticket round-trip into the builder queue with review gate | `phase-2/ticket-039-improvement-ticket-round-trip` | `agent_reports/2026-06-12_phase-2_ticket-039_improvement-ticket-round-trip.md` |
 | 40 | ticket-040 | done | Add CI golden gate workflow and rge-principal-audit command doc | `phase-2/ticket-040-ci-golden-gate` | `agent_reports/2026-06-12_phase-2_ticket-040_ci-golden-gate.md` |
 | 41 | ticket-041 | done | Bounded RGE operator loop runner | `phase-2/ticket-041-operator-loop-runner` | `agent_reports/2026-06-12_phase-2_ticket-041_operator-loop-runner.md` |
+| 42 | ticket-042 | proposed | Public-site deployment readiness: static hosting docs and pre-deploy checklist | | |
+
+## Queue Notes (2026-06-12, ticket-042 seed)
+
+- ticket-042 seeded from Phase 2 roadmap (deployment readiness). Docs-only;
+  pre-deploy checklist requires safety audit + snapshot review. No pre-ticket
+  audit required at low risk if scope stays documentation-only.
 
 ## Queue Notes (2026-06-12, ticket-041 agent)
 
@@ -409,7 +416,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-none (ticket-041 merged to main; select next ticket — ticket-042 per roadmap)
+ticket-042 proposed (public-site deployment readiness docs)
 ```
 
 ## Queue Rules
