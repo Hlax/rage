@@ -1,0 +1,52 @@
+{
+  "id": "ticket-061",
+  "title": "Live claim extraction calibration for local Qwen",
+  "problem": "ticket-060 live probe with qwen2.5:7b returned accepted_count=0 because Qwen omitted subject/predicate/object and put scope outside claim_text, triggering overgeneralized_scope. The Ollama prompt lacked SPO fields and scope-in-claim guidance.",
+  "evidence": [
+    "agent_reports/2026-06-12_pre-ticket-059_local-live-structured-task-probe.md",
+    "agent_reports/2026-06-12_phase-2_ticket-060_safe-local-live-claim-probe.md",
+    "rge/modules/claim_validator.py",
+    "rge/llm/ollama_client.py",
+    "data/reports/live_probes/"
+  ],
+  "affected_modules": [
+    "rge/llm/ollama_client.py",
+    "rge/modules/claim_validator.py",
+    "rge/modules/live_probe.py",
+    "rge/cli.py",
+    "fixtures/sources/live_probe_claim_calibration_short.txt"
+  ],
+  "expected_files": [
+    "rge/llm/ollama_client.py",
+    "rge/modules/claim_validator.py",
+    "rge/modules/live_probe.py",
+    "fixtures/sources/live_probe_claim_calibration_short.txt",
+    "tests/unit/test_claim_rejection_diagnostics.py",
+    "tests/unit/test_ollama_claim_prompt.py",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "tickets/ticket-061.json",
+    "agent_reports/2026-06-12_phase-2_ticket-061_live-claim-calibration.md"
+  ],
+  "acceptance_criteria": [
+    "Live probe with qwen2.5:7b yields accepted_count >= 1 on default calibration fixture.",
+    "db_writes remains false; report under data/reports/live_probes/.",
+    "GT02 overgeneralized_scope validation unchanged; at least one overgeneralized case still rejected in tests.",
+    "Rejected live probe rows include validation_diagnostic notes.",
+    "Mock/default pytest and CI remain green without Ollama."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_claim_rejection_diagnostics.py -q",
+    "RGE_LLM_MODE=mock python -m pytest -q",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site",
+    "Manual live: probe-extract-claims with ollama opt-in"
+  ],
+  "non_goals": [
+    "Do not weaken overgeneralized_scope validation.",
+    "Do not add OpenAI/OpenRouter or API keys.",
+    "Do not persist to default DB or public exports.",
+    "Do not add concept/relationship/contradiction live probes."
+  ],
+  "risk_level": "low-medium",
+  "rollback_plan": "Revert prompt, fixture default, and diagnostics; no schema changes.",
+  "status": "done"
+}

@@ -92,6 +92,12 @@ superseded
 | 58 | ticket-058 | done | Local-first model runtime readiness and escalation policy | `phase-2/ticket-058-local-first-model-runtime` | `agent_reports/2026-06-12_phase-2_ticket-058_local-first-model-runtime.md` |
 | 59 | ticket-059 | proposed | OpenAI opt-in cloud adapter (placeholder — not implemented) | | |
 | 60 | ticket-060 | done | Safe local live claim-extraction probe CLI | `phase-2/ticket-060-safe-local-live-claim-probe` | `agent_reports/2026-06-12_phase-2_ticket-060_safe-local-live-claim-probe.md` |
+| 61 | ticket-061 | done | Live claim extraction calibration for local Qwen | `phase-2/ticket-061-live-claim-calibration` | `agent_reports/2026-06-12_phase-2_ticket-061_live-claim-calibration.md` |
+
+## Queue Notes (2026-06-12, ticket-061 agent)
+
+- Root cause of 0 accepted: scope not embedded in claim_text + missing SPO fields; validator correct.
+- Calibrated Ollama prompt (SPO, scope-in-claim rules, examples), calibration fixture default, validation_diagnostic on rejections.
 
 ## Queue Notes (2026-06-12, ticket-060 agent)
 

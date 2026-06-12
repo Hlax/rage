@@ -209,6 +209,33 @@ class OllamaModelClient(ModelClient):
             f"{chunk_text}\n"
             f"--- UNTRUSTED SOURCE TEXT END ---\n\n"
             f"Research contract context (JSON): {json.dumps(contract, ensure_ascii=False)}\n\n"
+            "Rules for each claim:\n"
+            "- quote_span MUST be an exact contiguous substring from the source text.\n"
+            "- scope MUST be a short, specific boundary phrase (population, task, or setting).\n"
+            "- claim_text MUST include the scope phrase verbatim (same wording as scope).\n"
+            "- subject, predicate, and object MUST be non-empty strings.\n"
+            "- Do NOT produce universal claims (e.g. 'AI reduces creativity').\n"
+            "- Prefer falsifiable, scoped empirical claims grounded in the source.\n\n"
+            "Positive example (accepted shape):\n"
+            "{\n"
+            '  "claim_text": "AI-assisted brainstorming increased average idea quality in short-form writing tasks.",\n'
+            '  "quote_span": "AI-assisted brainstorming increased average idea quality across submitted ideas",\n'
+            '  "subject": "AI-assisted brainstorming",\n'
+            '  "predicate": "increased",\n'
+            '  "object": "average idea quality",\n'
+            '  "scope": "short-form writing tasks",\n'
+            '  "evidence_type": "empirical",\n'
+            '  "confidence": 0.7,\n'
+            '  "limitations": ["Only tested short-form writing tasks."],\n'
+            f'  "domain": "{domain_pack}",\n'
+            '  "domain_metadata": {}\n'
+            "}\n\n"
+            "Negative example (rejected — scope not embedded in claim_text):\n"
+            "{\n"
+            '  "claim_text": "AI-assisted brainstorming increased average idea quality across submitted ideas.",\n'
+            '  "scope": "short-form writing tasks",\n'
+            '  "quote_span": "..."\n'
+            "}\n\n"
             "Return ONLY valid JSON matching this shape:\n"
             "{\n"
             f'  "task_name": "claim_extraction",\n'
@@ -216,12 +243,15 @@ class OllamaModelClient(ModelClient):
             '  "items": [\n'
             "    {\n"
             '      "claim_text": "...",\n'
-            '      "quote_span": "exact substring from source or null",\n'
+            '      "quote_span": "exact substring from source",\n'
+            '      "subject": "...",\n'
+            '      "predicate": "...",\n'
+            '      "object": "...",\n'
             '      "scope": "...",\n'
             '      "evidence_type": "empirical",\n'
             '      "confidence": 0.5,\n'
             '      "limitations": ["..."],\n'
-            '      "domain": "creativity",\n'
+            f'      "domain": "{domain_pack}",\n'
             '      "domain_metadata": {}\n'
             "    }\n"
             "  ]\n"

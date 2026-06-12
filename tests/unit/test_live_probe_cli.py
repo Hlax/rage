@@ -18,7 +18,10 @@ from rge.modules.live_probe import (
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_FIXTURE = (
-    REPO_ROOT / "fixtures" / "sources" / "creativity_ai_diversity_short.txt"
+    REPO_ROOT
+    / "fixtures"
+    / "sources"
+    / "live_probe_claim_calibration_short.txt"
 )
 
 

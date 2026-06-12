@@ -169,3 +169,48 @@ def validate_candidate_claims(
             )
 
     return {"accepted": accepted, "rejected": rejected}
+
+
+def rejection_diagnostic(
+    candidate: dict[str, Any],
+    *,
+    chunk_text: str,
+    rejection_reason: str | None = None,
+) -> str:
+    """Human-readable note for a rejected candidate (probe reporting only)."""
+    reason = rejection_reason or REJECTION_UNSUPPORTED
+    claim_text = candidate.get("claim_text") or ""
+    scope = candidate.get("scope")
+
+    if reason == REJECTION_MISSING_QUOTE:
+        return "quote_span is missing or empty"
+    if reason == REJECTION_UNSUPPORTED:
+        if not _quote_in_chunk(str(candidate.get("quote_span") or ""), chunk_text):
+            return "quote_span is not an exact substring of the source chunk"
+        for field in ("subject", "predicate", "object", "evidence_type", "domain"):
+            value = candidate.get(field)
+            if value is None or (isinstance(value, str) and not str(value).strip()):
+                return f"required field {field!r} is missing or empty"
+        if candidate.get("confidence") is None:
+            return "confidence is required"
+        if candidate.get("limitations") is None:
+            return "limitations list is required (use [] if none)"
+        return "claim failed unsupported_claim checks"
+    if reason == REJECTION_OVERGENERALIZED:
+        if not scope or not str(scope).strip():
+            return "scope field is missing or empty"
+        scope_normalized = _normalize(str(scope))
+        if scope_normalized and scope_normalized not in _normalize(claim_text):
+            return (
+                f"scope {scope!r} must appear verbatim inside claim_text; "
+                "embed the scope phrase in the claim sentence"
+            )
+        for pattern in _OVERGENERALIZED_CLAIM_PATTERNS:
+            if pattern in _normalize(claim_text):
+                return f"claim_text matches blocked overgeneralized pattern {pattern!r}"
+        return "claim failed overgeneralized_scope checks"
+    if reason == REJECTION_MISSING_SOURCE:
+        return "source_id or chunk_id is missing"
+    if reason == REJECTION_INJECTED_CONTENT:
+        return "candidate matched prompt-injection rejection rules"
+    return reason

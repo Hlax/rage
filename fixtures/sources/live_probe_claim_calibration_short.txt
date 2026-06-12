@@ -1,0 +1,14 @@
+Live probe calibration fixture (ticket-061).
+Controlled source for local Qwen claim-extraction probe.
+
+In a controlled study of short-form writing tasks, we found that AI-assisted
+brainstorming increased average idea quality across submitted ideas. Independent
+raters scored ideas produced with AI assistance higher on usefulness and coherence
+in this short-form writing task setting.
+
+However, AI-assisted brainstorming reduced semantic diversity across submitted
+ideas in the same short-form writing task setting.
+
+Limitations: the sample consisted of undergraduate students from introductory
+writing courses. Results may not generalize to film, music, or professional
+creative work.

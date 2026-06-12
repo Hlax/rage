@@ -1764,9 +1764,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     probe_extract_parser.add_argument(
         "--fixture-source",
+        "--fixture",
+        dest="fixture_source",
         help=(
             "Fixture text file (default: "
-            "fixtures/sources/creativity_ai_diversity_short.txt)."
+            "fixtures/sources/live_probe_claim_calibration_short.txt)."
         ),
     )
     probe_extract_parser.add_argument(

@@ -17,8 +17,15 @@ from rge.llm.mode import effective_llm_mode, live_llm_enabled
 from rge.llm.ollama_client import OllamaStructuredCallError
 from rge.llm.registry import get_model_client
 from rge.modules.claim_extractor import extract_and_validate_for_chunk
+from rge.modules.claim_validator import rejection_diagnostic
 
 DEFAULT_PROBE_FIXTURE = (
+    Path(__file__).resolve().parents[2]
+    / "fixtures"
+    / "sources"
+    / "live_probe_claim_calibration_short.txt"
+)
+LEGACY_PROBE_FIXTURE = (
     Path(__file__).resolve().parents[2]
     / "fixtures"
     / "sources"
@@ -127,6 +134,12 @@ def run_probe_extract_claims(
 
     accepted = validation["accepted"]
     rejected = validation["rejected"]
+    for item in rejected:
+        item["validation_diagnostic"] = rejection_diagnostic(
+            item,
+            chunk_text=chunk_text,
+            rejection_reason=item.get("rejection_reason"),
+        )
     total = len(accepted) + len(rejected)
     if total == 0:
         raise LiveProbeError(

@@ -125,7 +125,8 @@ python -m rge.cli model-health
 python -m rge.cli probe-extract-claims
 ```
 
-Optional fixture override: `--fixture-source fixtures/sources/creativity_ai_diversity_short.txt`
+Optional fixture override: `--fixture fixtures/sources/live_probe_claim_calibration_short.txt`
+(legacy GT02 source: `fixtures/sources/creativity_ai_diversity_short.txt`)
 
 Reports land in gitignored `data/reports/live_probes/`. Excluded from CI/golden.
 Optional smoke: `python -m pytest -m live_smoke tests/smoke` (requires Ollama).
