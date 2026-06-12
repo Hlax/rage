@@ -1,0 +1,59 @@
+{
+  "id": "ticket-063",
+  "title": "Safe local live relationship-drafting probe CLI",
+  "problem": "Tickets 061-062 proved report-only live claim extraction and concept linking. build-relationships still requires persisted claims, concepts, and SQLite writes. Operators need a no-DB live probe for relationship drafting before any graph persistence.",
+  "evidence": [
+    "agent_reports/2026-06-12_pre-ticket-063_local-live-relationship-probe.md",
+    "agent_reports/2026-06-12_phase-2_ticket-062_safe-local-live-concept-linking-probe.md",
+    "agent_reports/2026-06-12_phase-2_ticket-061_live-claim-calibration.md",
+    "rge/modules/relationship_builder.py",
+    "rge/modules/live_probe.py",
+    "rge/llm/ollama_client.py"
+  ],
+  "affected_modules": [
+    "rge/modules/live_probe.py",
+    "rge/modules/relationship_builder.py",
+    "rge/llm/ollama_client.py",
+    "rge/cli.py",
+    "fixtures/probes/live_probe_relationship_quality_bundle.json"
+  ],
+  "expected_files": [
+    "rge/modules/live_probe.py",
+    "rge/modules/relationship_builder.py",
+    "rge/llm/ollama_client.py",
+    "rge/cli.py",
+    "fixtures/probes/live_probe_relationship_quality_bundle.json",
+    "fixtures/llm_outputs/relationship_drafting_live_probe_quality.json",
+    "tests/unit/test_live_probe_draft_relationships_cli.py",
+    "tests/unit/test_relationship_rejection_diagnostics.py",
+    "tests/unit/test_ollama_relationship_prompt.py",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "tickets/ticket-063.json",
+    "agent_reports/2026-06-12_phase-2_ticket-063_safe-local-live-relationship-probe.md"
+  ],
+  "acceptance_criteria": [
+    "probe-draft-relationships requires RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1.",
+    "Live probe with qwen2.5:7b yields accepted_count >= 1 on default bundle fixture.",
+    "db_writes remains false; report under data/reports/live_probes/.",
+    "validate_relationship_candidates unchanged; GT06 still passes mock-only.",
+    "Rejected live probe rows include validation_diagnostic notes.",
+    "Mock/default pytest and CI remain green without Ollama."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_live_probe_draft_relationships_cli.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_relationship_rejection_diagnostics.py -q",
+    "RGE_LLM_MODE=mock python -m pytest -q",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site",
+    "Manual live: probe-draft-relationships with ollama opt-in"
+  ],
+  "non_goals": [
+    "Do not persist relationships or evidence to default DB or public exports.",
+    "Do not add OpenAI/OpenRouter or API keys.",
+    "Do not add contradiction-detection live probes.",
+    "Do not weaken relationship validation rules.",
+    "Do not edit ontology YAML."
+  ],
+  "risk_level": "low-medium",
+  "rollback_plan": "Revert CLI, probe helper, prompt calibration, fixtures, and tests. No schema migrations.",
+  "status": "ready"
+}

@@ -94,6 +94,15 @@ superseded
 | 60 | ticket-060 | done | Safe local live claim-extraction probe CLI | `phase-2/ticket-060-safe-local-live-claim-probe` | `agent_reports/2026-06-12_phase-2_ticket-060_safe-local-live-claim-probe.md` |
 | 61 | ticket-061 | done | Live claim extraction calibration for local Qwen | `phase-2/ticket-061-live-claim-calibration` | `agent_reports/2026-06-12_phase-2_ticket-061_live-claim-calibration.md` |
 | 62 | ticket-062 | done | Safe local live concept-linking probe CLI | `phase-2/ticket-062-safe-local-live-concept-linking-probe` | `agent_reports/2026-06-12_phase-2_ticket-062_safe-local-live-concept-linking-probe.md` |
+| 63 | ticket-063 | ready | Safe local live relationship-drafting probe CLI | `phase-2/ticket-063-safe-local-live-relationship-probe` | (pending) |
+
+## Queue Notes (2026-06-12, ticket-063 seed)
+
+- Pre-ticket audit GO: `agent_reports/2026-06-12_pre-ticket-063_local-live-relationship-probe.md`.
+- Adds `probe-draft-relationships` (report-only, no default DB); default embedded bundle fixture
+  (claim + concept links + probe-local concepts); optional `--from-report` / `--chain-link`;
+  Ollama prompt calibration + relationship rejection diagnostics.
+- ticket-059 OpenAI remains proposed/deferred.
 
 ## Queue Notes (2026-06-12, ticket-062 agent)
 
@@ -571,7 +580,10 @@ superseded
 ## Current Active Ticket
 
 ```txt
-(none — ticket-059 proposed OpenAI placeholder; defer until more local probes stable)
+ticket-063 (ready) — Safe local live relationship-drafting probe CLI
+Branch: phase-2/ticket-063-safe-local-live-relationship-probe
+Pre-ticket audit: agent_reports/2026-06-12_pre-ticket-063_local-live-relationship-probe.md
+ticket-059 OpenAI placeholder remains deferred.
 ```
 
 ## Queue Rules
