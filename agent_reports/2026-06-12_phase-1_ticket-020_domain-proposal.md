@@ -89,9 +89,9 @@ Not required: no public export, public site, or write routes changed. Domain pro
 
 ## 11. Merge to Main
 
-- Merge commit: _(pending)_
+- Merge commit: `68da5105422054ccd48e6c4694a2e38547a06598`
 - Branch: `phase-1/ticket-020-domain-proposal` merged to `main` and pushed to `origin/main`.
-- Post-merge pytest on `main`: _(pending)_
+- Post-merge pytest on `main`: 85 passed.
 
 ## 12. Recommended Next Ticket
 
