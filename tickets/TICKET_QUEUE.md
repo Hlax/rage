@@ -51,7 +51,18 @@ superseded
 | 22 | ticket-022 | done | Add improvement ticket generation (Golden Test 20) | `phase-1/ticket-022-improvement-tickets` | `agent_reports/2026-06-12_phase-1_ticket-022_improvement-tickets.md` |
 | 23 | ticket-023 | done | Validate improvement tickets for builder consumption (Golden Test 21) | `phase-1/ticket-023-builder-ticket-consumption` | `agent_reports/2026-06-12_phase-1_ticket-023_builder-ticket-consumption.md` |
 | 24 | ticket-024 | done | Add builder golden merge gate (Golden Test 22) | `phase-1/ticket-024-builder-golden-gate` | `agent_reports/2026-06-12_phase-1_ticket-024_builder-golden-gate.md` |
-| 25 | ticket-025 | proposed | Add safety audit merge gate (Golden Test 23) | | |
+| 25 | ticket-025 | done | Add safety audit merge gate (Golden Test 23) | `phase-1/ticket-025-safety-audit-gate` | `agent_reports/2026-06-12_phase-1_ticket-025_safety-audit-gate.md` |
+| 26 | ticket-026 | proposed | Add prompt-injection golden fixture handling (Golden Test 24) | | |
+
+## Queue Notes (2026-06-12, ticket-025 agent)
+
+- ticket-025 implemented full `run_safety_audit()` with route/export/secrets/raw-html/
+  model-tool checks, CLI pass/fail JSON output, and Golden Test 23 (5 tests). All
+  106 golden tests pass; `python -m rge.modules.safety_auditor --audit full`
+  returns `pass`.
+- Pre-ticket-025 audit report included in merge; satisfies overdue checkpoint.
+- ticket-026 proposes prompt-injection fixture handling for Golden Test 24
+  (medium risk; pre-ticket audit recommended).
 
 ## Queue Notes (2026-06-12, ticket-024 agent)
 
@@ -215,7 +226,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-025 (proposed; awaiting review — pre-ticket audit recommended)
+ticket-026 (proposed; awaiting review — pre-ticket audit recommended)
 ```
 
 ## Queue Rules

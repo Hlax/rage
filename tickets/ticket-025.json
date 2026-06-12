@@ -35,5 +35,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert branch phase-1/ticket-025-safety-audit-gate.",
-  "status": "proposed"
+  "status": "done"
 }
