@@ -76,3 +76,21 @@ def test_live_probe_detect_contradictions_on_quality_bundle() -> None:
     assert report["db_writes"] is False
     report_path = report["report_path"]
     assert report_path.startswith("data/reports/live_probes/")
+
+
+def test_live_probe_mini_run_default_hybrid() -> None:
+    from rge.modules.live_probe import run_probe_mini_run
+
+    report = run_probe_mini_run()
+    assert report["status"] in ("ok", "partial")
+    assert report["provider"] == "ollama"
+    assert report["db_writes"] is False
+    assert report["stages"]["claim_extraction"]["accepted_count"] >= 1
+    assert report["stages"]["concept_linking"]["accepted_count"] >= 1
+    assert report["stages"]["relationship_drafting"]["accepted_count"] >= 1
+    assert report["contradiction_input_mode"] in (
+        "hybrid_overlay",
+        "chain",
+    )
+    report_path = report["report_path"]
+    assert report_path.startswith("data/reports/live_probes/")

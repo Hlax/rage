@@ -1,0 +1,51 @@
+{
+  "id": "ticket-065",
+  "title": "Report-only local live mini-run chain",
+  "problem": "Tickets 060-064 proved individual report-only live structured probes. Operators lack a single command that runs the local research spine end-to-end and writes one auditable report without DB, export, or cloud surfaces.",
+  "evidence": [
+    "agent_reports/2026-06-12_pre-ticket-065_local-live-mini-run-chain.md",
+    "agent_reports/2026-06-12_phase-2_ticket-064_safe-local-live-contradiction-probe.md",
+    "agent_reports/2026-06-12_principal-audit-post-ticket-064.md",
+    "rge/modules/live_probe.py",
+    "docs/agents/13_MODEL_ESCALATION_POLICY.md"
+  ],
+  "affected_modules": [
+    "rge/modules/live_probe.py",
+    "rge/cli.py",
+    "docs/agents/12_RUNTIME_CONFIG.md"
+  ],
+  "expected_files": [
+    "rge/modules/live_probe.py",
+    "rge/cli.py",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "tests/unit/test_live_probe_mini_run_cli.py",
+    "tests/smoke/test_live_ollama_smoke.py",
+    "tickets/ticket-065.json",
+    "agent_reports/2026-06-12_phase-2_ticket-065_local-live-mini-run-chain.md"
+  ],
+  "acceptance_criteria": [
+    "probe-mini-run requires RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1.",
+    "Live run on default fixture: stages 1-3 each accepted_count >= 1.",
+    "Stage 4 accepted_count >= 1 via default hybrid overlay mode.",
+    "One report under data/reports/live_probes/; db_writes remains false.",
+    "strict-chain records skipped contradiction when chain inputs insufficient.",
+    "Mock/default pytest and CI remain green without Ollama.",
+    "Mini-run does not call ticket drafting or queue promotion APIs."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_live_probe_mini_run_cli.py -q",
+    "RGE_LLM_MODE=mock python -m pytest -q",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site",
+    "Manual live: probe-mini-run and probe-mini-run --strict-chain with ollama opt-in"
+  ],
+  "non_goals": [
+    "Do not persist claims, relationships, or contradiction evidence to default DB or public exports.",
+    "Do not add OpenAI/OpenRouter or API keys.",
+    "Do not let Qwen author or promote implementation tickets.",
+    "Do not weaken stage validators.",
+    "Pure chained contradiction as default acceptance gate."
+  ],
+  "risk_level": "low-medium",
+  "rollback_plan": "Revert CLI, mini-run orchestrator, tests, and docs. No schema migrations.",
+  "status": "done"
+}

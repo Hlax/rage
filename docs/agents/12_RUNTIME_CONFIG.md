@@ -126,6 +126,7 @@ python -m rge.cli probe-extract-claims
 python -m rge.cli probe-link-concepts
 python -m rge.cli probe-draft-relationships
 python -m rge.cli probe-detect-contradictions
+python -m rge.cli probe-mini-run
 ```
 
 Claim probe optional fixture: `--fixture fixtures/sources/live_probe_claim_calibration_short.txt`
@@ -147,10 +148,19 @@ Optional: `--from-report data/reports/live_probes/probe_draft_relationships_<sta
 (qualifying claim overlay) or `--chain-relationship` (runs relationship probe first;
 variability applies).
 
+Mini-run probe chains extract → link → relationship live from the default calibration
+source, then contradiction detection with hybrid overlay by default:
+
+```powershell
+python -m rge.cli probe-mini-run
+python -m rge.cli probe-mini-run --strict-chain
+```
+
+`--strict-chain` skips stage 4 when upstream outputs lack contradiction-suitable inputs.
+
 Reports land in gitignored `data/reports/live_probes/`. Excluded from CI/golden.
-Optional smoke (`tests/smoke/test_live_ollama_smoke.py`) covers `probe-extract-claims`,
-`probe-link-concepts`, `probe-draft-relationships`, and `probe-detect-contradictions`
-when Ollama is available:
+Optional smoke (`tests/smoke/test_live_ollama_smoke.py`) covers individual probes and
+`probe-mini-run` when Ollama is available:
 
 ```powershell
 python -m pytest -m live_smoke tests/smoke

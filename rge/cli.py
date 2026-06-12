@@ -957,6 +957,23 @@ def _cmd_probe_detect_contradictions(args: argparse.Namespace) -> int:
     )
 
 
+def _cmd_probe_mini_run(args: argparse.Namespace) -> int:
+    from rge.modules.live_probe import run_probe_mini_run
+
+    return _run_live_probe_command(
+        command="probe-mini-run",
+        runner=lambda: run_probe_mini_run(
+            fixture_source=Path(args.fixture_source) if args.fixture_source else None,
+            domain_pack=args.domain,
+            strict_chain=bool(args.strict_chain),
+            contradiction_bundle=(
+                Path(args.contradiction_bundle) if args.contradiction_bundle else None
+            ),
+            root=_REPO_ROOT,
+        ),
+    )
+
+
 def _cmd_verify(args: argparse.Namespace) -> int:
     from rge.modules.verify_runner import run_verification
 
@@ -2014,6 +2031,48 @@ def build_parser() -> argparse.ArgumentParser:
         help="Domain pack for validation (default: creativity).",
     )
     probe_contradiction_parser.set_defaults(func=_cmd_probe_detect_contradictions)
+
+    probe_mini_run_parser = subparsers.add_parser(
+        "probe-mini-run",
+        help="Live Ollama mini-run chain probe (report-only, no DB writes).",
+        description=(
+            "Run the local live research spine in one report: extract claims, "
+            "link concepts, draft relationships, detect contradictions. Default "
+            "source is fixtures/sources/live_probe_claim_calibration_short.txt. "
+            "Stage 4 uses hybrid contradiction overlay unless --strict-chain is set. "
+            "Requires RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1."
+        ),
+    )
+    probe_mini_run_parser.add_argument(
+        "--fixture-source",
+        "--fixture",
+        dest="fixture_source",
+        help=(
+            "Source text fixture for claim extraction "
+            "(default: fixtures/sources/live_probe_claim_calibration_short.txt)."
+        ),
+    )
+    probe_mini_run_parser.add_argument(
+        "--strict-chain",
+        action="store_true",
+        help=(
+            "Require contradiction detection from upstream chain only; skip stage 4 "
+            "when chain inputs are insufficient."
+        ),
+    )
+    probe_mini_run_parser.add_argument(
+        "--contradiction-bundle",
+        help=(
+            "Contradiction overlay bundle for hybrid stage 4 "
+            "(default: fixtures/probes/live_probe_contradiction_quality_bundle.json)."
+        ),
+    )
+    probe_mini_run_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack for validation (default: creativity).",
+    )
+    probe_mini_run_parser.set_defaults(func=_cmd_probe_mini_run)
 
     verify_parser = subparsers.add_parser(
         "verify",

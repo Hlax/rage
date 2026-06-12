@@ -7,6 +7,7 @@ without persisting to the default SQLite database or public exports.
 from __future__ import annotations
 
 import json
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -25,6 +26,8 @@ from rge.modules.concept_linker import (
     validate_concept_links,
 )
 from rge.modules.contradiction_detector import (
+    OPPOSING_CLAIM_FRAGMENT,
+    QUALIFYING_CLAIM_FRAGMENT,
     claim_dicts_as_objects,
     contradiction_rejection_diagnostic,
     propose_contradictions,
@@ -920,5 +923,395 @@ def run_probe_detect_contradictions(
         base=base,
         reports_dir=reports_dir,
         filename_prefix="probe_detect_contradictions",
+        report=report,
+    )
+
+
+def _normalize_label(text: str) -> str:
+    return text.strip().casefold()
+
+
+def _diagnostics_sample(
+    rejected: list[dict[str, Any]],
+    *,
+    limit: int = 3,
+) -> list[str]:
+    samples: list[str] = []
+    for item in rejected[:limit]:
+        diagnostic = item.get("validation_diagnostic") or item.get("rejection_reason")
+        if diagnostic:
+            samples.append(str(diagnostic))
+    return samples
+
+
+def relationships_from_accepted_drafts(
+    accepted: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Build probe-local relationship dicts from accepted relationship drafts."""
+    relationships: list[dict[str, Any]] = []
+    for index, relationship in enumerate(accepted, start=1):
+        relationships.append(
+            {
+                "id": f"rel_mini_run_chain_{index:03d}",
+                "subject_concept": relationship.get("subject_concept"),
+                "predicate": relationship.get("predicate"),
+                "object_concept": relationship.get("object_concept"),
+                "status": "active",
+            }
+        )
+    return relationships
+
+
+def chain_inputs_suitable_for_contradiction(
+    domain_claims: list[dict[str, Any]],
+    relationships: list[dict[str, Any]],
+) -> bool:
+    """Return True when chained claims/relationships satisfy GT07-shaped tension."""
+    predicates = {
+        _normalize_label(str(relationship.get("predicate", "")))
+        for relationship in relationships
+    }
+    if "may_reduce" not in predicates or "may_increase" not in predicates:
+        return False
+    combined = " ".join(
+        str(claim.get("claim_text", "")) for claim in domain_claims
+    ).casefold()
+    return (
+        OPPOSING_CLAIM_FRAGMENT in combined
+        and QUALIFYING_CLAIM_FRAGMENT in combined
+    )
+
+
+def _run_mini_run_contradiction_stage(
+    *,
+    domain_pack: str,
+    strict_chain: bool,
+    input_claim: dict[str, Any],
+    chain_domain_claims: list[dict[str, Any]],
+    chain_relationships: list[dict[str, Any]],
+    model_client: Any,
+    root: Path,
+    contradiction_bundle: Path | None,
+    started_at: float,
+) -> tuple[dict[str, Any], str]:
+    elapsed_ms = int((time.monotonic() - started_at) * 1000)
+    chain_suitable = chain_inputs_suitable_for_contradiction(
+        chain_domain_claims,
+        chain_relationships,
+    )
+
+    if strict_chain and not chain_suitable:
+        return (
+            {
+                "status": "skipped",
+                "accepted_count": 0,
+                "rejected_count": 0,
+                "elapsed_ms": elapsed_ms,
+                "skip_reason": "upstream chain lacks contradiction-suitable inputs",
+                "diagnostics_summary": [],
+                "accepted": [],
+                "rejected": [],
+            },
+            "skipped_strict_chain_insufficient_inputs",
+        )
+
+    overlay_bundle_path = resolve_contradiction_bundle(contradiction_bundle, root)
+    if chain_suitable and not strict_chain:
+        source_claims = [dict(input_claim)]
+        domain_claims = [dict(claim) for claim in chain_domain_claims]
+        relationships = [dict(rel) for rel in chain_relationships]
+        input_mode = "chain"
+        overlay_path: str | None = None
+    else:
+        default_source, default_domain, relationships = load_contradiction_bundle(
+            overlay_bundle_path,
+            root,
+        )
+        relationship_shape = {
+            "input_claim": input_claim,
+        }
+        source_claims, domain_claims = merge_qualifying_claim_from_relationship_report(
+            relationship_shape,
+            default_source,
+            default_domain,
+        )
+        input_mode = "hybrid_overlay"
+        try:
+            overlay_path = str(overlay_bundle_path.relative_to(root)).replace("\\", "/")
+        except ValueError:
+            overlay_path = str(overlay_bundle_path)
+
+    source_claim_objects = claim_dicts_as_objects(source_claims)
+    domain_claim_objects = claim_dicts_as_objects(domain_claims)
+    source_claim_ids = {claim["id"] for claim in source_claims if claim.get("id")}
+    domain_claim_ids = {claim["id"] for claim in domain_claims if claim.get("id")}
+    relationship_triples = relationship_triples_from_bundle(relationships)
+
+    try:
+        proposed = propose_contradictions(
+            domain_claims,
+            relationships,
+            domain_pack,
+            client=model_client,
+            fixture_name="contradiction_detection_live_probe_quality.json",
+        )
+    except OllamaStructuredCallError as exc:
+        raise LiveProbeError(str(exc)) from exc
+
+    validation = validate_contradiction_probe_batch(
+        proposed,
+        source_claims=source_claim_objects,
+        domain_claims=domain_claim_objects,
+        relationships=relationships,
+    )
+    accepted = validation["accepted"]
+    rejected = validation["rejected"]
+    for item in rejected:
+        item["validation_diagnostic"] = contradiction_rejection_diagnostic(
+            item,
+            rejection_reason=item.get("rejection_reason"),
+            source_claim_ids=source_claim_ids,
+            domain_claim_ids=domain_claim_ids,
+            relationship_triples=relationship_triples,
+        )
+
+    total = len(accepted) + len(rejected)
+    if total == 0:
+        raise LiveProbeError(
+            "Mini-run received no parseable contradiction candidates from the model."
+        )
+
+    stage: dict[str, Any] = {
+        "status": "ok",
+        "accepted_count": len(accepted),
+        "rejected_count": len(rejected),
+        "elapsed_ms": int((time.monotonic() - started_at) * 1000),
+        "diagnostics_summary": _diagnostics_sample(rejected),
+        "accepted": accepted,
+        "rejected": rejected,
+    }
+    if overlay_path is not None:
+        stage["overlay_bundle_path"] = overlay_path
+    return stage, input_mode
+
+
+def run_probe_mini_run(
+    *,
+    fixture_source: Path | None = None,
+    domain_pack: str = DEFAULT_PROBE_DOMAIN,
+    strict_chain: bool = False,
+    contradiction_bundle: Path | None = None,
+    root: Path | None = None,
+    reports_dir: Path | None = None,
+    config: RgeConfig | None = None,
+    client: Any | None = None,
+    skip_health_check: bool = False,
+) -> dict[str, Any]:
+    """Run the local live mini-run chain; write one combined report (no DB)."""
+    base = root if root is not None else repo_root()
+    command = "probe-mini-run"
+    run_started = time.monotonic()
+    cfg = assert_live_probe_env(config, command=command)
+    health = assert_ollama_health(cfg) if not skip_health_check else {}
+
+    fixture_path = resolve_fixture_source(fixture_source, base)
+    if not fixture_path.is_file():
+        raise LiveProbeError(f"fixture source not found: {fixture_path}")
+
+    chunk_text = fixture_path.read_text(encoding="utf-8")
+    chunk = {
+        "id": PROBE_CHUNK_ID,
+        "source_id": PROBE_SOURCE_ID,
+        "chunk_index": 0,
+        "chunk_text": chunk_text,
+    }
+    model_client = client or get_model_client(cfg, mode="ollama")
+
+    # Stage 1 — claim extraction
+    stage1_started = time.monotonic()
+    try:
+        claim_validation = extract_and_validate_for_chunk(
+            chunk,
+            domain_pack=domain_pack,
+            client=model_client,
+        )
+    except OllamaStructuredCallError as exc:
+        raise LiveProbeError(str(exc)) from exc
+
+    claim_accepted = claim_validation["accepted"]
+    claim_rejected = claim_validation["rejected"]
+    for item in claim_rejected:
+        item["validation_diagnostic"] = rejection_diagnostic(
+            item,
+            chunk_text=chunk_text,
+            rejection_reason=item.get("rejection_reason"),
+        )
+    if not claim_accepted:
+        raise LiveProbeError(
+            "Mini-run stage claim_extraction produced no accepted claims."
+        )
+    input_claims = assign_probe_claim_ids(claim_accepted)
+    if input_claims:
+        input_claims[0]["id"] = PROBE_CLAIM_ID
+    claim_stage = {
+        "status": "ok",
+        "accepted_count": len(claim_accepted),
+        "rejected_count": len(claim_rejected),
+        "elapsed_ms": int((time.monotonic() - stage1_started) * 1000),
+        "diagnostics_summary": _diagnostics_sample(claim_rejected),
+        "accepted": claim_accepted,
+        "rejected": claim_rejected,
+    }
+
+    # Stage 2 — concept linking
+    stage2_started = time.monotonic()
+    ontology_labels = ontology_labels_for_pack(domain_pack)
+    try:
+        link_proposed = propose_concept_links(
+            input_claims,
+            domain_pack,
+            client=model_client,
+            diversity_heuristic=False,
+        )
+    except OllamaStructuredCallError as exc:
+        raise LiveProbeError(str(exc)) from exc
+
+    link_validation = validate_concept_links(link_proposed)
+    link_accepted = link_validation["accepted"]
+    link_rejected = link_validation["rejected"]
+    for item in link_rejected:
+        item["validation_diagnostic"] = link_rejection_diagnostic(
+            item,
+            rejection_reason=item.get("rejection_reason"),
+            ontology_labels=ontology_labels,
+        )
+    if not link_accepted:
+        raise LiveProbeError(
+            "Mini-run stage concept_linking produced no accepted concept links."
+        )
+    link_stage = {
+        "status": "ok",
+        "accepted_count": len(link_accepted),
+        "rejected_count": len(link_rejected),
+        "elapsed_ms": int((time.monotonic() - stage2_started) * 1000),
+        "diagnostics_summary": _diagnostics_sample(link_rejected),
+        "accepted": link_accepted,
+        "rejected": link_rejected,
+    }
+
+    # Stage 3 — relationship drafting
+    stage3_started = time.monotonic()
+    input_claim = dict(input_claims[0])
+    input_concepts = concept_dicts_from_links(link_accepted)
+    concept_labels = {concept["label"] for concept in input_concepts}
+    accepted_claim_ids = {input_claim["id"]}
+
+    try:
+        relationship_proposed = propose_relationship_drafts(
+            [input_claim],
+            input_concepts,
+            domain_pack,
+            client=model_client,
+            fixture_name="relationship_drafting_live_probe_quality.json",
+            diversity_fallback=False,
+        )
+    except OllamaStructuredCallError as exc:
+        raise LiveProbeError(str(exc)) from exc
+
+    relationship_validation = validate_relationship_candidates(
+        relationship_proposed,
+        accepted_claim_ids=accepted_claim_ids,
+        concept_labels=concept_labels,
+    )
+    relationship_accepted = relationship_validation["accepted"]
+    relationship_rejected = relationship_validation["rejected"]
+    for item in relationship_rejected:
+        item["validation_diagnostic"] = relationship_rejection_diagnostic(
+            item,
+            rejection_reason=item.get("rejection_reason"),
+            concept_labels=concept_labels,
+            accepted_claim_ids=accepted_claim_ids,
+        )
+    if not relationship_accepted:
+        raise LiveProbeError(
+            "Mini-run stage relationship_drafting produced no accepted relationships."
+        )
+    relationship_stage = {
+        "status": "ok",
+        "accepted_count": len(relationship_accepted),
+        "rejected_count": len(relationship_rejected),
+        "elapsed_ms": int((time.monotonic() - stage3_started) * 1000),
+        "diagnostics_summary": _diagnostics_sample(relationship_rejected),
+        "accepted": relationship_accepted,
+        "rejected": relationship_rejected,
+    }
+
+    chain_relationships = relationships_from_accepted_drafts(relationship_accepted)
+    stage4_started = time.monotonic()
+    contradiction_stage, contradiction_input_mode = _run_mini_run_contradiction_stage(
+        domain_pack=domain_pack,
+        strict_chain=strict_chain,
+        input_claim=input_claim,
+        chain_domain_claims=input_claims,
+        chain_relationships=chain_relationships,
+        model_client=model_client,
+        root=base,
+        contradiction_bundle=contradiction_bundle,
+        started_at=stage4_started,
+    )
+
+    try:
+        fixture_rel = str(fixture_path.relative_to(base)).replace("\\", "/")
+    except ValueError:
+        fixture_rel = str(fixture_path)
+
+    probe_local_ids = {
+        "claims": [claim.get("id") for claim in input_claims if claim.get("id")],
+        "concepts": [concept.get("id") for concept in input_concepts if concept.get("id")],
+        "relationships": [
+            relationship.get("id")
+            for relationship in chain_relationships
+            if relationship.get("id")
+        ],
+    }
+
+    overall_status = "ok"
+    if contradiction_stage.get("status") == "skipped":
+        overall_status = "partial"
+
+    created_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    report: dict[str, Any] = {
+        "report_type": "live_probe_mini_run_report",
+        "command": command,
+        "status": overall_status,
+        "created_at": created_at,
+        "fixture_source": fixture_rel,
+        "domain_pack": domain_pack,
+        "strict_chain": strict_chain,
+        "contradiction_input_mode": contradiction_input_mode,
+        "effective_llm_mode": effective_llm_mode(cfg),
+        "provider": model_client.provider,
+        "model": getattr(model_client, "model", None),
+        "base_url": getattr(model_client, "base_url", None),
+        "schema_version": cfg.llm_schema_version,
+        "health": health,
+        "elapsed_ms": int((time.monotonic() - run_started) * 1000),
+        "db_writes": False,
+        "public_export": False,
+        "cloud_calls": False,
+        "default_db_path": str(DEFAULT_DB_PATH).replace("\\", "/"),
+        "probe_local_ids": probe_local_ids,
+        "stages": {
+            "claim_extraction": claim_stage,
+            "concept_linking": link_stage,
+            "relationship_drafting": relationship_stage,
+            "contradiction_detection": contradiction_stage,
+        },
+    }
+
+    return _write_live_probe_report(
+        base=base,
+        reports_dir=reports_dir,
+        filename_prefix="probe_mini_run",
         report=report,
     )

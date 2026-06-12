@@ -96,6 +96,23 @@ superseded
 | 62 | ticket-062 | done | Safe local live concept-linking probe CLI | `phase-2/ticket-062-safe-local-live-concept-linking-probe` | `agent_reports/2026-06-12_phase-2_ticket-062_safe-local-live-concept-linking-probe.md` |
 | 63 | ticket-063 | done | Safe local live relationship-drafting probe CLI | `phase-2/ticket-063-safe-local-live-relationship-probe` | `agent_reports/2026-06-12_phase-2_ticket-063_safe-local-live-relationship-probe.md` |
 | 64 | ticket-064 | done | Safe local live contradiction-detection probe CLI | `phase-2/ticket-064-safe-local-live-contradiction-probe` | `agent_reports/2026-06-12_phase-2_ticket-064_safe-local-live-contradiction-probe.md` |
+| 65 | ticket-065 | done | Report-only local live mini-run chain | `phase-2/ticket-065-local-live-mini-run-chain` | `agent_reports/2026-06-12_phase-2_ticket-065_local-live-mini-run-chain.md` |
+
+## Queue Notes (2026-06-12, ticket-065 agent)
+
+- Adds `probe-mini-run` report-only CLI; chains extract → link → relationship live;
+  stage 4 hybrid overlay by default; `--strict-chain` skips contradiction when insufficient.
+  Live default: status=ok, hybrid_overlay, all stages accepted>=1. Live strict: partial, skipped stage 4.
+- Qwen bounded worker only; no ticket authoring authority.
+- ticket-059 OpenAI remains deferred.
+
+## Queue Notes (2026-06-12, ticket-065 seed)
+
+- Pre-ticket audit GO (narrowed hybrid): `agent_reports/2026-06-12_pre-ticket-065_local-live-mini-run-chain.md`.
+- Adds `probe-mini-run` (report-only, no default DB); chains extract → link → relationship live;
+  stage 4 hybrid overlay by default; `--strict-chain` optional.
+- Qwen remains bounded worker only; no ticket authoring authority.
+- ticket-059 OpenAI remains proposed/deferred.
 
 ## Queue Notes (2026-06-12, ticket-064 agent)
 
