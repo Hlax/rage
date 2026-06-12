@@ -67,6 +67,15 @@ superseded
 | 33 | ticket-033 | done | Pre-phase-2 principal audit checkpoint | | `agent_reports/2026-06-12_pre-phase-2_principal-audit.md` |
 | 34 | ticket-034 | done | Make fixture-mode run repo-clean and export serialization deterministic | `phase-2/ticket-034-fixture-run-artifact-hygiene` | `agent_reports/2026-06-12_phase-2_ticket-034_fixture-run-artifact-hygiene.md` |
 | 35 | ticket-035 | done | Refresh README for Phase 1 reality and operator quickstart | `phase-2/ticket-035-readme-operator-refresh` | `agent_reports/2026-06-12_phase-2_ticket-035_readme-operator-refresh.md` |
+| 36 | ticket-036 | proposed | Public-site presentation polish and about page (no data surface changes) | | |
+
+## Queue Notes (2026-06-12, ticket-036 seed)
+
+- ticket-036 seeded from the Phase 2 roadmap after a focused pre-ticket-036
+  public-site readiness audit
+  (`agent_reports/2026-06-12_pre-ticket-036_public-site-polish-readiness-audit.md`).
+  Recommendation: proceed presentation-only; no export schema changes, no new
+  public data fields. ticket-037+ intentionally not seeded in this pass.
 
 ## Queue Notes (2026-06-12, ticket-035 agent)
 
@@ -334,7 +343,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-036 proposed (public-site presentation polish — seed from Phase 2 roadmap)
+ticket-036 proposed (public-site presentation polish and about page — seeded; pre-ticket audit complete)
 ```
 
 ## Queue Rules

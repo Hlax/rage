@@ -1,0 +1,63 @@
+{
+  "id": "ticket-036",
+  "title": "Public-site presentation polish and about page (no data surface changes)",
+  "problem": "The public site is structurally real but still reads as a test artifact. It exposes raw enum strings and raw ISO timestamps, lacks an /about methodology and trust page, has default 404 behavior, no explicit empty state, minimal metadata/favicons, and inline styling debt. This should be presentation-only and must not broaden the public data surface.",
+  "evidence": [
+    "agent_reports/2026-06-12_pre-phase-2_principal-audit.md Public-Facing UI / Product Assessment",
+    "agent_reports/2026-06-12_phase-2_ticket-roadmap.md ticket-036",
+    "agent_reports/2026-06-12_phase-2_ticket-035_readme-operator-refresh.md section 9",
+    "agent_reports/2026-06-12_pre-ticket-036_public-site-polish-readiness-audit.md"
+  ],
+  "affected_modules": [
+    "apps/public-site/app/page.tsx",
+    "apps/public-site/app/cards/[id]/page.tsx",
+    "apps/public-site/app/about/page.tsx",
+    "apps/public-site/app/not-found.tsx",
+    "apps/public-site/lib/publicCards.ts",
+    "tests/golden/test_12_public_site_static_render.py",
+    "tests/golden/test_25_public_site_debug_details.py"
+  ],
+  "expected_files": [
+    "apps/public-site/app/page.tsx",
+    "apps/public-site/app/cards/[id]/page.tsx",
+    "apps/public-site/app/about/page.tsx",
+    "apps/public-site/app/not-found.tsx",
+    "apps/public-site/lib/publicCards.ts",
+    "tests/golden/test_12_public_site_static_render.py",
+    "tests/golden/test_25_public_site_debug_details.py",
+    "agent_reports/2026-06-12_phase-2_ticket-036_public-site-polish.md"
+  ],
+  "acceptance_criteria": [
+    "Raw enum values are humanized in public UI without changing the export schema.",
+    "Public timestamps are formatted for humans while preserving safe public values.",
+    "/about exists and explains the engine, fixture provenance, confidence semantics, read-only safety boundary, and public/private data split.",
+    "A custom 404 page and zero-card empty state use the public site's visual language.",
+    "No new public export fields are added.",
+    "No raw source text, prompts, secrets, local paths, private notes, hidden reasoning, injected instructions, unreviewed draft internals, or internal IDs are rendered.",
+    "Public site remains static and read-only.",
+    "Existing GT12 and GT25 still pass, with tests updated only for presentation/page coverage.",
+    "Public-site build passes.",
+    "Full golden tests and safety audit pass."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden/test_12_public_site_static_render.py",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden/test_25_public_site_debug_details.py",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden",
+    "RGE_LLM_MODE=mock python -m pytest",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "Do not change the public export schema.",
+    "Do not add new public data fields.",
+    "Do not change runtime pipeline behavior.",
+    "Do not add live provider or Ollama work.",
+    "Do not add public write routes.",
+    "Do not expose private/debug/internal data.",
+    "Do not implement deployment docs.",
+    "Do not implement ticket-037 or later."
+  ],
+  "risk_level": "low-medium",
+  "rollback_plan": "Revert the ticket-036 branch.",
+  "status": "proposed"
+}
