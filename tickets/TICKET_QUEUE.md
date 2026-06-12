@@ -67,7 +67,18 @@ superseded
 | 33 | ticket-033 | done | Pre-phase-2 principal audit checkpoint | | `agent_reports/2026-06-12_pre-phase-2_principal-audit.md` |
 | 34 | ticket-034 | done | Make fixture-mode run repo-clean and export serialization deterministic | `phase-2/ticket-034-fixture-run-artifact-hygiene` | `agent_reports/2026-06-12_phase-2_ticket-034_fixture-run-artifact-hygiene.md` |
 | 35 | ticket-035 | done | Refresh README for Phase 1 reality and operator quickstart | `phase-2/ticket-035-readme-operator-refresh` | `agent_reports/2026-06-12_phase-2_ticket-035_readme-operator-refresh.md` |
-| 36 | ticket-036 | proposed | Public-site presentation polish and about page (no data surface changes) | | |
+| 36 | ticket-036 | done | Public-site presentation polish and about page (no data surface changes) | `phase-2/ticket-036-public-site-polish` | `agent_reports/2026-06-12_phase-2_ticket-036_public-site-polish.md` |
+
+## Queue Notes (2026-06-12, ticket-036 agent)
+
+- ticket-036 delivered presentation-only public-site polish: humanized enum
+  labels, deterministic human-readable timestamps, static `/about` page,
+  custom 404, and zero-card empty state. No export schema changes; no new
+  public data fields. All 127 golden tests pass; safety audit passes; site
+  builds 12 static pages.
+- ticket-037 (live Ollama structured tasks) is next per Phase 2 roadmap and
+  **requires its own pre-ticket audit** before seeding. ticket-040 (CI golden
+  gate) is an independent low-risk alternative that may be pulled earlier.
 
 ## Queue Notes (2026-06-12, ticket-036 seed)
 
@@ -343,7 +354,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-036 proposed (public-site presentation polish and about page — seeded; pre-ticket audit complete)
+none (next: pre-ticket-037 live-Ollama audit before seeding ticket-037)
 ```
 
 ## Queue Rules

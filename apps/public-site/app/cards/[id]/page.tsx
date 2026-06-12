@@ -6,6 +6,9 @@ import { notFound } from 'next/navigation';
 import {
   conceptToSlug,
   findCardById,
+  formatPublicTimestamp,
+  formatSourceCount,
+  humanizeLabel,
   publicCards,
 } from '../../../lib/publicCards';
 
@@ -48,8 +51,9 @@ export default async function CardDetailPage({ params }: PageProps) {
         {card.title}
       </h1>
       <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', color: '#8b93a3' }}>
-        {card.type} · confidence: {card.confidence} · sources: {card.source_count} ·{' '}
-        {card.public_detail_level}
+        {humanizeLabel(card.type)} · {humanizeLabel(card.confidence)} confidence ·{' '}
+        {formatSourceCount(card.source_count)} ·{' '}
+        {humanizeLabel(card.public_detail_level)} detail
       </p>
       <p style={{ color: '#aeb4c0', lineHeight: 1.65, marginTop: '1.5rem' }}>
         {card.summary}
@@ -123,10 +127,12 @@ export default async function CardDetailPage({ params }: PageProps) {
           }}
         >
           <dt style={{ color: '#8b93a3' }}>Evidence type</dt>
-          <dd style={{ margin: 0 }}>{card.evidence_type ?? 'not specified'}</dd>
+          <dd style={{ margin: 0 }}>
+            {card.evidence_type ? humanizeLabel(card.evidence_type) : 'Not specified'}
+          </dd>
           <dt style={{ color: '#8b93a3' }}>Public run timestamp</dt>
           <dd style={{ margin: 0 }}>
-            {card.public_run_timestamp ?? card.updated_at}
+            {formatPublicTimestamp(card.public_run_timestamp ?? card.updated_at)}
           </dd>
         </dl>
       </section>
@@ -141,7 +147,9 @@ export default async function CardDetailPage({ params }: PageProps) {
         }}
       >
         <p style={{ margin: 0 }}>Card ID: {card.id}</p>
-        <p style={{ margin: '0.25rem 0 0' }}>Last updated: {card.updated_at}</p>
+        <p style={{ margin: '0.25rem 0 0' }}>
+          Last updated: {formatPublicTimestamp(card.updated_at)}
+        </p>
       </footer>
     </main>
   );

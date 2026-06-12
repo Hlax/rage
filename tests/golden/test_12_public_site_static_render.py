@@ -16,6 +16,8 @@ OUT_DIR = SITE_DIR / "out"
 CARD_DETAIL_PAGE = SITE_DIR / "app" / "cards" / "[id]" / "page.tsx"
 CONCEPT_DETAIL_PAGE = SITE_DIR / "app" / "concepts" / "[id]" / "page.tsx"
 LIST_PAGE = SITE_DIR / "app" / "page.tsx"
+ABOUT_PAGE = SITE_DIR / "app" / "about" / "page.tsx"
+NOT_FOUND_PAGE = SITE_DIR / "app" / "not-found.tsx"
 
 FORBIDDEN_SOURCE_PATTERNS = (
     "dangerouslySetInnerHTML",
@@ -58,8 +60,33 @@ def test_list_page_links_to_card_and_concept_routes() -> None:
     assert "next/link" in text
     assert "/cards/" in text
     assert "/concepts/" in text
+    assert "/about" in text
     assert "Last updated:" in text
     assert "buildInfo.generated_at" in text
+
+
+def test_about_page_is_static_presentation_only() -> None:
+    """ticket-036: /about is allowed in route policy and must stay static copy."""
+    assert ABOUT_PAGE.is_file(), "missing about page route"
+    text = ABOUT_PAGE.read_text(encoding="utf-8")
+    assert "About this site" in text
+    assert "confidence" in text.casefold()
+    assert "read-only" in text.casefold()
+    assert "fetch(" not in text, "about page must not fetch data"
+
+
+def test_not_found_page_uses_site_visual_language() -> None:
+    """ticket-036: custom 404 replaces the default unstyled Next page."""
+    assert NOT_FOUND_PAGE.is_file(), "missing custom not-found page"
+    text = NOT_FOUND_PAGE.read_text(encoding="utf-8")
+    assert "Page not found" in text
+    assert "next/link" in text, "404 must link back into the site"
+
+
+def test_list_page_declares_zero_card_empty_state() -> None:
+    """ticket-036: zero-card snapshots must render an explicit empty state."""
+    text = LIST_PAGE.read_text(encoding="utf-8")
+    assert "No public cards in this snapshot yet." in text
 
 
 def test_public_site_source_has_no_write_or_unsafe_patterns() -> None:
@@ -93,6 +120,14 @@ def test_static_export_html_pages_exist() -> None:
     index_html = (OUT_DIR / "index.html").read_text(encoding="utf-8")
     assert "Last updated:" in index_html
     assert cards[0]["title"] in index_html
+
+    about_html_path = OUT_DIR / "about.html"
+    assert about_html_path.is_file(), "missing static export for /about"
+    assert "About this site" in about_html_path.read_text(encoding="utf-8")
+
+    not_found_html_path = OUT_DIR / "404.html"
+    assert not_found_html_path.is_file(), "missing static 404 export"
+    assert "Page not found" in not_found_html_path.read_text(encoding="utf-8")
 
     for card in cards:
         card_page = _static_html_path(OUT_DIR, "cards", card["id"])

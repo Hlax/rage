@@ -5,8 +5,8 @@ import { notFound } from 'next/navigation';
 
 import {
   cardsForConcept,
-  conceptToSlug,
   findConceptBySlug,
+  humanizeLabel,
   listConceptSlugs,
 } from '../../../lib/publicCards';
 
@@ -59,7 +59,8 @@ export default async function ConceptDetailPage({ params }: PageProps) {
               }}
             >
               <p style={{ margin: 0, fontSize: '0.75rem', color: '#8b93a3' }}>
-                {card.type} · confidence: {card.confidence}
+                {humanizeLabel(card.type)} · {humanizeLabel(card.confidence)}{' '}
+                confidence
               </p>
               <h3 style={{ margin: '0.35rem 0', fontSize: '1rem' }}>
                 <Link href={`/cards/${card.id}`} style={{ color: '#e6e8ec' }}>
