@@ -894,6 +894,36 @@ def _cmd_probe_link_concepts(args: argparse.Namespace) -> int:
     )
 
 
+def _cmd_probe_draft_relationships(args: argparse.Namespace) -> int:
+    from rge.modules.live_probe import run_probe_draft_relationships
+
+    if args.from_report and args.chain_link:
+        payload = {
+            "status": "error",
+            "command": "probe-draft-relationships",
+            "detail": "Use only one of --from-report or --chain-link.",
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+    return _run_live_probe_command(
+        command="probe-draft-relationships",
+        runner=lambda: run_probe_draft_relationships(
+            domain_pack=args.domain,
+            bundle_fixture=Path(args.bundle) if args.bundle else None,
+            from_report=Path(args.from_report) if args.from_report else None,
+            chain_link=bool(args.chain_link),
+            chain_fixture_source=(
+                Path(args.fixture_source) if args.fixture_source else None
+            ),
+            chain_claim_fixture=(
+                Path(args.claim_fixture) if args.claim_fixture else None
+            ),
+            root=_REPO_ROOT,
+        ),
+    )
+
+
 def _cmd_verify(args: argparse.Namespace) -> int:
     from rge.modules.verify_runner import run_verification
 
@@ -1848,6 +1878,54 @@ def build_parser() -> argparse.ArgumentParser:
         help="Domain pack for validation (default: creativity).",
     )
     probe_link_parser.set_defaults(func=_cmd_probe_link_concepts)
+
+    probe_relationship_parser = subparsers.add_parser(
+        "probe-draft-relationships",
+        help="Live Ollama relationship-drafting probe (report-only, no DB writes).",
+        description=(
+            "Run one live structured relationship-drafting task on probe-local "
+            "claim and concept inputs. Default input is "
+            "fixtures/probes/live_probe_relationship_quality_bundle.json. "
+            "Requires RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1. Writes a JSON "
+            "report under data/reports/live_probes/ only; never touches the default "
+            "SQLite database or public exports."
+        ),
+    )
+    probe_relationship_parser.add_argument(
+        "--bundle",
+        help=(
+            "JSON bundle with claim, concept_links, and concepts "
+            "(default: fixtures/probes/live_probe_relationship_quality_bundle.json)."
+        ),
+    )
+    probe_relationship_parser.add_argument(
+        "--from-report",
+        help="Load claim and concept links from a prior probe-link-concepts report.",
+    )
+    probe_relationship_parser.add_argument(
+        "--chain-link",
+        action="store_true",
+        help=(
+            "Run probe-link-concepts first and draft relationships from its "
+            "accepted links."
+        ),
+    )
+    probe_relationship_parser.add_argument(
+        "--claim-fixture",
+        help="Claim JSON for --chain-link when not using --fixture-source extract chain.",
+    )
+    probe_relationship_parser.add_argument(
+        "--fixture-source",
+        "--fixture",
+        dest="fixture_source",
+        help="Source text fixture for extract step inside --chain-link only.",
+    )
+    probe_relationship_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack for validation (default: creativity).",
+    )
+    probe_relationship_parser.set_defaults(func=_cmd_probe_draft_relationships)
 
     verify_parser = subparsers.add_parser(
         "verify",

@@ -1,0 +1,44 @@
+{
+  "claim": {
+    "id": "claim_live_probe_link_001",
+    "claim_text": "AI-assisted brainstorming increased average idea quality in short-form writing tasks.",
+    "subject": "AI-assisted brainstorming",
+    "predicate": "increased",
+    "object": "average idea quality",
+    "scope": "short-form writing tasks",
+    "evidence_type": "empirical",
+    "confidence": 0.7,
+    "limitations": ["Only tested short-form writing tasks."],
+    "domain": "creativity",
+    "source_id": "src_live_probe_001",
+    "chunk_id": "chunk_live_probe_001"
+  },
+  "concept_links": [
+    {
+      "claim_id": "claim_live_probe_link_001",
+      "concept_label": "brainstorming",
+      "role": "method",
+      "confidence": 0.8,
+      "domain_metadata": {}
+    },
+    {
+      "claim_id": "claim_live_probe_link_001",
+      "concept_label": "AI assistance",
+      "role": "subject",
+      "confidence": 0.85,
+      "domain_metadata": {}
+    },
+    {
+      "claim_id": "claim_live_probe_link_001",
+      "concept_label": "ideation",
+      "role": "context",
+      "confidence": 0.6,
+      "domain_metadata": {}
+    }
+  ],
+  "concepts": [
+    { "id": "concept_live_probe_001", "label": "brainstorming" },
+    { "id": "concept_live_probe_002", "label": "AI assistance" },
+    { "id": "concept_live_probe_003", "label": "ideation" }
+  ]
+}

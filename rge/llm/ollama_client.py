@@ -331,10 +331,60 @@ class OllamaModelClient(ModelClient):
         domain_pack: str,
         schema_version: str,
     ) -> str:
+        concept_labels = sorted(
+            {
+                str(concept.get("label", "")).strip()
+                for concept in concepts
+                if concept.get("label")
+            }
+        )
+        claim_ids = [claim.get("id") for claim in claims if claim.get("id")]
+        example_claim_id = claim_ids[0] if claim_ids else "claim_example"
+        example_scope = ""
+        for claim in claims:
+            scope = claim.get("scope")
+            if scope and str(scope).strip():
+                example_scope = str(scope).strip()
+                break
+        if not example_scope:
+            example_scope = "short-form writing tasks"
+        labels_json = json.dumps(concept_labels, ensure_ascii=False)
         return (
-            f"Draft evidence relationships for domain pack {domain_pack!r}.\n"
+            f"You are a research relationship-drafting assistant for domain pack "
+            f"{domain_pack!r}.\n"
             f"Claims (JSON): {json.dumps(claims, ensure_ascii=False)}\n"
             f"Concepts (JSON): {json.dumps(concepts, ensure_ascii=False)}\n\n"
+            f"Allowed concept labels for subject_concept and object_concept: "
+            f"{labels_json}\n"
+            f"Valid claim ids for supporting_claim_ids: "
+            f"{json.dumps(claim_ids, ensure_ascii=False)}\n\n"
+            "Rules for each relationship:\n"
+            "- subject_concept and object_concept MUST use allowed concept labels.\n"
+            "- predicate MUST be a short verb phrase.\n"
+            "- stance MUST be supports, contradicts, or qualifies.\n"
+            "- scope MUST be non-empty; prefer the claim scope phrase when present.\n"
+            '- confidence MUST be "low", "medium", or "high" (not a number).\n'
+            "- supporting_claim_ids MUST reference valid claim ids exactly.\n\n"
+            "Positive example (accepted shape):\n"
+            "{\n"
+            '  "subject_concept": "AI assistance",\n'
+            '  "predicate": "supports",\n'
+            '  "object_concept": "ideation",\n'
+            '  "stance": "supports",\n'
+            f'  "scope": "{example_scope}",\n'
+            '  "confidence": "medium",\n'
+            f'  "supporting_claim_ids": ["{example_claim_id}"]\n'
+            "}\n\n"
+            "Negative example (rejected — invalid confidence):\n"
+            "{\n"
+            '  "subject_concept": "brainstorming",\n'
+            '  "predicate": "relates_to",\n'
+            '  "object_concept": "ideation",\n'
+            '  "stance": "supports",\n'
+            f'  "scope": "{example_scope}",\n'
+            '  "confidence": "0.8",\n'
+            f'  "supporting_claim_ids": ["{example_claim_id}"]\n'
+            "}\n\n"
             "Return ONLY valid JSON matching this shape:\n"
             "{\n"
             f'  "task_name": "relationship_drafting",\n'

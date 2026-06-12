@@ -22,6 +22,13 @@ CONFIDENCE_LABEL_TO_REAL: dict[str, float] = {
 
 VALID_STANCES = frozenset({"supports", "contradicts", "qualifies"})
 
+REJECTION_UNKNOWN_CONCEPT = "unknown_concept_label"
+REJECTION_MISSING_SCOPE = "missing_scope"
+REJECTION_INVALID_STANCE = "invalid_stance"
+REJECTION_MISSING_PREDICATE = "missing_predicate"
+REJECTION_MISSING_EVIDENCE = "missing_evidence_claim"
+REJECTION_INVALID_CONFIDENCE = "invalid_confidence_label"
+
 DIVERSITY_CLAIM_FRAGMENT = "reduced semantic diversity"
 
 
@@ -40,10 +47,18 @@ def _resolve_diversity_claim_id(claim_dicts: list[dict[str, Any]]) -> str | None
     return claim_dicts[0]["id"] if claim_dicts else None
 
 
+def _default_claim_id(claim_dicts: list[dict[str, Any]], *, diversity_fallback: bool) -> str | None:
+    if diversity_fallback:
+        return _resolve_diversity_claim_id(claim_dicts)
+    return claim_dicts[0]["id"] if claim_dicts else None
+
+
 def _resolve_supporting_claim_ids(
     candidate: dict[str, Any],
     accepted_claim_ids: set[str],
     claim_dicts: list[dict[str, Any]],
+    *,
+    diversity_fallback: bool = True,
 ) -> list[str]:
     """Resolve fixture claim IDs against accepted claims for the source."""
     supporting = [
@@ -53,8 +68,52 @@ def _resolve_supporting_claim_ids(
     ]
     if supporting:
         return supporting
-    fallback = _resolve_diversity_claim_id(claim_dicts)
+    raw_ids = candidate.get("supporting_claim_ids") or []
+    if raw_ids and raw_ids != ["placeholder"]:
+        return []
+    fallback = _default_claim_id(claim_dicts, diversity_fallback=diversity_fallback)
     return [fallback] if fallback else []
+
+
+def relationship_rejection_diagnostic(
+    candidate: dict[str, Any],
+    *,
+    rejection_reason: str | None = None,
+    concept_labels: set[str] | None = None,
+    accepted_claim_ids: set[str] | None = None,
+) -> str:
+    """Human-readable note for a rejected relationship (probe reporting only)."""
+    reason = rejection_reason or REJECTION_UNKNOWN_CONCEPT
+    allowed = {label.casefold() for label in concept_labels} if concept_labels else set()
+    claim_ids = accepted_claim_ids or set()
+
+    if reason == REJECTION_UNKNOWN_CONCEPT:
+        subject = (candidate.get("subject_concept") or "").strip()
+        obj = (candidate.get("object_concept") or "").strip()
+        for label, field in ((subject, "subject_concept"), (obj, "object_concept")):
+            if label and allowed and label.casefold() not in allowed:
+                return (
+                    f"{field} {label!r} is not in the allowed concept label set "
+                    "for this probe"
+                )
+        return "subject_concept or object_concept is not an allowed concept label"
+    if reason == REJECTION_MISSING_SCOPE:
+        return "scope is missing or empty"
+    if reason == REJECTION_INVALID_STANCE:
+        return "stance must be one of supports, contradicts, or qualifies"
+    if reason == REJECTION_MISSING_PREDICATE:
+        return "predicate is missing or empty"
+    if reason == REJECTION_MISSING_EVIDENCE:
+        raw = candidate.get("supporting_claim_ids") or []
+        if not raw:
+            return "supporting_claim_ids is missing or empty"
+        return (
+            "supporting_claim_ids must reference a probe-local claim id "
+            f"from {sorted(claim_ids)}"
+        )
+    if reason == REJECTION_INVALID_CONFIDENCE:
+        return "confidence must be low, medium, or high"
+    return f"rejected with reason {reason!r}"
 
 
 def validate_relationship_candidates(
@@ -121,6 +180,44 @@ def _pipeline_model_client(config=None):
     return get_model_client(cfg, mode=effective_llm_mode(cfg))
 
 
+def propose_relationship_drafts(
+    claim_dicts: list[dict[str, Any]],
+    concept_dicts: list[dict[str, Any]],
+    domain_pack: str,
+    *,
+    client: Any | None = None,
+    fixture_name: str | None = None,
+    diversity_fallback: bool = True,
+) -> list[dict[str, Any]]:
+    """Propose relationship drafts via the model client without persistence."""
+    config = load_config()
+    model_client = client if client is not None else _pipeline_model_client(config)
+    draft_kwargs: dict[str, Any] = {
+        "claims": claim_dicts,
+        "concepts": concept_dicts,
+        "domain_pack": domain_pack,
+        "schema_version": config.llm_schema_version,
+    }
+    if isinstance(model_client, MockModelClient):
+        draft_kwargs["fixture_name"] = (
+            fixture_name or "relationship_drafting_creativity_diversity.json"
+        )
+    batch = model_client.draft_relationships(**draft_kwargs)
+
+    accepted_claim_ids = {claim["id"] for claim in claim_dicts if claim.get("id")}
+    drafts: list[dict[str, Any]] = []
+    for item in batch.items:
+        draft = item.model_dump()
+        draft["supporting_claim_ids"] = _resolve_supporting_claim_ids(
+            draft,
+            accepted_claim_ids,
+            claim_dicts,
+            diversity_fallback=diversity_fallback,
+        )
+        drafts.append(draft)
+    return drafts
+
+
 def draft_relationships_for_source(
     claim_dicts: list[dict[str, Any]],
     concept_dicts: list[dict[str, Any]],
@@ -129,29 +226,13 @@ def draft_relationships_for_source(
     fixture_name: str | None = None,
 ) -> list[dict[str, Any]]:
     """Propose relationship drafts via the configured model client."""
-    config = load_config()
-    client = _pipeline_model_client(config)
-    draft_kwargs: dict[str, Any] = {
-        "claims": claim_dicts,
-        "concepts": concept_dicts,
-        "domain_pack": domain_pack,
-        "schema_version": config.llm_schema_version,
-    }
-    if isinstance(client, MockModelClient):
-        draft_kwargs["fixture_name"] = (
-            fixture_name or "relationship_drafting_creativity_diversity.json"
-        )
-    batch = client.draft_relationships(**draft_kwargs)
-
-    accepted_claim_ids = {claim["id"] for claim in claim_dicts}
-    drafts: list[dict[str, Any]] = []
-    for item in batch.items:
-        draft = item.model_dump()
-        draft["supporting_claim_ids"] = _resolve_supporting_claim_ids(
-            draft, accepted_claim_ids, claim_dicts
-        )
-        drafts.append(draft)
-    return drafts
+    return propose_relationship_drafts(
+        claim_dicts,
+        concept_dicts,
+        domain_pack,
+        fixture_name=fixture_name,
+        diversity_fallback=True,
+    )
 
 
 def build_relationships_for_source(

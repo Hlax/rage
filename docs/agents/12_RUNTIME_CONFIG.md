@@ -124,6 +124,7 @@ $env:RGE_ALLOW_LIVE_LLM = "1"
 python -m rge.cli model-health
 python -m rge.cli probe-extract-claims
 python -m rge.cli probe-link-concepts
+python -m rge.cli probe-draft-relationships
 ```
 
 Claim probe optional fixture: `--fixture fixtures/sources/live_probe_claim_calibration_short.txt`
@@ -133,6 +134,11 @@ Concept-link probe default input:
 `fixtures/claims/live_probe_concept_link_quality_claim.json`.
 Optional: `--from-report data/reports/live_probes/probe_extract_claims_<stamp>.json`
 or `--chain-extract` (runs claim probe first; variability applies).
+
+Relationship probe default input:
+`fixtures/probes/live_probe_relationship_quality_bundle.json`.
+Optional: `--from-report data/reports/live_probes/probe_link_concepts_<stamp>.json`
+or `--chain-link` (runs concept-link probe first; variability applies).
 
 Reports land in gitignored `data/reports/live_probes/`. Excluded from CI/golden.
 Optional smoke: `python -m pytest -m live_smoke tests/smoke` (requires Ollama).

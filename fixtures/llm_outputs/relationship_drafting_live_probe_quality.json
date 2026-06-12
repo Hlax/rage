@@ -1,0 +1,15 @@
+{
+  "task_name": "relationship_drafting",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "subject_concept": "AI assistance",
+      "predicate": "supports",
+      "object_concept": "ideation",
+      "stance": "supports",
+      "scope": "short-form writing tasks",
+      "confidence": "medium",
+      "supporting_claim_ids": ["claim_live_probe_link_001"]
+    }
+  ]
+}

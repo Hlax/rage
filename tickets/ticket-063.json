@@ -55,5 +55,5 @@
   ],
   "risk_level": "low-medium",
   "rollback_plan": "Revert CLI, probe helper, prompt calibration, fixtures, and tests. No schema migrations.",
-  "status": "ready"
+  "status": "done"
 }

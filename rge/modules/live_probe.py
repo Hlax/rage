@@ -24,6 +24,11 @@ from rge.modules.concept_linker import (
     propose_concept_links,
     validate_concept_links,
 )
+from rge.modules.relationship_builder import (
+    propose_relationship_drafts,
+    relationship_rejection_diagnostic,
+    validate_relationship_candidates,
+)
 
 DEFAULT_PROBE_FIXTURE = (
     Path(__file__).resolve().parents[2]
@@ -43,6 +48,12 @@ DEFAULT_PROBE_CLAIM_FIXTURE = (
     / "fixtures"
     / "claims"
     / "live_probe_concept_link_quality_claim.json"
+)
+DEFAULT_PROBE_RELATIONSHIP_BUNDLE = (
+    Path(__file__).resolve().parents[2]
+    / "fixtures"
+    / "probes"
+    / "live_probe_relationship_quality_bundle.json"
 )
 PROBE_CHUNK_ID = "chunk_live_probe_001"
 PROBE_SOURCE_ID = "src_live_probe_001"
@@ -402,5 +413,243 @@ def run_probe_link_concepts(
         base=base,
         reports_dir=reports_dir,
         filename_prefix="probe_link_concepts",
+        report=report,
+    )
+
+
+def resolve_relationship_bundle(path: Path | None, root: Path | None = None) -> Path:
+    base = root if root is not None else repo_root()
+    bundle = path if path is not None else DEFAULT_PROBE_RELATIONSHIP_BUNDLE
+    if not bundle.is_absolute():
+        bundle = base / bundle
+    return bundle.resolve()
+
+
+def concept_dicts_from_links(
+    concept_links: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Build probe-local concept dicts from accepted concept-link labels."""
+    concepts: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for link in concept_links:
+        label = str(link.get("concept_label", "")).strip()
+        if not label or label.casefold() in seen:
+            continue
+        seen.add(label.casefold())
+        concepts.append(
+            {"id": f"concept_live_probe_{len(concepts) + 1:03d}", "label": label}
+        )
+    return concepts
+
+
+def load_default_relationship_bundle(
+    root: Path | None = None,
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]]:
+    bundle_path = resolve_relationship_bundle(None, root)
+    if not bundle_path.is_file():
+        raise LiveProbeError(f"default relationship bundle not found: {bundle_path}")
+    return load_relationship_bundle(bundle_path, root)
+
+
+def load_relationship_bundle(
+    bundle_path: Path,
+    root: Path | None = None,
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]]:
+    base = root if root is not None else repo_root()
+    path = bundle_path if bundle_path.is_absolute() else (base / bundle_path)
+    path = path.resolve()
+    if not path.is_file():
+        raise LiveProbeError(f"relationship bundle not found: {path}")
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    claim = dict(payload.get("claim") or {})
+    if not claim.get("id"):
+        claim["id"] = PROBE_CLAIM_ID
+    concept_links = list(payload.get("concept_links") or [])
+    concepts = list(payload.get("concepts") or [])
+    if not concepts and concept_links:
+        concepts = concept_dicts_from_links(concept_links)
+    if not claim or not concepts:
+        raise LiveProbeError("relationship bundle must include claim and concepts")
+    return claim, concept_links, concepts
+
+
+def load_relationship_inputs_from_link_report(
+    report_path: Path,
+    root: Path | None = None,
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]], str]:
+    """Load claim, links, and concepts from a probe-link-concepts report."""
+    base = root if root is not None else repo_root()
+    path = report_path if report_path.is_absolute() else (base / report_path)
+    path = path.resolve()
+    if not path.is_file():
+        raise LiveProbeError(f"probe report not found: {path}")
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if payload.get("command") != "probe-link-concepts":
+        raise LiveProbeError(
+            f"expected probe-link-concepts report, got {payload.get('command')!r}"
+        )
+    accepted_links = payload.get("accepted") or []
+    if not accepted_links:
+        raise LiveProbeError("probe-link-concepts report contains no accepted links")
+
+    input_claims = payload.get("input_claims") or []
+    if not input_claims:
+        raise LiveProbeError("probe-link-concepts report missing input_claims")
+    claim = dict(input_claims[0])
+    if not claim.get("id"):
+        claim = assign_probe_claim_ids([claim])[0]
+
+    concepts = concept_dicts_from_links(accepted_links)
+    rel = (
+        str(path.relative_to(base)).replace("\\", "/")
+        if path.is_relative_to(base)
+        else str(path)
+    )
+    return claim, accepted_links, concepts, rel
+
+
+def run_probe_draft_relationships(
+    *,
+    domain_pack: str = DEFAULT_PROBE_DOMAIN,
+    bundle_fixture: Path | None = None,
+    from_report: Path | None = None,
+    chain_link: bool = False,
+    chain_fixture_source: Path | None = None,
+    chain_claim_fixture: Path | None = None,
+    root: Path | None = None,
+    reports_dir: Path | None = None,
+    config: RgeConfig | None = None,
+    client: Any | None = None,
+    skip_health_check: bool = False,
+) -> dict[str, Any]:
+    """Run live relationship drafting on probe inputs; write report only (no DB)."""
+    base = root if root is not None else repo_root()
+    command = "probe-draft-relationships"
+    cfg = assert_live_probe_env(config, command=command)
+    health = assert_ollama_health(cfg) if not skip_health_check else {}
+
+    input_source = "embedded_bundle"
+    from_report_path: str | None = None
+    chain_link_report_path: str | None = None
+    input_claim: dict[str, Any]
+    input_concept_links: list[dict[str, Any]]
+    input_concepts: list[dict[str, Any]]
+
+    if chain_link:
+        link_report = run_probe_link_concepts(
+            domain_pack=domain_pack,
+            claim_fixture=chain_claim_fixture,
+            chain_extract=chain_fixture_source is not None,
+            chain_fixture_source=chain_fixture_source,
+            root=base,
+            reports_dir=reports_dir,
+            config=cfg,
+            client=client,
+            skip_health_check=True,
+        )
+        input_source = "chain_link"
+        chain_link_report_path = link_report.get("report_path")
+        accepted_links = link_report.get("accepted") or []
+        if not accepted_links:
+            raise LiveProbeError(
+                "chain-link produced no accepted concept links for relationship drafting"
+            )
+        input_claims = link_report.get("input_claims") or []
+        if not input_claims:
+            raise LiveProbeError("chain-link report missing input_claims")
+        input_claim = dict(input_claims[0])
+        input_concept_links = accepted_links
+        input_concepts = concept_dicts_from_links(accepted_links)
+    elif from_report is not None:
+        input_claim, input_concept_links, input_concepts, from_report_path = (
+            load_relationship_inputs_from_link_report(from_report, base)
+        )
+        input_source = "from_report"
+    elif bundle_fixture is not None:
+        input_claim, input_concept_links, input_concepts = load_relationship_bundle(
+            bundle_fixture,
+            base,
+        )
+        input_source = "bundle_fixture"
+    else:
+        input_claim, input_concept_links, input_concepts = (
+            load_default_relationship_bundle(base)
+        )
+        input_source = "embedded_bundle"
+
+    claim_dicts = [input_claim]
+    concept_labels = {concept["label"] for concept in input_concepts}
+    accepted_claim_ids = {input_claim["id"]}
+
+    model_client = client or get_model_client(cfg, mode="ollama")
+    try:
+        proposed = propose_relationship_drafts(
+            claim_dicts,
+            input_concepts,
+            domain_pack,
+            client=model_client,
+            fixture_name="relationship_drafting_live_probe_quality.json",
+            diversity_fallback=False,
+        )
+    except OllamaStructuredCallError as exc:
+        raise LiveProbeError(str(exc)) from exc
+
+    validation = validate_relationship_candidates(
+        proposed,
+        accepted_claim_ids=accepted_claim_ids,
+        concept_labels=concept_labels,
+    )
+    accepted = validation["accepted"]
+    rejected = validation["rejected"]
+    for item in rejected:
+        item["validation_diagnostic"] = relationship_rejection_diagnostic(
+            item,
+            rejection_reason=item.get("rejection_reason"),
+            concept_labels=concept_labels,
+            accepted_claim_ids=accepted_claim_ids,
+        )
+
+    total = len(accepted) + len(rejected)
+    if total == 0:
+        raise LiveProbeError(
+            "Live probe received no parseable relationship candidates from the model."
+        )
+
+    created_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    report: dict[str, Any] = {
+        "report_type": "live_probe_report",
+        "command": command,
+        "status": "ok",
+        "probe": "relationship_drafting",
+        "created_at": created_at,
+        "input_source": input_source,
+        "from_report_path": from_report_path,
+        "chain_link_report_path": chain_link_report_path,
+        "input_claim": input_claim,
+        "input_concept_links": input_concept_links,
+        "input_concepts": input_concepts,
+        "domain_pack": domain_pack,
+        "concept_labels_allowed": sorted(concept_labels),
+        "accepted_claim_ids": sorted(accepted_claim_ids),
+        "effective_llm_mode": effective_llm_mode(cfg),
+        "provider": model_client.provider,
+        "model": getattr(model_client, "model", None),
+        "base_url": getattr(model_client, "base_url", None),
+        "schema_version": cfg.llm_schema_version,
+        "health": health,
+        "accepted_count": len(accepted),
+        "rejected_count": len(rejected),
+        "accepted": accepted,
+        "rejected": rejected,
+        "db_writes": False,
+        "default_db_path": str(DEFAULT_DB_PATH).replace("\\", "/"),
+    }
+
+    return _write_live_probe_report(
+        base=base,
+        reports_dir=reports_dir,
+        filename_prefix="probe_draft_relationships",
         report=report,
     )
