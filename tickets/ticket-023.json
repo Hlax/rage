@@ -1,0 +1,38 @@
+{
+  "id": "ticket-023",
+  "title": "Validate improvement tickets for builder consumption (Golden Test 21)",
+  "problem": "ticket-022 generates improvement tickets from run report failure modes, but Golden Test 21 requires every ticket to include the full builder-consumable field set (title, problem, evidence, affected_modules, expected_files, acceptance_criteria, test_plan, non_goals, risk_level, rollback_plan).",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 21: improvement tickets can be consumed by builder agents.",
+    "docs/agents/08_REPORTING_SPEC.md section 14: improvement ticket reports.",
+    "agent_reports/2026-06-12_phase-1_ticket-022_improvement-tickets.md sections 11–13."
+  ],
+  "affected_modules": [
+    "rge/modules/ticket_writer.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/ticket_writer.py",
+    "tests/golden/test_21_builder_ticket_consumption.py"
+  ],
+  "acceptance_criteria": [
+    "Every generated improvement ticket includes all Golden Test 21 required fields.",
+    "Tickets are specific enough to convert into a branch task with testable acceptance criteria.",
+    "pytest tests/golden/test_21_builder_ticket_consumption.py passes.",
+    "Existing golden tests still pass (93+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_21_builder_ticket_consumption.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not implement LangGraph or live web discovery.",
+    "Do not add public write routes.",
+    "Do not implement builder merge gating (Golden Test 22)."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert branch phase-1/ticket-023-builder-ticket-consumption.",
+  "status": "proposed"
+}

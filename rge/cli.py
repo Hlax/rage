@@ -281,6 +281,46 @@ def _cmd_generate_run_report(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_generate_improvement_tickets(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import ImprovementTicketRepository
+    from rge.modules.run_evaluator import GOLDEN_RUN_ID
+    from rge.modules.ticket_writer import generate_improvement_tickets
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        output_dir = Path(args.output_dir) if args.output_dir else None
+        result = generate_improvement_tickets(
+            conn,
+            run_id=args.run_id or GOLDEN_RUN_ID,
+            output_dir=output_dir,
+        )
+        payload = {
+            "status": result["status"],
+            "command": "generate-improvement-tickets",
+            "run_id": result["run_id"],
+            "ticket_ids": result["ticket_ids"],
+            "ticket_count": ImprovementTicketRepository(conn).count_for_run(
+                result["run_id"]
+            ),
+            "output_path": result.get("output_path"),
+            "tickets": result.get("tickets"),
+        }
+        print(json.dumps(payload, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "generate-improvement-tickets",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_export_public(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.modules.card_exporter import export_public_cards
@@ -1046,6 +1086,29 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional output directory for run_report_latest.json (for tests).",
     )
     run_report_parser.set_defaults(func=_cmd_generate_run_report)
+
+    improvement_parser = subparsers.add_parser(
+        "generate-improvement-tickets",
+        help="Generate improvement tickets from run report failure modes.",
+        description=(
+            "Read a persisted run report, map top_failure_modes to actionable "
+            "draft improvement tickets, persist them, and write "
+            "improvement_ticket_latest.json."
+        ),
+    )
+    improvement_parser.add_argument(
+        "--run-id",
+        help="Research run ID (defaults to golden Test 19 run ID).",
+    )
+    improvement_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    improvement_parser.add_argument(
+        "--output-dir",
+        help="Optional output directory for improvement_ticket_latest.json (for tests).",
+    )
+    improvement_parser.set_defaults(func=_cmd_generate_improvement_tickets)
 
     export_parser = subparsers.add_parser(
         "export-public",
