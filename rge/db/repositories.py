@@ -1371,6 +1371,144 @@ def _row_to_ontology_proposal(row: sqlite3.Row) -> OntologyProposalRecord:
     )
 
 
+def make_domain_proposal_id(domain_id: str) -> str:
+    digest = sha256_hex(domain_id)
+    return f"dpr_{digest[:16]}"
+
+
+@dataclass(frozen=True)
+class DomainProposalRecord:
+    id: str
+    domain_id: str
+    status: str
+    parent_domains_json: str
+    overlap_domains_json: str
+    specialized_terms_json: str
+    scoring_overlay_proposals_json: str
+    evidence_claims_json: str
+    threshold_report_json: str
+    proposal_json: str
+    created_at: str
+    updated_at: str
+
+
+class DomainProposalRepository:
+    """Persist and read ``domain_proposals`` rows."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def get_by_id(self, proposal_id: str) -> DomainProposalRecord | None:
+        row = self._conn.execute(
+            """
+            SELECT id, domain_id, status, parent_domains_json, overlap_domains_json,
+                   specialized_terms_json, scoring_overlay_proposals_json,
+                   evidence_claims_json, threshold_report_json, created_at, updated_at
+            FROM domain_proposals
+            WHERE id = ?
+            """,
+            (proposal_id,),
+        ).fetchone()
+        return _row_to_domain_proposal(row) if row else None
+
+    def get_latest_for_domain(self, domain_id: str) -> DomainProposalRecord | None:
+        row = self._conn.execute(
+            """
+            SELECT id, domain_id, status, parent_domains_json, overlap_domains_json,
+                   specialized_terms_json, scoring_overlay_proposals_json,
+                   evidence_claims_json, threshold_report_json, created_at, updated_at
+            FROM domain_proposals
+            WHERE domain_id = ?
+            ORDER BY created_at DESC
+            LIMIT 1
+            """,
+            (domain_id,),
+        ).fetchone()
+        return _row_to_domain_proposal(row) if row else None
+
+    def count(self) -> int:
+        row = self._conn.execute("SELECT COUNT(*) FROM domain_proposals").fetchone()
+        return int(row[0]) if row else 0
+
+    def insert(
+        self,
+        *,
+        domain_id: str,
+        status: str,
+        parent_domains: list[str],
+        overlap_domains: list[str],
+        specialized_terms: list[str],
+        scoring_overlay_proposals: list[str],
+        evidence_claims: list[str],
+        threshold_report: dict[str, Any],
+        proposal: dict[str, Any],
+    ) -> DomainProposalRecord:
+        now = utc_now_iso()
+        proposal_id = make_domain_proposal_id(domain_id)
+        self._conn.execute(
+            """
+            INSERT INTO domain_proposals (
+                id, domain_id, status, parent_domains_json, overlap_domains_json,
+                specialized_terms_json, scoring_overlay_proposals_json,
+                evidence_claims_json, threshold_report_json, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO NOTHING
+            """,
+            (
+                proposal_id,
+                domain_id,
+                status,
+                json.dumps(parent_domains),
+                json.dumps(overlap_domains),
+                json.dumps(specialized_terms),
+                json.dumps(scoring_overlay_proposals),
+                json.dumps(evidence_claims),
+                json.dumps(threshold_report),
+                now,
+                now,
+            ),
+        )
+        self._conn.commit()
+        record = self.get_by_id(proposal_id)
+        assert record is not None
+        return record
+
+
+def _row_to_domain_proposal(row: sqlite3.Row) -> DomainProposalRecord:
+    threshold_report = json.loads(row["threshold_report_json"])
+    proposal = {
+        "report_type": "domain_proposal_report",
+        "domain_id": row["domain_id"],
+        "status": row["status"],
+        "thresholds": threshold_report.get("thresholds", threshold_report),
+        "parent_domains": json.loads(row["parent_domains_json"]),
+        "overlap_domains": json.loads(row["overlap_domains_json"]),
+        "specialized_terms": json.loads(row["specialized_terms_json"]),
+        "scoring_overlay_proposals": json.loads(
+            row["scoring_overlay_proposals_json"]
+        ),
+        "evidence_claims": json.loads(row["evidence_claims_json"]),
+        "reason_parent_domain_is_underspecified": threshold_report.get(
+            "reason_parent_domain_is_underspecified", ""
+        ),
+        "ontology_rationale": threshold_report.get("ontology_rationale", ""),
+    }
+    return DomainProposalRecord(
+        id=row["id"],
+        domain_id=row["domain_id"],
+        status=row["status"],
+        parent_domains_json=row["parent_domains_json"],
+        overlap_domains_json=row["overlap_domains_json"],
+        specialized_terms_json=row["specialized_terms_json"],
+        scoring_overlay_proposals_json=row["scoring_overlay_proposals_json"],
+        evidence_claims_json=row["evidence_claims_json"],
+        threshold_report_json=row["threshold_report_json"],
+        proposal_json=json.dumps(proposal),
+        created_at=row["created_at"],
+        updated_at=row["updated_at"],
+    )
+
+
 def persist_relationship_score_update(
     conn: sqlite3.Connection,
     *,

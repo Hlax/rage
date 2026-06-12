@@ -30,6 +30,7 @@ def test_migration_harness_creates_schema(temp_db: Path) -> None:
             "0004_cluster_reports",
             "0005_theory_candidates",
             "0006_ontology_proposals",
+            "0007_domain_proposals",
         ]
         tables = {
             row[0]

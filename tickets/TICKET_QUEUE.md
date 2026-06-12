@@ -46,7 +46,17 @@ superseded
 | 17 | ticket-017 | done | Add mock theory generator (Golden Test 15) | `phase-1/ticket-017-theory-generator` | `agent_reports/2026-06-12_phase-1_ticket-017_theory-generator.md` |
 | 18 | ticket-018 | done | Add contract-respecting question generation (Golden Test 16) | `phase-1/ticket-018-question-generation` | `agent_reports/2026-06-12_phase-1_ticket-018_question-generation.md` |
 | 19 | ticket-019 | done | Add ontology pressure report (Golden Test 17) | `phase-1/ticket-019-ontology-pressure` | `agent_reports/2026-06-12_phase-1_ticket-019_ontology-pressure.md` |
-| 20 | ticket-020 | proposed | Add domain proposal threshold trigger (Golden Test 18) | | |
+| 20 | ticket-020 | done | Add domain proposal threshold trigger (Golden Test 18) | `phase-1/ticket-020-domain-proposal` | `agent_reports/2026-06-12_phase-1_ticket-020_domain-proposal.md` |
+| 21 | ticket-021 | proposed | Add research run report (Golden Test 19) | | |
+
+## Queue Notes (2026-06-12, ticket-020 agent)
+
+- ticket-020 implemented `generate-domain-proposal` with migration `0007`,
+  deterministic golden padding (40 claims / 8 sources / 15 specialized terms /
+  3 mismatch signals), draft domain proposals, and Golden Test 18 (4 tests).
+  All 85 golden tests pass without Ollama.
+- Pre-ticket-020 audit report included in merge.
+- ticket-021 proposes research run report for Golden Test 19.
 
 ## Queue Notes (2026-06-12, ticket-019 agent)
 
@@ -167,7 +177,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-020 (proposed; awaiting review)
+ticket-021 (proposed; awaiting review)
 ```
 
 ## Queue Rules

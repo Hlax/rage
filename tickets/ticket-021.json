@@ -1,0 +1,40 @@
+{
+  "id": "ticket-021",
+  "title": "Add research run report (Golden Test 19)",
+  "problem": "ticket-020 completes domain proposal gating, but deterministic research run reporting is not yet implemented. Golden Test 19 requires every research run to produce a machine-readable run report with failure modes.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 19: every research run produces a run report.",
+    "docs/agents/08_REPORTING_SPEC.md section 14: research run reports.",
+    "agent_reports/2026-06-12_phase-1_ticket-020_domain-proposal.md sections 11–13."
+  ],
+  "affected_modules": [
+    "rge/modules/run_reporter.py",
+    "rge/db/repositories.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/run_reporter.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "tests/golden/test_19_run_report.py"
+  ],
+  "acceptance_criteria": [
+    "Deterministic run report generation after fixture-mode research spine without Ollama.",
+    "Report JSON includes required counters and machine-readable top_failure_modes.",
+    "pytest tests/golden/test_19_run_report.py passes.",
+    "Existing golden tests still pass (85+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_19_run_report.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not implement LangGraph or live web discovery.",
+    "Do not add public write routes."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert branch phase-1/ticket-021-run-report.",
+  "status": "proposed"
+}
