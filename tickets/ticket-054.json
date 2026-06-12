@@ -1,0 +1,45 @@
+{
+  "id": "ticket-054",
+  "title": "Operator verify docs and Windows local verify reliability",
+  "problem": "ticket-051 implemented research verify, but AGENTS.md and README.md still list only decomposed pytest/safety commands. Windows audits repeatedly hit PATH confusion when research is not on PATH. Local Windows verification also failed: nested pytest subprocess capture in test_ci_golden_gate raised WinError 6, and verify appeared to hang with no progress output.",
+  "evidence": [
+    "agent_reports/2026-06-12_principal-audit-post-ticket-052-loop-readiness.md",
+    "agent_reports/2026-06-12_principal-audit-post-ticket-053.md",
+    "rge/modules/verify_runner.py",
+    "tickets/ticket-051.json"
+  ],
+  "affected_modules": [
+    "AGENTS.md",
+    "README.md",
+    "tests/unit/test_ci_golden_gate.py",
+    "rge/modules/verify_runner.py"
+  ],
+  "expected_files": [
+    "AGENTS.md",
+    "README.md",
+    "tests/unit/test_ci_golden_gate.py",
+    "rge/modules/verify_runner.py",
+    "tickets/ticket-054.json",
+    "agent_reports/2026-06-12_phase-2_ticket-054_operator-verify-docs.md"
+  ],
+  "acceptance_criteria": [
+    "AGENTS.md default verification leads with python -m rge.cli verify and documents --skip-site.",
+    "README operator quickstart and verification table document verify and Windows module-form fallback.",
+    "Docs do not claim bare research verify works when Scripts dir is off PATH.",
+    "python -m pytest -q passes on Windows without WinError 6 in test_default_pytest_deselects_live_smoke.",
+    "python -m rge.cli verify --skip-site emits stderr progress while subprocess checks run."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_ci_golden_gate.py -q",
+    "RGE_LLM_MODE=mock python -m pytest -q",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Do not change CI workflow definitions.",
+    "Do not promote improvement drafts.",
+    "Do not update unrelated README status counts."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert AGENTS.md and README.md doc edits.",
+  "status": "done"
+}

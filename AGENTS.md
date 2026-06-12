@@ -77,16 +77,41 @@ See `docs/agents/11_AGENT_OPERATING_PROTOCOL.md` for the full workflow.
 
 ## Default Verification Commands
 
-Use the strongest available verification for the current phase:
+Use the strongest available verification for the current phase.
+
+**Preferred:** one mock-only suite (golden tests, full pytest, safety audit, optional site build):
+
+```bash
+export RGE_LLM_MODE=mock
+python -m rge.cli verify
+```
+
+```powershell
+# PowerShell
+$env:RGE_LLM_MODE = "mock"
+python -m rge.cli verify
+```
+
+Add `--skip-site` when Node.js is unavailable or you only need Python checks:
+
+```bash
+python -m rge.cli verify --skip-site
+```
+
+On Windows, `research` may not be on PATH after `pip install -e ".[dev]"`. Use
+`python -m rge.cli` for all CLI commands (including `verify`); do not treat a
+missing `research` command as a verification failure when the module form works.
+
+Individual checks (same gates, decomposed):
 
 ```bash
 pytest
 pytest tests/golden
+python -m rge.modules.safety_auditor --audit full
+cd apps/public-site && npm run build
 research --help
 research run --topic "Does AI improve creative output while reducing diversity?" --domain creativity --fixture-mode
 research export-public --limit 100
-python -m rge.modules.safety_auditor --audit full
-cd apps/public-site && npm run build
 ```
 
 If a command is not available yet, report that clearly instead of pretending it passed.

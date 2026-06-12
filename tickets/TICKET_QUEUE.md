@@ -85,6 +85,13 @@ superseded
 | 51 | ticket-051 | done | Implement research verify mock-only verification suite | `phase-2/ticket-051-research-verify` | `agent_reports/2026-06-12_phase-2_ticket-051_research-verify.md` |
 | 52 | ticket-052 | done | Persist char_start and char_end for accepted claim quote spans | `phase-2/ticket-052-quote-span-offsets` | `agent_reports/2026-06-12_phase-2_ticket-052_quote-span-offsets.md` |
 | 53 | ticket-053 | done | Loop rehearsal — stale draft hygiene and actionable improvement draft drill | `phase-2/ticket-053-loop-rehearsal` | `agent_reports/2026-06-12_phase-2_ticket-053_loop-rehearsal.md` |
+| 54 | ticket-054 | done | Operator verify docs and Windows local verify reliability | `phase-2/ticket-054-operator-verify-docs` | `agent_reports/2026-06-12_phase-2_ticket-054_operator-verify-docs.md` |
+
+## Queue Notes (2026-06-12, ticket-054 agent)
+
+- AGENTS.md and README.md lead with `python -m rge.cli verify` (and `--skip-site`).
+- Windows PATH fallback documented; module form is canonical when `research` is missing.
+- Windows repair: `test_default_pytest_deselects_live_smoke` uses temp-file subprocess capture; `verify_runner` prints stderr progress per check.
 
 ## Queue Notes (2026-06-12, ticket-053 agent)
 

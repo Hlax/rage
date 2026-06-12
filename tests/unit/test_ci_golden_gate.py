@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -47,13 +48,25 @@ def test_pyproject_excludes_live_smoke_by_default() -> None:
 
 
 def test_default_pytest_deselects_live_smoke() -> None:
-    result = subprocess.run(
-        [sys.executable, "-m", "pytest", "--collect-only", "-q"],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    combined = result.stdout + result.stderr
+    # Redirect nested pytest output to temp files instead of capture_output=True.
+    # On Windows, capture_output inside an active pytest session can raise WinError 6
+    # when duplicating inherited handles.
+    with tempfile.TemporaryDirectory() as tmpdir:
+        stdout_path = Path(tmpdir) / "stdout.txt"
+        stderr_path = Path(tmpdir) / "stderr.txt"
+        with stdout_path.open("w", encoding="utf-8") as stdout_f, stderr_path.open(
+            "w", encoding="utf-8"
+        ) as stderr_f:
+            result = subprocess.run(
+                [sys.executable, "-m", "pytest", "--collect-only", "-q"],
+                cwd=REPO_ROOT,
+                stdin=subprocess.DEVNULL,
+                stdout=stdout_f,
+                stderr=stderr_f,
+                check=False,
+            )
+        combined = stdout_path.read_text(encoding="utf-8") + stderr_path.read_text(
+            encoding="utf-8"
+        )
     assert result.returncode == pytest.ExitCode.OK
     assert "tests/smoke/" not in combined

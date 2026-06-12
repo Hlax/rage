@@ -49,7 +49,10 @@ python -m pip install -e ".[dev]"
 cd apps/public-site && npm install
 ```
 
-On Windows, use `python -m rge.cli` when `research.exe` is not on PATH.
+On Windows, `research.exe` is often not on PATH after editable install. Use
+`python -m rge.cli <command>` (for example `python -m rge.cli verify`) instead
+of bare `research …`. A missing `research` command is a PATH issue, not a failed
+verification suite, when the module form succeeds.
 
 ## Operator Quickstart
 
@@ -65,12 +68,31 @@ $env:RGE_LLM_MODE = "mock"
 export RGE_LLM_MODE=mock
 ```
 
-Run the default verification suite:
+Run the default verification suite (preferred — one command):
+
+```bash
+export RGE_LLM_MODE=mock
+python -m rge.cli verify
+```
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+python -m rge.cli verify
+```
+
+Use `--skip-site` for Python-only checks when Node.js is unavailable:
+
+```bash
+python -m rge.cli verify --skip-site
+```
+
+Individual checks (same gates, decomposed):
 
 ```bash
 python -m pytest tests/golden
 python -m pytest
 python -m rge.modules.safety_auditor --audit full
+cd apps/public-site && npm run build
 ```
 
 Run the full fixture-mode MVP pipeline:
@@ -94,12 +116,17 @@ After ticket-034, repeated fixture-mode runs leave `git status --short` empty. R
 
 | Command | Purpose |
 |---|---|
-| `python -m pytest tests/golden` | Builder merge gate (123 tests, mock LLM) |
+| `python -m rge.cli verify` | **Preferred:** mock-only golden + pytest + safety audit + site build |
+| `python -m rge.cli verify --skip-site` | Same, without npm build (Python checks only) |
+| `python -m pytest tests/golden` | Builder merge gate (mock LLM) |
 | `python -m pytest` | Full test suite |
 | `python -m rge.modules.safety_auditor --audit full` | Deterministic safety audit |
 | `python -m rge.cli run --fixture-mode ...` | End-to-end fixture MVP |
 | `python -m rge.cli export-public --limit 100` | Export public-safe cards |
 | `cd apps/public-site && npm run build` | Static public site build |
+
+On Windows, prefer `python -m rge.cli verify` over `research verify` when the
+`research` script is not on PATH.
 
 Golden tests always run in mock LLM mode and do not require Ollama.
 

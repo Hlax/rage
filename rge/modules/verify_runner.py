@@ -40,6 +40,11 @@ def run_verification(
         env = os.environ.copy()
         env.update(_MOCK_ENV)
         env.update(command.get("env", {}))
+        print(
+            f"[verify] running {command['name']}...",
+            file=sys.stderr,
+            flush=True,
+        )
         completed = runner(
             command["argv"],
             cwd=command["cwd"],
@@ -50,6 +55,12 @@ def run_verification(
         )
         passed = completed.returncode == 0
         all_passed = all_passed and passed
+        print(
+            f"[verify] {command['name']}: "
+            f"{'ok' if passed else 'FAIL'} (exit {completed.returncode})",
+            file=sys.stderr,
+            flush=True,
+        )
         results.append(
             {
                 "name": command["name"],
