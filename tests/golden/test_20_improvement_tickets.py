@@ -157,74 +157,132 @@ def _generate_run_and_tickets(db_path: Path, report_dir: Path) -> None:
     )
 
 
-def test_improvement_ticket_generated_from_overgeneralized_rejections(
+def test_golden_covered_overgeneralized_scope_does_not_generate_improvement_ticket(
     temp_db: Path, report_dir: Path
 ) -> None:
     from rge.db.connection import connect
     from rge.db.repositories import ImprovementTicketRepository
+    from rge.modules.run_evaluator import build_run_report
 
     _prepare_rejection_spine(temp_db)
-    _generate_run_and_tickets(temp_db, report_dir)
+    from rge.cli import main
+
+    assert (
+        main(
+            [
+                "generate-run-report",
+                "--run-id",
+                GOLDEN_RUN_ID,
+                "--topic",
+                GOLDEN_TOPIC,
+                "--domain",
+                "creativity",
+                "--db",
+                str(temp_db),
+                "--output-dir",
+                str(report_dir),
+            ]
+        )
+        == 0
+    )
+
+    conn = connect(temp_db)
+    try:
+        report = build_run_report(
+            conn,
+            run_id=GOLDEN_RUN_ID,
+            topic=GOLDEN_TOPIC,
+            domain_pack="creativity",
+        )
+        reasons = {mode["reason"] for mode in report["top_failure_modes"]}
+        assert "overgeneralized_scope" in reasons
+    finally:
+        conn.close()
+
+    assert (
+        main(
+            [
+                "generate-improvement-tickets",
+                "--run-id",
+                GOLDEN_RUN_ID,
+                "--db",
+                str(temp_db),
+                "--output-dir",
+                str(report_dir),
+            ]
+        )
+        == 0
+    )
+
+    output_file = report_dir / "improvement_ticket_latest.json"
+    assert output_file.is_file()
+    assert json.loads(output_file.read_text(encoding="utf-8")) == []
 
     conn = connect(temp_db)
     try:
         repo = ImprovementTicketRepository(conn)
-        assert repo.count_for_run(GOLDEN_RUN_ID) >= 1
-        records = repo.list_for_run(GOLDEN_RUN_ID)
-        overgeneralized = next(
-            (
-                json.loads(record.ticket_json)
-                for record in records
-                if "overgeneralized_scope" in record.evidence_json
-            ),
-            None,
-        )
-        assert overgeneralized is not None
-        assert overgeneralized["type"] == "improvement_ticket"
-        assert overgeneralized["priority"] == "high"
-        assert overgeneralized["title"] == GOLDEN_OVERGENERALIZED_TITLE
-        assert overgeneralized["problem"]
-        assert overgeneralized["evidence"]
-        assert any(
-            "run_report:" in item and "overgeneralized_scope_count=" in item
-            for item in overgeneralized["evidence"]
-        )
-        assert overgeneralized["affected_modules"]
-        assert overgeneralized["expected_files"]
-        assert overgeneralized["acceptance_criteria"]
-        assert overgeneralized["test_plan"]
-        assert overgeneralized["non_goals"]
-        assert overgeneralized["risk_level"] == "medium"
-        assert overgeneralized["rollback_plan"]
-        assert overgeneralized["status"] == "draft"
+        for record in repo.list_for_run(GOLDEN_RUN_ID):
+            ticket = json.loads(record.ticket_json)
+            assert ticket.get("failure_reason") != "overgeneralized_scope"
+            assert ticket["title"] != GOLDEN_OVERGENERALIZED_TITLE
     finally:
         conn.close()
 
+
+def test_improvement_ticket_generated_from_weak_concept_mapping(
+    temp_db: Path, report_dir: Path
+) -> None:
+    from rge.modules.ticket_writer import write_improvement_tickets
+
+    tickets = write_improvement_tickets(
+        {
+            "run_id": "run_actionable_weak_concept",
+            "top_failure_modes": [{"reason": "weak_concept_mapping", "count": 1}],
+        }
+    )
+    assert len(tickets) == 1
+    ticket = tickets[0]
+    assert ticket["type"] == "improvement_ticket"
+    assert ticket["priority"] == "medium"
+    assert ticket["title"] == "Improve concept mapping validation"
+    assert ticket["failure_reason"] == "weak_concept_mapping"
+    assert ticket["problem"]
+    assert any(
+        "run_report:" in item and "weak_concept_mapping_count=" in item
+        for item in ticket["evidence"]
+    )
+    assert ticket["affected_modules"]
+    assert ticket["expected_files"]
+    assert ticket["acceptance_criteria"]
+    assert ticket["test_plan"]
+    assert ticket["non_goals"]
+    assert ticket["risk_level"] == "medium"
+    assert ticket["rollback_plan"]
+    assert ticket["status"] == "draft"
+
     output_file = report_dir / "improvement_ticket_latest.json"
+    report_dir.mkdir(parents=True, exist_ok=True)
+    output_file.write_text(json.dumps(tickets, indent=2) + "\n", encoding="utf-8")
     assert output_file.is_file()
 
 
 def test_improvement_tickets_are_actionable_not_vague(
     temp_db: Path, report_dir: Path
 ) -> None:
-    from rge.db.connection import connect
+    from rge.modules.ticket_writer import write_improvement_tickets
 
-    _prepare_rejection_spine(temp_db)
-    _generate_run_and_tickets(temp_db, report_dir)
-
-    conn = connect(temp_db)
-    try:
-        rows = conn.execute(
-            "SELECT title, problem, acceptance_criteria_json, test_plan_json FROM improvement_tickets"
-        ).fetchall()
-        assert rows
-        for row in rows:
-            assert len(row["title"]) >= 10
-            assert len(row["problem"]) >= 20
-            assert json.loads(row["acceptance_criteria_json"])
-            assert json.loads(row["test_plan_json"])
-    finally:
-        conn.close()
+    tickets = write_improvement_tickets(
+        {
+            "run_id": GOLDEN_RUN_ID,
+            "top_failure_modes": [{"reason": "weak_concept_mapping", "count": 1}],
+        }
+    )
+    assert tickets
+    for ticket in tickets:
+        assert len(ticket["title"]) >= 10
+        assert len(ticket["problem"]) >= 20
+        assert ticket["acceptance_criteria"]
+        assert ticket["test_plan"]
 
 
 def test_generate_improvement_tickets_is_idempotent(
@@ -250,6 +308,7 @@ def test_generate_improvement_tickets_is_idempotent(
     conn = connect(temp_db)
     try:
         count_after_first = ImprovementTicketRepository(conn).count_for_run(GOLDEN_RUN_ID)
+        assert count_after_first == 0
         assert main(args) == 0
         assert (
             ImprovementTicketRepository(conn).count_for_run(GOLDEN_RUN_ID)
@@ -283,11 +342,9 @@ def test_generate_improvement_tickets_cli_emits_machine_readable_json(
     )
     payload = json.loads(capsys.readouterr().out)
     assert payload["command"] == "generate-improvement-tickets"
-    assert payload["status"] in {"generated", "already_generated"}
-    assert payload["ticket_ids"][0].startswith("imp_")
-    assert payload["tickets"]
-    titles = {ticket["title"] for ticket in payload["tickets"]}
-    assert GOLDEN_OVERGENERALIZED_TITLE in titles
+    assert payload["status"] == "skipped_golden_covered"
+    assert payload["ticket_ids"] == []
+    assert payload["tickets"] == []
 
 
 def test_golden_covered_missing_quote_span_does_not_generate_improvement_ticket(
@@ -350,21 +407,31 @@ def test_golden_covered_missing_quote_span_does_not_generate_improvement_ticket(
     conn = connect(temp_db)
     try:
         repo = ImprovementTicketRepository(conn)
-        records = repo.list_for_run(GOLDEN_RUN_ID)
-        assert records
-        for record in records:
-            ticket = json.loads(record.ticket_json)
-            assert ticket.get("failure_reason") != "missing_quote_span"
-            assert ticket["title"] != "Improve claim quote span validation"
+        assert repo.count_for_run(GOLDEN_RUN_ID) == 0
     finally:
         conn.close()
 
 
-def test_write_improvement_tickets_skips_only_golden_covered_modes() -> None:
+def test_write_improvement_tickets_skips_golden_covered_modes() -> None:
     from rge.modules.ticket_writer import write_improvement_tickets
 
     run_report = {
-        "run_id": "run_only_missing_quote",
-        "top_failure_modes": [{"reason": "missing_quote_span", "count": 1}],
+        "run_id": "run_only_golden_covered",
+        "top_failure_modes": [
+            {"reason": "missing_quote_span", "count": 1},
+            {"reason": "overgeneralized_scope", "count": 1},
+        ],
     }
     assert write_improvement_tickets(run_report) == []
+
+
+def test_write_improvement_tickets_still_generates_weak_concept_mapping() -> None:
+    from rge.modules.ticket_writer import write_improvement_tickets
+
+    run_report = {
+        "run_id": "run_weak_concept_only",
+        "top_failure_modes": [{"reason": "weak_concept_mapping", "count": 1}],
+    }
+    tickets = write_improvement_tickets(run_report)
+    assert len(tickets) == 1
+    assert tickets[0]["failure_reason"] == "weak_concept_mapping"

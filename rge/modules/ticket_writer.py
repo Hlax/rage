@@ -23,10 +23,16 @@ GOLDEN_MIN_FAILURE_COUNT = 1
 GOLDEN_COVERED_IMPROVEMENT_FAILURE_MODES: frozenset[str] = frozenset(
     {
         "missing_quote_span",  # GT02 test_claims_without_quote_spans_are_rejected
+        "overgeneralized_scope",  # GT02 test_overgeneralized_claims_are_rejected
     }
 )
 
-GOLDEN_COVERED_IMPROVEMENT_TITLE = "Improve claim quote span validation"
+GOLDEN_COVERED_IMPROVEMENT_TITLES: frozenset[str] = frozenset(
+    {
+        "Improve claim quote span validation",
+        "Improve claim extractor scope preservation",
+    }
+)
 
 BUILDER_REQUIRED_TICKET_FIELDS: tuple[str, ...] = (
     "title",
@@ -136,11 +142,17 @@ def improvement_draft_is_actionable(draft: dict[str, Any]) -> bool:
     reason = draft.get("failure_reason")
     if isinstance(reason, str) and failure_mode_covered_by_golden_tests(reason):
         return False
-    if draft.get("title") == GOLDEN_COVERED_IMPROVEMENT_TITLE:
+    title = draft.get("title")
+    if isinstance(title, str) and title in GOLDEN_COVERED_IMPROVEMENT_TITLES:
         return False
     evidence = draft.get("evidence") or []
     if any(
         isinstance(item, str) and "missing_quote_span_count=" in item
+        for item in evidence
+    ):
+        return False
+    if any(
+        isinstance(item, str) and "overgeneralized_scope_count=" in item
         for item in evidence
     ):
         return False

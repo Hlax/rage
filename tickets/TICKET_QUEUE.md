@@ -84,6 +84,14 @@ superseded
 | 50 | ticket-050 | done | CI Golden Gate: opt into Node 24 for GitHub Actions | `phase-2/ticket-050-ci-node24-actions` | `agent_reports/2026-06-12_phase-2_ticket-050_ci-node24-actions.md` |
 | 51 | ticket-051 | done | Implement research verify mock-only verification suite | `phase-2/ticket-051-research-verify` | `agent_reports/2026-06-12_phase-2_ticket-051_research-verify.md` |
 | 52 | ticket-052 | done | Persist char_start and char_end for accepted claim quote spans | `phase-2/ticket-052-quote-span-offsets` | `agent_reports/2026-06-12_phase-2_ticket-052_quote-span-offsets.md` |
+| 53 | ticket-053 | done | Loop rehearsal — stale draft hygiene and actionable improvement draft drill | `phase-2/ticket-053-loop-rehearsal` | `agent_reports/2026-06-12_phase-2_ticket-053_loop-rehearsal.md` |
+
+## Queue Notes (2026-06-12, ticket-053 agent)
+
+- Pre-ticket audit rejects overgeneralized_scope promotion as GT02 golden-covered duplicate.
+- ticket-053 extends golden-covered filter to `overgeneralized_scope`; clears stale
+  `improvement_ticket_latest.json` to `[]`.
+- Loop drill confirms `weak_concept_mapping` still produces actionable drafts; no `--confirm` promotion in this ticket.
 
 ## Queue Notes (2026-06-12, ticket-052 agent)
 

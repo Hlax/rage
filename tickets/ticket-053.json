@@ -1,0 +1,46 @@
+{
+  "id": "ticket-053",
+  "title": "Loop rehearsal — stale draft hygiene and actionable improvement draft drill",
+  "problem": "After ticket-049, fixture MVP runs produce zero actionable improvement drafts by design, while improvement_ticket_latest.json still held a stale rejected missing_quote_span draft. The self-improvement loop positive path (fresh actionable draft → review → promotion decision) had not been exercised post-filter; overgeneralized_scope was the next golden-covered false-positive class.",
+  "evidence": [
+    "agent_reports/2026-06-12_principal-audit-post-ticket-052-loop-readiness.md",
+    "data/tickets/improvement_ticket_latest.json",
+    "tests/golden/test_02_claim_extraction.py test_overgeneralized_claims_are_rejected",
+    "tests/golden/test_20_improvement_tickets.py"
+  ],
+  "affected_modules": [
+    "rge/modules/ticket_writer.py",
+    "tests/golden/test_20_improvement_tickets.py",
+    "tests/golden/test_21_builder_ticket_consumption.py",
+    "tests/unit/test_operator_loop.py"
+  ],
+  "expected_files": [
+    "rge/modules/ticket_writer.py",
+    "data/tickets/improvement_ticket_latest.json",
+    "tests/golden/test_20_improvement_tickets.py",
+    "tests/golden/test_21_builder_ticket_consumption.py",
+    "tests/unit/test_operator_loop.py",
+    "tickets/ticket-053.json",
+    "agent_reports/2026-06-12_pre-ticket-053_overgeneralized-improvement-draft-audit.md",
+    "agent_reports/2026-06-12_phase-2_ticket-053_loop-rehearsal.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit rejects overgeneralized_scope promotion as golden-covered duplicate (GT02).",
+    "overgeneralized_scope filtered from improvement drafts; weak_concept_mapping still generates actionable drafts.",
+    "Stale improvement_ticket_latest.json superseded with empty list artifact.",
+    "GT20/GT21 and operator loop tests pass; python -m rge.cli verify --skip-site passes."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden/test_20_improvement_tickets.py tests/golden/test_21_builder_ticket_consumption.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_operator_loop.py -q",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Do not promote any draft with --confirm in this ticket.",
+    "Do not weaken claim_validator rejection rules.",
+    "Do not change public export schema."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert ticket-053 branch; restore prior improvement artifact and ticket_writer filter set.",
+  "status": "done"
+}

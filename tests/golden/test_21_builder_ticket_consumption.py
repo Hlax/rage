@@ -187,31 +187,81 @@ def test_failure_templates_include_all_builder_required_fields() -> None:
         assert validate_builder_ticket(ticket) == []
 
 
-def test_generated_improvement_tickets_are_builder_consumable(
-    temp_db: Path, report_dir: Path
-) -> None:
+def _seed_weak_concept_improvement_ticket(db_path: Path, report_dir: Path) -> None:
+    """Persist a non-golden-covered draft for promotion round-trip tests."""
+    from rge.cli import main
     from rge.db.connection import connect
     from rge.db.repositories import ImprovementTicketRepository
 
-    _prepare_rejection_spine(temp_db)
-    _generate_run_and_tickets(temp_db, report_dir)
-
-    conn = connect(temp_db)
+    _prepare_rejection_spine(db_path)
+    assert (
+        main(
+            [
+                "generate-run-report",
+                "--run-id",
+                GOLDEN_RUN_ID,
+                "--topic",
+                GOLDEN_TOPIC,
+                "--domain",
+                "creativity",
+                "--db",
+                str(db_path),
+                "--output-dir",
+                str(report_dir),
+            ]
+        )
+        == 0
+    )
+    tickets = write_improvement_tickets(
+        {
+            "run_id": GOLDEN_RUN_ID,
+            "top_failure_modes": [{"reason": "weak_concept_mapping", "count": 1}],
+        }
+    )
+    assert len(tickets) == 1
+    ticket = tickets[0]
+    conn = connect(db_path)
     try:
-        records = ImprovementTicketRepository(conn).list_for_run(GOLDEN_RUN_ID)
-        assert records
-        for record in records:
-            ticket = json.loads(record.ticket_json)
-            violations = validate_builder_ticket(ticket)
-            assert violations == [], f"ticket {ticket.get('title')}: {violations}"
-            assert ticket["affected_modules"]
-            assert ticket["expected_files"]
-            assert all(
-                isinstance(item, str) and len(item.strip()) >= 10
-                for item in ticket["acceptance_criteria"]
-            )
+        ImprovementTicketRepository(conn).insert(
+            run_id=GOLDEN_RUN_ID,
+            failure_reason="weak_concept_mapping",
+            priority=ticket["priority"],
+            title=ticket["title"],
+            problem=ticket["problem"],
+            evidence=ticket["evidence"],
+            affected_modules=ticket["affected_modules"],
+            expected_files=ticket["expected_files"],
+            acceptance_criteria=ticket["acceptance_criteria"],
+            test_plan=ticket["test_plan"],
+            non_goals=ticket["non_goals"],
+            risk_level=ticket["risk_level"],
+            rollback_plan=ticket["rollback_plan"],
+            ticket=ticket,
+        )
+        conn.commit()
     finally:
         conn.close()
+
+
+def test_generated_improvement_tickets_are_builder_consumable(
+    temp_db: Path, report_dir: Path
+) -> None:
+    tickets = write_improvement_tickets(
+        {
+            "run_id": GOLDEN_RUN_ID,
+            "top_failure_modes": [{"reason": "weak_concept_mapping", "count": 1}],
+        }
+    )
+    assert tickets
+    for ticket in tickets:
+        violations = validate_builder_ticket(ticket)
+        assert violations == [], f"ticket {ticket.get('title')}: {violations}"
+        assert ticket["affected_modules"]
+        assert ticket["expected_files"]
+        assert all(
+            isinstance(item, str) and len(item.strip()) >= 10
+            for item in ticket["acceptance_criteria"]
+        )
 
 
 def test_validate_builder_ticket_rejects_missing_required_fields() -> None:
@@ -243,8 +293,7 @@ def test_promote_improvement_ticket_round_trip(
     from rge.db.connection import connect
     from rge.modules.ticket_writer import promote_improvement_ticket
 
-    _prepare_rejection_spine(temp_db)
-    _generate_run_and_tickets(temp_db, report_dir)
+    _seed_weak_concept_improvement_ticket(temp_db, report_dir)
 
     queue_dir = tmp_path / "tickets"
     conn = connect(temp_db)
@@ -255,7 +304,7 @@ def test_promote_improvement_ticket_round_trip(
             output_dir=queue_dir,
             conn=conn,
             run_id=GOLDEN_RUN_ID,
-            failure_reason="overgeneralized_scope",
+            failure_reason="weak_concept_mapping",
         )
         assert result["status"] == "promoted"
         output_path = Path(result["output_path"])
@@ -292,8 +341,7 @@ def test_promote_improvement_ticket_cli_with_confirm(
 ) -> None:
     from rge.cli import main
 
-    _prepare_rejection_spine(temp_db)
-    _generate_run_and_tickets(temp_db, report_dir)
+    _seed_weak_concept_improvement_ticket(temp_db, report_dir)
     queue_dir = tmp_path / "tickets"
 
     assert (
@@ -305,7 +353,7 @@ def test_promote_improvement_ticket_cli_with_confirm(
                 "--run-id",
                 GOLDEN_RUN_ID,
                 "--failure-reason",
-                "overgeneralized_scope",
+                "weak_concept_mapping",
                 "--confirm",
                 "--db",
                 str(temp_db),

@@ -124,9 +124,9 @@ def test_pending_improvement_ticket_requires_human_confirmation(tmp_path: Path) 
         json.dumps(
             [
                 {
-                    "title": "Improve claim extractor scope preservation",
+                    "title": "Improve concept mapping validation",
                     "status": "draft",
-                    "failure_reason": "overgeneralized_scope",
+                    "failure_reason": "weak_concept_mapping",
                     "risk_level": "medium",
                 }
             ]
@@ -248,6 +248,33 @@ def test_pending_improvement_skips_golden_covered_drafts(tmp_path: Path) -> None
                     "title": "Improve claim quote span validation",
                     "evidence": [
                         "run_report:run_golden_fixture_mvp:missing_quote_span_count=1"
+                    ],
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    report = pending_improvement_tickets(root=tmp_path, artifact_path=artifact)
+
+    assert report["pending"] is False
+    assert report["draft_count"] == 0
+
+
+def test_pending_improvement_skips_golden_covered_overgeneralized_drafts(
+    tmp_path: Path,
+) -> None:
+    artifact_dir = tmp_path / "data" / "tickets"
+    artifact_dir.mkdir(parents=True)
+    artifact = artifact_dir / "improvement_ticket_latest.json"
+    artifact.write_text(
+        json.dumps(
+            [
+                {
+                    "status": "draft",
+                    "title": "Improve claim extractor scope preservation",
+                    "evidence": [
+                        "run_report:run_golden_fixture_mvp:overgeneralized_scope_count=1"
                     ],
                 }
             ]
