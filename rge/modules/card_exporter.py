@@ -124,12 +124,7 @@ def resolve_export_targets(
     elif fixture_mode or publish_public:
         targets = default_export_dirs(root)
     else:
-        from rge.config import load_config
-        from rge.llm.mode import live_llm_enabled
-
         targets = [root / "data" / "exports"]
-        if not live_llm_enabled(load_config()):
-            targets.append(public_site_export_dir(root))
 
     _assert_export_targets_allowed(
         targets,

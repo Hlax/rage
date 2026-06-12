@@ -78,6 +78,13 @@ superseded
 | 44 | ticket-044 | done | Fix principal audit gate false overdue cadence counting | `phase-2/ticket-044-principal-audit-gate-fix` | `agent_reports/2026-06-12_phase-2_ticket-044_principal-audit-gate-fix.md` |
 | 45 | ticket-045 | proposed | Promote improvement draft with explicit review gate | | |
 | 46 | ticket-046 | done | Fix operator loop done-without-commit false positive | `phase-2/ticket-046-operator-loop-drift-fix` | `agent_reports/2026-06-12_phase-2_ticket-046_operator-loop-drift-fix.md` |
+| 47 | ticket-047 | done | Stop plain export-public from rewriting committed public-site JSON | `phase-2/ticket-047-export-public-publish-only` | `agent_reports/2026-06-12_phase-2_ticket-047_export-public-publish-only.md` |
+
+## Queue Notes (2026-06-12, ticket-047 agent)
+
+- ticket-047 limits default mock-mode `export-public` to `data/exports/` only.
+  Public-site committed JSON updates require `--publish` or fixture-mode.
+  +1 export publish gate unit test; GT11 unchanged; 135 golden pass.
 
 ## Queue Notes (2026-06-12, ticket-046 agent)
 
@@ -454,7 +461,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-047 (proposed — export-public publish-only guard for committed public JSON)
+ticket-045 (proposed — improvement draft promotion with review gate; requires pre-ticket audit)
 ```
 
 ## Queue Rules

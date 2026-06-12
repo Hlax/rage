@@ -9,6 +9,20 @@ import pytest
 from rge.modules.card_exporter import public_site_export_dir, resolve_export_targets
 
 
+def test_mock_mode_default_export_skips_public_site(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setenv("RGE_LLM_MODE", "mock")
+    monkeypatch.delenv("RGE_ALLOW_LIVE_LLM", raising=False)
+    repo = tmp_path / "repo"
+    (repo / "data" / "exports").mkdir(parents=True)
+    (repo / "apps" / "public-site" / "public" / "data").mkdir(parents=True)
+
+    targets = resolve_export_targets(output_dirs=None, repo_root=repo)
+    assert targets == [repo / "data" / "exports"]
+    assert public_site_export_dir(repo) not in targets
+
+
 def test_live_mode_default_export_skips_public_site(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

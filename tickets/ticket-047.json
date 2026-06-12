@@ -1,0 +1,38 @@
+{
+  "id": "ticket-047",
+  "title": "Stop plain export-public from rewriting committed public-site JSON",
+  "problem": "Default mock-mode export-public writes to both data/exports/ and apps/public-site/public/data/, rewriting generated_at and updated_at timestamps in committed snapshot JSON and dirtying the repo after operator runs.",
+  "evidence": [
+    "agent_reports/2026-06-12_principal-repo-state-drift-ci-audit.md section 7",
+    "rge/modules/card_exporter.py resolve_export_targets",
+    "tests/unit/test_export_publish_gate.py"
+  ],
+  "affected_modules": [
+    "rge/modules/card_exporter.py",
+    "tests/unit/test_export_publish_gate.py"
+  ],
+  "expected_files": [
+    "rge/modules/card_exporter.py",
+    "tests/unit/test_export_publish_gate.py",
+    "tickets/ticket-047.json",
+    "agent_reports/2026-06-12_phase-2_ticket-047_export-public-publish-only.md"
+  ],
+  "acceptance_criteria": [
+    "Default mock-mode export-public writes only to data/exports/.",
+    "Committed public-site JSON updates require --publish or fixture_mode.",
+    "Fixture-mode runs still write deterministic snapshots to public-site paths.",
+    "Golden tests and export publish gate unit tests pass."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_export_publish_gate.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden/test_11_public_card_export.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Do not change public export schema or card field curation.",
+    "Do not auto-publish during fixture-mode beyond existing behavior."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert ticket-047 branch; mock export-public again writes public-site JSON by default.",
+  "status": "done"
+}
