@@ -72,7 +72,7 @@ $env:RGE_LLM_MODE = "mock"          # PowerShell
 $env:RGE_ALLOW_LIVE_LLM = "0"
 python -m pytest tests/golden -q
 python -m pytest -q
-python -m pytest --collect-only -q   # live_smoke must NOT appear in default collection
+python -m pytest --collect-only -q   # tests/smoke/ must NOT appear in default collection
 python -m rge.modules.safety_auditor --audit full
 cd apps/public-site && npm run build
 ```

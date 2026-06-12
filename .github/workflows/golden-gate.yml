@@ -43,8 +43,8 @@ jobs:
 
       - name: Confirm live_smoke not collected by default
         run: |
-          if python -m pytest --collect-only -q 2>&1 | grep -q live_smoke; then
-            echo "live_smoke tests must not be collected by default pytest"
+          if python -m pytest --collect-only -q 2>&1 | grep -q 'tests/smoke/'; then
+            echo "tests/smoke must not be collected by default pytest"
             exit 1
           fi
 
