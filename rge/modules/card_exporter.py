@@ -105,6 +105,66 @@ def default_export_dirs(repo_root: Path | None = None) -> list[Path]:
     ]
 
 
+def public_site_export_dir(repo_root: Path | None = None) -> Path:
+    root = repo_root or _repo_root()
+    return root / "apps" / "public-site" / "public" / "data"
+
+
+def resolve_export_targets(
+    *,
+    output_dirs: list[Path] | None,
+    repo_root: Path | None = None,
+    fixture_mode: bool = False,
+    publish_public: bool = False,
+) -> list[Path]:
+    """Resolve export directories with live-mode public-site publish guard."""
+    root = repo_root or _repo_root()
+    if output_dirs is not None:
+        targets = list(output_dirs)
+    elif fixture_mode or publish_public:
+        targets = default_export_dirs(root)
+    else:
+        from rge.config import load_config
+        from rge.llm.mode import live_llm_enabled
+
+        targets = [root / "data" / "exports"]
+        if not live_llm_enabled(load_config()):
+            targets.append(public_site_export_dir(root))
+
+    _assert_export_targets_allowed(
+        targets,
+        repo_root=root,
+        fixture_mode=fixture_mode,
+        publish_public=publish_public,
+    )
+    return targets
+
+
+def _assert_export_targets_allowed(
+    targets: list[Path],
+    *,
+    repo_root: Path,
+    fixture_mode: bool,
+    publish_public: bool,
+) -> None:
+    if fixture_mode or publish_public:
+        return
+    from rge.config import load_config
+    from rge.llm.mode import live_llm_enabled
+
+    if not live_llm_enabled(load_config()):
+        return
+
+    public_site = public_site_export_dir(repo_root).resolve()
+    for target in targets:
+        resolved = target.resolve()
+        if resolved == public_site or public_site in resolved.parents:
+            raise ValueError(
+                "Live-mode export to apps/public-site/public/data/ requires --publish. "
+                "Use data/exports/ for scratch exports."
+            )
+
+
 def default_ticket_output_dir(repo_root: Path | None = None) -> Path:
     """Gitignored runtime directory for generated improvement ticket artifacts."""
     return (repo_root or _repo_root()) / "data" / "tickets"
@@ -220,6 +280,7 @@ def export_public_cards(
     repo_root: Path | None = None,
     fixture_mode: bool = False,
     export_timestamp: str | None = None,
+    publish_public: bool = False,
 ) -> dict[str, Any]:
     """Export public-safe cards as JSON files after validation."""
     seeded_ids = ensure_golden_public_cards(conn)
@@ -270,7 +331,12 @@ def export_public_cards(
             + (f"; and {len(violations) - 5} more" if len(violations) > 5 else "")
         )
 
-    targets = output_dirs if output_dirs is not None else default_export_dirs(repo_root)
+    targets = resolve_export_targets(
+        output_dirs=output_dirs,
+        repo_root=repo_root,
+        fixture_mode=fixture_mode,
+        publish_public=publish_public,
+    )
     written_files: list[str] = []
     payloads = {
         "public_cards.json": cards,
@@ -294,4 +360,5 @@ def export_public_cards(
         "export_schema_version": EXPORT_SCHEMA_VERSION,
         "generated_at": generated_at,
         "fixture_mode": fixture_mode,
+        "publish_public": publish_public,
     }

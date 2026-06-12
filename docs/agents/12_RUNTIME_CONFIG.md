@@ -52,9 +52,47 @@ These categories are **not** read by any `rge/` module today:
 - `GOOGLE_APPLICATION_CREDENTIALS`, Gemini / Vertex project/location vars
 - `CURSOR_API_KEY` (Cursor IDE/CLI auth — operator-level, outside RGE runtime)
 - `RGE_DB_PATH` (use CLI `--db` or default `data/db/creative_research.sqlite`)
-- `RGE_SMOKE_*`, `RGE_DRY_RUN`, `live_smoke` pytest marker (ticket-038)
 
 Add provider variables only when a ticket wires an adapter and documents them here.
+
+## Live smoke tests (ticket-038)
+
+Optional live Ollama smoke tests live under `tests/smoke/` and are marked
+`live_smoke`. Default pytest runs exclude them:
+
+```txt
+pyproject.toml → addopts = "-m 'not live_smoke'"
+```
+
+To run smoke tests explicitly (requires local Ollama):
+
+```powershell
+$env:RGE_ALLOW_LIVE_LLM = "1"
+$env:RGE_LLM_MODE = "ollama"
+python -m pytest -m live_smoke tests/smoke
+```
+
+Without both env vars, collected smoke tests skip at runtime. `pytest` and
+`pytest tests/golden` collect **zero** smoke tests by default.
+
+## Model health CLI
+
+```powershell
+python -m rge.cli model-health
+```
+
+Always exits 0 with JSON reporting `reachable`, `model_available`, and effective
+LLM mode flags. Does not run structured pipeline tasks.
+
+## Live-mode public export publish gate
+
+When effective LLM mode is `ollama` (`RGE_LLM_MODE=ollama` and
+`RGE_ALLOW_LIVE_LLM=1`), `export-public` writes to `data/exports/` only unless
+`--publish` is passed. Explicit `--output-dir` pointing at
+`apps/public-site/public/data/` is blocked without `--publish`.
+
+Fixture-mode runs (`--fixture-mode`) and mock/default mode continue to write
+both export directories (Golden Test 26 unchanged).
 
 ## Database and artifact paths
 
@@ -149,8 +187,9 @@ Before a future live-inference smoke (not golden tests):
 1. Copy `.env.smoke.example` → `.env.smoke.local` (gitignored).
 2. Set `OLLAMA_BASE_URL` and `RGE_LOCAL_LLM` to your local Ollama instance.
 3. Ensure Ollama is running and the model is pulled.
-4. Understand structured tasks still use mock until a later ticket implements them.
-5. Run safety audit after any export: `python -m rge.modules.safety_auditor --audit full`
+4. Understand structured tasks require `RGE_ALLOW_LIVE_LLM=1` (ticket-037).
+5. Run `python -m rge.cli model-health` to verify Ollama reachability.
+6. Run safety audit after any export: `python -m rge.modules.safety_auditor --audit full`
 
 ## Fixture-mode MVP run
 

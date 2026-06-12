@@ -759,6 +759,7 @@ def _cmd_export_public(args: argparse.Namespace) -> int:
             conn,
             limit=args.limit,
             output_dirs=output_dirs,
+            publish_public=bool(getattr(args, "publish", False)),
         )
         print(json.dumps(result, indent=2))
         return 0
@@ -772,6 +773,25 @@ def _cmd_export_public(args: argparse.Namespace) -> int:
         return 1
     finally:
         conn.close()
+
+
+def _cmd_model_health(_args: argparse.Namespace) -> int:
+    from rge.config import load_config
+    from rge.llm.mode import effective_llm_mode, live_llm_enabled
+    from rge.llm.registry import get_model_client
+
+    config = load_config()
+    client = get_model_client(config, mode="ollama")
+    report = client.health_check()
+    payload = {
+        "command": "model-health",
+        "status": "ok",
+        **report,
+        "live_llm_enabled": live_llm_enabled(config),
+        "effective_llm_mode": effective_llm_mode(config),
+    }
+    print(json.dumps(payload, indent=2))
+    return 0
 
 
 def _cmd_verify(_args: argparse.Namespace) -> int:
@@ -1578,7 +1598,25 @@ def build_parser() -> argparse.ArgumentParser:
         "--output-dir",
         help="Optional single output directory (for tests; skips default export paths).",
     )
+    export_parser.add_argument(
+        "--publish",
+        action="store_true",
+        help=(
+            "Allow writing to apps/public-site/public/data/. Required for live-mode "
+            "exports when RGE_ALLOW_LIVE_LLM=1 and RGE_LLM_MODE=ollama."
+        ),
+    )
     export_parser.set_defaults(func=_cmd_export_public)
+
+    model_health_parser = subparsers.add_parser(
+        "model-health",
+        help="Report local Ollama reachability without raising.",
+        description=(
+            "Probe the configured Ollama endpoint and model availability. "
+            "Always exits 0 with a JSON report; does not run structured tasks."
+        ),
+    )
+    model_health_parser.set_defaults(func=_cmd_model_health)
 
     verify_parser = subparsers.add_parser(
         "verify",
