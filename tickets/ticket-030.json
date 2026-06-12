@@ -1,0 +1,33 @@
+{
+  "id": "ticket-030",
+  "title": "Extend builder golden gate for safety and prompt-injection (Golden Tests 23-24)",
+  "problem": "ticket-029 adds full MVP run to the builder merge gate map, but Golden Tests 23-24 (safety audit gate and prompt injection) are not yet listed in REQUIRED_GOLDEN_AREAS.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Tests 23-24.",
+    "tests/golden/test_22_builder_golden_gate.py REQUIRED_GOLDEN_AREAS map.",
+    "agent_reports/2026-06-12_phase-1_ticket-029_builder-golden-gate-mvp.md sections 10-11."
+  ],
+  "affected_modules": [
+    "tests/golden/test_22_builder_golden_gate.py"
+  ],
+  "expected_files": [
+    "tests/golden/test_22_builder_golden_gate.py"
+  ],
+  "acceptance_criteria": [
+    "REQUIRED_GOLDEN_AREAS includes safety_audit_gate and prompt_injection areas mapped to test_23 and test_24.",
+    "pytest tests/golden/test_22_builder_golden_gate.py passes.",
+    "Existing golden tests still pass (118+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_22_builder_golden_gate.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not change safety auditor or prompt-injection runtime behavior.",
+    "Do not add Ollama or live discovery."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert branch phase-1/ticket-030-builder-golden-gate-safety.",
+  "status": "proposed"
+}

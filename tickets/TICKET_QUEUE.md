@@ -55,7 +55,14 @@ superseded
 | 26 | ticket-026 | done | Add prompt-injection golden fixture handling (Golden Test 24) | `phase-1/ticket-026-prompt-injection` | `agent_reports/2026-06-12_phase-1_ticket-026_prompt-injection.md` |
 | 27 | ticket-027 | done | Add public-site debug details without private data exposure (Golden Test 25) | `phase-1/ticket-027-public-site-debug-details` | `agent_reports/2026-06-12_phase-1_ticket-027_public-site-debug-details.md` |
 | 28 | ticket-028 | done | Full MVP end-to-end golden run (Golden Test 26) | `phase-1/ticket-028-full-mvp-run` | `agent_reports/2026-06-12_phase-1_ticket-028_full-mvp-run.md` |
-| 29 | ticket-029 | proposed | Extend builder golden gate for full MVP run (Golden Test 26) | | |
+| 29 | ticket-029 | done | Extend builder golden gate for full MVP run (Golden Test 26) | `phase-1/ticket-029-builder-golden-gate-mvp` | `agent_reports/2026-06-12_phase-1_ticket-029_builder-golden-gate-mvp.md` |
+| 30 | ticket-030 | proposed | Extend builder golden gate for safety and prompt-injection (Golden Tests 23-24) | | |
+
+## Queue Notes (2026-06-12, ticket-029 agent)
+
+- ticket-029 added `full_mvp_run` to Golden Test 22 `REQUIRED_GOLDEN_AREAS`
+  (`test_26_full_mvp_run.py`). All 118 golden tests pass.
+- ticket-030 proposes safety/prompt-injection builder gate coverage for GT23-24.
 
 ## Queue Notes (2026-06-12, ticket-028 agent)
 
@@ -261,7 +268,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-029 (proposed; awaiting review)
+ticket-030 (proposed; awaiting review)
 ```
 
 ## Queue Rules

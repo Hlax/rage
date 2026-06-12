@@ -24,6 +24,7 @@ REQUIRED_GOLDEN_AREAS: dict[str, tuple[str, ...]] = {
         "tests/golden/test_20_improvement_tickets.py",
         "tests/golden/test_21_builder_ticket_consumption.py",
     ),
+    "full_mvp_run": ("tests/golden/test_26_full_mvp_run.py",),
 }
 
 
@@ -84,6 +85,7 @@ def test_golden_directory_covers_all_required_areas() -> None:
         "public_export",
         "cluster_report",
         "ticket_generation",
+        "full_mvp_run",
     }
     assert GOLDEN_DIR.is_dir()
     golden_files = {path.name for path in GOLDEN_DIR.glob("test_*.py")}
