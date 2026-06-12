@@ -38,5 +38,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert the ticket-039 branch.",
-  "status": "proposed"
+  "status": "done"
 }

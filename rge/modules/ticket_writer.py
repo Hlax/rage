@@ -33,6 +33,13 @@ BUILDER_REQUIRED_TICKET_FIELDS: tuple[str, ...] = (
 
 BUILDER_RISK_LEVELS: frozenset[str] = frozenset({"low", "medium", "high"})
 
+QUEUE_TICKET_ID_PATTERN = "ticket-"
+
+PROMOTION_REVIEW_REQUIRED_MSG = (
+    "promotion requires explicit --confirm review gate; "
+    "generated tickets are never auto-promoted during pipeline runs"
+)
+
 VAGUE_TICKET_PHRASES: tuple[str, ...] = (
     "make it better",
     "improve things",
@@ -174,6 +181,163 @@ def validate_builder_ticket(ticket: dict[str, Any]) -> list[str]:
         violations.append(f"invalid risk_level: {risk_level}")
 
     return violations
+
+
+def _normalize_queue_ticket_id(queue_ticket_id: str) -> str:
+    ticket_id = queue_ticket_id.strip()
+    if not ticket_id.startswith(QUEUE_TICKET_ID_PATTERN):
+        raise ValueError(
+            f"queue ticket id must start with {QUEUE_TICKET_ID_PATTERN!r}: "
+            f"{queue_ticket_id!r}"
+        )
+    suffix = ticket_id[len(QUEUE_TICKET_ID_PATTERN) :]
+    if not suffix.isdigit() or len(suffix) < 3:
+        raise ValueError(
+            f"queue ticket id must use numeric suffix (e.g. ticket-041): "
+            f"{queue_ticket_id!r}"
+        )
+    return ticket_id
+
+
+def improvement_ticket_to_queue_ticket(
+    improvement: dict[str, Any],
+    *,
+    queue_ticket_id: str,
+) -> dict[str, Any]:
+    """Map a draft improvement ticket report into a builder queue ticket JSON dict."""
+    normalized_id = _normalize_queue_ticket_id(queue_ticket_id)
+    violations = validate_builder_ticket(improvement)
+    if violations:
+        raise ValueError(
+            "improvement ticket is not builder-consumable: " + "; ".join(violations)
+        )
+    return {
+        "id": normalized_id,
+        "title": improvement["title"],
+        "problem": improvement["problem"],
+        "evidence": list(improvement["evidence"]),
+        "affected_modules": list(improvement["affected_modules"]),
+        "expected_files": list(improvement["expected_files"]),
+        "acceptance_criteria": list(improvement["acceptance_criteria"]),
+        "test_plan": list(improvement["test_plan"]),
+        "non_goals": list(improvement["non_goals"]),
+        "risk_level": improvement["risk_level"],
+        "rollback_plan": improvement["rollback_plan"],
+        "status": "proposed",
+    }
+
+
+def _load_improvement_ticket_from_json(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(payload, list):
+        if len(payload) != 1:
+            raise ValueError(
+                "from-json file must contain one improvement ticket or pass "
+                "run-id + failure-reason to select from a list"
+            )
+        ticket = payload[0]
+    elif isinstance(payload, dict):
+        ticket = payload
+    else:
+        raise ValueError("from-json payload must be an object or single-item list")
+    if not isinstance(ticket, dict):
+        raise ValueError("improvement ticket payload must be a JSON object")
+    return ticket
+
+
+def _load_improvement_ticket_from_db(
+    conn: sqlite3.Connection,
+    *,
+    run_id: str | None,
+    failure_reason: str | None,
+    improvement_ticket_id: str | None,
+) -> dict[str, Any]:
+    repo = ImprovementTicketRepository(conn)
+    record: ImprovementTicketRecord | None
+    if improvement_ticket_id:
+        record = repo.get_by_id(improvement_ticket_id)
+        if record is None:
+            raise ValueError(
+                f"No improvement ticket found for id={improvement_ticket_id}"
+            )
+    elif run_id and failure_reason:
+        record = repo.get_for_run_and_reason(
+            run_id=run_id,
+            failure_reason=failure_reason,
+        )
+        if record is None:
+            raise ValueError(
+                f"No improvement ticket found for run_id={run_id} "
+                f"failure_reason={failure_reason}"
+            )
+    else:
+        raise ValueError(
+            "provide --improvement-ticket-id or both --run-id and --failure-reason"
+        )
+    return json.loads(record.ticket_json)
+
+
+def promote_improvement_ticket(
+    *,
+    queue_ticket_id: str,
+    reviewed: bool,
+    output_dir: Path,
+    from_json: Path | None = None,
+    conn: sqlite3.Connection | None = None,
+    run_id: str | None = None,
+    failure_reason: str | None = None,
+    improvement_ticket_id: str | None = None,
+) -> dict[str, Any]:
+    """Promote a reviewed improvement ticket to a queue ticket JSON file.
+
+    Never updates ``TICKET_QUEUE.md``; operators add queue rows manually after review.
+    """
+    if not reviewed:
+        raise ValueError(PROMOTION_REVIEW_REQUIRED_MSG)
+
+    has_db_source = conn is not None and (
+        improvement_ticket_id is not None
+        or (run_id is not None and failure_reason is not None)
+    )
+    sources = [from_json is not None, has_db_source]
+    if sum(sources) != 1:
+        raise ValueError(
+            "provide exactly one source: --from-json or DB lookup via "
+            "--improvement-ticket-id or (--run-id and --failure-reason)"
+        )
+
+    if from_json is not None:
+        improvement = _load_improvement_ticket_from_json(from_json)
+    else:
+        assert conn is not None
+        improvement = _load_improvement_ticket_from_db(
+            conn,
+            run_id=run_id,
+            failure_reason=failure_reason,
+            improvement_ticket_id=improvement_ticket_id,
+        )
+
+    queue_ticket = improvement_ticket_to_queue_ticket(
+        improvement,
+        queue_ticket_id=queue_ticket_id,
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / f"{queue_ticket['id']}.json"
+    if output_path.exists():
+        raise ValueError(
+            f"queue ticket file already exists: {output_path}; "
+            "refuse to overwrite without manual review"
+        )
+    output_path.write_text(json.dumps(queue_ticket, indent=2) + "\n", encoding="utf-8")
+    return {
+        "status": "promoted",
+        "command": "promote-improvement-ticket",
+        "queue_ticket_id": queue_ticket["id"],
+        "output_path": str(output_path),
+        "source_failure_reason": improvement.get("failure_reason"),
+        "reviewed": True,
+        "ticket": queue_ticket,
+    }
 
 
 def _build_ticket_report(

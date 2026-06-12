@@ -1,0 +1,39 @@
+{
+  "id": "ticket-040",
+  "title": "Add CI golden gate workflow and rge-principal-audit command doc",
+  "problem": "The GT22 merge gate has no mechanical enforcement (no CI), and /rge-principal-audit is referenced by handoffs but missing from .cursor/commands/. The inductive safety of main depends on every agent honoring the protocol; CI converts convention to guarantee.",
+  "evidence": [
+    "agent_reports/2026-06-12_phase-2_ticket-roadmap.md ticket-040",
+    "agent_reports/2026-06-12_pre-phase-2_principal-audit.md",
+    "agent_reports/2026-06-12_phase-2_ticket-039_improvement-ticket-round-trip.md section 11"
+  ],
+  "affected_modules": [
+    ".github/workflows/golden-gate.yml",
+    ".cursor/commands/rge-principal-audit.md"
+  ],
+  "expected_files": [
+    ".github/workflows/golden-gate.yml",
+    ".cursor/commands/rge-principal-audit.md",
+    "agent_reports/2026-06-12_phase-2_ticket-040_ci-golden-gate.md"
+  ],
+  "acceptance_criteria": [
+    "GitHub Actions workflow runs pytest tests/golden with RGE_LLM_MODE=mock.",
+    "Workflow runs safety auditor --audit full and fails on blocked reasons.",
+    "Workflow runs public-site npm run build when applicable.",
+    "rge-principal-audit command doc codifies the checkpoint performed in pre-phase-2 audit.",
+    "Golden tests and default pytest pass without Ollama locally."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden",
+    "RGE_LLM_MODE=mock python -m pytest",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "Do not remove temporary merge-to-main checkpoint in AGENTS.md yet.",
+    "Do not add live Ollama to CI.",
+    "Do not implement ticket-041 or later."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert the ticket-040 branch.",
+  "status": "proposed"
+}

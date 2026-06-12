@@ -111,6 +111,33 @@ phase-0/ticket-001-repo-scaffold-model-runtime
 
 Do not combine unrelated tickets on one branch.
 
+## Improvement Ticket Promotion
+
+Generated improvement tickets are **drafts** only. They are written to
+gitignored `data/tickets/improvement_ticket_latest.json` and persisted in
+`improvement_tickets` rows. Pipeline runs (including `research run
+--fixture-mode`) **never** promote drafts into the builder queue automatically.
+
+To round-trip a draft into a builder-consumable queue ticket:
+
+1. Run `research generate-improvement-tickets` (or complete a fixture spine that
+   produces failure modes).
+2. Review the draft JSON and validate it is specific enough for a branch task.
+3. Run an explicit promotion with the review gate:
+
+```bash
+python -m rge.cli promote-improvement-ticket \
+  --queue-ticket-id ticket-041 \
+  --run-id <run_id> \
+  --failure-reason overgeneralized_scope \
+  --confirm
+```
+
+Alternatively load from a reviewed JSON file with `--from-json`. Promotion writes
+`tickets/<queue-ticket-id>.json` with `status: proposed` and re-validates GT21
+builder-consumption rules. It does **not** edit `TICKET_QUEUE.md`; a human or
+audit agent adds the queue row after reviewing the promoted JSON.
+
 ## Implementation Rules
 
 Agents must:

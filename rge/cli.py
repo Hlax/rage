@@ -747,6 +747,46 @@ def _cmd_generate_improvement_tickets(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_promote_improvement_ticket(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.modules.ticket_writer import promote_improvement_ticket
+
+    from_json = Path(args.from_json) if args.from_json else None
+    output_dir = (
+        Path(args.output_dir)
+        if args.output_dir
+        else _REPO_ROOT / "tickets"
+    )
+    conn = None
+    try:
+        if from_json is None:
+            db_path = Path(args.db) if args.db else None
+            conn = ensure_database(db_path)
+        result = promote_improvement_ticket(
+            queue_ticket_id=args.queue_ticket_id,
+            reviewed=bool(args.confirm),
+            output_dir=output_dir,
+            from_json=from_json,
+            conn=conn,
+            run_id=args.run_id,
+            failure_reason=args.failure_reason,
+            improvement_ticket_id=args.improvement_ticket_id,
+        )
+        print(json.dumps(result, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "promote-improvement-ticket",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        if conn is not None:
+            conn.close()
+
+
 def _cmd_export_public(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.modules.card_exporter import export_public_cards
@@ -1578,6 +1618,50 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional output directory for improvement_ticket_latest.json (for tests).",
     )
     improvement_parser.set_defaults(func=_cmd_generate_improvement_tickets)
+
+    promote_parser = subparsers.add_parser(
+        "promote-improvement-ticket",
+        help="Promote a reviewed improvement ticket to tickets/<id>.json.",
+        description=(
+            "Convert a draft improvement ticket into a builder queue ticket JSON "
+            "file after explicit human/audit review. Does not edit TICKET_QUEUE.md."
+        ),
+    )
+    promote_parser.add_argument(
+        "--queue-ticket-id",
+        required=True,
+        help="Target queue ticket id (e.g. ticket-041).",
+    )
+    promote_parser.add_argument(
+        "--confirm",
+        action="store_true",
+        help="Required review gate; promotion fails without this flag.",
+    )
+    promote_parser.add_argument(
+        "--from-json",
+        help="Path to improvement_ticket_latest.json or a single ticket object.",
+    )
+    promote_parser.add_argument(
+        "--run-id",
+        help="Run id when loading an improvement ticket from the database.",
+    )
+    promote_parser.add_argument(
+        "--failure-reason",
+        help="Failure reason key when loading by run id (e.g. overgeneralized_scope).",
+    )
+    promote_parser.add_argument(
+        "--improvement-ticket-id",
+        help="Improvement ticket row id (imp_*) when loading from the database.",
+    )
+    promote_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    promote_parser.add_argument(
+        "--output-dir",
+        help="Directory for the promoted queue ticket JSON (defaults to tickets/).",
+    )
+    promote_parser.set_defaults(func=_cmd_promote_improvement_ticket)
 
     export_parser = subparsers.add_parser(
         "export-public",
