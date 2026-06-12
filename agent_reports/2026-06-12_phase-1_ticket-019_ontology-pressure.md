@@ -88,7 +88,9 @@ Not required: no public export, public site, or write routes changed.
 
 ## 11. Merge to Main
 
-*(Updated after merge.)*
+- Merge commit: `c0c23273c50990b6849a275b88aacf9b815d9703`
+- Branch: `phase-1/ticket-019-ontology-pressure` merged to `main` and pushed to `origin/main`.
+- Post-merge pytest on `main`: 81 passed.
 
 ## 12. Recommended Next Ticket
 
