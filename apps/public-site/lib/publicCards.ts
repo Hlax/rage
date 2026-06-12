@@ -23,6 +23,55 @@ export type PublicCard = {
 
 export const publicCards = cards as PublicCard[];
 
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+] as const;
+
+/**
+ * Presentation-only label formatting for already-exported enum values
+ * (e.g. "cluster_card" -> "Cluster card"). Never changes underlying data.
+ */
+export function humanizeLabel(value: string): string {
+  const cleaned = value.replace(/_/g, ' ').trim();
+  if (!cleaned) {
+    return value;
+  }
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
+/**
+ * Deterministic human-readable formatting for safe public ISO timestamps
+ * (e.g. "2026-06-12T00:00:00Z" -> "June 12, 2026 (00:00 UTC)").
+ * Falls back to the raw value if the shape is unexpected.
+ */
+export function formatPublicTimestamp(iso: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(iso);
+  if (!match) {
+    return iso;
+  }
+  const [, year, month, day, hour, minute] = match;
+  const monthName = MONTH_NAMES[Number(month) - 1];
+  if (!monthName) {
+    return iso;
+  }
+  return `${monthName} ${Number(day)}, ${year} (${hour}:${minute} UTC)`;
+}
+
+export function formatSourceCount(count: number): string {
+  return count === 1 ? '1 source' : `${count} sources`;
+}
+
 export function conceptToSlug(label: string): string {
   return label
     .trim()

@@ -15,6 +15,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SITE_DIR = REPO_ROOT / "apps" / "public-site"
 DATA_DIR = SITE_DIR / "public" / "data"
 CARD_DETAIL_PAGE = SITE_DIR / "app" / "cards" / "[id]" / "page.tsx"
+ABOUT_PAGE = SITE_DIR / "app" / "about" / "page.tsx"
+NOT_FOUND_PAGE = SITE_DIR / "app" / "not-found.tsx"
 FIXTURE_SOURCE = REPO_ROOT / "fixtures" / "sources" / "creativity_ai_diversity_short.txt"
 
 ALLOWED_CARD_FIELDS = {
@@ -167,6 +169,16 @@ def test_card_detail_page_renders_debug_section_without_private_fields() -> None
 
     for key in FORBIDDEN_PRIVATE_KEYS:
         assert key not in text, f"card detail page references private field {key}"
+
+
+def test_presentation_pages_render_no_private_fields() -> None:
+    """ticket-036: new presentation pages must not reference private data."""
+    for page in (ABOUT_PAGE, NOT_FOUND_PAGE):
+        assert page.is_file(), f"missing presentation page {page}"
+        text = page.read_text(encoding="utf-8")
+        assert "dangerouslySetInnerHTML" not in text
+        for key in FORBIDDEN_PRIVATE_KEYS:
+            assert key not in text, f"{page} references private field {key}"
 
 
 def test_static_public_cards_json_includes_debug_fields() -> None:

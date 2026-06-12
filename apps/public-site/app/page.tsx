@@ -6,7 +6,13 @@ import Link from 'next/link';
 
 import memos from '../public/data/public_memos.json';
 import buildInfo from '../public/data/build_info.json';
-import { conceptToSlug, publicCards } from '../lib/publicCards';
+import {
+  conceptToSlug,
+  formatPublicTimestamp,
+  formatSourceCount,
+  humanizeLabel,
+  publicCards,
+} from '../lib/publicCards';
 
 export default function HomePage() {
   const cardList = publicCards;
@@ -29,13 +35,35 @@ export default function HomePage() {
         This site renders public-safe research cards exported as static JSON
         snapshots from a local-first research engine. It has no write routes,
         no source ingestion, and no agent execution. It never connects to the
-        private local engine.
+        private local engine.{' '}
+        <Link href="/about" style={{ color: '#9eb4ff' }}>
+          How this works
+        </Link>
+        .
       </p>
 
       <section style={{ marginTop: '2.5rem' }}>
         <h2 style={{ fontSize: '1.1rem' }}>
           Public cards ({cardList.length})
         </h2>
+        {cardList.length === 0 ? (
+          <div
+            style={{
+              border: '1px dashed #2a2f3a',
+              borderRadius: 8,
+              padding: '1.5rem 1.25rem',
+              background: '#161922',
+              color: '#aeb4c0',
+              lineHeight: 1.6,
+            }}
+          >
+            <p style={{ margin: 0 }}>No public cards in this snapshot yet.</p>
+            <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem' }}>
+              Cards appear here only after a research run passes deterministic
+              validation and the public export safety audit.
+            </p>
+          </div>
+        ) : null}
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {cardList.map((card) => (
             <li
@@ -49,8 +77,8 @@ export default function HomePage() {
               }}
             >
               <p style={{ margin: 0, fontSize: '0.75rem', color: '#8b93a3' }}>
-                {card.type} · confidence: {card.confidence} · sources:{' '}
-                {card.source_count}
+                {humanizeLabel(card.type)} · {humanizeLabel(card.confidence)}{' '}
+                confidence · {formatSourceCount(card.source_count)}
               </p>
               <h3 style={{ margin: '0.35rem 0', fontSize: '1rem' }}>
                 <Link href={`/cards/${card.id}`} style={{ color: '#e6e8ec' }}>
@@ -98,10 +126,13 @@ export default function HomePage() {
       >
         <p style={{ margin: 0 }}>
           Export schema {String(buildInfo.export_schema_version)} · phase{' '}
-          {String(buildInfo.phase)} · memos: {(memos as unknown[]).length}
+          {String(buildInfo.phase)} · memos: {(memos as unknown[]).length} ·{' '}
+          <Link href="/about" style={{ color: '#9eb4ff' }}>
+            About
+          </Link>
         </p>
         <p style={{ margin: '0.25rem 0 0' }}>
-          Last updated: {String(buildInfo.generated_at)}
+          Last updated: {formatPublicTimestamp(String(buildInfo.generated_at))}
         </p>
       </footer>
     </main>
