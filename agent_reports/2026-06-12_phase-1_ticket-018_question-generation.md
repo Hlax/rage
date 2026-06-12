@@ -88,7 +88,9 @@ Not required: no public export, public site, or write routes changed.
 
 ## 11. Merge to Main
 
-*(Updated after merge.)*
+- Merge commit: `f8de9704f966055b2e194aa4e12010c3c1550183`
+- Branch: `phase-1/ticket-018-question-generation` merged to `main` and pushed to `origin/main`.
+- Post-merge pytest on `main`: 77 passed.
 
 ## 12. Recommended Next Ticket
 
