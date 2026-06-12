@@ -1,0 +1,39 @@
+{
+  "id": "ticket-025",
+  "title": "Add safety audit merge gate (Golden Test 23)",
+  "problem": "ticket-024 documents the golden merge gate, but Golden Test 23 requires the safety audit to produce machine-readable pass/fail output and block dangerous or leaky builder changes before merge.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 23: safety audit blocks dangerous or leaky changes.",
+    "docs/agents/10_SAFETY_MODEL.md safety audit expectations.",
+    "agent_reports/2026-06-12_phase-1_ticket-024_builder-golden-gate.md sections 11–13."
+  ],
+  "affected_modules": [
+    "rge/modules/safety_auditor.py",
+    "tests/golden"
+  ],
+  "expected_files": [
+    "rge/modules/safety_auditor.py",
+    "tests/golden/test_23_safety_audit_gate.py"
+  ],
+  "acceptance_criteria": [
+    "Safety audit full run returns machine-readable JSON with status, blocked_reasons, checked_routes, checked_exports, and checked_secrets.",
+    "Golden Test 23 verifies audit is not prose-only and fails closed on forbidden public write/ingestion/agent routes.",
+    "pytest tests/golden/test_23_safety_audit_gate.py passes.",
+    "Existing golden tests still pass (101+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_23_safety_audit_gate.py",
+    "python -m rge.modules.safety_auditor --audit full",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not add public write routes.",
+    "Do not implement CI pipeline wiring.",
+    "Do not implement live safety evaluator agent merge ownership."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert branch phase-1/ticket-025-safety-audit-gate.",
+  "status": "proposed"
+}
