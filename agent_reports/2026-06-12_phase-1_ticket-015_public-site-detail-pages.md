@@ -116,7 +116,7 @@ Revert branch `phase-1/ticket-015-public-site-detail-pages`. Restore placeholder
 - Instruction source: `AGENTS.md` step 9 (temporary).
 - Pre-merge `main` tip: `c8042a1570ecd858296e2dfc88bdb82fba101db4`
 - Branch: `phase-1/ticket-015-public-site-detail-pages`
-- Merge result: pending (record hash below after merge/push).
+- Merge result: `--no-ff` merge commit `5125d27`; pushed `origin/main`.
 
 ## 15. Recommended Next Ticket
 
