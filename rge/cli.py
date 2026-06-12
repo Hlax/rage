@@ -73,6 +73,50 @@ def _cmd_generate_cluster_report(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_generate_theory_candidates(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import TheoryCandidateRepository
+    from rge.modules.theory_generator import generate_theory_candidates
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        output_dir = Path(args.output_dir) if args.output_dir else None
+        result = generate_theory_candidates(
+            conn,
+            domain=args.domain,
+            cluster_report_id=args.cluster_report,
+            fixture_name=args.fixture,
+            output_dir=output_dir,
+        )
+        payload = {
+            "status": result["status"],
+            "command": "generate-theory-candidates",
+            "domain": args.domain,
+            "cluster_report_id": result.get("cluster_report_id"),
+            "theory_candidate_count": TheoryCandidateRepository(conn).count(),
+            "theory_candidate_ids": result.get("theory_candidate_ids"),
+            "rejected_count": result.get("rejected_count", 0),
+            "output_path": result.get("output_path"),
+            "report": result.get("report"),
+            "candidates": result.get("candidates"),
+        }
+        if result.get("rejected"):
+            payload["rejected"] = result["rejected"]
+        print(json.dumps(payload, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "generate-theory-candidates",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_export_public(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.modules.card_exporter import export_public_cards
@@ -682,6 +726,38 @@ def build_parser() -> argparse.ArgumentParser:
         help="Skip deterministic golden threshold padding (for negative tests).",
     )
     cluster_report_parser.set_defaults(func=_cmd_generate_cluster_report)
+
+    theory_parser = subparsers.add_parser(
+        "generate-theory-candidates",
+        help="Generate candidate theories from cluster evidence packets.",
+        description=(
+            "Load a cluster report evidence packet, propose candidate theories "
+            "via mock fixture, validate deterministically, and persist candidates."
+        ),
+    )
+    theory_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack ID for cluster lookup (default: creativity).",
+    )
+    theory_parser.add_argument(
+        "--cluster-report",
+        help="Optional cluster report ID (defaults to latest golden cluster report).",
+    )
+    theory_parser.add_argument(
+        "--fixture",
+        default="theory_generation_creativity_diversity.json",
+        help="Mock theory fixture filename.",
+    )
+    theory_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    theory_parser.add_argument(
+        "--output-dir",
+        help="Optional output directory for theory_candidate_latest.json (for tests).",
+    )
+    theory_parser.set_defaults(func=_cmd_generate_theory_candidates)
 
     export_parser = subparsers.add_parser(
         "export-public",

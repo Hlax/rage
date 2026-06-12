@@ -269,6 +269,23 @@ CREATE TABLE IF NOT EXISTS cluster_reports (
     created_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS theory_candidates (
+    id TEXT PRIMARY KEY,
+    run_id TEXT REFERENCES research_runs(id),
+    cluster_report_id TEXT REFERENCES cluster_reports(id),
+    theory_text TEXT NOT NULL,
+    confidence TEXT NOT NULL,
+    supporting_claims_json TEXT NOT NULL,
+    contradicting_or_qualifying_claims_json TEXT NOT NULL,
+    boundary_conditions_json TEXT NOT NULL,
+    weakening_evidence_json TEXT NOT NULL,
+    next_questions_json TEXT NOT NULL,
+    status TEXT NOT NULL,
+    report_json TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
 -- Public surface and improvement loop ----------------------------------------
 
 CREATE TABLE IF NOT EXISTS public_cards (

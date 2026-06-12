@@ -1,0 +1,40 @@
+{
+  "id": "ticket-018",
+  "title": "Add contract-respecting question generation (Golden Test 16)",
+  "problem": "ticket-017 produces candidate theories with next questions, but active vs parked follow-up question generation is not yet contract-gated. Golden Test 16 requires useful on-scope questions and parked off-scope questions with reasons.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 16: new question generation respects research contract.",
+    "docs/agents/09_RESEARCH_RUN_CONTRACT.md follow-up question thresholds.",
+    "agent_reports/2026-06-12_phase-1_ticket-017_theory-generator.md sections 11–13."
+  ],
+  "affected_modules": [
+    "rge/modules/research_planner.py",
+    "rge/db/repositories.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/research_planner.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "tests/golden/test_16_question_generation.py"
+  ],
+  "acceptance_criteria": [
+    "Deterministic generation of on-scope and parked follow-up questions from cluster/theory context without Ollama.",
+    "Active questions queue with contract validation; off-scope questions parked with machine-readable reasons.",
+    "pytest tests/golden/test_16_question_generation.py passes.",
+    "Existing golden tests still pass (73+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_16_question_generation.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not implement LangGraph or live web discovery.",
+    "Do not add public write routes."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert branch phase-1/ticket-018-question-generation.",
+  "status": "proposed"
+}

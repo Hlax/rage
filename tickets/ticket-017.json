@@ -37,5 +37,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert branch phase-1/ticket-017-theory-generator.",
-  "status": "proposed"
+  "status": "done"
 }

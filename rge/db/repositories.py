@@ -1125,6 +1125,141 @@ def _row_to_cluster_report(row: sqlite3.Row) -> ClusterReportRecord:
     )
 
 
+def make_theory_candidate_id(cluster_report_id: str, theory_text: str) -> str:
+    digest = sha256_hex(f"{cluster_report_id}:{theory_text}")
+    return f"thc_{digest[:16]}"
+
+
+@dataclass(frozen=True)
+class TheoryCandidateRecord:
+    id: str
+    run_id: str | None
+    cluster_report_id: str | None
+    theory_text: str
+    confidence: str
+    supporting_claims_json: str
+    contradicting_or_qualifying_claims_json: str
+    boundary_conditions_json: str
+    weakening_evidence_json: str
+    next_questions_json: str
+    status: str
+    report_json: str
+    created_at: str
+    updated_at: str
+
+
+class TheoryCandidateRepository:
+    """Persist and read ``theory_candidates`` rows."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def get_by_id(self, theory_id: str) -> TheoryCandidateRecord | None:
+        row = self._conn.execute(
+            """
+            SELECT id, run_id, cluster_report_id, theory_text, confidence,
+                   supporting_claims_json, contradicting_or_qualifying_claims_json,
+                   boundary_conditions_json, weakening_evidence_json,
+                   next_questions_json, status, report_json, created_at, updated_at
+            FROM theory_candidates
+            WHERE id = ?
+            """,
+            (theory_id,),
+        ).fetchone()
+        return _row_to_theory_candidate(row) if row else None
+
+    def list_for_cluster_report(
+        self, cluster_report_id: str
+    ) -> list[TheoryCandidateRecord]:
+        rows = self._conn.execute(
+            """
+            SELECT id, run_id, cluster_report_id, theory_text, confidence,
+                   supporting_claims_json, contradicting_or_qualifying_claims_json,
+                   boundary_conditions_json, weakening_evidence_json,
+                   next_questions_json, status, report_json, created_at, updated_at
+            FROM theory_candidates
+            WHERE cluster_report_id = ?
+            ORDER BY created_at
+            """,
+            (cluster_report_id,),
+        ).fetchall()
+        return [_row_to_theory_candidate(row) for row in rows]
+
+    def count(self) -> int:
+        row = self._conn.execute("SELECT COUNT(*) FROM theory_candidates").fetchone()
+        return int(row[0]) if row else 0
+
+    def insert(
+        self,
+        *,
+        cluster_report_id: str,
+        theory_text: str,
+        confidence: str,
+        supporting_claims: list[str],
+        contradicting_or_qualifying_claims: list[str],
+        boundary_conditions: list[str],
+        weakening_evidence: list[str],
+        next_questions: list[str],
+        report: dict[str, Any],
+        run_id: str | None = None,
+        status: str = "candidate",
+    ) -> TheoryCandidateRecord:
+        now = utc_now_iso()
+        theory_id = make_theory_candidate_id(cluster_report_id, theory_text)
+        self._conn.execute(
+            """
+            INSERT INTO theory_candidates (
+                id, run_id, cluster_report_id, theory_text, confidence,
+                supporting_claims_json, contradicting_or_qualifying_claims_json,
+                boundary_conditions_json, weakening_evidence_json,
+                next_questions_json, status, report_json, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO NOTHING
+            """,
+            (
+                theory_id,
+                run_id,
+                cluster_report_id,
+                theory_text,
+                confidence,
+                json.dumps(supporting_claims),
+                json.dumps(contradicting_or_qualifying_claims),
+                json.dumps(boundary_conditions),
+                json.dumps(weakening_evidence),
+                json.dumps(next_questions),
+                status,
+                json.dumps(report),
+                now,
+                now,
+            ),
+        )
+        self._conn.commit()
+        record = self.get_by_id(theory_id)
+        assert record is not None
+        return record
+
+
+def _row_to_theory_candidate(row: sqlite3.Row) -> TheoryCandidateRecord:
+    return TheoryCandidateRecord(
+        id=row["id"],
+        run_id=row["run_id"],
+        cluster_report_id=row["cluster_report_id"],
+        theory_text=row["theory_text"],
+        confidence=row["confidence"],
+        supporting_claims_json=row["supporting_claims_json"],
+        contradicting_or_qualifying_claims_json=row[
+            "contradicting_or_qualifying_claims_json"
+        ],
+        boundary_conditions_json=row["boundary_conditions_json"],
+        weakening_evidence_json=row["weakening_evidence_json"],
+        next_questions_json=row["next_questions_json"],
+        status=row["status"],
+        report_json=row["report_json"],
+        created_at=row["created_at"],
+        updated_at=row["updated_at"],
+    )
+
+
 def persist_relationship_score_update(
     conn: sqlite3.Connection,
     *,
