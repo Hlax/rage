@@ -93,8 +93,10 @@ Full safety audit passes and now includes GT25 evidence files in `checked_files`
 
 ## 10. Merge to Main
 
-- Merge commit: _(recorded after merge)_
+- Merge commit: `32e0e04` (fast-forward from `1b2929c`)
 - Branch: `phase-1/ticket-027-public-site-debug-details` merged to `main`.
+- Post-merge pytest on `main`: 114 passed.
+- Post-merge safety audit on `main`: `pass`.
 
 ## 11. Recommended Next Ticket
 
