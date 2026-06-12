@@ -36,5 +36,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert branch phase-1/ticket-019-ontology-pressure.",
-  "status": "proposed"
+  "status": "done"
 }

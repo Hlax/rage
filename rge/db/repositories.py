@@ -1260,6 +1260,117 @@ def _row_to_theory_candidate(row: sqlite3.Row) -> TheoryCandidateRecord:
     )
 
 
+def make_ontology_proposal_id(candidate_concept: str, proposal_type: str) -> str:
+    digest = sha256_hex(f"{candidate_concept}:{proposal_type}")
+    return f"ont_{digest[:16]}"
+
+
+@dataclass(frozen=True)
+class OntologyProposalRecord:
+    id: str
+    proposal_type: str
+    candidate_concept: str | None
+    status: str
+    evidence_claims_json: str
+    reason: str
+    proposal_json: str
+    created_at: str
+    updated_at: str
+
+
+class OntologyProposalRepository:
+    """Persist and read ``ontology_proposals`` rows."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def get_by_id(self, proposal_id: str) -> OntologyProposalRecord | None:
+        row = self._conn.execute(
+            """
+            SELECT id, proposal_type, candidate_concept, status,
+                   evidence_claims_json, reason, proposal_json,
+                   created_at, updated_at
+            FROM ontology_proposals
+            WHERE id = ?
+            """,
+            (proposal_id,),
+        ).fetchone()
+        return _row_to_ontology_proposal(row) if row else None
+
+    def get_latest_for_candidate(
+        self, candidate_concept: str
+    ) -> OntologyProposalRecord | None:
+        row = self._conn.execute(
+            """
+            SELECT id, proposal_type, candidate_concept, status,
+                   evidence_claims_json, reason, proposal_json,
+                   created_at, updated_at
+            FROM ontology_proposals
+            WHERE candidate_concept = ?
+            ORDER BY created_at DESC
+            LIMIT 1
+            """,
+            (candidate_concept,),
+        ).fetchone()
+        return _row_to_ontology_proposal(row) if row else None
+
+    def count(self) -> int:
+        row = self._conn.execute("SELECT COUNT(*) FROM ontology_proposals").fetchone()
+        return int(row[0]) if row else 0
+
+    def insert(
+        self,
+        *,
+        proposal_type: str,
+        candidate_concept: str,
+        status: str,
+        evidence_claims: list[str],
+        reason: str,
+        proposal: dict[str, Any],
+    ) -> OntologyProposalRecord:
+        now = utc_now_iso()
+        proposal_id = make_ontology_proposal_id(candidate_concept, proposal_type)
+        self._conn.execute(
+            """
+            INSERT INTO ontology_proposals (
+                id, proposal_type, candidate_concept, status,
+                evidence_claims_json, reason, proposal_json,
+                created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO NOTHING
+            """,
+            (
+                proposal_id,
+                proposal_type,
+                candidate_concept,
+                status,
+                json.dumps(evidence_claims),
+                reason,
+                json.dumps(proposal),
+                now,
+                now,
+            ),
+        )
+        self._conn.commit()
+        record = self.get_by_id(proposal_id)
+        assert record is not None
+        return record
+
+
+def _row_to_ontology_proposal(row: sqlite3.Row) -> OntologyProposalRecord:
+    return OntologyProposalRecord(
+        id=row["id"],
+        proposal_type=row["proposal_type"],
+        candidate_concept=row["candidate_concept"],
+        status=row["status"],
+        evidence_claims_json=row["evidence_claims_json"],
+        reason=row["reason"],
+        proposal_json=row["proposal_json"],
+        created_at=row["created_at"],
+        updated_at=row["updated_at"],
+    )
+
+
 def persist_relationship_score_update(
     conn: sqlite3.Connection,
     *,

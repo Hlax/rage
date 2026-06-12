@@ -45,7 +45,17 @@ superseded
 | 16 | ticket-016 | done | Add cluster report threshold trigger (Golden Test 13) | `phase-1/ticket-016-cluster-report` | `agent_reports/2026-06-12_phase-1_ticket-016_cluster-report.md` |
 | 17 | ticket-017 | done | Add mock theory generator (Golden Test 15) | `phase-1/ticket-017-theory-generator` | `agent_reports/2026-06-12_phase-1_ticket-017_theory-generator.md` |
 | 18 | ticket-018 | done | Add contract-respecting question generation (Golden Test 16) | `phase-1/ticket-018-question-generation` | `agent_reports/2026-06-12_phase-1_ticket-018_question-generation.md` |
-| 19 | ticket-019 | proposed | Add ontology pressure report (Golden Test 17) | | |
+| 19 | ticket-019 | done | Add ontology pressure report (Golden Test 17) | `phase-1/ticket-019-ontology-pressure` | `agent_reports/2026-06-12_phase-1_ticket-019_ontology-pressure.md` |
+| 20 | ticket-020 | proposed | Add domain proposal threshold trigger (Golden Test 18) | | |
+
+## Queue Notes (2026-06-12, ticket-019 agent)
+
+- ticket-019 implemented `generate-ontology-pressure` with migration `0006`,
+  deterministic golden vocabulary padding (20 pressure claims / 2+ sources),
+  draft ontology proposals, and Golden Test 17 (4 tests). All 81 golden tests
+  pass without Ollama.
+- Pre-ticket-019 audit report included in merge.
+- ticket-020 proposes domain proposal threshold trigger for Golden Test 18.
 
 ## Queue Notes (2026-06-12, ticket-018 agent)
 
@@ -157,7 +167,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-019 (proposed; awaiting review)
+ticket-020 (proposed; awaiting review)
 ```
 
 ## Queue Rules
