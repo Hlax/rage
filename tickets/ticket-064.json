@@ -1,0 +1,60 @@
+{
+  "id": "ticket-064",
+  "title": "Safe local live contradiction-detection probe CLI",
+  "problem": "Tickets 061-063 proved report-only live claim extraction, concept linking, and relationship drafting. detect-contradictions still requires persisted claims, relationships, and SQLite writes for qualification evidence. Operators need a no-DB live probe for contradiction detection before any graph persistence.",
+  "evidence": [
+    "agent_reports/2026-06-12_pre-ticket-064_local-live-contradiction-probe.md",
+    "agent_reports/2026-06-12_phase-2_ticket-063_safe-local-live-relationship-probe.md",
+    "agent_reports/2026-06-12_phase-2_ticket-062_safe-local-live-concept-linking-probe.md",
+    "rge/modules/contradiction_detector.py",
+    "rge/modules/live_probe.py",
+    "rge/llm/ollama_client.py",
+    "tests/golden/test_07_contradiction_detection.py"
+  ],
+  "affected_modules": [
+    "rge/modules/live_probe.py",
+    "rge/modules/contradiction_detector.py",
+    "rge/llm/ollama_client.py",
+    "rge/cli.py",
+    "fixtures/probes/live_probe_contradiction_quality_bundle.json"
+  ],
+  "expected_files": [
+    "rge/modules/live_probe.py",
+    "rge/modules/contradiction_detector.py",
+    "rge/llm/ollama_client.py",
+    "rge/cli.py",
+    "fixtures/probes/live_probe_contradiction_quality_bundle.json",
+    "fixtures/llm_outputs/contradiction_detection_live_probe_quality.json",
+    "tests/unit/test_live_probe_detect_contradictions_cli.py",
+    "tests/unit/test_contradiction_rejection_diagnostics.py",
+    "tests/unit/test_ollama_contradiction_prompt.py",
+    "tests/smoke/test_live_ollama_smoke.py",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "tickets/ticket-064.json",
+    "agent_reports/2026-06-12_phase-2_ticket-064_safe-local-live-contradiction-probe.md"
+  ],
+  "acceptance_criteria": [
+    "probe-detect-contradictions requires RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1.",
+    "Live probe with qwen2.5:7b yields accepted_count >= 1 on default contradiction bundle fixture.",
+    "db_writes remains false; report under data/reports/live_probes/.",
+    "validate_contradiction_candidates unchanged; GT07 still passes mock-only.",
+    "Rejected live probe rows include validation_diagnostic notes.",
+    "Mock/default pytest and CI remain green without Ollama."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_live_probe_detect_contradictions_cli.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_contradiction_rejection_diagnostics.py -q",
+    "RGE_LLM_MODE=mock python -m pytest -q",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site",
+    "Manual live: probe-detect-contradictions with ollama opt-in"
+  ],
+  "non_goals": [
+    "Do not persist qualification evidence or relationship metadata to default DB or public exports.",
+    "Do not add OpenAI/OpenRouter or API keys.",
+    "Do not weaken contradiction validation rules.",
+    "Do not edit ontology YAML."
+  ],
+  "risk_level": "low-medium",
+  "rollback_plan": "Revert CLI, probe helper, prompt calibration, fixtures, and tests. No schema migrations.",
+  "status": "done"
+}

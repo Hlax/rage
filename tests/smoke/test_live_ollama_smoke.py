@@ -40,3 +40,39 @@ def test_live_probe_extract_claims_on_fixture_chunk() -> None:
     assert report["db_writes"] is False
     report_path = report["report_path"]
     assert report_path.startswith("data/reports/live_probes/")
+
+
+def test_live_probe_link_concepts_on_quality_claim() -> None:
+    from rge.modules.live_probe import run_probe_link_concepts
+
+    report = run_probe_link_concepts()
+    assert report["status"] == "ok"
+    assert report["provider"] == "ollama"
+    assert report["accepted_count"] + report["rejected_count"] > 0
+    assert report["db_writes"] is False
+    report_path = report["report_path"]
+    assert report_path.startswith("data/reports/live_probes/")
+
+
+def test_live_probe_draft_relationships_on_quality_bundle() -> None:
+    from rge.modules.live_probe import run_probe_draft_relationships
+
+    report = run_probe_draft_relationships()
+    assert report["status"] == "ok"
+    assert report["provider"] == "ollama"
+    assert report["accepted_count"] + report["rejected_count"] > 0
+    assert report["db_writes"] is False
+    report_path = report["report_path"]
+    assert report_path.startswith("data/reports/live_probes/")
+
+
+def test_live_probe_detect_contradictions_on_quality_bundle() -> None:
+    from rge.modules.live_probe import run_probe_detect_contradictions
+
+    report = run_probe_detect_contradictions()
+    assert report["status"] == "ok"
+    assert report["provider"] == "ollama"
+    assert report["accepted_count"] + report["rejected_count"] > 0
+    assert report["db_writes"] is False
+    report_path = report["report_path"]
+    assert report_path.startswith("data/reports/live_probes/")

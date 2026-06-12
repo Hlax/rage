@@ -924,6 +924,39 @@ def _cmd_probe_draft_relationships(args: argparse.Namespace) -> int:
     )
 
 
+def _cmd_probe_detect_contradictions(args: argparse.Namespace) -> int:
+    from rge.modules.live_probe import run_probe_detect_contradictions
+
+    if args.from_report and args.chain_relationship:
+        payload = {
+            "status": "error",
+            "command": "probe-detect-contradictions",
+            "detail": "Use only one of --from-report or --chain-relationship.",
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+    return _run_live_probe_command(
+        command="probe-detect-contradictions",
+        runner=lambda: run_probe_detect_contradictions(
+            domain_pack=args.domain,
+            bundle_fixture=Path(args.bundle) if args.bundle else None,
+            from_report=Path(args.from_report) if args.from_report else None,
+            chain_relationship=bool(args.chain_relationship),
+            chain_fixture_source=(
+                Path(args.fixture_source) if args.fixture_source else None
+            ),
+            chain_claim_fixture=(
+                Path(args.claim_fixture) if args.claim_fixture else None
+            ),
+            chain_bundle_fixture=(
+                Path(args.relationship_bundle) if args.relationship_bundle else None
+            ),
+            root=_REPO_ROOT,
+        ),
+    )
+
+
 def _cmd_verify(args: argparse.Namespace) -> int:
     from rge.modules.verify_runner import run_verification
 
@@ -1926,6 +1959,61 @@ def build_parser() -> argparse.ArgumentParser:
         help="Domain pack for validation (default: creativity).",
     )
     probe_relationship_parser.set_defaults(func=_cmd_probe_draft_relationships)
+
+    probe_contradiction_parser = subparsers.add_parser(
+        "probe-detect-contradictions",
+        help="Live Ollama contradiction-detection probe (report-only, no DB writes).",
+        description=(
+            "Run one live structured contradiction-detection task on probe-local "
+            "claims and relationships. Default input is "
+            "fixtures/probes/live_probe_contradiction_quality_bundle.json. "
+            "Requires RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1. Writes a JSON "
+            "report under data/reports/live_probes/ only; never touches the default "
+            "SQLite database or public exports."
+        ),
+    )
+    probe_contradiction_parser.add_argument(
+        "--bundle",
+        help=(
+            "JSON bundle with source_claims, domain_claims, and relationships "
+            "(default: fixtures/probes/live_probe_contradiction_quality_bundle.json)."
+        ),
+    )
+    probe_contradiction_parser.add_argument(
+        "--from-report",
+        help=(
+            "Load qualifying claim from a prior probe-draft-relationships report; "
+            "base/new relationships come from the default contradiction bundle."
+        ),
+    )
+    probe_contradiction_parser.add_argument(
+        "--chain-relationship",
+        action="store_true",
+        help=(
+            "Run probe-draft-relationships first and detect contradictions using "
+            "its qualifying claim with the default contradiction bundle edges."
+        ),
+    )
+    probe_contradiction_parser.add_argument(
+        "--relationship-bundle",
+        help="Relationship bundle for --chain-relationship when not using default.",
+    )
+    probe_contradiction_parser.add_argument(
+        "--claim-fixture",
+        help="Claim JSON for relationship chain inside --chain-relationship only.",
+    )
+    probe_contradiction_parser.add_argument(
+        "--fixture-source",
+        "--fixture",
+        dest="fixture_source",
+        help="Source text fixture for extract step inside --chain-relationship only.",
+    )
+    probe_contradiction_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack for validation (default: creativity).",
+    )
+    probe_contradiction_parser.set_defaults(func=_cmd_probe_detect_contradictions)
 
     verify_parser = subparsers.add_parser(
         "verify",

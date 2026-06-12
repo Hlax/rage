@@ -24,6 +24,12 @@ from rge.modules.concept_linker import (
     propose_concept_links,
     validate_concept_links,
 )
+from rge.modules.contradiction_detector import (
+    claim_dicts_as_objects,
+    contradiction_rejection_diagnostic,
+    propose_contradictions,
+    validate_contradiction_probe_batch,
+)
 from rge.modules.relationship_builder import (
     propose_relationship_drafts,
     relationship_rejection_diagnostic,
@@ -54,6 +60,12 @@ DEFAULT_PROBE_RELATIONSHIP_BUNDLE = (
     / "fixtures"
     / "probes"
     / "live_probe_relationship_quality_bundle.json"
+)
+DEFAULT_PROBE_CONTRADICTION_BUNDLE = (
+    Path(__file__).resolve().parents[2]
+    / "fixtures"
+    / "probes"
+    / "live_probe_contradiction_quality_bundle.json"
 )
 PROBE_CHUNK_ID = "chunk_live_probe_001"
 PROBE_SOURCE_ID = "src_live_probe_001"
@@ -651,5 +663,262 @@ def run_probe_draft_relationships(
         base=base,
         reports_dir=reports_dir,
         filename_prefix="probe_draft_relationships",
+        report=report,
+    )
+
+
+def resolve_contradiction_bundle(path: Path | None, root: Path | None = None) -> Path:
+    base = root if root is not None else repo_root()
+    bundle = path if path is not None else DEFAULT_PROBE_CONTRADICTION_BUNDLE
+    if not bundle.is_absolute():
+        bundle = base / bundle
+    return bundle.resolve()
+
+
+def load_contradiction_bundle(
+    bundle_path: Path,
+    root: Path | None = None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    base = root if root is not None else repo_root()
+    path = bundle_path if bundle_path.is_absolute() else (base / bundle_path)
+    path = path.resolve()
+    if not path.is_file():
+        raise LiveProbeError(f"contradiction bundle not found: {path}")
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    source_claims = list(payload.get("source_claims") or [])
+    domain_claims = list(payload.get("domain_claims") or [])
+    relationships = list(payload.get("relationships") or [])
+    if not source_claims or not domain_claims or not relationships:
+        raise LiveProbeError(
+            "contradiction bundle must include source_claims, domain_claims, "
+            "and relationships"
+        )
+    return source_claims, domain_claims, relationships
+
+
+def load_default_contradiction_bundle(
+    root: Path | None = None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    bundle_path = resolve_contradiction_bundle(None, root)
+    if not bundle_path.is_file():
+        raise LiveProbeError(f"default contradiction bundle not found: {bundle_path}")
+    return load_contradiction_bundle(bundle_path, root)
+
+
+def relationship_triples_from_bundle(
+    relationships: list[dict[str, Any]],
+) -> set[tuple[str, str, str]]:
+    triples: set[tuple[str, str, str]] = set()
+    for relationship in relationships:
+        subject = str(relationship.get("subject_concept", "")).strip()
+        predicate = str(relationship.get("predicate", "")).strip()
+        obj = str(relationship.get("object_concept", "")).strip()
+        if subject and predicate and obj:
+            triples.add((subject, predicate, obj))
+    return triples
+
+
+def merge_qualifying_claim_from_relationship_report(
+    relationship_report: dict[str, Any],
+    source_claims: list[dict[str, Any]],
+    domain_claims: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Overlay qualifying claim from a relationship probe report onto bundle claims."""
+    input_claim = dict(relationship_report.get("input_claim") or {})
+    if not input_claim:
+        raise LiveProbeError("relationship probe report missing input_claim")
+    if not input_claim.get("id"):
+        input_claim["id"] = PROBE_CLAIM_ID
+    qualifying_id = input_claim["id"]
+    updated_source = [dict(input_claim)]
+    updated_domain: list[dict[str, Any]] = []
+    replaced = False
+    for claim in domain_claims:
+        if claim.get("id") == qualifying_id:
+            updated_domain.append(dict(input_claim))
+            replaced = True
+        else:
+            updated_domain.append(dict(claim))
+    if not replaced:
+        updated_domain.insert(0, dict(input_claim))
+    return updated_source, updated_domain
+
+
+def load_contradiction_inputs_from_relationship_report(
+    report_path: Path,
+    root: Path | None = None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], str]:
+    """Load contradiction inputs using qualifying claim from a relationship probe."""
+    base = root if root is not None else repo_root()
+    path = report_path if report_path.is_absolute() else (base / report_path)
+    path = path.resolve()
+    if not path.is_file():
+        raise LiveProbeError(f"probe report not found: {path}")
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if payload.get("command") != "probe-draft-relationships":
+        raise LiveProbeError(
+            f"expected probe-draft-relationships report, got {payload.get('command')!r}"
+        )
+    default_source, default_domain, relationships = load_default_contradiction_bundle(base)
+    source_claims, domain_claims = merge_qualifying_claim_from_relationship_report(
+        payload,
+        default_source,
+        default_domain,
+    )
+    rel = (
+        str(path.relative_to(base)).replace("\\", "/")
+        if path.is_relative_to(base)
+        else str(path)
+    )
+    return source_claims, domain_claims, relationships, rel
+
+
+def run_probe_detect_contradictions(
+    *,
+    domain_pack: str = DEFAULT_PROBE_DOMAIN,
+    bundle_fixture: Path | None = None,
+    from_report: Path | None = None,
+    chain_relationship: bool = False,
+    chain_fixture_source: Path | None = None,
+    chain_claim_fixture: Path | None = None,
+    chain_bundle_fixture: Path | None = None,
+    root: Path | None = None,
+    reports_dir: Path | None = None,
+    config: RgeConfig | None = None,
+    client: Any | None = None,
+    skip_health_check: bool = False,
+) -> dict[str, Any]:
+    """Run live contradiction detection on probe inputs; write report only (no DB)."""
+    base = root if root is not None else repo_root()
+    command = "probe-detect-contradictions"
+    cfg = assert_live_probe_env(config, command=command)
+    health = assert_ollama_health(cfg) if not skip_health_check else {}
+
+    input_source = "embedded_bundle"
+    from_report_path: str | None = None
+    chain_relationship_report_path: str | None = None
+    source_claims: list[dict[str, Any]]
+    domain_claims: list[dict[str, Any]]
+    relationships: list[dict[str, Any]]
+
+    if chain_relationship:
+        relationship_report = run_probe_draft_relationships(
+            domain_pack=domain_pack,
+            bundle_fixture=chain_bundle_fixture,
+            chain_link=chain_claim_fixture is not None
+            or chain_fixture_source is not None,
+            chain_fixture_source=chain_fixture_source,
+            chain_claim_fixture=chain_claim_fixture,
+            root=base,
+            reports_dir=reports_dir,
+            config=cfg,
+            client=client,
+            skip_health_check=True,
+        )
+        input_source = "chain_relationship"
+        chain_relationship_report_path = relationship_report.get("report_path")
+        default_source, default_domain, relationships = load_default_contradiction_bundle(
+            base
+        )
+        source_claims, domain_claims = merge_qualifying_claim_from_relationship_report(
+            relationship_report,
+            default_source,
+            default_domain,
+        )
+    elif from_report is not None:
+        source_claims, domain_claims, relationships, from_report_path = (
+            load_contradiction_inputs_from_relationship_report(from_report, base)
+        )
+        input_source = "from_report"
+    elif bundle_fixture is not None:
+        source_claims, domain_claims, relationships = load_contradiction_bundle(
+            bundle_fixture,
+            base,
+        )
+        input_source = "bundle_fixture"
+    else:
+        source_claims, domain_claims, relationships = load_default_contradiction_bundle(
+            base
+        )
+        input_source = "embedded_bundle"
+
+    source_claim_objects = claim_dicts_as_objects(source_claims)
+    domain_claim_objects = claim_dicts_as_objects(domain_claims)
+    source_claim_ids = {claim["id"] for claim in source_claims if claim.get("id")}
+    domain_claim_ids = {claim["id"] for claim in domain_claims if claim.get("id")}
+    relationship_triples = relationship_triples_from_bundle(relationships)
+
+    model_client = client or get_model_client(cfg, mode="ollama")
+    try:
+        proposed = propose_contradictions(
+            domain_claims,
+            relationships,
+            domain_pack,
+            client=model_client,
+            fixture_name="contradiction_detection_live_probe_quality.json",
+        )
+    except OllamaStructuredCallError as exc:
+        raise LiveProbeError(str(exc)) from exc
+
+    validation = validate_contradiction_probe_batch(
+        proposed,
+        source_claims=source_claim_objects,
+        domain_claims=domain_claim_objects,
+        relationships=relationships,
+    )
+    accepted = validation["accepted"]
+    rejected = validation["rejected"]
+    for item in rejected:
+        item["validation_diagnostic"] = contradiction_rejection_diagnostic(
+            item,
+            rejection_reason=item.get("rejection_reason"),
+            source_claim_ids=source_claim_ids,
+            domain_claim_ids=domain_claim_ids,
+            relationship_triples=relationship_triples,
+        )
+
+    total = len(accepted) + len(rejected)
+    if total == 0:
+        raise LiveProbeError(
+            "Live probe received no parseable contradiction candidates from the model."
+        )
+
+    created_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    report: dict[str, Any] = {
+        "report_type": "live_probe_report",
+        "command": command,
+        "status": "ok",
+        "probe": "contradiction_detection",
+        "created_at": created_at,
+        "input_source": input_source,
+        "from_report_path": from_report_path,
+        "chain_relationship_report_path": chain_relationship_report_path,
+        "source_claims": source_claims,
+        "domain_claims": domain_claims,
+        "input_relationships": relationships,
+        "domain_pack": domain_pack,
+        "relationship_triples_allowed": sorted(relationship_triples),
+        "source_claim_ids": sorted(source_claim_ids),
+        "domain_claim_ids": sorted(domain_claim_ids),
+        "effective_llm_mode": effective_llm_mode(cfg),
+        "provider": model_client.provider,
+        "model": getattr(model_client, "model", None),
+        "base_url": getattr(model_client, "base_url", None),
+        "schema_version": cfg.llm_schema_version,
+        "health": health,
+        "accepted_count": len(accepted),
+        "rejected_count": len(rejected),
+        "accepted": accepted,
+        "rejected": rejected,
+        "db_writes": False,
+        "default_db_path": str(DEFAULT_DB_PATH).replace("\\", "/"),
+    }
+
+    return _write_live_probe_report(
+        base=base,
+        reports_dir=reports_dir,
+        filename_prefix="probe_detect_contradictions",
         report=report,
     )

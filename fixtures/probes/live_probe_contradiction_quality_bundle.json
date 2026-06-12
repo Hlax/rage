@@ -1,0 +1,40 @@
+{
+  "source_claims": [
+    {
+      "id": "claim_live_probe_qualify_001",
+      "claim_text": "AI-assisted brainstorming increased idea diversity when participants were instructed to generate multiple divergent directions.",
+      "domain": "creativity",
+      "source_id": "src_live_probe_contra_001"
+    }
+  ],
+  "domain_claims": [
+    {
+      "id": "claim_live_probe_qualify_001",
+      "claim_text": "AI-assisted brainstorming increased idea diversity when participants were instructed to generate multiple divergent directions.",
+      "domain": "creativity",
+      "source_id": "src_live_probe_contra_001"
+    },
+    {
+      "id": "claim_live_probe_oppose_001",
+      "claim_text": "AI-assisted brainstorming reduced semantic diversity across submitted ideas in short-form writing tasks.",
+      "domain": "creativity",
+      "source_id": "src_live_probe_base_001"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel_live_probe_base_001",
+      "subject_concept": "AI assistance",
+      "predicate": "may_reduce",
+      "object_concept": "semantic diversity",
+      "status": "active"
+    },
+    {
+      "id": "rel_live_probe_new_001",
+      "subject_concept": "AI assistance",
+      "predicate": "may_increase",
+      "object_concept": "diversity",
+      "status": "active"
+    }
+  ]
+}

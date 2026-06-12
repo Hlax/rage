@@ -95,6 +95,24 @@ superseded
 | 61 | ticket-061 | done | Live claim extraction calibration for local Qwen | `phase-2/ticket-061-live-claim-calibration` | `agent_reports/2026-06-12_phase-2_ticket-061_live-claim-calibration.md` |
 | 62 | ticket-062 | done | Safe local live concept-linking probe CLI | `phase-2/ticket-062-safe-local-live-concept-linking-probe` | `agent_reports/2026-06-12_phase-2_ticket-062_safe-local-live-concept-linking-probe.md` |
 | 63 | ticket-063 | done | Safe local live relationship-drafting probe CLI | `phase-2/ticket-063-safe-local-live-relationship-probe` | `agent_reports/2026-06-12_phase-2_ticket-063_safe-local-live-relationship-probe.md` |
+| 64 | ticket-064 | done | Safe local live contradiction-detection probe CLI | `phase-2/ticket-064-safe-local-live-contradiction-probe` | `agent_reports/2026-06-12_phase-2_ticket-064_safe-local-live-contradiction-probe.md` |
+
+## Queue Notes (2026-06-12, ticket-064 agent)
+
+- Adds `probe-detect-contradictions` report-only CLI; default embedded GT07-shaped
+  contradiction bundle; optional `--from-report` / `--chain-relationship`; calibrated
+  Ollama contradiction prompt; `contradiction_rejection_diagnostic` on rejections.
+  Live: accepted_count=1, db_writes=false. `live_smoke` covers full probe chain (5 tests).
+- ticket-059 OpenAI remains deferred.
+
+## Queue Notes (2026-06-12, ticket-064 seed)
+
+- Pre-ticket audit GO: `agent_reports/2026-06-12_pre-ticket-064_local-live-contradiction-probe.md`.
+- Adds `probe-detect-contradictions` (report-only, no default DB); default embedded GT07-shaped
+  contradiction bundle; optional `--from-report` / `--chain-relationship`; Ollama prompt calibration
+  + contradiction rejection diagnostics.
+- Prep hygiene: `live_smoke` extended for `probe-link-concepts` and `probe-draft-relationships`.
+- ticket-059 OpenAI remains proposed/deferred.
 
 ## Queue Notes (2026-06-12, ticket-063 agent)
 

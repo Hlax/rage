@@ -125,6 +125,7 @@ python -m rge.cli model-health
 python -m rge.cli probe-extract-claims
 python -m rge.cli probe-link-concepts
 python -m rge.cli probe-draft-relationships
+python -m rge.cli probe-detect-contradictions
 ```
 
 Claim probe optional fixture: `--fixture fixtures/sources/live_probe_claim_calibration_short.txt`
@@ -140,8 +141,20 @@ Relationship probe default input:
 Optional: `--from-report data/reports/live_probes/probe_link_concepts_<stamp>.json`
 or `--chain-link` (runs concept-link probe first; variability applies).
 
+Contradiction probe default input:
+`fixtures/probes/live_probe_contradiction_quality_bundle.json`.
+Optional: `--from-report data/reports/live_probes/probe_draft_relationships_<stamp>.json`
+(qualifying claim overlay) or `--chain-relationship` (runs relationship probe first;
+variability applies).
+
 Reports land in gitignored `data/reports/live_probes/`. Excluded from CI/golden.
-Optional smoke: `python -m pytest -m live_smoke tests/smoke` (requires Ollama).
+Optional smoke (`tests/smoke/test_live_ollama_smoke.py`) covers `probe-extract-claims`,
+`probe-link-concepts`, `probe-draft-relationships`, and `probe-detect-contradictions`
+when Ollama is available:
+
+```powershell
+python -m pytest -m live_smoke tests/smoke
+```
 
 ## Live-mode public export publish gate
 

@@ -411,10 +411,59 @@ class OllamaModelClient(ModelClient):
         domain_pack: str,
         schema_version: str,
     ) -> str:
+        relationship_triples = [
+            {
+                "subject_concept": rel.get("subject_concept"),
+                "predicate": rel.get("predicate"),
+                "object_concept": rel.get("object_concept"),
+            }
+            for rel in relationships
+            if rel.get("subject_concept") and rel.get("predicate") and rel.get("object_concept")
+        ]
+        triples_json = json.dumps(relationship_triples, ensure_ascii=False)
+        claim_ids = [claim.get("id") for claim in claims if claim.get("id")]
         return (
-            f"Detect contradiction or qualification links for domain pack {domain_pack!r}.\n"
+            f"You are a research contradiction-detection assistant for domain pack "
+            f"{domain_pack!r}.\n"
             f"Claims (JSON): {json.dumps(claims, ensure_ascii=False)}\n"
             f"Relationships (JSON): {json.dumps(relationships, ensure_ascii=False)}\n\n"
+            f"Known relationship triples (use exact subject/predicate/object values): "
+            f"{triples_json}\n"
+            f"Known claim ids (optional in output): "
+            f"{json.dumps(claim_ids, ensure_ascii=False)}\n\n"
+            "Rules for each contradiction link:\n"
+            "- base_subject_concept, base_predicate, base_object_concept MUST match "
+            "one existing relationship triple (typically the may_reduce edge).\n"
+            "- new_subject_concept, new_predicate, new_object_concept MUST match "
+            "another existing relationship triple (typically the may_increase edge).\n"
+            "- qualification_stance MUST be qualifies.\n"
+            '- contradiction_classification MUST be '
+            '"apparent_contradiction_metric_or_condition_difference".\n'
+            "- qualifying_claim_id and opposing_claim_id are optional; the validator "
+            "can resolve claims by text fragments when omitted.\n\n"
+            "Positive example (accepted shape):\n"
+            "{\n"
+            '  "base_subject_concept": "AI assistance",\n'
+            '  "base_predicate": "may_reduce",\n'
+            '  "base_object_concept": "semantic diversity",\n'
+            '  "new_subject_concept": "AI assistance",\n'
+            '  "new_predicate": "may_increase",\n'
+            '  "new_object_concept": "diversity",\n'
+            '  "qualification_stance": "qualifies",\n'
+            '  "contradiction_classification": '
+            '"apparent_contradiction_metric_or_condition_difference"\n'
+            "}\n\n"
+            "Negative example (rejected — invalid classification):\n"
+            "{\n"
+            '  "base_subject_concept": "AI assistance",\n'
+            '  "base_predicate": "may_reduce",\n'
+            '  "base_object_concept": "semantic diversity",\n'
+            '  "new_subject_concept": "AI assistance",\n'
+            '  "new_predicate": "may_increase",\n'
+            '  "new_object_concept": "diversity",\n'
+            '  "qualification_stance": "qualifies",\n'
+            '  "contradiction_classification": "resolved_contradiction"\n'
+            "}\n\n"
             "Return ONLY valid JSON matching this shape:\n"
             "{\n"
             f'  "task_name": "contradiction_detection",\n'

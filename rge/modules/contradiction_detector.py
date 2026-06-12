@@ -21,9 +21,145 @@ VALID_CLASSIFICATIONS = frozenset(
     {"qualifies", "apparent_contradiction_metric_or_condition_difference"}
 )
 
+REJECTION_MISSING_BASE_RELATIONSHIP = "missing_base_relationship"
+REJECTION_MISSING_NEW_RELATIONSHIP = "missing_new_relationship"
+REJECTION_INVALID_STANCE = "invalid_stance"
+REJECTION_INVALID_CLASSIFICATION = "invalid_classification"
+REJECTION_MISSING_QUALIFYING_CLAIM = "missing_qualifying_claim"
+REJECTION_MISSING_OPPOSING_CLAIM = "missing_opposing_claim"
+REJECTION_SAME_CLAIM_PAIR = "same_claim_pair"
+
 
 def _normalize(text: str) -> str:
     return text.strip().casefold()
+
+
+def claim_dicts_as_objects(claim_dicts: list[dict[str, Any]]) -> list[Any]:
+    """Wrap probe-local claim dicts for validators that read attribute fields."""
+    return [type("Claim", (), claim)() for claim in claim_dicts]
+
+
+def find_relationship_by_triple(
+    relationships: list[dict[str, Any]],
+    *,
+    subject_concept: str,
+    predicate: str,
+    object_concept: str,
+) -> dict[str, Any] | None:
+    """Match a probe-local relationship dict by subject/predicate/object triple."""
+    subject_key = _normalize(subject_concept)
+    predicate_key = _normalize(predicate)
+    object_key = _normalize(object_concept)
+    for relationship in relationships:
+        if (
+            _normalize(str(relationship.get("subject_concept", ""))) == subject_key
+            and _normalize(str(relationship.get("predicate", ""))) == predicate_key
+            and _normalize(str(relationship.get("object_concept", ""))) == object_key
+        ):
+            return relationship
+    return None
+
+
+def contradiction_rejection_diagnostic(
+    candidate: dict[str, Any],
+    *,
+    rejection_reason: str | None = None,
+    source_claim_ids: set[str] | None = None,
+    domain_claim_ids: set[str] | None = None,
+    relationship_triples: set[tuple[str, str, str]] | None = None,
+) -> str:
+    """Human-readable note for a rejected contradiction candidate (probe reporting)."""
+    reason = rejection_reason or REJECTION_INVALID_CLASSIFICATION
+    source_ids = source_claim_ids or set()
+    domain_ids = domain_claim_ids or set()
+    triples = relationship_triples or set()
+
+    if reason == REJECTION_MISSING_BASE_RELATIONSHIP:
+        triple = (
+            candidate.get("base_subject_concept"),
+            candidate.get("base_predicate"),
+            candidate.get("base_object_concept"),
+        )
+        return (
+            "base relationship triple "
+            f"{triple!r} does not match any probe-local relationship "
+            f"(allowed triples: {sorted(triples)})"
+        )
+    if reason == REJECTION_MISSING_NEW_RELATIONSHIP:
+        triple = (
+            candidate.get("new_subject_concept"),
+            candidate.get("new_predicate"),
+            candidate.get("new_object_concept"),
+        )
+        return (
+            "new relationship triple "
+            f"{triple!r} does not match any probe-local relationship "
+            f"(allowed triples: {sorted(triples)})"
+        )
+    if reason == REJECTION_INVALID_STANCE:
+        return "qualification_stance must be one of supports, contradicts, or qualifies"
+    if reason == REJECTION_INVALID_CLASSIFICATION:
+        return (
+            "contradiction_classification must be qualifies or "
+            "apparent_contradiction_metric_or_condition_difference"
+        )
+    if reason == REJECTION_MISSING_QUALIFYING_CLAIM:
+        return (
+            "qualifying claim could not be resolved from source claims "
+            f"(expected fragment {QUALIFYING_CLAIM_FRAGMENT!r} or id in {sorted(source_ids)})"
+        )
+    if reason == REJECTION_MISSING_OPPOSING_CLAIM:
+        return (
+            "opposing claim could not be resolved from domain claims "
+            f"(expected fragment {OPPOSING_CLAIM_FRAGMENT!r} or id in {sorted(domain_ids)})"
+        )
+    if reason == REJECTION_SAME_CLAIM_PAIR:
+        return "qualifying_claim_id and opposing_claim_id must differ"
+    return f"rejected with reason {reason!r}"
+
+
+def resolve_relationship_pair_for_probe(
+    candidate: dict[str, Any],
+    relationships: list[dict[str, Any]],
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """Resolve base/new relationship dicts for one contradiction candidate."""
+    base_relationship = find_relationship_by_triple(
+        relationships,
+        subject_concept=str(candidate.get("base_subject_concept", "")),
+        predicate=str(candidate.get("base_predicate", "")),
+        object_concept=str(candidate.get("base_object_concept", "")),
+    )
+    new_relationship = find_relationship_by_triple(
+        relationships,
+        subject_concept=str(candidate.get("new_subject_concept", "")),
+        predicate=str(candidate.get("new_predicate", "")),
+        object_concept=str(candidate.get("new_object_concept", "")),
+    )
+    return base_relationship, new_relationship
+
+
+def validate_contradiction_probe_batch(
+    candidates: list[dict[str, Any]],
+    *,
+    source_claims: list[Any],
+    domain_claims: list[Any],
+    relationships: list[dict[str, Any]],
+) -> dict[str, list[dict[str, Any]]]:
+    """Validate contradiction candidates against probe-local relationship dicts."""
+    if not candidates:
+        return {"accepted": [], "rejected": []}
+    first = candidates[0]
+    base_relationship, new_relationship = resolve_relationship_pair_for_probe(
+        first,
+        relationships,
+    )
+    return validate_contradiction_candidates(
+        candidates,
+        source_claims=source_claims,
+        domain_claims=domain_claims,
+        base_relationship=base_relationship,
+        new_relationship=new_relationship,
+    )
 
 
 def _resolve_qualifying_claim_id(
@@ -128,22 +264,23 @@ def propose_contradictions(
     relationships: list[dict[str, Any]],
     domain_pack: str,
     *,
+    client: Any | None = None,
     fixture_name: str | None = None,
 ) -> list[dict[str, Any]]:
     """Propose contradiction/qualification links via the configured model client."""
     config = load_config()
-    client = _pipeline_model_client(config)
+    model_client = client if client is not None else _pipeline_model_client(config)
     detect_kwargs: dict[str, Any] = {
         "claims": claim_dicts,
         "relationships": relationships,
         "domain_pack": domain_pack,
         "schema_version": config.llm_schema_version,
     }
-    if isinstance(client, MockModelClient):
+    if isinstance(model_client, MockModelClient):
         detect_kwargs["fixture_name"] = (
             fixture_name or "contradiction_detection_creativity_diversity.json"
         )
-    batch = client.detect_contradictions(**detect_kwargs)
+    batch = model_client.detect_contradictions(**detect_kwargs)
 
     return [item.model_dump() for item in batch.items]
 
