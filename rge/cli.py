@@ -840,31 +840,58 @@ def _cmd_probe_extract_claims(args: argparse.Namespace) -> int:
         run_probe_extract_claims,
     )
 
-    fixture = Path(args.fixture_source) if args.fixture_source else None
-    try:
-        report = run_probe_extract_claims(
-            fixture_source=fixture,
+    return _run_live_probe_command(
+        command="probe-extract-claims",
+        runner=lambda: run_probe_extract_claims(
+            fixture_source=Path(args.fixture_source) if args.fixture_source else None,
             domain_pack=args.domain,
             root=_REPO_ROOT,
-        )
+        ),
+    )
+
+
+def _run_live_probe_command(*, command: str, runner: Any) -> int:
+    from rge.modules.live_probe import LiveProbeError, LiveProbeGateError
+
+    try:
+        report = runner()
         print(json.dumps(report, indent=2))
         return 0
     except LiveProbeGateError as exc:
-        payload = {
-            "status": "error",
-            "command": "probe-extract-claims",
-            "detail": str(exc),
-        }
+        payload = {"status": "error", "command": command, "detail": str(exc)}
         print(json.dumps(payload, indent=2))
         return 2
     except LiveProbeError as exc:
+        payload = {"status": "error", "command": command, "detail": str(exc)}
+        print(json.dumps(payload, indent=2))
+        return 1
+
+
+def _cmd_probe_link_concepts(args: argparse.Namespace) -> int:
+    from rge.modules.live_probe import run_probe_link_concepts
+
+    if args.from_report and args.chain_extract:
         payload = {
             "status": "error",
-            "command": "probe-extract-claims",
-            "detail": str(exc),
+            "command": "probe-link-concepts",
+            "detail": "Use only one of --from-report or --chain-extract.",
         }
         print(json.dumps(payload, indent=2))
         return 1
+
+    return _run_live_probe_command(
+        command="probe-link-concepts",
+        runner=lambda: run_probe_link_concepts(
+            domain_pack=args.domain,
+            claim_fixture=Path(args.claim_fixture) if args.claim_fixture else None,
+            from_report=Path(args.from_report) if args.from_report else None,
+            chain_extract=bool(args.chain_extract),
+            chain_fixture_source=(
+                Path(args.fixture_source) if args.fixture_source else None
+            ),
+            root=_REPO_ROOT,
+        ),
+    )
 
 
 def _cmd_verify(args: argparse.Namespace) -> int:
@@ -1777,6 +1804,50 @@ def build_parser() -> argparse.ArgumentParser:
         help="Domain pack for validation (default: creativity).",
     )
     probe_extract_parser.set_defaults(func=_cmd_probe_extract_claims)
+
+    probe_link_parser = subparsers.add_parser(
+        "probe-link-concepts",
+        help="Live Ollama concept-linking probe (report-only, no DB writes).",
+        description=(
+            "Run one live structured concept-linking task on probe-local claims. "
+            "Default input is fixtures/claims/live_probe_concept_link_quality_claim.json. "
+            "Requires RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1. Writes a JSON "
+            "report under data/reports/live_probes/ only; never touches the default "
+            "SQLite database or public exports."
+        ),
+    )
+    probe_link_parser.add_argument(
+        "--claim-fixture",
+        help=(
+            "JSON file with a single accepted claim dict "
+            "(default: fixtures/claims/live_probe_concept_link_quality_claim.json)."
+        ),
+    )
+    probe_link_parser.add_argument(
+        "--from-report",
+        help="Load accepted claims from a prior probe-extract-claims report JSON.",
+    )
+    probe_link_parser.add_argument(
+        "--chain-extract",
+        action="store_true",
+        help=(
+            "Run probe-extract-claims first and link concepts for its accepted claims."
+        ),
+    )
+    probe_link_parser.add_argument(
+        "--fixture-source",
+        "--fixture",
+        dest="fixture_source",
+        help=(
+            "Fixture text file for --chain-extract only (default calibration fixture)."
+        ),
+    )
+    probe_link_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack for validation (default: creativity).",
+    )
+    probe_link_parser.set_defaults(func=_cmd_probe_link_concepts)
 
     verify_parser = subparsers.add_parser(
         "verify",

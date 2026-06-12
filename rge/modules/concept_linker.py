@@ -20,6 +20,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 _GENERIC_ONLY_LABELS = frozenset({"ai", "creativity"})
 
+REJECTION_WEAK_CONCEPT_MAPPING = "weak_concept_mapping"
+
 SUPPLEMENTAL_CREATIVITY_CONCEPTS = (
     {
         "ontology_id": "concept_brainstorming",
@@ -81,6 +83,54 @@ def _normalize_label(label: str) -> str:
     return label.strip().casefold()
 
 
+def ontology_labels_for_pack(domain_pack: str) -> list[str]:
+    """Sorted unique concept labels from the domain pack ontology."""
+    concepts = load_domain_pack_concepts(domain_pack)
+    return sorted({str(concept["label"]) for concept in concepts if concept.get("label")})
+
+
+def link_rejection_diagnostic(
+    link: dict[str, Any],
+    *,
+    rejection_reason: str | None = None,
+    ontology_labels: list[str] | None = None,
+) -> str:
+    """Human-readable note for a rejected concept link (probe reporting only)."""
+    reason = rejection_reason or REJECTION_WEAK_CONCEPT_MAPPING
+    if reason != REJECTION_WEAK_CONCEPT_MAPPING:
+        return f"rejected with reason {reason!r}"
+
+    if not link.get("claim_id"):
+        return "claim_id is missing or empty"
+    if not link.get("concept_label"):
+        return "concept_label is missing or empty"
+    if link.get("confidence") is None:
+        return "confidence is required"
+
+    label = _normalize_label(str(link.get("concept_label", "")))
+    if label in _GENERIC_ONLY_LABELS:
+        return (
+            "batch needs at least two specific concept labels "
+            "(not only generic 'ai' or 'creativity')"
+        )
+
+    allowed = (
+        {_normalize_label(item) for item in ontology_labels}
+        if ontology_labels
+        else set()
+    )
+    if allowed and label not in allowed:
+        return (
+            f"concept_label {link.get('concept_label')!r} is not in the domain "
+            "ontology label list exposed to the probe"
+        )
+
+    return (
+        "batch needs at least two distinct specific concept labels across all "
+        "proposed links"
+    )
+
+
 def validate_concept_links(
     links: list[dict[str, Any]],
 ) -> dict[str, list[dict[str, Any]]]:
@@ -118,6 +168,62 @@ def _pipeline_model_client(config=None):
     return get_model_client(cfg, mode=effective_llm_mode(cfg))
 
 
+def _resolve_link_claim_ids(
+    links: list[dict[str, Any]],
+    claims: list[dict[str, Any]],
+    *,
+    diversity_heuristic: bool,
+) -> list[dict[str, Any]]:
+    """Attach claim_id to model links; preserve model ids when present."""
+    if not claims:
+        return links
+
+    default_claim_id = claims[0].get("id")
+    if diversity_heuristic:
+        for claim in claims:
+            if "reduced semantic diversity" in claim.get("claim_text", ""):
+                default_claim_id = claim["id"]
+                break
+
+    resolved: list[dict[str, Any]] = []
+    for item in links:
+        link = dict(item)
+        claim_id = link.get("claim_id")
+        if not claim_id or claim_id == "placeholder":
+            link["claim_id"] = default_claim_id
+        resolved.append(link)
+    return resolved
+
+
+def propose_concept_links(
+    claims: list[dict[str, Any]],
+    domain_pack: str,
+    *,
+    client: Any | None = None,
+    fixture_name: str | None = None,
+    diversity_heuristic: bool = False,
+) -> list[dict[str, Any]]:
+    """Propose concept links via the model client without persistence."""
+    config = load_config()
+    model_client = client if client is not None else _pipeline_model_client(config)
+    link_kwargs: dict[str, Any] = {
+        "claims": claims,
+        "domain_pack": domain_pack,
+        "schema_version": config.llm_schema_version,
+    }
+    if isinstance(model_client, MockModelClient):
+        link_kwargs["fixture_name"] = (
+            fixture_name or "concept_linking_creativity_diversity.json"
+        )
+    batch = model_client.link_concepts(**link_kwargs)
+    links = [item.model_dump() for item in batch.items]
+    return _resolve_link_claim_ids(
+        links,
+        claims,
+        diversity_heuristic=diversity_heuristic,
+    )
+
+
 def link_claim_concepts(
     claims: list[dict[str, Any]],
     domain_pack: str,
@@ -125,33 +231,12 @@ def link_claim_concepts(
     fixture_name: str | None = None,
 ) -> list[dict[str, Any]]:
     """Propose concept links for claims via the configured model client."""
-    config = load_config()
-    client = _pipeline_model_client(config)
-    link_kwargs: dict[str, Any] = {
-        "claims": claims,
-        "domain_pack": domain_pack,
-        "schema_version": config.llm_schema_version,
-    }
-    if isinstance(client, MockModelClient):
-        link_kwargs["fixture_name"] = (
-            fixture_name or "concept_linking_creativity_diversity.json"
-        )
-    batch = client.link_concepts(**link_kwargs)
-
-    target_claim_id = None
-    for claim in claims:
-        if "reduced semantic diversity" in claim.get("claim_text", ""):
-            target_claim_id = claim["id"]
-            break
-    if target_claim_id is None and claims:
-        target_claim_id = claims[0]["id"]
-
-    links: list[dict[str, Any]] = []
-    for item in batch.items:
-        link = item.model_dump()
-        link["claim_id"] = target_claim_id
-        links.append(link)
-    return links
+    return propose_concept_links(
+        claims,
+        domain_pack,
+        fixture_name=fixture_name,
+        diversity_heuristic=True,
+    )
 
 
 def link_concepts_for_source(

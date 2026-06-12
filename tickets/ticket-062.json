@@ -1,0 +1,58 @@
+{
+  "id": "ticket-062",
+  "title": "Safe local live concept-linking probe CLI",
+  "problem": "Ticket-061 proved live Qwen claim extraction with report-only probes. Concept linking still requires persisted claims in SQLite via link-concepts and writes claim_concepts. Operators need a no-DB live probe to validate Ollama concept linking before any persistence work.",
+  "evidence": [
+    "agent_reports/2026-06-12_pre-ticket-062_local-live-concept-linking-probe.md",
+    "agent_reports/2026-06-12_phase-2_ticket-061_live-claim-calibration.md",
+    "agent_reports/2026-06-12_phase-2_ticket-060_safe-local-live-claim-probe.md",
+    "rge/modules/concept_linker.py",
+    "rge/modules/live_probe.py",
+    "rge/llm/ollama_client.py"
+  ],
+  "affected_modules": [
+    "rge/modules/live_probe.py",
+    "rge/modules/concept_linker.py",
+    "rge/llm/ollama_client.py",
+    "rge/cli.py",
+    "fixtures/claims/live_probe_concept_link_quality_claim.json"
+  ],
+  "expected_files": [
+    "rge/modules/live_probe.py",
+    "rge/modules/concept_linker.py",
+    "rge/llm/ollama_client.py",
+    "rge/cli.py",
+    "fixtures/claims/live_probe_concept_link_quality_claim.json",
+    "tests/unit/test_live_probe_link_concepts_cli.py",
+    "tests/unit/test_concept_link_rejection_diagnostics.py",
+    "tests/unit/test_ollama_concept_link_prompt.py",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "tickets/ticket-062.json",
+    "agent_reports/2026-06-12_phase-2_ticket-062_safe-local-live-concept-linking-probe.md"
+  ],
+  "acceptance_criteria": [
+    "probe-link-concepts requires RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1.",
+    "Live probe with qwen2.5:7b yields accepted_count >= 1 on default embedded claim input.",
+    "db_writes remains false; report under data/reports/live_probes/.",
+    "validate_concept_links unchanged; GT05 still passes mock-only.",
+    "Rejected live probe rows include validation_diagnostic notes.",
+    "Mock/default pytest and CI remain green without Ollama."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_live_probe_link_concepts_cli.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_concept_link_rejection_diagnostics.py -q",
+    "RGE_LLM_MODE=mock python -m pytest -q",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site",
+    "Manual live: probe-link-concepts with ollama opt-in"
+  ],
+  "non_goals": [
+    "Do not persist concepts or links to default DB or public exports.",
+    "Do not add OpenAI/OpenRouter or API keys.",
+    "Do not add relationship/contradiction live probes.",
+    "Do not weaken weak_concept_mapping validation.",
+    "Do not edit ontology YAML; use existing labels in prompt calibration only."
+  ],
+  "risk_level": "low-medium",
+  "rollback_plan": "Revert CLI, probe helper, prompt calibration, and tests. No schema migrations.",
+  "status": "done"
+}

@@ -264,16 +264,61 @@ class OllamaModelClient(ModelClient):
         claims: list[dict[str, Any]],
         domain_pack: str,
         schema_version: str,
+        *,
+        ontology_labels: list[str] | None = None,
     ) -> str:
+        labels = ontology_labels or []
+        labels_json = json.dumps(labels, ensure_ascii=False)
+        claim_ids = [claim.get("id") for claim in claims if claim.get("id")]
+        example_claim_id = claim_ids[0] if claim_ids else "claim_example"
         return (
-            f"Propose concept links for accepted claims in domain pack {domain_pack!r}.\n"
+            f"You are a research concept-linking assistant for domain pack "
+            f"{domain_pack!r}.\n"
             f"Claims (JSON): {json.dumps(claims, ensure_ascii=False)}\n\n"
+            f"Allowed ontology concept labels (use exact spelling): {labels_json}\n\n"
+            "Rules for each link:\n"
+            "- claim_id MUST match an input claim id exactly.\n"
+            "- concept_label MUST be one of the allowed ontology labels.\n"
+            "- confidence MUST be a number between 0 and 1.\n"
+            "- Propose multiple links per claim when appropriate.\n"
+            "- The batch MUST include at least two DISTINCT specific concept labels "
+            "(labels other than generic-only 'ai' or 'creativity').\n"
+            "- Optional role: subject, object, method, context, or domain.\n"
+            "- domain_metadata may be {} or include pack-specific keys.\n\n"
+            "Positive example (accepted batch shape):\n"
+            "[\n"
+            "  {\n"
+            f'    "claim_id": "{example_claim_id}",\n'
+            '    "concept_label": "brainstorming",\n'
+            '    "role": "method",\n'
+            '    "confidence": 0.8,\n'
+            '    "domain_metadata": {}\n'
+            "  },\n"
+            "  {\n"
+            f'    "claim_id": "{example_claim_id}",\n'
+            '    "concept_label": "AI assistance",\n'
+            '    "role": "subject",\n'
+            '    "confidence": 0.85,\n'
+            '    "domain_metadata": {}\n'
+            "  }\n"
+            "]\n\n"
+            "Negative example (rejected — only generic labels):\n"
+            "[\n"
+            f'  {{"claim_id": "{example_claim_id}", "concept_label": "creativity", '
+            '"confidence": 0.7}}\n'
+            "]\n\n"
             "Return ONLY valid JSON matching this shape:\n"
             "{\n"
             f'  "task_name": "concept_linking",\n'
             f'  "schema_version": "{schema_version}",\n'
             '  "items": [\n'
-            '    {"claim_id": "...", "concept_label": "...", "confidence": 0.5}\n'
+            "    {\n"
+            '      "claim_id": "...",\n'
+            '      "concept_label": "...",\n'
+            '      "role": "context",\n'
+            '      "confidence": 0.5,\n'
+            '      "domain_metadata": {}\n'
+            "    }\n"
             "  ]\n"
             "}\n"
             "Do not include markdown fences or commentary."
@@ -364,7 +409,15 @@ class OllamaModelClient(ModelClient):
         domain_pack: str,
         schema_version: str,
     ) -> CandidateConceptLinkBatch_v0_1:
-        prompt = self._concept_linking_prompt(claims, domain_pack, schema_version)
+        from rge.modules.concept_linker import ontology_labels_for_pack
+
+        labels = ontology_labels_for_pack(domain_pack)
+        prompt = self._concept_linking_prompt(
+            claims,
+            domain_pack,
+            schema_version,
+            ontology_labels=labels,
+        )
         return self._structured_call(
             task_name="concept_linking",
             prompt=prompt,

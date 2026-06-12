@@ -93,6 +93,21 @@ superseded
 | 59 | ticket-059 | proposed | OpenAI opt-in cloud adapter (placeholder — not implemented) | | |
 | 60 | ticket-060 | done | Safe local live claim-extraction probe CLI | `phase-2/ticket-060-safe-local-live-claim-probe` | `agent_reports/2026-06-12_phase-2_ticket-060_safe-local-live-claim-probe.md` |
 | 61 | ticket-061 | done | Live claim extraction calibration for local Qwen | `phase-2/ticket-061-live-claim-calibration` | `agent_reports/2026-06-12_phase-2_ticket-061_live-claim-calibration.md` |
+| 62 | ticket-062 | done | Safe local live concept-linking probe CLI | `phase-2/ticket-062-safe-local-live-concept-linking-probe` | `agent_reports/2026-06-12_phase-2_ticket-062_safe-local-live-concept-linking-probe.md` |
+
+## Queue Notes (2026-06-12, ticket-062 agent)
+
+- Adds `probe-link-concepts` report-only CLI; default embedded quality claim fixture;
+  optional `--from-report` / `--chain-extract`; calibrated Ollama concept prompt;
+  `link_rejection_diagnostic` on rejections. Live: accepted_count=3, db_writes=false.
+- ticket-059 OpenAI remains deferred.
+
+## Queue Notes (2026-06-12, ticket-062 seed)
+
+- Pre-ticket audit GO: `agent_reports/2026-06-12_pre-ticket-062_local-live-concept-linking-probe.md`.
+- Adds `probe-link-concepts` (report-only, no default DB); default embedded accepted claim fixture;
+  optional `--from-report` / `--chain-extract`; Ollama prompt calibration + link rejection diagnostics.
+- ticket-059 OpenAI remains proposed/deferred.
 
 ## Queue Notes (2026-06-12, ticket-061 agent)
 
@@ -556,7 +571,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-(none — ticket-059 proposed OpenAI placeholder; defer until local probes expand)
+(none — ticket-059 proposed OpenAI placeholder; defer until more local probes stable)
 ```
 
 ## Queue Rules

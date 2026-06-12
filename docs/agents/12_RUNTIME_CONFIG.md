@@ -123,10 +123,16 @@ $env:RGE_LLM_MODE = "ollama"
 $env:RGE_ALLOW_LIVE_LLM = "1"
 python -m rge.cli model-health
 python -m rge.cli probe-extract-claims
+python -m rge.cli probe-link-concepts
 ```
 
-Optional fixture override: `--fixture fixtures/sources/live_probe_claim_calibration_short.txt`
+Claim probe optional fixture: `--fixture fixtures/sources/live_probe_claim_calibration_short.txt`
 (legacy GT02 source: `fixtures/sources/creativity_ai_diversity_short.txt`)
+
+Concept-link probe default input:
+`fixtures/claims/live_probe_concept_link_quality_claim.json`.
+Optional: `--from-report data/reports/live_probes/probe_extract_claims_<stamp>.json`
+or `--chain-extract` (runs claim probe first; variability applies).
 
 Reports land in gitignored `data/reports/live_probes/`. Excluded from CI/golden.
 Optional smoke: `python -m pytest -m live_smoke tests/smoke` (requires Ollama).
