@@ -79,7 +79,16 @@ superseded
 | 45 | ticket-045 | done | Promote improvement draft with explicit review gate | `phase-2/ticket-045-improvement-draft-promotion` | `agent_reports/2026-06-12_phase-2_ticket-045_improvement-draft-promotion.md` |
 | 46 | ticket-046 | done | Fix operator loop done-without-commit false positive | `phase-2/ticket-046-operator-loop-drift-fix` | `agent_reports/2026-06-12_phase-2_ticket-046_operator-loop-drift-fix.md` |
 | 47 | ticket-047 | done | Stop plain export-public from rewriting committed public-site JSON | `phase-2/ticket-047-export-public-publish-only` | `agent_reports/2026-06-12_phase-2_ticket-047_export-public-publish-only.md` |
-| 48 | ticket-048 | proposed | Improve claim quote span validation | | |
+| 48 | ticket-048 | rejected | Improve claim quote span validation | | `agent_reports/2026-06-12_pre-ticket-048_claim-quote-span-readiness-audit.md` |
+| 49 | ticket-049 | proposed | Skip improvement tickets for golden-covered rejection modes | | |
+
+## Queue Notes (2026-06-12, pre-ticket-048 audit)
+
+- ticket-048 **rejected**: quote-span validation already implemented (GT02 pass);
+  `missing_quote_span_count=1` is intentional fixture rejection, not a gap.
+  Pre-ticket audit: `agent_reports/2026-06-12_pre-ticket-048_claim-quote-span-readiness-audit.md`.
+- Golden Gate run 27425020457 green on GitHub at `c98726b` (release PASS).
+- ticket-049 seeded: filter improvement drafts for golden-covered failure modes.
 
 ## Queue Notes (2026-06-12, ticket-045 agent)
 
@@ -469,7 +478,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-048 (proposed — improve claim quote span validation; pre-ticket audit required)
+ticket-049 (proposed — skip golden-covered failure modes in improvement drafts)
 ```
 
 ## Queue Rules

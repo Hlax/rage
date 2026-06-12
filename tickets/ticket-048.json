@@ -26,5 +26,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert claim validator quote-span checks.",
-  "status": "proposed"
+  "status": "rejected",
+  "rejection_reason": "Duplicate: missing_quote_span validation and GT02 already implemented; evidence is intentional fixture rejection per pre-ticket-048 audit."
 }

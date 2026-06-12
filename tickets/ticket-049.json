@@ -1,0 +1,39 @@
+{
+  "id": "ticket-049",
+  "title": "Skip improvement tickets for golden-covered rejection modes",
+  "problem": "write_improvement_tickets promotes failure modes like missing_quote_span when fixture MVP runs intentionally reject claims for golden test coverage. ticket-048 was a false-positive promotion of already-implemented validation.",
+  "evidence": [
+    "agent_reports/2026-06-12_pre-ticket-048_claim-quote-span-readiness-audit.md",
+    "fixtures/llm_outputs/claim_extraction_valid_and_missing_quote.json",
+    "tests/golden/test_02_claim_extraction.py",
+    "tests/golden/test_20_improvement_tickets.py",
+    "rge/modules/ticket_writer.py write_improvement_tickets"
+  ],
+  "affected_modules": [
+    "rge/modules/ticket_writer.py",
+    "tests/golden/test_20_improvement_tickets.py"
+  ],
+  "expected_files": [
+    "rge/modules/ticket_writer.py",
+    "tests/golden/test_20_improvement_tickets.py",
+    "tickets/ticket-049.json",
+    "agent_reports/2026-06-12_phase-2_ticket-049_improvement-generator-filter.md"
+  ],
+  "acceptance_criteria": [
+    "missing_quote_span does not produce an improvement draft when rejections are only from golden-intentional fixture spine.",
+    "Run reports still record top_failure_modes for observability.",
+    "GT20 and GT21 pass without Ollama.",
+    "Operator loop no longer recommends promoting stale draft after ticket-048 rejection."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden/test_20_improvement_tickets.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden/test_21_builder_ticket_consumption.py -q"
+  ],
+  "non_goals": [
+    "Do not change claim_validator rejection rules.",
+    "Do not auto-edit TICKET_QUEUE.md beyond ticket-049 row."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert ticket-049 branch; improvement drafts again include all qualifying failure modes.",
+  "status": "proposed"
+}
