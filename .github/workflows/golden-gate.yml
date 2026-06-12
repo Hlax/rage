@@ -16,6 +16,7 @@ jobs:
   golden-gate:
     runs-on: ubuntu-latest
     env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
       RGE_LLM_MODE: mock
       RGE_ALLOW_LIVE_LLM: "0"
       RGE_TEST_LLM_MODE: mock

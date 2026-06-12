@@ -81,6 +81,12 @@ superseded
 | 47 | ticket-047 | done | Stop plain export-public from rewriting committed public-site JSON | `phase-2/ticket-047-export-public-publish-only` | `agent_reports/2026-06-12_phase-2_ticket-047_export-public-publish-only.md` |
 | 48 | ticket-048 | rejected | Improve claim quote span validation | | `agent_reports/2026-06-12_pre-ticket-048_claim-quote-span-readiness-audit.md` |
 | 49 | ticket-049 | done | Skip improvement tickets for golden-covered rejection modes | `phase-2/ticket-049-improvement-generator-filter` | `agent_reports/2026-06-12_phase-2_ticket-049_improvement-generator-filter.md` |
+| 50 | ticket-050 | done | CI Golden Gate: opt into Node 24 for GitHub Actions | `phase-2/ticket-050-ci-node24-actions` | `agent_reports/2026-06-12_phase-2_ticket-050_ci-node24-actions.md` |
+
+## Queue Notes (2026-06-12, ticket-050 agent)
+
+- ticket-050 sets `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` on Golden Gate job.
+  +1 CI meta-test; addresses Actions Node 20 deprecation annotation.
 
 ## Queue Notes (2026-06-12, ticket-049 agent)
 
@@ -484,7 +490,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-(none — seed next ticket from Phase 2 roadmap)
+ticket-051 (proposed — research verify mock-only verification suite)
 ```
 
 ## Queue Rules

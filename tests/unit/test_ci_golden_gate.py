@@ -25,6 +25,7 @@ def test_golden_gate_workflow_exists_with_mock_only_steps() -> None:
     assert "live_smoke" in text
     assert "tests/smoke/" in text
     assert "grep -q live_smoke" not in text
+    assert "FORCE_JAVASCRIPT_ACTIONS_TO_NODE24" in text
 
 
 def test_principal_audit_command_doc_exists() -> None:

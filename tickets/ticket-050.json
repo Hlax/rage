@@ -1,0 +1,35 @@
+{
+  "id": "ticket-050",
+  "title": "CI Golden Gate: opt into Node 24 for GitHub Actions",
+  "problem": "Golden Gate CI emits Node.js 20 deprecation warnings for actions/checkout, setup-python, and setup-node. GitHub will force Node 24 on runners starting June 2026.",
+  "evidence": [
+    "GitHub Actions run 27425638984 annotation",
+    ".github/workflows/golden-gate.yml"
+  ],
+  "affected_modules": [
+    ".github/workflows/golden-gate.yml",
+    "tests/unit/test_ci_golden_gate.py"
+  ],
+  "expected_files": [
+    ".github/workflows/golden-gate.yml",
+    "tests/unit/test_ci_golden_gate.py",
+    "tickets/ticket-050.json",
+    "agent_reports/2026-06-12_phase-2_ticket-050_ci-node24-actions.md"
+  ],
+  "acceptance_criteria": [
+    "golden-gate.yml sets FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 for the job.",
+    "CI meta-test asserts the env var is present.",
+    "Golden tests and pytest pass locally."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_ci_golden_gate.py -q",
+    "RGE_LLM_MODE=mock python -m pytest -q"
+  ],
+  "non_goals": [
+    "Do not change public-site Node version unless required.",
+    "Do not bump action major versions in the same ticket unless needed."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 from golden-gate.yml.",
+  "status": "done"
+}
