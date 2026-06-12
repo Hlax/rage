@@ -108,9 +108,9 @@ implementation ticket beyond routine low-risk calibration.
 
 ## Merge
 
-- Ticket commit SHA: _(filled after commit)_
-- Main push SHA: _(filled after push)_
-- Golden Gate run: _(filled after push)_
+- Ticket commit SHA: `9a3092da4559347a780b78f72b06ddfe7bb76f91`
+- Main push SHA: `9a3092da4559347a780b78f72b06ddfe7bb76f91` (fast-forward)
+- Golden Gate run: **27436378654** — **success** at `9a3092d`
 
 ## Recommended next move
 
