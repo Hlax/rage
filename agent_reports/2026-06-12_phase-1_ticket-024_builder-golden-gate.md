@@ -77,9 +77,9 @@ None.
 
 ## 11. Merge to Main
 
-- Merge commit: _(pending)_
+- Merge commit: `3185684f1e0b9413e34576e5709da0e332039978`
 - Branch: `phase-1/ticket-024-builder-golden-gate` merged to `main` and pushed to `origin/main`.
-- Post-merge pytest on `main`: _(pending)_
+- Post-merge pytest on `main`: 101 passed.
 
 ## 12. Recommended Next Ticket
 
