@@ -58,9 +58,10 @@ No live Ollama, no live smoke, no cloud credentials. `RGE_LLM_MODE=mock`, `RGE_A
 
 ## Merge
 
-- Branch commit: (recorded below after commit)
-- Merged to `main` and pushed per AGENTS.md step 9
-- Golden Gate run: (recorded below after push)
+- Branch commit: `aadbc59d1ecb7ef9193f50f1b870bf44a824c2a7`
+- Merged to `main` via fast-forward from `dc2dd8f`
+- Pushed to `origin/main`
+- Golden Gate run **27431881399** → **success** at `aadbc59`
 
 ## Recommended next ticket family
 
