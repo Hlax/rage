@@ -17,9 +17,7 @@ venv/
 .env.smoke.local
 
 # Local data (durable private memory; never committed)
-data/db/*.sqlite
-data/db/*.sqlite3
-data/backups/
+data/
 
 # Node / Next.js
 node_modules/

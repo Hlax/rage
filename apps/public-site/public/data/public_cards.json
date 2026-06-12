@@ -5,8 +5,12 @@
     "title": "AI assistance and semantic diversity",
     "summary": "Fixture evidence suggests AI-assisted brainstorming may improve average idea quality while reducing semantic diversity in some short-form writing tasks.",
     "confidence": "medium",
-    "concepts": ["AI assistance", "semantic diversity", "ideation"],
-    "source_count": 1,
+    "concepts": [
+      "AI assistance",
+      "semantic diversity",
+      "ideation"
+    ],
+    "source_count": 3,
     "public_caveats": [
       "Evidence is from short-form creative writing fixtures."
     ],
@@ -17,7 +21,9 @@
         "source_type": "fixture"
       }
     ],
-    "related_cards": ["card_golden_originality_002"],
+    "related_cards": [
+      "card_golden_originality_002"
+    ],
     "public_detail_level": "standard",
     "evidence_type": "empirical",
     "public_run_timestamp": "2026-06-12T00:00:00Z",
@@ -29,8 +35,12 @@
     "title": "AI assistance and creative originality",
     "summary": "Accepted fixture claims indicate AI assistance can raise output volume while leaving open whether originality gains persist outside controlled ideation tasks.",
     "confidence": "medium",
-    "concepts": ["AI assistance", "originality", "human control"],
-    "source_count": 1,
+    "concepts": [
+      "AI assistance",
+      "originality",
+      "human control"
+    ],
+    "source_count": 3,
     "public_caveats": [
       "Fixture-derived synthesis; not a live literature review."
     ],
@@ -41,7 +51,9 @@
         "source_type": "fixture"
       }
     ],
-    "related_cards": ["card_golden_diversity_001"],
+    "related_cards": [
+      "card_golden_diversity_001"
+    ],
     "public_detail_level": "standard",
     "evidence_type": "empirical",
     "public_run_timestamp": "2026-06-12T00:00:00Z",

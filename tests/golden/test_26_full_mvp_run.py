@@ -9,10 +9,15 @@ from pathlib import Path
 import pytest
 
 from rge.cli import FIXTURE_RUN_ID, GOLDEN_MVP_TOPIC, execute_fixture_mode_run
+from rge.modules.card_exporter import (
+    FIXTURE_EXPORT_TIMESTAMP,
+    default_ticket_output_dir,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SITE_DIR = REPO_ROOT / "apps" / "public-site"
 SITE_OUT_DIR = SITE_DIR / "out"
+COMMITTED_PUBLIC_DATA = SITE_DIR / "public" / "data"
 
 
 @pytest.fixture()
@@ -175,3 +180,58 @@ def test_public_site_build_succeeds_after_export() -> None:
     for card in cards:
         card_page = SITE_OUT_DIR / "cards" / f"{card['id']}.html"
         assert card_page.is_file(), f"missing static export for card {card['id']}"
+
+
+def test_fixture_mode_default_ticket_dir_is_gitignored_runtime_path() -> None:
+    assert default_ticket_output_dir(REPO_ROOT) == REPO_ROOT / "data" / "tickets"
+    assert default_ticket_output_dir(REPO_ROOT).name == "tickets"
+    assert default_ticket_output_dir(REPO_ROOT).parent.name == "data"
+
+
+def test_fixture_mode_export_matches_committed_public_snapshots(
+    temp_db: Path, artifact_dirs: dict[str, Path]
+) -> None:
+    _run_fixture_mvp(temp_db, artifact_dirs)
+
+    for filename in ("public_cards.json", "public_memos.json", "build_info.json"):
+        generated = (artifact_dirs["export"] / filename).read_bytes()
+        committed = (COMMITTED_PUBLIC_DATA / filename).read_bytes()
+        assert generated == committed, (
+            f"fixture export {filename} must match committed public snapshot byte-for-byte"
+        )
+
+
+def test_fixture_mode_export_is_idempotent(
+    temp_db: Path, artifact_dirs: dict[str, Path]
+) -> None:
+    export_dir = artifact_dirs["export"]
+    first = _run_fixture_mvp(temp_db, artifact_dirs, run_id="run_golden_fixture_idempotent_a")
+    first_bytes = {
+        name: (export_dir / name).read_bytes()
+        for name in ("public_cards.json", "public_memos.json", "build_info.json")
+    }
+
+    second = _run_fixture_mvp(temp_db, artifact_dirs, run_id="run_golden_fixture_idempotent_b")
+    assert second["status"] == "completed"
+    assert first["card_count"] == second["card_count"]
+
+    for name, expected in first_bytes.items():
+        assert (export_dir / name).read_bytes() == expected
+
+
+def test_fixture_mode_export_uses_stable_timestamp(
+    temp_db: Path, artifact_dirs: dict[str, Path]
+) -> None:
+    _run_fixture_mvp(temp_db, artifact_dirs)
+
+    build_info = json.loads(
+        (artifact_dirs["export"] / "build_info.json").read_text(encoding="utf-8")
+    )
+    cards = json.loads(
+        (artifact_dirs["export"] / "public_cards.json").read_text(encoding="utf-8")
+    )
+
+    assert build_info["generated_at"] == FIXTURE_EXPORT_TIMESTAMP
+    for card in cards:
+        assert card["updated_at"] == FIXTURE_EXPORT_TIMESTAMP
+        assert card["source_count"] == 3

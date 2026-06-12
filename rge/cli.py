@@ -97,7 +97,12 @@ def execute_fixture_mode_run(
 ) -> dict[str, Any]:
     """Run the deterministic fixture-mode MVP pipeline end to end."""
     from rge.db.connection import ensure_database, get_db_path
-    from rge.modules.card_exporter import default_export_dirs, export_public_cards
+    from rge.modules.card_exporter import (
+        FIXTURE_EXPORT_TIMESTAMP,
+        default_export_dirs,
+        default_ticket_output_dir,
+        export_public_cards,
+    )
     from rge.modules.cluster_reporter import generate_cluster_report
     from rge.modules.research_planner import ensure_golden_contract, generate_followup_questions
     from rge.modules.research_queue import queue_sources_from_fixture
@@ -111,7 +116,7 @@ def execute_fixture_mode_run(
     root = _REPO_ROOT
     resolved_db = get_db_path(db_path)
     resolved_reports = report_dir or (root / "data" / "reports")
-    resolved_tickets = ticket_dir or (root / "tickets")
+    resolved_tickets = ticket_dir or default_ticket_output_dir(root)
     resolved_exports = (
         export_dirs if export_dirs is not None else default_export_dirs(root)
     )
@@ -267,6 +272,8 @@ def execute_fixture_mode_run(
                 conn,
                 output_dirs=resolved_exports,
                 repo_root=root,
+                fixture_mode=True,
+                export_timestamp=FIXTURE_EXPORT_TIMESTAMP,
             )
             steps_completed.append("export_public_cards")
 
@@ -1151,7 +1158,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     run_parser.add_argument(
         "--ticket-dir",
-        help="Optional improvement ticket output directory (defaults to tickets/).",
+        help="Optional improvement ticket output directory (defaults to data/tickets/).",
     )
     run_parser.add_argument(
         "--export-dir",

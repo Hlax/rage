@@ -60,11 +60,32 @@ superseded
 | 31 | ticket-031 | done | Extend builder golden gate for public-site debug details (Golden Test 25) | `phase-1/ticket-031-builder-golden-gate-public-site` | `agent_reports/2026-06-12_phase-1_ticket-031_builder-golden-gate-public-site.md` |
 | 32 | ticket-032 | done | Phase 1 builder golden gate completion checkpoint | `phase-1/ticket-032-builder-golden-gate-completion` | `agent_reports/2026-06-12_phase-1_ticket-032_builder-golden-gate-completion.md` |
 
-## Phase 2 Queue (seed)
+## Phase 2 Queue
 
 | Order | Ticket ID | Status | Title | Branch | Report |
 |---:|---|---|---|---|---|
-| 33 | ticket-033 | proposed | Pre-phase-2 principal audit checkpoint | | |
+| 33 | ticket-033 | done | Pre-phase-2 principal audit checkpoint | | `agent_reports/2026-06-12_pre-phase-2_principal-audit.md` |
+| 34 | ticket-034 | done | Make fixture-mode run repo-clean and export serialization deterministic | `phase-2/ticket-034-fixture-run-artifact-hygiene` | `agent_reports/2026-06-12_phase-2_ticket-034_fixture-run-artifact-hygiene.md` |
+
+## Queue Notes (2026-06-12, ticket-034 agent)
+
+- ticket-034 made fixture-mode runs repo-clean: canonical export serialization,
+  stable fixture timestamps, `source_count: 3` snapshot reconciliation, default
+  improvement-ticket output under gitignored `data/tickets/`, and `data/` gitignore.
+  All 123 golden tests pass; safety audit passes; repeated fixture runs leave
+  git clean.
+- ticket-035 (README/operator refresh) is next per Phase 2 roadmap; seed JSON
+  before implementation.
+
+## Queue Notes (2026-06-12, ticket-033 principal audit)
+
+- ticket-033 completed pre-Phase-2 principal audit and Phase 2 roadmap
+  (`agent_reports/2026-06-12_pre-phase-2_principal-audit.md`,
+  `agent_reports/2026-06-12_phase-2_ticket-roadmap.md`). Phase 2 is GO.
+  First must-fix: ticket-034 fixture-run artifact hygiene.
+- All 119 golden tests pass; safety audit passes; fixture-mode MVP run completes
+  all 12 steps but dirties the repo (non-deterministic export, timestamp churn,
+  source_count drift, generated artifacts in `data/` and `tickets/`).
 
 ## Queue Notes (2026-06-12, ticket-032 agent)
 
@@ -299,7 +320,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-none (Phase 1 MVP golden gate complete; ticket-033 proposed for pre-phase-2 audit)
+ticket-035 proposed (README/operator refresh — seed from Phase 2 roadmap)
 ```
 
 ## Queue Rules
