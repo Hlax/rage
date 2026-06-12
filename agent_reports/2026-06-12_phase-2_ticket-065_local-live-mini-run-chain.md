@@ -103,9 +103,10 @@ Post-ticket-064 checkpoint satisfied; **1 done ticket** after (065). Threshold 3
 
 ## Merge
 
-- Implementation commit SHA: *(pending commit)*
-- Main push SHA: *(pending merge/push)*
-- Golden Gate: *(pending)*
+- Pre-ticket audit commit: `2518922`
+- Implementation commit SHA: `bb4e661`
+- Main push SHA: `bb4e661` (fast-forward)
+- Golden Gate run: **27442963753** — **success** at `bb4e661`
 
 ## Recommended next move
 
