@@ -70,6 +70,7 @@ def test_subpackages_import() -> None:
     import rge.llm
     import rge.models.schemas
     import rge.modules.claim_extractor
+    import rge.modules.card_exporter
     import rge.modules.safety_auditor
     import rge.safety.public_export_policy  # noqa: F401
 

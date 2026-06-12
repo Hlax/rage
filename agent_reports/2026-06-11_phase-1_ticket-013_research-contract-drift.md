@@ -108,7 +108,7 @@ Revert branch `phase-1/ticket-013-research-contract-drift`. Delete follow-up que
 - Instruction source: `AGENTS.md` step 9 (temporary).
 - Pre-merge `main` tip: `2e5b214661d1334a5086b7c489cb53ec25a7b4bc`
 - Branch: `phase-1/ticket-013-research-contract-drift`
-- Merge result: pending (record hash below after merge/push).
+- Merge result: `--no-ff` merge commit `69befe6`; pushed `origin/main`.
 
 ## 15. Recommended Next Ticket
 

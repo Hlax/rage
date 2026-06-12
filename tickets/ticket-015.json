@@ -1,0 +1,43 @@
+{
+  "id": "ticket-015",
+  "title": "Add public site card and concept detail pages (Golden Test 12)",
+  "problem": "ticket-014 exports public-safe card JSON, but the public site only renders a list placeholder. Golden Test 12 requires static card detail, concept detail, and build-info rendering without local FastAPI or SQLite.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 12: public site renders exported cards in static mode.",
+    "docs/agents/02_ARCHITECTURE.md public routes GET /cards/[id] and GET /concepts/[id].",
+    "apps/public-site/app/page.tsx list-only placeholder.",
+    "agent_reports/2026-06-11_phase-1_ticket-014_public-card-export.md section 15–16."
+  ],
+  "affected_modules": [
+    "apps/public-site/app/cards/[id]/page.tsx",
+    "apps/public-site/app/concepts/[id]/page.tsx",
+    "apps/public-site/app/page.tsx"
+  ],
+  "expected_files": [
+    "apps/public-site/app/cards/[id]/page.tsx",
+    "apps/public-site/app/concepts/[id]/page.tsx",
+    "apps/public-site/app/page.tsx",
+    "tests/golden/test_12_public_site_static_render.py"
+  ],
+  "acceptance_criteria": [
+    "Public site builds with card list, card detail, and concept detail routes using static JSON only.",
+    "Build info / last updated field renders on the list page.",
+    "No write, ingestion, or agent routes are added.",
+    "pytest tests/golden/test_12_public_site_static_render.py passes.",
+    "Existing golden tests still pass (59+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_12_public_site_static_render.py",
+    "pytest tests/golden",
+    "pytest",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "Do not add public write routes or API endpoints.",
+    "Do not require local FastAPI or SQLite at build/runtime.",
+    "Do not implement Ollama or LangGraph."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert branch phase-1/ticket-015-public-site-detail-pages.",
+  "status": "proposed"
+}
