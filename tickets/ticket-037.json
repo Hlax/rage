@@ -1,0 +1,73 @@
+{
+  "id": "ticket-037",
+  "title": "Implement Ollama structured tasks behind explicit live-mode opt-in",
+  "problem": "Live structured inference is impossible today: four pipeline modules hard-force RGE_LLM_MODE=mock before every model call, and OllamaModelClient structured tasks raise OllamaNotAvailableInPhase0. The core product rule (Qwen/Ollama proposes candidate JSON; Python validates and writes) has never run live. Phase 2 needs a real local model path behind an explicit opt-in gate without weakening golden tests or safety boundaries.",
+  "evidence": [
+    "agent_reports/2026-06-12_pre-phase-2_principal-audit.md Live Provider Readiness",
+    "agent_reports/2026-06-12_phase-2_ticket-roadmap.md ticket-037",
+    "agent_reports/2026-06-12_phase-2_ticket-036_public-site-polish.md section 11",
+    "agent_reports/2026-06-12_pre-ticket-028_env-and-model-config-audit.md Mock vs Live section",
+    "agent_reports/2026-06-12_pre-ticket-037_ollama-live-structured-tasks-readiness-audit.md"
+  ],
+  "affected_modules": [
+    "rge/config.py",
+    "rge/llm/ollama_client.py",
+    "rge/llm/registry.py",
+    "rge/modules/claim_extractor.py",
+    "rge/modules/concept_linker.py",
+    "rge/modules/relationship_builder.py",
+    "rge/modules/contradiction_detector.py",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    ".env.example",
+    ".env.smoke.example",
+    "tests/golden/test_00_model_runtime.py"
+  ],
+  "expected_files": [
+    "rge/config.py",
+    "rge/llm/mode.py",
+    "rge/llm/ollama_client.py",
+    "rge/llm/registry.py",
+    "rge/modules/claim_extractor.py",
+    "rge/modules/concept_linker.py",
+    "rge/modules/relationship_builder.py",
+    "rge/modules/contradiction_detector.py",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    ".env.example",
+    ".env.smoke.example",
+    "tests/unit/test_ollama_structured_tasks.py",
+    "tests/golden/test_00_model_runtime.py",
+    "agent_reports/2026-06-12_phase-2_ticket-037_ollama-live-structured-tasks.md"
+  ],
+  "acceptance_criteria": [
+    "RGE_ALLOW_LIVE_LLM opt-in is implemented in config with fail-closed parsing; documented in 12_RUNTIME_CONFIG.md, .env.example, and .env.smoke.example.",
+    "A shared effective-mode resolver returns mock unless RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1; four pipeline modules use it instead of hard-forced mock env hacks.",
+    "execute_fixture_mode_run and golden tests remain mock-only regardless of operator .env settings.",
+    "OllamaModelClient implements structured tasks for extract_claims, link_concepts, draft_relationships, and detect_contradictions via prompt + JSON parse + schema_version check + Pydantic validation.",
+    "Without RGE_ALLOW_LIVE_LLM=1, pipeline behavior is identical to today (mock/fixture path); with opt-in set but Ollama unreachable, structured calls fail with a clear error and do not silently fall back to mock.",
+    "With RGE_ALLOW_LIVE_LLM=1 and a running Ollama instance, research extract-claims produces validated accepted/rejected claims through the existing Python validation path (manual smoke documented in agent report).",
+    "No model client writes directly to accepted graph tables; extractor metadata records actual provider/model from the client.",
+    "Canned unit tests (mocked HTTP, no Ollama) cover prompt construction, valid JSON parse, schema_version mismatch, malformed JSON, and invalid batch rejection.",
+    "Golden tests pass unchanged with RGE_LLM_MODE=mock and no Ollama running.",
+    "Full pytest and python -m rge.modules.safety_auditor --audit full pass.",
+    "No cloud provider adapters or API keys are added."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_ollama_structured_tasks.py",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden/test_00_model_runtime.py",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden",
+    "RGE_LLM_MODE=mock python -m pytest",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not add OpenAI, OpenRouter, Anthropic, Gemini, or Vertex adapters.",
+    "Do not change public export schema or public-site behavior.",
+    "Do not add LangGraph nodes or live discovery (research run without --fixture-mode).",
+    "Do not add live_smoke pytest marker, model-health CLI, or CI workflow (ticket-038).",
+    "Do not remove mock forcing from execute_fixture_mode_run.",
+    "Do not add default live tests to pytest collection.",
+    "Do not implement ticket-038 or later."
+  ],
+  "risk_level": "medium-high",
+  "rollback_plan": "Revert the ticket-037 branch; golden tests and fixture runs remain mock-only.",
+  "status": "proposed"
+}

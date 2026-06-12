@@ -68,6 +68,16 @@ superseded
 | 34 | ticket-034 | done | Make fixture-mode run repo-clean and export serialization deterministic | `phase-2/ticket-034-fixture-run-artifact-hygiene` | `agent_reports/2026-06-12_phase-2_ticket-034_fixture-run-artifact-hygiene.md` |
 | 35 | ticket-035 | done | Refresh README for Phase 1 reality and operator quickstart | `phase-2/ticket-035-readme-operator-refresh` | `agent_reports/2026-06-12_phase-2_ticket-035_readme-operator-refresh.md` |
 | 36 | ticket-036 | done | Public-site presentation polish and about page (no data surface changes) | `phase-2/ticket-036-public-site-polish` | `agent_reports/2026-06-12_phase-2_ticket-036_public-site-polish.md` |
+| 37 | ticket-037 | proposed | Implement Ollama structured tasks behind explicit live-mode opt-in | | |
+
+## Queue Notes (2026-06-12, ticket-037 seed)
+
+- ticket-037 seeded after focused pre-ticket-037 live-Ollama readiness audit
+  (`agent_reports/2026-06-12_pre-ticket-037_ollama-live-structured-tasks-readiness-audit.md`).
+  Recommendation: proceed with explicit `RGE_ALLOW_LIVE_LLM=1` opt-in, shared
+  effective-mode resolver, Ollama structured tasks for four pipeline modules,
+  canned unit tests with mocked HTTP, golden/fixture runs staying mock-only.
+  ticket-038+ intentionally not seeded in this pass.
 
 ## Queue Notes (2026-06-12, ticket-036 agent)
 
@@ -354,7 +364,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-none (next: pre-ticket-037 live-Ollama audit before seeding ticket-037)
+ticket-037 proposed (Ollama structured tasks behind explicit live opt-in — pre-ticket audit complete)
 ```
 
 ## Queue Rules
