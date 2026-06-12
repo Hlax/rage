@@ -66,8 +66,9 @@ Not required for this ticket (test-only meta-gate map; no public export, routes,
 
 ## 9. Merge to Main
 
-- Merge commit: _(recorded after merge)_
+- Merge commit: `9c90123`
 - Branch: `phase-1/ticket-029-builder-golden-gate-mvp` merged to `main`.
+- Post-merge pytest on `main`: 118 passed.
 
 ## 10. Recommended Next Ticket
 
