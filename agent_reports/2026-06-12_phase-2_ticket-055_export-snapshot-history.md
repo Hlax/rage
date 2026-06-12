@@ -41,7 +41,9 @@ python -m rge.cli verify --skip-site                             # pass
 
 ## Merge
 
-Pending commit hash after merge to `main` and push.
+- Commit: `0c12d31` on `phase-2/ticket-055-export-snapshot-history`
+- Merged to `main` via fast-forward from `b620fe3`
+- Pushed to `origin/main`
 
 ## Recommended next ticket
 
