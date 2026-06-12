@@ -99,9 +99,9 @@ Not required (test-only meta-gate map; no public surface changes).
 
 ## 10. Merge to Main
 
-- Merge commit: _(pending)_
+- Merge commit: `95041c9`
 - Branch: `phase-1/ticket-032-builder-golden-gate-completion` merged to `main`.
-- Post-merge pytest on `main`: _(pending)_
+- Post-merge pytest on `main`: 119 passed.
 
 ## 11. Recommended Next Ticket
 
