@@ -74,8 +74,9 @@ python -m rge.cli probe-detect-contradictions
 
 ## Merge / CI
 
-- Merge commit: *(pending — working tree uncommitted at report time)*
-- Golden Gate: *(pending after merge/push)*
+- Implementation commit: `87b036e`
+- Merge to `main`: fast-forward at `87b036e` (2026-06-12)
+- Golden Gate: *(pending CI run on push)*
 
 ## Non-goals honored
 
