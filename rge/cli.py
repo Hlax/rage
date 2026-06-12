@@ -32,6 +32,47 @@ def _cmd_run(args: argparse.Namespace) -> int:
     )
 
 
+def _cmd_generate_cluster_report(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import ClusterReportRepository
+    from rge.modules.cluster_reporter import generate_cluster_report
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        output_dir = Path(args.output_dir) if args.output_dir else None
+        result = generate_cluster_report(
+            conn,
+            domain=args.domain,
+            output_dir=output_dir,
+            pad_golden=not args.no_pad,
+        )
+        reports = ClusterReportRepository(conn).count()
+        payload = {
+            "status": result["status"],
+            "command": "generate-cluster-report",
+            "domain": args.domain,
+            "cluster_report_id": result.get("cluster_report_id"),
+            "cluster_report_count": reports,
+            "readiness": result.get("readiness"),
+            "padding": result.get("padding"),
+            "output_path": result.get("output_path"),
+            "report": result.get("report"),
+        }
+        print(json.dumps(payload, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "generate-cluster-report",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_export_public(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.modules.card_exporter import export_public_cards
@@ -613,6 +654,34 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
     )
     validate_parser.set_defaults(func=_cmd_validate_contract)
+
+    cluster_report_parser = subparsers.add_parser(
+        "generate-cluster-report",
+        help="Generate cluster report when claim/source thresholds are met.",
+        description=(
+            "Evaluate cluster maturity thresholds, build a balanced evidence "
+            "packet, persist a cluster report, and write cluster_report_latest.json."
+        ),
+    )
+    cluster_report_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack ID for cluster evaluation (default: creativity).",
+    )
+    cluster_report_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    cluster_report_parser.add_argument(
+        "--output-dir",
+        help="Optional output directory for cluster_report_latest.json (for tests).",
+    )
+    cluster_report_parser.add_argument(
+        "--no-pad",
+        action="store_true",
+        help="Skip deterministic golden threshold padding (for negative tests).",
+    )
+    cluster_report_parser.set_defaults(func=_cmd_generate_cluster_report)
 
     export_parser = subparsers.add_parser(
         "export-public",

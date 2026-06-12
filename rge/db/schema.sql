@@ -258,6 +258,17 @@ CREATE TABLE IF NOT EXISTS run_reports (
     created_at TEXT
 );
 
+CREATE TABLE IF NOT EXISTS cluster_reports (
+    id TEXT PRIMARY KEY,
+    run_id TEXT REFERENCES research_runs(id),
+    cluster_label TEXT NOT NULL,
+    included_concepts_json TEXT NOT NULL,
+    evidence_packet_json TEXT NOT NULL,
+    report_json TEXT NOT NULL,
+    prose_summary TEXT,
+    created_at TEXT NOT NULL
+);
+
 -- Public surface and improvement loop ----------------------------------------
 
 CREATE TABLE IF NOT EXISTS public_cards (
