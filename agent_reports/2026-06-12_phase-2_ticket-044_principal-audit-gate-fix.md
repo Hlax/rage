@@ -48,14 +48,16 @@ python -m rge.modules.principal_audit_gate --next-ticket ticket-044  # satisfied
 | Field | Value |
 |---|---|
 | Branch | `phase-2/ticket-044-principal-audit-gate-fix` |
-| `main` tip (pre-merge) | `cc1c17c` |
-| HEAD SHA | pending commit |
-| Merge to `main` | pending |
-| Push to `origin` | pending |
+| Implementation commit | `b43b009` |
+| Merge commit on `main` | `8822e1d` |
+| Push to `origin` | pushed (`cc1c17c..8822e1d`) |
 
 ## Merge to main
 
-Pending step 12.
+```txt
+8822e1dc73b05d7efabb76a0288f00848f88fabd Merge branch 'phase-2/ticket-044-principal-audit-gate-fix'
+b43b009 Implement ticket-044 principal audit gate cadence fix
+```
 
 ## Recommended next ticket
 
