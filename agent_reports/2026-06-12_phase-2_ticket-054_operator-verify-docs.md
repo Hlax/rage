@@ -45,7 +45,9 @@ python -m rge.modules.operator_loop --mode plan         # pass
 
 ## Merge
 
-Pending commit hash below after merge to `main` and push.
+- Commit: `9e30158` on `phase-2/ticket-054-operator-verify-docs`
+- Merged to `main` via fast-forward from `c513491`
+- Pushed to `origin/main`
 
 ## Recommended next ticket
 
