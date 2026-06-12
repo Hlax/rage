@@ -33,5 +33,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert the ticket-042 branch (docs-only).",
-  "status": "proposed"
+  "status": "done"
 }

@@ -73,7 +73,14 @@ superseded
 | 39 | ticket-039 | done | Validate improvement-ticket round-trip into the builder queue with review gate | `phase-2/ticket-039-improvement-ticket-round-trip` | `agent_reports/2026-06-12_phase-2_ticket-039_improvement-ticket-round-trip.md` |
 | 40 | ticket-040 | done | Add CI golden gate workflow and rge-principal-audit command doc | `phase-2/ticket-040-ci-golden-gate` | `agent_reports/2026-06-12_phase-2_ticket-040_ci-golden-gate.md` |
 | 41 | ticket-041 | done | Bounded RGE operator loop runner | `phase-2/ticket-041-operator-loop-runner` | `agent_reports/2026-06-12_phase-2_ticket-041_operator-loop-runner.md` |
-| 42 | ticket-042 | proposed | Public-site deployment readiness: static hosting docs and pre-deploy checklist | | |
+| 42 | ticket-042 | done | Public-site deployment readiness: static hosting docs and pre-deploy checklist | `phase-2/ticket-042-public-site-deployment-readiness` | `agent_reports/2026-06-12_phase-2_ticket-042_public-site-deployment-readiness.md` |
+
+## Queue Notes (2026-06-12, ticket-042 agent)
+
+- ticket-042 added `docs/deployment/public-site-static-hosting.md` (build, pre-deploy
+  checklist, snapshot refresh, static host guidance) and `preview:static` npm script.
+  Docs-only; no export schema or route changes. 132 golden pass; safety audit pass;
+  public site builds 12 static pages.
 
 ## Queue Notes (2026-06-12, ticket-042 seed)
 
@@ -416,7 +423,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-042 proposed (public-site deployment readiness docs)
+none (ticket-042 done on branch; await merge to main)
 ```
 
 ## Queue Rules
