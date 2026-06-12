@@ -53,7 +53,18 @@ superseded
 | 24 | ticket-024 | done | Add builder golden merge gate (Golden Test 22) | `phase-1/ticket-024-builder-golden-gate` | `agent_reports/2026-06-12_phase-1_ticket-024_builder-golden-gate.md` |
 | 25 | ticket-025 | done | Add safety audit merge gate (Golden Test 23) | `phase-1/ticket-025-safety-audit-gate` | `agent_reports/2026-06-12_phase-1_ticket-025_safety-audit-gate.md` |
 | 26 | ticket-026 | done | Add prompt-injection golden fixture handling (Golden Test 24) | `phase-1/ticket-026-prompt-injection` | `agent_reports/2026-06-12_phase-1_ticket-026_prompt-injection.md` |
-| 27 | ticket-027 | proposed | Add public-site debug details without private data exposure (Golden Test 25) | | |
+| 27 | ticket-027 | done | Add public-site debug details without private data exposure (Golden Test 25) | `phase-1/ticket-027-public-site-debug-details` | `agent_reports/2026-06-12_phase-1_ticket-027_public-site-debug-details.md` |
+| 28 | ticket-028 | proposed | Full MVP end-to-end golden run (Golden Test 26) | | |
+
+## Queue Notes (2026-06-12, ticket-027 agent)
+
+- ticket-027 implemented curated `evidence_type` and `public_run_timestamp` public
+  export fields, card detail debug section, Golden Test 25 (4 tests), and full
+  safety audit GT25 evidence check. All 114 golden tests pass; public site builds
+  11 static pages; `python -m rge.modules.safety_auditor --audit full` returns
+  `pass`.
+- Pre-ticket-027 audit report included in branch base.
+- ticket-028 proposes full MVP end-to-end golden run for Golden Test 26.
 
 ## Queue Notes (2026-06-12, ticket-026 agent)
 
@@ -239,7 +250,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-027 (proposed; awaiting review — pre-ticket audit recommended)
+ticket-028 (proposed; awaiting review)
 ```
 
 ## Queue Rules

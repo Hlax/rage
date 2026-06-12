@@ -1,0 +1,37 @@
+{
+  "id": "ticket-028",
+  "title": "Full MVP end-to-end golden run (Golden Test 26)",
+  "problem": "ticket-027 completes public-site debug details, but Golden Test 26 requires a full fixture-mode research run from topic to public cards and improvement tickets, proving the end-to-end MVP chain is real.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 26: full MVP run proves the system is real.",
+    "docs/agents/07_MVP_ACCEPTANCE_TESTS.md end-to-end acceptance criteria.",
+    "agent_reports/2026-06-12_phase-1_ticket-027_public-site-debug-details.md sections 11-12."
+  ],
+  "affected_modules": [
+    "rge/cli.py",
+    "tests/golden/test_26_full_mvp_run.py"
+  ],
+  "expected_files": [
+    "tests/golden/test_26_full_mvp_run.py"
+  ],
+  "acceptance_criteria": [
+    "Fixture-mode `research run` produces accepted claims, public cards, and improvement tickets.",
+    "Public export and safety audit pass after the full run.",
+    "pytest tests/golden/test_26_full_mvp_run.py passes.",
+    "Existing golden tests still pass (114+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_26_full_mvp_run.py",
+    "pytest tests/golden",
+    "pytest",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not add public write routes.",
+    "Do not implement live web discovery."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert branch phase-1/ticket-028-full-mvp-run.",
+  "status": "proposed"
+}

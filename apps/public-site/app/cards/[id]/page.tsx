@@ -110,6 +110,27 @@ export default async function CardDetailPage({ params }: PageProps) {
         </section>
       ) : null}
 
+      <section style={{ marginTop: '2rem' }}>
+        <h2 style={{ fontSize: '1rem' }}>Research debug details</h2>
+        <dl
+          style={{
+            margin: 0,
+            display: 'grid',
+            gridTemplateColumns: 'max-content 1fr',
+            gap: '0.35rem 1.25rem',
+            color: '#aeb4c0',
+            fontSize: '0.9rem',
+          }}
+        >
+          <dt style={{ color: '#8b93a3' }}>Evidence type</dt>
+          <dd style={{ margin: 0 }}>{card.evidence_type ?? 'not specified'}</dd>
+          <dt style={{ color: '#8b93a3' }}>Public run timestamp</dt>
+          <dd style={{ margin: 0 }}>
+            {card.public_run_timestamp ?? card.updated_at}
+          </dd>
+        </dl>
+      </section>
+
       <footer
         style={{
           marginTop: '3rem',

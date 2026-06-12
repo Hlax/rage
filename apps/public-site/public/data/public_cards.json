@@ -19,6 +19,8 @@
     ],
     "related_cards": ["card_golden_originality_002"],
     "public_detail_level": "standard",
+    "evidence_type": "empirical",
+    "public_run_timestamp": "2026-06-12T00:00:00Z",
     "updated_at": "2026-06-12T00:00:00Z"
   },
   {
@@ -41,6 +43,8 @@
     ],
     "related_cards": ["card_golden_diversity_001"],
     "public_detail_level": "standard",
+    "evidence_type": "empirical",
+    "public_run_timestamp": "2026-06-12T00:00:00Z",
     "updated_at": "2026-06-12T00:00:00Z"
   }
 ]

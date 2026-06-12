@@ -38,5 +38,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert branch phase-1/ticket-027-public-site-debug-details.",
-  "status": "proposed"
+  "status": "done"
 }

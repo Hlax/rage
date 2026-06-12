@@ -16,6 +16,8 @@ export type PublicCard = {
   }>;
   related_cards?: string[];
   public_detail_level: string;
+  evidence_type?: string;
+  public_run_timestamp?: string;
   updated_at: string;
 };
 

@@ -22,6 +22,8 @@ ALLOWED_PUBLIC_CARD_FIELDS = frozenset(
         "public_source_metadata",
         "related_cards",
         "public_detail_level",
+        "evidence_type",
+        "public_run_timestamp",
         "updated_at",
     }
 )

@@ -38,6 +38,8 @@ GOLDEN_CARD_EXTRAS: dict[str, dict[str, Any]] = {
             }
         ],
         "related_cards": [CARD_GOLDEN_ORIGINALITY_ID],
+        "evidence_type": "empirical",
+        "public_run_timestamp": "2026-06-12T00:00:00Z",
     },
     CARD_GOLDEN_ORIGINALITY_ID: {
         "public_caveats": [
@@ -51,6 +53,8 @@ GOLDEN_CARD_EXTRAS: dict[str, dict[str, Any]] = {
             }
         ],
         "related_cards": [CARD_GOLDEN_DIVERSITY_ID],
+        "evidence_type": "empirical",
+        "public_run_timestamp": "2026-06-12T00:00:00Z",
     },
 }
 
@@ -72,6 +76,24 @@ def default_export_dirs(repo_root: Path | None = None) -> list[Path]:
         root / "data" / "exports",
         root / "apps" / "public-site" / "public" / "data",
     ]
+
+
+def _dominant_evidence_type(conn: Any, claim_ids: list[str]) -> str | None:
+    """Return the most common evidence type among linked accepted claims."""
+    if not claim_ids:
+        return None
+    placeholders = ",".join("?" * len(claim_ids))
+    rows = conn.execute(
+        f"""
+        SELECT evidence_type FROM claims
+        WHERE id IN ({placeholders}) AND status = 'accepted'
+        """,
+        claim_ids,
+    ).fetchall()
+    types = [row[0] for row in rows if row[0]]
+    if not types:
+        return None
+    return max(set(types), key=types.count)
 
 
 def _accepted_claim_count(conn: Any) -> int:
@@ -155,15 +177,21 @@ def export_public_cards(
     repo = PublicCardRepository(conn)
     records = repo.list_public_safe(limit=limit)
 
-    cards = [
-        curated_public_card(
-            public_card_record_to_export_dict(
-                record,
-                extras=GOLDEN_CARD_EXTRAS.get(record.id),
+    cards = []
+    for record in records:
+        extras = dict(GOLDEN_CARD_EXTRAS.get(record.id) or {})
+        claim_ids = json.loads(record.claim_ids_json or "[]")
+        if "evidence_type" not in extras:
+            evidence_type = _dominant_evidence_type(conn, claim_ids)
+            if evidence_type:
+                extras["evidence_type"] = evidence_type
+        if "public_run_timestamp" not in extras:
+            extras["public_run_timestamp"] = record.created_at
+        cards.append(
+            curated_public_card(
+                public_card_record_to_export_dict(record, extras=extras)
             )
         )
-        for record in records
-    ]
     memos: list[dict[str, Any]] = []
     generated_at = utc_now_iso()
     build_info = {

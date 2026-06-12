@@ -219,6 +219,22 @@ def _audit_prompt_injection_policy(root: Path) -> tuple[list[str], list[str]]:
     return checked, blocked
 
 
+def _audit_public_site_debug_policy(root: Path) -> tuple[list[str], list[str]]:
+    """Verify public-site debug detail policy and deterministic GT25 evidence exist."""
+    checked = [
+        "apps/public-site/app/cards/[id]/page.tsx",
+        "apps/public-site/lib/publicCards.ts",
+        "tests/golden/test_25_public_site_debug_details.py",
+    ]
+    blocked: list[str] = []
+    for relative_path in checked:
+        if not (root / relative_path).is_file():
+            blocked.append(
+                f"missing public site debug detail protection evidence: {relative_path}"
+            )
+    return checked, blocked
+
+
 def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> dict[str, Any]:
     """Run deterministic safety checks and return a machine-readable report."""
     if audit_type not in AUDIT_TYPES:
@@ -240,6 +256,7 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             "raw_html",
             "model_tool_permissions",
             "prompt_injection",
+            "public_site_debug",
         ]
     else:
         checks = [audit_type]
@@ -270,6 +287,10 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             blocked_reasons.extend(blocked)
         elif check == "prompt_injection":
             files, blocked = _audit_prompt_injection_policy(project_root)
+            checked_files.extend(files)
+            blocked_reasons.extend(blocked)
+        elif check == "public_site_debug":
+            files, blocked = _audit_public_site_debug_policy(project_root)
             checked_files.extend(files)
             blocked_reasons.extend(blocked)
 

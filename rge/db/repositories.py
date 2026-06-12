@@ -2570,7 +2570,13 @@ def public_card_record_to_export_dict(
         "updated_at": record.updated_at,
     }
     if extras:
-        for key in ("public_caveats", "public_source_metadata", "related_cards"):
+        for key in (
+            "public_caveats",
+            "public_source_metadata",
+            "related_cards",
+            "evidence_type",
+            "public_run_timestamp",
+        ):
             if key in extras:
                 card[key] = extras[key]
     return card
