@@ -10,8 +10,11 @@ venv/
 .pytest_cache/
 .coverage
 
-# Secrets / local config
+# Secrets / local config (never commit real values)
 .env
+.env.local
+.env.*.local
+.env.smoke.local
 
 # Local data (durable private memory; never committed)
 data/db/*.sqlite
