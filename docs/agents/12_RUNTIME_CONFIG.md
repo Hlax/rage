@@ -127,6 +127,7 @@ python -m rge.cli probe-link-concepts
 python -m rge.cli probe-draft-relationships
 python -m rge.cli probe-detect-contradictions
 python -m rge.cli probe-mini-run
+python -m rge.cli probe-mini-run-suite
 ```
 
 Claim probe optional fixture: `--fixture fixtures/sources/live_probe_claim_calibration_short.txt`
@@ -157,6 +158,16 @@ python -m rge.cli probe-mini-run --strict-chain
 ```
 
 `--strict-chain` skips stage 4 when upstream outputs lack contradiction-suitable inputs.
+
+Multi-fixture repeatability batch (default four committed creativity sources):
+
+```powershell
+python -m rge.cli probe-mini-run-suite
+python -m rge.cli probe-mini-run-suite --strict-chain
+```
+
+Repeat `--fixture-source` to override the default set. Writes individual
+`probe_mini_run_*.json` reports plus one `probe_mini_run_suite_*.json` summary.
 
 Full stage floors, `contradiction_input_mode` semantics, and evidence-accumulation
 workflow: `docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md`.

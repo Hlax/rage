@@ -70,6 +70,24 @@ DEFAULT_PROBE_CONTRADICTION_BUNDLE = (
     / "probes"
     / "live_probe_contradiction_quality_bundle.json"
 )
+MINI_RUN_SUITE_FIXTURES: tuple[Path, ...] = (
+    DEFAULT_PROBE_FIXTURE,
+    LEGACY_PROBE_FIXTURE,
+    Path(__file__).resolve().parents[2]
+    / "fixtures"
+    / "sources"
+    / "creativity_ai_diversity_followup_short.txt",
+    Path(__file__).resolve().parents[2]
+    / "fixtures"
+    / "sources"
+    / "creativity_ai_diversity_contradiction.txt",
+)
+MINI_RUN_STAGE_FLOOR_KEYS: tuple[str, ...] = (
+    "claim_extraction",
+    "concept_linking",
+    "relationship_drafting",
+    "contradiction_detection",
+)
 PROBE_CHUNK_ID = "chunk_live_probe_001"
 PROBE_SOURCE_ID = "src_live_probe_001"
 PROBE_CLAIM_ID = "claim_live_probe_link_001"
@@ -1313,5 +1331,182 @@ def run_probe_mini_run(
         base=base,
         reports_dir=reports_dir,
         filename_prefix="probe_mini_run",
+        report=report,
+    )
+
+
+def resolve_mini_run_suite_fixtures(
+    fixture_sources: list[Path] | None,
+    root: Path | None = None,
+) -> list[Path]:
+    """Resolve committed fixture paths for a mini-run suite batch."""
+    base = root if root is not None else repo_root()
+    if not fixture_sources:
+        return [resolve_fixture_source(path, base) for path in MINI_RUN_SUITE_FIXTURES]
+    resolved: list[Path] = []
+    for source in fixture_sources:
+        resolved.append(resolve_fixture_source(source, base))
+    return resolved
+
+
+def _fixture_rel_path(fixture_path: Path, base: Path) -> str:
+    try:
+        return str(fixture_path.relative_to(base)).replace("\\", "/")
+    except ValueError:
+        return str(fixture_path).replace("\\", "/")
+
+
+def mini_run_stage_floor_met(
+    stage_key: str,
+    stage: dict[str, Any],
+    *,
+    strict_chain: bool,
+) -> bool:
+    """Return whether a mini-run stage meets the operator acceptance floor."""
+    if stage.get("status") == "skipped":
+        return strict_chain and stage_key == "contradiction_detection"
+    return int(stage.get("accepted_count") or 0) >= 1
+
+
+def mini_run_floors_met(report: dict[str, Any]) -> bool:
+    """Return whether all mini-run stage floors pass for one fixture run."""
+    strict_chain = bool(report.get("strict_chain"))
+    stages = report.get("stages") or {}
+    for stage_key in MINI_RUN_STAGE_FLOOR_KEYS:
+        stage = stages.get(stage_key)
+        if not isinstance(stage, dict):
+            return False
+        if not mini_run_stage_floor_met(stage_key, stage, strict_chain=strict_chain):
+            return False
+    return True
+
+
+def summarize_mini_run_for_suite(report: dict[str, Any], *, base: Path) -> dict[str, Any]:
+    """Build a compact per-fixture entry for a suite summary report."""
+    stages = report.get("stages") or {}
+    stage_summary: dict[str, Any] = {}
+    for stage_key in MINI_RUN_STAGE_FLOOR_KEYS:
+        stage = stages.get(stage_key) or {}
+        stage_summary[stage_key] = {
+            "status": stage.get("status"),
+            "accepted_count": int(stage.get("accepted_count") or 0),
+            "rejected_count": int(stage.get("rejected_count") or 0),
+            "floor_met": mini_run_stage_floor_met(
+                stage_key,
+                stage,
+                strict_chain=bool(report.get("strict_chain")),
+            ),
+        }
+        if stage.get("skip_reason"):
+            stage_summary[stage_key]["skip_reason"] = stage.get("skip_reason")
+    return {
+        "fixture_source": report.get("fixture_source")
+        or _fixture_rel_path(Path(str(report.get("fixture_source", ""))), base),
+        "status": report.get("status"),
+        "contradiction_input_mode": report.get("contradiction_input_mode"),
+        "floors_met": mini_run_floors_met(report),
+        "elapsed_ms": report.get("elapsed_ms"),
+        "report_path": report.get("report_path"),
+        "stages": stage_summary,
+    }
+
+
+def run_probe_mini_run_suite(
+    *,
+    fixture_sources: list[Path] | None = None,
+    domain_pack: str = DEFAULT_PROBE_DOMAIN,
+    strict_chain: bool = False,
+    contradiction_bundle: Path | None = None,
+    root: Path | None = None,
+    reports_dir: Path | None = None,
+    config: RgeConfig | None = None,
+    client: Any | None = None,
+    skip_health_check: bool = False,
+) -> dict[str, Any]:
+    """Run hybrid mini-run across multiple fixtures; write suite summary (no DB)."""
+    base = root if root is not None else repo_root()
+    command = "probe-mini-run-suite"
+    run_started = time.monotonic()
+    cfg = assert_live_probe_env(config, command=command)
+    health = assert_ollama_health(cfg) if not skip_health_check else {}
+    model_client = client or get_model_client(cfg, mode="ollama")
+
+    resolved_fixtures = resolve_mini_run_suite_fixtures(fixture_sources, base)
+    for fixture_path in resolved_fixtures:
+        if not fixture_path.is_file():
+            raise LiveProbeError(f"fixture source not found: {fixture_path}")
+
+    run_entries: list[dict[str, Any]] = []
+    for fixture_path in resolved_fixtures:
+        fixture_rel = _fixture_rel_path(fixture_path, base)
+        try:
+            mini_report = run_probe_mini_run(
+                fixture_source=fixture_path,
+                domain_pack=domain_pack,
+                strict_chain=strict_chain,
+                contradiction_bundle=contradiction_bundle,
+                root=base,
+                reports_dir=reports_dir,
+                config=cfg,
+                client=model_client,
+                skip_health_check=True,
+            )
+            entry = summarize_mini_run_for_suite(mini_report, base=base)
+            entry["fixture_source"] = mini_report.get("fixture_source") or fixture_rel
+            entry["error"] = None
+        except LiveProbeError as exc:
+            entry = {
+                "fixture_source": fixture_rel,
+                "status": "error",
+                "contradiction_input_mode": None,
+                "floors_met": False,
+                "elapsed_ms": None,
+                "report_path": None,
+                "stages": {},
+                "error": str(exc),
+            }
+        run_entries.append(entry)
+
+    fixtures_passed = sum(1 for entry in run_entries if entry.get("floors_met"))
+    fixtures_failed = len(run_entries) - fixtures_passed
+    if fixtures_failed == 0:
+        suite_status = "ok"
+    elif fixtures_passed == 0:
+        suite_status = "error"
+    else:
+        suite_status = "partial"
+
+    created_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    report: dict[str, Any] = {
+        "report_type": "live_probe_mini_run_suite_report",
+        "command": command,
+        "status": suite_status,
+        "created_at": created_at,
+        "fixture_count": len(run_entries),
+        "fixtures_passed": fixtures_passed,
+        "fixtures_failed": fixtures_failed,
+        "strict_chain": strict_chain,
+        "domain_pack": domain_pack,
+        "effective_llm_mode": effective_llm_mode(cfg),
+        "provider": model_client.provider,
+        "model": getattr(model_client, "model", None),
+        "base_url": getattr(model_client, "base_url", None),
+        "schema_version": cfg.llm_schema_version,
+        "health": health,
+        "elapsed_ms": int((time.monotonic() - run_started) * 1000),
+        "db_writes": False,
+        "public_export": False,
+        "cloud_calls": False,
+        "default_db_path": str(DEFAULT_DB_PATH).replace("\\", "/"),
+        "stage_floors": {
+            stage_key: {"min_accepted": 1}
+            for stage_key in MINI_RUN_STAGE_FLOOR_KEYS
+        },
+        "runs": run_entries,
+    }
+    return _write_live_probe_report(
+        base=base,
+        reports_dir=reports_dir,
+        filename_prefix="probe_mini_run_suite",
         report=report,
     )

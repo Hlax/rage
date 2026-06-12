@@ -974,6 +974,24 @@ def _cmd_probe_mini_run(args: argparse.Namespace) -> int:
     )
 
 
+def _cmd_probe_mini_run_suite(args: argparse.Namespace) -> int:
+    from rge.modules.live_probe import run_probe_mini_run_suite
+
+    fixture_sources = [Path(item) for item in args.fixture_source] if args.fixture_source else None
+    return _run_live_probe_command(
+        command="probe-mini-run-suite",
+        runner=lambda: run_probe_mini_run_suite(
+            fixture_sources=fixture_sources,
+            domain_pack=args.domain,
+            strict_chain=bool(args.strict_chain),
+            contradiction_bundle=(
+                Path(args.contradiction_bundle) if args.contradiction_bundle else None
+            ),
+            root=_REPO_ROOT,
+        ),
+    )
+
+
 def _cmd_verify(args: argparse.Namespace) -> int:
     from rge.modules.verify_runner import run_verification
 
@@ -2073,6 +2091,49 @@ def build_parser() -> argparse.ArgumentParser:
         help="Domain pack for validation (default: creativity).",
     )
     probe_mini_run_parser.set_defaults(func=_cmd_probe_mini_run)
+
+    probe_mini_run_suite_parser = subparsers.add_parser(
+        "probe-mini-run-suite",
+        help="Live Ollama multi-fixture mini-run suite (report-only, no DB writes).",
+        description=(
+            "Run the hybrid mini-run chain across multiple committed creativity "
+            "source fixtures and write one suite summary plus individual mini-run "
+            "reports. Default fixtures: calibration short, creativity_ai_diversity_short, "
+            "followup short, contradiction source. Requires RGE_LLM_MODE=ollama and "
+            "RGE_ALLOW_LIVE_LLM=1."
+        ),
+    )
+    probe_mini_run_suite_parser.add_argument(
+        "--fixture-source",
+        "--fixture",
+        dest="fixture_source",
+        action="append",
+        help=(
+            "Source text fixture for one suite run (repeatable). "
+            "When omitted, runs the default four-fixture creativity set."
+        ),
+    )
+    probe_mini_run_suite_parser.add_argument(
+        "--strict-chain",
+        action="store_true",
+        help=(
+            "Require contradiction detection from upstream chain only; fixtures may "
+            "record partial status when stage 4 is skipped."
+        ),
+    )
+    probe_mini_run_suite_parser.add_argument(
+        "--contradiction-bundle",
+        help=(
+            "Contradiction overlay bundle for hybrid stage 4 "
+            "(default: fixtures/probes/live_probe_contradiction_quality_bundle.json)."
+        ),
+    )
+    probe_mini_run_suite_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack for validation (default: creativity).",
+    )
+    probe_mini_run_suite_parser.set_defaults(func=_cmd_probe_mini_run_suite)
 
     verify_parser = subparsers.add_parser(
         "verify",

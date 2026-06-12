@@ -1,0 +1,51 @@
+{
+  "id": "ticket-066",
+  "title": "Multi-fixture local live mini-run repeatability",
+  "problem": "Ticket-065 proved the hybrid mini-run on a single calibration source. Operators cannot yet batch the same report-only spine across multiple controlled fixtures to detect overfitting or fixture-specific brittleness.",
+  "evidence": [
+    "agent_reports/2026-06-12_live-probe-evidence-review.md",
+    "agent_reports/2026-06-12_pre-ticket-066_multi-fixture-mini-run-repeatability.md",
+    "agent_reports/2026-06-12_phase-2_ticket-065_local-live-mini-run-chain.md",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "affected_modules": [
+    "rge/modules/live_probe.py",
+    "rge/cli.py",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "expected_files": [
+    "rge/modules/live_probe.py",
+    "rge/cli.py",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "tests/unit/test_live_probe_mini_run_suite_cli.py",
+    "tickets/ticket-066.json",
+    "agent_reports/2026-06-12_phase-2_ticket-066_multi-fixture-mini-run-repeatability.md"
+  ],
+  "acceptance_criteria": [
+    "probe-mini-run-suite requires RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1.",
+    "Default run executes four committed creativity source fixtures sequentially.",
+    "Each fixture writes an individual probe_mini_run report; suite writes probe_mini_run_suite summary.",
+    "Suite summary records per-fixture stage counts, contradiction_input_mode, and floors_met.",
+    "All reports remain db_writes false with no default DB or public export writes.",
+    "Mock pytest and verify remain green without Ollama.",
+    "No ticket drafting or queue promotion APIs are invoked."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_live_probe_mini_run_suite_cli.py -q",
+    "RGE_LLM_MODE=mock python -m pytest -q",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site",
+    "Manual live: probe-mini-run-suite with ollama opt-in on operator machine"
+  ],
+  "non_goals": [
+    "Do not persist accepted candidates to default or scratch SQLite.",
+    "Do not add OpenAI/OpenRouter or API keys.",
+    "Do not let Qwen author or promote implementation tickets.",
+    "Do not weaken stage validators.",
+    "Do not require pure chained contradiction across all fixtures."
+  ],
+  "risk_level": "low-medium",
+  "rollback_plan": "Revert suite orchestrator, CLI, tests, and docs. No schema migrations.",
+  "status": "done"
+}

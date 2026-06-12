@@ -59,6 +59,7 @@ Filename patterns:
 | `probe-draft-relationships` | `probe_draft_relationships_<UTC>.json` |
 | `probe-detect-contradictions` | `probe_detect_contradictions_<UTC>.json` |
 | `probe-mini-run` | `probe_mini_run_<UTC>.json` |
+| `probe-mini-run-suite` | `probe_mini_run_suite_<UTC>.json` (plus per-fixture `probe_mini_run_*.json`) |
 
 Every report must include `db_writes: false`.
 
@@ -110,6 +111,40 @@ Overall report `status`:
 
 - `ok` — stages 1–3 passed; stage 4 accepted (default hybrid) or chain-suitable
 - `partial` — stages 1–3 passed; stage 4 skipped under `--strict-chain` only
+
+## `probe-mini-run-suite` (multi-fixture repeatability)
+
+Batch the hybrid mini-run across controlled creativity sources to detect
+fixture-specific brittleness. Still report-only.
+
+```powershell
+python -m rge.cli probe-mini-run-suite
+python -m rge.cli probe-mini-run-suite --strict-chain
+```
+
+### Default fixture set
+
+| Fixture | Purpose |
+| ------- | ------- |
+| `fixtures/sources/live_probe_claim_calibration_short.txt` | ticket-061 calibration baseline |
+| `fixtures/sources/creativity_ai_diversity_short.txt` | golden GT02-style passage |
+| `fixtures/sources/creativity_ai_diversity_followup_short.txt` | replication-style short source |
+| `fixtures/sources/creativity_ai_diversity_contradiction.txt` | divergent-condition source |
+
+Repeat `--fixture-source` to override the default list.
+
+### Suite summary fields
+
+| Field | Meaning |
+| ----- | ------- |
+| `fixture_count` | Number of fixtures attempted |
+| `fixtures_passed` | Runs where all stage floors met |
+| `fixtures_failed` | Runs missing a floor or raising an error |
+| `runs[].floors_met` | Per-fixture floor check |
+| `runs[].report_path` | Link to individual mini-run JSON |
+
+Suite `status`: `ok` when all fixtures pass floors; `partial` when some pass;
+`error` when none pass.
 
 ### `contradiction_input_mode` semantics
 
@@ -225,6 +260,10 @@ python -m rge.cli probe-detect-contradictions
 # End-to-end spine (one report)
 python -m rge.cli probe-mini-run
 python -m rge.cli probe-mini-run --strict-chain
+
+# Multi-fixture repeatability (suite summary + per-fixture reports)
+python -m rge.cli probe-mini-run-suite
+python -m rge.cli probe-mini-run-suite --strict-chain
 ```
 
 ## Related documents

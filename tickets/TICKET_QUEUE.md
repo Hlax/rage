@@ -97,6 +97,21 @@ superseded
 | 63 | ticket-063 | done | Safe local live relationship-drafting probe CLI | `phase-2/ticket-063-safe-local-live-relationship-probe` | `agent_reports/2026-06-12_phase-2_ticket-063_safe-local-live-relationship-probe.md` |
 | 64 | ticket-064 | done | Safe local live contradiction-detection probe CLI | `phase-2/ticket-064-safe-local-live-contradiction-probe` | `agent_reports/2026-06-12_phase-2_ticket-064_safe-local-live-contradiction-probe.md` |
 | 65 | ticket-065 | done | Report-only local live mini-run chain | `phase-2/ticket-065-local-live-mini-run-chain` | `agent_reports/2026-06-12_phase-2_ticket-065_local-live-mini-run-chain.md` |
+| 66 | ticket-066 | done | Multi-fixture local live mini-run repeatability | `phase-2/ticket-066-multi-fixture-mini-run-repeatability` | `agent_reports/2026-06-12_phase-2_ticket-066_multi-fixture-mini-run-repeatability.md` |
+
+## Queue Notes (2026-06-12, ticket-066 agent)
+
+- Adds `probe-mini-run-suite` batch command; default four creativity sources.
+- Live suite: 1/4 fixtures pass floors (calibration short only); exposes overfit.
+- Suite summary + per-fixture floors in gitignored reports; no DB/export/cloud.
+- ticket-059 OpenAI remains deferred.
+
+## Queue Notes (2026-06-12, ticket-066 seed)
+
+- Human approved evidence review option A.
+- Pre-ticket audit GO: `agent_reports/2026-06-12_pre-ticket-066_multi-fixture-mini-run-repeatability.md`.
+- Adds `probe-mini-run-suite` (report-only, no default DB); batches hybrid mini-run across four committed creativity sources.
+- Qwen remains bounded worker only; ticket-059 OpenAI remains deferred.
 
 ## Queue Notes (2026-06-12, ticket-065 agent)
 
@@ -622,7 +637,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-(none — ticket-059 proposed OpenAI placeholder; defer until local probe chain stable)
+(none — ticket-059 proposed OpenAI placeholder; defer until operator approves cloud work)
 ```
 
 ## Queue Rules
