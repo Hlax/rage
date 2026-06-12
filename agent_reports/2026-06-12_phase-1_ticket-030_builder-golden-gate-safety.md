@@ -65,8 +65,9 @@ Not required (test-only meta-gate map; no changes to auditor implementation).
 
 ## 9. Merge to Main
 
-- Merge commit: _(recorded after merge)_
+- Merge commit: `48fd6ba`
 - Branch: `phase-1/ticket-030-builder-golden-gate-safety` merged to `main`.
+- Post-merge pytest on `main`: 118 passed.
 
 ## 10. Recommended Next Ticket
 
