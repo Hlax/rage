@@ -22,6 +22,8 @@ from rge.safety.public_export_policy import (
 )
 
 EXPORT_SCHEMA_VERSION = "0.1.0"
+FIXTURE_EXPORT_TIMESTAMP = "2026-06-12T00:00:00Z"
+GOLDEN_FIXTURE_SOURCE_COUNT = 3
 CARD_GOLDEN_DIVERSITY_ID = "card_golden_diversity_001"
 CARD_GOLDEN_ORIGINALITY_ID = "card_golden_originality_002"
 
@@ -65,6 +67,31 @@ GOLDEN_PRIVATE_FIELDS: dict[str, Any] = {
     "raw_source_excerpt": "Full private source text must not appear in export.",
 }
 
+EXPORT_CARD_FIELD_ORDER: tuple[str, ...] = (
+    "id",
+    "type",
+    "title",
+    "summary",
+    "confidence",
+    "concepts",
+    "source_count",
+    "public_caveats",
+    "public_source_metadata",
+    "related_cards",
+    "public_detail_level",
+    "evidence_type",
+    "public_run_timestamp",
+    "updated_at",
+)
+
+BUILD_INFO_FIELD_ORDER: tuple[str, ...] = (
+    "export_schema_version",
+    "generated_at",
+    "phase",
+    "card_count",
+    "memo_count",
+)
+
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -76,6 +103,26 @@ def default_export_dirs(repo_root: Path | None = None) -> list[Path]:
         root / "data" / "exports",
         root / "apps" / "public-site" / "public" / "data",
     ]
+
+
+def default_ticket_output_dir(repo_root: Path | None = None) -> Path:
+    """Gitignored runtime directory for generated improvement ticket artifacts."""
+    return (repo_root or _repo_root()) / "data" / "tickets"
+
+
+def order_public_card_fields(card: dict[str, Any]) -> dict[str, Any]:
+    """Return a public card dict with stable field ordering for export."""
+    return {key: card[key] for key in EXPORT_CARD_FIELD_ORDER if key in card}
+
+
+def order_build_info_fields(build_info: dict[str, Any]) -> dict[str, Any]:
+    """Return build_info with stable field ordering for export."""
+    return {key: build_info[key] for key in BUILD_INFO_FIELD_ORDER if key in build_info}
+
+
+def canonical_json_dumps(payload: Any) -> str:
+    """Serialize JSON with stable key order and trailing newline."""
+    return json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
 
 
 def _dominant_evidence_type(conn: Any, claim_ids: list[str]) -> str | None:
@@ -171,6 +218,8 @@ def export_public_cards(
     limit: int = 100,
     output_dirs: list[Path] | None = None,
     repo_root: Path | None = None,
+    fixture_mode: bool = False,
+    export_timestamp: str | None = None,
 ) -> dict[str, Any]:
     """Export public-safe cards as JSON files after validation."""
     seeded_ids = ensure_golden_public_cards(conn)
@@ -187,20 +236,31 @@ def export_public_cards(
                 extras["evidence_type"] = evidence_type
         if "public_run_timestamp" not in extras:
             extras["public_run_timestamp"] = record.created_at
-        cards.append(
-            curated_public_card(
-                public_card_record_to_export_dict(record, extras=extras)
-            )
+        card = curated_public_card(
+            public_card_record_to_export_dict(record, extras=extras)
         )
+        if fixture_mode:
+            card["source_count"] = GOLDEN_FIXTURE_SOURCE_COUNT
+            stable_ts = export_timestamp or FIXTURE_EXPORT_TIMESTAMP
+            card["updated_at"] = stable_ts
+            if "public_run_timestamp" not in extras:
+                card["public_run_timestamp"] = stable_ts
+        cards.append(order_public_card_fields(card))
+
+    cards.sort(key=lambda item: item["id"])
     memos: list[dict[str, Any]] = []
-    generated_at = utc_now_iso()
-    build_info = {
-        "export_schema_version": EXPORT_SCHEMA_VERSION,
-        "generated_at": generated_at,
-        "phase": "1",
-        "card_count": len(cards),
-        "memo_count": len(memos),
-    }
+    generated_at = export_timestamp if fixture_mode else utc_now_iso()
+    if fixture_mode and export_timestamp is None:
+        generated_at = FIXTURE_EXPORT_TIMESTAMP
+    build_info = order_build_info_fields(
+        {
+            "export_schema_version": EXPORT_SCHEMA_VERSION,
+            "generated_at": generated_at,
+            "phase": "1",
+            "card_count": len(cards),
+            "memo_count": len(memos),
+        }
+    )
 
     violations = validate_public_export_bundle(cards, memos, build_info)
     if violations:
@@ -221,10 +281,7 @@ def export_public_cards(
         directory.mkdir(parents=True, exist_ok=True)
         for filename, payload in payloads.items():
             path = directory / filename
-            path.write_text(
-                json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
-                encoding="utf-8",
-            )
+            path.write_text(canonical_json_dumps(payload), encoding="utf-8")
             written_files.append(str(path))
 
     return {
@@ -236,4 +293,5 @@ def export_public_cards(
         "written_files": written_files,
         "export_schema_version": EXPORT_SCHEMA_VERSION,
         "generated_at": generated_at,
+        "fixture_mode": fixture_mode,
     }

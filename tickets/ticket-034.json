@@ -1,0 +1,52 @@
+{
+  "id": "ticket-034",
+  "title": "Make fixture-mode run repo-clean and export serialization deterministic",
+  "problem": "research run --fixture-mode dirties the working tree by rewriting committed public export snapshots with non-deterministic key ordering and live timestamps, drifting source_count, and writing generated artifacts into data/ and tickets/improvement_ticket_latest.json.",
+  "evidence": [
+    "agent_reports/2026-06-12_pre-phase-2_principal-audit.md",
+    "agent_reports/2026-06-12_phase-2_ticket-roadmap.md ticket-034 section"
+  ],
+  "affected_modules": [
+    "rge/modules/card_exporter.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/card_exporter.py",
+    "rge/cli.py",
+    ".gitignore",
+    "apps/public-site/public/data/build_info.json",
+    "apps/public-site/public/data/public_cards.json",
+    "tests/golden/test_26_full_mvp_run.py",
+    "agent_reports/2026-06-12_phase-2_ticket-034_fixture-run-artifact-hygiene.md"
+  ],
+  "acceptance_criteria": [
+    "Running the fixture-mode command twice from a clean tree leaves git status --short empty.",
+    "Committed public snapshots match regenerated output byte-for-byte.",
+    "Export serialization is deterministic and stable.",
+    "Fixture-mode timestamps are deterministic or snapshot-safe.",
+    "source_count drift is reconciled deliberately.",
+    "Improvement ticket artifacts no longer land in the real tickets/ queue directory.",
+    "Generated local artifacts are ignored or routed under a gitignored location.",
+    "pytest tests/golden passes.",
+    "pytest passes.",
+    "python -m rge.modules.safety_auditor --audit full passes."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden",
+    "RGE_LLM_MODE=mock python -m pytest",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No Ollama.",
+    "No live provider work.",
+    "No LangGraph.",
+    "No UI polish.",
+    "No README rewrite.",
+    "No public write routes.",
+    "No schema migration unless proven absolutely necessary.",
+    "Do not implement ticket-035 or later."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert the ticket-034 branch.",
+  "status": "done"
+}
