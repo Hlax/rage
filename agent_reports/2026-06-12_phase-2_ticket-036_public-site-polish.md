@@ -95,7 +95,8 @@ Full safety audit passes on the ticket branch. The auditor's route/raw-html scan
 
 ## 10. Merge to Main
 
-- Merge commit: `PENDING` (filled after merge)
+- Merge commit: `2547632`
+- Branch: `phase-2/ticket-036-public-site-polish` merged to `main`; full pytest re-run on merged main: 127 passed.
 
 ## 11. Recommended Next Ticket
 
