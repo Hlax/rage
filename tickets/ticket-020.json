@@ -1,0 +1,40 @@
+{
+  "id": "ticket-020",
+  "title": "Add domain proposal threshold trigger (Golden Test 18)",
+  "problem": "ticket-019 completes ontology pressure proposals, but strict domain proposal gating is not yet implemented. Golden Test 18 requires domain proposals only when high thresholds are met.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 18: domain proposal requires strict thresholds.",
+    "docs/agents/08_REPORTING_SPEC.md section 12: domain proposal reports.",
+    "agent_reports/2026-06-12_phase-1_ticket-019_ontology-pressure.md sections 11–13."
+  ],
+  "affected_modules": [
+    "rge/modules/domain_proposer.py",
+    "rge/db/repositories.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/domain_proposer.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "tests/golden/test_18_domain_proposal.py"
+  ],
+  "acceptance_criteria": [
+    "Deterministic domain proposal generation only when golden thresholds are met without Ollama.",
+    "Proposal JSON proves thresholds and remains draft/candidate; no automatic domain activation.",
+    "pytest tests/golden/test_18_domain_proposal.py passes.",
+    "Existing golden tests still pass (81+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_18_domain_proposal.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not implement LangGraph or live web discovery.",
+    "Do not add public write routes."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert branch phase-1/ticket-020-domain-proposal.",
+  "status": "proposed"
+}

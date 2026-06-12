@@ -286,6 +286,18 @@ CREATE TABLE IF NOT EXISTS theory_candidates (
     updated_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS ontology_proposals (
+    id TEXT PRIMARY KEY,
+    proposal_type TEXT NOT NULL,
+    candidate_concept TEXT,
+    status TEXT NOT NULL,
+    evidence_claims_json TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    proposal_json TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
 -- Public surface and improvement loop ----------------------------------------
 
 CREATE TABLE IF NOT EXISTS public_cards (

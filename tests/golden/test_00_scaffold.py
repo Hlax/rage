@@ -31,6 +31,7 @@ EXPECTED_SCHEMA_TABLES = [
     "run_reports",
     "cluster_reports",
     "theory_candidates",
+    "ontology_proposals",
     "public_cards",
     "improvement_tickets",
     "safety_audits",
@@ -96,6 +97,7 @@ def test_cli_top_level_help() -> None:
         "generate-cluster-report",
         "generate-theory-candidates",
         "generate-followup-questions",
+        "generate-ontology-pressure",
         "export-public",
         "verify",
     ):

@@ -161,6 +161,46 @@ def _cmd_generate_followup_questions(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_generate_ontology_pressure(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import OntologyProposalRepository
+    from rge.modules.ontology_pressure import generate_ontology_pressure_report
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        output_dir = Path(args.output_dir) if args.output_dir else None
+        result = generate_ontology_pressure_report(
+            conn,
+            domain=args.domain,
+            output_dir=output_dir,
+            pad_golden=not args.no_pad,
+        )
+        payload = {
+            "status": result["status"],
+            "command": "generate-ontology-pressure",
+            "domain": args.domain,
+            "proposal_id": result.get("proposal_id"),
+            "proposal_count": OntologyProposalRepository(conn).count(),
+            "readiness": result.get("readiness"),
+            "padding": result.get("padding"),
+            "output_path": result.get("output_path"),
+            "report": result.get("report"),
+        }
+        print(json.dumps(payload, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "generate-ontology-pressure",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_export_public(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.modules.card_exporter import export_public_cards
@@ -834,6 +874,34 @@ def build_parser() -> argparse.ArgumentParser:
         help="Skip built-in Golden Test 16 question batch.",
     )
     followup_parser.set_defaults(func=_cmd_generate_followup_questions)
+
+    ontology_parser = subparsers.add_parser(
+        "generate-ontology-pressure",
+        help="Generate ontology pressure report when vocabulary thresholds are met.",
+        description=(
+            "Detect recurring uncaptured vocabulary, build a draft ontology "
+            "proposal, persist it, and write ontology_pressure_latest.json."
+        ),
+    )
+    ontology_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack ID for ontology evaluation (default: creativity).",
+    )
+    ontology_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    ontology_parser.add_argument(
+        "--output-dir",
+        help="Optional output directory for ontology_pressure_latest.json (for tests).",
+    )
+    ontology_parser.add_argument(
+        "--no-pad",
+        action="store_true",
+        help="Skip deterministic golden threshold padding (for negative tests).",
+    )
+    ontology_parser.set_defaults(func=_cmd_generate_ontology_pressure)
 
     export_parser = subparsers.add_parser(
         "export-public",
