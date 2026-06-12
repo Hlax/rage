@@ -92,8 +92,9 @@ Public site / export **not touched** — no build re-run required.
 
 ## Merge
 
-- Merge commit SHA: `c4f1690` (fast-forward to main)
-- Golden Gate run: _(pending CI on push)_
+- Implementation SHA: `c4f1690`
+- Docs/report SHA: `79c1188`
+- Golden Gate run: **27448451264** — **success** at `79c1188`
 
 ## Recommended next move
 
