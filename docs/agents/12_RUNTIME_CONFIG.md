@@ -158,6 +158,9 @@ python -m rge.cli probe-mini-run --strict-chain
 
 `--strict-chain` skips stage 4 when upstream outputs lack contradiction-suitable inputs.
 
+Full stage floors, `contradiction_input_mode` semantics, and evidence-accumulation
+workflow: `docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md`.
+
 Reports land in gitignored `data/reports/live_probes/`. Excluded from CI/golden.
 Optional smoke (`tests/smoke/test_live_ollama_smoke.py`) covers individual probes and
 `probe-mini-run` when Ollama is available:

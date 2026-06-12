@@ -184,6 +184,10 @@ python -m rge.cli probe-extract-claims
 Writes a report-only JSON artifact under `data/reports/live_probes/`. Does **not**
 write to the default SQLite database or public exports. See `12_RUNTIME_CONFIG.md`.
 
+End-to-end operator runbook (mini-run floors, `contradiction_input_mode`, evidence
+accumulation for human-gated improvement proposals):
+`docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md`.
+
 ## Related documents
 
 - `03_MODEL_RUNTIME_SPEC.md` — adapter contract and task list

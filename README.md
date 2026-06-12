@@ -46,6 +46,9 @@ What requires **explicit live opt-in** (local Ollama only):
 - Requires `RGE_LLM_MODE=ollama` **and** `RGE_ALLOW_LIVE_LLM=1`
 - Run `python -m rge.cli model-health` before live pipeline work
 
+**Live probe runbook** (mini-run stage floors, `contradiction_input_mode`, evidence
+for human-gated improvements): `docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md`.
+
 See `docs/agents/13_MODEL_ESCALATION_POLICY.md` for mode profiles and task tiers.
 
 Phase 2 work (live Ollama, UI polish, deployment) is tracked in `agent_reports/2026-06-12_phase-2_ticket-roadmap.md`.

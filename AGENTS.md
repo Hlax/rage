@@ -26,7 +26,8 @@ Read sources in this order:
 12. `docs/agents/11_AGENT_OPERATING_PROTOCOL.md`
 13. `docs/agents/12_RUNTIME_CONFIG.md`
 14. `docs/agents/13_MODEL_ESCALATION_POLICY.md` — local-first modes and escalation policy
-15. `docs/agents/000_init.md` only as historical seed context
+15. `docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md` — live probe operator runbook
+16. `docs/agents/000_init.md` only as historical seed context
 
 If documents conflict, follow the higher-priority document.
 
