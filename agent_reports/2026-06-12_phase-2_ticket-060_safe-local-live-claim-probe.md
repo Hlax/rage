@@ -103,9 +103,9 @@ expected behavior proving the validation layer is authoritative over live model 
 
 ## Merge
 
-- Ticket commit SHA: _(filled after commit)_
-- Main push SHA: _(filled after push)_
-- Golden Gate run: _(filled after push)_
+- Ticket commit SHA: `b7326f7824c2fa4d484bb1c78929e541f5897780`
+- Main push SHA: `b7326f7824c2fa4d484bb1c78929e541f5897780` (fast-forward)
+- Golden Gate run: **27435876687** — **success** at `b7326f7`
 
 ## Recommended next move
 
