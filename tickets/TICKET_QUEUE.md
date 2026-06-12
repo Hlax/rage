@@ -58,7 +58,23 @@ superseded
 | 29 | ticket-029 | done | Extend builder golden gate for full MVP run (Golden Test 26) | `phase-1/ticket-029-builder-golden-gate-mvp` | `agent_reports/2026-06-12_phase-1_ticket-029_builder-golden-gate-mvp.md` |
 | 30 | ticket-030 | done | Extend builder golden gate for safety and prompt-injection (Golden Tests 23-24) | `phase-1/ticket-030-builder-golden-gate-safety` | `agent_reports/2026-06-12_phase-1_ticket-030_builder-golden-gate-safety.md` |
 | 31 | ticket-031 | done | Extend builder golden gate for public-site debug details (Golden Test 25) | `phase-1/ticket-031-builder-golden-gate-public-site` | `agent_reports/2026-06-12_phase-1_ticket-031_builder-golden-gate-public-site.md` |
-| 32 | ticket-032 | proposed | Phase 1 builder golden gate completion checkpoint | | |
+| 32 | ticket-032 | done | Phase 1 builder golden gate completion checkpoint | `phase-1/ticket-032-builder-golden-gate-completion` | `agent_reports/2026-06-12_phase-1_ticket-032_builder-golden-gate-completion.md` |
+
+## Phase 2 Queue (seed)
+
+| Order | Ticket ID | Status | Title | Branch | Report |
+|---:|---|---|---|---|---|
+| 33 | ticket-033 | proposed | Pre-phase-2 principal audit checkpoint | | |
+
+## Queue Notes (2026-06-12, ticket-032 agent)
+
+- ticket-032 completed Phase 1 builder golden gate inventory: added
+  `contradiction_detection` (GT07), `research_queue` (GT09), and
+  `public_site_static_render` (GT12) to `REQUIRED_GOLDEN_AREAS`; documented
+  nine optional golden modules in `INTENTIONALLY_OPTIONAL_GOLDEN_TESTS`.
+  All 119 golden tests pass.
+- Phase 1 MVP golden gate is complete. ticket-033 proposes a read-only
+  pre-phase-2 principal audit before live Ollama or Phase 2 implementation.
 
 ## Queue Notes (2026-06-12, ticket-031 agent)
 
@@ -283,7 +299,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-032 (proposed; awaiting review)
+none (Phase 1 MVP golden gate complete; ticket-033 proposed for pre-phase-2 audit)
 ```
 
 ## Queue Rules
