@@ -57,7 +57,15 @@ superseded
 | 28 | ticket-028 | done | Full MVP end-to-end golden run (Golden Test 26) | `phase-1/ticket-028-full-mvp-run` | `agent_reports/2026-06-12_phase-1_ticket-028_full-mvp-run.md` |
 | 29 | ticket-029 | done | Extend builder golden gate for full MVP run (Golden Test 26) | `phase-1/ticket-029-builder-golden-gate-mvp` | `agent_reports/2026-06-12_phase-1_ticket-029_builder-golden-gate-mvp.md` |
 | 30 | ticket-030 | done | Extend builder golden gate for safety and prompt-injection (Golden Tests 23-24) | `phase-1/ticket-030-builder-golden-gate-safety` | `agent_reports/2026-06-12_phase-1_ticket-030_builder-golden-gate-safety.md` |
-| 31 | ticket-031 | proposed | Extend builder golden gate for public-site debug details (Golden Test 25) | | |
+| 31 | ticket-031 | done | Extend builder golden gate for public-site debug details (Golden Test 25) | `phase-1/ticket-031-builder-golden-gate-public-site` | `agent_reports/2026-06-12_phase-1_ticket-031_builder-golden-gate-public-site.md` |
+| 32 | ticket-032 | proposed | Phase 1 builder golden gate completion checkpoint | | |
+
+## Queue Notes (2026-06-12, ticket-031 agent)
+
+- ticket-031 added `public_site_debug` (GT25) to Golden Test 22
+  `REQUIRED_GOLDEN_AREAS`. All 118 golden tests pass.
+- ticket-032 proposes builder gate completion checkpoint for remaining Phase 1
+  golden areas.
 
 ## Queue Notes (2026-06-12, ticket-030 agent)
 
@@ -275,7 +283,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-031 (proposed; awaiting review)
+ticket-032 (proposed; awaiting review)
 ```
 
 ## Queue Rules

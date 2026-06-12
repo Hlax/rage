@@ -26,6 +26,7 @@ REQUIRED_GOLDEN_AREAS: dict[str, tuple[str, ...]] = {
     ),
     "safety_audit_gate": ("tests/golden/test_23_safety_audit_gate.py",),
     "prompt_injection": ("tests/golden/test_24_prompt_injection.py",),
+    "public_site_debug": ("tests/golden/test_25_public_site_debug_details.py",),
     "full_mvp_run": ("tests/golden/test_26_full_mvp_run.py",),
 }
 
@@ -89,6 +90,7 @@ def test_golden_directory_covers_all_required_areas() -> None:
         "ticket_generation",
         "safety_audit_gate",
         "prompt_injection",
+        "public_site_debug",
         "full_mvp_run",
     }
     assert GOLDEN_DIR.is_dir()
