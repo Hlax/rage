@@ -76,9 +76,17 @@ superseded
 | 42 | ticket-042 | done | Public-site deployment readiness: static hosting docs and pre-deploy checklist | `phase-2/ticket-042-public-site-deployment-readiness` | `agent_reports/2026-06-12_phase-2_ticket-042_public-site-deployment-readiness.md` |
 | 43 | ticket-043 | done | Extend safety auditor to data/exports and tighten evidence checks | `phase-2/ticket-043-safety-auditor-exports` | `agent_reports/2026-06-12_phase-2_ticket-043_safety-auditor-exports.md` |
 | 44 | ticket-044 | done | Fix principal audit gate false overdue cadence counting | `phase-2/ticket-044-principal-audit-gate-fix` | `agent_reports/2026-06-12_phase-2_ticket-044_principal-audit-gate-fix.md` |
-| 45 | ticket-045 | proposed | Promote improvement draft with explicit review gate | | |
+| 45 | ticket-045 | done | Promote improvement draft with explicit review gate | `phase-2/ticket-045-improvement-draft-promotion` | `agent_reports/2026-06-12_phase-2_ticket-045_improvement-draft-promotion.md` |
 | 46 | ticket-046 | done | Fix operator loop done-without-commit false positive | `phase-2/ticket-046-operator-loop-drift-fix` | `agent_reports/2026-06-12_phase-2_ticket-046_operator-loop-drift-fix.md` |
 | 47 | ticket-047 | done | Stop plain export-public from rewriting committed public-site JSON | `phase-2/ticket-047-export-public-publish-only` | `agent_reports/2026-06-12_phase-2_ticket-047_export-public-publish-only.md` |
+| 48 | ticket-048 | proposed | Improve claim quote span validation | | |
+
+## Queue Notes (2026-06-12, ticket-045 agent)
+
+- ticket-045 promoted improvement draft to `tickets/ticket-048.json` via
+  `promote-improvement-ticket --confirm --from-json`. GT21 pass; no runtime
+  changes. Pre-ticket audit written before promotion. ticket-048 is proposed
+  for future implementation (medium risk; pre-ticket audit required).
 
 ## Queue Notes (2026-06-12, ticket-047 agent)
 
@@ -461,7 +469,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-045 (proposed — improvement draft promotion with review gate; requires pre-ticket audit)
+ticket-048 (proposed — improve claim quote span validation; pre-ticket audit required)
 ```
 
 ## Queue Rules

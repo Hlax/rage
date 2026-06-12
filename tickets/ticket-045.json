@@ -12,7 +12,7 @@
     "tickets/"
   ],
   "expected_files": [
-    "tickets/ticket-046.json",
+    "tickets/ticket-048.json",
     "agent_reports/2026-06-12_phase-2_ticket-045_improvement-draft-promotion.md"
   ],
   "acceptance_criteria": [
@@ -30,6 +30,6 @@
     "Do not auto-promote during fixture-mode run."
   ],
   "risk_level": "medium",
-  "rollback_plan": "Delete promoted tickets/ticket-046.json and revert queue notes.",
-  "status": "proposed"
+  "rollback_plan": "Delete promoted tickets/ticket-048.json and revert queue notes.",
+  "status": "done"
 }

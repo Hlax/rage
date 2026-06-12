@@ -1,0 +1,30 @@
+{
+  "id": "ticket-048",
+  "title": "Improve claim quote span validation",
+  "problem": "Rejected claims are missing required quote spans.",
+  "evidence": [
+    "run_report:run_golden_fixture_mvp:missing_quote_span_count=1"
+  ],
+  "affected_modules": [
+    "claim_extractor",
+    "claim_validator"
+  ],
+  "expected_files": [
+    "rge/modules/claim_extractor.py",
+    "rge/modules/claim_validator.py",
+    "tests/golden/test_02_claim_extraction.py"
+  ],
+  "acceptance_criteria": [
+    "Claims without quote spans are rejected with machine-readable reasons.",
+    "Accepted claims always include primary quote spans."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_02_claim_extraction.py"
+  ],
+  "non_goals": [
+    "Do not broaden claim extraction to live web sources."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert claim validator quote-span checks.",
+  "status": "proposed"
+}
