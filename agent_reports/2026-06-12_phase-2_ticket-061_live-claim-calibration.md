@@ -11,6 +11,23 @@ status: current
 - Baseline HEAD: `894f1f6023e31710c719072efbf20f76a9fb8d87`
 - Risk level: low-medium
 
+## Recovery after reconnect (2026-06-12)
+
+Interrupted session recovered on `main` with a **clean working tree** (`git status`
+empty). Branch `phase-2/ticket-061-live-claim-calibration` exists locally; work was
+already merged and pushed before reconnect.
+
+| Check | Result |
+| ----- | ------ |
+| Classification | **DONE_AND_PUSHED** |
+| HEAD | `63ce729` (docs follow-up on `9a3092d` implementation) |
+| `main` vs `origin/main` | In sync |
+| Uncommitted partial work | None |
+
+Re-ran mock gates and live probe on recovery — all acceptance criteria still met
+(see sections below; live re-run artifact
+`data/reports/live_probes/probe_extract_claims_2026-06-12T191423Z.json`).
+
 ## Summary
 
 Calibrated local Qwen claim extraction so `probe-extract-claims` produces at least
