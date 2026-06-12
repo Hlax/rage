@@ -71,3 +71,82 @@ def test_safety_auditor_cli_emits_json_not_prose(capsys: pytest.CaptureFixture[s
     for field in REQUIRED_AUDIT_FIELDS:
         assert field in payload
     assert "detail" not in payload
+
+
+def _write_clean_scratch_export(exports_dir: Path) -> None:
+    exports_dir.mkdir(parents=True, exist_ok=True)
+    cards = [
+        {
+            "id": "card_scratch_001",
+            "type": "cluster_card",
+            "title": "Scratch export card",
+            "summary": "Public-safe scratch export for safety audit coverage.",
+            "confidence": "medium",
+            "concepts": ["semantic diversity"],
+            "source_count": 1,
+            "public_detail_level": "standard",
+            "updated_at": "2026-06-12T00:00:00Z",
+        }
+    ]
+    build_info = {
+        "export_schema_version": "0.1.0",
+        "generated_at": "2026-06-12T00:00:00Z",
+        "phase": "1",
+        "card_count": 1,
+        "memo_count": 0,
+    }
+    (exports_dir / "public_cards.json").write_text(
+        json.dumps(cards, indent=2) + "\n", encoding="utf-8"
+    )
+    (exports_dir / "public_memos.json").write_text("[]\n", encoding="utf-8")
+    (exports_dir / "build_info.json").write_text(
+        json.dumps(build_info, indent=2) + "\n", encoding="utf-8"
+    )
+
+
+def test_data_exports_audit_skipped_when_directory_missing(tmp_path: Path) -> None:
+    report = run_safety_audit("public_export", root=tmp_path)
+    assert report["status"] == "fail"
+    assert any("missing public export file" in item for item in report["blocked_reasons"])
+    assert report["checked_exports"] == []
+
+
+def test_data_exports_audit_passes_on_clean_scratch_bundle(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    public_data = repo_root / "apps" / "public-site" / "public" / "data"
+    site_data = tmp_path / "apps" / "public-site" / "public" / "data"
+    site_data.mkdir(parents=True)
+    for name in ("public_cards.json", "public_memos.json", "build_info.json"):
+        (site_data / name).write_text(
+            (public_data / name).read_text(encoding="utf-8"), encoding="utf-8"
+        )
+    _write_clean_scratch_export(tmp_path / "data" / "exports")
+
+    report = run_safety_audit("public_export", root=tmp_path)
+    assert report["status"] == "pass", report["blocked_reasons"]
+    assert "data\\exports\\public_cards.json" in report["checked_exports"] or (
+        "data/exports/public_cards.json" in report["checked_exports"]
+    )
+
+
+def test_data_exports_audit_fails_closed_on_leaky_scratch_export(
+    tmp_path: Path,
+) -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    public_data = repo_root / "apps" / "public-site" / "public" / "data"
+    site_data = tmp_path / "apps" / "public-site" / "public" / "data"
+    site_data.mkdir(parents=True)
+    for name in ("public_cards.json", "public_memos.json", "build_info.json"):
+        (site_data / name).write_text(
+            (public_data / name).read_text(encoding="utf-8"), encoding="utf-8"
+        )
+    exports_dir = tmp_path / "data" / "exports"
+    _write_clean_scratch_export(exports_dir)
+    cards_path = exports_dir / "public_cards.json"
+    cards = json.loads(cards_path.read_text(encoding="utf-8"))
+    cards[0]["summary"] = "Leaked path C:\\Users\\private\\notes.txt in export."
+    cards_path.write_text(json.dumps(cards, indent=2) + "\n", encoding="utf-8")
+
+    report = run_safety_audit("public_export", root=tmp_path)
+    assert report["status"] == "fail"
+    assert any("data/exports" in item or "data\\exports" in item for item in report["blocked_reasons"])

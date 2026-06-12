@@ -166,6 +166,44 @@ def _audit_public_export(root: Path) -> tuple[list[str], list[str]]:
 
     cards, memos, build_info = _load_public_export_bundle(root)
     blocked.extend(validate_public_export_bundle(cards, memos, build_info))
+    scratch_checked, scratch_blocked = _audit_data_exports(root)
+    checked.extend(scratch_checked)
+    blocked.extend(scratch_blocked)
+    return checked, blocked
+
+
+def _audit_data_exports(root: Path) -> tuple[list[str], list[str]]:
+    """Validate scratch export JSON under data/exports/ when present."""
+    exports_dir = root / "data" / "exports"
+    checked: list[str] = []
+    blocked: list[str] = []
+    if not exports_dir.is_dir():
+        return checked, blocked
+
+    json_files = sorted(exports_dir.glob("*.json"))
+    if not json_files:
+        return checked, blocked
+
+    for path in json_files:
+        relative = str(path.relative_to(root))
+        checked.append(relative)
+        payload = path.read_text(encoding="utf-8")
+        for pattern in FORBIDDEN_VALUE_PATTERNS:
+            if pattern.search(payload):
+                blocked.append(
+                    f"secret-like content in {relative} matching {pattern.pattern!r}"
+                )
+
+    cards_path = exports_dir / "public_cards.json"
+    memos_path = exports_dir / "public_memos.json"
+    build_path = exports_dir / "build_info.json"
+    if cards_path.is_file() and memos_path.is_file() and build_path.is_file():
+        cards = json.loads(cards_path.read_text(encoding="utf-8"))
+        memos = json.loads(memos_path.read_text(encoding="utf-8"))
+        build_info = json.loads(build_path.read_text(encoding="utf-8"))
+        for issue in validate_public_export_bundle(cards, memos, build_info):
+            blocked.append(f"data/exports bundle: {issue}")
+
     return checked, blocked
 
 

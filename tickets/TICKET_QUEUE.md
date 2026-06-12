@@ -74,6 +74,20 @@ superseded
 | 40 | ticket-040 | done | Add CI golden gate workflow and rge-principal-audit command doc | `phase-2/ticket-040-ci-golden-gate` | `agent_reports/2026-06-12_phase-2_ticket-040_ci-golden-gate.md` |
 | 41 | ticket-041 | done | Bounded RGE operator loop runner | `phase-2/ticket-041-operator-loop-runner` | `agent_reports/2026-06-12_phase-2_ticket-041_operator-loop-runner.md` |
 | 42 | ticket-042 | done | Public-site deployment readiness: static hosting docs and pre-deploy checklist | `phase-2/ticket-042-public-site-deployment-readiness` | `agent_reports/2026-06-12_phase-2_ticket-042_public-site-deployment-readiness.md` |
+| 43 | ticket-043 | done | Extend safety auditor to data/exports and tighten evidence checks | `phase-2/ticket-043-safety-auditor-exports` | `agent_reports/2026-06-12_phase-2_ticket-043_safety-auditor-exports.md` |
+
+## Queue Notes (2026-06-12, ticket-043 agent)
+
+- ticket-043 added `_audit_data_exports()` to scan `data/exports/*.json` when present.
+- GT23 +3 tests (135 golden total); safety audit pass; improvement promotion deferred.
+
+## Queue Notes (2026-06-12, ticket-043 seed)
+
+- Principal audit checkpoint written after tickets 040–042:
+  `agent_reports/2026-06-12_principal-audit-post-ticket-042.md`.
+- ticket-043 extends `safety_auditor` to validate `data/exports/*.json` when present
+  using existing `validate_public_export_bundle` and `FORBIDDEN_VALUE_PATTERNS`.
+- Improvement draft promotion deferred until after ticket-043.
 
 ## Queue Notes (2026-06-12, ticket-042 agent)
 
@@ -423,7 +437,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-none (ticket-042 done on branch; await merge to main)
+none (ticket-043 done on branch; await merge to main)
 ```
 
 ## Queue Rules

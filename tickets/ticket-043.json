@@ -1,0 +1,39 @@
+{
+  "id": "ticket-043",
+  "title": "Extend safety auditor to data/exports and tighten evidence checks",
+  "problem": "The safety auditor validates only apps/public-site/public/data/ export JSON. Live-mode scratch exports land in data/exports/ without the same deterministic audit coverage, leaving a gap as Phase 2 export targets grow.",
+  "evidence": [
+    "agent_reports/2026-06-12_phase-2_ticket-roadmap.md (safety gate expansion item)",
+    "agent_reports/2026-06-12_principal-audit-post-ticket-042.md",
+    "rge/modules/card_exporter.py default_export_dirs includes data/exports"
+  ],
+  "affected_modules": [
+    "rge/modules/safety_auditor.py",
+    "tests/golden/test_23_safety_audit_gate.py"
+  ],
+  "expected_files": [
+    "rge/modules/safety_auditor.py",
+    "tests/golden/test_23_safety_audit_gate.py",
+    "tickets/ticket-043.json",
+    "agent_reports/2026-06-12_phase-2_ticket-043_safety-auditor-exports.md"
+  ],
+  "acceptance_criteria": [
+    "When data/exports/*.json exists, full safety audit validates those files with the same public export policy and forbidden-value patterns.",
+    "When data/exports/ is missing or has no JSON files, full audit still passes (no false failure).",
+    "GT23 covers clean scratch export pass and leaky export fail-closed behavior.",
+    "Golden tests and default pytest pass without Ollama."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden/test_23_safety_audit_gate.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not change public export schema or committed public-site JSON.",
+    "Do not add cloud deployment automation.",
+    "Do not promote improvement tickets or edit TICKET_QUEUE beyond this ticket row."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert the ticket-043 branch; safety auditor returns to public-site-only export scan.",
+  "status": "done"
+}
