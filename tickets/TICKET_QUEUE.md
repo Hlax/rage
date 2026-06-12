@@ -66,6 +66,20 @@ superseded
 |---:|---|---|---|---|---|
 | 33 | ticket-033 | done | Pre-phase-2 principal audit checkpoint | | `agent_reports/2026-06-12_pre-phase-2_principal-audit.md` |
 | 34 | ticket-034 | done | Make fixture-mode run repo-clean and export serialization deterministic | `phase-2/ticket-034-fixture-run-artifact-hygiene` | `agent_reports/2026-06-12_phase-2_ticket-034_fixture-run-artifact-hygiene.md` |
+| 35 | ticket-035 | done | Refresh README for Phase 1 reality and operator quickstart | `phase-2/ticket-035-readme-operator-refresh` | `agent_reports/2026-06-12_phase-2_ticket-035_readme-operator-refresh.md` |
+
+## Queue Notes (2026-06-12, ticket-035 agent)
+
+- ticket-035 refreshed README, `.env.example`, and `12_RUNTIME_CONFIG.md` for Phase 1
+  MVP operator reality. All 123 golden tests pass; safety audit passes; public site
+  builds 11 static pages. No runtime changes.
+- ticket-036 (public-site presentation polish) is next per Phase 2 roadmap; seed
+  JSON before implementation.
+
+## Queue Notes (2026-06-12, ticket-035 seed)
+
+- ticket-035 seeds Phase 2 operator docs refresh from the principal audit roadmap.
+  Scope: README, `.env.example`, `docs/agents/12_RUNTIME_CONFIG.md` only.
 
 ## Queue Notes (2026-06-12, ticket-034 agent)
 
@@ -320,7 +334,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-035 proposed (README/operator refresh — seed from Phase 2 roadmap)
+ticket-036 proposed (public-site presentation polish — seed from Phase 2 roadmap)
 ```
 
 ## Queue Rules

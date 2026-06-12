@@ -1,0 +1,48 @@
+{
+  "id": "ticket-035",
+  "title": "Refresh README for Phase 1 reality and operator quickstart",
+  "problem": "The root README still describes the repo as a Phase 0 scaffold and claims pipeline behavior is not implemented. It does not explain the fixture MVP run, mock-vs-live limitations, artifact paths, verification commands, public-site build, or safety boundaries. This makes the repo misleading for new engineers and external MVP review.",
+  "evidence": [
+    "agent_reports/2026-06-12_pre-phase-2_principal-audit.md Docs / README Assessment",
+    "agent_reports/2026-06-12_phase-2_ticket-roadmap.md ticket-035",
+    "agent_reports/2026-06-12_phase-2_ticket-034_fixture-run-artifact-hygiene.md section 10"
+  ],
+  "affected_modules": [
+    "README.md",
+    ".env.example",
+    "docs/agents/12_RUNTIME_CONFIG.md"
+  ],
+  "expected_files": [
+    "README.md",
+    ".env.example",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "tests/golden"
+  ],
+  "acceptance_criteria": [
+    "README accurately describes the current Phase 1 MVP instead of Phase 0 scaffold status.",
+    "README includes fixture-mode quickstart commands for tests, safety audit, MVP run, and public-site build.",
+    "README clearly explains mock-only golden behavior, live-provider limitations, Ollama status, and where local env files belong.",
+    "README documents artifact paths and explains that fixture-mode runs should leave the repo clean after ticket-034.",
+    "README documents public-site safety boundaries and links to runtime config and safety docs.",
+    "No real secrets, API keys, local paths, private prompts, or generated artifacts are committed.",
+    "pytest tests/golden passes.",
+    "pytest passes."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden",
+    "RGE_LLM_MODE=mock python -m pytest",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "Do not implement live Ollama or cloud providers.",
+    "Do not change runtime pipeline behavior.",
+    "Do not change public export schema.",
+    "Do not change frontend UI.",
+    "Do not add secrets or local-only values.",
+    "Do not implement ticket-036 or later."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert the ticket-035 branch.",
+  "status": "done"
+}

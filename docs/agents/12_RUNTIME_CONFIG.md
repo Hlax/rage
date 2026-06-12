@@ -26,7 +26,7 @@ Golden tests and the builder agent should set `RGE_LLM_MODE=mock` explicitly.
 
 | Variable | Required | Secret | Local-only | Public build | Used by |
 |---|---|---|---|---|---|
-| `RGE_LLM_MODE` | optional (default `ollama`) | no | yes | no | `rge/llm/registry.py`, all model client selection |
+| `RGE_LLM_MODE` | optional (default `ollama` in code; use `mock` in `.env.local`) | no | yes | no | `rge/llm/registry.py`, all model client selection |
 | `RGE_TEST_LLM_MODE` | optional (default `mock`) | no | yes | no | Documented for tests; golden tests set `mock` directly |
 | `OLLAMA_BASE_URL` | optional | no | yes | no | `OllamaModelClient`, `rge/config.py` |
 | `RGE_LOCAL_LLM` | optional | no | yes | no | Ollama model tag (not a filesystem path) |
@@ -56,13 +56,17 @@ Add provider variables only when a ticket wires an adapter and documents them he
 
 | Path | Config var | Git | Notes |
 |---|---|---|---|
+| `data/` | none | gitignored | All local runtime output (db, reports, exports, generated tickets) |
 | `data/db/creative_research.sqlite` | CLI `--db` only | gitignored | Default private DB |
-| `data/exports/` | none | not gitignored | Generated export JSON; keep free of secrets |
-| `data/reports/` | none | varies | Run/cluster reports; private |
-| `apps/public-site/public/data/` | none | committed snapshots | Public-safe JSON only |
+| `data/reports/` | none | gitignored | Run/cluster/theory private reports |
+| `data/exports/` | none | gitignored | Generated export JSON copies |
+| `data/tickets/` | none | gitignored | Generated improvement-ticket artifacts (not the queue) |
+| `apps/public-site/public/data/` | none | committed snapshots | Public-safe JSON only; review diffs before commit |
+| `apps/public-site/out/` | none | gitignored | Static site build output |
+| `tickets/ticket-*.json` | none | committed | Manually reviewed implementation queue |
 | `agent_reports/` | none | committed | No secrets in reports |
 
-## Mock vs live behavior (Phase 1)
+## Mock vs live behavior (Phase 1 / Phase 2 boundary)
 
 ### Golden tests / CI
 
@@ -127,11 +131,16 @@ Before a future live-inference smoke (not golden tests):
 4. Understand structured tasks still use mock until a later ticket implements them.
 5. Run safety audit after any export: `python -m rge.modules.safety_auditor --audit full`
 
-## Ticket-028 / Golden Test 26
+## Fixture-mode MVP run
 
-`research run --fixture-mode` is implemented in ticket-028. Golden Test 26 must
-run in **mock/fixture mode only** per ticket-028 non-goals. No provider keys are
-required for GT26 implementation or CI.
+`python -m rge.cli run --fixture-mode` orchestrates the full Phase 1 pipeline
+using deterministic fixtures (Golden Test 26). Requirements:
 
-Optional operator smoke of Ollama `health_check` is out of scope for ticket-028
-unless explicitly added in a follow-up ticket with env gates.
+- Set `RGE_LLM_MODE=mock` (explicit in tests; orchestrator forces mock).
+- No provider keys or Ollama instance required.
+- After ticket-034, repeated fixture runs use stable export serialization and
+  leave `git status --short` empty; runtime output stays under gitignored `data/`.
+- Committed public snapshots in `apps/public-site/public/data/` change only in
+  deliberate review commits, not as a side effect of local demo runs.
+
+Live discovery (`research run` without `--fixture-mode`) is not implemented.
