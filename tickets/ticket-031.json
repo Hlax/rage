@@ -29,5 +29,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert branch phase-1/ticket-031-builder-golden-gate-public-site.",
-  "status": "proposed"
+  "status": "done"
 }

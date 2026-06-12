@@ -1,0 +1,35 @@
+{
+  "id": "ticket-032",
+  "title": "Phase 1 builder golden gate completion checkpoint",
+  "problem": "ticket-031 completes safety-critical and MVP builder gate coverage entries, but several Phase 1 golden tests (e.g. contradiction detection, research queue, public site static render) are not yet mapped in REQUIRED_GOLDEN_AREAS and no completion checkpoint documents the intentional omissions.",
+  "evidence": [
+    "tests/golden/test_22_builder_golden_gate.py REQUIRED_GOLDEN_AREAS map.",
+    "docs/agents/00_GOLDEN_TESTS.md Phase 1 golden test inventory.",
+    "agent_reports/2026-06-12_phase-1_ticket-031_builder-golden-gate-public-site.md sections 10-11."
+  ],
+  "affected_modules": [
+    "tests/golden/test_22_builder_golden_gate.py"
+  ],
+  "expected_files": [
+    "tests/golden/test_22_builder_golden_gate.py",
+    "agent_reports/2026-06-12_phase-1_ticket-032_builder-golden-gate-completion.md"
+  ],
+  "acceptance_criteria": [
+    "Document which remaining golden tests are intentionally outside REQUIRED_GOLDEN_AREAS and why.",
+    "Add any missing merge-critical areas to REQUIRED_GOLDEN_AREAS if audit finds gaps (contradiction_detection, research_queue, public_site_static_render candidates).",
+    "pytest tests/golden/test_22_builder_golden_gate.py passes.",
+    "Existing golden tests still pass (118+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_22_builder_golden_gate.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not change runtime pipeline behavior.",
+    "Do not add Ollama or live discovery."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert branch phase-1/ticket-032-builder-golden-gate-completion.",
+  "status": "proposed"
+}
