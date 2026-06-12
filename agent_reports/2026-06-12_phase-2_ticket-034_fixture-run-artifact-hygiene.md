@@ -99,7 +99,7 @@ Full safety audit passes after public snapshot update (`source_count` only; no n
 
 ## 10. Merge to Main
 
-- Merge commit: (recorded after merge)
+- Merge commit: `2e1dd9d`
 - Branch: `phase-2/ticket-034-fixture-run-artifact-hygiene` merged to `main`.
 
 ## 11. Recommended Next Ticket
