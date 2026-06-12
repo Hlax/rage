@@ -743,17 +743,16 @@ def relationship_triples_from_bundle(
     return triples
 
 
-def merge_qualifying_claim_from_relationship_report(
-    relationship_report: dict[str, Any],
+def _claim_text_has_fragment(claim: dict[str, Any], fragment: str) -> bool:
+    return fragment in str(claim.get("claim_text", "")).casefold()
+
+
+def _merge_qualifying_claim_overlay(
+    input_claim: dict[str, Any],
     source_claims: list[dict[str, Any]],
     domain_claims: list[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    """Overlay qualifying claim from a relationship probe report onto bundle claims."""
-    input_claim = dict(relationship_report.get("input_claim") or {})
-    if not input_claim:
-        raise LiveProbeError("relationship probe report missing input_claim")
-    if not input_claim.get("id"):
-        input_claim["id"] = PROBE_CLAIM_ID
+    """Replace qualifying claim slots with the input claim (default hybrid overlay)."""
     qualifying_id = input_claim["id"]
     updated_source = [dict(input_claim)]
     updated_domain: list[dict[str, Any]] = []
@@ -767,6 +766,49 @@ def merge_qualifying_claim_from_relationship_report(
     if not replaced:
         updated_domain.insert(0, dict(input_claim))
     return updated_source, updated_domain
+
+
+def _merge_opposing_claim_overlay(
+    input_claim: dict[str, Any],
+    source_claims: list[dict[str, Any]],
+    domain_claims: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Replace opposing claim slots while preserving bundle qualifying source claims."""
+    updated_source = [dict(claim) for claim in source_claims]
+    updated_domain: list[dict[str, Any]] = []
+    replaced = False
+    for claim in domain_claims:
+        if _claim_text_has_fragment(claim, OPPOSING_CLAIM_FRAGMENT) or (
+            not replaced and claim.get("id", "").endswith("_oppose_001")
+        ):
+            merged = dict(input_claim)
+            merged["id"] = claim.get("id") or input_claim["id"]
+            updated_domain.append(merged)
+            replaced = True
+        else:
+            updated_domain.append(dict(claim))
+    if not replaced:
+        updated_domain.append(dict(input_claim))
+    return updated_source, updated_domain
+
+
+def merge_qualifying_claim_from_relationship_report(
+    relationship_report: dict[str, Any],
+    source_claims: list[dict[str, Any]],
+    domain_claims: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Overlay mini-run or relationship probe input claim onto bundle claims."""
+    input_claim = dict(relationship_report.get("input_claim") or {})
+    if not input_claim:
+        raise LiveProbeError("relationship probe report missing input_claim")
+    if not input_claim.get("id"):
+        input_claim["id"] = PROBE_CLAIM_ID
+
+    qualifies = _claim_text_has_fragment(input_claim, QUALIFYING_CLAIM_FRAGMENT)
+    opposes = _claim_text_has_fragment(input_claim, OPPOSING_CLAIM_FRAGMENT)
+    if opposes and not qualifies:
+        return _merge_opposing_claim_overlay(input_claim, source_claims, domain_claims)
+    return _merge_qualifying_claim_overlay(input_claim, source_claims, domain_claims)
 
 
 def load_contradiction_inputs_from_relationship_report(

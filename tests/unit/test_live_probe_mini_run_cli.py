@@ -10,9 +10,16 @@ import pytest
 
 from rge.cli import main
 from rge.llm.mock_client import MockModelClient
+from rge.modules.contradiction_detector import (
+    claim_dicts_as_objects,
+    propose_contradictions,
+    validate_contradiction_probe_batch,
+)
 from rge.modules.live_probe import (
     assert_live_probe_env,
     chain_inputs_suitable_for_contradiction,
+    load_default_contradiction_bundle,
+    merge_qualifying_claim_from_relationship_report,
     run_probe_mini_run,
 )
 
@@ -66,6 +73,63 @@ def test_chain_inputs_suitable_for_contradiction_requires_gt07_shape() -> None:
             },
         ],
     )
+
+
+def test_merge_opposing_only_hybrid_overlay_preserves_qualifying_source() -> None:
+    default_source, default_domain, _ = load_default_contradiction_bundle(REPO_ROOT)
+    opposing_input = {
+        "id": "claim_live_probe_link_001",
+        "claim_text": (
+            "AI-assisted brainstorming reduced semantic diversity across submitted "
+            "ideas in short-form writing tasks."
+        ),
+    }
+    source_claims, domain_claims = merge_qualifying_claim_from_relationship_report(
+        {"input_claim": opposing_input},
+        default_source,
+        default_domain,
+    )
+    assert source_claims[0]["id"] == "claim_live_probe_qualify_001"
+    assert "increased idea diversity" in source_claims[0]["claim_text"].casefold()
+    opposing_ids = [
+        claim["id"]
+        for claim in domain_claims
+        if "reduced semantic diversity" in claim["claim_text"].casefold()
+    ]
+    assert len(opposing_ids) == 1
+    assert opposing_ids[0] != source_claims[0]["id"]
+
+
+def test_opposing_hybrid_overlay_passes_contradiction_validation() -> None:
+    default_source, default_domain, relationships = load_default_contradiction_bundle(
+        REPO_ROOT
+    )
+    opposing_input = {
+        "id": "claim_live_probe_link_001",
+        "claim_text": (
+            "AI-assisted brainstorming reduced semantic diversity across submitted "
+            "ideas in short-form writing tasks."
+        ),
+    }
+    source_claims, domain_claims = merge_qualifying_claim_from_relationship_report(
+        {"input_claim": opposing_input},
+        default_source,
+        default_domain,
+    )
+    proposed = propose_contradictions(
+        domain_claims,
+        relationships,
+        "creativity",
+        client=MockModelClient(),
+        fixture_name="contradiction_detection_live_probe_quality.json",
+    )
+    validation = validate_contradiction_probe_batch(
+        proposed,
+        source_claims=claim_dicts_as_objects(source_claims),
+        domain_claims=claim_dicts_as_objects(domain_claims),
+        relationships=relationships,
+    )
+    assert len(validation["accepted"]) >= 1
 
 
 def test_cli_probe_mini_run_refuses_without_live_opt_in(

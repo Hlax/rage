@@ -40,5 +40,8 @@ def test_contradiction_detection_prompt_includes_triples_and_validation_rules() 
     assert "may_increase" in prompt
     assert "qualification_stance" in prompt
     assert "apparent_contradiction_metric_or_condition_difference" in prompt
+    assert "increased idea diversity" in prompt
+    assert "reduced semantic diversity" in prompt
+    assert "MUST differ" in prompt
     assert "Positive example" in prompt
     assert "Negative example" in prompt

@@ -463,8 +463,14 @@ class OllamaModelClient(ModelClient):
             "- qualification_stance MUST be qualifies.\n"
             '- contradiction_classification MUST be '
             '"apparent_contradiction_metric_or_condition_difference".\n'
-            "- qualifying_claim_id and opposing_claim_id are optional; the validator "
-            "can resolve claims by text fragments when omitted.\n\n"
+            "- When Claims JSON includes both divergent-condition and reduction "
+            "evidence, set qualifying_claim_id to the claim id whose claim_text "
+            "contains 'increased idea diversity' and opposing_claim_id to the claim "
+            "id whose claim_text contains 'reduced semantic diversity'. "
+            "qualifying_claim_id and opposing_claim_id MUST differ.\n"
+            "- If only one fragment is present, still set opposing_claim_id when "
+            "the reduced semantic diversity fragment appears and qualifying_claim_id "
+            "when the increased idea diversity fragment appears.\n\n"
             "Positive example (accepted shape):\n"
             "{\n"
             '  "base_subject_concept": "AI assistance",\n'

@@ -1,0 +1,51 @@
+{
+  "id": "ticket-069",
+  "title": "Followup contradiction calibration",
+  "problem": "Live mini-run suite passes 3/4 fixtures. creativity_ai_diversity_followup_short.txt fails contradiction stage only (0/1) because hybrid overlay treats an opposing-only extracted claim as qualifying, causing same_claim_pair validation rejection.",
+  "evidence": [
+    "agent_reports/2026-06-12_phase-2_ticket-067_multi-fixture-prompt-calibration.md",
+    "agent_reports/2026-06-12_phase-2_ticket-068_scratch-db-reviewed-live-probe-persistence.md",
+    "agent_reports/2026-06-12_pre-ticket-069_followup-contradiction-calibration.md",
+    "data/reports/live_probes/probe_mini_run_2026-06-12T220753Z.json"
+  ],
+  "affected_modules": [
+    "rge/modules/live_probe.py",
+    "rge/llm/ollama_client.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "expected_files": [
+    "rge/modules/live_probe.py",
+    "rge/llm/ollama_client.py",
+    "tests/unit/test_live_probe_mini_run_cli.py",
+    "tests/unit/test_ollama_contradiction_prompt.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "tickets/ticket-069.json",
+    "agent_reports/2026-06-12_phase-2_ticket-069_followup-contradiction-calibration.md"
+  ],
+  "acceptance_criteria": [
+    "creativity_ai_diversity_followup_short.txt contradiction stage reaches accepted_count >= 1 in default hybrid mode.",
+    "Live mini-run suite passes floors on 4/4 fixtures when Ollama is available, or report documents honest residual flakiness after minimal calibration.",
+    "Existing three passing suite fixtures remain passing.",
+    "Validators and floors unchanged.",
+    "No default DB writes; scratch DB remains operator-only.",
+    "Golden/mock gates and safety audit pass."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_ollama_contradiction_prompt.py tests/unit/test_live_probe_mini_run_cli.py -q",
+    "pytest tests/golden -q",
+    "pytest -q",
+    "python -m rge.modules.safety_auditor --audit full",
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-070",
+    "python -m rge.cli probe-mini-run-suite (live, when Ollama available)"
+  ],
+  "non_goals": [
+    "Do not weaken contradiction validators or lower floors.",
+    "Do not skip the followup fixture.",
+    "Do not add OpenAI or cloud fallback.",
+    "Do not write to scratch or accepted graph DB during suite runs.",
+    "Do not change public export."
+  ],
+  "risk_level": "low-medium",
+  "rollback_plan": "Revert handoff and prompt changes; suite returns to 3/4 on followup contradiction.",
+  "status": "in_progress"
+}
