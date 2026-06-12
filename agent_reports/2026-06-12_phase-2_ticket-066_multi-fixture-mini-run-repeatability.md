@@ -94,9 +94,9 @@ Post-ticket-064 checkpoint; **2 done tickets** after (065, 066). Threshold 3 —
 
 ## Merge
 
-- Merge commit SHA: _(filled after merge)_
-- Main push SHA: _(filled after push)_
-- Golden Gate run: _(filled after CI)_
+- Merge commit SHA: `59e9df2`
+- Main push SHA: `59e9df2`
+- Golden Gate run: **27445249742** — **success** at `59e9df2`
 
 ## Recommended next move
 
