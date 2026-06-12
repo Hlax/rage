@@ -72,6 +72,15 @@ superseded
 | 38 | ticket-038 | done | Gate live smoke tests behind env opt-in and add model-health command | `phase-2/ticket-038-live-smoke-gating` | `agent_reports/2026-06-12_phase-2_ticket-038_live-smoke-gating.md` |
 | 39 | ticket-039 | done | Validate improvement-ticket round-trip into the builder queue with review gate | `phase-2/ticket-039-improvement-ticket-round-trip` | `agent_reports/2026-06-12_phase-2_ticket-039_improvement-ticket-round-trip.md` |
 | 40 | ticket-040 | done | Add CI golden gate workflow and rge-principal-audit command doc | `phase-2/ticket-040-ci-golden-gate` | `agent_reports/2026-06-12_phase-2_ticket-040_ci-golden-gate.md` |
+| 41 | ticket-041 | done | Bounded RGE operator loop runner | `phase-2/ticket-041-operator-loop-runner` | `agent_reports/2026-06-12_phase-2_ticket-041_operator-loop-runner.md` |
+
+## Queue Notes (2026-06-12, ticket-041 agent)
+
+- ticket-041 adds `python -m rge.modules.operator_loop` with `--mode plan`
+  (read-only JSON status) and `--mode execute-safe` (mock-only golden/pytest/
+  safety audit/public-site build when clean). Classifies next action as
+  safe-autonomous, review-gated, or blocked. Detects documentation-ahead-of-git
+  drift. Never merges, pushes, promotes, or edits the queue.
 
 ## Queue Notes (2026-06-12, ticket-040 agent)
 
@@ -400,7 +409,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-none (ticket-040 committed on branch; await merge to main)
+none (ticket-041 committed on branch; await merge to main)
 ```
 
 ## Queue Rules
