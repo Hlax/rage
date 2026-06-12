@@ -41,6 +41,48 @@ def _quote_in_chunk(quote_span: str, chunk_text: str) -> bool:
     return _collapse_whitespace(quote_span) in _collapse_whitespace(chunk_text)
 
 
+def _build_collapsed_index_map(text: str) -> tuple[str, list[int]]:
+    """Map collapsed-whitespace indices back to original string indices."""
+    collapsed_chars: list[str] = []
+    index_map: list[int] = []
+    i = 0
+    n = len(text)
+    while i < n:
+        if text[i].isspace():
+            if index_map:
+                collapsed_chars.append(" ")
+                index_map.append(i)
+            while i < n and text[i].isspace():
+                i += 1
+            continue
+        collapsed_chars.append(text[i])
+        index_map.append(i)
+        i += 1
+    return "".join(collapsed_chars), index_map
+
+
+def locate_quote_offsets(
+    quote_span: str, chunk_text: str
+) -> tuple[int | None, int | None]:
+    """Return char_start/char_end when quote_span matches chunk_text (exact or collapsed)."""
+    quote = str(quote_span).strip()
+    if not quote:
+        return None, None
+    start = chunk_text.find(quote)
+    if start >= 0:
+        return start, start + len(quote)
+
+    collapsed_chunk, index_map = _build_collapsed_index_map(chunk_text)
+    collapsed_quote = _collapse_whitespace(quote)
+    start_c = collapsed_chunk.find(collapsed_quote)
+    if start_c < 0 or not index_map:
+        return None, None
+    end_c = start_c + len(collapsed_quote) - 1
+    if end_c >= len(index_map):
+        return None, None
+    return index_map[start_c], index_map[end_c] + 1
+
+
 def validate_candidate_claim(
     candidate: dict[str, Any],
     *,

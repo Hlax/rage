@@ -429,12 +429,14 @@ class ClaimRepository:
 
         quote_text = str(claim["quote_span"])
         quote_id = make_quote_id(claim_id, quote_text)
+        char_start = claim.get("quote_char_start")
+        char_end = claim.get("quote_char_end")
         self._conn.execute(
             """
             INSERT INTO claim_quotes (
                 id, claim_id, source_id, chunk_id, quote_text, char_start,
                 char_end, page, is_primary, created_at
-            ) VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, 1, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, 1, ?)
             ON CONFLICT(id) DO NOTHING
             """,
             (
@@ -443,6 +445,8 @@ class ClaimRepository:
                 claim["source_id"],
                 claim["chunk_id"],
                 quote_text,
+                char_start,
+                char_end,
                 now,
             ),
         )

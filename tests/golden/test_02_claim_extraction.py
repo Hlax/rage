@@ -119,6 +119,10 @@ def test_extract_claims_produces_scoped_accepted_claims(temp_db: Path) -> None:
             assert len(quotes) >= 1
             assert any(quote["is_primary"] == 1 for quote in quotes)
             assert quotes[0]["quote_text"]
+            primary = next(q for q in quotes if q["is_primary"] == 1)
+            assert primary["char_start"] is not None
+            assert primary["char_end"] is not None
+            assert primary["char_end"] > primary["char_start"]
     finally:
         conn.close()
 

@@ -1,0 +1,43 @@
+{
+  "id": "ticket-052",
+  "title": "Persist char_start and char_end for accepted claim quote spans",
+  "problem": "claim_quotes rows store quote_text but char_start/char_end are always NULL. Fixture quote spans match source text exactly; offsets improve traceability without changing validation rules.",
+  "evidence": [
+    "docs/agents/05_DATA_MODEL.md claim_quotes char_start/char_end nullable",
+    "rge/db/repositories.py insert_accepted",
+    "agent_reports/2026-06-12_pre-ticket-048_claim-quote-span-readiness-audit.md optional future work"
+  ],
+  "affected_modules": [
+    "rge/modules/claim_validator.py",
+    "rge/modules/claim_extractor.py",
+    "rge/db/repositories.py",
+    "tests/golden/test_02_claim_extraction.py"
+  ],
+  "expected_files": [
+    "rge/modules/claim_validator.py",
+    "rge/modules/claim_extractor.py",
+    "rge/db/repositories.py",
+    "tests/unit/test_claim_quote_offsets.py",
+    "tests/golden/test_02_claim_extraction.py",
+    "tickets/ticket-052.json",
+    "agent_reports/2026-06-12_phase-2_ticket-052_quote-span-offsets.md"
+  ],
+  "acceptance_criteria": [
+    "When quote_span is an exact substring of chunk text, claim_quotes stores char_start and char_end.",
+    "Validation rules unchanged; missing_quote_span rejection unchanged.",
+    "GT02 passes and asserts offsets on accepted fixture claims.",
+    "Golden and pytest pass without Ollama."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_claim_quote_offsets.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden/test_02_claim_extraction.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Do not change missing_quote_span validation logic.",
+    "Do not compute offsets for collapsed-whitespace-only matches in this ticket."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert offset computation; char_start/char_end return to NULL.",
+  "status": "done"
+}

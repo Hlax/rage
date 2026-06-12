@@ -83,6 +83,13 @@ superseded
 | 49 | ticket-049 | done | Skip improvement tickets for golden-covered rejection modes | `phase-2/ticket-049-improvement-generator-filter` | `agent_reports/2026-06-12_phase-2_ticket-049_improvement-generator-filter.md` |
 | 50 | ticket-050 | done | CI Golden Gate: opt into Node 24 for GitHub Actions | `phase-2/ticket-050-ci-node24-actions` | `agent_reports/2026-06-12_phase-2_ticket-050_ci-node24-actions.md` |
 | 51 | ticket-051 | done | Implement research verify mock-only verification suite | `phase-2/ticket-051-research-verify` | `agent_reports/2026-06-12_phase-2_ticket-051_research-verify.md` |
+| 52 | ticket-052 | done | Persist char_start and char_end for accepted claim quote spans | `phase-2/ticket-052-quote-span-offsets` | `agent_reports/2026-06-12_phase-2_ticket-052_quote-span-offsets.md` |
+
+## Queue Notes (2026-06-12, ticket-052 agent)
+
+- ticket-052 stores quote char_start/char_end on accepted claims when quote_span
+  matches chunk text (exact or collapsed whitespace). GT02 +4 offset unit tests;
+  187 pytest pass.
 
 ## Queue Notes (2026-06-12, ticket-051 agent)
 
@@ -496,7 +503,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-052 (proposed — quote span char offsets for accepted claims)
+(none — seed next ticket from Post-Phase-2 roadmap)
 ```
 
 ## Queue Rules

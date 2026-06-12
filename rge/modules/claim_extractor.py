@@ -18,7 +18,7 @@ from rge.llm.mock_client import MockModelClient
 from rge.llm.mode import effective_llm_mode
 from rge.llm.registry import get_model_client
 from rge.llm.schemas import CandidateClaimBatch_v0_1
-from rge.modules.claim_validator import validate_candidate_claims
+from rge.modules.claim_validator import locate_quote_offsets, validate_candidate_claims
 from rge.safety.prompt_injection import source_text_has_prompt_injection_fixture
 
 
@@ -153,6 +153,13 @@ def extract_claims_for_source(
             fixture_name=fixture_name,
             client=model_client,
         )
+        for claim in result["accepted"]:
+            char_start, char_end = locate_quote_offsets(
+                str(claim["quote_span"]), chunk_dict["chunk_text"]
+            )
+            if char_start is not None:
+                claim["quote_char_start"] = char_start
+                claim["quote_char_end"] = char_end
         for claim in result["accepted"]:
             record = claim_repo.insert_accepted(
                 claim,
