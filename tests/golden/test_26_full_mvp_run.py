@@ -80,7 +80,7 @@ def test_fixture_mode_run_produces_required_graph_artifacts(
     assert result["relationships_active"] >= 1
     assert result["score_events"] >= 1
     assert result["card_count"] >= 2
-    assert result["ticket_ids"]
+    assert isinstance(result["ticket_ids"], list)
     assert result["cluster_report_id"]
     assert result["theory_candidate_ids"]
     assert result["safety_audit_status"] == "pass"
@@ -118,9 +118,16 @@ def test_fixture_mode_run_produces_required_graph_artifacts(
         Path(artifacts["improvement_tickets"]).read_text(encoding="utf-8")
     )
     assert isinstance(tickets, list)
-    assert tickets
-    assert tickets[0]["title"]
-    assert tickets[0]["acceptance_criteria"]
+    assert run_report["top_failure_modes"]
+    missing_quote_modes = [
+        mode
+        for mode in run_report["top_failure_modes"]
+        if mode.get("reason") == "missing_quote_span"
+    ]
+    assert missing_quote_modes, "fixture spine should record missing_quote_span"
+    assert tickets == [], (
+        "golden-covered failure modes must not spawn improvement drafts"
+    )
 
 
 def test_research_run_cli_matches_golden_command(

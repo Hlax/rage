@@ -22,6 +22,7 @@ from rge.modules.principal_audit_gate import (
     parse_queue_rows,
     repo_root,
 )
+from rge.modules.ticket_writer import improvement_draft_is_actionable
 
 _REPO_ROOT = repo_root()
 _QUEUE_PATH = _REPO_ROOT / "tickets" / "TICKET_QUEUE.md"
@@ -454,7 +455,9 @@ def pending_improvement_tickets(
     drafts = [
         ticket
         for ticket in tickets
-        if isinstance(ticket, dict) and ticket.get("status") == "draft"
+        if isinstance(ticket, dict)
+        and ticket.get("status") == "draft"
+        and improvement_draft_is_actionable(ticket)
     ]
     return {
         "pending": len(drafts) > 0,

@@ -35,5 +35,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert ticket-049 branch; improvement drafts again include all qualifying failure modes.",
-  "status": "proposed"
+  "status": "done"
 }

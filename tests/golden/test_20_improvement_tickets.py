@@ -288,3 +288,83 @@ def test_generate_improvement_tickets_cli_emits_machine_readable_json(
     assert payload["tickets"]
     titles = {ticket["title"] for ticket in payload["tickets"]}
     assert GOLDEN_OVERGENERALIZED_TITLE in titles
+
+
+def test_golden_covered_missing_quote_span_does_not_generate_improvement_ticket(
+    temp_db: Path, report_dir: Path
+) -> None:
+    from rge.db.connection import connect
+    from rge.db.repositories import ImprovementTicketRepository
+    from rge.modules.run_evaluator import build_run_report
+
+    _prepare_rejection_spine(temp_db)
+    from rge.cli import main
+
+    assert (
+        main(
+            [
+                "generate-run-report",
+                "--run-id",
+                GOLDEN_RUN_ID,
+                "--topic",
+                GOLDEN_TOPIC,
+                "--domain",
+                "creativity",
+                "--db",
+                str(temp_db),
+                "--output-dir",
+                str(report_dir),
+            ]
+        )
+        == 0
+    )
+
+    conn = connect(temp_db)
+    try:
+        report = build_run_report(
+            conn,
+            run_id=GOLDEN_RUN_ID,
+            topic=GOLDEN_TOPIC,
+            domain_pack="creativity",
+        )
+        reasons = {mode["reason"] for mode in report["top_failure_modes"]}
+        assert "missing_quote_span" in reasons
+    finally:
+        conn.close()
+
+    assert (
+        main(
+            [
+                "generate-improvement-tickets",
+                "--run-id",
+                GOLDEN_RUN_ID,
+                "--db",
+                str(temp_db),
+                "--output-dir",
+                str(report_dir),
+            ]
+        )
+        == 0
+    )
+
+    conn = connect(temp_db)
+    try:
+        repo = ImprovementTicketRepository(conn)
+        records = repo.list_for_run(GOLDEN_RUN_ID)
+        assert records
+        for record in records:
+            ticket = json.loads(record.ticket_json)
+            assert ticket.get("failure_reason") != "missing_quote_span"
+            assert ticket["title"] != "Improve claim quote span validation"
+    finally:
+        conn.close()
+
+
+def test_write_improvement_tickets_skips_only_golden_covered_modes() -> None:
+    from rge.modules.ticket_writer import write_improvement_tickets
+
+    run_report = {
+        "run_id": "run_only_missing_quote",
+        "top_failure_modes": [{"reason": "missing_quote_span", "count": 1}],
+    }
+    assert write_improvement_tickets(run_report) == []

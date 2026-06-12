@@ -80,7 +80,13 @@ superseded
 | 46 | ticket-046 | done | Fix operator loop done-without-commit false positive | `phase-2/ticket-046-operator-loop-drift-fix` | `agent_reports/2026-06-12_phase-2_ticket-046_operator-loop-drift-fix.md` |
 | 47 | ticket-047 | done | Stop plain export-public from rewriting committed public-site JSON | `phase-2/ticket-047-export-public-publish-only` | `agent_reports/2026-06-12_phase-2_ticket-047_export-public-publish-only.md` |
 | 48 | ticket-048 | rejected | Improve claim quote span validation | | `agent_reports/2026-06-12_pre-ticket-048_claim-quote-span-readiness-audit.md` |
-| 49 | ticket-049 | proposed | Skip improvement tickets for golden-covered rejection modes | | |
+| 49 | ticket-049 | done | Skip improvement tickets for golden-covered rejection modes | `phase-2/ticket-049-improvement-generator-filter` | `agent_reports/2026-06-12_phase-2_ticket-049_improvement-generator-filter.md` |
+
+## Queue Notes (2026-06-12, ticket-049 agent)
+
+- ticket-049 filters `missing_quote_span` from improvement drafts (GT02 already covers).
+- Operator loop ignores golden-covered stale drafts in `improvement_ticket_latest.json`.
+- +2 GT20, +1 operator loop unit test; 181 pytest pass; safety audit pass.
 
 ## Queue Notes (2026-06-12, pre-ticket-048 audit)
 
@@ -478,7 +484,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-049 (proposed — skip golden-covered failure modes in improvement drafts)
+(none — seed next ticket from Phase 2 roadmap)
 ```
 
 ## Queue Rules

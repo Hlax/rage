@@ -10,6 +10,7 @@ import pytest
 
 from rge.modules.ticket_writer import (
     BUILDER_REQUIRED_TICKET_FIELDS,
+    GOLDEN_COVERED_IMPROVEMENT_FAILURE_MODES,
     GOLDEN_FAILURE_TEMPLATES,
     validate_builder_ticket,
     write_improvement_tickets,
@@ -169,10 +170,16 @@ def test_failure_templates_include_all_builder_required_fields() -> None:
         "top_failure_modes": [
             {"reason": reason, "count": 1}
             for reason in GOLDEN_FAILURE_TEMPLATES
+            if reason not in GOLDEN_COVERED_IMPROVEMENT_FAILURE_MODES
         ],
     }
     tickets = write_improvement_tickets(run_report)
-    assert len(tickets) == len(GOLDEN_FAILURE_TEMPLATES)
+    expected = {
+        reason
+        for reason in GOLDEN_FAILURE_TEMPLATES
+        if reason not in GOLDEN_COVERED_IMPROVEMENT_FAILURE_MODES
+    }
+    assert len(tickets) == len(expected)
     for ticket in tickets:
         for field in BUILDER_REQUIRED_TICKET_FIELDS:
             assert field in ticket

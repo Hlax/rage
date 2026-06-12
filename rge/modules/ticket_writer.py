@@ -18,6 +18,16 @@ from rge.modules.run_evaluator import GOLDEN_RUN_ID, default_report_dir
 
 GOLDEN_MIN_FAILURE_COUNT = 1
 
+# Failure modes that golden tests already prove via intentional fixture rejections.
+# Run reports may still count these for observability; improvement drafts are suppressed.
+GOLDEN_COVERED_IMPROVEMENT_FAILURE_MODES: frozenset[str] = frozenset(
+    {
+        "missing_quote_span",  # GT02 test_claims_without_quote_spans_are_rejected
+    }
+)
+
+GOLDEN_COVERED_IMPROVEMENT_TITLE = "Improve claim quote span validation"
+
 BUILDER_REQUIRED_TICKET_FIELDS: tuple[str, ...] = (
     "title",
     "problem",
@@ -114,6 +124,27 @@ GOLDEN_FAILURE_TEMPLATES: dict[str, dict[str, Any]] = {
         "rollback_plan": "Revert concept linker validation rules.",
     },
 }
+
+
+def failure_mode_covered_by_golden_tests(failure_reason: str) -> bool:
+    """Return True when golden tests already cover intentional fixture rejection."""
+    return failure_reason in GOLDEN_COVERED_IMPROVEMENT_FAILURE_MODES
+
+
+def improvement_draft_is_actionable(draft: dict[str, Any]) -> bool:
+    """Return False for drafts that duplicate golden-covered validation work."""
+    reason = draft.get("failure_reason")
+    if isinstance(reason, str) and failure_mode_covered_by_golden_tests(reason):
+        return False
+    if draft.get("title") == GOLDEN_COVERED_IMPROVEMENT_TITLE:
+        return False
+    evidence = draft.get("evidence") or []
+    if any(
+        isinstance(item, str) and "missing_quote_span_count=" in item
+        for item in evidence
+    ):
+        return False
+    return True
 
 
 def validate_builder_ticket(ticket: dict[str, Any]) -> list[str]:
@@ -380,6 +411,8 @@ def write_improvement_tickets(run_report: dict[str, Any]) -> list[dict[str, Any]
         template = GOLDEN_FAILURE_TEMPLATES.get(reason or "")
         if template is None or count < GOLDEN_MIN_FAILURE_COUNT:
             continue
+        if failure_mode_covered_by_golden_tests(reason or ""):
+            continue
         tickets.append(
             _build_ticket_report(
                 run_id=run_id,
@@ -406,10 +439,19 @@ def generate_improvement_tickets(
 
     run_report = json.loads(run_record.report_json)
     proposed = write_improvement_tickets(run_report)
+    target_dir = output_dir or default_report_dir()
+    target_dir.mkdir(parents=True, exist_ok=True)
+    output_path = target_dir / "improvement_ticket_latest.json"
+
     if not proposed:
-        raise ValueError(
-            "No improvement tickets generated: run report has no qualifying failure modes."
-        )
+        output_path.write_text(json.dumps([], indent=2) + "\n", encoding="utf-8")
+        return {
+            "status": "skipped_golden_covered",
+            "run_id": run_id,
+            "ticket_ids": [],
+            "tickets": [],
+            "output_path": str(output_path),
+        }
 
     existing_count = ticket_repo.count_for_run(run_id)
     created_ids: list[str] = []

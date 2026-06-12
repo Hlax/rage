@@ -236,6 +236,31 @@ def test_pending_improvement_helper_detects_drafts(tmp_path: Path) -> None:
     assert report["draft_count"] == 1
 
 
+def test_pending_improvement_skips_golden_covered_drafts(tmp_path: Path) -> None:
+    artifact_dir = tmp_path / "data" / "tickets"
+    artifact_dir.mkdir(parents=True)
+    artifact = artifact_dir / "improvement_ticket_latest.json"
+    artifact.write_text(
+        json.dumps(
+            [
+                {
+                    "status": "draft",
+                    "title": "Improve claim quote span validation",
+                    "evidence": [
+                        "run_report:run_golden_fixture_mvp:missing_quote_span_count=1"
+                    ],
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    report = pending_improvement_tickets(root=tmp_path, artifact_path=artifact)
+
+    assert report["pending"] is False
+    assert report["draft_count"] == 0
+
+
 def test_audit_only_ticket_skips_done_without_commit_check(tmp_path: Path) -> None:
     (tmp_path / "tickets").mkdir(parents=True)
     (tmp_path / "tickets" / "ticket-033.json").write_text(

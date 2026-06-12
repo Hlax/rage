@@ -349,8 +349,6 @@ def execute_fixture_mode_run(
                 raise ValueError("fixture run requires score events")
             if export_result.get("card_count", 0) < 2:
                 raise ValueError("fixture run requires at least two public cards")
-            if tickets < 1:
-                raise ValueError("fixture run requires at least one improvement ticket")
             if qualifies < 1 or supports < 1:
                 raise ValueError(
                     "fixture run requires support and qualification evidence"
