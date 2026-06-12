@@ -93,8 +93,9 @@ Post-ticket-061 principal audit satisfied; **2 done tickets** since checkpoint
 
 ## Merge
 
-- Ticket commit SHA: (pending commit)
-- Main push SHA: (pending merge)
+- Ticket commit SHA: `e116721c8380d85cd39d6bbd62cb71028bdb2158`
+- Main push SHA: `e116721c8380d85cd39d6bbd62cb71028bdb2158` (fast-forward)
+- Golden Gate run: **27439801572** — **success** at `e116721`
 
 ## Recommended next move
 
