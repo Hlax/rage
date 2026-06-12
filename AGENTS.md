@@ -23,7 +23,10 @@ Read sources in this order:
 9. `docs/agents/08_REPORTING_SPEC.md`
 10. `docs/agents/09_RESEARCH_RUN_CONTRACT.md`
 11. `docs/agents/10_SAFETY_MODEL.md`
-12. `docs/agents/000_init.md` only as historical seed context
+12. `docs/agents/11_AGENT_OPERATING_PROTOCOL.md`
+13. `docs/agents/12_RUNTIME_CONFIG.md`
+14. `docs/agents/13_MODEL_ESCALATION_POLICY.md` — local-first modes and escalation policy
+15. `docs/agents/000_init.md` only as historical seed context
 
 If documents conflict, follow the higher-priority document.
 

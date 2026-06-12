@@ -93,6 +93,12 @@ local sentence-transformer → Ollama embeddings, OpenAI embeddings, or vector D
 single provider adapter → provider registry with local/API fallback
 ```
 
+**Task-tier alignment (ticket-058):** Local Ollama handles four pipeline structured
+tasks when `RGE_ALLOW_LIVE_LLM=1`. Python owns validation, scoring, and all DB
+writes. Cluster/theory/ontology synthesis remains deterministic until future cloud
+escalation. Mode ladder, forbidden actions, and responsibility split:
+`docs/agents/13_MODEL_ESCALATION_POLICY.md`.
+
 ## 4. Adapter Module Layout
 
 Add a formal model adapter package:

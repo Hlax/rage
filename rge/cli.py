@@ -1708,7 +1708,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Report local Ollama reachability without raising.",
         description=(
             "Probe the configured Ollama endpoint and model availability. "
-            "Always exits 0 with a JSON report; does not run structured tasks."
+            "Always exits 0 with a JSON report; does not run structured tasks. "
+            "effective_llm_mode=mock is expected when RGE_ALLOW_LIVE_LLM is not set. "
+            "See docs/agents/13_MODEL_ESCALATION_POLICY.md for local vs mock profiles."
         ),
     )
     model_health_parser.set_defaults(func=_cmd_model_health)

@@ -1,0 +1,22 @@
+{
+  "id": "ticket-059",
+  "title": "OpenAI opt-in cloud adapter (proposed — not implemented)",
+  "problem": "Future ticket to add an optional OpenAI-compatible cloud adapter behind explicit opt-in, evidence thresholds, and budget gates. Deferred from ticket-058 which documents policy only.",
+  "evidence": [
+    "docs/agents/13_MODEL_ESCALATION_POLICY.md",
+    "agent_reports/2026-06-12_pre-ticket-058_local-model-runtime-readiness-audit.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [],
+  "acceptance_criteria": [
+    "Not started — placeholder only until human promotes from proposed."
+  ],
+  "test_plan": [],
+  "non_goals": [
+    "No implementation in ticket-058 scope.",
+    "OpenRouter deferred to a separate future ticket."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "N/A — not implemented.",
+  "status": "proposed"
+}

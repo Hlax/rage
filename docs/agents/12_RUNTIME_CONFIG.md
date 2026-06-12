@@ -8,6 +8,7 @@ golden tests, fixture-mode runs, and future smoke tests without leaking secrets
 into the repo or public exports.
 
 Canonical model-runtime contract: `docs/agents/03_MODEL_RUNTIME_SPEC.md`.  
+Local-first modes and escalation policy: `docs/agents/13_MODEL_ESCALATION_POLICY.md`.  
 Safety boundaries: `docs/agents/10_SAFETY_MODEL.md`.
 
 ## Configuration loader
@@ -81,8 +82,37 @@ Without both env vars, collected smoke tests skip at runtime. `pytest` and
 python -m rge.cli model-health
 ```
 
-Always exits 0 with JSON reporting `reachable`, `model_available`, and effective
-LLM mode flags. Does not run structured pipeline tasks.
+Always exits 0 with JSON reporting `reachable`, `model_available`, `configured_model`,
+`available_models` (sample), `action_hint` (when unreachable or model missing),
+`live_llm_enabled`, and `effective_llm_mode`. Does not run structured pipeline tasks.
+
+**Interpretation:** `effective_llm_mode: mock` is **expected** when
+`RGE_ALLOW_LIVE_LLM` is not set — this is not a verification failure. For live
+research, set both `RGE_LLM_MODE=ollama` and `RGE_ALLOW_LIVE_LLM=1` and confirm
+`model_available: true`. See `13_MODEL_ESCALATION_POLICY.md` for profiles.
+
+## Local-first mode profiles
+
+### Safe verification (CI / golden / agents)
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+$env:RGE_ALLOW_LIVE_LLM = "0"
+python -m rge.cli verify --skip-site
+```
+
+### Local research (operator machine)
+
+```powershell
+$env:RGE_LLM_MODE = "ollama"
+$env:RGE_ALLOW_LIVE_LLM = "1"
+$env:OLLAMA_BASE_URL = "http://127.0.0.1:11434"
+$env:RGE_LOCAL_LLM = "qwen2.5:7b"
+python -m rge.cli model-health
+```
+
+Copy `.env.smoke.example` → `.env.smoke.local` for a committed smoke profile
+template. Cloud mode is **not implemented** (future ticket-059+).
 
 ## Live-mode public export publish gate
 

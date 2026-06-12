@@ -90,19 +90,45 @@ class OllamaModelClient(ModelClient):
             "provider": self.provider,
             "base_url": self.base_url,
             "model": self.model,
+            "configured_model": self.model,
             "reachable": False,
             "model_available": False,
+            "available_models": [],
+            "action_hint": None,
         }
         try:
             with urllib.request.urlopen(
                 f"{self.base_url}/api/tags", timeout=self.timeout_seconds
             ) as response:
                 payload = json.loads(response.read().decode("utf-8"))
+            models_list = [
+                name
+                for entry in payload.get("models", [])
+                if (name := entry.get("name"))
+            ]
+            models = set(models_list)
             result["reachable"] = True
-            models = {entry.get("name") for entry in payload.get("models", [])}
+            result["available_models"] = models_list[:20]
             result["model_available"] = self.model in models
+            if not result["model_available"]:
+                qwen_matches = [m for m in models_list if "qwen" in m.lower()]
+                if qwen_matches:
+                    sample = ", ".join(qwen_matches[:3])
+                    result["action_hint"] = (
+                        f"Configured model {self.model!r} not found locally. "
+                        f"Run 'ollama pull {self.model}' or set RGE_LOCAL_LLM "
+                        f"to an available tag such as: {sample}"
+                    )
+                else:
+                    result["action_hint"] = (
+                        f"Configured model {self.model!r} not found locally. "
+                        f"Run 'ollama pull {self.model}'."
+                    )
         except (OSError, ValueError, urllib.error.URLError):
-            pass
+            result["action_hint"] = (
+                f"Ollama not reachable at {self.base_url}. "
+                "Start the Ollama service and verify OLLAMA_BASE_URL."
+            )
         return result
 
     def _post_generate(self, prompt: str) -> dict[str, Any]:

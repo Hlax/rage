@@ -1,0 +1,62 @@
+{
+  "id": "ticket-058",
+  "title": "Local-first model runtime readiness and escalation policy",
+  "problem": "Ticket-037/038 implemented live Ollama structured tasks and health/smoke gating, but operators lack a single local-first runbook, task-tier assignment table, and escalation policy. model-health reports model_available=false without actionable guidance when the configured tag is missing. No cloud escalation rules are documented.",
+  "evidence": [
+    "agent_reports/2026-06-12_pre-ticket-058_local-model-runtime-readiness-audit.md",
+    "docs/agents/03_MODEL_RUNTIME_SPEC.md",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "rge/cli.py",
+    "rge/llm/ollama_client.py"
+  ],
+  "affected_modules": [
+    "docs/agents/13_MODEL_ESCALATION_POLICY.md",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "docs/agents/03_MODEL_RUNTIME_SPEC.md",
+    "README.md",
+    "AGENTS.md",
+    ".env.example",
+    ".env.smoke.example",
+    "rge/llm/ollama_client.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "docs/agents/13_MODEL_ESCALATION_POLICY.md",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "docs/agents/03_MODEL_RUNTIME_SPEC.md",
+    "README.md",
+    "AGENTS.md",
+    ".env.example",
+    ".env.smoke.example",
+    "rge/llm/ollama_client.py",
+    "rge/cli.py",
+    "tests/unit/test_ollama_health_check.py",
+    "tickets/ticket-058.json",
+    "tickets/ticket-059.json",
+    "agent_reports/2026-06-12_phase-2_ticket-058_local-first-model-runtime.md"
+  ],
+  "acceptance_criteria": [
+    "Operator can follow docs to reach model-health with model_available=true (pull or alias paths documented).",
+    "Escalation policy states mock default for CI/tests; local Ollama for real research; cloud disabled until future ticket.",
+    "Task tier table maps human intent to current modules and marks gaps as future local tasks.",
+    "model-health JSON includes configured_model, available_models sample, and action_hint when model missing.",
+    "Golden tests and CI remain mock-only; no OpenAI/OpenRouter code added.",
+    "Models never write accepted records / never shell/Git section matches 10_SAFETY_MODEL.md."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock RGE_ALLOW_LIVE_LLM=0 python -m pytest -q",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site",
+    "RGE_LLM_MODE=mock python -m rge.modules.operator_loop --mode execute-safe"
+  ],
+  "non_goals": [
+    "Do not implement OpenAI or OpenRouter adapters.",
+    "Do not run live smoke tests unless explicitly approved.",
+    "Do not add API keys or commit .env secrets.",
+    "Do not make live LLM mode the default.",
+    "Do not wire cloud escalation gates in Python (ticket-059+)."
+  ],
+  "risk_level": "low-medium",
+  "rollback_plan": "Revert docs and model-health hint fields; no schema or export changes.",
+  "status": "done"
+}

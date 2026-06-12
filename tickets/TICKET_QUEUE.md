@@ -89,6 +89,14 @@ superseded
 | 55 | ticket-055 | done | Export snapshot manifest and scratch history for operator review | `phase-2/ticket-055-export-snapshot-history` | `agent_reports/2026-06-12_phase-2_ticket-055_export-snapshot-history.md` |
 | 56 | ticket-056 | done | Windows-safe npm subprocess for operator execute-safe | `phase-2/ticket-056-windows-npm-subprocess` | `agent_reports/2026-06-12_phase-2_ticket-056_windows-npm-subprocess.md` |
 | 57 | ticket-057 | done | Windows subprocess UTF-8 decode for operator/verify npm capture | `phase-2/ticket-057-windows-subprocess-utf8-decode` | `agent_reports/2026-06-12_phase-2_ticket-057_windows-subprocess-utf8-decode.md` |
+| 58 | ticket-058 | done | Local-first model runtime readiness and escalation policy | `phase-2/ticket-058-local-first-model-runtime` | `agent_reports/2026-06-12_phase-2_ticket-058_local-first-model-runtime.md` |
+| 59 | ticket-059 | proposed | OpenAI opt-in cloud adapter (placeholder — not implemented) | | |
+
+## Queue Notes (2026-06-12, ticket-058 agent)
+
+- Pre-ticket-058 audit: PARTIAL — human completed `ollama pull qwen2.5:7b`; model-health now `model_available: true`.
+- ticket-058 adds `13_MODEL_ESCALATION_POLICY.md`, runbook updates, model-health hints (`configured_model`, `available_models`, `action_hint`).
+- OpenAI/OpenRouter deferred; ticket-059 seeded as proposed placeholder only.
 
 ## Queue Notes (2026-06-12, ticket-057 agent)
 
@@ -536,7 +544,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-(none — seed next Post-Phase-2 ticket after human review)
+(none — ticket-059 proposed; promote when ready)
 ```
 
 ## Queue Rules

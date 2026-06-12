@@ -34,11 +34,19 @@ What is **real and executable today**:
 
 What is **mock or fixture-only**:
 
-- All LLM steps use `RGE_LLM_MODE=mock` and deterministic fixtures under `fixtures/`
-- Pipeline modules force mock mode even if `.env` sets `ollama`
-- `OllamaModelClient` structured tasks are not implemented (`OllamaNotAvailableInPhase0`)
+- Golden tests, CI, and `research verify` always use `RGE_LLM_MODE=mock`
+- Fixture-mode orchestration forces mock regardless of `.env` settings
 - Live discovery (`research run` without `--fixture-mode`) returns `not_implemented`
-- No OpenAI, OpenRouter, Anthropic, Gemini, or Vertex wiring
+- Cloud providers (OpenAI, OpenRouter, Anthropic, Gemini, Vertex) are **not wired**
+
+What requires **explicit live opt-in** (local Ollama only):
+
+- Four pipeline structured tasks: claim extraction, concept linking, relationship
+  building, contradiction detection (ticket-037)
+- Requires `RGE_LLM_MODE=ollama` **and** `RGE_ALLOW_LIVE_LLM=1`
+- Run `python -m rge.cli model-health` before live pipeline work
+
+See `docs/agents/13_MODEL_ESCALATION_POLICY.md` for mode profiles and task tiers.
 
 Phase 2 work (live Ollama, UI polish, deployment) is tracked in `agent_reports/2026-06-12_phase-2_ticket-roadmap.md`.
 
@@ -149,11 +157,31 @@ Use CLI flags to override paths for tests: `--db`, `--output-dir`, `--export-dir
 
 | Mode | Status |
 |---|---|
-| `RGE_LLM_MODE=mock` | **Default for tests and fixture runs.** Deterministic fixtures. |
-| `RGE_LLM_MODE=ollama` | Config only. Structured tasks fail closed; only `health_check()` may touch the network when explicitly invoked. |
-| Cloud providers | **Not wired.** No OpenAI/OpenRouter/Gemini/Vertex code paths. |
+| `RGE_LLM_MODE=mock` | **Default for tests, CI, and fixture runs.** Deterministic fixtures. |
+| `RGE_LLM_MODE=ollama` + `RGE_ALLOW_LIVE_LLM=1` | Local research on operator machine. Four pipeline structured tasks live; Python validates all writes. |
+| Cloud providers | **Not wired.** OpenAI/OpenRouter deferred to ticket-059+. |
 
-Copy `.env.example` to gitignored `.env.local` for daily settings. See `docs/agents/12_RUNTIME_CONFIG.md` for the full variable reference.
+**Local research env** (copy to gitignored `.env.local` or set in shell):
+
+```powershell
+$env:RGE_LLM_MODE = "ollama"
+$env:RGE_ALLOW_LIVE_LLM = "1"
+$env:OLLAMA_BASE_URL = "http://127.0.0.1:11434"
+$env:RGE_LOCAL_LLM = "qwen2.5:7b"
+python -m rge.cli model-health
+```
+
+**Safe verification env** (no Ollama required):
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+$env:RGE_ALLOW_LIVE_LLM = "0"
+python -m rge.cli verify --skip-site
+```
+
+Copy `.env.example` to gitignored `.env.local` for daily settings. Full policy:
+`docs/agents/13_MODEL_ESCALATION_POLICY.md`. Variable reference:
+`docs/agents/12_RUNTIME_CONFIG.md`.
 
 **Never commit** `.env`, `.env.local`, `.env.smoke.local`, API keys, tokens, or machine-specific paths.
 
@@ -197,6 +225,7 @@ Implementation follows `docs/agents/` in the priority order defined by `AGENTS.m
 
 Key operator docs:
 
+- Model escalation policy: `docs/agents/13_MODEL_ESCALATION_POLICY.md`
 - Runtime config: `docs/agents/12_RUNTIME_CONFIG.md`
 - Safety model: `docs/agents/10_SAFETY_MODEL.md`
 - Golden tests: `docs/agents/00_GOLDEN_TESTS.md`
