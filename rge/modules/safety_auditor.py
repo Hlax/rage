@@ -402,6 +402,46 @@ def _audit_live_smoke_policy(root: Path) -> tuple[list[str], list[str]]:
     return checked, blocked
 
 
+def _audit_live_probe_scratch_policy(root: Path) -> tuple[list[str], list[str]]:
+    """Verify isolated scratch persistence is explicit and not export-wired."""
+    checked: list[str] = []
+    blocked: list[str] = []
+    module = root / "rge" / "modules" / "live_probe_scratch.py"
+    if not module.is_file():
+        blocked.append("missing live probe scratch module: rge/modules/live_probe_scratch.py")
+        return checked, blocked
+    checked.append("rge/modules/live_probe_scratch.py")
+    source = module.read_text(encoding="utf-8")
+    if "confirm_review" not in source:
+        blocked.append("live_probe_scratch missing confirm_review gate")
+    if "LIVE_PROBE_SCRATCH_DB_PATH" not in source:
+        blocked.append("live_probe_scratch missing dedicated scratch DB path constant")
+    if "card_exporter" in source:
+        blocked.append("live_probe_scratch must not import card_exporter")
+
+    exporter = root / "rge" / "modules" / "card_exporter.py"
+    if exporter.is_file():
+        exporter_source = exporter.read_text(encoding="utf-8")
+        if "live_probe_scratch" in exporter_source:
+            blocked.append("card_exporter must not reference live_probe_scratch")
+
+    live_probe = root / "rge" / "modules" / "live_probe.py"
+    if live_probe.is_file():
+        live_probe_source = live_probe.read_text(encoding="utf-8")
+        if "live_probe_scratch" in live_probe_source:
+            blocked.append("live_probe must not auto-call scratch persistence")
+
+    cli_path = root / "rge" / "cli.py"
+    if cli_path.is_file():
+        cli_source = cli_path.read_text(encoding="utf-8")
+        if (
+            "probe-persist-reviewed-report" not in cli_source
+            or "_cmd_probe_persist_reviewed_report" not in cli_source
+        ):
+            blocked.append("missing probe-persist-reviewed-report command in rge/cli.py")
+    return checked, blocked
+
+
 def _audit_ci_golden_gate_policy(root: Path) -> tuple[list[str], list[str]]:
     """Verify CI golden gate workflow and principal audit command evidence."""
     checked = [
@@ -460,6 +500,7 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             "full_mvp_run",
             "live_llm_policy",
             "live_smoke_policy",
+            "live_probe_scratch_policy",
             "ci_golden_gate_policy",
         ]
     else:
@@ -507,6 +548,10 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             blocked_reasons.extend(blocked)
         elif check == "live_smoke_policy":
             files, blocked = _audit_live_smoke_policy(project_root)
+            checked_files.extend(files)
+            blocked_reasons.extend(blocked)
+        elif check == "live_probe_scratch_policy":
+            files, blocked = _audit_live_probe_scratch_policy(project_root)
             checked_files.extend(files)
             blocked_reasons.extend(blocked)
         elif check == "ci_golden_gate_policy":

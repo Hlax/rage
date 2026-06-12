@@ -1,0 +1,55 @@
+{
+  "id": "ticket-068",
+  "title": "Scratch DB persistence for reviewed live mini-run reports",
+  "problem": "Tickets 065-067 proved report-only live mini-run and suite repeatability, but operators cannot accumulate reviewed probe evidence locally without re-reading gitignored JSON files. An isolated scratch SQLite path is needed for explicit operator-reviewed metadata only.",
+  "evidence": [
+    "agent_reports/2026-06-12_principal-audit-post-ticket-067.md",
+    "agent_reports/2026-06-12_pre-ticket-068_scratch-db-reviewed-live-probe-persistence.md",
+    "agent_reports/2026-06-12_phase-2_ticket-067_multi-fixture-prompt-calibration.md",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "affected_modules": [
+    "rge/modules/live_probe_scratch.py",
+    "rge/db/live_probe_scratch_schema.sql",
+    "rge/cli.py",
+    "rge/modules/safety_auditor.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "expected_files": [
+    "rge/modules/live_probe_scratch.py",
+    "rge/db/live_probe_scratch_schema.sql",
+    "rge/cli.py",
+    "rge/modules/safety_auditor.py",
+    "tests/fixtures/probes/reviewed_mini_run_report_sample.json",
+    "tests/unit/test_live_probe_scratch_persistence.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "tickets/ticket-068.json",
+    "agent_reports/2026-06-12_phase-2_ticket-068_scratch-db-reviewed-live-probe-persistence.md"
+  ],
+  "acceptance_criteria": [
+    "probe-persist-reviewed-report requires --confirm-review and writes only to scratch DB.",
+    "Default scratch path is data/db/live_probe_scratch.sqlite separate from creative_research.sqlite.",
+    "Ordinary probe-mini-run and probe-mini-run-suite do not write any DB by default.",
+    "Persisted rows include stage counts, floors_met, fixture_source, contradiction_input_mode, review timestamp.",
+    "Invalid or malformed report JSON fails closed with clear errors.",
+    "Scratch records are not accepted claims, relationships, or public export inputs.",
+    "Safety audit and golden/mock tests pass."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_live_probe_scratch_persistence.py -q",
+    "pytest tests/golden -q",
+    "pytest -q",
+    "python -m rge.modules.safety_auditor --audit full",
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-069"
+  ],
+  "non_goals": [
+    "Do not fix followup contradiction suite gap.",
+    "Do not write to default creative_research.sqlite.",
+    "Do not add public export from scratch DB.",
+    "Do not auto-persist on mini-run without operator review.",
+    "Do not add OpenAI or Qwen ticket authority."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert scratch module, CLI, schema, tests, docs; delete local scratch sqlite file.",
+  "status": "done"
+}

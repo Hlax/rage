@@ -210,6 +210,27 @@ Include per run:
 
 Do **not** commit `data/reports/live_probes/*.json`.
 
+### Scratch DB (operator-reviewed metadata only)
+
+After reviewing a mini-run or suite report locally, optionally persist **sanitized
+metadata** to an isolated scratch SQLite file (not the accepted graph DB):
+
+```powershell
+python -m rge.cli probe-persist-reviewed-report `
+  --report data/reports/live_probes/probe_mini_run_<UTC>.json `
+  --confirm-review `
+  --note "reviewed ok for evidence log"
+```
+
+Default scratch path: `data/db/live_probe_scratch.sqlite` (gitignored under `data/`).
+
+**Rules:**
+
+- `--confirm-review` is **required** — fail closed without operator confirmation
+- Mini-run / suite commands **never** write scratch DB automatically
+- Scratch rows are metadata only (counts, modes, diagnostics summary) — not accepted claims
+- No public export reads scratch DB; no Qwen/model authority over persist
+
 ### Who does what
 
 | Role | Responsibility |

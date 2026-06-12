@@ -99,6 +99,21 @@ superseded
 | 65 | ticket-065 | done | Report-only local live mini-run chain | `phase-2/ticket-065-local-live-mini-run-chain` | `agent_reports/2026-06-12_phase-2_ticket-065_local-live-mini-run-chain.md` |
 | 66 | ticket-066 | done | Multi-fixture local live mini-run repeatability | `phase-2/ticket-066-multi-fixture-mini-run-repeatability` | `agent_reports/2026-06-12_phase-2_ticket-066_multi-fixture-mini-run-repeatability.md` |
 | 67 | ticket-067 | done | Multi-fixture prompt calibration for local live mini-run suite | `phase-2/ticket-067-multi-fixture-prompt-calibration` | `agent_reports/2026-06-12_phase-2_ticket-067_multi-fixture-prompt-calibration.md` |
+| 68 | ticket-068 | done | Scratch DB persistence for reviewed live mini-run reports | `phase-2/ticket-068-scratch-db-reviewed-live-probe-persistence` | `agent_reports/2026-06-12_phase-2_ticket-068_scratch-db-reviewed-live-probe-persistence.md` |
+
+## Queue Notes (2026-06-12, ticket-068 agent)
+
+- Adds `probe-persist-reviewed-report --confirm-review` → `data/db/live_probe_scratch.sqlite`.
+- Sanitized metadata only; mini-run/suite remain report-only by default.
+- Safety auditor `live_probe_scratch_policy` check added.
+- ticket-059 OpenAI remains deferred.
+
+## Queue Notes (2026-06-12, ticket-068 seed)
+
+- Pre-ticket audit GO: `agent_reports/2026-06-12_pre-ticket-068_scratch-db-reviewed-live-probe-persistence.md`.
+- Adds explicit `probe-persist-reviewed-report --confirm-review` to isolated scratch SQLite.
+- No default DB, no public export, no auto-persist on mini-run.
+- ticket-059 OpenAI remains deferred.
 
 ## Queue Notes (2026-06-12, ticket-067 agent)
 

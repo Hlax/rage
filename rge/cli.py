@@ -992,6 +992,41 @@ def _cmd_probe_mini_run_suite(args: argparse.Namespace) -> int:
     )
 
 
+def _cmd_probe_persist_reviewed_report(args: argparse.Namespace) -> int:
+    from rge.modules.live_probe_scratch import (
+        LiveProbeScratchError,
+        LiveProbeScratchValidationError,
+        persist_reviewed_report,
+    )
+
+    try:
+        result = persist_reviewed_report(
+            report_path=Path(args.report),
+            scratch_db=Path(args.scratch_db) if args.scratch_db else None,
+            operator_note=args.note,
+            confirm_review=bool(args.confirm_review),
+            root=_REPO_ROOT,
+        )
+        print(json.dumps(result, indent=2))
+        return 0
+    except LiveProbeScratchValidationError as exc:
+        payload = {
+            "status": "error",
+            "command": "probe-persist-reviewed-report",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 2
+    except LiveProbeScratchError as exc:
+        payload = {
+            "status": "error",
+            "command": "probe-persist-reviewed-report",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+
 def _cmd_verify(args: argparse.Namespace) -> int:
     from rge.modules.verify_runner import run_verification
 
@@ -2134,6 +2169,39 @@ def build_parser() -> argparse.ArgumentParser:
         help="Domain pack for validation (default: creativity).",
     )
     probe_mini_run_suite_parser.set_defaults(func=_cmd_probe_mini_run_suite)
+
+    probe_persist_parser = subparsers.add_parser(
+        "probe-persist-reviewed-report",
+        help="Persist operator-reviewed live probe report metadata to scratch DB.",
+        description=(
+            "Write sanitized metadata from a reviewed live probe mini-run or suite "
+            "report into an isolated scratch SQLite database. Requires "
+            "--confirm-review. Never writes to the default accepted graph DB or "
+            "public exports."
+        ),
+    )
+    probe_persist_parser.add_argument(
+        "--report",
+        required=True,
+        help="Path to a live probe mini-run or suite JSON report under data/reports/live_probes/.",
+    )
+    probe_persist_parser.add_argument(
+        "--scratch-db",
+        help=(
+            "Scratch SQLite path (default: data/db/live_probe_scratch.sqlite). "
+            "Must not equal the default creative_research.sqlite path."
+        ),
+    )
+    probe_persist_parser.add_argument(
+        "--note",
+        help="Optional operator review note (private metadata).",
+    )
+    probe_persist_parser.add_argument(
+        "--confirm-review",
+        action="store_true",
+        help="Required flag confirming the operator reviewed the report before persist.",
+    )
+    probe_persist_parser.set_defaults(func=_cmd_probe_persist_reviewed_report)
 
     verify_parser = subparsers.add_parser(
         "verify",

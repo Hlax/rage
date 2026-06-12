@@ -1,0 +1,44 @@
+{
+  "report_type": "live_probe_mini_run_report",
+  "command": "probe-mini-run",
+  "status": "ok",
+  "created_at": "2026-06-12T22:00:00+00:00",
+  "fixture_source": "fixtures/sources/live_probe_claim_calibration_short.txt",
+  "domain_pack": "creativity",
+  "strict_chain": false,
+  "contradiction_input_mode": "hybrid_overlay",
+  "effective_llm_mode": "ollama",
+  "provider": "ollama",
+  "model": "qwen2.5:7b",
+  "db_writes": false,
+  "public_export": false,
+  "cloud_calls": false,
+  "stages": {
+    "claim_extraction": {
+      "status": "ok",
+      "accepted_count": 1,
+      "rejected_count": 1,
+      "rejected": [
+        {
+          "rejection_reason": "overgeneralized_scope",
+          "validation_diagnostic": "scope must appear verbatim inside claim_text"
+        }
+      ]
+    },
+    "concept_linking": {
+      "status": "ok",
+      "accepted_count": 2,
+      "rejected_count": 0
+    },
+    "relationship_drafting": {
+      "status": "ok",
+      "accepted_count": 1,
+      "rejected_count": 0
+    },
+    "contradiction_detection": {
+      "status": "ok",
+      "accepted_count": 1,
+      "rejected_count": 0
+    }
+  }
+}

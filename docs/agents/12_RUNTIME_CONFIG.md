@@ -195,7 +195,8 @@ both export directories (Golden Test 26 unchanged).
 | Path | Config var | Git | Notes |
 |---|---|---|---|
 | `data/` | none | gitignored | All local runtime output (db, reports, exports, generated tickets) |
-| `data/db/creative_research.sqlite` | CLI `--db` only | gitignored | Default private DB |
+| `data/db/creative_research.sqlite` | CLI `--db` only | gitignored | Default private accepted graph DB |
+| `data/db/live_probe_scratch.sqlite` | `probe-persist-reviewed-report` only | gitignored | Reviewed live probe metadata (not accepted graph) |
 | `data/reports/` | none | gitignored | Run/cluster/theory private reports |
 | `data/exports/` | none | gitignored | Generated export JSON copies |
 | `data/tickets/` | none | gitignored | Generated improvement-ticket artifacts (not the queue) |
