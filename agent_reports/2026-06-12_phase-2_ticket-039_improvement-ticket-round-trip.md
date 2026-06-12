@@ -87,7 +87,9 @@ None.
 
 ## 10. Merge to Main
 
-Placeholder — updated after merge.
+- Merge commit: `96b35e7`
+- Branch: `phase-2/ticket-039-improvement-ticket-round-trip` merged to `main` with `--no-ff`
+- Post-merge pytest on `main`: PASS — 143 passed, 1 deselected
 
 ## 11. Recommended Next Ticket
 
