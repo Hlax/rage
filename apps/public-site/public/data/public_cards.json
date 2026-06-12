@@ -1,16 +1,46 @@
 [
   {
-    "id": "card_placeholder_0001",
-    "type": "claim_card",
-    "title": "Placeholder: public export surface is live",
-    "summary": "This is a Phase 0 placeholder card. Real research cards arrive when the local engine exports public-safe JSON snapshots.",
-    "confidence": "low",
-    "concepts": [],
-    "source_count": 0,
-    "public_caveats": ["Placeholder data only; no research has been exported yet."],
-    "public_source_metadata": [],
-    "related_cards": [],
-    "public_detail_level": "summary",
-    "updated_at": "2026-06-11T00:00:00Z"
+    "id": "card_golden_diversity_001",
+    "type": "cluster_card",
+    "title": "AI assistance and semantic diversity",
+    "summary": "Fixture evidence suggests AI-assisted brainstorming may improve average idea quality while reducing semantic diversity in some short-form writing tasks.",
+    "confidence": "medium",
+    "concepts": ["AI assistance", "semantic diversity", "ideation"],
+    "source_count": 1,
+    "public_caveats": [
+      "Evidence is from short-form creative writing fixtures."
+    ],
+    "public_source_metadata": [
+      {
+        "title": "Creativity AI diversity (fixture)",
+        "year": 2026,
+        "source_type": "fixture"
+      }
+    ],
+    "related_cards": ["card_golden_originality_002"],
+    "public_detail_level": "standard",
+    "updated_at": "2026-06-12T00:00:00Z"
+  },
+  {
+    "id": "card_golden_originality_002",
+    "type": "cluster_card",
+    "title": "AI assistance and creative originality",
+    "summary": "Accepted fixture claims indicate AI assistance can raise output volume while leaving open whether originality gains persist outside controlled ideation tasks.",
+    "confidence": "medium",
+    "concepts": ["AI assistance", "originality", "human control"],
+    "source_count": 1,
+    "public_caveats": [
+      "Fixture-derived synthesis; not a live literature review."
+    ],
+    "public_source_metadata": [
+      {
+        "title": "Creativity AI diversity (fixture)",
+        "year": 2026,
+        "source_type": "fixture"
+      }
+    ],
+    "related_cards": ["card_golden_diversity_001"],
+    "public_detail_level": "standard",
+    "updated_at": "2026-06-12T00:00:00Z"
   }
 ]

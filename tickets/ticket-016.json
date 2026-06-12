@@ -1,0 +1,40 @@
+{
+  "id": "ticket-016",
+  "title": "Add cluster report threshold trigger (Golden Test 13)",
+  "problem": "ticket-015 completes public static rendering, but cluster intelligence reports are not yet generated. Golden Test 13 requires a cluster_report when claim/source/concept thresholds are met.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 13: cluster report triggers when threshold is met.",
+    "docs/agents/08_REPORTING_SPEC.md cluster report requirements.",
+    "agent_reports/2026-06-12_phase-1_ticket-015_public-site-detail-pages.md section 15–16."
+  ],
+  "affected_modules": [
+    "rge/modules/cluster_reporter.py",
+    "rge/db/repositories.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/cluster_reporter.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "tests/golden/test_13_cluster_report.py"
+  ],
+  "acceptance_criteria": [
+    "Deterministic cluster report generation when golden thresholds are met without Ollama.",
+    "Report JSON includes concepts, supporting/contradicting claims, relationships, gaps, and next questions.",
+    "pytest tests/golden/test_13_cluster_report.py passes.",
+    "Existing golden tests still pass (65+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_13_cluster_report.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not implement LangGraph or live web discovery.",
+    "Do not add public write routes."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert branch phase-1/ticket-016-cluster-report.",
+  "status": "proposed"
+}

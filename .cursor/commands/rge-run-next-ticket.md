@@ -54,6 +54,28 @@ ready
 
 **Do not** implement multiple tickets in one run.
 
+## 3.5 Audit gate (mandatory stop)
+
+Before selecting or implementing a ticket, check whether a **principal audit** is required. If the gate is unmet, **stop immediately**: do not create a branch, do not implement, and tell the user to run a principal audit checkpoint first (or produce an audit report in `agent_reports/` if you are the audit agent).
+
+Require a current pre-ticket audit report (`agent_reports/*pre-ticket-*` or explicit user audit command) when **any** of the following is true:
+
+| Milestone | Examples | Why |
+|---|---|---|
+| **Public export** | First or changed `export-public`, `card_exporter`, `public_export_policy` | Public data boundary; fail-closed export must be reviewed |
+| **Public site changes** | `apps/public-site/**`, static JSON consumed by the site | Read-only surface, routing, HTML safety |
+| **Schema migrations** | New/edited `rge/db/migrations/*.sql` | Irreversible graph shape changes |
+| **Live Ollama** | Removing mock-only constraints, live model paths in tests | Non-deterministic / environment-dependent behavior |
+| **Overdue checkpoint** | ≥3 consecutive `done` tickets since last principal audit | Loop outran intended review cadence |
+
+Additional rules:
+
+- If the selected ticket JSON `risk_level` is `medium` or `high` and no pre-ticket audit exists for that ticket ID, **stop**.
+- If the user invoked this command right after a batch of merges without an audit, **stop** and recommend audit before the next implementation.
+- Audits are read-only checkpoints: they may patch runner/docs but must not implement the queued ticket.
+
+Record in the implementation report when an audit gate was satisfied (audit file path + date).
+
 ## 4. Create the implementation branch
 
 Branch name pattern from queue or ticket JSON:
@@ -67,6 +89,8 @@ Example:
 ```bash
 git checkout -b phase-1/ticket-011-mock-contradiction-detection
 ```
+
+Set ticket status to `in_progress` in the JSON only after creating the branch.
 
 ## 5. Implement exactly one ticket
 

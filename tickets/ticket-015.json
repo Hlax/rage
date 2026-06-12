@@ -39,5 +39,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert branch phase-1/ticket-015-public-site-detail-pages.",
-  "status": "proposed"
+  "status": "done"
 }

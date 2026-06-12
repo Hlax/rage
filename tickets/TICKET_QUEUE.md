@@ -41,7 +41,16 @@ superseded
 | 12 | ticket-012 | done | Add mock research queue ranking (Golden Test 9) | `phase-1/ticket-012-mock-research-queue` | `agent_reports/2026-06-11_phase-1_ticket-012_mock-research-queue.md` |
 | 13 | ticket-013 | done | Add research contract drift gating (Golden Test 10) | `phase-1/ticket-013-research-contract-drift` | `agent_reports/2026-06-11_phase-1_ticket-013_research-contract-drift.md` |
 | 14 | ticket-014 | done | Add public card export with safety filtering (Golden Test 11) | `phase-1/ticket-014-public-card-export` | `agent_reports/2026-06-11_phase-1_ticket-014_public-card-export.md` |
-| 15 | ticket-015 | proposed | Add public site card and concept detail pages (Golden Test 12) | | |
+| 15 | ticket-015 | done | Add public site card and concept detail pages (Golden Test 12) | `phase-1/ticket-015-public-site-detail-pages` | `agent_reports/2026-06-12_phase-1_ticket-015_public-site-detail-pages.md` |
+| 16 | ticket-016 | proposed | Add cluster report threshold trigger (Golden Test 13) | | |
+
+## Queue Notes (2026-06-12, ticket-015 agent)
+
+- ticket-015 implemented static card detail (`/cards/[id]`) and concept detail
+  (`/concepts/[slug]`) pages, list-page links, golden export JSON refresh, and
+  Golden Test 12 (6 tests). All 65 golden tests pass; public site builds 11 static pages.
+- Pre-ticket-015 audit report and runner audit-gate patch included in merge.
+- ticket-016 proposes cluster report threshold trigger for Golden Test 13.
 
 ## Queue Notes (2026-06-11, ticket-014 agent)
 
@@ -120,7 +129,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-015 (proposed; awaiting review)
+ticket-016 (proposed; awaiting review)
 ```
 
 ## Queue Rules
