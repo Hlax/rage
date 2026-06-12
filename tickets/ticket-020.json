@@ -36,5 +36,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert branch phase-1/ticket-020-domain-proposal.",
-  "status": "proposed"
+  "status": "done"
 }

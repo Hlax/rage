@@ -201,6 +201,46 @@ def _cmd_generate_ontology_pressure(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_generate_domain_proposal(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import DomainProposalRepository
+    from rge.modules.domain_proposer import generate_domain_proposal
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        output_dir = Path(args.output_dir) if args.output_dir else None
+        result = generate_domain_proposal(
+            conn,
+            domain=args.domain,
+            output_dir=output_dir,
+            pad_golden=not args.no_pad,
+        )
+        payload = {
+            "status": result["status"],
+            "command": "generate-domain-proposal",
+            "domain": args.domain,
+            "proposal_id": result.get("proposal_id"),
+            "proposal_count": DomainProposalRepository(conn).count(),
+            "readiness": result.get("readiness"),
+            "padding": result.get("padding"),
+            "output_path": result.get("output_path"),
+            "report": result.get("report"),
+        }
+        print(json.dumps(payload, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "generate-domain-proposal",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_export_public(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.modules.card_exporter import export_public_cards
@@ -902,6 +942,34 @@ def build_parser() -> argparse.ArgumentParser:
         help="Skip deterministic golden threshold padding (for negative tests).",
     )
     ontology_parser.set_defaults(func=_cmd_generate_ontology_pressure)
+
+    domain_proposal_parser = subparsers.add_parser(
+        "generate-domain-proposal",
+        help="Generate draft domain proposal when strict thresholds are met.",
+        description=(
+            "Evaluate domain proposal thresholds, build a draft subdomain "
+            "proposal, persist it, and write domain_proposal_latest.json."
+        ),
+    )
+    domain_proposal_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Parent domain pack ID for evaluation (default: creativity).",
+    )
+    domain_proposal_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    domain_proposal_parser.add_argument(
+        "--output-dir",
+        help="Optional output directory for domain_proposal_latest.json (for tests).",
+    )
+    domain_proposal_parser.add_argument(
+        "--no-pad",
+        action="store_true",
+        help="Skip deterministic golden threshold padding (for negative tests).",
+    )
+    domain_proposal_parser.set_defaults(func=_cmd_generate_domain_proposal)
 
     export_parser = subparsers.add_parser(
         "export-public",
