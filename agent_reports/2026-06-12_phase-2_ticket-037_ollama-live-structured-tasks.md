@@ -123,7 +123,8 @@ Full safety audit passes including new `live_llm_policy` evidence check. No publ
 
 ## 10. Merge to Main
 
-- Merge commit: `PENDING` (filled after merge)
+- Merge commit: `4e05271`
+- Branch: `phase-2/ticket-037-ollama-live-structured-tasks` merged to `main`; post-merge pytest: 137 passed.
 
 ## 11. Recommended Next Ticket
 
