@@ -90,7 +90,9 @@ Not required: no public export, public site, or write routes changed.
 
 ## 11. Merge to Main
 
-*(Updated after merge.)*
+- Merge commit: `a72ea7b55fa97a6a84db038e0caa9c60b5f07722`
+- Branch: `phase-1/ticket-016-cluster-report` merged to `main` and pushed to `origin/main`.
+- Post-merge pytest on `main`: 69 passed.
 
 ## 12. Recommended Next Ticket
 
