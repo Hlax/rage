@@ -85,9 +85,9 @@ Self-referential: implemented module is the safety audit. Full audit passes on c
 
 ## 11. Merge to Main
 
-- Merge commit: _(pending)_
+- Merge commit: `30d054b1b6203d98f2e687efa0a99927a6336427`
 - Branch: `phase-1/ticket-025-safety-audit-gate` merged to `main` and pushed to `origin/main`.
-- Post-merge pytest on `main`: _(pending)_
+- Post-merge pytest on `main`: 106 passed.
 
 ## 12. Recommended Next Ticket
 
