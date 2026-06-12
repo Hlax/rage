@@ -28,3 +28,15 @@ def test_ollama_health_check_does_not_raise() -> None:
     assert report["mode"] == "ollama"
     assert "reachable" in report
     assert "model_available" in report
+
+
+def test_live_probe_extract_claims_on_fixture_chunk() -> None:
+    from rge.modules.live_probe import run_probe_extract_claims
+
+    report = run_probe_extract_claims()
+    assert report["status"] == "ok"
+    assert report["provider"] == "ollama"
+    assert report["accepted_count"] + report["rejected_count"] > 0
+    assert report["db_writes"] is False
+    report_path = report["report_path"]
+    assert report_path.startswith("data/reports/live_probes/")

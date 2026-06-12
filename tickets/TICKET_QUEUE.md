@@ -91,6 +91,12 @@ superseded
 | 57 | ticket-057 | done | Windows subprocess UTF-8 decode for operator/verify npm capture | `phase-2/ticket-057-windows-subprocess-utf8-decode` | `agent_reports/2026-06-12_phase-2_ticket-057_windows-subprocess-utf8-decode.md` |
 | 58 | ticket-058 | done | Local-first model runtime readiness and escalation policy | `phase-2/ticket-058-local-first-model-runtime` | `agent_reports/2026-06-12_phase-2_ticket-058_local-first-model-runtime.md` |
 | 59 | ticket-059 | proposed | OpenAI opt-in cloud adapter (placeholder — not implemented) | | |
+| 60 | ticket-060 | done | Safe local live claim-extraction probe CLI | `phase-2/ticket-060-safe-local-live-claim-probe` | `agent_reports/2026-06-12_phase-2_ticket-060_safe-local-live-claim-probe.md` |
+
+## Queue Notes (2026-06-12, ticket-060 agent)
+
+- Pre-ticket-059 audit GO: seed local live probe; ticket-059 stays OpenAI placeholder.
+- ticket-060 adds `probe-extract-claims` (report-only, no default DB), `rge/modules/live_probe.py`, unit + live_smoke tests.
 
 ## Queue Notes (2026-06-12, ticket-058 agent)
 
@@ -544,7 +550,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-(none — ticket-059 proposed; promote when ready)
+(none — ticket-059 proposed OpenAI placeholder; defer until local probes expand)
 ```
 
 ## Queue Rules

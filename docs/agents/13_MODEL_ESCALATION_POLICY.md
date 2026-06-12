@@ -173,7 +173,16 @@ documents an exception:
    `RGE_ALLOW_LIVE_LLM=1`.
 7. After any export change, run `python -m rge.modules.safety_auditor --audit full`.
 
-Full variable reference: `12_RUNTIME_CONFIG.md`.
+### Live structured probe (ticket-060)
+
+Outside CI, with live opt-in set and Ollama ready:
+
+```powershell
+python -m rge.cli probe-extract-claims
+```
+
+Writes a report-only JSON artifact under `data/reports/live_probes/`. Does **not**
+write to the default SQLite database or public exports. See `12_RUNTIME_CONFIG.md`.
 
 ## Related documents
 

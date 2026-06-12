@@ -114,6 +114,22 @@ python -m rge.cli model-health
 Copy `.env.smoke.example` → `.env.smoke.local` for a committed smoke profile
 template. Cloud mode is **not implemented** (future ticket-059+).
 
+## Live structured probe (ticket-060)
+
+Report-only live claim extraction (no default DB writes):
+
+```powershell
+$env:RGE_LLM_MODE = "ollama"
+$env:RGE_ALLOW_LIVE_LLM = "1"
+python -m rge.cli model-health
+python -m rge.cli probe-extract-claims
+```
+
+Optional fixture override: `--fixture-source fixtures/sources/creativity_ai_diversity_short.txt`
+
+Reports land in gitignored `data/reports/live_probes/`. Excluded from CI/golden.
+Optional smoke: `python -m pytest -m live_smoke tests/smoke` (requires Ollama).
+
 ## Live-mode public export publish gate
 
 When effective LLM mode is `ollama` (`RGE_LLM_MODE=ollama` and

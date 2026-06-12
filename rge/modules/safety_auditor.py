@@ -387,6 +387,13 @@ def _audit_live_smoke_policy(root: Path) -> tuple[list[str], list[str]]:
         source = cli_path.read_text(encoding="utf-8")
         if "model-health" not in source or "_cmd_model_health" not in source:
             blocked.append("missing model-health command in rge/cli.py")
+        if "probe-extract-claims" not in source or "_cmd_probe_extract_claims" not in source:
+            blocked.append("missing probe-extract-claims command in rge/cli.py")
+    live_probe = root / "rge" / "modules" / "live_probe.py"
+    if live_probe.is_file():
+        checked.append("rge/modules/live_probe.py")
+    else:
+        blocked.append("missing live probe module: rge/modules/live_probe.py")
     exporter = root / "rge" / "modules" / "card_exporter.py"
     if exporter.is_file():
         source = exporter.read_text(encoding="utf-8")

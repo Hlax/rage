@@ -833,6 +833,40 @@ def _cmd_model_health(_args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_probe_extract_claims(args: argparse.Namespace) -> int:
+    from rge.modules.live_probe import (
+        LiveProbeError,
+        LiveProbeGateError,
+        run_probe_extract_claims,
+    )
+
+    fixture = Path(args.fixture_source) if args.fixture_source else None
+    try:
+        report = run_probe_extract_claims(
+            fixture_source=fixture,
+            domain_pack=args.domain,
+            root=_REPO_ROOT,
+        )
+        print(json.dumps(report, indent=2))
+        return 0
+    except LiveProbeGateError as exc:
+        payload = {
+            "status": "error",
+            "command": "probe-extract-claims",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 2
+    except LiveProbeError as exc:
+        payload = {
+            "status": "error",
+            "command": "probe-extract-claims",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+
 def _cmd_verify(args: argparse.Namespace) -> int:
     from rge.modules.verify_runner import run_verification
 
@@ -1250,10 +1284,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     extract_parser = subparsers.add_parser(
         "extract-claims",
-        help="Extract scoped claims from an ingested source (mock LLM).",
+        help="Extract scoped claims from an ingested source (mock or live).",
         description=(
-            "Extract candidate claims via the mock model client, validate them "
-            "deterministically, and persist accepted/rejected claim records."
+            "Extract candidate claims via the configured model client, validate "
+            "them deterministically, and persist accepted/rejected claim records. "
+            "Uses mock fixtures by default; live Ollama requires RGE_ALLOW_LIVE_LLM=1. "
+            "For a no-DB live probe, use probe-extract-claims instead."
         ),
     )
     extract_parser.add_argument(
@@ -1714,6 +1750,31 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     model_health_parser.set_defaults(func=_cmd_model_health)
+
+    probe_extract_parser = subparsers.add_parser(
+        "probe-extract-claims",
+        help="Live Ollama claim-extraction probe (report-only, no DB writes).",
+        description=(
+            "Run one live structured claim-extraction task on a fixture chunk. "
+            "Requires RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1, plus a "
+            "reachable Ollama with the configured model available. Writes a JSON "
+            "report under data/reports/live_probes/ only; never touches the "
+            "default SQLite database or public exports."
+        ),
+    )
+    probe_extract_parser.add_argument(
+        "--fixture-source",
+        help=(
+            "Fixture text file (default: "
+            "fixtures/sources/creativity_ai_diversity_short.txt)."
+        ),
+    )
+    probe_extract_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack for validation (default: creativity).",
+    )
+    probe_extract_parser.set_defaults(func=_cmd_probe_extract_claims)
 
     verify_parser = subparsers.add_parser(
         "verify",

@@ -1,0 +1,57 @@
+{
+  "id": "ticket-060",
+  "title": "Safe local live claim-extraction probe CLI",
+  "problem": "Ticket-058 proved local Ollama readiness and ticket-059 audit found live structured tasks wired but no fail-closed operator CLI. extract-claims persists to the default SQLite path and is easy to mis-run. Operators need a report-only live probe outside CI.",
+  "evidence": [
+    "agent_reports/2026-06-12_pre-ticket-059_local-live-structured-task-probe.md",
+    "docs/agents/13_MODEL_ESCALATION_POLICY.md",
+    "rge/modules/claim_extractor.py",
+    "rge/cli.py"
+  ],
+  "affected_modules": [
+    "rge/modules/live_probe.py",
+    "rge/cli.py",
+    "tests/unit/test_live_probe_cli.py",
+    "tests/smoke/test_live_ollama_smoke.py",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "docs/agents/13_MODEL_ESCALATION_POLICY.md",
+    "rge/modules/safety_auditor.py"
+  ],
+  "expected_files": [
+    "rge/modules/live_probe.py",
+    "rge/cli.py",
+    "tests/unit/test_live_probe_cli.py",
+    "tests/smoke/test_live_ollama_smoke.py",
+    "tests/golden/test_00_scaffold.py",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "docs/agents/13_MODEL_ESCALATION_POLICY.md",
+    "rge/modules/safety_auditor.py",
+    "tickets/ticket-060.json",
+    "agent_reports/2026-06-12_phase-2_ticket-060_safe-local-live-claim-probe.md"
+  ],
+  "acceptance_criteria": [
+    "probe-extract-claims requires RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1.",
+    "Command fails closed when Ollama unreachable or model unavailable.",
+    "Live claim extraction on fixture chunk validates via Python; report written to data/reports/live_probes/.",
+    "No write to default SQLite DB; no public export.",
+    "Unit tests mock-only; live_smoke structured test excluded from default pytest.",
+    "Golden/CI remain mock-only."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock RGE_ALLOW_LIVE_LLM=0 python -m pytest tests/unit/test_live_probe_cli.py -q",
+    "RGE_LLM_MODE=mock python -m pytest -q",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site",
+    "Manual: RGE_LLM_MODE=ollama RGE_ALLOW_LIVE_LLM=1 python -m rge.cli probe-extract-claims"
+  ],
+  "non_goals": [
+    "Do not implement OpenAI or OpenRouter.",
+    "Do not persist to default DB or public exports.",
+    "Do not run live probe in CI/golden.",
+    "Do not add API keys.",
+    "Do not implement full live research orchestration."
+  ],
+  "risk_level": "low-medium",
+  "rollback_plan": "Remove probe subcommand and live_probe module; revert docs and smoke extension.",
+  "status": "done"
+}
