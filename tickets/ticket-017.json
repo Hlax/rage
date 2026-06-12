@@ -1,0 +1,41 @@
+{
+  "id": "ticket-017",
+  "title": "Add mock theory generator (Golden Test 15)",
+  "problem": "ticket-016 produces cluster reports with balanced evidence packets, but candidate theories are not yet generated. Golden Test 15 requires theory proposals with caveats, not facts.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 15: theory generator creates candidate theories, not facts.",
+    "docs/agents/08_REPORTING_SPEC.md section 13: theory candidate reports.",
+    "agent_reports/2026-06-12_phase-1_ticket-016_cluster-report.md sections 11–13."
+  ],
+  "affected_modules": [
+    "rge/modules/theory_generator.py",
+    "rge/db/repositories.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/theory_generator.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "tests/golden/test_15_theory_generator.py"
+  ],
+  "acceptance_criteria": [
+    "Deterministic candidate theory generation from golden cluster evidence without Ollama.",
+    "Theory JSON includes supporting claims, contradicting/qualifying claims, boundary conditions, weakening evidence, and next questions.",
+    "Theories stored as candidates, never as accepted facts.",
+    "pytest tests/golden/test_15_theory_generator.py passes.",
+    "Existing golden tests still pass (69+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_15_theory_generator.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not implement LangGraph or live web discovery.",
+    "Do not add public write routes."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert branch phase-1/ticket-017-theory-generator.",
+  "status": "proposed"
+}

@@ -42,7 +42,17 @@ superseded
 | 13 | ticket-013 | done | Add research contract drift gating (Golden Test 10) | `phase-1/ticket-013-research-contract-drift` | `agent_reports/2026-06-11_phase-1_ticket-013_research-contract-drift.md` |
 | 14 | ticket-014 | done | Add public card export with safety filtering (Golden Test 11) | `phase-1/ticket-014-public-card-export` | `agent_reports/2026-06-11_phase-1_ticket-014_public-card-export.md` |
 | 15 | ticket-015 | done | Add public site card and concept detail pages (Golden Test 12) | `phase-1/ticket-015-public-site-detail-pages` | `agent_reports/2026-06-12_phase-1_ticket-015_public-site-detail-pages.md` |
-| 16 | ticket-016 | proposed | Add cluster report threshold trigger (Golden Test 13) | | |
+| 16 | ticket-016 | done | Add cluster report threshold trigger (Golden Test 13) | `phase-1/ticket-016-cluster-report` | `agent_reports/2026-06-12_phase-1_ticket-016_cluster-report.md` |
+| 17 | ticket-017 | proposed | Add mock theory generator (Golden Test 15) | | |
+
+## Queue Notes (2026-06-12, ticket-016 agent)
+
+- ticket-016 implemented `generate-cluster-report` with migration `0004`,
+  deterministic golden threshold padding (15 claims / 3 sources), balanced
+  evidence packet assembly, and Golden Test 13 (4 tests). All 69 golden tests
+  pass without Ollama.
+- Pre-ticket-016 audit report included in merge.
+- ticket-017 proposes mock theory generator for Golden Test 15.
 
 ## Queue Notes (2026-06-12, ticket-015 agent)
 
@@ -129,7 +139,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-016 (proposed; awaiting review)
+ticket-017 (proposed; awaiting review)
 ```
 
 ## Queue Rules

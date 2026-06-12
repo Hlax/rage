@@ -29,6 +29,7 @@ EXPECTED_SCHEMA_TABLES = [
     "research_runs",
     "node_reports",
     "run_reports",
+    "cluster_reports",
     "public_cards",
     "improvement_tickets",
     "safety_audits",
@@ -91,6 +92,7 @@ def test_cli_top_level_help() -> None:
         "detect-contradictions",
         "queue-sources",
         "validate-contract",
+        "generate-cluster-report",
         "export-public",
         "verify",
     ):

@@ -1008,6 +1008,122 @@ class ScoreEventRepository:
         ).fetchall()
         return [dict(row) for row in rows]
 
+    def list_all(self) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """
+            SELECT id, entity_type, entity_id, old_score, new_score,
+                   triggering_claim_id, triggering_source_id, reason,
+                   formula_version, created_at
+            FROM score_events
+            ORDER BY created_at DESC
+            """
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def make_cluster_report_id(cluster_id: str, cluster_label: str) -> str:
+    digest = sha256_hex(f"{cluster_id}:{cluster_label}")
+    return f"crpt_{digest[:16]}"
+
+
+@dataclass(frozen=True)
+class ClusterReportRecord:
+    id: str
+    run_id: str | None
+    cluster_label: str
+    included_concepts_json: str
+    evidence_packet_json: str
+    report_json: str
+    prose_summary: str | None
+    created_at: str
+
+
+class ClusterReportRepository:
+    """Persist and read ``cluster_reports`` rows."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def get_by_id(self, report_id: str) -> ClusterReportRecord | None:
+        row = self._conn.execute(
+            """
+            SELECT id, run_id, cluster_label, included_concepts_json,
+                   evidence_packet_json, report_json, prose_summary, created_at
+            FROM cluster_reports
+            WHERE id = ?
+            """,
+            (report_id,),
+        ).fetchone()
+        return _row_to_cluster_report(row) if row else None
+
+    def get_latest_for_label(self, cluster_label: str) -> ClusterReportRecord | None:
+        row = self._conn.execute(
+            """
+            SELECT id, run_id, cluster_label, included_concepts_json,
+                   evidence_packet_json, report_json, prose_summary, created_at
+            FROM cluster_reports
+            WHERE cluster_label = ?
+            ORDER BY created_at DESC
+            LIMIT 1
+            """,
+            (cluster_label,),
+        ).fetchone()
+        return _row_to_cluster_report(row) if row else None
+
+    def count(self) -> int:
+        row = self._conn.execute("SELECT COUNT(*) FROM cluster_reports").fetchone()
+        return int(row[0]) if row else 0
+
+    def insert(
+        self,
+        *,
+        cluster_id: str,
+        cluster_label: str,
+        included_concepts: list[str],
+        evidence_packet: dict[str, Any],
+        report: dict[str, Any],
+        prose_summary: str | None = None,
+        run_id: str | None = None,
+    ) -> ClusterReportRecord:
+        now = utc_now_iso()
+        report_id = make_cluster_report_id(cluster_id, cluster_label)
+        self._conn.execute(
+            """
+            INSERT INTO cluster_reports (
+                id, run_id, cluster_label, included_concepts_json,
+                evidence_packet_json, report_json, prose_summary, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO NOTHING
+            """,
+            (
+                report_id,
+                run_id,
+                cluster_label,
+                json.dumps(included_concepts),
+                json.dumps(evidence_packet),
+                json.dumps(report),
+                prose_summary,
+                now,
+            ),
+        )
+        self._conn.commit()
+        record = self.get_by_id(report_id)
+        assert record is not None
+        return record
+
+
+def _row_to_cluster_report(row: sqlite3.Row) -> ClusterReportRecord:
+    return ClusterReportRecord(
+        id=row["id"],
+        run_id=row["run_id"],
+        cluster_label=row["cluster_label"],
+        included_concepts_json=row["included_concepts_json"],
+        evidence_packet_json=row["evidence_packet_json"],
+        report_json=row["report_json"],
+        prose_summary=row["prose_summary"],
+        created_at=row["created_at"],
+    )
+
 
 def persist_relationship_score_update(
     conn: sqlite3.Connection,
