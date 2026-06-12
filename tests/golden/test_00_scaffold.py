@@ -103,6 +103,7 @@ def test_cli_top_level_help() -> None:
         "generate-run-report",
         "generate-improvement-tickets",
         "export-public",
+        "model-health",
         "verify",
     ):
         assert command in help_text

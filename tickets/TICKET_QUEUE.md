@@ -69,7 +69,16 @@ superseded
 | 35 | ticket-035 | done | Refresh README for Phase 1 reality and operator quickstart | `phase-2/ticket-035-readme-operator-refresh` | `agent_reports/2026-06-12_phase-2_ticket-035_readme-operator-refresh.md` |
 | 36 | ticket-036 | done | Public-site presentation polish and about page (no data surface changes) | `phase-2/ticket-036-public-site-polish` | `agent_reports/2026-06-12_phase-2_ticket-036_public-site-polish.md` |
 | 37 | ticket-037 | done | Implement Ollama structured tasks behind explicit live-mode opt-in | `phase-2/ticket-037-ollama-live-structured-tasks` | `agent_reports/2026-06-12_phase-2_ticket-037_ollama-live-structured-tasks.md` |
-| 38 | ticket-038 | proposed | Gate live smoke tests behind env opt-in and add model-health command | | |
+| 38 | ticket-038 | done | Gate live smoke tests behind env opt-in and add model-health command | `phase-2/ticket-038-live-smoke-gating` | `agent_reports/2026-06-12_phase-2_ticket-038_live-smoke-gating.md` |
+| 39 | ticket-039 | proposed | Validate improvement-ticket round-trip into the builder queue with review gate | | |
+
+## Queue Notes (2026-06-12, ticket-038 agent)
+
+- ticket-038 added `live_smoke` pytest marker excluded from default runs,
+  `research model-health` CLI, live-mode `export-public --publish` guard, and
+  safety audit `live_smoke_policy` evidence. 129 golden + 140 total pytest pass;
+  1 smoke test deselected. Safety audit passes.
+- ticket-039 (improvement-ticket promotion round-trip) seeded as next proposed.
 
 ## Queue Notes (2026-06-12, ticket-037 agent)
 
@@ -374,7 +383,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-038 proposed (live smoke gating + model-health CLI)
+ticket-039 proposed (improvement-ticket promotion round-trip with review gate)
 ```
 
 ## Queue Rules

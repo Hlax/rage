@@ -274,6 +274,35 @@ def _audit_live_llm_policy(root: Path) -> tuple[list[str], list[str]]:
     return checked, blocked
 
 
+def _audit_live_smoke_policy(root: Path) -> tuple[list[str], list[str]]:
+    """Verify live smoke gating and model-health CLI evidence exist."""
+    checked = [
+        "tests/smoke/test_live_ollama_smoke.py",
+        "pyproject.toml",
+        "rge/cli.py",
+    ]
+    blocked: list[str] = []
+    for relative_path in checked:
+        if not (root / relative_path).is_file():
+            blocked.append(f"missing live smoke gating evidence: {relative_path}")
+    pyproject = root / "pyproject.toml"
+    if pyproject.is_file():
+        text = pyproject.read_text(encoding="utf-8")
+        if "live_smoke" not in text or "not live_smoke" not in text:
+            blocked.append("pyproject.toml missing live_smoke marker exclusion")
+    cli_path = root / "rge" / "cli.py"
+    if cli_path.is_file():
+        source = cli_path.read_text(encoding="utf-8")
+        if "model-health" not in source or "_cmd_model_health" not in source:
+            blocked.append("missing model-health command in rge/cli.py")
+    exporter = root / "rge" / "modules" / "card_exporter.py"
+    if exporter.is_file():
+        source = exporter.read_text(encoding="utf-8")
+        if "resolve_export_targets" not in source or "publish_public" not in source:
+            blocked.append("missing publish_public export guard in card_exporter.py")
+    return checked, blocked
+
+
 def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> dict[str, Any]:
     """Run deterministic safety checks and return a machine-readable report."""
     if audit_type not in AUDIT_TYPES:
@@ -298,6 +327,7 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             "public_site_debug",
             "full_mvp_run",
             "live_llm_policy",
+            "live_smoke_policy",
         ]
     else:
         checks = [audit_type]
@@ -340,6 +370,10 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             blocked_reasons.extend(blocked)
         elif check == "live_llm_policy":
             files, blocked = _audit_live_llm_policy(project_root)
+            checked_files.extend(files)
+            blocked_reasons.extend(blocked)
+        elif check == "live_smoke_policy":
+            files, blocked = _audit_live_smoke_policy(project_root)
             checked_files.extend(files)
             blocked_reasons.extend(blocked)
 

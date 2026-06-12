@@ -29,3 +29,7 @@ include = ["rge*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "live_smoke: optional live Ollama smoke tests; excluded from default pytest runs",
+]
+addopts = "-m 'not live_smoke'"

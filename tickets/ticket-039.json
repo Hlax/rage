@@ -1,0 +1,42 @@
+{
+  "id": "ticket-039",
+  "title": "Validate improvement-ticket round-trip into the builder queue with review gate",
+  "problem": "Improvement tickets are generated and validated for builder consumption (GT20/GT21), but no ticket has round-tripped: generated ticket → promoted into tickets/ queue → implemented → verified. The self-improvement loop is plumbed, not proven.",
+  "evidence": [
+    "agent_reports/2026-06-12_phase-2_ticket-roadmap.md ticket-039",
+    "docs/agents/00_GOLDEN_TESTS.md Test 20 and Test 21",
+    "agent_reports/2026-06-12_phase-2_ticket-038_live-smoke-gating.md section 11"
+  ],
+  "affected_modules": [
+    "rge/modules/ticket_writer.py",
+    "rge/cli.py",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "expected_files": [
+    "rge/modules/ticket_writer.py",
+    "rge/cli.py",
+    "tests/golden/test_21_builder_ticket_consumption.py",
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md",
+    "agent_reports/2026-06-12_phase-2_ticket-039_improvement-ticket-round-trip.md"
+  ],
+  "acceptance_criteria": [
+    "A generated improvement ticket can be promoted to a valid queue ticket JSON via an explicit reviewed step.",
+    "Promotion never happens implicitly during pipeline runs.",
+    "Promoted format passes GT21 builder-consumption validation rules.",
+    "Documented promotion workflow in AGENTS or operating protocol.",
+    "Golden tests and default pytest pass without Ollama."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden",
+    "RGE_LLM_MODE=mock python -m pytest",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not auto-insert generated tickets into TICKET_QUEUE.md without review.",
+    "Do not implement ticket-040 CI workflow in this ticket.",
+    "Do not add cloud providers or live discovery."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert the ticket-039 branch.",
+  "status": "proposed"
+}
