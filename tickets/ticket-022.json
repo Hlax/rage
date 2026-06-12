@@ -1,0 +1,40 @@
+{
+  "id": "ticket-022",
+  "title": "Add improvement ticket generation (Golden Test 20)",
+  "problem": "ticket-021 completes run reporting, but rejection patterns do not yet generate actionable improvement tickets. Golden Test 20 requires tickets from run report failure modes.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 20: rejection patterns generate improvement tickets.",
+    "docs/agents/08_REPORTING_SPEC.md section 14: improvement ticket reports.",
+    "agent_reports/2026-06-12_phase-1_ticket-021_run-report.md sections 11–13."
+  ],
+  "affected_modules": [
+    "rge/modules/ticket_writer.py",
+    "rge/db/repositories.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/ticket_writer.py",
+    "rge/db/repositories.py",
+    "rge/cli.py",
+    "tests/golden/test_20_improvement_tickets.py"
+  ],
+  "acceptance_criteria": [
+    "Deterministic improvement ticket generation from run report failure modes without Ollama.",
+    "Tickets include evidence, expected files, acceptance criteria, test plan, non-goals, and rollback plan.",
+    "pytest tests/golden/test_20_improvement_tickets.py passes.",
+    "Existing golden tests still pass (89+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_20_improvement_tickets.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not call Ollama.",
+    "Do not implement LangGraph or live web discovery.",
+    "Do not add public write routes."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert branch phase-1/ticket-022-improvement-tickets.",
+  "status": "proposed"
+}

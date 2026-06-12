@@ -241,6 +241,46 @@ def _cmd_generate_domain_proposal(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_generate_run_report(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import RunReportRepository
+    from rge.modules.run_evaluator import GOLDEN_RUN_ID, generate_run_report
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        output_dir = Path(args.output_dir) if args.output_dir else None
+        result = generate_run_report(
+            conn,
+            run_id=args.run_id or GOLDEN_RUN_ID,
+            topic=args.topic,
+            domain_pack=args.domain,
+            contract_id=args.contract,
+            output_dir=output_dir,
+        )
+        payload = {
+            "status": result["status"],
+            "command": "generate-run-report",
+            "run_id": result["run_id"],
+            "report_id": result.get("report_id"),
+            "report_count": RunReportRepository(conn).count(),
+            "output_path": result.get("output_path"),
+            "report": result.get("report"),
+        }
+        print(json.dumps(payload, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "generate-run-report",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_export_public(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.modules.card_exporter import export_public_cards
@@ -970,6 +1010,42 @@ def build_parser() -> argparse.ArgumentParser:
         help="Skip deterministic golden threshold padding (for negative tests).",
     )
     domain_proposal_parser.set_defaults(func=_cmd_generate_domain_proposal)
+
+    run_report_parser = subparsers.add_parser(
+        "generate-run-report",
+        help="Generate machine-readable research run report from DB metrics.",
+        description=(
+            "Aggregate accepted/rejected counters, failure modes, and spine "
+            "metrics into a run report, persist it, and write run_report_latest.json."
+        ),
+    )
+    run_report_parser.add_argument(
+        "--run-id",
+        help="Research run ID (defaults to golden Test 19 run ID).",
+    )
+    run_report_parser.add_argument(
+        "--topic",
+        default="Does AI improve creative output while reducing diversity?",
+        help="Research topic stored on the run report.",
+    )
+    run_report_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack ID for the run report (default: creativity).",
+    )
+    run_report_parser.add_argument(
+        "--contract",
+        help="Research contract ID (defaults to golden Test 10 contract).",
+    )
+    run_report_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    run_report_parser.add_argument(
+        "--output-dir",
+        help="Optional output directory for run_report_latest.json (for tests).",
+    )
+    run_report_parser.set_defaults(func=_cmd_generate_run_report)
 
     export_parser = subparsers.add_parser(
         "export-public",
