@@ -1,0 +1,30 @@
+{
+  "task_name": "theory_generation",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "type": "candidate_theory",
+      "graph_pattern": "contradiction_by_metric",
+      "theory_text": "As AI assistance lowers the cost of generating variations, human judgment may become more important for selecting diverse and original outputs when metrics of diversity diverge.",
+      "confidence": "medium",
+      "supporting_claim_fragments": [
+        "reduced semantic diversity"
+      ],
+      "contradicting_or_qualifying_claim_fragments": [
+        "increased idea diversity"
+      ],
+      "boundary_conditions": [
+        "Effects may differ between short-form writing and divergent ideation prompts.",
+        "Rated idea diversity may diverge from embedding-based semantic diversity."
+      ],
+      "weakening_evidence_fragments": [
+        "increased idea diversity"
+      ],
+      "next_questions": [
+        "Does AI assistance preserve originality gains outside controlled ideation tasks?",
+        "When does divergent prompting offset semantic diversity reductions?"
+      ],
+      "status": "candidate"
+    }
+  ]
+}

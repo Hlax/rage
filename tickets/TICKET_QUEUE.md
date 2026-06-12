@@ -43,7 +43,16 @@ superseded
 | 14 | ticket-014 | done | Add public card export with safety filtering (Golden Test 11) | `phase-1/ticket-014-public-card-export` | `agent_reports/2026-06-11_phase-1_ticket-014_public-card-export.md` |
 | 15 | ticket-015 | done | Add public site card and concept detail pages (Golden Test 12) | `phase-1/ticket-015-public-site-detail-pages` | `agent_reports/2026-06-12_phase-1_ticket-015_public-site-detail-pages.md` |
 | 16 | ticket-016 | done | Add cluster report threshold trigger (Golden Test 13) | `phase-1/ticket-016-cluster-report` | `agent_reports/2026-06-12_phase-1_ticket-016_cluster-report.md` |
-| 17 | ticket-017 | proposed | Add mock theory generator (Golden Test 15) | | |
+| 17 | ticket-017 | done | Add mock theory generator (Golden Test 15) | `phase-1/ticket-017-theory-generator` | `agent_reports/2026-06-12_phase-1_ticket-017_theory-generator.md` |
+| 18 | ticket-018 | proposed | Add contract-respecting question generation (Golden Test 16) | | |
+
+## Queue Notes (2026-06-12, ticket-017 agent)
+
+- ticket-017 implemented `generate-theory-candidates` with migration `0005`,
+  mock theory fixture, deterministic validation against cluster evidence packets,
+  and Golden Test 15 (4 tests). All 73 golden tests pass without Ollama.
+- Pre-ticket-017 audit report committed on main before implementation branch.
+- ticket-018 proposes contract-respecting question generation for Golden Test 16.
 
 ## Queue Notes (2026-06-12, ticket-016 agent)
 
@@ -139,7 +148,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-017 (proposed; awaiting review)
+ticket-018 (proposed; awaiting review)
 ```
 
 ## Queue Rules
