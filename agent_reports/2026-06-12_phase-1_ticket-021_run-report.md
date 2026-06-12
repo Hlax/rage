@@ -87,9 +87,9 @@ Not required: no public export, public site, or write routes changed. Run report
 
 ## 11. Merge to Main
 
-- Merge commit: _(pending)_
+- Merge commit: `ac1c11e19e187622a711f5be51fb40ffeef989dd`
 - Branch: `phase-1/ticket-021-run-report` merged to `main` and pushed to `origin/main`.
-- Post-merge pytest on `main`: _(pending)_
+- Post-merge pytest on `main`: 89 passed.
 
 ## 12. Recommended Next Ticket
 
