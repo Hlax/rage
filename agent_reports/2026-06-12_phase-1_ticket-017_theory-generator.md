@@ -93,7 +93,10 @@ Not required: no public export, public site, or write routes changed. Theory art
 
 ## 11. Merge to Main
 
-*(Updated after merge.)*
+- Merge commit: `4aa2296f2bf86b1d39e64cf12fee78c8a2498550`
+- Branch: `phase-1/ticket-017-theory-generator` merged to `main` and pushed to `origin/main`.
+- Post-merge pytest on `main`: 73 passed.
+- Pre-ticket audit commit included: `0154e87` (theory generator audit + runner gate).
 
 ## 12. Recommended Next Ticket
 
