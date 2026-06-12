@@ -88,8 +88,8 @@ site build not re-run (not required for this ticket).
 
 ## Merge
 
-- Merge commit SHA: _(filled after merge)_
-- Golden Gate run: _(filled after CI)_
+- Merge commit SHA: `06611a4`
+- Golden Gate run: **27446502799** — **success** at `06611a4`
 
 ## Recommended next ticket
 
