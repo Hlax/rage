@@ -61,3 +61,98 @@ def test_checkpoint_status_overdue_without_recent_audit(tmp_path: Path) -> None:
     report = checkpoint_status(root=tmp_path)
     assert report["cadence_status"] == "overdue"
     assert report["done_tickets_since_latest_checkpoint"] >= 3
+
+
+def test_post_ticket_principal_audit_satisfies_cadence(tmp_path: Path) -> None:
+    (tmp_path / "tickets").mkdir()
+    (tmp_path / "agent_reports").mkdir()
+    (tmp_path / "tickets" / "TICKET_QUEUE.md").write_text(
+        """
+| 42 | ticket-042 | done | prev | | |
+| 43 | ticket-043 | done | latest | | |
+| 44 | ticket-044 | proposed | next | | |
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "agent_reports" / "2026-06-12_principal-audit-post-ticket-042.md").write_text(
+        "# principal audit after ticket-042", encoding="utf-8"
+    )
+
+    report = checkpoint_status(root=tmp_path, next_ticket_id="ticket-044")
+    assert report["latest_checkpoint_ticket_number"] == 42
+    assert report["cadence_status"] == "satisfied"
+    assert report["done_tickets_since_latest_checkpoint"] == 1
+    assert report["done_ticket_ids_since_latest_checkpoint"] == ["ticket-043"]
+    assert report["status"] == "satisfied"
+
+
+def test_three_done_tickets_after_checkpoint_becomes_overdue(tmp_path: Path) -> None:
+    (tmp_path / "tickets").mkdir()
+    (tmp_path / "agent_reports").mkdir()
+    (tmp_path / "tickets" / "TICKET_QUEUE.md").write_text(
+        """
+| 39 | ticket-039 | done | t | | |
+| 40 | ticket-040 | done | a | | |
+| 41 | ticket-041 | done | b | | |
+| 42 | ticket-042 | done | c | | |
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "agent_reports" / "2026-06-12_pre-ticket-039_round-trip-readiness-audit.md").write_text(
+        "# audit", encoding="utf-8"
+    )
+
+    report = checkpoint_status(root=tmp_path)
+    assert report["cadence_status"] == "overdue"
+    assert report["done_tickets_since_latest_checkpoint"] == 3
+    assert report["done_ticket_ids_since_latest_checkpoint"] == [
+        "ticket-040",
+        "ticket-041",
+        "ticket-042",
+    ]
+
+
+def test_premature_post_ticket_principal_audit_is_ignored(tmp_path: Path) -> None:
+    (tmp_path / "tickets").mkdir()
+    (tmp_path / "agent_reports").mkdir()
+    (tmp_path / "tickets" / "TICKET_QUEUE.md").write_text(
+        """
+| 33 | ticket-033 | done | phase audit | | |
+| 42 | ticket-042 | done | prev | | |
+| 43 | ticket-043 | proposed | next | | |
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "agent_reports" / "2026-06-01_pre-phase-2_principal-audit.md").write_text(
+        "# phase boundary", encoding="utf-8"
+    )
+    (tmp_path / "agent_reports" / "2026-06-12_principal-audit-post-ticket-043.md").write_text(
+        "# premature", encoding="utf-8"
+    )
+
+    report = checkpoint_status(root=tmp_path)
+    assert "pre-phase-2" in report["latest_checkpoint_report"]
+    assert report["latest_checkpoint_ticket_number"] == 33
+
+
+def test_medium_risk_ticket_without_pre_audit_remains_blocked(tmp_path: Path) -> None:
+    (tmp_path / "tickets").mkdir()
+    (tmp_path / "agent_reports").mkdir()
+    (tmp_path / "tickets" / "TICKET_QUEUE.md").write_text(
+        """
+| 43 | ticket-043 | done | prev | | |
+| 44 | ticket-044 | proposed | next | | |
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "agent_reports" / "2026-06-12_principal-audit-post-ticket-043.md").write_text(
+        "# audit", encoding="utf-8"
+    )
+    (tmp_path / "tickets" / "ticket-044.json").write_text(
+        '{"id":"ticket-044","risk_level":"medium"}', encoding="utf-8"
+    )
+
+    report = checkpoint_status(root=tmp_path, next_ticket_id="ticket-044")
+    assert report["cadence_status"] == "satisfied"
+    assert report["implementation_gate"] == "blocked_missing_pre_ticket_audit"
+    assert report["status"] == "blocked"

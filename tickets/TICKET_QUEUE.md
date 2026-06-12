@@ -75,6 +75,16 @@ superseded
 | 41 | ticket-041 | done | Bounded RGE operator loop runner | `phase-2/ticket-041-operator-loop-runner` | `agent_reports/2026-06-12_phase-2_ticket-041_operator-loop-runner.md` |
 | 42 | ticket-042 | done | Public-site deployment readiness: static hosting docs and pre-deploy checklist | `phase-2/ticket-042-public-site-deployment-readiness` | `agent_reports/2026-06-12_phase-2_ticket-042_public-site-deployment-readiness.md` |
 | 43 | ticket-043 | done | Extend safety auditor to data/exports and tighten evidence checks | `phase-2/ticket-043-safety-auditor-exports` | `agent_reports/2026-06-12_phase-2_ticket-043_safety-auditor-exports.md` |
+| 44 | ticket-044 | done | Fix principal audit gate false overdue cadence counting | `phase-2/ticket-044-principal-audit-gate-fix` | `agent_reports/2026-06-12_phase-2_ticket-044_principal-audit-gate-fix.md` |
+| 45 | ticket-045 | proposed | Promote improvement draft with explicit review gate | | |
+
+## Queue Notes (2026-06-12, ticket-044 agent)
+
+- ticket-044 fixes `principal_audit_gate` to parse `post-ticket-NNN` and
+  `pre-phase-N_principal-audit` checkpoints; counts only done tickets after the
+  referenced ticket. Premature post-ticket reports ignored. Operator loop cadence
+  now satisfied after post-ticket-042 audit. 7 gate unit tests + 17 operator loop
+  tests; 174 total pytest pass.
 
 ## Queue Notes (2026-06-12, ticket-043 agent)
 
@@ -437,7 +447,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-none (ticket-043 done on branch; await merge to main)
+ticket-045 (proposed — improvement draft promotion with review gate)
 ```
 
 ## Queue Rules
