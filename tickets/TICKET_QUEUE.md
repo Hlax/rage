@@ -70,7 +70,16 @@ superseded
 | 36 | ticket-036 | done | Public-site presentation polish and about page (no data surface changes) | `phase-2/ticket-036-public-site-polish` | `agent_reports/2026-06-12_phase-2_ticket-036_public-site-polish.md` |
 | 37 | ticket-037 | done | Implement Ollama structured tasks behind explicit live-mode opt-in | `phase-2/ticket-037-ollama-live-structured-tasks` | `agent_reports/2026-06-12_phase-2_ticket-037_ollama-live-structured-tasks.md` |
 | 38 | ticket-038 | done | Gate live smoke tests behind env opt-in and add model-health command | `phase-2/ticket-038-live-smoke-gating` | `agent_reports/2026-06-12_phase-2_ticket-038_live-smoke-gating.md` |
-| 39 | ticket-039 | proposed | Validate improvement-ticket round-trip into the builder queue with review gate | | |
+| 39 | ticket-039 | done | Validate improvement-ticket round-trip into the builder queue with review gate | `phase-2/ticket-039-improvement-ticket-round-trip` | `agent_reports/2026-06-12_phase-2_ticket-039_improvement-ticket-round-trip.md` |
+| 40 | ticket-040 | proposed | Add CI golden gate workflow and rge-principal-audit command doc | | |
+
+## Queue Notes (2026-06-12, ticket-039 agent)
+
+- ticket-039 added `promote-improvement-ticket` with mandatory `--confirm` review
+  gate, queue JSON mapping in `ticket_writer.py`, GT21 round-trip tests (+3),
+  and promotion workflow docs. No auto `TICKET_QUEUE.md` mutation. 132 golden +
+  143 total pytest pass; safety audit passes.
+- ticket-040 (CI golden gate + principal-audit command) seeded as next proposed.
 
 ## Queue Notes (2026-06-12, ticket-038 agent)
 
@@ -383,7 +392,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-039 proposed (improvement-ticket promotion round-trip with review gate)
+ticket-040 proposed (CI golden gate workflow + rge-principal-audit command doc)
 ```
 
 ## Queue Rules

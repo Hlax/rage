@@ -227,3 +227,99 @@ def test_validate_builder_ticket_rejects_vague_acceptance_criteria() -> None:
     }
     violations = validate_builder_ticket(ticket)
     assert any("vague acceptance criterion" in item for item in violations)
+
+
+def test_promote_improvement_ticket_round_trip(
+    temp_db: Path, report_dir: Path, tmp_path: Path
+) -> None:
+    from rge.cli import main
+    from rge.db.connection import connect
+    from rge.modules.ticket_writer import promote_improvement_ticket
+
+    _prepare_rejection_spine(temp_db)
+    _generate_run_and_tickets(temp_db, report_dir)
+
+    queue_dir = tmp_path / "tickets"
+    conn = connect(temp_db)
+    try:
+        result = promote_improvement_ticket(
+            queue_ticket_id="ticket-991",
+            reviewed=True,
+            output_dir=queue_dir,
+            conn=conn,
+            run_id=GOLDEN_RUN_ID,
+            failure_reason="overgeneralized_scope",
+        )
+        assert result["status"] == "promoted"
+        output_path = Path(result["output_path"])
+        assert output_path.is_file()
+        queue_ticket = json.loads(output_path.read_text(encoding="utf-8"))
+        assert queue_ticket["id"] == "ticket-991"
+        assert queue_ticket["status"] == "proposed"
+        assert validate_builder_ticket(queue_ticket) == []
+    finally:
+        conn.close()
+
+    assert (
+        main(
+            [
+                "promote-improvement-ticket",
+                "--queue-ticket-id",
+                "ticket-992",
+                "--run-id",
+                GOLDEN_RUN_ID,
+                "--failure-reason",
+                "missing_quote_span",
+                "--db",
+                str(temp_db),
+                "--output-dir",
+                str(queue_dir),
+            ]
+        )
+        == 1
+    )
+
+
+def test_promote_improvement_ticket_cli_with_confirm(
+    temp_db: Path, report_dir: Path, tmp_path: Path
+) -> None:
+    from rge.cli import main
+
+    _prepare_rejection_spine(temp_db)
+    _generate_run_and_tickets(temp_db, report_dir)
+    queue_dir = tmp_path / "tickets"
+
+    assert (
+        main(
+            [
+                "promote-improvement-ticket",
+                "--queue-ticket-id",
+                "ticket-993",
+                "--run-id",
+                GOLDEN_RUN_ID,
+                "--failure-reason",
+                "overgeneralized_scope",
+                "--confirm",
+                "--db",
+                str(temp_db),
+                "--output-dir",
+                str(queue_dir),
+            ]
+        )
+        == 0
+    )
+    promoted = json.loads((queue_dir / "ticket-993.json").read_text(encoding="utf-8"))
+    assert promoted["status"] == "proposed"
+    assert validate_builder_ticket(promoted) == []
+
+
+def test_pipeline_paths_do_not_auto_promote_tickets() -> None:
+    import inspect
+
+    from rge.cli import execute_fixture_mode_run
+    from rge.modules.ticket_writer import generate_improvement_tickets
+
+    fixture_source = inspect.getsource(execute_fixture_mode_run)
+    generate_source = inspect.getsource(generate_improvement_tickets)
+    assert "promote_improvement_ticket" not in fixture_source
+    assert "promote_improvement_ticket" not in generate_source

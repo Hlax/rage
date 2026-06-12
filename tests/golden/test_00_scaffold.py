@@ -102,6 +102,7 @@ def test_cli_top_level_help() -> None:
         "generate-domain-proposal",
         "generate-run-report",
         "generate-improvement-tickets",
+        "promote-improvement-ticket",
         "export-public",
         "model-health",
         "verify",
