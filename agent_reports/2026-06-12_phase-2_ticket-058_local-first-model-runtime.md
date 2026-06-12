@@ -125,9 +125,9 @@ python -m rge.modules.operator_loop --mode execute-safe  # blocked (dirty tree d
 
 ## Merge
 
-- Ticket commit SHA: _(filled after commit)_
-- Main push SHA: _(filled after push)_
-- Golden Gate run: _(filled after push)_
+- Ticket commit SHA: `e5ff08b6218ec74a7fdfb8ca2441c8a35403c261`
+- Main push SHA: `e5ff08b6218ec74a7fdfb8ca2441c8a35403c261` (fast-forward)
+- Golden Gate run: **27434370291** — **success** at `e5ff08b`
 
 ## Recommended next move
 
