@@ -7,10 +7,11 @@ relationship needs evidence links with stance, confidence, and scope.
 
 from __future__ import annotations
 
-import os
 from typing import Any
 
 from rge.config import load_config
+from rge.llm.mock_client import MockModelClient
+from rge.llm.mode import effective_llm_mode
 from rge.llm.registry import get_model_client
 
 CONFIDENCE_LABEL_TO_REAL: dict[str, float] = {
@@ -115,6 +116,11 @@ def validate_relationship_candidates(
     return {"accepted": accepted, "rejected": rejected}
 
 
+def _pipeline_model_client(config=None):
+    cfg = config if config is not None else load_config()
+    return get_model_client(cfg, mode=effective_llm_mode(cfg))
+
+
 def draft_relationships_for_source(
     claim_dicts: list[dict[str, Any]],
     concept_dicts: list[dict[str, Any]],
@@ -122,24 +128,20 @@ def draft_relationships_for_source(
     *,
     fixture_name: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Propose relationship drafts via the mock model client."""
-    prior_mode = os.environ.get("RGE_LLM_MODE")
-    os.environ["RGE_LLM_MODE"] = "mock"
-    try:
-        config = load_config()
-        client = get_model_client(config)
-        batch = client.draft_relationships(
-            claims=claim_dicts,
-            concepts=concept_dicts,
-            domain_pack=domain_pack,
-            schema_version=config.llm_schema_version,
-            fixture_name=fixture_name or "relationship_drafting_creativity_diversity.json",
+    """Propose relationship drafts via the configured model client."""
+    config = load_config()
+    client = _pipeline_model_client(config)
+    draft_kwargs: dict[str, Any] = {
+        "claims": claim_dicts,
+        "concepts": concept_dicts,
+        "domain_pack": domain_pack,
+        "schema_version": config.llm_schema_version,
+    }
+    if isinstance(client, MockModelClient):
+        draft_kwargs["fixture_name"] = (
+            fixture_name or "relationship_drafting_creativity_diversity.json"
         )
-    finally:
-        if prior_mode is None:
-            os.environ.pop("RGE_LLM_MODE", None)
-        else:
-            os.environ["RGE_LLM_MODE"] = prior_mode
+    batch = client.draft_relationships(**draft_kwargs)
 
     accepted_claim_ids = {claim["id"] for claim in claim_dicts}
     drafts: list[dict[str, Any]] = []

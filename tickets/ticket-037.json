@@ -69,5 +69,5 @@
   ],
   "risk_level": "medium-high",
   "rollback_plan": "Revert the ticket-037 branch; golden tests and fixture runs remain mock-only.",
-  "status": "proposed"
+  "status": "done"
 }

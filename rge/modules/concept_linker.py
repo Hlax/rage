@@ -7,12 +7,13 @@ in ``domain_metadata``, validated by the domain pack, never hardcoded here.
 
 from __future__ import annotations
 
-import os
 import re
 from pathlib import Path
 from typing import Any
 
 from rge.config import load_config
+from rge.llm.mock_client import MockModelClient
+from rge.llm.mode import effective_llm_mode
 from rge.llm.registry import get_model_client
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -112,29 +113,30 @@ def validate_concept_links(
     return {"accepted": accepted, "rejected": rejected}
 
 
+def _pipeline_model_client(config=None):
+    cfg = config if config is not None else load_config()
+    return get_model_client(cfg, mode=effective_llm_mode(cfg))
+
+
 def link_claim_concepts(
     claims: list[dict[str, Any]],
     domain_pack: str,
     *,
     fixture_name: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Propose concept links for claims via the mock model client."""
-    prior_mode = os.environ.get("RGE_LLM_MODE")
-    os.environ["RGE_LLM_MODE"] = "mock"
-    try:
-        config = load_config()
-        client = get_model_client(config)
-        batch = client.link_concepts(
-            claims=claims,
-            domain_pack=domain_pack,
-            schema_version=config.llm_schema_version,
-            fixture_name=fixture_name or "concept_linking_creativity_diversity.json",
+    """Propose concept links for claims via the configured model client."""
+    config = load_config()
+    client = _pipeline_model_client(config)
+    link_kwargs: dict[str, Any] = {
+        "claims": claims,
+        "domain_pack": domain_pack,
+        "schema_version": config.llm_schema_version,
+    }
+    if isinstance(client, MockModelClient):
+        link_kwargs["fixture_name"] = (
+            fixture_name or "concept_linking_creativity_diversity.json"
         )
-    finally:
-        if prior_mode is None:
-            os.environ.pop("RGE_LLM_MODE", None)
-        else:
-            os.environ["RGE_LLM_MODE"] = prior_mode
+    batch = client.link_concepts(**link_kwargs)
 
     target_claim_id = None
     for claim in claims:

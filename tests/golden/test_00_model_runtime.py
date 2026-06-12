@@ -11,6 +11,7 @@ import pytest
 
 from rge.config import load_config
 from rge.llm.mock_client import MockModelClient
+from rge.llm.mode import effective_llm_mode, live_llm_enabled
 from rge.llm.ollama_client import OllamaModelClient, OllamaNotAvailableInPhase0
 from rge.llm.registry import LlmModeError, get_model_client
 from rge.llm.schemas import (
@@ -82,13 +83,30 @@ def test_schema_version_mismatch_fails_closed() -> None:
         )
 
 
-def test_ollama_structured_tasks_fail_honestly_in_phase_0() -> None:
+def test_effective_llm_mode_requires_explicit_opt_in(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("RGE_LLM_MODE", "ollama")
+    monkeypatch.setenv("RGE_ALLOW_LIVE_LLM", "0")
+    config = load_config()
+    assert live_llm_enabled(config) is False
+    assert effective_llm_mode(config) == "mock"
+
+
+def test_effective_llm_mode_enables_ollama_with_opt_in(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("RGE_LLM_MODE", "ollama")
+    monkeypatch.setenv("RGE_ALLOW_LIVE_LLM", "1")
+    config = load_config()
+    assert live_llm_enabled(config) is True
+    assert effective_llm_mode(config) == "ollama"
+
+
+def test_ollama_non_pipeline_tasks_remain_unimplemented() -> None:
     client = OllamaModelClient(base_url="http://127.0.0.1:11434", model="qwen2.5:7b")
     with pytest.raises(OllamaNotAvailableInPhase0):
-        client.extract_claims(
-            chunk={}, contract={}, domain_pack="creativity",
-            schema_version=SCHEMA_VERSION_0_1_0,
-        )
+        client.draft_run_summary({}, SCHEMA_VERSION_0_1_0)
 
 
 def test_llm_package_has_no_write_side_effect_imports() -> None:

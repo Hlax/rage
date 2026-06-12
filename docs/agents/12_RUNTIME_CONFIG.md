@@ -27,6 +27,7 @@ Golden tests and the builder agent should set `RGE_LLM_MODE=mock` explicitly.
 | Variable | Required | Secret | Local-only | Public build | Used by |
 |---|---|---|---|---|---|
 | `RGE_LLM_MODE` | optional (default `ollama` in code; use `mock` in `.env.local`) | no | yes | no | `rge/llm/registry.py`, all model client selection |
+| `RGE_ALLOW_LIVE_LLM` | optional (default `0`) | no | yes | no | `rge/llm/mode.py`, pipeline effective-mode resolver |
 | `RGE_TEST_LLM_MODE` | optional (default `mock`) | no | yes | no | Documented for tests; golden tests set `mock` directly |
 | `OLLAMA_BASE_URL` | optional | no | yes | no | `OllamaModelClient`, `rge/config.py` |
 | `RGE_LOCAL_LLM` | optional | no | yes | no | Ollama model tag (not a filesystem path) |
@@ -38,6 +39,9 @@ Golden tests and the builder agent should set `RGE_LLM_MODE=mock` explicitly.
 
 Valid `RGE_LLM_MODE` values: `mock`, `ollama` only. Anything else fails closed.
 
+Valid `RGE_ALLOW_LIVE_LLM` values: `0`/`false`/`no` (default) or `1`/`true`/`yes`.
+Any other value raises `ConfigError` (fail closed).
+
 ## Not implemented (do not add to committed `.env` yet)
 
 These categories are **not** read by any `rge/` module today:
@@ -48,7 +52,7 @@ These categories are **not** read by any `rge/` module today:
 - `GOOGLE_APPLICATION_CREDENTIALS`, Gemini / Vertex project/location vars
 - `CURSOR_API_KEY` (Cursor IDE/CLI auth — operator-level, outside RGE runtime)
 - `RGE_DB_PATH` (use CLI `--db` or default `data/db/creative_research.sqlite`)
-- `RGE_SMOKE_*`, `RGE_DRY_RUN`, `RGE_LIVE_*` smoke gates
+- `RGE_SMOKE_*`, `RGE_DRY_RUN`, `live_smoke` pytest marker (ticket-038)
 
 Add provider variables only when a ticket wires an adapter and documents them here.
 
@@ -79,23 +83,40 @@ python -m pytest tests/golden
 
 ### Pipeline modules
 
-Even if `RGE_LLM_MODE=ollama` in `.env`, these modules **force mock** before
-calling the model client:
+Pipeline modules resolve **effective mode** via `rge/llm/mode.py`:
+
+```txt
+effective_mode = mock
+  unless RGE_LLM_MODE=ollama AND RGE_ALLOW_LIVE_LLM=1
+    then effective_mode = ollama
+```
+
+Modules using effective mode:
 
 - `rge/modules/claim_extractor.py`
 - `rge/modules/concept_linker.py`
 - `rge/modules/relationship_builder.py`
 - `rge/modules/contradiction_detector.py`
 
-Fixture-mode golden runs and ticket-028 orchestration therefore do **not** need
-API keys or a running Ollama instance.
+Without `RGE_ALLOW_LIVE_LLM=1`, behavior is identical to pre-ticket-037 (mock
+fixtures). With opt-in set but Ollama unreachable, structured calls raise a
+clear error and do **not** silently fall back to mock.
+
+Fixture-mode orchestration (`execute_fixture_mode_run` in `rge/cli.py`) **always**
+forces mock regardless of operator `.env` settings.
+
+Golden tests and fixture runs therefore do **not** need a running Ollama instance.
 
 ### Ollama client
 
 `rge/llm/ollama_client.py`:
 
 - `health_check()` may call `OLLAMA_BASE_URL` when explicitly invoked.
-- Structured tasks (`extract_claims`, etc.) raise `OllamaNotAvailableInPhase0`.
+- Structured pipeline tasks (`extract_claims`, `link_concepts`,
+  `draft_relationships`, `detect_contradictions`) call Ollama when effective mode
+  is `ollama`.
+- Non-pipeline tasks (`draft_run_summary`, `draft_ticket`) remain unimplemented
+  on the live client.
 
 ## Public site
 

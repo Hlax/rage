@@ -255,6 +255,25 @@ def _audit_full_mvp_run_policy(root: Path) -> tuple[list[str], list[str]]:
     return checked, blocked
 
 
+def _audit_live_llm_policy(root: Path) -> tuple[list[str], list[str]]:
+    """Verify live LLM opt-in helper and deterministic unit-test evidence exist."""
+    checked = [
+        "rge/llm/mode.py",
+        "rge/config.py",
+        "tests/unit/test_ollama_structured_tasks.py",
+    ]
+    blocked: list[str] = []
+    for relative_path in checked:
+        if not (root / relative_path).is_file():
+            blocked.append(f"missing live LLM opt-in evidence: {relative_path}")
+    config_path = root / "rge" / "config.py"
+    if config_path.is_file():
+        source = config_path.read_text(encoding="utf-8")
+        if "allow_live_llm" not in source or "RGE_ALLOW_LIVE_LLM" not in source:
+            blocked.append("missing RGE_ALLOW_LIVE_LLM in rge/config.py")
+    return checked, blocked
+
+
 def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> dict[str, Any]:
     """Run deterministic safety checks and return a machine-readable report."""
     if audit_type not in AUDIT_TYPES:
@@ -278,6 +297,7 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             "prompt_injection",
             "public_site_debug",
             "full_mvp_run",
+            "live_llm_policy",
         ]
     else:
         checks = [audit_type]
@@ -316,6 +336,10 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             blocked_reasons.extend(blocked)
         elif check == "full_mvp_run":
             files, blocked = _audit_full_mvp_run_policy(project_root)
+            checked_files.extend(files)
+            blocked_reasons.extend(blocked)
+        elif check == "live_llm_policy":
+            files, blocked = _audit_live_llm_policy(project_root)
             checked_files.extend(files)
             blocked_reasons.extend(blocked)
 

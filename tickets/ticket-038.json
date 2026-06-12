@@ -1,0 +1,43 @@
+{
+  "id": "ticket-038",
+  "title": "Gate live smoke tests behind env opt-in and add model-health command",
+  "problem": "No safe harness exists for live Ollama runs: no pytest marker isolation, no model-health CLI, and live runs could write to the same default export dirs as golden runs. After ticket-037 enables structured tasks behind RGE_ALLOW_LIVE_LLM, operators need explicit smoke-test gating and a health probe command.",
+  "evidence": [
+    "agent_reports/2026-06-12_pre-phase-2_principal-audit.md Live Provider Readiness",
+    "agent_reports/2026-06-12_phase-2_ticket-roadmap.md ticket-038",
+    "agent_reports/2026-06-12_phase-2_ticket-037_ollama-live-structured-tasks.md section 11"
+  ],
+  "affected_modules": [
+    "pyproject.toml",
+    "rge/cli.py",
+    "docs/agents/12_RUNTIME_CONFIG.md"
+  ],
+  "expected_files": [
+    "pyproject.toml",
+    "rge/cli.py",
+    "tests/smoke/test_live_ollama_smoke.py",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "agent_reports/2026-06-12_phase-2_ticket-038_live-smoke-gating.md"
+  ],
+  "acceptance_criteria": [
+    "pytest and pytest tests/golden collect zero live smoke tests by default.",
+    "research model-health (or equivalent CLI) reports Ollama reachability without raising.",
+    "Live-mode runs cannot write apps/public-site/public/data/ without an explicit publish flag.",
+    "Safety audit unchanged or extended with smoke-gate evidence.",
+    "Golden tests and default pytest pass without Ollama."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden",
+    "RGE_LLM_MODE=mock python -m pytest",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not add cloud providers.",
+    "Do not change public export schema.",
+    "Do not remove RGE_ALLOW_LIVE_LLM gate from ticket-037.",
+    "Do not implement ticket-039 or later."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert the ticket-038 branch.",
+  "status": "proposed"
+}
