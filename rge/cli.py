@@ -33,11 +33,30 @@ def _cmd_run(args: argparse.Namespace) -> int:
 
 
 def _cmd_export_public(args: argparse.Namespace) -> int:
-    return _not_implemented(
-        "export-public",
-        "Public-safe card export arrives with Phase 4 "
-        f"(requested limit={args.limit}).",
-    )
+    from rge.db.connection import ensure_database
+    from rge.modules.card_exporter import export_public_cards
+
+    db_path = Path(args.db) if args.db else None
+    output_dirs = [Path(args.output_dir)] if args.output_dir else None
+    conn = ensure_database(db_path)
+    try:
+        result = export_public_cards(
+            conn,
+            limit=args.limit,
+            output_dirs=output_dirs,
+        )
+        print(json.dumps(result, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "export-public",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
 
 
 def _cmd_verify(_args: argparse.Namespace) -> int:
@@ -597,11 +616,22 @@ def build_parser() -> argparse.ArgumentParser:
 
     export_parser = subparsers.add_parser(
         "export-public",
-        help="Export public-safe card JSON (placeholder in Phase 0).",
-        description="Export public-safe card JSON. Placeholder in Phase 0.",
+        help="Export public-safe card JSON with safety filtering.",
+        description=(
+            "Export public-safe card JSON to data/exports and the public site "
+            "static data directory after deterministic safety validation."
+        ),
     )
     export_parser.add_argument(
         "--limit", type=int, default=100, help="Maximum records to export."
+    )
+    export_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    export_parser.add_argument(
+        "--output-dir",
+        help="Optional single output directory (for tests; skips default export paths).",
     )
     export_parser.set_defaults(func=_cmd_export_public)
 

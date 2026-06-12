@@ -2,16 +2,210 @@
 
 Selects accepted/public-safe records, strips everything not in the curated
 public field list (``docs/agents/10_SAFETY_MODEL.md`` section 7), and fails
-closed: one unsafe record blocks the whole export. Output flows to
-``data/exports/`` and ``apps/public-site/public/data/`` only after the safety
-audit passes. Phase 0 stub.
+closed: one unsafe record blocks the whole export.
 """
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any
 
+from rge.db.repositories import (
+    PublicCardRepository,
+    public_card_record_to_export_dict,
+    utc_now_iso,
+)
+from rge.safety.public_export_policy import (
+    curated_public_card,
+    validate_public_export_bundle,
+)
 
-def export_public_cards(limit: int = 100) -> dict[str, Any]:
-    """Export public-safe cards as JSON. Not implemented in Phase 0."""
-    raise NotImplementedError("card_exporter.export_public_cards arrives with Phase 4.")
+EXPORT_SCHEMA_VERSION = "0.1.0"
+CARD_GOLDEN_DIVERSITY_ID = "card_golden_diversity_001"
+CARD_GOLDEN_ORIGINALITY_ID = "card_golden_originality_002"
+
+GOLDEN_CARD_EXTRAS: dict[str, dict[str, Any]] = {
+    CARD_GOLDEN_DIVERSITY_ID: {
+        "public_caveats": [
+            "Evidence is from short-form creative writing fixtures.",
+        ],
+        "public_source_metadata": [
+            {
+                "title": "Creativity AI diversity (fixture)",
+                "year": 2026,
+                "source_type": "fixture",
+            }
+        ],
+        "related_cards": [CARD_GOLDEN_ORIGINALITY_ID],
+    },
+    CARD_GOLDEN_ORIGINALITY_ID: {
+        "public_caveats": [
+            "Fixture-derived synthesis; not a live literature review.",
+        ],
+        "public_source_metadata": [
+            {
+                "title": "Creativity AI diversity (fixture)",
+                "year": 2026,
+                "source_type": "fixture",
+            }
+        ],
+        "related_cards": [CARD_GOLDEN_DIVERSITY_ID],
+    },
+}
+
+GOLDEN_PRIVATE_FIELDS: dict[str, Any] = {
+    "evaluator_notes": "INTERNAL: hidden evaluator notes must never export.",
+    "local_path": "C:\\Users\\private\\research_notes.txt",
+    "prompt_template": "Extract claims from the following untrusted source text.",
+    "raw_source_excerpt": "Full private source text must not appear in export.",
+}
+
+
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def default_export_dirs(repo_root: Path | None = None) -> list[Path]:
+    root = repo_root or _repo_root()
+    return [
+        root / "data" / "exports",
+        root / "apps" / "public-site" / "public" / "data",
+    ]
+
+
+def _accepted_claim_count(conn: Any) -> int:
+    row = conn.execute(
+        "SELECT COUNT(*) FROM claims WHERE status = 'accepted'"
+    ).fetchone()
+    return int(row[0]) if row else 0
+
+
+def ensure_golden_public_cards(conn: Any) -> list[str]:
+    """Seed deterministic golden cards when the graph has accepted claims."""
+    repo = PublicCardRepository(conn)
+    if repo.count_public_safe() > 0:
+        return []
+
+    if _accepted_claim_count(conn) == 0:
+        return []
+
+    claim_rows = conn.execute(
+        "SELECT id, source_id FROM claims WHERE status = 'accepted' ORDER BY id"
+    ).fetchall()
+    claim_ids = [row["id"] for row in claim_rows[:3]]
+    source_count = len({row["source_id"] for row in claim_rows})
+
+    seeded: list[str] = []
+    cards = (
+        {
+            "card_id": CARD_GOLDEN_DIVERSITY_ID,
+            "card_type": "cluster_card",
+            "title": "AI assistance and semantic diversity",
+            "summary": (
+                "Fixture evidence suggests AI-assisted brainstorming may improve "
+                "average idea quality while reducing semantic diversity in some "
+                "short-form writing tasks."
+            ),
+            "confidence": "medium",
+            "concepts": ["AI assistance", "semantic diversity", "ideation"],
+        },
+        {
+            "card_id": CARD_GOLDEN_ORIGINALITY_ID,
+            "card_type": "cluster_card",
+            "title": "AI assistance and creative originality",
+            "summary": (
+                "Accepted fixture claims indicate AI assistance can raise output "
+                "volume while leaving open whether originality gains persist "
+                "outside controlled ideation tasks."
+            ),
+            "confidence": "medium",
+            "concepts": ["AI assistance", "originality", "human control"],
+        },
+    )
+
+    for card in cards:
+        repo.insert(
+            card_id=card["card_id"],
+            card_type=card["card_type"],
+            title=card["title"],
+            summary=card["summary"],
+            confidence=card["confidence"],
+            concepts=card["concepts"],
+            source_count=source_count,
+            claim_ids=claim_ids,
+            public_detail_level="standard",
+            is_public_safe=True,
+            private_fields=GOLDEN_PRIVATE_FIELDS,
+        )
+        seeded.append(card["card_id"])
+
+    return seeded
+
+
+def export_public_cards(
+    conn: Any,
+    *,
+    limit: int = 100,
+    output_dirs: list[Path] | None = None,
+    repo_root: Path | None = None,
+) -> dict[str, Any]:
+    """Export public-safe cards as JSON files after validation."""
+    seeded_ids = ensure_golden_public_cards(conn)
+    repo = PublicCardRepository(conn)
+    records = repo.list_public_safe(limit=limit)
+
+    cards = [
+        curated_public_card(
+            public_card_record_to_export_dict(
+                record,
+                extras=GOLDEN_CARD_EXTRAS.get(record.id),
+            )
+        )
+        for record in records
+    ]
+    memos: list[dict[str, Any]] = []
+    generated_at = utc_now_iso()
+    build_info = {
+        "export_schema_version": EXPORT_SCHEMA_VERSION,
+        "generated_at": generated_at,
+        "phase": "1",
+        "card_count": len(cards),
+        "memo_count": len(memos),
+    }
+
+    violations = validate_public_export_bundle(cards, memos, build_info)
+    if violations:
+        raise ValueError(
+            "Public export blocked by safety policy: "
+            + "; ".join(violations[:5])
+            + (f"; and {len(violations) - 5} more" if len(violations) > 5 else "")
+        )
+
+    targets = output_dirs if output_dirs is not None else default_export_dirs(repo_root)
+    written_files: list[str] = []
+    payloads = {
+        "public_cards.json": cards,
+        "public_memos.json": memos,
+        "build_info.json": build_info,
+    }
+    for directory in targets:
+        directory.mkdir(parents=True, exist_ok=True)
+        for filename, payload in payloads.items():
+            path = directory / filename
+            path.write_text(
+                json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            written_files.append(str(path))
+
+    return {
+        "status": "success",
+        "command": "export-public",
+        "card_count": len(cards),
+        "memo_count": len(memos),
+        "seeded_card_ids": seeded_ids,
+        "written_files": written_files,
+        "export_schema_version": EXPORT_SCHEMA_VERSION,
+        "generated_at": generated_at,
+    }

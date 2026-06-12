@@ -42,5 +42,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert branch phase-1/ticket-014-public-card-export. Delete generated public JSON artifacts from apps/public-site/public/data if needed.",
-  "status": "proposed"
+  "status": "done"
 }

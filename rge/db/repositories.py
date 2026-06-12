@@ -1542,3 +1542,148 @@ class ResearchQueueRepository:
             }
             for row in rows
         ]
+
+
+@dataclass(frozen=True)
+class PublicCardRecord:
+    id: str
+    type: str
+    title: str
+    summary: str
+    confidence: str
+    concepts_json: str
+    source_count: int
+    claim_ids_json: str
+    public_detail_level: str
+    is_public_safe: int
+    private_fields_json: str
+    created_at: str
+    updated_at: str
+
+
+class PublicCardRepository:
+    """Persist and read ``public_cards`` rows."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def count_public_safe(self) -> int:
+        row = self._conn.execute(
+            "SELECT COUNT(*) FROM public_cards WHERE is_public_safe = 1"
+        ).fetchone()
+        return int(row[0]) if row else 0
+
+    def get_by_id(self, card_id: str) -> PublicCardRecord | None:
+        row = self._conn.execute(
+            """
+            SELECT id, type, title, summary, confidence, concepts_json,
+                   source_count, claim_ids_json, public_detail_level,
+                   is_public_safe, private_fields_json, created_at, updated_at
+            FROM public_cards
+            WHERE id = ?
+            """,
+            (card_id,),
+        ).fetchone()
+        return _row_to_public_card(row) if row else None
+
+    def insert(
+        self,
+        *,
+        card_id: str,
+        card_type: str,
+        title: str,
+        summary: str,
+        confidence: str,
+        concepts: list[str],
+        source_count: int,
+        claim_ids: list[str],
+        public_detail_level: str,
+        is_public_safe: bool,
+        private_fields: dict[str, Any] | None = None,
+    ) -> PublicCardRecord:
+        now = utc_now_iso()
+        self._conn.execute(
+            """
+            INSERT INTO public_cards (
+                id, type, title, summary, confidence, concepts_json,
+                source_count, claim_ids_json, public_detail_level,
+                is_public_safe, private_fields_json, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO NOTHING
+            """,
+            (
+                card_id,
+                card_type,
+                title,
+                summary,
+                confidence,
+                json.dumps(concepts),
+                source_count,
+                json.dumps(claim_ids),
+                public_detail_level,
+                1 if is_public_safe else 0,
+                json.dumps(private_fields or {}),
+                now,
+                now,
+            ),
+        )
+        self._conn.commit()
+        record = self.get_by_id(card_id)
+        assert record is not None
+        return record
+
+    def list_public_safe(self, limit: int = 100) -> list[PublicCardRecord]:
+        rows = self._conn.execute(
+            """
+            SELECT id, type, title, summary, confidence, concepts_json,
+                   source_count, claim_ids_json, public_detail_level,
+                   is_public_safe, private_fields_json, created_at, updated_at
+            FROM public_cards
+            WHERE is_public_safe = 1
+            ORDER BY updated_at DESC, id
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+        return [_row_to_public_card(row) for row in rows]
+
+
+def _row_to_public_card(row: sqlite3.Row) -> PublicCardRecord:
+    return PublicCardRecord(
+        id=row["id"],
+        type=row["type"],
+        title=row["title"],
+        summary=row["summary"],
+        confidence=row["confidence"],
+        concepts_json=row["concepts_json"],
+        source_count=int(row["source_count"]),
+        claim_ids_json=row["claim_ids_json"],
+        public_detail_level=row["public_detail_level"],
+        is_public_safe=int(row["is_public_safe"]),
+        private_fields_json=row["private_fields_json"],
+        created_at=row["created_at"],
+        updated_at=row["updated_at"],
+    )
+
+
+def public_card_record_to_export_dict(
+    record: PublicCardRecord,
+    extras: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Map a DB record to curated public card JSON."""
+    card: dict[str, Any] = {
+        "id": record.id,
+        "type": record.type,
+        "title": record.title,
+        "summary": record.summary,
+        "confidence": record.confidence,
+        "concepts": json.loads(record.concepts_json or "[]"),
+        "source_count": record.source_count,
+        "public_detail_level": record.public_detail_level,
+        "updated_at": record.updated_at,
+    }
+    if extras:
+        for key in ("public_caveats", "public_source_metadata", "related_cards"):
+            if key in extras:
+                card[key] = extras[key]
+    return card

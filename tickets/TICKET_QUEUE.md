@@ -40,7 +40,16 @@ superseded
 | 11 | ticket-011 | done | Add mock contradiction detection (Golden Test 7) | `phase-1/ticket-011-mock-contradiction-detection` | `agent_reports/2026-06-11_phase-1_ticket-011_mock-contradiction-detection.md` |
 | 12 | ticket-012 | done | Add mock research queue ranking (Golden Test 9) | `phase-1/ticket-012-mock-research-queue` | `agent_reports/2026-06-11_phase-1_ticket-012_mock-research-queue.md` |
 | 13 | ticket-013 | done | Add research contract drift gating (Golden Test 10) | `phase-1/ticket-013-research-contract-drift` | `agent_reports/2026-06-11_phase-1_ticket-013_research-contract-drift.md` |
-| 14 | ticket-014 | proposed | Add public card export with safety filtering (Golden Test 11) | | |
+| 14 | ticket-014 | done | Add public card export with safety filtering (Golden Test 11) | `phase-1/ticket-014-public-card-export` | `agent_reports/2026-06-11_phase-1_ticket-014_public-card-export.md` |
+| 15 | ticket-015 | proposed | Add public site card and concept detail pages (Golden Test 12) | | |
+
+## Queue Notes (2026-06-11, ticket-014 agent)
+
+- ticket-014 implemented `research export-public` with deterministic safety validation,
+  golden card seeding from accepted claims, and JSON writes to `data/exports/` plus
+  `apps/public-site/public/data/`. Golden Test 11 passes (4 tests); all 59 golden
+  tests pass without Ollama; public site static build succeeds.
+- ticket-015 proposes public site card/concept detail pages for Golden Test 12.
 
 ## Queue Notes (2026-06-11, ticket-013 agent)
 
@@ -111,7 +120,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-014 (proposed; awaiting review)
+ticket-015 (proposed; awaiting review)
 ```
 
 ## Queue Rules
