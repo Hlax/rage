@@ -73,7 +73,9 @@ $env:RGE_LLM_MODE="mock"
 | State | Status |
 |---|---|
 | `main` at `daeeeb6` (pre-hotfix) | **BLOCKED** — CI packaging step fails |
-| After hotfix merge/push | **PENDING CI** — install path verified locally; await GitHub Golden Gate green run |
+| Hotfix commit | `2548a98` on `hotfix/packaging-readme-utf8` |
+| Merge on `main` | `ac0189b` pushed to `origin/main` |
+| Post-hotfix | **PENDING CI** — install path verified locally; GitHub Golden Gate not queried (`gh` unauthenticated) |
 
 ## Next safest move
 
