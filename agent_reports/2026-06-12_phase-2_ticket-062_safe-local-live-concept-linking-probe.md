@@ -84,8 +84,9 @@ implementation. Next cadence checkpoint due after 3 consecutive done tickets.
 
 ## Merge
 
-- Ticket commit SHA: (pending commit)
-- Main push SHA: (pending merge)
+- Ticket commit SHA: `ac3223d350501ed8a152623dedca990fcf4ceab5`
+- Main push SHA: `ac3223d350501ed8a152623dedca990fcf4ceab5` (fast-forward)
+- Golden Gate run: **27438854597** — **success** at `ac3223d`
 
 ## Recommended next move
 
