@@ -65,8 +65,9 @@ Not required (test-only meta-gate map; no public surface changes).
 
 ## 9. Merge to Main
 
-- Merge commit: _(recorded after merge)_
+- Merge commit: `b859fda`
 - Branch: `phase-1/ticket-031-builder-golden-gate-public-site` merged to `main`.
+- Post-merge pytest on `main`: 118 passed.
 
 ## 10. Recommended Next Ticket
 
