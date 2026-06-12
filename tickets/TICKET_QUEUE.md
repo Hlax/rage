@@ -50,7 +50,16 @@ superseded
 | 21 | ticket-021 | done | Add research run report (Golden Test 19) | `phase-1/ticket-021-run-report` | `agent_reports/2026-06-12_phase-1_ticket-021_run-report.md` |
 | 22 | ticket-022 | done | Add improvement ticket generation (Golden Test 20) | `phase-1/ticket-022-improvement-tickets` | `agent_reports/2026-06-12_phase-1_ticket-022_improvement-tickets.md` |
 | 23 | ticket-023 | done | Validate improvement tickets for builder consumption (Golden Test 21) | `phase-1/ticket-023-builder-ticket-consumption` | `agent_reports/2026-06-12_phase-1_ticket-023_builder-ticket-consumption.md` |
-| 24 | ticket-024 | proposed | Add builder golden merge gate (Golden Test 22) | | |
+| 24 | ticket-024 | done | Add builder golden merge gate (Golden Test 22) | `phase-1/ticket-024-builder-golden-gate` | `agent_reports/2026-06-12_phase-1_ticket-024_builder-golden-gate.md` |
+| 25 | ticket-025 | proposed | Add safety audit merge gate (Golden Test 23) | | |
+
+## Queue Notes (2026-06-12, ticket-024 agent)
+
+- ticket-024 implemented Golden Test 22 merge gate meta-tests with
+  `BUILDER_MERGE_GATE_COMMAND` and required golden area coverage map (4 tests).
+  All 101 golden tests pass without Ollama.
+- ticket-025 proposes safety audit merge gate for Golden Test 23 (medium risk;
+  pre-ticket audit recommended).
 
 ## Queue Notes (2026-06-12, ticket-023 agent)
 
@@ -206,7 +215,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-024 (proposed; awaiting review)
+ticket-025 (proposed; awaiting review — pre-ticket audit recommended)
 ```
 
 ## Queue Rules
