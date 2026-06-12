@@ -1,0 +1,53 @@
+{
+  "id": "ticket-067",
+  "title": "Multi-fixture prompt calibration for local live mini-run suite",
+  "problem": "Ticket-066 suite exposed three failing fixtures: relationship drafting on GT02-style sources (wrong concept labels / claim id handoff) and claim extraction on the contradiction source (overlong scope). Operators need calibrated prompts and a controlled contradiction fixture so at least two suite fixtures pass report-only floors.",
+  "evidence": [
+    "agent_reports/2026-06-12_phase-2_ticket-066_multi-fixture-mini-run-repeatability.md",
+    "agent_reports/2026-06-12_pre-ticket-067_multi-fixture-prompt-calibration.md",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "affected_modules": [
+    "rge/llm/ollama_client.py",
+    "rge/modules/live_probe.py",
+    "fixtures/sources/live_probe_diversity_calibration_short.txt",
+    "fixtures/sources/live_probe_contradiction_calibration_short.txt",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "expected_files": [
+    "rge/llm/ollama_client.py",
+    "rge/modules/live_probe.py",
+    "fixtures/sources/live_probe_diversity_calibration_short.txt",
+    "fixtures/sources/live_probe_contradiction_calibration_short.txt",
+    "tests/unit/test_ollama_claim_prompt.py",
+    "tests/unit/test_ollama_relationship_prompt.py",
+    "tests/unit/test_live_probe_mini_run_cli.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "tickets/ticket-067.json",
+    "agent_reports/2026-06-12_phase-2_ticket-067_multi-fixture-prompt-calibration.md"
+  ],
+  "acceptance_criteria": [
+    "Relationship prompt requires subject/object labels copied from allowed concept list only.",
+    "Mini-run relationship stage accepts all probe-local claim ids from stage 1 handoff.",
+    "Claim prompt adds concise-scope guidance and divergent-condition example.",
+    "Suite uses live_probe_contradiction_calibration_short.txt instead of long contradiction passage.",
+    "Live probe-mini-run-suite: at least two of four fixtures pass floors on qwen2.5:7b.",
+    "Mock pytest and verify remain green without Ollama.",
+    "No DB writes, export, cloud keys, or ticket authority for Qwen."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_ollama_claim_prompt.py tests/unit/test_ollama_relationship_prompt.py tests/unit/test_live_probe_mini_run_cli.py -q",
+    "RGE_LLM_MODE=mock python -m pytest -q",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site",
+    "Manual live: probe-mini-run-suite with ollama opt-in"
+  ],
+  "non_goals": [
+    "Do not weaken relationship or claim validators.",
+    "Do not add scratch DB persistence.",
+    "Do not add OpenAI/OpenRouter.",
+    "Do not let Qwen author tickets."
+  ],
+  "risk_level": "low-medium",
+  "rollback_plan": "Revert prompt, mini-run handoff, calibration fixture, and docs.",
+  "status": "done"
+}

@@ -127,9 +127,13 @@ python -m rge.cli probe-mini-run-suite --strict-chain
 | Fixture | Purpose |
 | ------- | ------- |
 | `fixtures/sources/live_probe_claim_calibration_short.txt` | ticket-061 calibration baseline |
-| `fixtures/sources/creativity_ai_diversity_short.txt` | golden GT02-style passage |
+| `fixtures/sources/live_probe_diversity_calibration_short.txt` | GT02-style scoped calibration (ticket-067) |
 | `fixtures/sources/creativity_ai_diversity_followup_short.txt` | replication-style short source |
-| `fixtures/sources/creativity_ai_diversity_contradiction.txt` | divergent-condition source |
+| `fixtures/sources/live_probe_contradiction_calibration_short.txt` | divergent-condition calibration (ticket-067) |
+
+The long golden passages (`creativity_ai_diversity_short.txt`,
+`creativity_ai_diversity_contradiction.txt`) remain for mock/golden tests but are
+not default suite fixtures.
 
 Repeat `--fixture-source` to override the default list.
 

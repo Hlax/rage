@@ -98,6 +98,21 @@ superseded
 | 64 | ticket-064 | done | Safe local live contradiction-detection probe CLI | `phase-2/ticket-064-safe-local-live-contradiction-probe` | `agent_reports/2026-06-12_phase-2_ticket-064_safe-local-live-contradiction-probe.md` |
 | 65 | ticket-065 | done | Report-only local live mini-run chain | `phase-2/ticket-065-local-live-mini-run-chain` | `agent_reports/2026-06-12_phase-2_ticket-065_local-live-mini-run-chain.md` |
 | 66 | ticket-066 | done | Multi-fixture local live mini-run repeatability | `phase-2/ticket-066-multi-fixture-mini-run-repeatability` | `agent_reports/2026-06-12_phase-2_ticket-066_multi-fixture-mini-run-repeatability.md` |
+| 67 | ticket-067 | done | Multi-fixture prompt calibration for local live mini-run suite | `phase-2/ticket-067-multi-fixture-prompt-calibration` | `agent_reports/2026-06-12_phase-2_ticket-067_multi-fixture-prompt-calibration.md` |
+
+## Queue Notes (2026-06-12, ticket-067 agent)
+
+- Calibrated Ollama claim/relationship prompts; mini-run multi-claim id handoff.
+- Added diversity + contradiction calibration fixtures for suite.
+- Live suite: 3/4 fixtures pass floors; followup contradiction stage still flaky.
+- ticket-059 OpenAI remains deferred.
+
+## Queue Notes (2026-06-12, ticket-067 seed)
+
+- Pre-ticket audit GO: `agent_reports/2026-06-12_pre-ticket-067_multi-fixture-prompt-calibration.md`.
+- Calibrates Ollama claim/relationship prompts; mini-run multi-claim handoff; contradiction calibration fixture.
+- Goal: at least two suite fixtures pass floors; still report-only.
+- ticket-059 OpenAI remains deferred.
 
 ## Queue Notes (2026-06-12, ticket-066 agent)
 

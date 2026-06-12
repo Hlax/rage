@@ -1,0 +1,13 @@
+Live probe GT02 calibration fixture (ticket-067).
+Scoped variant of creativity_ai_diversity_short for mini-run suite repeatability.
+
+In short-form writing tasks, AI-assisted brainstorming increased average idea quality
+across submitted ideas. Independent raters scored ideas produced with AI assistance
+higher on usefulness and coherence in short-form writing tasks.
+
+In short-form writing tasks, AI-assisted brainstorming reduced semantic diversity
+across submitted ideas.
+
+Limitations: the sample consisted of undergraduate students from introductory
+writing courses. Results may not generalize to film, music, or professional
+creative work.

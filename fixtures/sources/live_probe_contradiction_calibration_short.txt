@@ -1,0 +1,12 @@
+Live probe calibration fixture (ticket-067).
+Controlled source for divergent-condition claim extraction in mini-run suite.
+
+In ideation tasks under a divergent condition, AI-assisted brainstorming
+increased idea diversity when participants were instructed to generate multiple
+divergent directions before elaborating any single idea.
+
+In the default condition ideation tasks, AI assistance narrowed semantic spread
+across submitted ideas, consistent with prior short-form writing findings.
+
+Limitations: diversity was rated rather than embedding-based; tasks were general
+ideation prompts only.

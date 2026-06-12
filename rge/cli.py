@@ -2098,8 +2098,8 @@ def build_parser() -> argparse.ArgumentParser:
         description=(
             "Run the hybrid mini-run chain across multiple committed creativity "
             "source fixtures and write one suite summary plus individual mini-run "
-            "reports. Default fixtures: calibration short, creativity_ai_diversity_short, "
-            "followup short, contradiction source. Requires RGE_LLM_MODE=ollama and "
+            "reports. Default fixtures: calibration short, diversity calibration short, "
+            "followup short, contradiction calibration short. Requires RGE_LLM_MODE=ollama and "
             "RGE_ALLOW_LIVE_LLM=1."
         ),
     )

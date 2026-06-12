@@ -24,6 +24,8 @@ def test_relationship_drafting_prompt_includes_labels_and_validation_rules() -> 
     )
     assert "Allowed concept labels" in prompt
     assert "brainstorming" in prompt
+    assert "copied exactly from the allowed concept labels list" in prompt
+    assert "Do NOT invent new concept labels" in prompt
     assert "supporting_claim_ids" in prompt
     assert "claim_live_probe_link_001" in prompt
     assert "low" in prompt and "medium" in prompt and "high" in prompt

@@ -212,6 +212,7 @@ class OllamaModelClient(ModelClient):
             "Rules for each claim:\n"
             "- quote_span MUST be an exact contiguous substring from the source text.\n"
             "- scope MUST be a short, specific boundary phrase (population, task, or setting).\n"
+            "- scope SHOULD be concise (about 3-7 words); avoid long multi-clause scope strings.\n"
             "- claim_text MUST include the scope phrase verbatim (same wording as scope).\n"
             "- subject, predicate, and object MUST be non-empty strings.\n"
             "- Do NOT produce universal claims (e.g. 'AI reduces creativity').\n"
@@ -227,6 +228,20 @@ class OllamaModelClient(ModelClient):
             '  "evidence_type": "empirical",\n'
             '  "confidence": 0.7,\n'
             '  "limitations": ["Only tested short-form writing tasks."],\n'
+            f'  "domain": "{domain_pack}",\n'
+            '  "domain_metadata": {}\n'
+            "}\n\n"
+            "Positive example (divergent-condition shape):\n"
+            "{\n"
+            '  "claim_text": "AI-assisted brainstorming increased idea diversity in ideation tasks under a divergent condition.",\n'
+            '  "quote_span": "AI-assisted brainstorming increased idea diversity when participants were instructed to generate multiple divergent directions",\n'
+            '  "subject": "AI-assisted brainstorming",\n'
+            '  "predicate": "increased",\n'
+            '  "object": "idea diversity",\n'
+            '  "scope": "divergent condition ideation tasks",\n'
+            '  "evidence_type": "empirical",\n'
+            '  "confidence": 0.7,\n'
+            '  "limitations": ["Ideation tasks only."],\n'
             f'  "domain": "{domain_pack}",\n'
             '  "domain_metadata": {}\n'
             "}\n\n"
@@ -348,6 +363,12 @@ class OllamaModelClient(ModelClient):
                 break
         if not example_scope:
             example_scope = "short-form writing tasks"
+        example_subject = concept_labels[0] if concept_labels else "AI assistance"
+        example_object = (
+            concept_labels[1]
+            if len(concept_labels) > 1
+            else example_subject
+        )
         labels_json = json.dumps(concept_labels, ensure_ascii=False)
         return (
             f"You are a research relationship-drafting assistant for domain pack "
@@ -359,7 +380,10 @@ class OllamaModelClient(ModelClient):
             f"Valid claim ids for supporting_claim_ids: "
             f"{json.dumps(claim_ids, ensure_ascii=False)}\n\n"
             "Rules for each relationship:\n"
-            "- subject_concept and object_concept MUST use allowed concept labels.\n"
+            "- subject_concept and object_concept MUST be copied exactly from the "
+            "allowed concept labels list (same spelling and casing).\n"
+            "- Do NOT invent new concept labels (e.g. 'idea quality') or paraphrase "
+            "claim subjects when a linked label such as 'AI assistance' is available.\n"
             "- predicate MUST be a short verb phrase.\n"
             "- stance MUST be supports, contradicts, or qualifies.\n"
             "- scope MUST be non-empty; prefer the claim scope phrase when present.\n"
@@ -367,22 +391,22 @@ class OllamaModelClient(ModelClient):
             "- supporting_claim_ids MUST reference valid claim ids exactly.\n\n"
             "Positive example (accepted shape):\n"
             "{\n"
-            '  "subject_concept": "AI assistance",\n'
+            f'  "subject_concept": "{example_subject}",\n'
             '  "predicate": "supports",\n'
-            '  "object_concept": "ideation",\n'
+            f'  "object_concept": "{example_object}",\n'
             '  "stance": "supports",\n'
             f'  "scope": "{example_scope}",\n'
             '  "confidence": "medium",\n'
             f'  "supporting_claim_ids": ["{example_claim_id}"]\n'
             "}\n\n"
-            "Negative example (rejected — invalid confidence):\n"
+            "Negative example (rejected — label not in allowed list):\n"
             "{\n"
-            '  "subject_concept": "brainstorming",\n'
-            '  "predicate": "relates_to",\n'
-            '  "object_concept": "ideation",\n'
+            '  "subject_concept": "AI-assisted brainstorming",\n'
+            '  "predicate": "supports",\n'
+            '  "object_concept": "idea quality",\n'
             '  "stance": "supports",\n'
             f'  "scope": "{example_scope}",\n'
-            '  "confidence": "0.8",\n'
+            '  "confidence": "medium",\n'
             f'  "supporting_claim_ids": ["{example_claim_id}"]\n'
             "}\n\n"
             "Return ONLY valid JSON matching this shape:\n"

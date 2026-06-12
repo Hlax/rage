@@ -17,5 +17,7 @@ def test_claim_extraction_prompt_requires_subject_predicate_object_and_scoped_cl
     assert '"predicate"' in prompt
     assert '"object"' in prompt
     assert "include the scope phrase verbatim" in prompt
+    assert "concise (about 3-7 words)" in prompt
+    assert "divergent condition ideation tasks" in prompt
     assert "Positive example" in prompt
     assert "Negative example" in prompt

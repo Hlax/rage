@@ -72,7 +72,10 @@ DEFAULT_PROBE_CONTRADICTION_BUNDLE = (
 )
 MINI_RUN_SUITE_FIXTURES: tuple[Path, ...] = (
     DEFAULT_PROBE_FIXTURE,
-    LEGACY_PROBE_FIXTURE,
+    Path(__file__).resolve().parents[2]
+    / "fixtures"
+    / "sources"
+    / "live_probe_diversity_calibration_short.txt",
     Path(__file__).resolve().parents[2]
     / "fixtures"
     / "sources"
@@ -80,7 +83,7 @@ MINI_RUN_SUITE_FIXTURES: tuple[Path, ...] = (
     Path(__file__).resolve().parents[2]
     / "fixtures"
     / "sources"
-    / "creativity_ai_diversity_contradiction.txt",
+    / "live_probe_contradiction_calibration_short.txt",
 )
 MINI_RUN_STAGE_FLOOR_KEYS: tuple[str, ...] = (
     "claim_extraction",
@@ -1222,7 +1225,9 @@ def run_probe_mini_run(
     input_claim = dict(input_claims[0])
     input_concepts = concept_dicts_from_links(link_accepted)
     concept_labels = {concept["label"] for concept in input_concepts}
-    accepted_claim_ids = {input_claim["id"]}
+    accepted_claim_ids = {
+        claim["id"] for claim in input_claims if claim.get("id")
+    }
 
     try:
         relationship_proposed = propose_relationship_drafts(
