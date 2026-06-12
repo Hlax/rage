@@ -205,15 +205,17 @@ def _audit_model_tool_permissions(root: Path) -> tuple[list[str], list[str]]:
 
 
 def _audit_prompt_injection_policy(root: Path) -> tuple[list[str], list[str]]:
-    """Verify prompt-injection policy modules exist; GT24 covers runtime behavior."""
+    """Verify prompt-injection policy and deterministic GT24 evidence exist."""
     checked = [
         "rge/safety/prompt_injection.py",
-        "fixtures/sources (untrusted source text policy)",
+        "fixtures/sources/prompt_injection_creativity_short.txt",
+        "fixtures/llm_outputs/claim_extraction_prompt_injection.json",
+        "tests/golden/test_24_prompt_injection.py",
     ]
     blocked: list[str] = []
-    policy_path = root / "rge" / "safety" / "prompt_injection.py"
-    if not policy_path.is_file():
-        blocked.append("missing prompt injection policy module")
+    for relative_path in checked:
+        if not (root / relative_path).is_file():
+            blocked.append(f"missing prompt injection protection evidence: {relative_path}")
     return checked, blocked
 
 

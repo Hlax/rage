@@ -36,5 +36,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert branch phase-1/ticket-026-prompt-injection.",
-  "status": "proposed"
+  "status": "done"
 }

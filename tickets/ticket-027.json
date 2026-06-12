@@ -1,0 +1,42 @@
+{
+  "id": "ticket-027",
+  "title": "Add public-site debug details without private data exposure (Golden Test 25)",
+  "problem": "ticket-026 completes prompt-injection fixture handling, but Golden Test 25 requires the read-only public site to show richer debug/research detail without exposing raw prompts, private evaluator notes, local paths, full source text, API keys, hidden reasoning, or unreviewed draft claims.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 25: public site can display debug details without exposing private data.",
+    "docs/agents/10_SAFETY_MODEL.md sections 7-8: public export and public site safety.",
+    "agent_reports/2026-06-12_phase-1_ticket-026_prompt-injection.md sections 11-13."
+  ],
+  "affected_modules": [
+    "apps/public-site/app/cards/[id]/page.tsx",
+    "apps/public-site/lib/publicCards.ts",
+    "rge/modules/card_exporter.py"
+  ],
+  "expected_files": [
+    "apps/public-site/app/cards/[id]/page.tsx",
+    "apps/public-site/lib/publicCards.ts",
+    "rge/modules/card_exporter.py",
+    "tests/golden/test_25_public_site_debug_details.py"
+  ],
+  "acceptance_criteria": [
+    "Card detail pages show public-safe debug details such as evidence type, public caveats, public source metadata, related cards, and public run timestamp.",
+    "No raw prompt text, private evaluator notes, local paths, full source text, API keys, hidden internal reasoning, or unreviewed draft claims render in public debug details.",
+    "pytest tests/golden/test_25_public_site_debug_details.py passes.",
+    "Existing golden tests still pass (110+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_25_public_site_debug_details.py",
+    "pytest tests/golden",
+    "pytest",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "Do not add public write routes.",
+    "Do not expose local SQLite or local FastAPI.",
+    "Do not render raw HTML from card JSON.",
+    "Do not change prompt-injection handling."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert branch phase-1/ticket-027-public-site-debug-details.",
+  "status": "proposed"
+}

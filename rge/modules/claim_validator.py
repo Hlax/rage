@@ -11,10 +11,16 @@ from __future__ import annotations
 
 from typing import Any
 
+from rge.safety.prompt_injection import (
+    REJECTION_REASON_INJECTED_CONTENT,
+    candidate_has_prompt_injection,
+)
+
 REJECTION_MISSING_QUOTE = "missing_quote_span"
 REJECTION_OVERGENERALIZED = "overgeneralized_scope"
 REJECTION_MISSING_SOURCE = "missing_source_id"
 REJECTION_UNSUPPORTED = "unsupported_claim"
+REJECTION_INJECTED_CONTENT = REJECTION_REASON_INJECTED_CONTENT
 
 _OVERGENERALIZED_CLAIM_PATTERNS = (
     "ai reduces creativity",
@@ -56,6 +62,9 @@ def validate_candidate_claim(
 
     if not _quote_in_chunk(str(quote_span), chunk_text):
         return "rejected", None, REJECTION_UNSUPPORTED
+
+    if candidate_has_prompt_injection(candidate):
+        return "rejected", None, REJECTION_INJECTED_CONTENT
 
     scope = candidate.get("scope")
     if not scope or not str(scope).strip():

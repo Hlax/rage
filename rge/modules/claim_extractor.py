@@ -18,6 +18,7 @@ from rge.config import load_config
 from rge.llm.registry import get_model_client
 from rge.llm.schemas import CandidateClaimBatch_v0_1
 from rge.modules.claim_validator import validate_candidate_claims
+from rge.safety.prompt_injection import source_text_has_prompt_injection_fixture
 
 
 def _candidate_to_dict(item: Any) -> dict[str, Any]:
@@ -70,6 +71,8 @@ def extract_candidate_claims(
 
 def _default_fixture_for_chunk(chunk: dict[str, Any]) -> str:
     chunk_text = chunk.get("chunk_text", "")
+    if source_text_has_prompt_injection_fixture(chunk_text):
+        return "claim_extraction_prompt_injection.json"
     if _is_creativity_diversity_chunk(chunk_text):
         return "claim_extraction_creativity_scoped.json"
     return "claim_extraction_valid_and_missing_quote.json"
