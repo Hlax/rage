@@ -56,7 +56,14 @@ superseded
 | 27 | ticket-027 | done | Add public-site debug details without private data exposure (Golden Test 25) | `phase-1/ticket-027-public-site-debug-details` | `agent_reports/2026-06-12_phase-1_ticket-027_public-site-debug-details.md` |
 | 28 | ticket-028 | done | Full MVP end-to-end golden run (Golden Test 26) | `phase-1/ticket-028-full-mvp-run` | `agent_reports/2026-06-12_phase-1_ticket-028_full-mvp-run.md` |
 | 29 | ticket-029 | done | Extend builder golden gate for full MVP run (Golden Test 26) | `phase-1/ticket-029-builder-golden-gate-mvp` | `agent_reports/2026-06-12_phase-1_ticket-029_builder-golden-gate-mvp.md` |
-| 30 | ticket-030 | proposed | Extend builder golden gate for safety and prompt-injection (Golden Tests 23-24) | | |
+| 30 | ticket-030 | done | Extend builder golden gate for safety and prompt-injection (Golden Tests 23-24) | `phase-1/ticket-030-builder-golden-gate-safety` | `agent_reports/2026-06-12_phase-1_ticket-030_builder-golden-gate-safety.md` |
+| 31 | ticket-031 | proposed | Extend builder golden gate for public-site debug details (Golden Test 25) | | |
+
+## Queue Notes (2026-06-12, ticket-030 agent)
+
+- ticket-030 added `safety_audit_gate` (GT23) and `prompt_injection` (GT24) to Golden
+  Test 22 `REQUIRED_GOLDEN_AREAS`. All 118 golden tests pass.
+- ticket-031 proposes public-site debug builder gate coverage for GT25.
 
 ## Queue Notes (2026-06-12, ticket-029 agent)
 
@@ -268,7 +275,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-030 (proposed; awaiting review)
+ticket-031 (proposed; awaiting review)
 ```
 
 ## Queue Rules
