@@ -409,7 +409,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-none (ticket-041 committed on branch; await merge to main)
+none (ticket-041 merged to main; select next ticket — ticket-042 per roadmap)
 ```
 
 ## Queue Rules

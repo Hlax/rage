@@ -11,6 +11,7 @@ from rge.modules.operator_loop import (
     build_operator_plan,
     detect_documentation_git_drift,
     execute_safe_checks,
+    is_audit_only_ticket,
     pending_improvement_tickets,
 )
 from rge.modules.principal_audit_gate import QueueTicketRow
@@ -232,6 +233,75 @@ def test_pending_improvement_helper_detects_drafts(tmp_path: Path) -> None:
 
     assert report["pending"] is True
     assert report["draft_count"] == 1
+
+
+def test_audit_only_ticket_skips_done_without_commit_check(tmp_path: Path) -> None:
+    (tmp_path / "tickets").mkdir(parents=True)
+    (tmp_path / "tickets" / "ticket-033.json").write_text(
+        json.dumps(
+            {
+                "id": "ticket-033",
+                "title": "Pre-phase-2 principal audit checkpoint",
+                "affected_modules": [],
+                "expected_files": ["agent_reports/2026-06-12_pre-phase-2_principal-audit.md"],
+                "status": "done",
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert is_audit_only_ticket("ticket-033", root=tmp_path) is True
+
+    (tmp_path / ".git").mkdir()
+    rows = [QueueTicketRow(order=33, ticket_id="ticket-033", status="done")]
+
+    def empty_log(argv: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(argv, 0, stdout="", stderr="")
+
+    violations = detect_documentation_git_drift(
+        root=tmp_path,
+        working_tree=WorkingTreeStatus(clean=True, branch="main", dirty_paths=[]),
+        rows=rows,
+        active_row=None,
+        active_ticket_json=None,
+        latest_report_path=None,
+        log_runner=empty_log,
+    )
+    assert not any(
+        item["kind"] == "done_without_implementation_commit" for item in violations
+    )
+
+
+def test_merged_ticket_report_branch_allowed_on_main(tmp_path: Path) -> None:
+    reports = tmp_path / "agent_reports"
+    reports.mkdir(parents=True)
+    report = reports / "2026-06-12_phase-2_ticket-041_operator-loop-runner.md"
+    report.write_text(
+        "Branch: `phase-2/ticket-041-operator-loop-runner`\n",
+        encoding="utf-8",
+    )
+    (tmp_path / ".git").mkdir()
+
+    def log_with_commit(argv: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
+        if "--grep=ticket-041" in " ".join(argv):
+            return subprocess.CompletedProcess(
+                argv, 0, stdout="80a12a6 Implement ticket-041\n", stderr=""
+            )
+        return subprocess.CompletedProcess(argv, 0, stdout="", stderr="")
+
+    violations = detect_documentation_git_drift(
+        root=tmp_path,
+        working_tree=WorkingTreeStatus(
+            clean=True,
+            branch="main",
+            dirty_paths=[],
+        ),
+        rows=[],
+        active_row=None,
+        active_ticket_json=None,
+        latest_report_path=str(report.relative_to(tmp_path)),
+        log_runner=log_with_commit,
+    )
+    assert not any(item["kind"] == "report_branch_mismatch" for item in violations)
 
 
 def test_branch_mismatch_blocks_in_progress_ticket(tmp_path: Path) -> None:

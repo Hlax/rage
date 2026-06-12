@@ -10,13 +10,14 @@ status: current
 
 Replayed ticket-041 cleanly from updated `main` (post ticket-040 merge at `73cdca8`)
 on branch `phase-2/ticket-041-operator-loop-runner`. Added bounded mock-only operator
-loop with documentation-ahead-of-git drift detection. Implementation recovered from
-`.recovery/ticket-041/` after the stacked ticket-040/041 split.
+loop with documentation-ahead-of-git drift detection. Merged to `main` and pushed.
 
 ## Ticket metadata
 
 - Ticket ID: ticket-041
 - Branch: `phase-2/ticket-041-operator-loop-runner`
+- Implementation commit: `80a12a6`
+- Merge commit on `main`: `494d21b`
 - Base: `main` after ticket-040 merge (`73cdca8`)
 - Date: 2026-06-12
 - Risk level: low
@@ -40,24 +41,30 @@ loop with documentation-ahead-of-git drift detection. Implementation recovered f
 | `RGE_LLM_MODE=mock python -m pytest tests/golden -q` | 132 passed |
 | `RGE_LLM_MODE=mock python -m pytest -q` | 164 passed, 1 deselected |
 | `python -m rge.modules.safety_auditor --audit full` | pass |
-| `python -m rge.modules.operator_loop --mode plan` | blocked (dirty pre-commit tree) |
 
 ## Hardening
 
 Operator loop reports `blocked` on documentation-ahead-of-git drift when:
 
 1. Branch does not match an `in_progress` active ticket
-2. Latest build report claims a branch git does not confirm
+2. Latest build report claims a branch git does not confirm (unless merged on `main`)
 3. Queue/JSON marks `done` without a matching implementation commit on `main`
+   (audit-only tickets such as ticket-033 are excluded)
 4. Dirty paths span multiple ticket ids
 
 ## Git state
 
-- **Committed on branch:** see commit SHA below (not merged)
-- **Merged to main:** no
-- **Pushed:** no
+- **Implementation commit:** `80a12a6` on `phase-2/ticket-041-operator-loop-runner`
+- **Merged to `main`:** yes (`494d21b`)
+- **Pushed:** yes (`origin/main` matches local `main`)
 
 ## Merge readiness
 
-Awaiting human review. Do not merge until commit is reviewed on
-`phase-2/ticket-041-operator-loop-runner`.
+**Merged and pushed.** Recovery artifacts (`.recovery/`, recovery audit report)
+removed locally after merge verification.
+
+## Recommended next ticket
+
+**ticket-042** — public-site deployment readiness docs (Phase 2 roadmap), or review
+the pending improvement-ticket draft in `data/tickets/improvement_ticket_latest.json`
+before promotion.

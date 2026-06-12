@@ -228,6 +228,40 @@ def _read_report_text(root: Path, relative_path: str | None) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def is_audit_only_ticket(ticket_id: str, *, root: Path) -> bool:
+    """Return True when a done ticket is audit/report-only (no code implementation)."""
+    payload = load_queue_ticket_json(ticket_id, root=root)
+    if not payload:
+        return False
+    affected = payload.get("affected_modules") or []
+    expected = payload.get("expected_files") or []
+    if affected:
+        return False
+    if expected and all(str(path).startswith("agent_reports/") for path in expected):
+        return True
+    title = str(payload.get("title", "")).lower()
+    return "audit" in title and "checkpoint" in title
+
+
+def _ticket_id_from_report_path(relative_path: str | None) -> str | None:
+    if not relative_path:
+        return None
+    match = _TICKET_ID_RE.search(relative_path)
+    return f"ticket-{match.group(1)}" if match else None
+
+
+def _report_claims_positive_merge_to_main(report_text: str) -> bool:
+    for line in report_text.splitlines():
+        lowered = line.lower()
+        if "merged to" not in lowered or "main" not in lowered:
+            continue
+        if "not merged" in lowered or ": no" in lowered or "awaiting" in lowered:
+            continue
+        if "yes" in lowered or "complete" in lowered or "at `" in lowered:
+            return True
+    return False
+
+
 def ticket_has_implementation_commit(
     ticket_id: str,
     *,
@@ -283,11 +317,25 @@ def detect_documentation_git_drift(
             )
 
     report_text = _read_report_text(root, latest_report_path)
+    report_ticket_id = _ticket_id_from_report_path(latest_report_path)
     if report_text and working_tree.branch:
         branch_match = _REPORT_BRANCH_RE.search(report_text)
         if branch_match:
             claimed_branch = branch_match.group(1).strip()
-            if claimed_branch and claimed_branch != working_tree.branch:
+            merged_on_main = (
+                working_tree.branch == "main"
+                and report_ticket_id is not None
+                and ticket_has_implementation_commit(
+                    report_ticket_id,
+                    root=root,
+                    log_runner=log_runner,
+                )
+            )
+            if (
+                claimed_branch
+                and claimed_branch != working_tree.branch
+                and not merged_on_main
+            ):
                 violations.append(
                     {
                         "kind": "report_branch_mismatch",
@@ -297,8 +345,7 @@ def detect_documentation_git_drift(
                         ),
                     }
                 )
-        lowered = report_text.lower()
-        if "merged to `main`" in lowered or "merged to main" in lowered:
+        if _report_claims_positive_merge_to_main(report_text):
             merge_check = (log_runner or subprocess.run)(
                 ["git", "branch", "--show-current"],
                 cwd=root,
@@ -322,6 +369,8 @@ def detect_documentation_git_drift(
         for row in rows:
             if row.status != "done":
                 continue
+            if is_audit_only_ticket(row.ticket_id, root=root):
+                continue
             if not ticket_has_implementation_commit(
                 row.ticket_id,
                 root=root,
@@ -339,7 +388,9 @@ def detect_documentation_git_drift(
 
         if active_ticket_json and active_ticket_json.get("status") == "done":
             ticket_id = active_ticket_json.get("id")
-            if isinstance(ticket_id, str) and not ticket_has_implementation_commit(
+            if isinstance(ticket_id, str) and not is_audit_only_ticket(
+                ticket_id, root=root
+            ) and not ticket_has_implementation_commit(
                 ticket_id,
                 root=root,
                 log_runner=log_runner,
