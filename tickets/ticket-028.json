@@ -33,5 +33,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert branch phase-1/ticket-028-full-mvp-run.",
-  "status": "proposed"
+  "status": "done"
 }

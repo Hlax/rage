@@ -1,0 +1,33 @@
+{
+  "id": "ticket-029",
+  "title": "Extend builder golden gate for full MVP run (Golden Test 26)",
+  "problem": "ticket-028 completes the fixture-mode full MVP orchestrator, but Golden Test 22 builder merge gate coverage map does not yet list the full MVP run area.",
+  "evidence": [
+    "docs/agents/00_GOLDEN_TESTS.md Test 26: full MVP run proves the system is real.",
+    "tests/golden/test_22_builder_golden_gate.py REQUIRED_GOLDEN_AREAS map.",
+    "agent_reports/2026-06-12_phase-1_ticket-028_full-mvp-run.md sections 11-12."
+  ],
+  "affected_modules": [
+    "tests/golden/test_22_builder_golden_gate.py"
+  ],
+  "expected_files": [
+    "tests/golden/test_22_builder_golden_gate.py"
+  ],
+  "acceptance_criteria": [
+    "REQUIRED_GOLDEN_AREAS includes full_mvp_run mapped to test_26_full_mvp_run.py.",
+    "pytest tests/golden/test_22_builder_golden_gate.py passes.",
+    "Existing golden tests still pass (118+)."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_22_builder_golden_gate.py",
+    "pytest tests/golden",
+    "pytest"
+  ],
+  "non_goals": [
+    "Do not change fixture-mode run orchestration.",
+    "Do not add Ollama or live discovery."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert branch phase-1/ticket-029-builder-golden-gate-mvp.",
+  "status": "proposed"
+}
