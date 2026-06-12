@@ -1,0 +1,64 @@
+# Deterministic mock-only merge gate (Golden Test 22 + safety audit + public site).
+# Does not require Ollama, live LLM mode, cloud credentials, or local DB state.
+name: Golden Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: golden-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  golden-gate:
+    runs-on: ubuntu-latest
+    env:
+      RGE_LLM_MODE: mock
+      RGE_ALLOW_LIVE_LLM: "0"
+      RGE_TEST_LLM_MODE: mock
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Python package (dev extras)
+        run: python -m pip install -e ".[dev]"
+
+      - name: Golden tests (mock only)
+        run: python -m pytest tests/golden -q
+
+      - name: Full pytest (live_smoke excluded by default)
+        run: python -m pytest -q
+
+      - name: Confirm live_smoke not collected by default
+        run: |
+          if python -m pytest --collect-only -q 2>&1 | grep -q live_smoke; then
+            echo "live_smoke tests must not be collected by default pytest"
+            exit 1
+          fi
+
+      - name: Safety audit (full)
+        run: python -m rge.modules.safety_auditor --audit full
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/public-site/package-lock.json
+
+      - name: Install public-site dependencies
+        working-directory: apps/public-site
+        run: npm ci
+
+      - name: Public site static build
+        working-directory: apps/public-site
+        run: npm run build

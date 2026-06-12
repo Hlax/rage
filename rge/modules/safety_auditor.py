@@ -303,6 +303,39 @@ def _audit_live_smoke_policy(root: Path) -> tuple[list[str], list[str]]:
     return checked, blocked
 
 
+def _audit_ci_golden_gate_policy(root: Path) -> tuple[list[str], list[str]]:
+    """Verify CI golden gate workflow and principal audit command evidence."""
+    checked = [
+        ".github/workflows/golden-gate.yml",
+        ".cursor/commands/rge-principal-audit.md",
+        "rge/modules/principal_audit_gate.py",
+    ]
+    blocked: list[str] = []
+    for relative_path in checked:
+        if not (root / relative_path).is_file():
+            blocked.append(f"missing CI golden gate evidence: {relative_path}")
+    workflow = root / ".github" / "workflows" / "golden-gate.yml"
+    if workflow.is_file():
+        text = workflow.read_text(encoding="utf-8")
+        required_fragments = (
+            "RGE_LLM_MODE: mock",
+            "pytest tests/golden",
+            "rge.modules.safety_auditor",
+            "npm run build",
+        )
+        for fragment in required_fragments:
+            if fragment not in text:
+                blocked.append(
+                    f"golden-gate.yml missing required step fragment: {fragment}"
+                )
+    command_doc = root / ".cursor" / "commands" / "rge-principal-audit.md"
+    if command_doc.is_file():
+        text = command_doc.read_text(encoding="utf-8")
+        if "principal_audit_gate" not in text or "overdue" not in text:
+            blocked.append("rge-principal-audit.md missing checkpoint status guidance")
+    return checked, blocked
+
+
 def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> dict[str, Any]:
     """Run deterministic safety checks and return a machine-readable report."""
     if audit_type not in AUDIT_TYPES:
@@ -328,6 +361,7 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             "full_mvp_run",
             "live_llm_policy",
             "live_smoke_policy",
+            "ci_golden_gate_policy",
         ]
     else:
         checks = [audit_type]
@@ -374,6 +408,10 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             blocked_reasons.extend(blocked)
         elif check == "live_smoke_policy":
             files, blocked = _audit_live_smoke_policy(project_root)
+            checked_files.extend(files)
+            blocked_reasons.extend(blocked)
+        elif check == "ci_golden_gate_policy":
+            files, blocked = _audit_ci_golden_gate_policy(project_root)
             checked_files.extend(files)
             blocked_reasons.extend(blocked)
 

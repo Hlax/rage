@@ -214,6 +214,13 @@ Human review is required before:
 - Allowing any public route beyond static/read-only pages.
 - Allowing model-controlled tools beyond structured candidate generation.
 
+Principal audit cadence: run `/rge-principal-audit` (or
+`python -m rge.modules.principal_audit_gate --next-ticket <id>`) when ≥3
+consecutive tickets are `done` since the latest checkpoint report, before
+medium/high-risk tickets, or before milestone changes listed in
+`.cursor/commands/rge-run-next-ticket.md` step 3.5. CI enforces mock-only
+golden gates via `.github/workflows/golden-gate.yml`.
+
 ## Template Versioning
 
 Agent reports and handoffs should use the current templates in:

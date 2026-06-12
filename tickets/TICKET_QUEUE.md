@@ -71,7 +71,15 @@ superseded
 | 37 | ticket-037 | done | Implement Ollama structured tasks behind explicit live-mode opt-in | `phase-2/ticket-037-ollama-live-structured-tasks` | `agent_reports/2026-06-12_phase-2_ticket-037_ollama-live-structured-tasks.md` |
 | 38 | ticket-038 | done | Gate live smoke tests behind env opt-in and add model-health command | `phase-2/ticket-038-live-smoke-gating` | `agent_reports/2026-06-12_phase-2_ticket-038_live-smoke-gating.md` |
 | 39 | ticket-039 | done | Validate improvement-ticket round-trip into the builder queue with review gate | `phase-2/ticket-039-improvement-ticket-round-trip` | `agent_reports/2026-06-12_phase-2_ticket-039_improvement-ticket-round-trip.md` |
-| 40 | ticket-040 | proposed | Add CI golden gate workflow and rge-principal-audit command doc | | |
+| 40 | ticket-040 | done | Add CI golden gate workflow and rge-principal-audit command doc | `phase-2/ticket-040-ci-golden-gate` | `agent_reports/2026-06-12_phase-2_ticket-040_ci-golden-gate.md` |
+
+## Queue Notes (2026-06-12, ticket-040 agent)
+
+- ticket-040 added `.github/workflows/golden-gate.yml` (mock-only golden +
+  pytest + safety audit + public-site build), `/rge-principal-audit` command doc,
+  `principal_audit_gate` checkpoint helper, and safety audit CI evidence check.
+  132 golden + 150 total pytest pass; 1 live_smoke deselected; safety audit passes;
+  public site builds 12 pages. Ready to merge; GitHub Actions first run pending push.
 
 ## Queue Notes (2026-06-12, ticket-039 agent)
 
@@ -392,7 +400,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-040 proposed (CI golden gate workflow + rge-principal-audit command doc)
+none (ticket-040 committed on branch; await merge to main)
 ```
 
 ## Queue Rules
