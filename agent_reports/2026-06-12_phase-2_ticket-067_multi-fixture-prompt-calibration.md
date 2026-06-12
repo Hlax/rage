@@ -76,8 +76,9 @@ next medium-risk ticket; optional focused audit if seeding scratch DB next.
 
 ## Merge
 
-- Merge commit SHA: _(filled after merge)_
-- Golden Gate run: _(filled after CI)_
+- Merge commit SHA: `1fcce3d`
+- Main push SHA: `1fcce3d`
+- Golden Gate run: **27445901235** — **success** at `1fcce3d`
 
 ## Recommended next move
 
