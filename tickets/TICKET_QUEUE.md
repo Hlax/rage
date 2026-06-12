@@ -86,6 +86,12 @@ superseded
 | 52 | ticket-052 | done | Persist char_start and char_end for accepted claim quote spans | `phase-2/ticket-052-quote-span-offsets` | `agent_reports/2026-06-12_phase-2_ticket-052_quote-span-offsets.md` |
 | 53 | ticket-053 | done | Loop rehearsal — stale draft hygiene and actionable improvement draft drill | `phase-2/ticket-053-loop-rehearsal` | `agent_reports/2026-06-12_phase-2_ticket-053_loop-rehearsal.md` |
 | 54 | ticket-054 | done | Operator verify docs and Windows local verify reliability | `phase-2/ticket-054-operator-verify-docs` | `agent_reports/2026-06-12_phase-2_ticket-054_operator-verify-docs.md` |
+| 55 | ticket-055 | done | Export snapshot manifest and scratch history for operator review | `phase-2/ticket-055-export-snapshot-history` | `agent_reports/2026-06-12_phase-2_ticket-055_export-snapshot-history.md` |
+
+## Queue Notes (2026-06-12, ticket-055 agent)
+
+- Pre-ticket-055 audit GO: scratch snapshot manifest + `data/exports/history/` copies.
+- Default mock export retains history; `--no-snapshot-history` opt-out; ticket-047 publish guards preserved.
 
 ## Queue Notes (2026-06-12, ticket-054 agent)
 
@@ -518,7 +524,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-(none — seed next ticket from Post-Phase-2 roadmap)
+(none — seed next ticket from Post-Phase-2 roadmap or operator follow-up)
 ```
 
 ## Queue Rules

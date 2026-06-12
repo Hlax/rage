@@ -134,8 +134,41 @@ When private research produces new public-safe cards:
 ```bash
 RGE_LLM_MODE=mock python -m rge.cli export-public --limit 100
 python -m rge.modules.safety_auditor --audit full
+```
+
+Mock-mode `export-public` writes scratch exports to gitignored `data/exports/`
+and appends `data/exports/snapshot_manifest.json` plus a copy under
+`data/exports/history/<bundle_id>/` for operator review. Use
+`--no-snapshot-history` to skip history in tests or automation.
+
+Review scratch history before any publish:
+
+```bash
+# Latest scratch trio
+ls data/exports/
+# Manifest entries (newest last)
+cat data/exports/snapshot_manifest.json
+# Compare a prior bundle
+diff -ru data/exports/history/<older_bundle_id> data/exports/
+```
+
+To update committed public-site snapshots (after human review), use fixture-mode
+or live-mode `--publish` per ticket-047/038 guards, then:
+
+```bash
 git diff apps/public-site/public/data/
 ```
+
+### `export_schema_version` bump checklist
+
+When changing public export field shapes or `build_info` keys:
+
+1. Bump `EXPORT_SCHEMA_VERSION` in `rge/modules/card_exporter.py`.
+2. Update golden tests (GT11/GT23) and any fixture snapshots as needed.
+3. Run `python -m rge.modules.safety_auditor --audit full`.
+4. Document the change in the ticket agent report.
+5. Publish to `apps/public-site/public/data/` only after reviewed `--publish`
+   or fixture-mode refresh — never from an unreviewed scratch export alone.
 
 After review and commit of snapshot files:
 

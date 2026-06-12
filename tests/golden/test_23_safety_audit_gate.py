@@ -129,6 +129,30 @@ def test_data_exports_audit_passes_on_clean_scratch_bundle(tmp_path: Path) -> No
     )
 
 
+def test_data_exports_audit_passes_on_history_bundle(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    public_data = repo_root / "apps" / "public-site" / "public" / "data"
+    site_data = tmp_path / "apps" / "public-site" / "public" / "data"
+    site_data.mkdir(parents=True)
+    for name in ("public_cards.json", "public_memos.json", "build_info.json"):
+        (site_data / name).write_text(
+            (public_data / name).read_text(encoding="utf-8"), encoding="utf-8"
+        )
+    exports_dir = tmp_path / "data" / "exports"
+    _write_clean_scratch_export(exports_dir)
+    history_bundle = exports_dir / "history" / "2026-06-12T00-00-00Z"
+    history_bundle.mkdir(parents=True)
+    for name in ("public_cards.json", "public_memos.json", "build_info.json"):
+        (history_bundle / name).write_text(
+            (exports_dir / name).read_text(encoding="utf-8"), encoding="utf-8"
+        )
+
+    report = run_safety_audit("public_export", root=tmp_path)
+    assert report["status"] == "pass", report["blocked_reasons"]
+    checked = report["checked_exports"]
+    assert any("history" in item for item in checked)
+
+
 def test_data_exports_audit_fails_closed_on_leaky_scratch_export(
     tmp_path: Path,
 ) -> None:

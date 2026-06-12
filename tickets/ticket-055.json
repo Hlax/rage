@@ -1,0 +1,100 @@
+{
+
+  "id": "ticket-055",
+
+  "title": "Export snapshot manifest and scratch history for operator review",
+
+  "problem": "Default export-public overwrites gitignored scratch JSON without retained history or a documented export_schema_version bump workflow, making pre-publish review harder.",
+
+  "evidence": [
+
+    "agent_reports/2026-06-12_pre-ticket-055_export-snapshot-versioning-readiness-audit.md",
+
+    "agent_reports/2026-06-12_phase-2_ticket-roadmap.md",
+
+    "rge/modules/card_exporter.py",
+
+    "tickets/ticket-047.json"
+
+  ],
+
+  "affected_modules": [
+
+    "rge/modules/card_exporter.py",
+
+    "rge/cli.py",
+
+    "rge/modules/safety_auditor.py"
+
+  ],
+
+  "expected_files": [
+
+    "rge/modules/card_exporter.py",
+
+    "rge/cli.py",
+
+    "rge/modules/safety_auditor.py",
+
+    "tests/unit/test_export_snapshot_history.py",
+
+    "tests/golden/test_23_safety_audit_gate.py",
+
+    "docs/deployment/public-site-static-hosting.md",
+
+    "tickets/ticket-055.json",
+
+    "agent_reports/2026-06-12_phase-2_ticket-055_export-snapshot-history.md"
+
+  ],
+
+  "acceptance_criteria": [
+
+    "Mock default export-public still writes only data/exports/ latest trio unless --publish or fixture-mode.",
+
+    "Each scratch export appends snapshot_manifest.json and a history copy unless --no-snapshot-history.",
+
+    "Retention cap prunes oldest history bundles deterministically.",
+
+    "export_schema_version bump checklist documented for operators.",
+
+    "Safety audit passes with history directories present.",
+
+    "Golden and full pytest pass in mock mode."
+
+  ],
+
+  "test_plan": [
+
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_export_snapshot_history.py -q",
+
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q",
+
+    "RGE_LLM_MODE=mock python -m pytest -q",
+
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full",
+
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site"
+
+  ],
+
+  "non_goals": [
+
+    "Do not auto-publish to apps/public-site/public/data/.",
+
+    "Do not add new public JSON fields.",
+
+    "Do not fix npm/execute-safe Windows subprocess (separate ticket).",
+
+    "Do not use live Ollama or live smoke."
+
+  ],
+
+  "risk_level": "medium",
+
+  "rollback_plan": "Revert ticket-055 branch; delete local data/exports/history and snapshot_manifest.json.",
+
+  "status": "done"
+
+}
+

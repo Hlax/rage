@@ -798,6 +798,7 @@ def _cmd_export_public(args: argparse.Namespace) -> int:
             limit=args.limit,
             output_dirs=output_dirs,
             publish_public=bool(getattr(args, "publish", False)),
+            snapshot_history=not bool(getattr(args, "no_snapshot_history", False)),
         )
         print(json.dumps(result, indent=2))
         return 0
@@ -1668,8 +1669,9 @@ def build_parser() -> argparse.ArgumentParser:
         "export-public",
         help="Export public-safe card JSON with safety filtering.",
         description=(
-            "Export public-safe card JSON to data/exports and the public site "
-            "static data directory after deterministic safety validation."
+            "Export public-safe card JSON after deterministic safety validation. "
+            "Mock mode writes scratch exports to data/exports/ (with snapshot "
+            "history by default). Use --publish for live-mode public-site updates."
         ),
     )
     export_parser.add_argument(
@@ -1689,6 +1691,14 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "Allow writing to apps/public-site/public/data/. Required for live-mode "
             "exports when RGE_ALLOW_LIVE_LLM=1 and RGE_LLM_MODE=ollama."
+        ),
+    )
+    export_parser.add_argument(
+        "--no-snapshot-history",
+        action="store_true",
+        help=(
+            "Skip writing data/exports/snapshot_manifest.json and history copies "
+            "under data/exports/history/."
         ),
     )
     export_parser.set_defaults(func=_cmd_export_public)

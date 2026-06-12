@@ -23,6 +23,14 @@ from rge.safety.public_export_policy import (
 
 EXPORT_SCHEMA_VERSION = "0.1.0"
 FIXTURE_EXPORT_TIMESTAMP = "2026-06-12T00:00:00Z"
+SNAPSHOT_MANIFEST_FILENAME = "snapshot_manifest.json"
+SNAPSHOT_HISTORY_DIRNAME = "history"
+DEFAULT_SNAPSHOT_RETENTION = 10
+SNAPSHOT_BUNDLE_FILENAMES: tuple[str, ...] = (
+    "public_cards.json",
+    "public_memos.json",
+    "build_info.json",
+)
 GOLDEN_FIXTURE_SOURCE_COUNT = 3
 CARD_GOLDEN_DIVERSITY_ID = "card_golden_diversity_001"
 CARD_GOLDEN_ORIGINALITY_ID = "card_golden_originality_002"
@@ -97,10 +105,15 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def scratch_exports_dir(repo_root: Path | None = None) -> Path:
+    root = repo_root or _repo_root()
+    return root / "data" / "exports"
+
+
 def default_export_dirs(repo_root: Path | None = None) -> list[Path]:
     root = repo_root or _repo_root()
     return [
-        root / "data" / "exports",
+        scratch_exports_dir(root),
         root / "apps" / "public-site" / "public" / "data",
     ]
 
@@ -178,6 +191,112 @@ def order_build_info_fields(build_info: dict[str, Any]) -> dict[str, Any]:
 def canonical_json_dumps(payload: Any) -> str:
     """Serialize JSON with stable key order and trailing newline."""
     return json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+
+
+def bundle_id_from_timestamp(generated_at: str) -> str:
+    """Filesystem-safe bundle id derived from an ISO export timestamp."""
+    return generated_at.replace(":", "-")
+
+
+def unique_bundle_id(history_root: Path, generated_at: str) -> str:
+    """Return a bundle id that does not collide with an existing history directory."""
+    base = bundle_id_from_timestamp(generated_at)
+    candidate = base
+    suffix = 2
+    while (history_root / candidate).is_dir():
+        candidate = f"{base}-{suffix}"
+        suffix += 1
+    return candidate
+
+
+def _load_snapshot_manifest(manifest_path: Path) -> list[dict[str, Any]]:
+    if not manifest_path.is_file():
+        return []
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, list):
+        raise ValueError("snapshot_manifest.json must contain a JSON array")
+    return payload
+
+
+def _prune_snapshot_history(
+    history_root: Path,
+    manifest: list[dict[str, Any]],
+    *,
+    retention: int,
+) -> list[dict[str, Any]]:
+    if retention <= 0 or len(manifest) <= retention:
+        return manifest
+    ordered = sorted(manifest, key=lambda item: str(item.get("generated_at", "")))
+    keep = ordered[-retention:]
+    drop = ordered[:-retention]
+    for entry in drop:
+        bundle_id = entry.get("bundle_id")
+        if not bundle_id:
+            continue
+        bundle_dir = history_root / str(bundle_id)
+        if bundle_dir.is_dir():
+            for child in bundle_dir.iterdir():
+                child.unlink()
+            bundle_dir.rmdir()
+    return keep
+
+
+def write_snapshot_history(
+    *,
+    scratch_dir: Path,
+    repo_root: Path,
+    generated_at: str,
+    build_info: dict[str, Any],
+    fixture_mode: bool,
+    publish_public: bool,
+    retention: int = DEFAULT_SNAPSHOT_RETENTION,
+) -> dict[str, Any]:
+    """Copy the latest scratch bundle into history and append the manifest."""
+    history_root = scratch_dir / SNAPSHOT_HISTORY_DIRNAME
+    history_root.mkdir(parents=True, exist_ok=True)
+    bundle_id = unique_bundle_id(history_root, generated_at)
+    bundle_dir = history_root / bundle_id
+    bundle_dir.mkdir(parents=True, exist_ok=False)
+
+    for filename in SNAPSHOT_BUNDLE_FILENAMES:
+        source = scratch_dir / filename
+        if not source.is_file():
+            raise ValueError(f"missing scratch export file for snapshot history: {filename}")
+        (bundle_dir / filename).write_text(
+            source.read_text(encoding="utf-8"), encoding="utf-8"
+        )
+
+    relative_history = (
+        bundle_dir.relative_to(repo_root).as_posix()
+        if bundle_dir.is_relative_to(repo_root)
+        else str(bundle_dir)
+    )
+    entry = {
+        "bundle_id": bundle_id,
+        "export_schema_version": build_info.get("export_schema_version"),
+        "generated_at": generated_at,
+        "card_count": build_info.get("card_count"),
+        "memo_count": build_info.get("memo_count"),
+        "history_path": relative_history,
+        "fixture_mode": fixture_mode,
+        "publish_public": publish_public,
+    }
+
+    manifest_path = scratch_dir / SNAPSHOT_MANIFEST_FILENAME
+    manifest = _load_snapshot_manifest(manifest_path)
+    manifest.append(entry)
+    manifest = _prune_snapshot_history(
+        history_root,
+        manifest,
+        retention=retention,
+    )
+    manifest_path.write_text(canonical_json_dumps(manifest), encoding="utf-8")
+    return entry
+
+
+def scratch_dir_in_targets(targets: list[Path], repo_root: Path | None = None) -> bool:
+    scratch = scratch_exports_dir(repo_root).resolve()
+    return any(target.resolve() == scratch for target in targets)
 
 
 def _dominant_evidence_type(conn: Any, claim_ids: list[str]) -> str | None:
@@ -276,6 +395,8 @@ def export_public_cards(
     fixture_mode: bool = False,
     export_timestamp: str | None = None,
     publish_public: bool = False,
+    snapshot_history: bool = True,
+    snapshot_retention: int = DEFAULT_SNAPSHOT_RETENTION,
 ) -> dict[str, Any]:
     """Export public-safe cards as JSON files after validation."""
     seeded_ids = ensure_golden_public_cards(conn)
@@ -345,6 +466,26 @@ def export_public_cards(
             path.write_text(canonical_json_dumps(payload), encoding="utf-8")
             written_files.append(str(path))
 
+    snapshot_entry: dict[str, Any] | None = None
+    root = repo_root or _repo_root()
+    if (
+        snapshot_history
+        and scratch_dir_in_targets(targets, root)
+    ):
+        snapshot_entry = write_snapshot_history(
+            scratch_dir=scratch_exports_dir(root),
+            repo_root=root,
+            generated_at=generated_at,
+            build_info=build_info,
+            fixture_mode=fixture_mode,
+            publish_public=publish_public,
+            retention=snapshot_retention,
+        )
+        written_files.append(
+            str(scratch_exports_dir(root) / SNAPSHOT_MANIFEST_FILENAME)
+        )
+        written_files.append(str(root / snapshot_entry["history_path"]))
+
     return {
         "status": "success",
         "command": "export-public",
@@ -356,4 +497,6 @@ def export_public_cards(
         "generated_at": generated_at,
         "fixture_mode": fixture_mode,
         "publish_public": publish_public,
+        "snapshot_history": snapshot_history and snapshot_entry is not None,
+        "snapshot_entry": snapshot_entry,
     }
