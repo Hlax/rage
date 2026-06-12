@@ -1,8 +1,7 @@
 {
   "export_schema_version": "0.1.0",
-  "generated_at": "2026-06-11T00:00:00Z",
-  "phase": "0",
-  "note": "Phase 0 placeholder. Real build info is written by the public export pipeline in later phases.",
-  "card_count": 1,
+  "generated_at": "2026-06-12T00:00:00Z",
+  "phase": "1",
+  "card_count": 2,
   "memo_count": 0
 }

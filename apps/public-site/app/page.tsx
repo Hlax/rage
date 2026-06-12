@@ -1,26 +1,15 @@
-// Read-only public placeholder page.
+// Read-only public list page.
 // Data comes from static JSON imports only (apps/public-site/public/data/).
 // No fetches, no API routes, no forms, no raw HTML rendering.
 
-import cards from '../public/data/public_cards.json';
+import Link from 'next/link';
+
 import memos from '../public/data/public_memos.json';
 import buildInfo from '../public/data/build_info.json';
-
-type PublicCard = {
-  id: string;
-  type: string;
-  title: string;
-  summary: string;
-  confidence: string;
-  concepts: string[];
-  source_count: number;
-  public_caveats?: string[];
-  public_detail_level: string;
-  updated_at: string;
-};
+import { conceptToSlug, publicCards } from '../lib/publicCards';
 
 export default function HomePage() {
-  const cardList = cards as PublicCard[];
+  const cardList = publicCards;
   return (
     <main style={{ maxWidth: 760, margin: '0 auto', padding: '3rem 1.5rem' }}>
       <p
@@ -64,11 +53,35 @@ export default function HomePage() {
                 {card.source_count}
               </p>
               <h3 style={{ margin: '0.35rem 0', fontSize: '1rem' }}>
-                {card.title}
+                <Link href={`/cards/${card.id}`} style={{ color: '#e6e8ec' }}>
+                  {card.title}
+                </Link>
               </h3>
               <p style={{ margin: 0, color: '#aeb4c0', lineHeight: 1.55 }}>
                 {card.summary}
               </p>
+              {card.concepts.length > 0 ? (
+                <p
+                  style={{
+                    margin: '0.75rem 0 0',
+                    fontSize: '0.8rem',
+                    color: '#8b93a3',
+                  }}
+                >
+                  Concepts:{' '}
+                  {card.concepts.map((concept, index) => (
+                    <span key={concept}>
+                      {index > 0 ? ', ' : ''}
+                      <Link
+                        href={`/concepts/${conceptToSlug(concept)}`}
+                        style={{ color: '#9eb4ff' }}
+                      >
+                        {concept}
+                      </Link>
+                    </span>
+                  ))}
+                </p>
+              ) : null}
             </li>
           ))}
         </ul>
