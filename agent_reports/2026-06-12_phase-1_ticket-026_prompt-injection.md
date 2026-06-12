@@ -96,9 +96,10 @@ Full safety audit passes and now includes prompt-injection evidence files in `ch
 
 ## 11. Merge to Main
 
-- Merge commit: pending
-- Branch: `phase-1/ticket-026-prompt-injection`
-- Post-merge pytest on `main`: pending
+- Merge commit: `c015d3e51bd2fe214693bc094afc3e44c6be2327`
+- Branch: `phase-1/ticket-026-prompt-injection` merged to `main`.
+- Post-merge pytest on `main`: 110 passed.
+- Post-merge safety audit on `main`: `pass`.
 
 ## 12. Recommended Next Ticket
 
