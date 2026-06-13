@@ -480,6 +480,7 @@ def _action_from_state(
     audit: dict[str, Any],
     improvement: dict[str, Any],
     drift_violations: list[dict[str, str]],
+    scratch_evidence: dict[str, Any] | None = None,
     root: Path | None = None,
 ) -> RecommendedAction:
     safe_commands = safe_verification_commands(root)
@@ -624,6 +625,37 @@ def _action_from_state(
             ],
         )
 
+    scratch = scratch_evidence or {}
+    if scratch.get("evidence_review_ready"):
+        evidence_command = scratch.get("operator_commands", {}).get(
+            "evidence_review",
+            "python -m rge.cli probe-scratch-evidence-review",
+        )
+        return RecommendedAction(
+            action_id="run_scratch_evidence_review",
+            label="Run scratch evidence review for operator/principal sign-off",
+            gate="review_gated",
+            reason=(
+                f"Scratch DB at {scratch.get('scratch_db_path')} has "
+                f"{scratch.get('total_reviewed_reports')} reviewed report(s); "
+                "generate a deterministic evidence review artifact before seeding "
+                "improvement tickets."
+            ),
+            commands=[
+                {
+                    "shell": evidence_command,
+                    "purpose": "compose read-only evidence review from scratch DB",
+                },
+                {
+                    "shell": (
+                        "python -m rge.cli probe-scratch-evidence-review "
+                        "--out agent_reports/YYYY-MM-DD_scratch-evidence-review.md"
+                    ),
+                    "purpose": "archive review markdown under agent_reports/",
+                },
+            ],
+        )
+
     return RecommendedAction(
         action_id="run_deterministic_verification",
         label="Run deterministic mock-only verification checks",
@@ -735,6 +767,7 @@ def build_operator_plan(
         latest_report_path=latest_report,
         log_runner=log_runner,
     )
+    scratch_evidence = inspect_scratch_evidence_status(root=project_root)
     action = _action_from_state(
         working_tree=tree,
         active_row=active_row,
@@ -742,6 +775,7 @@ def build_operator_plan(
         audit=audit,
         improvement=improvement,
         drift_violations=drift_violations,
+        scratch_evidence=scratch_evidence,
         root=project_root,
     )
 
@@ -790,7 +824,7 @@ def build_operator_plan(
             "violations": drift_violations,
         },
         "audit_cadence": audit,
-        "scratch_evidence_status": inspect_scratch_evidence_status(root=project_root),
+        "scratch_evidence_status": scratch_evidence,
         "pending_improvement_tickets": improvement,
         "next_recommended_action": {
             "action_id": action.action_id,

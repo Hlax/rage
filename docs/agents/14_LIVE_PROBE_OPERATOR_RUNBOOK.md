@@ -270,6 +270,20 @@ python -m rge.cli probe-scratch-evidence-review `
 - `--out` must be under `data/reports/` or `agent_reports/`
 - Operator note bodies are not included (count only via summary)
 
+### Operator loop evidence review action (plan mode)
+
+When reviewed scratch rows exist and no higher-priority blocker applies (dirty
+tree, documentation drift, improvement drafts, audit overdue, or open queue
+ticket), `operator_loop --mode plan` recommends a **review_gated** action:
+
+```powershell
+python -m rge.modules.operator_loop --mode plan
+```
+
+Look for `next_recommended_action.action_id == run_scratch_evidence_review`.
+The plan also includes `scratch_evidence_status` (path, row count, readiness).
+Plan mode never auto-generates evidence reviews or mutates scratch/graph DBs.
+
 ### Who does what
 
 | Role | Responsibility |

@@ -104,7 +104,19 @@ superseded
 | 70 | ticket-070 | done | Scratch DB run summary | `phase-2/ticket-070-scratch-db-run-summary` | `agent_reports/2026-06-12_phase-2_ticket-070_scratch-db-run-summary.md` |
 | 71 | ticket-071 | done | Deterministic scratch evidence review report | `phase-2/ticket-071-deterministic-evidence-review-report` | `agent_reports/2026-06-13_phase-2_ticket-071_deterministic-evidence-review-report.md` |
 | 72 | ticket-072 | done | Operator loop scratch evidence status hook | `phase-2/ticket-072-operator-loop-scratch-evidence-status` | `agent_reports/2026-06-13_phase-2_ticket-072_operator-loop-scratch-evidence-status.md` |
-| 73 | ticket-073 | proposed | Operator loop evidence review readiness action hint | | |
+| 73 | ticket-073 | done | Operator loop evidence review readiness action hint | `phase-2/ticket-073-operator-loop-evidence-review-action` | `agent_reports/2026-06-13_phase-2_ticket-073_operator-loop-evidence-review-action.md` |
+| 74 | ticket-074 | proposed | Windows-safe UTF-8 stdout for probe-scratch-evidence-review | | |
+
+## Queue Notes (2026-06-13, ticket-074 seed)
+
+- Follow-on from operator probe: Windows cp1252 UnicodeEncodeError on markdown arrow.
+- Narrow CLI/formatter fix only.
+
+## Queue Notes (2026-06-13, ticket-073 agent)
+
+- Plan mode recommends `run_scratch_evidence_review` when scratch rows exist and no blockers.
+- Open queue tickets and improvement drafts still take precedence.
+- ticket-059 OpenAI deferred.
 
 ## Queue Notes (2026-06-13, ticket-073 seed)
 
@@ -734,7 +746,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-073 (proposed) — operator loop evidence review readiness action hint
+ticket-074 (proposed) — Windows-safe UTF-8 stdout for probe-scratch-evidence-review
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 

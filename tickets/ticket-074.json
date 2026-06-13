@@ -1,0 +1,41 @@
+{
+  "id": "ticket-074",
+  "title": "Windows-safe UTF-8 stdout for probe-scratch-evidence-review",
+  "problem": "On Windows cp1252 consoles, probe-scratch-evidence-review default markdown output fails with UnicodeEncodeError on the review window arrow character. Operators must currently set PYTHONIOENCODING or use --out/--format json as a workaround.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-073_operator-loop-evidence-review-action.md",
+    "rge/modules/live_probe_evidence_review.py",
+    "rge/cli.py"
+  ],
+  "affected_modules": [
+    "rge/modules/live_probe_evidence_review.py",
+    "rge/cli.py",
+    "tests/unit/test_live_probe_evidence_review.py"
+  ],
+  "expected_files": [
+    "rge/modules/live_probe_evidence_review.py",
+    "rge/cli.py",
+    "tests/unit/test_live_probe_evidence_review.py",
+    "tickets/ticket-074.json",
+    "agent_reports/2026-06-13_phase-2_ticket-074_windows-evidence-review-utf8-stdout.md"
+  ],
+  "acceptance_criteria": [
+    "Default markdown probe-scratch-evidence-review prints on Windows without UnicodeEncodeError (ASCII-safe arrow or stdout reconfigure).",
+    "JSON and --out behavior unchanged.",
+    "Unit test covers markdown formatter output encoding safety.",
+    "Golden/mock gates pass."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_live_probe_evidence_review.py -q",
+    "pytest tests/golden -q",
+    "pytest -q"
+  ],
+  "non_goals": [
+    "No LLM or OpenAI.",
+    "No public export or site changes.",
+    "No broad CLI stdout refactor outside evidence review command."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert markdown formatter or CLI stdout handling change.",
+  "status": "proposed"
+}

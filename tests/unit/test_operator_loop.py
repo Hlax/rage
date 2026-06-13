@@ -711,3 +711,82 @@ def test_plan_scratch_status_does_not_crash_on_invalid_db(tmp_path: Path) -> Non
 
     assert plan["scratch_evidence_status"]["status"] in {"invalid", "error"}
     assert plan["next_recommended_action"]["action_id"]
+
+
+def test_evidence_review_action_when_scratch_ready(tmp_path: Path) -> None:
+    _seed_queue(tmp_path, "| 73 | ticket-073 | done | evidence action | | |\n")
+    scratch_db = tmp_path / "data" / "db" / "live_probe_scratch.sqlite"
+    _seed_scratch_db(scratch_db, [_sample_scratch_record()])
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+    (tmp_path / "agent_reports" / "2026-06-12_pre-phase-2_principal-audit.md").write_text(
+        "# audit", encoding="utf-8"
+    )
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+    action = plan["next_recommended_action"]
+
+    assert action["action_id"] == "run_scratch_evidence_review"
+    assert action["gate"] == "review_gated"
+    assert "probe-scratch-evidence-review" in action["commands"][0]["shell"]
+
+
+def test_evidence_review_action_not_when_scratch_empty(tmp_path: Path) -> None:
+    _seed_queue(tmp_path, "| 73 | ticket-073 | done | evidence action | | |\n")
+    scratch_db = tmp_path / "data" / "db" / "live_probe_scratch.sqlite"
+    ensure_scratch_database(scratch_db).close()
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+
+    assert plan["next_recommended_action"]["action_id"] == "run_deterministic_verification"
+
+
+def test_evidence_review_deferred_for_improvement_draft(tmp_path: Path) -> None:
+    _seed_queue(tmp_path, "| 73 | ticket-073 | done | evidence action | | |\n")
+    scratch_db = tmp_path / "data" / "db" / "live_probe_scratch.sqlite"
+    _seed_scratch_db(scratch_db, [_sample_scratch_record()])
+    artifact = tmp_path / "data" / "tickets" / "improvement_ticket_latest.json"
+    artifact.parent.mkdir(parents=True, exist_ok=True)
+    artifact.write_text(
+        json.dumps(
+            [
+                {
+                    "status": "draft",
+                    "title": "Fix calibration",
+                    "failure_reason": "validation_diagnostic",
+                    "risk_level": "low",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+
+    assert plan["next_recommended_action"]["action_id"] == "review_improvement_ticket_promotion"
+
+
+def test_evidence_review_deferred_for_open_ticket(tmp_path: Path) -> None:
+    _seed_queue(tmp_path, "| 74 | ticket-074 | proposed | next ticket | | |\n")
+    scratch_db = tmp_path / "data" / "db" / "live_probe_scratch.sqlite"
+    _seed_scratch_db(scratch_db, [_sample_scratch_record()])
+    (tmp_path / "tickets" / "ticket-074.json").write_text(
+        json.dumps(
+            {
+                "id": "ticket-074",
+                "title": "Next ticket",
+                "risk_level": "low",
+                "status": "proposed",
+            }
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "agent_reports" / "2026-06-12_pre-phase-2_principal-audit.md").write_text(
+        "# audit", encoding="utf-8"
+    )
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+
+    assert plan["next_recommended_action"]["action_id"] == "begin_ticket_implementation"
