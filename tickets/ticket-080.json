@@ -27,5 +27,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "N/A (read-only audit).",
-  "status": "proposed"
+  "status": "done"
 }
