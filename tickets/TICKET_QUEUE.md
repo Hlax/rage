@@ -130,7 +130,8 @@ superseded
 | 96 | ticket-096 | done | Operating protocol manual synthnote spine cross-link | phase-2/ticket-096-operating-protocol-manual-synthnote-crosslink | agent_reports/2026-06-13_phase-2_ticket-096_operating-protocol-manual-synthnote-crosslink.md |
 | 97 | ticket-097 | done | Cursor build loop manual synthnote spine cross-link | phase-2/ticket-097-cursor-build-loop-manual-synthnote-crosslink | agent_reports/2026-06-13_phase-2_ticket-097_cursor-build-loop-manual-synthnote-crosslink.md |
 | 98 | ticket-098 | done | Runtime config manual synthnote spine cross-link | phase-2/ticket-098-runtime-config-manual-synthnote-crosslink | agent_reports/2026-06-13_phase-2_ticket-098_runtime-config-manual-synthnote-crosslink.md |
-| 99 | ticket-099 | proposed | Manual source score reconciliation proof (synthnote follow-up) | | |
+| 99 | ticket-099 | done | Manual source score reconciliation proof (synthnote follow-up) | phase-2/ticket-099-manual-source-score-reconciliation | agent_reports/2026-06-13_phase-2_ticket-099_manual-source-score-reconciliation.md |
+| 100 | ticket-100 | proposed | README manual synthnote reconcile-scores operator step | | |
 
 ## Queue Notes (2026-06-13, ticket-085 ingestion readiness audit)
 
@@ -852,7 +853,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-099 (proposed) — Manual source score reconciliation proof (synthnote follow-up)
+ticket-100 (proposed) — README manual synthnote reconcile-scores operator step
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 

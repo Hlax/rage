@@ -1,0 +1,29 @@
+{
+  "task_name": "claim_extraction",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "claim_text": "AI-assisted brainstorming reduced semantic diversity in timed brainstorming during a synthetic replication.",
+      "source_id": "src_placeholder",
+      "chunk_id": "chk_placeholder",
+      "quote_span": "AI-assisted brainstorming reduced semantic diversity across submitted ideas",
+      "subject": "AI-assisted brainstorming",
+      "predicate": "reduced",
+      "object": "semantic diversity",
+      "scope": "timed brainstorming",
+      "evidence_type": "empirical",
+      "confidence": 0.85,
+      "limitations": [
+        "Synthetic follow-up source note only.",
+        "Short-form brainstorming tasks; may not generalize."
+      ],
+      "domain": "creativity",
+      "domain_metadata": {
+        "track": "human-AI",
+        "creative_phase": "ideation",
+        "measured_dimension": "semantic diversity",
+        "source_credibility_tier": "high"
+      }
+    }
+  ]
+}

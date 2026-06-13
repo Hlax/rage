@@ -8,5 +8,8 @@
       "qualifying": "increased the number of usable ideas",
       "opposing": "narrowed the range of themes"
     }
+  },
+  "c5d1add68657e7ece8286c956cc5b3c494a45d33495ceb48927dd6d9ce628a16": {
+    "extract_claims": "claim_extraction_manual_synthnote_followup.json"
   }
 }
