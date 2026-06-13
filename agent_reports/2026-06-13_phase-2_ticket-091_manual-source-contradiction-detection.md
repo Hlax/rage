@@ -74,9 +74,10 @@ python -m rge.cli detect-contradictions --source src_2c53bfdfdf3c6853
 
 ## Merge
 
-- Implementation SHA: (pending commit)
-- Merge commit: (pending merge)
-- Pushed: (pending push)
+- Implementation SHA: `9c1347f`
+- Merge commit: `7668dc0`
+- Pushed: `main -> main`
+- Full pytest: **373 passed**, 6 `live_smoke` deselected
 
 ## Recommended next ticket
 
