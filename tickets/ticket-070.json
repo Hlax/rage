@@ -1,0 +1,56 @@
+{
+  "id": "ticket-070",
+  "title": "Scratch DB run summary",
+  "problem": "Ticket-068 persists operator-reviewed live probe metadata to an isolated scratch SQLite DB, but operators must query rows manually to see cross-run evidence. A deterministic read-only summary command is needed over scratch rows without model authority or graph/export coupling.",
+  "evidence": [
+    "agent_reports/2026-06-12_phase-2_ticket-068_scratch-db-reviewed-live-probe-persistence.md",
+    "agent_reports/2026-06-12_phase-2_ticket-069_followup-contradiction-calibration.md",
+    "agent_reports/2026-06-12_pre-ticket-070_scratch-db-run-summary.md",
+    "rge/modules/live_probe_scratch.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "affected_modules": [
+    "rge/modules/live_probe_scratch_summary.py",
+    "rge/cli.py",
+    "rge/modules/safety_auditor.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "expected_files": [
+    "rge/modules/live_probe_scratch_summary.py",
+    "rge/cli.py",
+    "tests/unit/test_live_probe_scratch_summary.py",
+    "rge/modules/safety_auditor.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "tickets/ticket-070.json",
+    "agent_reports/2026-06-12_phase-2_ticket-070_scratch-db-run-summary.md"
+  ],
+  "acceptance_criteria": [
+    "probe-scratch-summary reads scratch DB read-only and never mutates it.",
+    "Missing DB fails closed unless --allow-empty.",
+    "Empty valid scratch DB returns deterministic empty summary.",
+    "Invalid schema fails closed.",
+    "Summary includes fixture, floor, stage, contradiction-mode, and rejection counts.",
+    "Summary includes safety flags (no graph authority, export, model authority, raw responses).",
+    "Deterministic output for same DB state.",
+    "No accepted graph or scratch DB writes from summary command.",
+    "Golden/mock gates and safety audit pass."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_live_probe_scratch_summary.py -q",
+    "pytest tests/unit/test_live_probe_scratch_persistence.py -q",
+    "pytest tests/golden -q",
+    "pytest -q",
+    "python -m rge.modules.safety_auditor --audit full",
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-071"
+  ],
+  "non_goals": [
+    "No LLM or OpenAI.",
+    "No scratch or accepted graph writes.",
+    "No public export or site changes.",
+    "No ticket authority from summary output.",
+    "No raw prompt or model response dumps."
+  ],
+  "risk_level": "low-medium",
+  "rollback_plan": "Revert summary module, CLI, tests, docs, and safety audit extension.",
+  "status": "in_progress"
+}

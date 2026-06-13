@@ -101,6 +101,14 @@ superseded
 | 67 | ticket-067 | done | Multi-fixture prompt calibration for local live mini-run suite | `phase-2/ticket-067-multi-fixture-prompt-calibration` | `agent_reports/2026-06-12_phase-2_ticket-067_multi-fixture-prompt-calibration.md` |
 | 68 | ticket-068 | done | Scratch DB persistence for reviewed live mini-run reports | `phase-2/ticket-068-scratch-db-reviewed-live-probe-persistence` | `agent_reports/2026-06-12_phase-2_ticket-068_scratch-db-reviewed-live-probe-persistence.md` |
 | 69 | ticket-069 | done | Followup contradiction calibration | `phase-2/ticket-069-followup-contradiction-calibration` | `agent_reports/2026-06-12_phase-2_ticket-069_followup-contradiction-calibration.md` |
+| 70 | ticket-070 | in_progress | Scratch DB run summary | `phase-2/ticket-070-scratch-db-run-summary` | |
+
+## Queue Notes (2026-06-12, ticket-070 seed)
+
+- Pre-ticket audit GO: `agent_reports/2026-06-12_pre-ticket-070_scratch-db-run-summary.md`.
+- Adds read-only `probe-scratch-summary` over scratch SQLite; deterministic counts only.
+- No LLM, no graph/export writes; ticket-059 OpenAI deferred.
+- After done: post-ticket-070 principal audit required (3rd ticket since checkpoint).
 
 ## Queue Notes (2026-06-12, ticket-069 agent)
 

@@ -1027,6 +1027,44 @@ def _cmd_probe_persist_reviewed_report(args: argparse.Namespace) -> int:
         return 1
 
 
+def _cmd_probe_scratch_summary(args: argparse.Namespace) -> int:
+    from rge.modules.live_probe_scratch_summary import (
+        LiveProbeScratchSummaryError,
+        format_summary_json,
+        format_summary_markdown,
+        run_scratch_summary,
+    )
+
+    try:
+        result = run_scratch_summary(
+            scratch_db=Path(args.scratch_db) if args.scratch_db else None,
+            limit=int(args.limit) if args.limit else None,
+            fixture_filter=args.fixture,
+            allow_empty=bool(args.allow_empty),
+            output_format=args.format,
+            out_path=Path(args.out) if args.out else None,
+            root=_REPO_ROOT,
+        )
+        if args.out:
+            print(json.dumps(result, indent=2))
+        else:
+            text = (
+                format_summary_markdown(result)
+                if args.format == "markdown"
+                else format_summary_json(result)
+            )
+            print(text, end="" if text.endswith("\n") else None)
+        return 0
+    except LiveProbeScratchSummaryError as exc:
+        payload = {
+            "status": "error",
+            "command": "probe-scratch-summary",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 2
+
+
 def _cmd_verify(args: argparse.Namespace) -> int:
     from rge.modules.verify_runner import run_verification
 
@@ -2202,6 +2240,51 @@ def build_parser() -> argparse.ArgumentParser:
         help="Required flag confirming the operator reviewed the report before persist.",
     )
     probe_persist_parser.set_defaults(func=_cmd_probe_persist_reviewed_report)
+
+    probe_summary_parser = subparsers.add_parser(
+        "probe-scratch-summary",
+        help="Summarize operator-reviewed live probe scratch DB rows (read-only).",
+        description=(
+            "Deterministic read-only aggregation over reviewed_live_probe_reports "
+            "in the isolated scratch SQLite database. Never writes to scratch or "
+            "accepted graph DBs. No LLM calls."
+        ),
+    )
+    probe_summary_parser.add_argument(
+        "--scratch-db",
+        help=(
+            "Scratch SQLite path (default: data/db/live_probe_scratch.sqlite). "
+            "Opened read-only."
+        ),
+    )
+    probe_summary_parser.add_argument(
+        "--format",
+        choices=("json", "markdown"),
+        default="json",
+        help="Output format for stdout or --out (default: json).",
+    )
+    probe_summary_parser.add_argument(
+        "--out",
+        help=(
+            "Optional private output path under data/reports/ or agent_reports/. "
+            "When omitted, writes nothing to disk."
+        ),
+    )
+    probe_summary_parser.add_argument(
+        "--limit",
+        type=int,
+        help="Limit number of reviewed rows included (ordered by review time).",
+    )
+    probe_summary_parser.add_argument(
+        "--fixture",
+        help="Filter rows where fixture_source contains this substring.",
+    )
+    probe_summary_parser.add_argument(
+        "--allow-empty",
+        action="store_true",
+        help="When scratch DB is missing, return a deterministic empty summary.",
+    )
+    probe_summary_parser.set_defaults(func=_cmd_probe_scratch_summary)
 
     verify_parser = subparsers.add_parser(
         "verify",

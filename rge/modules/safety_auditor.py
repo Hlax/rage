@@ -439,6 +439,24 @@ def _audit_live_probe_scratch_policy(root: Path) -> tuple[list[str], list[str]]:
             or "_cmd_probe_persist_reviewed_report" not in cli_source
         ):
             blocked.append("missing probe-persist-reviewed-report command in rge/cli.py")
+        if (
+            "probe-scratch-summary" not in cli_source
+            or "_cmd_probe_scratch_summary" not in cli_source
+        ):
+            blocked.append("missing probe-scratch-summary command in rge/cli.py")
+
+    summary_module = root / "rge" / "modules" / "live_probe_scratch_summary.py"
+    if summary_module.is_file():
+        checked.append("rge/modules/live_probe_scratch_summary.py")
+        summary_source = summary_module.read_text(encoding="utf-8")
+        if "mode=ro" not in summary_source:
+            blocked.append("live_probe_scratch_summary must open scratch DB read-only")
+        if "ensure_scratch_database" in summary_source:
+            blocked.append("live_probe_scratch_summary must not bootstrap scratch schema")
+        if "card_exporter" in summary_source:
+            blocked.append("live_probe_scratch_summary must not import card_exporter")
+    else:
+        blocked.append("missing live probe scratch summary module")
     return checked, blocked
 
 

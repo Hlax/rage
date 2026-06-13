@@ -231,6 +231,26 @@ Default scratch path: `data/db/live_probe_scratch.sqlite` (gitignored under `dat
 - Scratch rows are metadata only (counts, modes, diagnostics summary) — not accepted claims
 - No public export reads scratch DB; no Qwen/model authority over persist
 
+### Scratch DB summary (read-only, deterministic)
+
+Summarize reviewed rows without LLM calls or DB writes:
+
+```powershell
+python -m rge.cli probe-scratch-summary
+python -m rge.cli probe-scratch-summary --format markdown
+python -m rge.cli probe-scratch-summary --fixture live_probe_claim_calibration_short.txt
+python -m rge.cli probe-scratch-summary `
+  --out data/reports/live_probes/scratch_summary_<UTC>.json
+```
+
+**Rules:**
+
+- Opens scratch DB with SQLite read-only mode (`mode=ro`)
+- Never creates, migrates, or mutates scratch DB
+- Missing DB fails closed unless `--allow-empty`
+- `--out` must be under `data/reports/` or `agent_reports/` (not public export paths)
+- Summary includes counts and safety flags only — no raw prompts, model responses, or operator note bodies
+
 ### Who does what
 
 | Role | Responsibility |
