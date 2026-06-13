@@ -79,8 +79,9 @@ Public site not touched — no build re-run.
 
 ## Merge
 
-- Merge commit SHA: _(filled after merge)_
-- Golden Gate run: _(filled after CI)_
+- Implementation SHA: `fa3da97`
+- Merge commit SHA: `89cb262`
+- Golden Gate run: `27455422055` (passed)
 
 ## Recommended next ticket
 
