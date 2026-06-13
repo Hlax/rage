@@ -47,9 +47,10 @@ Safety audit: **not required** (operating protocol docs-only).
 
 ## Merge
 
-- Implementation SHA: _(pending commit)_
-- Merge commit: _(pending merge)_
-- Pushed: _(pending)_
+- Implementation SHA: `0af995e`
+- Merge commit: `8cb0ea7`
+- Pushed: `main -> main`
+- Full pytest: **382 passed**, 6 `live_smoke` deselected
 
 ## Recommended next ticket
 
