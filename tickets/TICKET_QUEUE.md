@@ -114,7 +114,14 @@ superseded
 | 80 | ticket-080 | done | Post-ticket-079 principal audit checkpoint | `phase-2/ticket-080-principal-audit-post-ticket-079` | `agent_reports/2026-06-13_principal-audit-post-ticket-079.md` |
 | 81 | ticket-081 | done | Cursor build loop scratch evidence workflow cross-link | `phase-2/ticket-081-cursor-build-loop-scratch-workflow-crosslink` | `agent_reports/2026-06-13_phase-2_ticket-081_cursor-build-loop-scratch-workflow-crosslink.md` |
 | 82 | ticket-082 | done | Runtime config scratch evidence workflow cross-link | `phase-2/ticket-082-runtime-config-scratch-workflow-crosslink` | `agent_reports/2026-06-13_phase-2_ticket-082_runtime-config-scratch-workflow-crosslink.md` |
-| 83 | ticket-083 | proposed | Post-ticket-082 principal audit checkpoint | | |
+| 83 | ticket-083 | done | Post-ticket-082 principal audit checkpoint | `phase-2/ticket-083-principal-audit-post-ticket-082` | `agent_reports/2026-06-13_principal-audit-post-ticket-082.md` |
+| 84 | ticket-084 | proposed | Master repo alignment audit | | |
+
+## Queue Notes (2026-06-13, ticket-083 principal audit checkpoint)
+
+- Cadence satisfied: post-ticket-082 principal audit landed on `main` (tickets 080–082 since post-079).
+- Local mock-only gates green: 140 golden, safety audit pass.
+- GO for ticket-084 (read-only master alignment audit). ticket-059 OpenAI remains deferred.
 
 ## Queue Notes (2026-06-13, ticket-083 seed)
 
@@ -813,7 +820,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-083 (proposed) — Post-ticket-082 principal audit checkpoint
+ticket-084 (proposed) — Master repo alignment audit (read-only)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
