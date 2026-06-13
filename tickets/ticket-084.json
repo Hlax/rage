@@ -1,0 +1,39 @@
+{
+  "id": "ticket-084",
+  "title": "Master repo alignment audit",
+  "problem": "After ticket-082, the repo is release-healthy but ~15 consecutive tickets (068-082) invested in operator/scratch-evidence/doc-cross-link infrastructure. A read-only master alignment audit is needed to determine the true build phase, whether the build is drifting from its mission (real creativity research), the current MVP definition, domain-entry gates, and the next best move before any further implementation.",
+  "evidence": [
+    "agent_reports/2026-06-13_principal-audit-post-ticket-082.md",
+    "docs/agents/01_RESEARCH_GRAPH_ENGINE_CANONICAL_CONTEXT_v1.md",
+    "docs/agents/06_DOMAIN_PACK_SPEC.md",
+    "rge/modules/source_discovery.py (NotImplementedError)",
+    "rge/modules/fetcher.py (NotImplementedError)",
+    "rge/modules/candidate_ranker.py (NotImplementedError)",
+    "rge/modules/concept_linker.py (only ontology.yaml consumed)",
+    "tickets/TICKET_QUEUE.md (067-083 history)"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-13_master-alignment-audit-post-ticket-082.md"
+  ],
+  "acceptance_criteria": [
+    "Read-only repo-wide audit report covering README, AGENTS, canonical context, operating protocol, build loop, runtime config, runbook, ticket queue, tickets 067-082, scratch modules, CLI, safety auditor, export, public site, golden tests, unit tests since 067, CI, and .gitignore.",
+    "Clear answers to: build phase, what is real/verified, what is scaffold, drift assessment, updated MVP definition, domain-entry gates, first real domain pack recommendation, next best move (option comparison), what must not happen, and a next 3-ticket sequence.",
+    "No product features implemented; no domain work seeded; no validators or tests changed.",
+    "Private scratch/probe artifact left untracked (not committed)."
+  ],
+  "test_plan": [
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-084",
+    "python -m rge.modules.safety_auditor --audit full",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Do not implement product features in this pass.",
+    "Do not seed a domain implementation ticket beyond proposed next-sequence documentation.",
+    "Do not start ticket-059/OpenAI or add cloud/API calls.",
+    "Do not commit the local live probe/scratch evidence artifact."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "N/A (read-only audit report).",
+  "status": "done"
+}
