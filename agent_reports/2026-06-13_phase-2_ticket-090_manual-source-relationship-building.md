@@ -55,7 +55,10 @@ python -m rge.cli build-relationships --source src_2c53bfdfdf3c6853
 
 ## Merge
 
-- Implementation SHA: (pending commit)
+- Implementation SHA: `3c2652d`
+- Merge commit: `473c46a`
+- Pushed: `main -> main`
+- Full pytest: **368 passed**, 6 `live_smoke` deselected
 
 ## Recommended next ticket
 
