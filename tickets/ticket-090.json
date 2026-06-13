@@ -1,0 +1,32 @@
+{
+  "id": "ticket-090",
+  "title": "Manual source relationship proof (synthnote)",
+  "problem": "Ticket-089 proved concept linking on synthnote manual source. Next smallest proof is build-relationships on linked claims using a calibrated mock fixture, still deterministic and mock-only.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-089_manual-source-concept-linking.md",
+    "rge/modules/relationship_builder.py",
+    "tests/golden/test_06_relationship_builder.py"
+  ],
+  "affected_modules": [
+    "rge/modules/relationship_builder.py"
+  ],
+  "expected_files": [
+    "fixtures/llm_outputs/relationship_drafting_manual_synthnote.json",
+    "fixtures/manual_source_fixture_map.json",
+    "tests/unit/test_manual_relationship_building.py"
+  ],
+  "acceptance_criteria": [
+    "build-relationships on synthnote manual source persists relationships via checksum fixture map.",
+    "Golden GT06 unchanged; no live LLM."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_relationship_building.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, OpenAI/cloud, export, or schema migration."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert relationship fixture map entry and unit tests.",
+  "status": "proposed"
+}

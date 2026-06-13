@@ -29,5 +29,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert manual concept-linking fixture map entry and unit tests.",
-  "status": "proposed"
+  "status": "done"
 }

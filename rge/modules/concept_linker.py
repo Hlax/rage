@@ -19,6 +19,7 @@ from rge.modules.domain_pack_loader import (
     load_domain_pack,
     resolve_canonical_concept_label,
 )
+from rge.modules.manual_source_fixtures import link_fixture_for_manual_source
 
 _GENERIC_ONLY_LABELS = frozenset({"ai", "creativity"})
 
@@ -207,6 +208,7 @@ def propose_concept_links(
     client: Any | None = None,
     fixture_name: str | None = None,
     diversity_heuristic: bool = False,
+    source: Any | None = None,
 ) -> list[dict[str, Any]]:
     """Propose concept links via the model client without persistence."""
     config = load_config()
@@ -217,8 +219,9 @@ def propose_concept_links(
         "schema_version": config.llm_schema_version,
     }
     if isinstance(model_client, MockModelClient):
+        resolved_fixture = fixture_name or link_fixture_for_manual_source(source)
         link_kwargs["fixture_name"] = (
-            fixture_name or "concept_linking_creativity_diversity.json"
+            resolved_fixture or "concept_linking_creativity_diversity.json"
         )
     batch = model_client.link_concepts(**link_kwargs)
     links = [item.model_dump() for item in batch.items]
@@ -235,6 +238,7 @@ def link_claim_concepts(
     domain_pack: str,
     *,
     fixture_name: str | None = None,
+    source: Any | None = None,
 ) -> list[dict[str, Any]]:
     """Propose concept links for claims via the configured model client."""
     return propose_concept_links(
@@ -242,6 +246,7 @@ def link_claim_concepts(
         domain_pack,
         fixture_name=fixture_name,
         diversity_heuristic=True,
+        source=source,
     )
 
 
@@ -252,13 +257,19 @@ def link_concepts_for_source(
     fixture_name: str | None = None,
 ) -> dict[str, Any]:
     """Link accepted claims for a source to domain concepts and persist links."""
-    from rge.db.repositories import ClaimConceptRepository, ClaimRepository, ConceptRepository
+    from rge.db.repositories import (
+        ClaimConceptRepository,
+        ClaimRepository,
+        ConceptRepository,
+        SourceRepository,
+    )
 
     claim_repo = ClaimRepository(conn)
     source_claims = claim_repo.list_for_source(source_id, status="accepted")
     if not source_claims:
         raise ValueError(f"No accepted claims found for source: {source_id}")
 
+    source_record = SourceRepository(conn).get_by_id(source_id)
     domain_pack = source_claims[0].domain
     concept_repo = ConceptRepository(conn)
     concept_repo.ensure_domain_concepts(domain_pack)
@@ -283,7 +294,12 @@ def link_concepts_for_source(
         }
         for claim in source_claims
     ]
-    proposed = link_claim_concepts(claim_dicts, domain_pack, fixture_name=fixture_name)
+    proposed = link_claim_concepts(
+        claim_dicts,
+        domain_pack,
+        fixture_name=fixture_name,
+        source=source_record,
+    )
     validated = validate_concept_links(proposed)
 
     link_ids: list[str] = []
