@@ -56,8 +56,8 @@ Safety audit not required (build loop docs-only).
 
 ## Merge
 
-- Implementation SHA: (pending commit)
-- Merge commit SHA: (pending merge)
+- Implementation SHA: `d503b11`
+- Merge commit SHA: `751e9f4`
 - Golden Gate run: (pending push)
 
 ## Recommended next ticket
