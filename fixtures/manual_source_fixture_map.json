@@ -1,6 +1,7 @@
 {
   "2c53bfdfdf3c68530f89e24f4f6c88e4ba95574f76484aa5664be9b0ff0c04e4": {
     "extract_claims": "claim_extraction_manual_synthnote.json",
-    "link_concepts": "concept_linking_manual_synthnote.json"
+    "link_concepts": "concept_linking_manual_synthnote.json",
+    "build_relationships": "relationship_drafting_manual_synthnote.json"
   }
 }

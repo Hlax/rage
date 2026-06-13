@@ -1,0 +1,32 @@
+{
+  "id": "ticket-091",
+  "title": "Manual source contradiction detection proof (synthnote)",
+  "problem": "Ticket-090 proved relationship building on synthnote. Next smallest proof is detect-contradictions on the manual source spine using a calibrated mock fixture.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-090_manual-source-relationship-building.md",
+    "rge/modules/contradiction_detector.py",
+    "tests/golden/test_07_contradiction_detection.py"
+  ],
+  "affected_modules": [
+    "rge/modules/contradiction_detector.py"
+  ],
+  "expected_files": [
+    "fixtures/llm_outputs/contradiction_detection_manual_synthnote.json",
+    "fixtures/manual_source_fixture_map.json",
+    "tests/unit/test_manual_contradiction_detection.py"
+  ],
+  "acceptance_criteria": [
+    "detect-contradictions on synthnote manual source via checksum fixture map.",
+    "Golden GT07 unchanged; no live LLM."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_contradiction_detection.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, OpenAI/cloud, export, or schema migration."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert contradiction fixture map entry and unit tests.",
+  "status": "proposed"
+}
