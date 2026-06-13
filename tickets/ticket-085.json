@@ -1,0 +1,43 @@
+{
+  "id": "ticket-085",
+  "title": "Domain-entry gate spec + Phase-3 ingestion readiness audit",
+  "problem": "The master alignment audit (ticket-084) found the engine is mock/fixture-complete but real research has not started. Before implementing the first real manual source ingestion (ticket-086), we need a focused, read-only readiness audit that defines the domain-entry gates G1-G6, inventories real vs stub ingestion paths, and returns an explicit GO/NO-GO for ticket-086 with the exact minimal implementation target.",
+  "evidence": [
+    "agent_reports/2026-06-13_master-alignment-audit-post-ticket-082.md",
+    "rge/cli.py (_cmd_ingest + ingest subparser)",
+    "rge/db/repositories.py (ingest_local_source, SourceRepository, ChunkRepository)",
+    "rge/modules/fetcher.py (fetch_local_text_file real; fetch_source local-only)",
+    "rge/modules/parser.py (deterministic parse_source_text)",
+    "rge/db/migrations/0001_initial.sql (sources, chunks tables)",
+    "tests/golden/test_01_ingestion.py (ingest persists source+chunks, idempotent, survives restart)",
+    "rge/llm/mock_client.py (extract_claims loads canned fixture, not real text)",
+    "rge/modules/card_exporter.py (GOLDEN_PRIVATE_FIELDS: local_path/raw_source_excerpt forbidden; allowlist export)"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-13_phase-2_ticket-085_domain-entry-gate-spec-and-ingestion-readiness.md"
+  ],
+  "acceptance_criteria": [
+    "Readiness report exists with explicit GO or NO-GO for ticket-086.",
+    "Report inventories real vs stub ingestion paths (ingest CLI, fetcher, parser, repos, source_discovery, fetcher.fetch_source, candidate_ranker).",
+    "Report assesses gates G1-G6 with current status and minimal missing proof each.",
+    "Report defines the exact minimal ticket-086 implementation target and acceptance criteria.",
+    "Report defines first real source format (.txt/.md; PDF/URL deferred), local source location (gitignored data/sources/manual/creativity/), determinism proof, no-export-leak proof, and no-model-authority proof.",
+    "No ingestion implemented; no validators changed; no OpenAI/cloud; no broad docs cleanup; no private source files committed."
+  ],
+  "test_plan": [
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-085",
+    "python -m rge.modules.safety_auditor --audit full",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Do not implement manual ingestion (that is ticket-086).",
+    "Do not change validators or extraction logic.",
+    "Do not add OpenAI/cloud/API.",
+    "Do not do broad docs cleanup or another master audit.",
+    "Do not commit private local source files."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "N/A (read-only readiness report).",
+  "status": "done"
+}

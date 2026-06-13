@@ -116,6 +116,16 @@ superseded
 | 82 | ticket-082 | done | Runtime config scratch evidence workflow cross-link | `phase-2/ticket-082-runtime-config-scratch-workflow-crosslink` | `agent_reports/2026-06-13_phase-2_ticket-082_runtime-config-scratch-workflow-crosslink.md` |
 | 83 | ticket-083 | done | Post-ticket-082 principal audit checkpoint | `phase-2/ticket-083-principal-audit-post-ticket-082` | `agent_reports/2026-06-13_principal-audit-post-ticket-082.md` |
 | 84 | ticket-084 | done | Master repo alignment audit | `phase-2/ticket-084-master-alignment-audit` | `agent_reports/2026-06-13_master-alignment-audit-post-ticket-082.md` |
+| 85 | ticket-085 | done | Domain-entry gate spec + Phase-3 ingestion readiness audit | `phase-2/ticket-085-domain-entry-gate-spec-and-ingestion-readiness` | `agent_reports/2026-06-13_phase-2_ticket-085_domain-entry-gate-spec-and-ingestion-readiness.md` |
+| 86 | ticket-086 | proposed | Real manual source ingestion (Level-1) | | |
+
+## Queue Notes (2026-06-13, ticket-085 ingestion readiness audit)
+
+- **GO for ticket-086.** Ingestion spine already real and GT01-proven: `research ingest` persists source+chunks deterministically, idempotent by checksum, survives restart. Stubs (`source_discovery`/`fetcher.fetch_source`/`candidate_ranker`) are NOT on the manual path.
+- Only real gap: `source_type` hardcoded `"fixture"`; no `--source-title`/`--source-type`; no manual-source dir convention.
+- G1 PASS (one small gap); G2 deferred past 086 (mock extraction is canned; real-text floor needs live Qwen or seeded fixture); G3 not needed until ticket-087; G4 PASS (private DB under gitignored data/, allowlist export, local_path is a forbidden field); G5 PASS (human-gated promotion); G6 satisfied by this report (no separate pre-ticket audit needed at scoped size — no migration/validator/export change).
+- First source format: local `.txt`/`.md` (PDF/URL deferred). Source location: gitignored `data/sources/manual/creativity/` (no private sources committed).
+- ticket-086 scope: extend `ingest` with `--source-type`/`--source-title`, label real sources `manual_text`, prove determinism + no-export-leak + no-model-authority + unit tests. ticket-059 OpenAI remains deferred.
 
 ## Queue Notes (2026-06-13, ticket-084 master alignment audit)
 
@@ -829,8 +839,8 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-084 (done) — Master repo alignment audit (read-only)
-Next implementation candidate: ticket-085 — Domain-entry gate spec + Phase-3 ingestion readiness audit (proposed, low risk)
+ticket-085 (done) — Domain-entry gate spec + Phase-3 ingestion readiness audit (GO for ticket-086)
+Next implementation ticket: ticket-086 — Real manual source ingestion (Level-1) (proposed, low-medium risk)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
