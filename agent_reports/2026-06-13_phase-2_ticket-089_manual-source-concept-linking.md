@@ -59,7 +59,10 @@ python -m rge.cli link-concepts --source src_2c53bfdfdf3c6853
 
 ## Merge
 
-- Implementation SHA: (pending commit)
+- Implementation SHA: `29310e1`
+- Merge commit: `8fe1585`
+- Pushed: `main -> main`
+- Full pytest: **363 passed**, 6 `live_smoke` deselected
 
 ## Recommended next ticket
 
