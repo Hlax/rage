@@ -1,0 +1,32 @@
+{
+  "id": "ticket-099",
+  "title": "Manual source score reconciliation proof (synthnote follow-up)",
+  "problem": "Tickets 088–098 proved manual synthnote spine through detect-contradictions. Next MVP-Research step is reconcile-scores: prove score_events append when follow-up manual evidence supports an existing relationship (Golden Test 8 pattern) on the manual source path.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-098_runtime-config-manual-synthnote-crosslink.md",
+    "rge/modules/score_reconciler.py",
+    "tests/golden/test_08_score_reconciliation.py"
+  ],
+  "affected_modules": [
+    "rge/modules/score_reconciler.py"
+  ],
+  "expected_files": [
+    "fixtures/manual_source_fixture_map.json",
+    "tests/unit/test_manual_score_reconciliation.py"
+  ],
+  "acceptance_criteria": [
+    "reconcile-scores on manual synthnote spine produces score_events when qualifying follow-up claim supports may_reduce edge.",
+    "Golden GT08 unchanged; no live LLM."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_score_reconciliation.py -q",
+    "python -m pytest tests/golden/test_08_score_reconciliation.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, export, schema migration, or validator changes beyond ticket scope."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert manual score reconciliation wiring and unit tests.",
+  "status": "proposed"
+}
