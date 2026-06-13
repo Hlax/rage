@@ -57,8 +57,8 @@ Safety audit not required (operating protocol docs-only).
 
 ## Merge
 
-- Implementation SHA: (pending commit)
-- Merge commit SHA: (pending merge)
+- Implementation SHA: `bc52d24`
+- Merge commit SHA: `581480b`
 - Golden Gate run: (pending push)
 
 ## Recommended next ticket
