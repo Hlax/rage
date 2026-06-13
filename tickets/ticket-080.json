@@ -1,0 +1,31 @@
+{
+  "id": "ticket-080",
+  "title": "Post-ticket-079 principal audit checkpoint",
+  "problem": "Tickets 077–079 complete the scratch evidence workflow doc cross-link chain. Three consecutive done tickets since the post-ticket-076 principal audit require a read-only checkpoint before further Phase 2 implementation.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-079_operating-protocol-scratch-workflow-crosslink.md",
+    "agent_reports/2026-06-13_principal-audit-post-ticket-076.md",
+    "docs/agents/10_SAFETY_MODEL.md",
+    "AGENTS.md audit gate table"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-13_principal-audit-post-ticket-079.md"
+  ],
+  "acceptance_criteria": [
+    "Read-only audit report in agent_reports/ covering scratch evidence workflow posture, operator loop hooks, and next Phase 2 priorities.",
+    "Explicit go/no-go for next implementation ticket after doc cross-link chain.",
+    "No runtime or schema changes in the audit ticket itself."
+  ],
+  "test_plan": [
+    "python -m rge.modules.safety_auditor --audit full",
+    "pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Do not implement new features in the audit ticket.",
+    "Do not enable live Ollama in golden tests."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "N/A (read-only audit).",
+  "status": "proposed"
+}
