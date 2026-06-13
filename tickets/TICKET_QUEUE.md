@@ -101,7 +101,14 @@ superseded
 | 67 | ticket-067 | done | Multi-fixture prompt calibration for local live mini-run suite | `phase-2/ticket-067-multi-fixture-prompt-calibration` | `agent_reports/2026-06-12_phase-2_ticket-067_multi-fixture-prompt-calibration.md` |
 | 68 | ticket-068 | done | Scratch DB persistence for reviewed live mini-run reports | `phase-2/ticket-068-scratch-db-reviewed-live-probe-persistence` | `agent_reports/2026-06-12_phase-2_ticket-068_scratch-db-reviewed-live-probe-persistence.md` |
 | 69 | ticket-069 | done | Followup contradiction calibration | `phase-2/ticket-069-followup-contradiction-calibration` | `agent_reports/2026-06-12_phase-2_ticket-069_followup-contradiction-calibration.md` |
-| 70 | ticket-070 | in_progress | Scratch DB run summary | `phase-2/ticket-070-scratch-db-run-summary` | |
+| 70 | ticket-070 | done | Scratch DB run summary | `phase-2/ticket-070-scratch-db-run-summary` | `agent_reports/2026-06-12_phase-2_ticket-070_scratch-db-run-summary.md` |
+
+## Queue Notes (2026-06-12, ticket-070 agent)
+
+- Adds `probe-scratch-summary` read-only aggregation over scratch SQLite.
+- SQLite `mode=ro`; no schema bootstrap; private `--out` paths only.
+- **Cadence:** 3 done tickets since post-ticket-067 checkpoint — run `/rge-principal-audit` before next medium-risk ticket.
+- ticket-059 OpenAI deferred.
 
 ## Queue Notes (2026-06-12, ticket-070 seed)
 

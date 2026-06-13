@@ -52,5 +52,5 @@
   ],
   "risk_level": "low-medium",
   "rollback_plan": "Revert summary module, CLI, tests, docs, and safety audit extension.",
-  "status": "in_progress"
+  "status": "done"
 }
