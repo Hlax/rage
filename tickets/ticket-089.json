@@ -1,0 +1,33 @@
+{
+  "id": "ticket-089",
+  "title": "Manual source concept linking proof (synthnote)",
+  "problem": "Ticket-088 proved claim extraction from manual synthnote source. The next smallest proof is concept linking on those accepted claims using domain pack ontology+aliases, still mock-only and deterministic.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-088_real-claim-extraction-manual-source.md",
+    "rge/modules/concept_linker.py",
+    "tests/golden/test_05_concept_linking.py"
+  ],
+  "affected_modules": [
+    "rge/modules/concept_linker.py"
+  ],
+  "expected_files": [
+    "fixtures/llm_outputs/concept_linking_manual_synthnote.json",
+    "fixtures/manual_source_fixture_map.json",
+    "tests/unit/test_manual_concept_linking.py"
+  ],
+  "acceptance_criteria": [
+    "link-concepts on synthnote manual source persists claim_concepts using calibrated mock fixture.",
+    "Alias resolution applies to proposed concept labels.",
+    "Golden GT05 unchanged; no live LLM."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_concept_linking.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, OpenAI/cloud, export, or schema migration."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert manual concept-linking fixture map entry and unit tests.",
+  "status": "proposed"
+}

@@ -1,0 +1,71 @@
+# Synthetic Source Note: AI-Assisted Ideation and Semantic Diversity
+
+Source type: synthetic operator-authored manual source
+Domain: creativity
+Use: local pipeline smoke test only; not real external evidence
+Date: 2026-06-13
+
+## Summary
+
+This synthetic note describes a small fictional observation about AI-assisted brainstorming. It is designed to test whether a research graph engine can extract scoped claims, link them to creativity concepts, and identify a tension between improved creative output and reduced semantic diversity.
+
+## Scenario
+
+A small product design team tested three brainstorming workflows for early-stage app feature ideation.
+
+The first workflow was human-only brainstorming. Participants generated ideas for twenty minutes without using AI tools.
+
+The second workflow was AI-assisted brainstorming. Participants used an AI chatbot during the entire twenty-minute session to suggest feature ideas, reword concepts, and expand lists.
+
+The third workflow was delayed-AI brainstorming. Participants brainstormed without AI for the first ten minutes, then used AI for the final ten minutes to refine and extend their ideas.
+
+The team judged the outputs using three simple criteria: number of usable ideas, originality of the ideas, and semantic diversity across the idea set. Semantic diversity means how widely the ideas spread across different themes, user needs, and design directions.
+
+## Observations
+
+In this synthetic scenario, AI-assisted brainstorming increased the number of usable ideas. The AI-assisted group produced more feature concepts than the human-only group during the same twenty-minute window.
+
+However, the AI-assisted group also repeated similar themes more often. Many of its ideas clustered around personalization, productivity, onboarding, and recommendation features.
+
+The human-only group produced fewer total ideas, but the ideas covered a wider range of themes. Some ideas focused on community rituals, offline experiences, playful constraints, emotional memory, and unusual collaboration formats.
+
+The delayed-AI group produced a middle result. It generated more usable ideas than the human-only group while preserving more semantic diversity than the always-AI group.
+
+The strongest pattern was not that AI made creativity better or worse in general. The stronger pattern was conditional: AI assistance improved idea volume under time pressure, but always-on AI assistance narrowed the range of themes in the final idea set.
+
+## Claim-relevant passages
+
+AI assistance increased idea volume during timed brainstorming.
+
+Always-on AI assistance reduced semantic diversity by clustering ideas around common product patterns.
+
+Human-only brainstorming produced fewer usable ideas but covered a wider range of themes.
+
+Delayed AI assistance preserved more semantic diversity than always-on AI assistance.
+
+AI-assisted brainstorming may improve creative output when the target is idea quantity.
+
+AI-assisted brainstorming may reduce semantic diversity when participants rely on AI suggestions throughout the entire ideation session.
+
+A hybrid workflow may balance idea volume and semantic diversity by delaying AI use until after humans generate initial directions.
+
+## Limitations
+
+This is a synthetic source note, not a real study. It should not be cited as evidence about real people, real teams, or real creative outcomes.
+
+The scenario is intentionally small and controlled. It does not measure long-term creativity, expert creative practice, artistic quality, or commercial success.
+
+The note is useful for testing a research pipeline because it contains support, qualification, and tension:
+
+* support: AI assistance increased idea volume
+* qualification: the effect appears under timed brainstorming conditions
+* tension: AI assistance may reduce semantic diversity when used throughout ideation
+
+## Expected concepts
+
+AI assistance
+brainstorming
+ideation
+creative output
+semantic diversity
+human creativity

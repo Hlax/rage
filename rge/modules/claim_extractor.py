@@ -11,6 +11,8 @@ Flow:
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any
 
 from rge.config import load_config
@@ -20,6 +22,15 @@ from rge.llm.registry import get_model_client
 from rge.llm.schemas import CandidateClaimBatch_v0_1
 from rge.modules.claim_validator import locate_quote_offsets, validate_candidate_claims
 from rge.safety.prompt_injection import source_text_has_prompt_injection_fixture
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_MANUAL_SOURCE_FIXTURE_MAP_PATH = _REPO_ROOT / "fixtures" / "manual_source_fixture_map.json"
+
+
+def _manual_source_fixture_map() -> dict[str, str]:
+    if not _MANUAL_SOURCE_FIXTURE_MAP_PATH.is_file():
+        return {}
+    return json.loads(_MANUAL_SOURCE_FIXTURE_MAP_PATH.read_text(encoding="utf-8"))
 
 
 def _candidate_to_dict(item: Any) -> dict[str, Any]:
@@ -47,6 +58,7 @@ def extract_candidate_claims(
     *,
     fixture_name: str | None = None,
     client=None,
+    source: Any | None = None,
 ) -> list[dict[str, Any]]:
     """Extract candidate claims from one chunk via the configured model client."""
     config = load_config()
@@ -59,7 +71,7 @@ def extract_candidate_claims(
     }
     if isinstance(model_client, MockModelClient):
         extract_kwargs["fixture_name"] = (
-            fixture_name or _default_fixture_for_chunk(chunk)
+            fixture_name or _default_fixture_for_source_chunk(source, chunk)
         )
     batch: CandidateClaimBatch_v0_1 = model_client.extract_claims(**extract_kwargs)
 
@@ -70,6 +82,19 @@ def extract_candidate_claims(
         candidate["chunk_id"] = chunk["id"]
         candidates.append(candidate)
     return candidates
+
+
+def _default_fixture_for_source_chunk(
+    source: Any | None,
+    chunk: dict[str, Any],
+) -> str:
+    if source is not None and getattr(source, "source_type", None) == "manual_text":
+        checksum = getattr(source, "raw_text_checksum", None)
+        if checksum:
+            mapped = _manual_source_fixture_map().get(checksum)
+            if mapped:
+                return mapped
+    return _default_fixture_for_chunk(chunk)
 
 
 def _default_fixture_for_chunk(chunk: dict[str, Any]) -> str:
@@ -87,6 +112,7 @@ def extract_and_validate_for_chunk(
     domain_pack: str,
     fixture_name: str | None = None,
     client=None,
+    source: Any | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
     """Extract candidates for one chunk and validate them deterministically."""
     contract: dict[str, Any] = {"domain_pack": domain_pack}
@@ -96,6 +122,7 @@ def extract_and_validate_for_chunk(
         domain_pack,
         fixture_name=fixture_name,
         client=client,
+        source=source,
     )
     return validate_candidate_claims(
         candidates,
@@ -152,6 +179,7 @@ def extract_claims_for_source(
             domain_pack=source.domain,
             fixture_name=fixture_name,
             client=model_client,
+            source=source,
         )
         for claim in result["accepted"]:
             char_start, char_end = locate_quote_offsets(
