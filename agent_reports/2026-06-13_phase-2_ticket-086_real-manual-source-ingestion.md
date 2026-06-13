@@ -80,8 +80,22 @@ python -m rge.cli ingest data/sources/manual/creativity/note.md `
 
 ## Merge
 
-- Not merged in this run (awaiting operator commit/merge request).
-- Implementation SHA: (uncommitted on branch)
+- Implementation SHA: `689f84e`
+- Merge: fast-forward to `main` (689f84e == origin/main)
+- Pushed: `main -> main`
+
+## Operator test source
+
+Copied `C:\Users\guestt\OneDrive\Desktop\test.txt` to gitignored
+`data/sources/manual/creativity/test.txt` and ingested:
+
+```powershell
+python -m rge.cli ingest data/sources/manual/creativity/test.txt `
+  --domain creativity --source-type manual_text `
+  --source-title "test.txt (operator manual source)"
+```
+
+Result: `src_fc40fea5f4169dd8`, 1 chunk, `manual_text`, idempotent on re-run.
 
 ## Next ticket
 
