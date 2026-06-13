@@ -25,5 +25,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Delete the e2e unit test file.",
-  "status": "proposed"
+  "status": "done"
 }
