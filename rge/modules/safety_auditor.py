@@ -444,6 +444,11 @@ def _audit_live_probe_scratch_policy(root: Path) -> tuple[list[str], list[str]]:
             or "_cmd_probe_scratch_summary" not in cli_source
         ):
             blocked.append("missing probe-scratch-summary command in rge/cli.py")
+        if (
+            "probe-scratch-evidence-review" not in cli_source
+            or "_cmd_probe_scratch_evidence_review" not in cli_source
+        ):
+            blocked.append("missing probe-scratch-evidence-review command in rge/cli.py")
 
     summary_module = root / "rge" / "modules" / "live_probe_scratch_summary.py"
     if summary_module.is_file():
@@ -457,6 +462,23 @@ def _audit_live_probe_scratch_policy(root: Path) -> tuple[list[str], list[str]]:
             blocked.append("live_probe_scratch_summary must not import card_exporter")
     else:
         blocked.append("missing live probe scratch summary module")
+
+    evidence_module = root / "rge" / "modules" / "live_probe_evidence_review.py"
+    if evidence_module.is_file():
+        checked.append("rge/modules/live_probe_evidence_review.py")
+        evidence_source = evidence_module.read_text(encoding="utf-8")
+        if "build_scratch_summary" not in evidence_source:
+            blocked.append(
+                "live_probe_evidence_review must reuse build_scratch_summary"
+            )
+        if "automated_ticket_recommendations" not in evidence_source:
+            blocked.append(
+                "live_probe_evidence_review must declare no automated ticket recommendations"
+            )
+        if "card_exporter" in evidence_source:
+            blocked.append("live_probe_evidence_review must not import card_exporter")
+    else:
+        blocked.append("missing live probe evidence review module")
     return checked, blocked
 
 

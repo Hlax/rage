@@ -1,0 +1,56 @@
+{
+  "id": "ticket-071",
+  "title": "Deterministic scratch evidence review report",
+  "problem": "Ticket-070 provides machine-readable scratch DB summaries, but operators and principals still need a single formatted evidence review artifact (markdown/JSON) for human review before seeding improvement tickets. Today that composition is manual.",
+  "evidence": [
+    "agent_reports/2026-06-13_principal-audit-post-ticket-070.md",
+    "agent_reports/2026-06-12_phase-2_ticket-070_scratch-db-run-summary.md",
+    "agent_reports/2026-06-13_pre-ticket-071_deterministic-evidence-review-report.md",
+    "rge/modules/live_probe_scratch_summary.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "affected_modules": [
+    "rge/modules/live_probe_evidence_review.py",
+    "rge/modules/live_probe_scratch_summary.py",
+    "rge/cli.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "expected_files": [
+    "rge/modules/live_probe_evidence_review.py",
+    "rge/cli.py",
+    "tests/unit/test_live_probe_evidence_review.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "tickets/ticket-071.json",
+    "agent_reports/2026-06-13_phase-2_ticket-071_deterministic-evidence-review-report.md"
+  ],
+  "acceptance_criteria": [
+    "New CLI (e.g. probe-scratch-evidence-review) produces a deterministic evidence review from scratch DB via existing read-only summary builder.",
+    "Command reuses build_scratch_summary; does not duplicate aggregation logic or mutate scratch/accepted graph DBs.",
+    "Default prints formatted report to stdout; optional --out writes only under agent_reports/ or data/reports/.",
+    "Report includes fixture/floor/stage/rejection counts, latest report paths, and explicit safety attestation flags.",
+    "Report contains no raw prompts, model responses, operator note bodies, or automated ticket recommendations.",
+    "Missing scratch DB fails closed unless --allow-empty is passed through.",
+    "Empty valid scratch DB produces a valid zero-state review.",
+    "Deterministic output for identical scratch DB state.",
+    "Golden/mock gates and safety audit pass."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_live_probe_evidence_review.py -q",
+    "pytest tests/unit/test_live_probe_scratch_summary.py -q",
+    "pytest tests/golden -q",
+    "pytest -q",
+    "python -m rge.modules.safety_auditor --audit full",
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-072"
+  ],
+  "non_goals": [
+    "No LLM, OpenAI, or cloud API.",
+    "No scratch or accepted graph DB writes.",
+    "No public export or public-site changes.",
+    "No Qwen/model ticket authority or auto-seeding from report text.",
+    "No changes to live probe commands or validators.",
+    "No reimplementation of probe-scratch-summary aggregation."
+  ],
+  "risk_level": "low-medium",
+  "rollback_plan": "Revert evidence review module, CLI subcommand, tests, and runbook section; probe-scratch-summary unchanged.",
+  "status": "done"
+}

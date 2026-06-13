@@ -1,0 +1,42 @@
+{
+  "id": "ticket-072",
+  "title": "Operator loop scratch evidence status hook",
+  "problem": "After ticket-071, operators can run probe-scratch-evidence-review manually, but the bounded operator loop does not surface scratch DB presence, row counts, or evidence-review readiness in plan mode.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-071_deterministic-evidence-review-report.md",
+    "agent_reports/2026-06-13_principal-audit-post-ticket-070.md",
+    "rge/modules/operator_loop.py",
+    "rge/modules/live_probe_evidence_review.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop.py"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop.py",
+    "tickets/ticket-072.json",
+    "agent_reports/2026-06-13_phase-2_ticket-072_operator-loop-scratch-evidence-status.md"
+  ],
+  "acceptance_criteria": [
+    "operator_loop --mode plan reports scratch DB path, existence, and reviewed row count when readable.",
+    "Plan mode remains read-only; no scratch or graph DB writes.",
+    "Missing or invalid scratch DB reported honestly without crashing plan mode.",
+    "Existing operator loop tests pass; new unit tests cover scratch status fields."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_operator_loop.py -q",
+    "pytest tests/golden -q",
+    "pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No LLM or OpenAI.",
+    "No auto-persist or auto evidence review generation.",
+    "No public export or site changes.",
+    "No queue mutation from operator loop."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert operator loop scratch status fields and tests.",
+  "status": "proposed"
+}
