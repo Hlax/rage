@@ -103,7 +103,19 @@ superseded
 | 69 | ticket-069 | done | Followup contradiction calibration | `phase-2/ticket-069-followup-contradiction-calibration` | `agent_reports/2026-06-12_phase-2_ticket-069_followup-contradiction-calibration.md` |
 | 70 | ticket-070 | done | Scratch DB run summary | `phase-2/ticket-070-scratch-db-run-summary` | `agent_reports/2026-06-12_phase-2_ticket-070_scratch-db-run-summary.md` |
 | 71 | ticket-071 | done | Deterministic scratch evidence review report | `phase-2/ticket-071-deterministic-evidence-review-report` | `agent_reports/2026-06-13_phase-2_ticket-071_deterministic-evidence-review-report.md` |
-| 72 | ticket-072 | proposed | Operator loop scratch evidence status hook | | |
+| 72 | ticket-072 | done | Operator loop scratch evidence status hook | `phase-2/ticket-072-operator-loop-scratch-evidence-status` | `agent_reports/2026-06-13_phase-2_ticket-072_operator-loop-scratch-evidence-status.md` |
+| 73 | ticket-073 | proposed | Operator loop evidence review readiness action hint | | |
+
+## Queue Notes (2026-06-13, ticket-073 seed)
+
+- Proposed follow-on from ticket-072: review_gated plan action when scratch evidence is ready.
+- No auto evidence review generation or queue mutation.
+
+## Queue Notes (2026-06-13, ticket-072 agent)
+
+- Plan mode adds `scratch_evidence_status` (path, exists, row count, readiness).
+- Missing/invalid scratch DB fail gracefully; plan never crashes on scratch inspect.
+- ticket-059 OpenAI deferred.
 
 ## Queue Notes (2026-06-13, ticket-072 seed)
 
@@ -722,7 +734,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-072 (proposed) — operator loop scratch evidence status hook
+ticket-073 (proposed) — operator loop evidence review readiness action hint
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 

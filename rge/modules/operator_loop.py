@@ -11,12 +11,20 @@ import json
 import os
 import re
 import shutil
+import sqlite3
 import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
+from rge.modules.live_probe_scratch import get_scratch_db_path
+from rge.modules.live_probe_scratch_summary import (
+    REVIEWED_TABLE,
+    LiveProbeScratchSummaryError,
+    connect_scratch_readonly,
+    validate_scratch_schema,
+)
 from rge.modules.principal_audit_gate import (
     QueueTicketRow,
     checkpoint_status,
@@ -628,6 +636,70 @@ def _action_from_state(
     )
 
 
+def inspect_scratch_evidence_status(
+    *,
+    root: Path | None = None,
+    scratch_db: Path | None = None,
+) -> dict[str, Any]:
+    """Read-only scratch DB presence and reviewed-row counts for operator plan mode."""
+    project_root = root or repo_root()
+    scratch_path = get_scratch_db_path(scratch_db)
+    if not scratch_path.is_absolute():
+        scratch_path = project_root / scratch_path
+    scratch_path = scratch_path.resolve()
+    try:
+        rel_path = scratch_path.relative_to(project_root.resolve()).as_posix()
+    except ValueError:
+        rel_path = scratch_path.as_posix()
+
+    status: dict[str, Any] = {
+        "scratch_db_path": rel_path,
+        "scratch_db_exists": scratch_path.is_file(),
+        "readable": False,
+        "total_reviewed_reports": None,
+        "evidence_review_ready": False,
+        "summary_ready": False,
+        "status": "missing",
+        "error": None,
+        "operator_commands": {
+            "summary": "python -m rge.cli probe-scratch-summary --allow-empty",
+            "evidence_review": (
+                "python -m rge.cli probe-scratch-evidence-review --allow-empty"
+            ),
+        },
+    }
+
+    if not scratch_path.is_file():
+        status["error"] = f"scratch DB not found: {rel_path}"
+        return status
+
+    try:
+        conn = connect_scratch_readonly(scratch_path)
+        try:
+            validate_scratch_schema(conn)
+            row = conn.execute(
+                f"SELECT COUNT(*) AS total FROM {REVIEWED_TABLE}"
+            ).fetchone()
+            total = int(row["total"]) if row is not None else 0
+        finally:
+            conn.close()
+    except LiveProbeScratchSummaryError as exc:
+        status["status"] = "invalid"
+        status["error"] = str(exc)
+        return status
+    except (OSError, sqlite3.Error) as exc:
+        status["status"] = "error"
+        status["error"] = str(exc)
+        return status
+
+    status["readable"] = True
+    status["total_reviewed_reports"] = total
+    status["summary_ready"] = True
+    status["evidence_review_ready"] = total > 0
+    status["status"] = "ok" if total > 0 else "empty"
+    return status
+
+
 def build_operator_plan(
     *,
     root: Path | None = None,
@@ -718,6 +790,7 @@ def build_operator_plan(
             "violations": drift_violations,
         },
         "audit_cadence": audit,
+        "scratch_evidence_status": inspect_scratch_evidence_status(root=project_root),
         "pending_improvement_tickets": improvement,
         "next_recommended_action": {
             "action_id": action.action_id,

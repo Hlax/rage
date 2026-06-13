@@ -1,0 +1,44 @@
+{
+  "id": "ticket-073",
+  "title": "Operator loop evidence review readiness action hint",
+  "problem": "Ticket-072 exposes scratch_evidence_status in plan mode, but operators must still infer when to run probe-scratch-evidence-review. Plan mode should recommend a review_gated action when reviewed scratch rows exist and no higher-priority blocker applies.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-072_operator-loop-scratch-evidence-status.md",
+    "rge/modules/operator_loop.py",
+    "rge/modules/live_probe_evidence_review.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "tickets/ticket-073.json",
+    "agent_reports/2026-06-13_phase-2_ticket-073_operator-loop-evidence-review-action.md"
+  ],
+  "acceptance_criteria": [
+    "When scratch_evidence_status.evidence_review_ready is true and plan is not blocked, next_recommended_action suggests running probe-scratch-evidence-review with review_gated gate.",
+    "Higher-priority blockers (dirty tree, audit overdue, drift, improvement drafts) still take precedence.",
+    "No scratch/graph DB writes or automated evidence review generation from plan mode.",
+    "Unit tests cover ready and not-ready action selection."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_operator_loop.py -q",
+    "pytest tests/golden -q",
+    "pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No LLM or OpenAI.",
+    "No auto-persist or execute-safe evidence review runs.",
+    "No public export or site changes.",
+    "No queue mutation."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert action-hint logic, tests, and runbook note.",
+  "status": "proposed"
+}
