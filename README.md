@@ -132,7 +132,7 @@ python -m rge.cli ingest data/sources/manual/creativity/note.md --domain creativ
 
 Omit `--source-type` to keep golden-test back-compat (`fixture`). Ingest writes only to the private SQLite DB; it does not export.
 
-**Manual synthnote operator spine** (mock LLM; tickets 088–093): after placing
+**Manual synthnote operator spine** (mock LLM; tickets 088–099): after placing
 `synthnote.txt` under gitignored `data/sources/manual/creativity/`, run the full
 pipeline with checksum-based fixtures (no `--fixture` flags for `manual_text` sources).
 A committed test copy lives at `fixtures/sources/manual_synthnote.txt`.
@@ -157,6 +157,25 @@ python -m rge.cli build-relationships --source src_2c53bfdfdf3c6853
 
 # 5. Detect contradictions — 1 qualifies edge linking the two relationship directions
 python -m rge.cli detect-contradictions --source src_2c53bfdfdf3c6853
+```
+
+**Manual synthnote score reconciliation** (after steps 1–5): ingest a follow-up
+`manual_text` source with stronger supporting evidence, then reconcile scores.
+Committed test copy: `fixtures/sources/manual_synthnote_followup.txt`; operator copy:
+`data/sources/manual/creativity/synthnote_followup.txt`.
+
+```powershell
+# 6. Ingest follow-up — checksum map resolves extract fixture automatically
+python -m rge.cli ingest data/sources/manual/creativity/synthnote_followup.txt `
+  --domain creativity --source-type manual_text `
+  --source-title "Synthetic Follow-Up Note: AI Assistance and Semantic Diversity Replication"
+# Expected: source id src_c5d1add68657e7ec (checksum-prefixed)
+
+# 7. Extract claims — 1 accepted claim (confidence 0.85)
+python -m rge.cli extract-claims --source src_c5d1add68657e7ec
+
+# 8. Reconcile scores — 1 score_events row; may_reduce edge 0.5 → 0.62
+python -m rge.cli reconcile-scores --source src_c5d1add68657e7ec
 ```
 
 Re-running any step is idempotent (stable row counts). Fixture filenames resolve from
