@@ -106,7 +106,18 @@ superseded
 | 72 | ticket-072 | done | Operator loop scratch evidence status hook | `phase-2/ticket-072-operator-loop-scratch-evidence-status` | `agent_reports/2026-06-13_phase-2_ticket-072_operator-loop-scratch-evidence-status.md` |
 | 73 | ticket-073 | done | Operator loop evidence review readiness action hint | `phase-2/ticket-073-operator-loop-evidence-review-action` | `agent_reports/2026-06-13_phase-2_ticket-073_operator-loop-evidence-review-action.md` |
 | 74 | ticket-074 | done | Windows-safe UTF-8 stdout for probe-scratch-evidence-review | `phase-2/ticket-074-windows-evidence-review-utf8-stdout` | `agent_reports/2026-06-13_phase-2_ticket-074_windows-evidence-review-utf8-stdout.md` |
-| 75 | ticket-075 | proposed | Live probe runbook Windows console encoding note | | |
+| 75 | ticket-075 | done | Live probe runbook Windows console encoding note | `phase-2/ticket-075-runbook-windows-encoding-note` | `agent_reports/2026-06-13_phase-2_ticket-075_runbook-windows-encoding-note.md` |
+| 76 | ticket-076 | proposed | Runbook scratch evidence workflow checklist | | |
+
+## Queue Notes (2026-06-13, ticket-076 seed)
+
+- Docs-only numbered checklist linking persist → summary → evidence review → operator loop plan.
+
+## Queue Notes (2026-06-13, ticket-075 agent)
+
+- Runbook documents ASCII-safe default markdown on Windows cp1252 post ticket-074.
+- JSON/`--out` listed as optional conveniences, not encoding workarounds.
+- ticket-059 OpenAI deferred.
 
 ## Queue Notes (2026-06-13, ticket-075 seed)
 
@@ -756,7 +767,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-075 (proposed) — live probe runbook Windows console encoding note
+ticket-076 (proposed) — runbook scratch evidence workflow checklist
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 

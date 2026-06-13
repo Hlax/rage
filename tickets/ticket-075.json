@@ -31,5 +31,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert runbook section.",
-  "status": "proposed"
+  "status": "done"
 }

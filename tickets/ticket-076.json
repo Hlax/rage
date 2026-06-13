@@ -1,0 +1,35 @@
+{
+  "id": "ticket-076",
+  "title": "Runbook scratch evidence workflow checklist",
+  "problem": "After tickets 068–075, scratch persist, summary, and evidence review CLIs exist but the runbook scatters steps across sections without a single numbered operator checklist.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-075_runbook-windows-encoding-note.md",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "agent_reports/2026-06-13_phase-2_ticket-074_windows-evidence-review-utf8-stdout.md"
+  ],
+  "affected_modules": [
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "expected_files": [
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "tickets/ticket-076.json",
+    "agent_reports/2026-06-13_phase-2_ticket-076_runbook-scratch-workflow-checklist.md"
+  ],
+  "acceptance_criteria": [
+    "Runbook adds a numbered checklist: live probe → persist reviewed report → scratch summary → evidence review → operator loop plan.",
+    "Each step links to existing CLI commands; no new commands.",
+    "Docs-only; no code changes."
+  ],
+  "test_plan": [
+    "pytest tests/golden -q",
+    "pytest -q"
+  ],
+  "non_goals": [
+    "No CLI or DB changes.",
+    "No public export or site changes.",
+    "No automated workflow runner."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert runbook checklist section.",
+  "status": "proposed"
+}
