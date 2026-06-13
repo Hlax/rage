@@ -270,6 +270,17 @@ python -m rge.cli probe-scratch-evidence-review `
 - `--out` must be under `data/reports/` or `agent_reports/`
 - Operator note bodies are not included (count only via summary)
 
+**Windows console encoding (ticket-074+):**
+
+- Default markdown is **ASCII-safe** on Windows cp1252 consoles (review window uses
+  `->`, not a Unicode arrow). You do **not** need `$env:PYTHONIOENCODING = "utf-8"`
+  for normal `probe-scratch-evidence-review` stdout.
+- Use `--format json` when piping into other tools, or `--out` under
+  `agent_reports/` / `data/reports/` when archiving a file — these are convenience
+  options, not workarounds for default markdown encoding.
+- Other operator CLIs that print non-ASCII markdown to stdout may still require JSON,
+  `--out`, or UTF-8 console settings; scope fixes per command, not a global policy.
+
 ### Operator loop evidence review action (plan mode)
 
 When reviewed scratch rows exist and no higher-priority blocker applies (dirty
