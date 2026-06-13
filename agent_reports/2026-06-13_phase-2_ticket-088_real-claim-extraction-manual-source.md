@@ -85,11 +85,15 @@ python -m rge.cli extract-claims --source src_2c53bfdfdf3c6853
 
 ## Merge
 
-- Implementation SHA: (pending commit)
+- Implementation SHA: `963c271`
+- Merge commit: `1bf0e61`
+- Pushed: `main -> main`
 
 ## Final git status
 
-(After merge.)
+Clean except untracked operator probe artifact
+(`agent_reports/2026-06-13_scratch-evidence-review-probe.md`). Manual source
+artifacts remain under gitignored `data/`.
 
 ## Recommended next ticket
 
