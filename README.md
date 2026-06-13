@@ -46,8 +46,9 @@ What requires **explicit live opt-in** (local Ollama only):
 - Requires `RGE_LLM_MODE=ollama` **and** `RGE_ALLOW_LIVE_LLM=1`
 - Run `python -m rge.cli model-health` before live pipeline work
 
-**Live probe runbook** (mini-run stage floors, `contradiction_input_mode`, evidence
-for human-gated improvements): `docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md`.
+**Live probe runbook** (mini-run stage floors, `contradiction_input_mode`, scratch
+evidence workflow checklist, human-gated improvements):
+`docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md` — see **Scratch evidence workflow checklist**.
 
 See `docs/agents/13_MODEL_ESCALATION_POLICY.md` for mode profiles and task tiers.
 
@@ -122,6 +123,14 @@ cd apps/public-site && npm run build
 ```
 
 After ticket-034, repeated fixture-mode runs leave `git status --short` empty. Runtime output goes under gitignored `data/`; only reviewed public snapshots under `apps/public-site/public/data/` are committed.
+
+**Live probe scratch evidence workflow** (local Ollama opt-in; report-only until
+operator persist): use the numbered checklist in
+[`docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md`](docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md)
+(**Scratch evidence workflow checklist**). Summary: `probe-mini-run` or
+`probe-mini-run-suite` → `probe-persist-reviewed-report --confirm-review` →
+`probe-scratch-summary` → `probe-scratch-evidence-review` →
+`python -m rge.modules.operator_loop --mode plan`.
 
 ## Verification Commands
 
@@ -228,6 +237,7 @@ Implementation follows `docs/agents/` in the priority order defined by `AGENTS.m
 
 Key operator docs:
 
+- Live probe runbook (scratch evidence checklist): `docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md`
 - Model escalation policy: `docs/agents/13_MODEL_ESCALATION_POLICY.md`
 - Runtime config: `docs/agents/12_RUNTIME_CONFIG.md`
 - Safety model: `docs/agents/10_SAFETY_MODEL.md`
