@@ -108,7 +108,17 @@ superseded
 | 74 | ticket-074 | done | Windows-safe UTF-8 stdout for probe-scratch-evidence-review | `phase-2/ticket-074-windows-evidence-review-utf8-stdout` | `agent_reports/2026-06-13_phase-2_ticket-074_windows-evidence-review-utf8-stdout.md` |
 | 75 | ticket-075 | done | Live probe runbook Windows console encoding note | `phase-2/ticket-075-runbook-windows-encoding-note` | `agent_reports/2026-06-13_phase-2_ticket-075_runbook-windows-encoding-note.md` |
 | 76 | ticket-076 | done | Runbook scratch evidence workflow checklist | `phase-2/ticket-076-runbook-scratch-workflow-checklist` | `agent_reports/2026-06-13_phase-2_ticket-076_runbook-scratch-workflow-checklist.md` |
-| 77 | ticket-077 | proposed | README operator quickstart scratch evidence workflow pointer | | |
+| 77 | ticket-077 | done | README operator quickstart scratch evidence workflow pointer | `phase-2/ticket-077-readme-scratch-workflow-pointer` | `agent_reports/2026-06-13_phase-2_ticket-077_readme-scratch-workflow-pointer.md` |
+| 78 | ticket-078 | proposed | AGENTS.md operator quickstart scratch evidence workflow cross-link | | |
+
+## Queue Notes (2026-06-13, ticket-078 seed)
+
+- AGENTS.md cross-link to runbook scratch evidence checklist (docs-only).
+
+## Queue Notes (2026-06-13, ticket-077 agent)
+
+- README Operator Quickstart + Key operator docs link to runbook checklist.
+- ticket-059 OpenAI deferred.
 
 ## Queue Notes (2026-06-13, ticket-077 seed)
 
@@ -777,7 +787,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-077 (proposed) — README operator quickstart scratch evidence workflow pointer
+ticket-078 (proposed) — AGENTS.md operator quickstart scratch evidence workflow cross-link
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
