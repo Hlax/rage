@@ -29,5 +29,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert e2e reconcile-scores test extension.",
-  "status": "proposed"
+  "status": "done"
 }

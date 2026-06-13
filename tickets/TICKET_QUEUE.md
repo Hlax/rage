@@ -136,7 +136,8 @@ superseded
 | 102 | ticket-102 | done | Operating protocol manual synthnote reconcile-scores cross-link | `phase-2/ticket-102-operating-protocol-manual-synthnote-reconcile-scores-crosslink` | `agent_reports/2026-06-13_phase-2_ticket-102_operating-protocol-manual-synthnote-reconcile-scores-crosslink.md` |
 | 103 | ticket-103 | done | Cursor build loop manual synthnote reconcile-scores cross-link | `phase-2/ticket-103-cursor-build-loop-manual-synthnote-reconcile-scores-crosslink` | `agent_reports/2026-06-13_phase-2_ticket-103_cursor-build-loop-manual-synthnote-reconcile-scores-crosslink.md` |
 | 104 | ticket-104 | done | Runtime config manual synthnote reconcile-scores cross-link | `phase-2/ticket-104-runtime-config-manual-synthnote-reconcile-scores-crosslink` | `agent_reports/2026-06-13_phase-2_ticket-104_runtime-config-manual-synthnote-reconcile-scores-crosslink.md` |
-| 105 | ticket-105 | proposed | Manual source pipeline e2e through reconcile-scores | | |
+| 105 | ticket-105 | done | Manual source pipeline e2e through reconcile-scores | `phase-2/ticket-105-manual-source-pipeline-e2e-reconcile-scores` | `agent_reports/2026-06-13_phase-2_ticket-105_manual-source-pipeline-e2e-reconcile-scores.md` |
+| 106 | ticket-106 | proposed | Manual source pipeline idempotency through reconcile-scores | | |
 
 ## Queue Notes (2026-06-13, ticket-085 ingestion readiness audit)
 
@@ -858,7 +859,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-105 (proposed) — Manual source pipeline e2e through reconcile-scores
+ticket-106 (proposed) — Manual source pipeline idempotency through reconcile-scores
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
