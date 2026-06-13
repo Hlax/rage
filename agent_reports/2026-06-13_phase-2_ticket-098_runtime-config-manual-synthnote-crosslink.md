@@ -46,9 +46,10 @@ Safety audit: **not required** (runtime config docs-only).
 
 ## Merge
 
-- Implementation SHA: (pending commit)
-- Merge commit: (pending merge)
-- Pushed: (pending push)
+- Implementation SHA: `071d6ba`
+- Merge commit: `e2e7188`
+- Pushed: `main -> main`
+- Full pytest: **377 passed**, 6 `live_smoke` deselected
 
 ## Recommended next ticket
 
