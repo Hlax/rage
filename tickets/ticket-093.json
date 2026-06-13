@@ -1,0 +1,28 @@
+{
+  "id": "ticket-093",
+  "title": "Manual source pipeline idempotency proof (synthnote)",
+  "problem": "Ticket-092 proved the manual synthnote spine succeeds once. Next smallest proof is that re-running each pipeline command on the same source does not duplicate claims, links, relationships, or qualification evidence.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-092_manual-source-pipeline-e2e.md",
+    "tests/unit/test_manual_source_pipeline_e2e.py"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "tests/unit/test_manual_source_pipeline_idempotency.py"
+  ],
+  "acceptance_criteria": [
+    "Unit test runs full spine twice and asserts stable row counts for claims, links, relationships, and qualifications.",
+    "Existing manual and golden tests remain green."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_source_pipeline_idempotency.py -q",
+    "python -m pytest tests/unit/test_manual_source_pipeline_e2e.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, export, schema migration, or production code changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Delete the idempotency unit test file.",
+  "status": "proposed"
+}
