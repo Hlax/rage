@@ -190,6 +190,61 @@ Requires the same live opt-in env vars as CLI probes.
 
 Live probes produce **worker-layer evidence**, not implementation tickets.
 
+### Scratch evidence workflow checklist
+
+End-to-end operator path from live probes to scratch-backed evidence review.
+Each step uses **existing CLIs only**; nothing in this chain runs automatically.
+
+1. **Run live probes (report-only).** Save JSON under `data/reports/live_probes/`.
+
+   ```powershell
+   python -m rge.cli probe-mini-run
+   # or multi-fixture repeatability:
+   python -m rge.cli probe-mini-run-suite
+   ```
+
+   Requires live LLM opt-in (`RGE_LLM_MODE=ollama`, `RGE_ALLOW_LIVE_LLM=1`). Probe
+   commands do not write the accepted graph DB or scratch DB.
+
+2. **Review the report locally; persist reviewed metadata to scratch DB.**
+
+   ```powershell
+   python -m rge.cli probe-persist-reviewed-report `
+     --report data/reports/live_probes/probe_mini_run_<UTC>.json `
+     --confirm-review `
+     --note "optional operator note"
+   ```
+
+   Default scratch path: `data/db/live_probe_scratch.sqlite` (gitignored). `--confirm-review` is required.
+
+3. **Summarize scratch rows (read-only).**
+
+   ```powershell
+   python -m rge.cli probe-scratch-summary
+   python -m rge.cli probe-scratch-summary --format markdown
+   ```
+
+4. **Compose evidence review artifact (read-only; no automated ticket recommendations).**
+
+   ```powershell
+   python -m rge.cli probe-scratch-evidence-review
+   python -m rge.cli probe-scratch-evidence-review `
+     --out agent_reports/YYYY-MM-DD_scratch-evidence-review.md
+   ```
+
+5. **Inspect operator loop plan for scratch status and recommended next action.**
+
+   ```powershell
+   python -m rge.modules.operator_loop --mode plan
+   ```
+
+   Check `scratch_evidence_status` (path, row count, readiness). When reviewed rows
+   exist and no higher-priority blocker applies, expect
+   `next_recommended_action.action_id == run_scratch_evidence_review`.
+
+**Out of scope for this checklist:** accepted graph DB writes, public export,
+automatic ticket seeding, or execute-safe evidence review generation.
+
 ### What to keep locally
 
 After each probe session, retain reports under `data/reports/live_probes/`.

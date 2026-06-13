@@ -1,0 +1,34 @@
+{
+  "id": "ticket-077",
+  "title": "README operator quickstart scratch evidence workflow pointer",
+  "problem": "Ticket-076 adds a numbered scratch evidence checklist in the live probe runbook, but README operator quickstart does not link operators to that workflow.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-076_runbook-scratch-workflow-checklist.md",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "README.md"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "tickets/ticket-077.json",
+    "agent_reports/2026-06-13_phase-2_ticket-077_readme-scratch-workflow-pointer.md"
+  ],
+  "acceptance_criteria": [
+    "README operator quickstart links to runbook scratch evidence workflow checklist section.",
+    "No code changes outside README.",
+    "Golden/mock gates pass."
+  ],
+  "test_plan": [
+    "pytest tests/golden -q",
+    "pytest -q"
+  ],
+  "non_goals": [
+    "No CLI or runbook body rewrites.",
+    "No public export or site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README pointer.",
+  "status": "proposed"
+}
