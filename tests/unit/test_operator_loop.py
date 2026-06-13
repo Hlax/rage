@@ -11,11 +11,17 @@ from rge.modules.operator_loop import (
     build_operator_plan,
     detect_documentation_git_drift,
     execute_safe_checks,
+    inspect_scratch_evidence_status,
     is_audit_only_ticket,
     pending_improvement_tickets,
     resolve_npm_executable,
     safe_verification_commands,
     ticket_has_implementation_commit,
+)
+from rge.modules.live_probe_scratch import (
+    build_scratch_record,
+    ensure_scratch_database,
+    insert_reviewed_report,
 )
 from rge.modules.principal_audit_gate import QueueTicketRow
 
@@ -598,3 +604,110 @@ def test_resolved_npm_executable_runs_subprocess() -> None:
         check=False,
     )
     assert completed.returncode == 0
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+_SAMPLE_REPORT = (
+    REPO_ROOT / "tests" / "fixtures" / "probes" / "reviewed_mini_run_report_sample.json"
+)
+
+
+def _sample_scratch_record(**overrides: object) -> dict:
+    report = json.loads(_SAMPLE_REPORT.read_text(encoding="utf-8"))
+    record = build_scratch_record(
+        report,
+        report_rel_path="tests/fixtures/probes/reviewed_mini_run_report_sample.json",
+        operator_note="reviewed",
+        reviewed_at="2026-06-12T22:01:00+00:00",
+    )
+    record.update(overrides)
+    return record
+
+
+def _seed_scratch_db(db_path: Path, records: list[dict]) -> None:
+    conn = ensure_scratch_database(db_path)
+    try:
+        for record in records:
+            insert_reviewed_report(conn, record)
+    finally:
+        conn.close()
+
+
+def test_scratch_evidence_status_missing_db(tmp_path: Path) -> None:
+    scratch_db = tmp_path / "data" / "db" / "live_probe_scratch.sqlite"
+    status = inspect_scratch_evidence_status(root=tmp_path, scratch_db=scratch_db)
+
+    assert status["scratch_db_path"] == "data/db/live_probe_scratch.sqlite"
+    assert status["scratch_db_exists"] is False
+    assert status["readable"] is False
+    assert status["total_reviewed_reports"] is None
+    assert status["evidence_review_ready"] is False
+    assert status["status"] == "missing"
+    assert "not found" in (status["error"] or "")
+
+
+def test_scratch_evidence_status_reports_reviewed_row_count(tmp_path: Path) -> None:
+    scratch_db = tmp_path / "data" / "db" / "live_probe_scratch.sqlite"
+    _seed_scratch_db(scratch_db, [_sample_scratch_record()])
+
+    status = inspect_scratch_evidence_status(root=tmp_path, scratch_db=scratch_db)
+
+    assert status["scratch_db_exists"] is True
+    assert status["readable"] is True
+    assert status["total_reviewed_reports"] == 1
+    assert status["summary_ready"] is True
+    assert status["evidence_review_ready"] is True
+    assert status["status"] == "ok"
+    assert status["error"] is None
+
+
+def test_scratch_evidence_status_empty_db(tmp_path: Path) -> None:
+    scratch_db = tmp_path / "data" / "db" / "live_probe_scratch.sqlite"
+    ensure_scratch_database(scratch_db).close()
+
+    status = inspect_scratch_evidence_status(root=tmp_path, scratch_db=scratch_db)
+
+    assert status["readable"] is True
+    assert status["total_reviewed_reports"] == 0
+    assert status["summary_ready"] is True
+    assert status["evidence_review_ready"] is False
+    assert status["status"] == "empty"
+
+
+def test_scratch_evidence_status_invalid_db(tmp_path: Path) -> None:
+    scratch_db = tmp_path / "data" / "db" / "live_probe_scratch.sqlite"
+    scratch_db.parent.mkdir(parents=True, exist_ok=True)
+    scratch_db.write_text("not sqlite", encoding="utf-8")
+
+    status = inspect_scratch_evidence_status(root=tmp_path, scratch_db=scratch_db)
+
+    assert status["scratch_db_exists"] is True
+    assert status["readable"] is False
+    assert status["status"] in {"invalid", "error"}
+    assert status["error"]
+
+
+def test_plan_includes_scratch_evidence_status(tmp_path: Path) -> None:
+    _seed_queue(tmp_path, "| 72 | ticket-072 | in_progress | scratch hook | | |\n")
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+
+    assert "scratch_evidence_status" in plan
+    assert plan["scratch_evidence_status"]["status"] == "missing"
+    assert plan["scratch_evidence_status"]["scratch_db_path"].endswith(
+        "live_probe_scratch.sqlite"
+    )
+
+
+def test_plan_scratch_status_does_not_crash_on_invalid_db(tmp_path: Path) -> None:
+    _seed_queue(tmp_path, "| 72 | ticket-072 | in_progress | scratch hook | | |\n")
+    scratch_db = tmp_path / "data" / "db" / "live_probe_scratch.sqlite"
+    scratch_db.parent.mkdir(parents=True, exist_ok=True)
+    scratch_db.write_text("bad", encoding="utf-8")
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+
+    assert plan["scratch_evidence_status"]["status"] in {"invalid", "error"}
+    assert plan["next_recommended_action"]["action_id"]
