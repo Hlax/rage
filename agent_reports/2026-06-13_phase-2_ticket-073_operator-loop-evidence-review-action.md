@@ -75,8 +75,9 @@ arrow (`→`); use `--format json`, `--out`, or `PYTHONIOENCODING=utf-8`.
 
 ## Merge
 
-- Merge commit SHA: _(filled after merge)_
-- Golden Gate run: _(filled after CI)_
+- Implementation SHA: `568b246`
+- Merge commit SHA: `a4c1589`
+- Golden Gate run: `27467837127` (passed)
 
 ## Recommended next ticket
 
