@@ -316,6 +316,13 @@ python -m rge.modules.principal_audit_gate --next-ticket ticket-084   # satisfie
 Not re-run this pass (trusted from post-082 checkpoint at `77a54cf`): full `pytest -q`
 (328/6 deselected), `npm run build`, Golden Gate `27473374772`.
 
+## Merge
+
+- Implementation SHA: (ticket-084 branch commit on `phase-2/ticket-084-master-alignment-audit`)
+- Merge commit SHA: `7078342`
+- Pushed: `77a54cf..7078342  main -> main`
+- Golden Gate run: (pending push CI)
+
 ## 13. Stop
 
 Read-only master alignment audit complete. No product features implemented, no domain
