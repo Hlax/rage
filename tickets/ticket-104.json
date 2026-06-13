@@ -1,0 +1,28 @@
+{
+  "id": "ticket-104",
+  "title": "Runtime config manual synthnote reconcile-scores cross-link",
+  "problem": "Ticket-103 documented the manual synthnote reconcile-scores follow-up in the cursor build loop. docs/agents/12_RUNTIME_CONFIG.md should cross-link the same reconcile-scores steps for runtime-config-aligned agents.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-103_cursor-build-loop-manual-synthnote-reconcile-scores-crosslink.md",
+    "README.md",
+    "docs/agents/12_RUNTIME_CONFIG.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "docs/agents/12_RUNTIME_CONFIG.md"
+  ],
+  "acceptance_criteria": [
+    "12_RUNTIME_CONFIG.md links to README manual synthnote reconcile-scores follow-up.",
+    "No production code or golden test changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_score_reconciliation.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, export, schema migration, or cursor build loop rewrite."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert runtime config cross-link.",
+  "status": "proposed"
+}
