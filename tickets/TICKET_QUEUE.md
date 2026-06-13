@@ -115,7 +115,16 @@ superseded
 | 81 | ticket-081 | done | Cursor build loop scratch evidence workflow cross-link | `phase-2/ticket-081-cursor-build-loop-scratch-workflow-crosslink` | `agent_reports/2026-06-13_phase-2_ticket-081_cursor-build-loop-scratch-workflow-crosslink.md` |
 | 82 | ticket-082 | done | Runtime config scratch evidence workflow cross-link | `phase-2/ticket-082-runtime-config-scratch-workflow-crosslink` | `agent_reports/2026-06-13_phase-2_ticket-082_runtime-config-scratch-workflow-crosslink.md` |
 | 83 | ticket-083 | done | Post-ticket-082 principal audit checkpoint | `phase-2/ticket-083-principal-audit-post-ticket-082` | `agent_reports/2026-06-13_principal-audit-post-ticket-082.md` |
-| 84 | ticket-084 | proposed | Master repo alignment audit | | |
+| 84 | ticket-084 | done | Master repo alignment audit | `phase-2/ticket-084-master-alignment-audit` | `agent_reports/2026-06-13_master-alignment-audit-post-ticket-082.md` |
+
+## Queue Notes (2026-06-13, ticket-084 master alignment audit)
+
+- Read-only repo-wide alignment audit (docs/specs/CLI/tests/CI/domain pack).
+- Verdict: engine is **general RGE MVP**, mock/fixture-proven and release-healthy; **not** yet in real domain research. `source_discovery`/`fetcher`/`candidate_ranker` remain `NotImplementedError` (Phase 3); only `ontology.yaml` labels are consumed from the creativity pack; scratch DB empty.
+- Drift: tickets 068-082 over-invest in operator/scratch/doc infrastructure relative to real research content. No code changes; no domain seed; validators/tests unchanged.
+- MVP redefined as two tiers: MVP-Engine (done, mock) vs MVP-Research (not done: real source -> real accepted claim -> real public card).
+- Recommended next sequence (each gated): ticket-085 (domain-entry gate spec + Phase-3 ingestion readiness audit, low risk, no pre-ticket audit), ticket-086 (real manual Level-1 source ingestion, medium risk, pre-ticket audit required), ticket-087 (minimal domain pack loader for ontology+aliases, medium risk, pre-ticket audit required).
+- Private local probe artifact (`agent_reports/2026-06-13_scratch-evidence-review-probe.md`) left untracked.
 
 ## Queue Notes (2026-06-13, ticket-083 principal audit checkpoint)
 
@@ -820,7 +829,8 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-084 (proposed) — Master repo alignment audit (read-only)
+ticket-084 (done) — Master repo alignment audit (read-only)
+Next implementation candidate: ticket-085 — Domain-entry gate spec + Phase-3 ingestion readiness audit (proposed, low risk)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
