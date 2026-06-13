@@ -1,0 +1,28 @@
+{
+  "id": "ticket-100",
+  "title": "README manual synthnote reconcile-scores operator step",
+  "problem": "Ticket-099 proved manual score reconciliation with a follow-up source. README operator spine should document the follow-up ingest + reconcile-scores step and expected score_events outcome.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-099_manual-source-score-reconciliation.md",
+    "README.md",
+    "fixtures/sources/manual_synthnote_followup.txt"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "README.md"
+  ],
+  "acceptance_criteria": [
+    "README documents follow-up manual source ingest, extract-claims, and reconcile-scores with expected outcomes.",
+    "No production code or golden test changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_score_reconciliation.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, export, schema migration, or score_reconciler changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README reconcile-scores section.",
+  "status": "proposed"
+}

@@ -1,0 +1,22 @@
+# Synthetic Follow-Up Note: AI Assistance and Semantic Diversity Replication
+
+Source type: synthetic operator-authored manual source (follow-up)
+Domain: creativity
+Use: local score reconciliation smoke test only; not real external evidence
+Date: 2026-06-13
+
+## Summary
+
+This follow-up synthetic note extends the synthnote scenario with a replication-style
+observation about AI assistance and semantic diversity during short-form brainstorming.
+
+## Observation
+
+In a synthetic replication of timed brainstorming with a pre-registered protocol,
+AI-assisted brainstorming reduced semantic diversity across submitted ideas while
+maintaining comparable session completion rates. The fictional team used a larger
+sample than the original synthnote pilot and reported effect sizes consistent with
+the narrowing pattern described in the base scenario.
+
+Limitations: tasks remained short-form brainstorming only; generalization to other
+creative domains is uncertain.
