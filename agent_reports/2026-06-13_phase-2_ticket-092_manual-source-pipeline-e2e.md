@@ -49,9 +49,10 @@ Safety audit: **not required** (test-only; no export, routes, or schema changes)
 
 ## Merge
 
-- Implementation SHA: (pending commit)
-- Merge commit: (pending merge)
-- Pushed: (pending push)
+- Implementation SHA: `d313285`
+- Merge commit: `a50aa3b`
+- Pushed: `main -> main`
+- Full pytest: **375 passed**, 6 `live_smoke` deselected
 
 ## Recommended next ticket
 
