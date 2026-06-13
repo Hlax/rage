@@ -1,0 +1,44 @@
+{
+  "id": "ticket-086",
+  "title": "Real manual source ingestion (Level-1)",
+  "problem": "The ingest spine is real and GT01-proven but every ingested source is labeled source_type=fixture. Operators need a deterministic path to ingest real local .txt/.md creativity sources into the private graph with correct manual_text labeling, title override, idempotent re-ingest, and safety proofs (no export leak, no model authority).",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-085_domain-entry-gate-spec-and-ingestion-readiness.md",
+    "rge/cli.py (_cmd_ingest + ingest subparser)",
+    "rge/modules/fetcher.py (fetch_local_text_file)",
+    "rge/db/repositories.py (ingest_local_source)",
+    "tests/golden/test_01_ingestion.py"
+  ],
+  "affected_modules": [
+    "rge/cli.py",
+    "rge/modules/fetcher.py"
+  ],
+  "expected_files": [
+    "rge/cli.py",
+    "rge/modules/fetcher.py",
+    "tests/unit/test_manual_ingestion.py",
+    "agent_reports/2026-06-13_phase-2_ticket-086_real-manual-source-ingestion.md"
+  ],
+  "acceptance_criteria": [
+    "ingest accepts --source-type (default fixture) and --source-title; real sources use manual_text.",
+    "fetcher.fetch_local_text_file no longer forces source_type; .md supported.",
+    "Deterministic idempotent re-ingest: sources count stays 1, chunk IDs identical.",
+    "GT01 back-compat: ingest without --source-type still uses fixture.",
+    "No export by default; safety audit pass; local_path/raw text never exported.",
+    "No model authority: no LLM import; claims/concepts/relationships empty after ingest.",
+    "Unit tests under tests/unit/; 140 golden tests stay green."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_ingestion.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No URL fetch, PDF parse, source_discovery, or candidate_ranker.",
+    "No LLM/OpenAI/cloud, claim extraction, concept linking, or export.",
+    "No schema migration or validator change."
+  ],
+  "risk_level": "low-medium",
+  "rollback_plan": "Revert CLI flags and fetcher source_type removal; GT01 unchanged.",
+  "status": "done"
+}

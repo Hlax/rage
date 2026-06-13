@@ -117,7 +117,7 @@ superseded
 | 83 | ticket-083 | done | Post-ticket-082 principal audit checkpoint | `phase-2/ticket-083-principal-audit-post-ticket-082` | `agent_reports/2026-06-13_principal-audit-post-ticket-082.md` |
 | 84 | ticket-084 | done | Master repo alignment audit | `phase-2/ticket-084-master-alignment-audit` | `agent_reports/2026-06-13_master-alignment-audit-post-ticket-082.md` |
 | 85 | ticket-085 | done | Domain-entry gate spec + Phase-3 ingestion readiness audit | `phase-2/ticket-085-domain-entry-gate-spec-and-ingestion-readiness` | `agent_reports/2026-06-13_phase-2_ticket-085_domain-entry-gate-spec-and-ingestion-readiness.md` |
-| 86 | ticket-086 | proposed | Real manual source ingestion (Level-1) | | |
+| 86 | ticket-086 | done | Real manual source ingestion (Level-1) | phase-2/ticket-086-real-manual-source-ingestion | agent_reports/2026-06-13_phase-2_ticket-086_real-manual-source-ingestion.md |
 
 ## Queue Notes (2026-06-13, ticket-085 ingestion readiness audit)
 
@@ -839,8 +839,8 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-085 (done) — Domain-entry gate spec + Phase-3 ingestion readiness audit (GO for ticket-086)
-Next implementation ticket: ticket-086 — Real manual source ingestion (Level-1) (proposed, low-medium risk)
+ticket-086 (done) — Real manual source ingestion (Level-1)
+Next implementation ticket: ticket-087 — Minimal domain pack loader (proposed)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 

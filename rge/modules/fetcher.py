@@ -15,10 +15,10 @@ class FetchError(Exception):
 
 
 def fetch_local_text_file(path: Path) -> dict[str, Any]:
-    """Read a local plain-text file for ingestion.
+    """Read a local plain-text or Markdown file for ingestion.
 
-    Returns a dict with ``raw_text``, ``title``, ``local_path``, and
-    ``source_type``. Does not persist anything.
+    Returns a dict with ``raw_text``, ``title``, and ``local_path``.
+    Does not set ``source_type``; the ingest CLI decides that. Does not persist.
     """
     resolved = path.resolve()
     if not resolved.is_file():
@@ -36,7 +36,6 @@ def fetch_local_text_file(path: Path) -> dict[str, Any]:
         "raw_text": raw_text,
         "title": resolved.name,
         "local_path": resolved,
-        "source_type": "fixture",
     }
 
 

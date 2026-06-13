@@ -1425,13 +1425,14 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
 
     conn = ensure_database(db_path)
     try:
+        title = args.source_title if args.source_title else fetched["title"]
         result = ingest_local_source(
             conn,
             local_path=fetched["local_path"],
             domain=args.domain,
             raw_text=fetched["raw_text"],
-            title=fetched["title"],
-            source_type=fetched["source_type"],
+            title=title,
+            source_type=args.source_type,
         )
         source = SourceRepository(conn).get_by_id(result["source_id"])
         chunks = ChunkRepository(conn).list_for_source(result["source_id"])
@@ -1501,16 +1502,33 @@ def build_parser() -> argparse.ArgumentParser:
     ingest_parser = subparsers.add_parser(
         "ingest",
         help="Ingest a local text source into SQLite.",
-        description="Ingest a local plain-text source and persist source + chunk records.",
+        description=(
+            "Ingest a local plain-text or Markdown (.txt/.md) source and persist "
+            "source + chunk records. Real manual sources: "
+            "--source-type manual_text (see data/sources/manual/<domain>/)."
+        ),
     )
     ingest_parser.add_argument(
         "source_path",
-        help="Path to a local plain-text source file.",
+        help="Path to a local plain-text or Markdown source file (.txt or .md).",
     )
     ingest_parser.add_argument(
         "--domain",
         required=True,
         help="Primary domain pack ID (e.g. creativity).",
+    )
+    ingest_parser.add_argument(
+        "--source-type",
+        default="fixture",
+        help=(
+            "Source type label stored on the sources row "
+            "(default: fixture for golden-test back-compat; use manual_text for real sources)."
+        ),
+    )
+    ingest_parser.add_argument(
+        "--source-title",
+        default=None,
+        help="Override source title (default: filename).",
     )
     ingest_parser.add_argument(
         "--db",

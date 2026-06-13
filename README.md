@@ -124,6 +124,14 @@ cd apps/public-site && npm run build
 
 After ticket-034, repeated fixture-mode runs leave `git status --short` empty. Runtime output goes under gitignored `data/`; only reviewed public snapshots under `apps/public-site/public/data/` are committed.
 
+**Manual source ingestion** (Level-1): place operator `.txt`/`.md` files under gitignored `data/sources/manual/<domain>/` (e.g. `data/sources/manual/creativity/`) and ingest with:
+
+```powershell
+python -m rge.cli ingest data/sources/manual/creativity/note.md --domain creativity --source-type manual_text --source-title "My source title"
+```
+
+Omit `--source-type` to keep golden-test back-compat (`fixture`). Ingest writes only to the private SQLite DB; it does not export.
+
 **Live probe scratch evidence workflow** (local Ollama opt-in; report-only until
 operator persist): use the numbered checklist in
 [`docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md`](docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md)
