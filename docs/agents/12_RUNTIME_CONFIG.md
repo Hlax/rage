@@ -205,6 +205,13 @@ both export directories (Golden Test 26 unchanged).
 | `tickets/ticket-*.json` | none | committed | Manually reviewed implementation queue |
 | `agent_reports/` | none | committed | No secrets in reports |
 
+**Scratch evidence workflow:** after persisting reviewed live probe reports to
+`data/db/live_probe_scratch.sqlite`, follow the numbered checklist in
+`docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md` (**Scratch evidence workflow
+checklist**). Operator loop plan mode surfaces `scratch_evidence_status` and may
+recommend `run_scratch_evidence_review`. See also README Operator Quickstart and
+`AGENTS.md` Operator Loop.
+
 ## Mock vs live behavior (Phase 1 / Phase 2 boundary)
 
 ### Golden tests / CI

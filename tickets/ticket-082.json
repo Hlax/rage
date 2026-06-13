@@ -30,5 +30,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert runtime config cross-link.",
-  "status": "proposed"
+  "status": "done"
 }
