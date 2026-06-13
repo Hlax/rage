@@ -1,0 +1,29 @@
+{
+  "id": "ticket-092",
+  "title": "Manual source end-to-end pipeline proof (synthnote)",
+  "problem": "Tickets 088–091 proved each manual spine step in isolation. Next smallest proof is one integration test running ingest → extract-claims → link-concepts → build-relationships → detect-contradictions on synthnote with checksum fixture map and no explicit --fixture flags.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-091_manual-source-contradiction-detection.md",
+    "tests/unit/test_manual_contradiction_detection.py",
+    "fixtures/manual_source_fixture_map.json"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "tests/unit/test_manual_source_pipeline_e2e.py"
+  ],
+  "acceptance_criteria": [
+    "Single unit test runs full manual synthnote spine through detect-contradictions with mock LLM only.",
+    "No golden test changes; existing manual unit tests remain green."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_source_pipeline_e2e.py -q",
+    "python -m pytest tests/unit/test_manual_*.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, OpenAI/cloud, export, schema migration, or score reconciliation changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Delete the e2e unit test file.",
+  "status": "proposed"
+}

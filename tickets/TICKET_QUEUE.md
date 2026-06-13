@@ -122,7 +122,8 @@ superseded
 | 88 | ticket-088 | done | Real claim extraction proof from manual creativity source | phase-2/ticket-088-real-claim-extraction-manual-source | agent_reports/2026-06-13_phase-2_ticket-088_real-claim-extraction-manual-source.md |
 | 89 | ticket-089 | done | Manual source concept linking proof (synthnote) | phase-2/ticket-089-manual-source-concept-linking | agent_reports/2026-06-13_phase-2_ticket-089_manual-source-concept-linking.md |
 | 90 | ticket-090 | done | Manual source relationship proof (synthnote) | phase-2/ticket-090-manual-source-relationship-building | agent_reports/2026-06-13_phase-2_ticket-090_manual-source-relationship-building.md |
-| 91 | ticket-091 | proposed | Manual source contradiction detection proof (synthnote) | | |
+| 91 | ticket-091 | done | Manual source contradiction detection proof (synthnote) | phase-2/ticket-091-manual-source-contradiction-detection | agent_reports/2026-06-13_phase-2_ticket-091_manual-source-contradiction-detection.md |
+| 92 | ticket-092 | proposed | Manual source end-to-end pipeline proof (synthnote) | | |
 
 ## Queue Notes (2026-06-13, ticket-085 ingestion readiness audit)
 
@@ -844,8 +845,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-090 (done) — Manual source relationship proof (synthnote)
-Next implementation ticket: ticket-091 — Manual source contradiction detection proof (synthnote) (proposed)
+ticket-092 (proposed) — Manual source end-to-end pipeline proof (synthnote)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 

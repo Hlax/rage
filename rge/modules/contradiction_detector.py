@@ -13,6 +13,10 @@ from rge.config import load_config
 from rge.llm.mock_client import MockModelClient
 from rge.llm.mode import effective_llm_mode
 from rge.llm.registry import get_model_client
+from rge.modules.manual_source_fixtures import (
+    contradiction_claim_hints_for_manual_source,
+    contradiction_fixture_for_manual_source,
+)
 from rge.modules.relationship_builder import VALID_STANCES
 
 OPPOSING_CLAIM_FRAGMENT = "reduced semantic diversity"
@@ -259,6 +263,34 @@ def _pipeline_model_client(config=None):
     return get_model_client(cfg, mode=effective_llm_mode(cfg))
 
 
+def _apply_contradiction_claim_hints(
+    candidates: list[dict[str, Any]],
+    *,
+    source_claims: list[Any],
+    domain_claims: list[Any],
+    hints: dict[str, str],
+) -> list[dict[str, Any]]:
+    """Resolve placeholder claim IDs using pack-defined text fragments."""
+    qualifying_fragment = hints.get("qualifying", "").casefold()
+    opposing_fragment = hints.get("opposing", "").casefold()
+    resolved: list[dict[str, Any]] = []
+
+    for candidate in candidates:
+        item = dict(candidate)
+        if item.get("qualifying_claim_id") == "placeholder" and qualifying_fragment:
+            for claim in source_claims:
+                if qualifying_fragment in claim.claim_text.casefold():
+                    item["qualifying_claim_id"] = claim.id
+                    break
+        if item.get("opposing_claim_id") == "placeholder" and opposing_fragment:
+            for claim in domain_claims:
+                if opposing_fragment in claim.claim_text.casefold():
+                    item["opposing_claim_id"] = claim.id
+                    break
+        resolved.append(item)
+    return resolved
+
+
 def propose_contradictions(
     claim_dicts: list[dict[str, Any]],
     relationships: list[dict[str, Any]],
@@ -266,6 +298,7 @@ def propose_contradictions(
     *,
     client: Any | None = None,
     fixture_name: str | None = None,
+    source: Any | None = None,
 ) -> list[dict[str, Any]]:
     """Propose contradiction/qualification links via the configured model client."""
     config = load_config()
@@ -277,8 +310,9 @@ def propose_contradictions(
         "schema_version": config.llm_schema_version,
     }
     if isinstance(model_client, MockModelClient):
+        resolved_fixture = fixture_name or contradiction_fixture_for_manual_source(source)
         detect_kwargs["fixture_name"] = (
-            fixture_name or "contradiction_detection_creativity_diversity.json"
+            resolved_fixture or "contradiction_detection_creativity_diversity.json"
         )
     batch = model_client.detect_contradictions(**detect_kwargs)
 
@@ -296,6 +330,7 @@ def detect_contradictions_for_source(
         ClaimRepository,
         RelationshipEvidenceRepository,
         RelationshipRepository,
+        SourceRepository,
     )
 
     claim_repo = ClaimRepository(conn)
@@ -303,6 +338,7 @@ def detect_contradictions_for_source(
     if not source_claims:
         raise ValueError(f"No accepted claims found for source: {source_id}")
 
+    source_record = SourceRepository(conn).get_by_id(source_id)
     domain_pack = source_claims[0].domain
     relationship_repo = RelationshipRepository(conn)
     evidence_repo = RelationshipEvidenceRepository(conn)
@@ -331,7 +367,16 @@ def detect_contradictions_for_source(
         active_relationships,
         domain_pack,
         fixture_name=fixture_name,
+        source=source_record,
     )
+    hints = contradiction_claim_hints_for_manual_source(source_record)
+    if hints:
+        proposed = _apply_contradiction_claim_hints(
+            proposed,
+            source_claims=source_claims,
+            domain_claims=domain_claims,
+            hints=hints,
+        )
 
     base_relationship = None
     new_relationship = None

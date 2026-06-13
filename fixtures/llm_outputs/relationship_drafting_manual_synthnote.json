@@ -15,7 +15,7 @@
       "subject_concept": "AI assistance",
       "predicate": "may_increase",
       "object_concept": "variation volume",
-      "stance": "qualifies",
+      "stance": "supports",
       "scope": "timed brainstorming",
       "confidence": "medium",
       "supporting_claim_ids": ["placeholder"]
