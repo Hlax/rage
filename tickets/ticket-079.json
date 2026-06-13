@@ -1,0 +1,34 @@
+{
+  "id": "ticket-079",
+  "title": "Operating protocol scratch evidence workflow cross-link",
+  "problem": "Ticket-078 adds AGENTS.md pointers to the runbook scratch evidence workflow checklist, but docs/agents/11_AGENT_OPERATING_PROTOCOL.md does not cross-link the same workflow for operator protocol readers.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-078_agents-scratch-workflow-crosslink.md",
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "affected_modules": [
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md"
+  ],
+  "expected_files": [
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md",
+    "tickets/ticket-079.json",
+    "agent_reports/2026-06-13_phase-2_ticket-079_operating-protocol-scratch-workflow-crosslink.md"
+  ],
+  "acceptance_criteria": [
+    "11_AGENT_OPERATING_PROTOCOL.md links to runbook Scratch evidence workflow checklist.",
+    "Docs-only; no code changes.",
+    "Golden/mock gates pass."
+  ],
+  "test_plan": [
+    "pytest tests/golden -q",
+    "pytest -q"
+  ],
+  "non_goals": [
+    "No AGENTS.md or README rewrites.",
+    "No CLI or site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert operating protocol cross-link.",
+  "status": "proposed"
+}

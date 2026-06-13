@@ -61,6 +61,13 @@ golden tests, pytest, safety audit, and public-site build when the working
 tree is clean. It never merges, pushes, promotes tickets, or edits the queue.
 See `docs/agents/11_AGENT_OPERATING_PROTOCOL.md` for the full workflow.
 
+**Live probe scratch evidence workflow** (local Ollama opt-in; operator-only
+persist): after live probe sessions, follow the numbered checklist in
+`docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md` (**Scratch evidence workflow
+checklist**). Plan mode surfaces `scratch_evidence_status` and may recommend
+`run_scratch_evidence_review` when reviewed scratch rows exist. See also README
+Operator Quickstart.
+
 ## Expected Agent Workflow
 
 1. Read the active ticket from `tickets/TICKET_QUEUE.md` or create the smallest next ticket in `tickets/`.
