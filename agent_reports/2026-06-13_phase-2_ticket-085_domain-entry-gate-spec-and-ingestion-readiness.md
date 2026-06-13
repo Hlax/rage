@@ -287,6 +287,13 @@ Full `pytest -q` and public-site build were **not re-run** this pass: ticket-085
 are docs/JSON only (no Python/site code touched), and both are confirmed green at the
 post-082 checkpoint and Golden Gate `27473374772`. They will be required for ticket-086.
 
+## Merge
+
+- Implementation SHA: `ead6cba`
+- Merge commit SHA: `164c2e2`
+- Pushed: `main -> main`
+- Golden Gate run: (pending push CI)
+
 ## Stop
 
 Readiness audit complete. **GO for ticket-086** (real manual Level-1 ingestion) with the
