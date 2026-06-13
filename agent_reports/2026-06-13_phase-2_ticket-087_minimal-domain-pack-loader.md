@@ -81,12 +81,14 @@ python -m rge.modules.principal_audit_gate --next-ticket ticket-088     # satisf
 
 ## Merge
 
-- Implementation SHA: (pending commit)
-- Merge: (pending)
+- Implementation SHA: `43760ce`
+- Merge: fast-forward to `main` (43760ce == origin/main)
+- Pushed: `main -> main`
 
 ## Final git status
 
-(Recorded after merge.)
+Clean except untracked operator probe artifact
+(`agent_reports/2026-06-13_scratch-evidence-review-probe.md`).
 
 ## Recommended next move
 
