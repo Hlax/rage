@@ -1,0 +1,31 @@
+{
+  "id": "ticket-104",
+  "title": "Runtime config manual synthnote reconcile-scores cross-link",
+  "problem": "Tickets 100–103 documented manual synthnote reconcile-scores in README, AGENTS.md, operating protocol, and cursor build loop. docs/agents/12_RUNTIME_CONFIG.md still documents only the five-step spine (tickets 088–097) and omits the follow-up ingest + reconcile-scores operator steps, leaving a gap in the runtime-config doc triangle.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-103_cursor-build-loop-manual-synthnote-reconcile-scores-crosslink.md",
+    "agent_reports/2026-06-13_phase-2_ticket-098_runtime-config-manual-synthnote-crosslink.md",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "docs/agents/12_RUNTIME_CONFIG.md"
+  ],
+  "acceptance_criteria": [
+    "12_RUNTIME_CONFIG.md Operator/runtime section links to README Manual synthnote score reconciliation follow-up (steps 6–8).",
+    "Spine ticket range updated to 088–099; reconcile paragraph documents follow-up fixture path, expected score_events count, and may_reduce confidence 0.5 → 0.62.",
+    "No production code or golden test changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_score_reconciliation.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, export, schema migration, or cursor build loop / operating protocol rewrite."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert runtime config reconcile-scores cross-link paragraph.",
+  "status": "proposed"
+}
