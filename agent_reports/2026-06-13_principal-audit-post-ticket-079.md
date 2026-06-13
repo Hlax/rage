@@ -209,6 +209,13 @@ python -m rge.modules.principal_audit_gate --next-ticket ticket-081
 
 Expect `cadence_status: satisfied` and `implementation_gate: satisfied` for low-risk ticket-081.
 
+## Merge
+
+- Implementation SHA: `9f6c58c`
+- Merge commit SHA: `a8a5f6a`
+- Golden Gate run: (pending push)
+- Post-merge gate (`--next-ticket ticket-081`): **satisfied**
+
 ## Stop
 
 No further implementation in this invocation. Proceed with `/rge-run-next-ticket` for ticket-081 when ready.
