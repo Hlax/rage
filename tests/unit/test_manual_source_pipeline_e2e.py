@@ -1,4 +1,4 @@
-"""End-to-end manual synthnote pipeline proof (ticket-092)."""
+"""End-to-end manual synthnote pipeline proof (tickets 092, 105)."""
 
 from __future__ import annotations
 
@@ -8,12 +8,23 @@ from pathlib import Path
 
 import pytest
 
+from rge.modules.score_reconciler import STRONGER_SOURCE_BOOST
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SYNTHNOTE_SOURCE = REPO_ROOT / "fixtures" / "sources" / "manual_synthnote.txt"
+FOLLOWUP_SOURCE = REPO_ROOT / "fixtures" / "sources" / "manual_synthnote_followup.txt"
 SYNTHNOTE_CHECKSUM = "2c53bfdfdf3c68530f89e24f4f6c88e4ba95574f76484aa5664be9b0ff0c04e4"
+FOLLOWUP_CHECKSUM = (
+    "c5d1add68657e7ece8286c956cc5b3c494a45d33495ceb48927dd6d9ce628a16"
+)
 SYNTHNOTE_TITLE = (
     "Synthetic Source Note: AI-Assisted Ideation and Semantic Diversity"
 )
+FOLLOWUP_TITLE = (
+    "Synthetic Follow-Up Note: AI Assistance and Semantic Diversity Replication"
+)
+INITIAL_CONFIDENCE = 0.5
+EXPECTED_NEW_CONFIDENCE = round(INITIAL_CONFIDENCE + STRONGER_SOURCE_BOOST, 2)
 
 
 @pytest.fixture()
@@ -166,3 +177,103 @@ def test_manual_synthnote_pipeline_e2e_cli_json_summary(
     payload = json.loads(capsys.readouterr().out)
     assert payload["status"] == "completed"
     assert payload["qualification_count"] == 1
+
+
+def test_manual_synthnote_pipeline_e2e_through_reconcile_scores(
+    temp_db: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Run full spine plus follow-up ingest, extract-claims, and reconcile-scores."""
+    from rge.cli import main
+    from rge.db.connection import connect
+
+    assert (
+        main(
+            [
+                "ingest",
+                str(SYNTHNOTE_SOURCE),
+                "--domain",
+                "creativity",
+                "--source-type",
+                "manual_text",
+                "--source-title",
+                SYNTHNOTE_TITLE,
+                "--db",
+                str(temp_db),
+            ]
+        )
+        == 0
+    )
+    conn = connect(temp_db)
+    try:
+        source_id = conn.execute("SELECT id FROM sources").fetchone()[0]
+    finally:
+        conn.close()
+
+    for command in (
+        ["extract-claims", "--source", source_id, "--db", str(temp_db)],
+        ["link-concepts", "--source", source_id, "--db", str(temp_db)],
+        ["build-relationships", "--source", source_id, "--db", str(temp_db)],
+        ["detect-contradictions", "--source", source_id, "--db", str(temp_db)],
+    ):
+        assert main(command) == 0
+
+    assert (
+        main(
+            [
+                "ingest",
+                str(FOLLOWUP_SOURCE),
+                "--domain",
+                "creativity",
+                "--source-type",
+                "manual_text",
+                "--source-title",
+                FOLLOWUP_TITLE,
+                "--db",
+                str(temp_db),
+            ]
+        )
+        == 0
+    )
+    conn = connect(temp_db)
+    try:
+        followup_row = conn.execute(
+            "SELECT id, raw_text_checksum FROM sources WHERE title = ?",
+            (FOLLOWUP_TITLE,),
+        ).fetchone()
+        assert followup_row is not None
+        assert followup_row["raw_text_checksum"] == FOLLOWUP_CHECKSUM
+        followup_id = followup_row["id"]
+    finally:
+        conn.close()
+
+    assert (
+        main(["extract-claims", "--source", followup_id, "--db", str(temp_db)]) == 0
+    )
+    capsys.readouterr()
+    assert (
+        main(["reconcile-scores", "--source", followup_id, "--db", str(temp_db)]) == 0
+    )
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["status"] == "completed"
+    assert payload["score_events_created"] == 1
+
+    conn = connect(temp_db)
+    try:
+        relationship = conn.execute(
+            """
+            SELECT r.confidence
+            FROM relationships r
+            JOIN concepts sub ON sub.id = r.subject_concept_id
+            JOIN concepts obj ON obj.id = r.object_concept_id
+            WHERE sub.label = 'AI assistance'
+              AND obj.label = 'semantic diversity'
+              AND r.predicate = 'may_reduce'
+            """
+        ).fetchone()
+        assert relationship is not None
+        assert float(relationship["confidence"]) == EXPECTED_NEW_CONFIDENCE
+
+        event_count = conn.execute("SELECT COUNT(*) FROM score_events").fetchone()[0]
+        assert event_count == 1
+    finally:
+        conn.close()

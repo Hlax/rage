@@ -1,0 +1,31 @@
+{
+  "id": "ticket-106",
+  "title": "Manual source pipeline idempotency through reconcile-scores",
+  "problem": "Ticket-105 unified the manual synthnote e2e proof through reconcile-scores. tests/unit/test_manual_source_pipeline_idempotency.py still covers only the five-step spine (ticket-093). Re-running follow-up ingest, extract-claims, and reconcile-scores should leave stable row counts.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-105_manual-source-pipeline-e2e-reconcile-scores.md",
+    "tests/unit/test_manual_source_pipeline_idempotency.py",
+    "tests/unit/test_manual_score_reconciliation.py"
+  ],
+  "affected_modules": [
+    "tests/unit/test_manual_source_pipeline_idempotency.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_manual_source_pipeline_idempotency.py"
+  ],
+  "acceptance_criteria": [
+    "Idempotency test runs full spine plus follow-up reconcile-scores twice with stable score_events and relationship confidence.",
+    "No production code or golden test changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_source_pipeline_idempotency.py -q",
+    "python -m pytest tests/unit/test_manual_source_pipeline_e2e.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, export, schema migration, or doc changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert idempotency reconcile-scores test extension.",
+  "status": "proposed"
+}
