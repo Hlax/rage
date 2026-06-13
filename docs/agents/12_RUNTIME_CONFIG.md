@@ -212,6 +212,15 @@ checklist**). Operator loop plan mode surfaces `scratch_evidence_status` and may
 recommend `run_scratch_evidence_review`. See also README Operator Quickstart and
 `AGENTS.md` Operator Loop.
 
+**Manual synthnote operator spine** (mock LLM; tickets 088–097): operator
+`.txt`/`.md` sources for Level-1 `manual_text` research live under gitignored
+`data/sources/manual/<domain>/` (e.g. `data/sources/manual/creativity/synthnote.txt`).
+Follow the five-step CLI sequence in README **Operator Quickstart**
+(**Manual synthnote operator spine**): ingest → extract-claims → link-concepts →
+build-relationships → detect-contradictions. Private graph DB:
+`data/db/creative_research.sqlite` (or `--db`). Checksum fixtures resolve from
+`fixtures/manual_source_fixture_map.json`. See also `AGENTS.md` Operator Loop.
+
 ## Mock vs live behavior (Phase 1 / Phase 2 boundary)
 
 ### Golden tests / CI
