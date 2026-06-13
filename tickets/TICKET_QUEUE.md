@@ -128,7 +128,8 @@ superseded
 | 94 | ticket-094 | done | README manual synthnote operator spine quickstart | phase-2/ticket-094-readme-manual-synthnote-spine | agent_reports/2026-06-13_phase-2_ticket-094_readme-manual-synthnote-spine.md |
 | 95 | ticket-095 | done | AGENTS.md manual synthnote spine cross-link | phase-2/ticket-095-agents-manual-synthnote-crosslink | agent_reports/2026-06-13_phase-2_ticket-095_agents-manual-synthnote-crosslink.md |
 | 96 | ticket-096 | done | Operating protocol manual synthnote spine cross-link | phase-2/ticket-096-operating-protocol-manual-synthnote-crosslink | agent_reports/2026-06-13_phase-2_ticket-096_operating-protocol-manual-synthnote-crosslink.md |
-| 97 | ticket-097 | proposed | Cursor build loop manual synthnote spine cross-link | | |
+| 97 | ticket-097 | done | Cursor build loop manual synthnote spine cross-link | phase-2/ticket-097-cursor-build-loop-manual-synthnote-crosslink | agent_reports/2026-06-13_phase-2_ticket-097_cursor-build-loop-manual-synthnote-crosslink.md |
+| 98 | ticket-098 | proposed | Runtime config manual synthnote spine cross-link | | |
 
 ## Queue Notes (2026-06-13, ticket-085 ingestion readiness audit)
 
@@ -850,7 +851,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-097 (proposed) — Cursor build loop manual synthnote spine cross-link
+ticket-098 (proposed) — Runtime config manual synthnote spine cross-link
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
