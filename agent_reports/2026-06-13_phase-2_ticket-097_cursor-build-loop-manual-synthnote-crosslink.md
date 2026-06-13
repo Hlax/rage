@@ -45,9 +45,10 @@ Safety audit: **not required** (build loop docs-only).
 
 ## Merge
 
-- Implementation SHA: (pending commit)
-- Merge commit: (pending merge)
-- Pushed: (pending push)
+- Implementation SHA: `7fd31e5`
+- Merge commit: `6ccdcfe`
+- Pushed: `main -> main`
+- Full pytest: **377 passed**, 6 `live_smoke` deselected
 
 ## Recommended next ticket
 
