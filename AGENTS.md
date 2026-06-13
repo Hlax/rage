@@ -68,7 +68,7 @@ checklist**). Plan mode surfaces `scratch_evidence_status` and may recommend
 `run_scratch_evidence_review` when reviewed scratch rows exist. See also README
 Operator Quickstart.
 
-**Manual synthnote operator spine** (mock LLM; tickets 088–094): for Level-1
+**Manual synthnote operator spine** (mock LLM; tickets 088–099): for Level-1
 `manual_text` research on the creativity synthnote source, follow the five-step
 CLI sequence in README **Operator Quickstart** (**Manual synthnote operator spine**):
 ingest → extract-claims → link-concepts → build-relationships →
@@ -76,6 +76,13 @@ detect-contradictions. Uses checksum fixture map (`fixtures/manual_source_fixtur
 no `--fixture` flags for `manual_text`. Operator sources live under gitignored
 `data/sources/manual/creativity/`; committed test copy at
 `fixtures/sources/manual_synthnote.txt`.
+
+**Manual synthnote score reconciliation** (after the five-step spine): ingest a
+follow-up `manual_text` source, extract claims, then run `reconcile-scores`.
+See README **Operator Quickstart** (**Manual synthnote score reconciliation**)
+for steps 6–8 (follow-up ingest → extract-claims → reconcile-scores; expected
+1 `score_events` row and `may_reduce` confidence 0.5 → 0.62). Test copy:
+`fixtures/sources/manual_synthnote_followup.txt`.
 
 ## Expected Agent Workflow
 
