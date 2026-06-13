@@ -1,0 +1,35 @@
+{
+  "id": "ticket-075",
+  "title": "Live probe runbook Windows console encoding note",
+  "problem": "Ticket-074 fixed cp1252 stdout for probe-scratch-evidence-review markdown, but the operator runbook still documents PYTHONIOENCODING workarounds without noting the ASCII-safe formatter change.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-074_windows-evidence-review-utf8-stdout.md",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "agent_reports/2026-06-13_principal-audit-post-ticket-073.md"
+  ],
+  "affected_modules": [
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "expected_files": [
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "tickets/ticket-075.json",
+    "agent_reports/2026-06-13_phase-2_ticket-075_runbook-windows-encoding-note.md"
+  ],
+  "acceptance_criteria": [
+    "Runbook scratch evidence review section notes ASCII-safe markdown on Windows cp1252 consoles post ticket-074.",
+    "Documents --format json and --out as alternatives without implying PYTHONIOENCODING is required for default markdown.",
+    "No code changes outside runbook."
+  ],
+  "test_plan": [
+    "pytest tests/golden -q",
+    "pytest -q"
+  ],
+  "non_goals": [
+    "No CLI or formatter code changes.",
+    "No public export or site changes.",
+    "No broad encoding refactor across all commands."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert runbook section.",
+  "status": "proposed"
+}
