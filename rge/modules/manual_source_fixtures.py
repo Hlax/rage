@@ -10,20 +10,48 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 _MANUAL_SOURCE_FIXTURE_MAP_PATH = _REPO_ROOT / "fixtures" / "manual_source_fixture_map.json"
 
 
-def resolve_manual_source_fixture(checksum: str, task: str) -> str | None:
-    """Return fixture filename for a manual source checksum and pipeline task."""
+def _manual_source_map_entry(checksum: str) -> dict[str, Any] | str | None:
     if not _MANUAL_SOURCE_FIXTURE_MAP_PATH.is_file():
         return None
     mapping: dict[str, Any] = json.loads(
         _MANUAL_SOURCE_FIXTURE_MAP_PATH.read_text(encoding="utf-8")
     )
-    entry = mapping.get(checksum)
+    return mapping.get(checksum)
+
+
+def resolve_manual_source_fixture(checksum: str, task: str) -> str | None:
+    """Return fixture filename for a manual source checksum and pipeline task."""
+    entry = _manual_source_map_entry(checksum)
     if isinstance(entry, str):
         return entry if task == "extract_claims" else None
     if isinstance(entry, dict):
         value = entry.get(task)
         return str(value) if value else None
     return None
+
+
+def contradiction_claim_hints_for_manual_source(source: Any | None) -> dict[str, str] | None:
+    if source is None or getattr(source, "source_type", None) != "manual_text":
+        return None
+    checksum = getattr(source, "raw_text_checksum", None)
+    if not checksum:
+        return None
+    entry = _manual_source_map_entry(str(checksum))
+    if not isinstance(entry, dict):
+        return None
+    hints = entry.get("contradiction_claim_hints")
+    if not isinstance(hints, dict):
+        return None
+    return {str(key): str(value) for key, value in hints.items() if value}
+
+
+def contradiction_fixture_for_manual_source(source: Any | None) -> str | None:
+    if source is None or getattr(source, "source_type", None) != "manual_text":
+        return None
+    checksum = getattr(source, "raw_text_checksum", None)
+    if not checksum:
+        return None
+    return resolve_manual_source_fixture(str(checksum), "detect_contradictions")
 
 
 def link_fixture_for_manual_source(source: Any | None) -> str | None:

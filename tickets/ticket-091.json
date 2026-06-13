@@ -28,5 +28,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert contradiction fixture map entry and unit tests.",
-  "status": "proposed"
+  "status": "done"
 }
