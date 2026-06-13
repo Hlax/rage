@@ -126,7 +126,8 @@ superseded
 | 92 | ticket-092 | done | Manual source end-to-end pipeline proof (synthnote) | phase-2/ticket-092-manual-source-pipeline-e2e | agent_reports/2026-06-13_phase-2_ticket-092_manual-source-pipeline-e2e.md |
 | 93 | ticket-093 | done | Manual source pipeline idempotency proof (synthnote) | phase-2/ticket-093-manual-source-pipeline-idempotency | agent_reports/2026-06-13_phase-2_ticket-093_manual-source-pipeline-idempotency.md |
 | 94 | ticket-094 | done | README manual synthnote operator spine quickstart | phase-2/ticket-094-readme-manual-synthnote-spine | agent_reports/2026-06-13_phase-2_ticket-094_readme-manual-synthnote-spine.md |
-| 95 | ticket-095 | proposed | AGENTS.md manual synthnote spine cross-link | | |
+| 95 | ticket-095 | done | AGENTS.md manual synthnote spine cross-link | phase-2/ticket-095-agents-manual-synthnote-crosslink | agent_reports/2026-06-13_phase-2_ticket-095_agents-manual-synthnote-crosslink.md |
+| 96 | ticket-096 | proposed | Operating protocol manual synthnote spine cross-link | | |
 
 ## Queue Notes (2026-06-13, ticket-085 ingestion readiness audit)
 
@@ -848,7 +849,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-095 (proposed) — AGENTS.md manual synthnote spine cross-link
+ticket-096 (proposed) — Operating protocol manual synthnote spine cross-link
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 

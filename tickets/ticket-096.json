@@ -1,0 +1,28 @@
+{
+  "id": "ticket-096",
+  "title": "Operating protocol manual synthnote spine cross-link",
+  "problem": "Tickets 094–095 documented the manual synthnote spine in README and AGENTS.md. docs/agents/11_AGENT_OPERATING_PROTOCOL.md should cross-link the same operator workflow for protocol-aligned agents.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-095_agents-manual-synthnote-crosslink.md",
+    "README.md",
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md"
+  ],
+  "acceptance_criteria": [
+    "11_AGENT_OPERATING_PROTOCOL.md links to README manual synthnote operator spine quickstart.",
+    "No production code or golden test changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_source_pipeline_e2e.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, export, schema migration, or README/AGENTS rewrite."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert operating protocol cross-link.",
+  "status": "proposed"
+}
