@@ -68,8 +68,9 @@ Review window line: `None -> None` — no encode error on cp1252 stdout.
 
 ## Merge
 
-- Merge commit SHA: _(filled after merge)_
-- Golden Gate run: _(filled after CI)_
+- Implementation SHA: `27a670e`
+- Merge commit SHA: `2809812`
+- Golden Gate run: `27469482649` (passed)
 
 ## Recommended next ticket
 
