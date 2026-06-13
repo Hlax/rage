@@ -256,6 +256,15 @@ checklist**). Plan mode surfaces `scratch_evidence_status` and may recommend
 `run_scratch_evidence_review` when reviewed scratch rows exist. See also
 `AGENTS.md` Operator Loop and README Operator Quickstart.
 
+**Manual synthnote operator spine** (mock LLM; tickets 088–095): for Level-1
+`manual_text` research on the creativity synthnote source, follow the five-step
+CLI sequence in README **Operator Quickstart** (**Manual synthnote operator spine**):
+ingest → extract-claims → link-concepts → build-relationships →
+detect-contradictions. Checksum fixtures resolve from
+`fixtures/manual_source_fixture_map.json` (no `--fixture` flags for `manual_text`).
+Operator sources: gitignored `data/sources/manual/creativity/`; test copy:
+`fixtures/sources/manual_synthnote.txt`. See also `AGENTS.md` Operator Loop.
+
 ## Human Checkpoints
 
 Human review is required before:

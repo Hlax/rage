@@ -1,0 +1,28 @@
+{
+  "id": "ticket-097",
+  "title": "Cursor build loop manual synthnote spine cross-link",
+  "problem": "Tickets 094–096 documented the manual synthnote spine in README, AGENTS.md, and operating protocol. docs/agents/04_CURSOR_BUILD_LOOP.md should cross-link the same operator workflow for build-loop-aligned agents.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-096_operating-protocol-manual-synthnote-crosslink.md",
+    "README.md",
+    "docs/agents/04_CURSOR_BUILD_LOOP.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "docs/agents/04_CURSOR_BUILD_LOOP.md"
+  ],
+  "acceptance_criteria": [
+    "04_CURSOR_BUILD_LOOP.md links to README manual synthnote operator spine quickstart.",
+    "No production code or golden test changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_source_pipeline_e2e.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, export, schema migration, or README/AGENTS rewrite."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert cursor build loop cross-link.",
+  "status": "proposed"
+}
