@@ -61,8 +61,9 @@ Reviewed runbook section renders ASCII `->` guidance and explicitly states
 
 ## Merge
 
-- Merge commit SHA: _(filled after merge)_
-- Golden Gate run: _(filled after CI)_
+- Implementation SHA: `190e0e0`
+- Merge commit SHA: `8b14ed8`
+- Golden Gate run: `27470157333` (passed)
 
 ## Recommended next ticket
 
