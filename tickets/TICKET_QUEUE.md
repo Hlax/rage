@@ -111,11 +111,17 @@ superseded
 | 77 | ticket-077 | done | README operator quickstart scratch evidence workflow pointer | `phase-2/ticket-077-readme-scratch-workflow-pointer` | `agent_reports/2026-06-13_phase-2_ticket-077_readme-scratch-workflow-pointer.md` |
 | 78 | ticket-078 | done | AGENTS.md operator quickstart scratch evidence workflow cross-link | `phase-2/ticket-078-agents-scratch-workflow-crosslink` | `agent_reports/2026-06-13_phase-2_ticket-078_agents-scratch-workflow-crosslink.md` |
 | 79 | ticket-079 | done | Operating protocol scratch evidence workflow cross-link | `phase-2/ticket-079-operating-protocol-scratch-workflow-crosslink` | `agent_reports/2026-06-13_phase-2_ticket-079_operating-protocol-scratch-workflow-crosslink.md` |
-| 80 | ticket-080 | proposed | Post-ticket-079 principal audit checkpoint | | |
+| 80 | ticket-080 | done | Post-ticket-079 principal audit checkpoint | `phase-2/ticket-080-principal-audit-post-ticket-079` | `agent_reports/2026-06-13_principal-audit-post-ticket-079.md` |
+| 81 | ticket-081 | proposed | Cursor build loop scratch evidence workflow cross-link | | |
 
-## Queue Notes (2026-06-13, ticket-080 seed)
+## Queue Notes (2026-06-13, ticket-081 seed)
 
-- Principal audit required: 3 done tickets (077–079) since post-ticket-076 checkpoint.
+- 04_CURSOR_BUILD_LOOP.md cross-link to runbook scratch evidence checklist (docs-only); per post-079 audit recommendation.
+
+## Queue Notes (2026-06-13, ticket-080 principal audit)
+
+- Cadence satisfied: 3 done tickets (077–079) since post-076 checkpoint.
+- GO for ticket-081 (Cursor build loop doc cross-link).
 
 ## Queue Notes (2026-06-13, ticket-079 agent)
 
@@ -797,7 +803,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-080 (proposed) — Post-ticket-079 principal audit checkpoint
+ticket-081 (proposed) — Cursor build loop scratch evidence workflow cross-link
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
