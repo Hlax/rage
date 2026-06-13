@@ -76,8 +76,9 @@ python -m rge.modules.operator_loop --mode plan
 
 ## Merge
 
-- Merge commit SHA: _(filled after merge)_
-- Golden Gate run: _(filled after CI)_
+- Implementation SHA: `b8e47f5`
+- Merge commit SHA: `57ea981`
+- Golden Gate run: `27455591940` (passed)
 
 ## Recommended next ticket
 
