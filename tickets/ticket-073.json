@@ -40,5 +40,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert action-hint logic, tests, and runbook note.",
-  "status": "proposed"
+  "status": "done"
 }
