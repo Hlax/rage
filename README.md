@@ -132,6 +132,38 @@ python -m rge.cli ingest data/sources/manual/creativity/note.md --domain creativ
 
 Omit `--source-type` to keep golden-test back-compat (`fixture`). Ingest writes only to the private SQLite DB; it does not export.
 
+**Manual synthnote operator spine** (mock LLM; tickets 088–093): after placing
+`synthnote.txt` under gitignored `data/sources/manual/creativity/`, run the full
+pipeline with checksum-based fixtures (no `--fixture` flags for `manual_text` sources).
+A committed test copy lives at `fixtures/sources/manual_synthnote.txt`.
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+
+# 1. Ingest — idempotent by checksum; source_type manual_text
+python -m rge.cli ingest data/sources/manual/creativity/synthnote.txt `
+  --domain creativity --source-type manual_text `
+  --source-title "Synthetic Source Note: AI-Assisted Ideation and Semantic Diversity"
+# Expected: status ingested; source id src_2c53bfdfdf3c6853 (checksum-prefixed)
+
+# 2. Extract claims — 2 accepted, 1 rejected (missing_quote_span)
+python -m rge.cli extract-claims --source src_2c53bfdfdf3c6853
+
+# 3. Link concepts — 4 links; alias AI-assisted brainstorming → AI assistance
+python -m rge.cli link-concepts --source src_2c53bfdf3c6853
+
+# 4. Build relationships — 2 active edges (may_reduce semantic diversity; may_increase variation volume)
+python -m rge.cli build-relationships --source src_2c53bfdfdf3c6853
+
+# 5. Detect contradictions — 1 qualifies edge linking the two relationship directions
+python -m rge.cli detect-contradictions --source src_2c53bfdfdf3c6853
+```
+
+Re-running any step is idempotent (stable row counts). Fixture filenames resolve from
+`fixtures/manual_source_fixture_map.json` keyed by `raw_text_checksum`. Use
+`--db <path>` to target a non-default SQLite file. Golden fixture sources still pass
+explicit `--fixture` flags and are unchanged.
+
 **Live probe scratch evidence workflow** (local Ollama opt-in; report-only until
 operator persist): use the numbered checklist in
 [`docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md`](docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md)

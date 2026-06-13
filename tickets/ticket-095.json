@@ -1,0 +1,28 @@
+{
+  "id": "ticket-095",
+  "title": "AGENTS.md manual synthnote spine cross-link",
+  "problem": "Ticket-094 documented the manual synthnote operator spine in README. AGENTS.md operator quickstart should cross-link the same spine so builder agents discover it without reading README only.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-094_readme-manual-synthnote-spine.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "AGENTS.md"
+  ],
+  "acceptance_criteria": [
+    "AGENTS.md operator loop section links to README manual synthnote spine quickstart.",
+    "No production code or golden test changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_source_pipeline_e2e.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, export, schema migration, or README rewrite."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert AGENTS.md cross-link.",
+  "status": "proposed"
+}
