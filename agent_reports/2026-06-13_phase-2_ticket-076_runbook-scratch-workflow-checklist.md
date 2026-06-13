@@ -55,8 +55,9 @@ Safety audit not required (runbook-only).
 
 ## Merge
 
-- Merge commit SHA: _(filled after merge)_
-- Golden Gate run: _(filled after CI)_
+- Implementation SHA: `bc031d0`
+- Merge commit SHA: `7fdea6a`
+- Golden Gate run: `27470405093` (passed)
 
 ## Recommended next ticket
 
