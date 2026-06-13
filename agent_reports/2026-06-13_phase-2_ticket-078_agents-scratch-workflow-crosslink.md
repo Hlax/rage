@@ -56,8 +56,8 @@ Safety audit not required (AGENTS.md-only).
 
 ## Merge
 
-- Implementation SHA: (pending commit)
-- Merge commit SHA: (pending merge)
+- Implementation SHA: `a9d604c`
+- Merge commit SHA: `c902904`
 - Golden Gate run: (pending push)
 
 ## Recommended next ticket
