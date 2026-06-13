@@ -11,7 +11,6 @@ Flow:
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Any
 
@@ -21,16 +20,10 @@ from rge.llm.mode import effective_llm_mode
 from rge.llm.registry import get_model_client
 from rge.llm.schemas import CandidateClaimBatch_v0_1
 from rge.modules.claim_validator import locate_quote_offsets, validate_candidate_claims
+from rge.modules.manual_source_fixtures import extract_fixture_for_manual_source
 from rge.safety.prompt_injection import source_text_has_prompt_injection_fixture
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
-_MANUAL_SOURCE_FIXTURE_MAP_PATH = _REPO_ROOT / "fixtures" / "manual_source_fixture_map.json"
-
-
-def _manual_source_fixture_map() -> dict[str, str]:
-    if not _MANUAL_SOURCE_FIXTURE_MAP_PATH.is_file():
-        return {}
-    return json.loads(_MANUAL_SOURCE_FIXTURE_MAP_PATH.read_text(encoding="utf-8"))
 
 
 def _candidate_to_dict(item: Any) -> dict[str, Any]:
@@ -88,12 +81,9 @@ def _default_fixture_for_source_chunk(
     source: Any | None,
     chunk: dict[str, Any],
 ) -> str:
-    if source is not None and getattr(source, "source_type", None) == "manual_text":
-        checksum = getattr(source, "raw_text_checksum", None)
-        if checksum:
-            mapped = _manual_source_fixture_map().get(checksum)
-            if mapped:
-                return mapped
+    mapped = extract_fixture_for_manual_source(source)
+    if mapped:
+        return mapped
     return _default_fixture_for_chunk(chunk)
 
 

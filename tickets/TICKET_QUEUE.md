@@ -120,7 +120,8 @@ superseded
 | 86 | ticket-086 | done | Real manual source ingestion (Level-1) | phase-2/ticket-086-real-manual-source-ingestion | agent_reports/2026-06-13_phase-2_ticket-086_real-manual-source-ingestion.md |
 | 87 | ticket-087 | done | Minimal domain pack loader: ontology + aliases | phase-2/ticket-087-minimal-domain-pack-loader | agent_reports/2026-06-13_phase-2_ticket-087_minimal-domain-pack-loader.md |
 | 88 | ticket-088 | done | Real claim extraction proof from manual creativity source | phase-2/ticket-088-real-claim-extraction-manual-source | agent_reports/2026-06-13_phase-2_ticket-088_real-claim-extraction-manual-source.md |
-| 89 | ticket-089 | proposed | Manual source concept linking proof (synthnote) | | |
+| 89 | ticket-089 | done | Manual source concept linking proof (synthnote) | phase-2/ticket-089-manual-source-concept-linking | agent_reports/2026-06-13_phase-2_ticket-089_manual-source-concept-linking.md |
+| 90 | ticket-090 | proposed | Manual source relationship proof (synthnote) | | |
 
 ## Queue Notes (2026-06-13, ticket-085 ingestion readiness audit)
 
@@ -842,8 +843,8 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-088 (done) — Real claim extraction proof from manual creativity source
-Next implementation ticket: ticket-089 — Manual source concept linking proof (synthnote) (proposed)
+ticket-089 (done) — Manual source concept linking proof (synthnote)
+Next implementation ticket: ticket-090 — Manual source relationship proof (synthnote) (proposed)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
