@@ -107,7 +107,17 @@ superseded
 | 73 | ticket-073 | done | Operator loop evidence review readiness action hint | `phase-2/ticket-073-operator-loop-evidence-review-action` | `agent_reports/2026-06-13_phase-2_ticket-073_operator-loop-evidence-review-action.md` |
 | 74 | ticket-074 | done | Windows-safe UTF-8 stdout for probe-scratch-evidence-review | `phase-2/ticket-074-windows-evidence-review-utf8-stdout` | `agent_reports/2026-06-13_phase-2_ticket-074_windows-evidence-review-utf8-stdout.md` |
 | 75 | ticket-075 | done | Live probe runbook Windows console encoding note | `phase-2/ticket-075-runbook-windows-encoding-note` | `agent_reports/2026-06-13_phase-2_ticket-075_runbook-windows-encoding-note.md` |
-| 76 | ticket-076 | proposed | Runbook scratch evidence workflow checklist | | |
+| 76 | ticket-076 | done | Runbook scratch evidence workflow checklist | `phase-2/ticket-076-runbook-scratch-workflow-checklist` | `agent_reports/2026-06-13_phase-2_ticket-076_runbook-scratch-workflow-checklist.md` |
+| 77 | ticket-077 | proposed | README operator quickstart scratch evidence workflow pointer | | |
+
+## Queue Notes (2026-06-13, ticket-077 seed)
+
+- README link to runbook scratch evidence workflow checklist (docs-only).
+
+## Queue Notes (2026-06-13, ticket-076 agent)
+
+- Numbered 5-step checklist: probe → persist → summary → evidence review → operator loop plan.
+- ticket-059 OpenAI deferred.
 
 ## Queue Notes (2026-06-13, ticket-076 seed)
 
@@ -767,7 +777,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-076 (proposed) — runbook scratch evidence workflow checklist
+ticket-077 (proposed) — README operator quickstart scratch evidence workflow pointer
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
