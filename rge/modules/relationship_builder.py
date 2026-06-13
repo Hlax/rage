@@ -13,6 +13,7 @@ from rge.config import load_config
 from rge.llm.mock_client import MockModelClient
 from rge.llm.mode import effective_llm_mode
 from rge.llm.registry import get_model_client
+from rge.modules.manual_source_fixtures import relationship_fixture_for_manual_source
 
 CONFIDENCE_LABEL_TO_REAL: dict[str, float] = {
     "low": 0.25,
@@ -188,6 +189,7 @@ def propose_relationship_drafts(
     client: Any | None = None,
     fixture_name: str | None = None,
     diversity_fallback: bool = True,
+    source: Any | None = None,
 ) -> list[dict[str, Any]]:
     """Propose relationship drafts via the model client without persistence."""
     config = load_config()
@@ -199,8 +201,9 @@ def propose_relationship_drafts(
         "schema_version": config.llm_schema_version,
     }
     if isinstance(model_client, MockModelClient):
+        resolved_fixture = fixture_name or relationship_fixture_for_manual_source(source)
         draft_kwargs["fixture_name"] = (
-            fixture_name or "relationship_drafting_creativity_diversity.json"
+            resolved_fixture or "relationship_drafting_creativity_diversity.json"
         )
     batch = model_client.draft_relationships(**draft_kwargs)
 
@@ -224,6 +227,7 @@ def draft_relationships_for_source(
     domain_pack: str,
     *,
     fixture_name: str | None = None,
+    source: Any | None = None,
 ) -> list[dict[str, Any]]:
     """Propose relationship drafts via the configured model client."""
     return propose_relationship_drafts(
@@ -232,6 +236,7 @@ def draft_relationships_for_source(
         domain_pack,
         fixture_name=fixture_name,
         diversity_fallback=True,
+        source=source,
     )
 
 
@@ -247,6 +252,7 @@ def build_relationships_for_source(
         ConceptRepository,
         RelationshipEvidenceRepository,
         RelationshipRepository,
+        SourceRepository,
     )
 
     claim_repo = ClaimRepository(conn)
@@ -254,6 +260,7 @@ def build_relationships_for_source(
     if not source_claims:
         raise ValueError(f"No accepted claims found for source: {source_id}")
 
+    source_record = SourceRepository(conn).get_by_id(source_id)
     domain_pack = source_claims[0].domain
     concept_repo = ConceptRepository(conn)
     concept_repo.ensure_domain_concepts(domain_pack)
@@ -291,6 +298,7 @@ def build_relationships_for_source(
         concept_dicts,
         domain_pack,
         fixture_name=fixture_name,
+        source=source_record,
     )
     validated = validate_relationship_candidates(
         proposed,

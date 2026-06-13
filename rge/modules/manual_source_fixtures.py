@@ -35,6 +35,15 @@ def link_fixture_for_manual_source(source: Any | None) -> str | None:
     return resolve_manual_source_fixture(str(checksum), "link_concepts")
 
 
+def relationship_fixture_for_manual_source(source: Any | None) -> str | None:
+    if source is None or getattr(source, "source_type", None) != "manual_text":
+        return None
+    checksum = getattr(source, "raw_text_checksum", None)
+    if not checksum:
+        return None
+    return resolve_manual_source_fixture(str(checksum), "build_relationships")
+
+
 def extract_fixture_for_manual_source(source: Any | None) -> str | None:
     if source is None or getattr(source, "source_type", None) != "manual_text":
         return None

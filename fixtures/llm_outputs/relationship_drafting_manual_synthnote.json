@@ -1,0 +1,24 @@
+{
+  "task_name": "relationship_drafting",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "subject_concept": "AI assistance",
+      "predicate": "may_reduce",
+      "object_concept": "semantic diversity",
+      "stance": "supports",
+      "scope": "synthetic brainstorming",
+      "confidence": "medium",
+      "supporting_claim_ids": ["placeholder"]
+    },
+    {
+      "subject_concept": "AI assistance",
+      "predicate": "may_increase",
+      "object_concept": "variation volume",
+      "stance": "qualifies",
+      "scope": "timed brainstorming",
+      "confidence": "medium",
+      "supporting_claim_ids": ["placeholder"]
+    }
+  ]
+}
