@@ -1,0 +1,33 @@
+{
+  "id": "ticket-105",
+  "title": "Manual source pipeline e2e through reconcile-scores",
+  "problem": "Ticket-099 proved score reconciliation in isolation and tickets 100–104 completed operator doc cross-links. tests/unit/test_manual_source_pipeline_e2e.py still stops at detect-contradictions (ticket-092). A single e2e test through reconcile-scores would unify the full manual synthnote spine proof.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-104_runtime-config-manual-synthnote-reconcile-scores-crosslink.md",
+    "agent_reports/2026-06-13_phase-2_ticket-099_manual-source-score-reconciliation.md",
+    "tests/unit/test_manual_source_pipeline_e2e.py",
+    "tests/unit/test_manual_score_reconciliation.py"
+  ],
+  "affected_modules": [
+    "tests/unit/test_manual_source_pipeline_e2e.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_manual_source_pipeline_e2e.py"
+  ],
+  "acceptance_criteria": [
+    "E2E test runs full spine plus follow-up ingest, extract-claims, and reconcile-scores on temp --db.",
+    "Assert score_events_created: 1 and may_reduce confidence 0.5 → 0.62.",
+    "No production code or golden test changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_source_pipeline_e2e.py -q",
+    "python -m pytest tests/unit/test_manual_score_reconciliation.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, export, schema migration, or doc cross-link changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert e2e reconcile-scores test extension.",
+  "status": "proposed"
+}
