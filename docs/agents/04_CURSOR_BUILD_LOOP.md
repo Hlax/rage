@@ -174,6 +174,14 @@ The builder agent must not:
 - Add public write routes.
 - Add model-controlled shell/Git access.
 
+**Live probe scratch evidence workflow** (local Ollama opt-in; operator-only
+persist): when coordinating live probe calibration outside mock golden tests,
+follow the numbered checklist in
+`docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md` (**Scratch evidence workflow
+checklist**). The bounded operator loop surfaces `scratch_evidence_status` and
+may recommend `run_scratch_evidence_review`. See also `AGENTS.md` Operator Loop
+and README Operator Quickstart.
+
 ## 8. Build Phases
 
 ### Phase 0: Repo scaffold
