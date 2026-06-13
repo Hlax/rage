@@ -112,11 +112,16 @@ superseded
 | 78 | ticket-078 | done | AGENTS.md operator quickstart scratch evidence workflow cross-link | `phase-2/ticket-078-agents-scratch-workflow-crosslink` | `agent_reports/2026-06-13_phase-2_ticket-078_agents-scratch-workflow-crosslink.md` |
 | 79 | ticket-079 | done | Operating protocol scratch evidence workflow cross-link | `phase-2/ticket-079-operating-protocol-scratch-workflow-crosslink` | `agent_reports/2026-06-13_phase-2_ticket-079_operating-protocol-scratch-workflow-crosslink.md` |
 | 80 | ticket-080 | done | Post-ticket-079 principal audit checkpoint | `phase-2/ticket-080-principal-audit-post-ticket-079` | `agent_reports/2026-06-13_principal-audit-post-ticket-079.md` |
-| 81 | ticket-081 | proposed | Cursor build loop scratch evidence workflow cross-link | | |
+| 81 | ticket-081 | done | Cursor build loop scratch evidence workflow cross-link | `phase-2/ticket-081-cursor-build-loop-scratch-workflow-crosslink` | `agent_reports/2026-06-13_phase-2_ticket-081_cursor-build-loop-scratch-workflow-crosslink.md` |
+| 82 | ticket-082 | proposed | Runtime config scratch evidence workflow cross-link | | |
 
-## Queue Notes (2026-06-13, ticket-081 seed)
+## Queue Notes (2026-06-13, ticket-082 seed)
 
-- 04_CURSOR_BUILD_LOOP.md cross-link to runbook scratch evidence checklist (docs-only); per post-079 audit recommendation.
+- 12_RUNTIME_CONFIG.md cross-link to runbook scratch evidence checklist near scratch DB paths (docs-only).
+
+## Queue Notes (2026-06-13, ticket-081 agent)
+
+- 04_CURSOR_BUILD_LOOP.md Builder Agent Instructions links runbook scratch evidence checklist.
 
 ## Queue Notes (2026-06-13, ticket-080 principal audit)
 
@@ -803,7 +808,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-081 (proposed) — Cursor build loop scratch evidence workflow cross-link
+ticket-082 (proposed) — Runtime config scratch evidence workflow cross-link
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
