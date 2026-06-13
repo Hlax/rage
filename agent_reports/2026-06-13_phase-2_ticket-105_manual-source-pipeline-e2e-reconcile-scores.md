@@ -49,9 +49,10 @@ Safety audit: **not required** (unit tests only).
 
 ## Merge
 
-- Implementation SHA: _(pending commit)_
-- Merge commit: _(pending merge)_
-- Pushed: _(pending)_
+- Implementation SHA: `4b6d0af`
+- Merge commit: `74282d1`
+- Pushed: `main -> main`
+- Full pytest: **383 passed**, 6 `live_smoke` deselected
 
 ## Recommended next ticket
 
