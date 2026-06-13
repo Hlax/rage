@@ -1,0 +1,49 @@
+{
+  "id": "ticket-087",
+  "title": "Minimal domain pack loader: ontology + aliases",
+  "problem": "Concept linking reads ontology via an ad-hoc parser in concept_linker.py and ignores aliases.yaml. Supplemental creativity concepts are hardcoded in core Python. Before real claim extraction from manual sources (ticket-088), the engine needs a reusable domain pack loader and alias-to-canonical resolution owned by the pack, not the core.",
+  "evidence": [
+    "agent_reports/2026-06-13_pre-ticket-087_minimal-domain-pack-loader.md",
+    "agent_reports/2026-06-13_phase-2_ticket-085_domain-entry-gate-spec-and-ingestion-readiness.md",
+    "rge/modules/concept_linker.py",
+    "domain_packs/creativity/ontology.yaml",
+    "domain_packs/creativity/aliases.yaml",
+    "tests/golden/test_05_concept_linking.py"
+  ],
+  "affected_modules": [
+    "rge/modules/domain_pack_loader.py",
+    "rge/modules/concept_linker.py",
+    "domain_packs/creativity/ontology.yaml"
+  ],
+  "expected_files": [
+    "rge/modules/domain_pack_loader.py",
+    "rge/modules/concept_linker.py",
+    "domain_packs/creativity/ontology.yaml",
+    "tests/unit/test_domain_pack_loader.py",
+    "tests/unit/test_concept_link_aliases.py",
+    "agent_reports/2026-06-13_phase-2_ticket-087_minimal-domain-pack-loader.md"
+  ],
+  "acceptance_criteria": [
+    "Reusable domain pack loader reads ontology.yaml and aliases.yaml.",
+    "Concept linker maps alias phrases to canonical ontology concepts.",
+    "No hardcoded creativity-specific alias mappings in core engine.",
+    "Supplemental ontology labels moved to creativity pack YAML.",
+    "Missing/malformed pack files fail closed with clear errors.",
+    "Golden concept linking remains green; unit tests cover loader and aliases.",
+    "Safety audit passes; no model/cloud/API calls introduced."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_domain_pack_loader.py tests/unit/test_concept_link_aliases.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No scoring, evidence_types, claim_schema, or search_templates loading.",
+    "No source discovery, URL/PDF fetch, OpenAI/cloud, live LLM extraction.",
+    "No validator changes, schema migrations, or export changes."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert domain_pack_loader, concept_linker alias wiring, and ontology.yaml additions.",
+  "status": "done"
+}

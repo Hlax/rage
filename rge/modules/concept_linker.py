@@ -7,86 +7,78 @@ in ``domain_metadata``, validated by the domain pack, never hardcoded here.
 
 from __future__ import annotations
 
-import re
-from pathlib import Path
 from typing import Any
 
 from rge.config import load_config
 from rge.llm.mock_client import MockModelClient
 from rge.llm.mode import effective_llm_mode
 from rge.llm.registry import get_model_client
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
+from rge.modules.domain_pack_loader import (
+    DomainPack,
+    DomainPackError,
+    load_domain_pack,
+    resolve_canonical_concept_label,
+)
 
 _GENERIC_ONLY_LABELS = frozenset({"ai", "creativity"})
 
 REJECTION_WEAK_CONCEPT_MAPPING = "weak_concept_mapping"
-
-SUPPLEMENTAL_CREATIVITY_CONCEPTS = (
-    {
-        "ontology_id": "concept_brainstorming",
-        "label": "brainstorming",
-        "definition": "Generating multiple candidate ideas before selection or refinement.",
-        "status": "candidate",
-    },
-    {
-        "ontology_id": "concept_ideation",
-        "label": "ideation",
-        "definition": "The creative phase of generating ideas and possibilities.",
-        "status": "candidate",
-    },
-    {
-        "ontology_id": "concept_creativity_domain",
-        "label": "creativity",
-        "definition": "The domain of human and AI-assisted creative work.",
-        "status": "candidate",
-    },
-)
-
-
-def _parse_ontology_concepts(path: Path) -> list[dict[str, Any]]:
-    text = path.read_text(encoding="utf-8")
-    concepts: list[dict[str, Any]] = []
-    for block in re.split(r"\n  - id:", text)[1:]:
-        concept: dict[str, Any] = {}
-        block = f"id:{block}"
-        for key in ("id", "label", "status", "definition"):
-            match = re.search(rf"^\s*{key}: (.+)$", block, re.MULTILINE)
-            if match:
-                concept[key] = match.group(1).strip()
-        if concept.get("id") and concept.get("label"):
-            concepts.append(concept)
-    return concepts
-
-
-def load_domain_pack_concepts(domain_pack: str) -> list[dict[str, Any]]:
-    """Load ontology concepts for a domain pack from YAML stubs."""
-    if domain_pack != "creativity":
-        raise ValueError(f"Unsupported domain pack for concept linking: {domain_pack}")
-    ontology_path = REPO_ROOT / "domain_packs" / domain_pack / "ontology.yaml"
-    concepts = _parse_ontology_concepts(ontology_path)
-    existing_labels = {concept["label"].casefold() for concept in concepts}
-    for supplemental in SUPPLEMENTAL_CREATIVITY_CONCEPTS:
-        if supplemental["label"].casefold() not in existing_labels:
-            concepts.append(
-                {
-                    "id": supplemental["ontology_id"],
-                    "label": supplemental["label"],
-                    "definition": supplemental["definition"],
-                    "status": supplemental["status"],
-                }
-            )
-    return concepts
 
 
 def _normalize_label(label: str) -> str:
     return label.strip().casefold()
 
 
+def _get_domain_pack(domain_pack: str) -> DomainPack:
+    try:
+        return load_domain_pack(domain_pack)
+    except DomainPackError as exc:
+        raise ValueError(str(exc)) from exc
+
+
+def load_domain_pack_concepts(domain_pack: str) -> list[dict[str, Any]]:
+    """Load ontology concepts for a domain pack."""
+    from rge.modules.domain_pack_loader import concepts_as_dicts
+
+    pack = _get_domain_pack(domain_pack)
+    return concepts_as_dicts(pack)
+
+
 def ontology_labels_for_pack(domain_pack: str) -> list[str]:
-    """Sorted unique concept labels from the domain pack ontology."""
-    concepts = load_domain_pack_concepts(domain_pack)
-    return sorted({str(concept["label"]) for concept in concepts if concept.get("label")})
+    """Sorted unique canonical concept labels from the domain pack ontology."""
+    pack = _get_domain_pack(domain_pack)
+    return sorted({concept.label for concept in pack.concepts if concept.label})
+
+
+def allowed_concept_labels_for_pack(domain_pack: str) -> list[str]:
+    """Canonical labels plus pack-defined alias phrases exposed for validation."""
+    pack = _get_domain_pack(domain_pack)
+    labels = {concept.label for concept in pack.concepts if concept.label}
+    for canonical, alias_phrases in pack.aliases.items():
+        labels.add(canonical)
+        labels.update(alias_phrases)
+    return sorted(labels)
+
+
+def resolve_concept_label(domain_pack: str, concept_label: str) -> str:
+    """Map alias phrases to canonical ontology labels using the domain pack."""
+    pack = _get_domain_pack(domain_pack)
+    return resolve_canonical_concept_label(pack, concept_label)
+
+
+def normalize_proposed_concept_links(
+    links: list[dict[str, Any]],
+    domain_pack: str,
+) -> list[dict[str, Any]]:
+    """Resolve alias phrases to canonical labels before validation/persistence."""
+    normalized: list[dict[str, Any]] = []
+    for link in links:
+        item = dict(link)
+        label = item.get("concept_label")
+        if label:
+            item["concept_label"] = resolve_concept_label(domain_pack, str(label))
+        normalized.append(item)
+    return normalized
 
 
 def link_rejection_diagnostic(
@@ -94,6 +86,7 @@ def link_rejection_diagnostic(
     *,
     rejection_reason: str | None = None,
     ontology_labels: list[str] | None = None,
+    domain_pack: str | None = None,
 ) -> str:
     """Human-readable note for a rejected concept link (probe reporting only)."""
     reason = rejection_reason or REJECTION_WEAK_CONCEPT_MAPPING
@@ -114,12 +107,24 @@ def link_rejection_diagnostic(
             "(not only generic 'ai' or 'creativity')"
         )
 
-    allowed = (
-        {_normalize_label(item) for item in ontology_labels}
-        if ontology_labels
-        else set()
-    )
+    allowed: set[str] = set()
+    if ontology_labels:
+        allowed = {_normalize_label(item) for item in ontology_labels}
+    elif domain_pack:
+        allowed = {
+            _normalize_label(item) for item in allowed_concept_labels_for_pack(domain_pack)
+        }
     if allowed and label not in allowed:
+        resolved = (
+            resolve_concept_label(domain_pack, str(link.get("concept_label", "")))
+            if domain_pack
+            else str(link.get("concept_label", ""))
+        )
+        if _normalize_label(resolved) in allowed:
+            return (
+                f"concept_label {link.get('concept_label')!r} maps to "
+                f"{resolved!r} but was not normalized before validation"
+            )
         return (
             f"concept_label {link.get('concept_label')!r} is not in the domain "
             "ontology label list exposed to the probe"
@@ -217,11 +222,12 @@ def propose_concept_links(
         )
     batch = model_client.link_concepts(**link_kwargs)
     links = [item.model_dump() for item in batch.items]
-    return _resolve_link_claim_ids(
+    resolved = _resolve_link_claim_ids(
         links,
         claims,
         diversity_heuristic=diversity_heuristic,
     )
+    return normalize_proposed_concept_links(resolved, domain_pack)
 
 
 def link_claim_concepts(

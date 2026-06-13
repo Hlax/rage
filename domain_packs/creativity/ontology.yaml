@@ -114,3 +114,18 @@ concepts:
     status: active
     definition: The stage of the creative process a claim or observation concerns.
     groups: [Generation, Selection, Execution]
+  - id: concept_brainstorming
+    label: brainstorming
+    status: candidate
+    definition: Generating multiple candidate ideas before selection or refinement.
+    groups: [Generation]
+  - id: concept_ideation
+    label: ideation
+    status: candidate
+    definition: The creative phase of generating ideas and possibilities.
+    groups: [Generation]
+  - id: concept_creativity_domain
+    label: creativity
+    status: candidate
+    definition: The domain of human and AI-assisted creative work.
+    groups: [Meaning]
