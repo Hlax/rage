@@ -1065,6 +1065,44 @@ def _cmd_probe_scratch_summary(args: argparse.Namespace) -> int:
         return 2
 
 
+def _cmd_probe_scratch_evidence_review(args: argparse.Namespace) -> int:
+    from rge.modules.live_probe_evidence_review import (
+        LiveProbeEvidenceReviewError,
+        format_evidence_review_json,
+        format_evidence_review_markdown,
+        run_evidence_review,
+    )
+
+    try:
+        result = run_evidence_review(
+            scratch_db=Path(args.scratch_db) if args.scratch_db else None,
+            limit=int(args.limit) if args.limit else None,
+            fixture_filter=args.fixture,
+            allow_empty=bool(args.allow_empty),
+            output_format=args.format,
+            out_path=Path(args.out) if args.out else None,
+            root=_REPO_ROOT,
+        )
+        if args.out:
+            print(json.dumps(result, indent=2))
+        else:
+            text = (
+                format_evidence_review_json(result)
+                if args.format == "json"
+                else format_evidence_review_markdown(result)
+            )
+            print(text, end="" if text.endswith("\n") else None)
+        return 0
+    except LiveProbeEvidenceReviewError as exc:
+        payload = {
+            "status": "error",
+            "command": "probe-scratch-evidence-review",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 2
+
+
 def _cmd_verify(args: argparse.Namespace) -> int:
     from rge.modules.verify_runner import run_verification
 
@@ -2285,6 +2323,51 @@ def build_parser() -> argparse.ArgumentParser:
         help="When scratch DB is missing, return a deterministic empty summary.",
     )
     probe_summary_parser.set_defaults(func=_cmd_probe_scratch_summary)
+
+    probe_evidence_parser = subparsers.add_parser(
+        "probe-scratch-evidence-review",
+        help="Compose deterministic scratch evidence review for human/principal review.",
+        description=(
+            "Build a formatted evidence review from read-only scratch DB summary "
+            "data. Reuses probe-scratch-summary aggregation. No LLM calls. No "
+            "automated ticket recommendations."
+        ),
+    )
+    probe_evidence_parser.add_argument(
+        "--scratch-db",
+        help=(
+            "Scratch SQLite path (default: data/db/live_probe_scratch.sqlite). "
+            "Opened read-only via summary builder."
+        ),
+    )
+    probe_evidence_parser.add_argument(
+        "--format",
+        choices=("json", "markdown"),
+        default="markdown",
+        help="Output format for stdout or --out (default: markdown).",
+    )
+    probe_evidence_parser.add_argument(
+        "--out",
+        help=(
+            "Optional private output path under data/reports/ or agent_reports/. "
+            "When omitted, writes nothing to disk."
+        ),
+    )
+    probe_evidence_parser.add_argument(
+        "--limit",
+        type=int,
+        help="Limit number of reviewed rows included (ordered by review time).",
+    )
+    probe_evidence_parser.add_argument(
+        "--fixture",
+        help="Filter rows where fixture_source contains this substring.",
+    )
+    probe_evidence_parser.add_argument(
+        "--allow-empty",
+        action="store_true",
+        help="When scratch DB is missing, return a deterministic empty review.",
+    )
+    probe_evidence_parser.set_defaults(func=_cmd_probe_scratch_evidence_review)
 
     verify_parser = subparsers.add_parser(
         "verify",

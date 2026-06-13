@@ -251,6 +251,25 @@ python -m rge.cli probe-scratch-summary `
 - `--out` must be under `data/reports/` or `agent_reports/` (not public export paths)
 - Summary includes counts and safety flags only — no raw prompts, model responses, or operator note bodies
 
+### Scratch evidence review (read-only, deterministic)
+
+Compose a principal/operator evidence review from scratch summary data:
+
+```powershell
+python -m rge.cli probe-scratch-evidence-review
+python -m rge.cli probe-scratch-evidence-review --format json
+python -m rge.cli probe-scratch-evidence-review `
+  --out agent_reports/YYYY-MM-DD_scratch-evidence-review.md
+```
+
+**Rules:**
+
+- Reuses `probe-scratch-summary` aggregation (read-only scratch DB)
+- Default output is markdown for human review
+- No LLM calls; **no automated ticket recommendations** in report body
+- `--out` must be under `data/reports/` or `agent_reports/`
+- Operator note bodies are not included (count only via summary)
+
 ### Who does what
 
 | Role | Responsibility |

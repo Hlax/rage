@@ -102,6 +102,32 @@ superseded
 | 68 | ticket-068 | done | Scratch DB persistence for reviewed live mini-run reports | `phase-2/ticket-068-scratch-db-reviewed-live-probe-persistence` | `agent_reports/2026-06-12_phase-2_ticket-068_scratch-db-reviewed-live-probe-persistence.md` |
 | 69 | ticket-069 | done | Followup contradiction calibration | `phase-2/ticket-069-followup-contradiction-calibration` | `agent_reports/2026-06-12_phase-2_ticket-069_followup-contradiction-calibration.md` |
 | 70 | ticket-070 | done | Scratch DB run summary | `phase-2/ticket-070-scratch-db-run-summary` | `agent_reports/2026-06-12_phase-2_ticket-070_scratch-db-run-summary.md` |
+| 71 | ticket-071 | done | Deterministic scratch evidence review report | `phase-2/ticket-071-deterministic-evidence-review-report` | `agent_reports/2026-06-13_phase-2_ticket-071_deterministic-evidence-review-report.md` |
+| 72 | ticket-072 | proposed | Operator loop scratch evidence status hook | | |
+
+## Queue Notes (2026-06-13, ticket-072 seed)
+
+- Proposed follow-on from ticket-071: read-only scratch evidence status in operator loop plan mode.
+- No LLM, no auto-persist, no queue mutation.
+
+## Queue Notes (2026-06-13, ticket-071 agent)
+
+- Adds `probe-scratch-evidence-review` reusing read-only scratch summary aggregation.
+- Markdown default; no automated ticket recommendations; private `--out` only.
+- ticket-059 OpenAI deferred.
+
+## Queue Notes (2026-06-13, ticket-071 seed)
+
+- Pre-ticket audit GO: `agent_reports/2026-06-13_pre-ticket-071_deterministic-evidence-review-report.md`.
+- Adds formatted evidence review CLI reusing read-only `probe-scratch-summary` aggregation.
+- No LLM, no graph/export writes, no automated ticket recommendations.
+- ticket-059 OpenAI remains deferred.
+
+## Queue Notes (2026-06-13, principal audit post-ticket-070)
+
+- Cadence satisfied: `agent_reports/2026-06-13_principal-audit-post-ticket-070.md` at `64f4686`.
+- Live suite 4/4; scratch persist + read-only summary operational.
+- Recommended next: ticket-071 evidence review (deterministic) before OpenAI.
 
 ## Queue Notes (2026-06-12, ticket-070 agent)
 
@@ -696,7 +722,8 @@ superseded
 ## Current Active Ticket
 
 ```txt
-(none — ticket-059 proposed OpenAI placeholder; defer until operator approves cloud work)
+ticket-072 (proposed) — operator loop scratch evidence status hook
+(ticket-059 OpenAI placeholder remains deferred)
 ```
 
 ## Queue Rules
