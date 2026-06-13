@@ -1,0 +1,67 @@
+{
+  "task_name": "claim_extraction",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "claim_text": "Always-on AI assistance narrowed the range of themes in the final idea set during synthetic brainstorming.",
+      "source_id": "src_placeholder",
+      "chunk_id": "chk_placeholder",
+      "quote_span": "always-on AI assistance narrowed the range of themes in the final idea set",
+      "subject": "always-on AI assistance",
+      "predicate": "narrowed",
+      "object": "range of themes",
+      "scope": "synthetic brainstorming",
+      "evidence_type": "empirical",
+      "confidence": 0.72,
+      "limitations": [
+        "Synthetic operator-authored scenario; not a real study.",
+        "Small fictional product design team; may not generalize."
+      ],
+      "domain": "creativity",
+      "domain_metadata": {
+        "track": "human-AI",
+        "creative_phase": "ideation",
+        "measured_dimension": "semantic diversity"
+      }
+    },
+    {
+      "claim_text": "AI-assisted brainstorming increased the number of usable ideas during timed brainstorming.",
+      "source_id": "src_placeholder",
+      "chunk_id": "chk_placeholder",
+      "quote_span": "AI-assisted brainstorming increased the number of usable ideas",
+      "subject": "AI-assisted brainstorming",
+      "predicate": "increased",
+      "object": "number of usable ideas",
+      "scope": "timed brainstorming",
+      "evidence_type": "empirical",
+      "confidence": 0.7,
+      "limitations": [
+        "Synthetic source note only.",
+        "Twenty-minute session window; not long-term creativity."
+      ],
+      "domain": "creativity",
+      "domain_metadata": {
+        "track": "human-AI",
+        "creative_phase": "ideation",
+        "measured_dimension": "quality"
+      }
+    },
+    {
+      "claim_text": "AI-assisted brainstorming increased idea volume during timed brainstorming.",
+      "source_id": "src_placeholder",
+      "chunk_id": "chk_placeholder",
+      "quote_span": null,
+      "subject": "AI-assisted brainstorming",
+      "predicate": "increased",
+      "object": "idea volume",
+      "scope": "timed brainstorming",
+      "evidence_type": "empirical",
+      "confidence": 0.65,
+      "limitations": [
+        "Synthetic scenario."
+      ],
+      "domain": "creativity",
+      "domain_metadata": {}
+    }
+  ]
+}

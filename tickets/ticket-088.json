@@ -1,0 +1,45 @@
+{
+  "id": "ticket-088",
+  "title": "Real claim extraction proof from manual creativity source",
+  "problem": "Manual ingestion (ticket-086) and domain pack loading (ticket-087) are proven, but mock claim extraction still only auto-selects fixtures for the legacy diversity chunk heuristic. Operator manual sources like synthnote.txt need a deterministic extraction floor: at least one accepted scoped claim and one reasoned rejection grounded in the source text, without live LLM.",
+  "evidence": [
+    "agent_reports/2026-06-13_pre-ticket-088_real-claim-extraction-manual-source.md",
+    "agent_reports/2026-06-13_phase-2_ticket-085_domain-entry-gate-spec-and-ingestion-readiness.md",
+    "rge/modules/claim_extractor.py",
+    "fixtures/sources/manual_synthnote.txt",
+    "tests/golden/test_02_claim_extraction.py"
+  ],
+  "affected_modules": [
+    "rge/modules/claim_extractor.py"
+  ],
+  "expected_files": [
+    "rge/modules/claim_extractor.py",
+    "fixtures/manual_source_fixture_map.json",
+    "fixtures/llm_outputs/claim_extraction_manual_synthnote.json",
+    "fixtures/sources/manual_synthnote.txt",
+    "tests/unit/test_manual_claim_extraction.py",
+    "agent_reports/2026-06-13_phase-2_ticket-088_real-claim-extraction-manual-source.md"
+  ],
+  "acceptance_criteria": [
+    "Manual_text source synthnote extracts via checksum→fixture map without --fixture flag.",
+    "At least one accepted scoped claim with valid quote span in source text.",
+    "At least one rejected claim with documented rejection reason.",
+    "Fixture diversity source path unchanged (GT02 green).",
+    "No validator changes, no schema migration, no live LLM, no export change.",
+    "Unit tests cover manual extraction, idempotency, and fixture back-compat."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_claim_extraction.py -q",
+    "python -m pytest tests/golden/test_02_claim_extraction.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No live Ollama extraction, OpenAI/cloud, concept linking on manual source.",
+    "No validator changes, schema migrations, or export changes.",
+    "No automatic LLM fixture generation."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert fixture map, synthnote fixture, claim_extractor checksum lookup, and unit tests.",
+  "status": "done"
+}

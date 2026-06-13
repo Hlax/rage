@@ -119,6 +119,8 @@ superseded
 | 85 | ticket-085 | done | Domain-entry gate spec + Phase-3 ingestion readiness audit | `phase-2/ticket-085-domain-entry-gate-spec-and-ingestion-readiness` | `agent_reports/2026-06-13_phase-2_ticket-085_domain-entry-gate-spec-and-ingestion-readiness.md` |
 | 86 | ticket-086 | done | Real manual source ingestion (Level-1) | phase-2/ticket-086-real-manual-source-ingestion | agent_reports/2026-06-13_phase-2_ticket-086_real-manual-source-ingestion.md |
 | 87 | ticket-087 | done | Minimal domain pack loader: ontology + aliases | phase-2/ticket-087-minimal-domain-pack-loader | agent_reports/2026-06-13_phase-2_ticket-087_minimal-domain-pack-loader.md |
+| 88 | ticket-088 | done | Real claim extraction proof from manual creativity source | phase-2/ticket-088-real-claim-extraction-manual-source | agent_reports/2026-06-13_phase-2_ticket-088_real-claim-extraction-manual-source.md |
+| 89 | ticket-089 | proposed | Manual source concept linking proof (synthnote) | | |
 
 ## Queue Notes (2026-06-13, ticket-085 ingestion readiness audit)
 
@@ -840,8 +842,8 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-087 (done) — Minimal domain pack loader: ontology + aliases
-Next implementation ticket: ticket-088 — Real claim extraction proof (proposed)
+ticket-088 (done) — Real claim extraction proof from manual creativity source
+Next implementation ticket: ticket-089 — Manual source concept linking proof (synthnote) (proposed)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
