@@ -56,9 +56,10 @@ bytes — matches `sha256_hex(read_text())` on Windows CRLF files.
 
 ## Merge
 
-- Implementation SHA: (pending commit)
-- Merge commit: (pending merge)
-- Pushed: (pending push)
+- Implementation SHA: `d1ae20f`
+- Merge commit: `15e9ae7`
+- Pushed: `main -> main`
+- Full pytest: **382 passed**, 6 `live_smoke` deselected
 
 ## Recommended next ticket
 
