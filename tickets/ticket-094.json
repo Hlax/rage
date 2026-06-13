@@ -1,0 +1,28 @@
+{
+  "id": "ticket-094",
+  "title": "README manual synthnote operator spine quickstart",
+  "problem": "Tickets 088–093 proved the manual synthnote pipeline in code. Operators need a documented CLI sequence (ingest through detect-contradictions) referencing fixture map behavior and the gitignored operator source path.",
+  "evidence": [
+    "agent_reports/2026-06-13_phase-2_ticket-093_manual-source-pipeline-idempotency.md",
+    "README.md",
+    "tests/unit/test_manual_source_pipeline_e2e.py"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "README.md"
+  ],
+  "acceptance_criteria": [
+    "README documents the manual synthnote operator spine with python -m rge.cli commands and expected outcomes.",
+    "No production code or golden test changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_source_pipeline_e2e.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, export, schema migration, or new CLI commands."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section.",
+  "status": "proposed"
+}
