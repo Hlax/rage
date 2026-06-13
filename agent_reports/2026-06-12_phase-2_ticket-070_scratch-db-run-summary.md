@@ -102,7 +102,8 @@ After ticket-070: **3 done tickets** since post-ticket-067 checkpoint (068, 069,
 ## Merge
 
 - Implementation SHA: `865d3a9`
-- Golden Gate run: _(pending CI)_
+- Docs/report SHA: `e79d769`
+- Golden Gate run: **27455038931** — **success** at `e79d769`
 
 ## Recommended next move
 
