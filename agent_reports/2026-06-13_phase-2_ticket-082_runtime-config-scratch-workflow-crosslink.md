@@ -56,8 +56,8 @@ Safety audit not required (runtime config docs-only).
 
 ## Merge
 
-- Implementation SHA: (pending commit)
-- Merge commit SHA: (pending merge)
+- Implementation SHA: `04a2e68`
+- Merge commit SHA: `0010eb1`
 - Golden Gate run: (pending push)
 
 ## Recommended next ticket
