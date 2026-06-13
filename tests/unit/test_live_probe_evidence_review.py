@@ -171,6 +171,44 @@ def test_build_evidence_review_reuses_summary_fields() -> None:
     assert payload["safety_attestation"]["public_export"] is False
 
 
+def test_evidence_review_markdown_encodes_on_cp1252_console() -> None:
+    payload = build_evidence_review_payload(
+        {
+            "status": "ok",
+            "scratch_db_path": "data/db/live_probe_scratch.sqlite",
+            "first_reviewed_at": "2026-06-12T22:00:00+00:00",
+            "last_reviewed_at": "2026-06-12T23:00:00+00:00",
+            "total_reviewed_reports": 1,
+            "safety_flags": {"public_export": False},
+        }
+    )
+    md = format_evidence_review_markdown(payload)
+    md.encode("cp1252")
+    assert " -> " in md
+    assert "\u2192" not in md
+
+
+def test_cli_probe_scratch_evidence_review_markdown_stdout_cp1252(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    scratch_db = tmp_path / "live_probe_scratch.sqlite"
+    _seed_scratch_db(scratch_db, [_sample_record()])
+    exit_code = main(
+        [
+            "probe-scratch-evidence-review",
+            "--scratch-db",
+            str(scratch_db),
+            "--format",
+            "markdown",
+        ]
+    )
+    assert exit_code == 0
+    out = capsys.readouterr().out
+    out.encode("cp1252")
+    assert " -> " in out
+
+
 def test_cli_probe_scratch_evidence_review_success(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],

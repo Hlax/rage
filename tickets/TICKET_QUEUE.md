@@ -105,7 +105,17 @@ superseded
 | 71 | ticket-071 | done | Deterministic scratch evidence review report | `phase-2/ticket-071-deterministic-evidence-review-report` | `agent_reports/2026-06-13_phase-2_ticket-071_deterministic-evidence-review-report.md` |
 | 72 | ticket-072 | done | Operator loop scratch evidence status hook | `phase-2/ticket-072-operator-loop-scratch-evidence-status` | `agent_reports/2026-06-13_phase-2_ticket-072_operator-loop-scratch-evidence-status.md` |
 | 73 | ticket-073 | done | Operator loop evidence review readiness action hint | `phase-2/ticket-073-operator-loop-evidence-review-action` | `agent_reports/2026-06-13_phase-2_ticket-073_operator-loop-evidence-review-action.md` |
-| 74 | ticket-074 | proposed | Windows-safe UTF-8 stdout for probe-scratch-evidence-review | | |
+| 74 | ticket-074 | done | Windows-safe UTF-8 stdout for probe-scratch-evidence-review | `phase-2/ticket-074-windows-evidence-review-utf8-stdout` | `agent_reports/2026-06-13_phase-2_ticket-074_windows-evidence-review-utf8-stdout.md` |
+| 75 | ticket-075 | proposed | Live probe runbook Windows console encoding note | | |
+
+## Queue Notes (2026-06-13, ticket-075 seed)
+
+- Docs-only follow-on from ticket-074: runbook Windows cp1252 guidance update.
+
+## Queue Notes (2026-06-13, ticket-074 agent)
+
+- Evidence review markdown uses ASCII `->` review window separator for cp1252 stdout.
+- ticket-059 OpenAI deferred.
 
 ## Queue Notes (2026-06-13, ticket-074 seed)
 
@@ -746,7 +756,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-074 (proposed) — Windows-safe UTF-8 stdout for probe-scratch-evidence-review
+ticket-075 (proposed) — live probe runbook Windows console encoding note
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 

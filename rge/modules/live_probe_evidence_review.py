@@ -73,7 +73,7 @@ def format_evidence_review_markdown(payload: dict[str, Any]) -> str:
         f"- Generated at: {payload.get('generated_at')}",
         f"- Scratch DB: `{payload.get('scratch_db_path')}`",
         f"- Total reviewed reports: {payload.get('total_reviewed_reports')}",
-        f"- Review window: {payload.get('first_reviewed_at')} → "
+        f"- Review window: {payload.get('first_reviewed_at')} -> "
         f"{payload.get('last_reviewed_at')}",
         f"- Floors passed: {payload.get('floors_passed')}",
         f"- Floors failed: {payload.get('floors_failed')}",
