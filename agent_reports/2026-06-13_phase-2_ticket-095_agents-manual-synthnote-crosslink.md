@@ -45,9 +45,10 @@ Safety audit: **not required** (AGENTS.md-only).
 
 ## Merge
 
-- Implementation SHA: (pending commit)
-- Merge commit: (pending merge)
-- Pushed: (pending push)
+- Implementation SHA: `130ab0e`
+- Merge commit: `9873bde`
+- Pushed: `main -> main`
+- Full pytest: **377 passed**, 6 `live_smoke` deselected
 
 ## Recommended next ticket
 
