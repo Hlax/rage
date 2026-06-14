@@ -1,0 +1,44 @@
+{
+  "id": "ticket-114",
+  "title": "Domain pack evidence_types.yaml loader proof (NM-5 continuation)",
+  "problem": "Ticket-113 proved scoring.yaml drives score reconciliation. The creativity pack still has eight other declarative files not loaded at runtime. NM-5 requires incremental proof that the domain-pack abstraction generalizes beyond ontology, aliases, and scoring before claiming domain-generality.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-113_domain-pack-scoring-loader.md",
+    "agent_reports/2026-06-14_pre-ticket-113_domain-pack-scoring-loader-audit.md",
+    "domain_packs/creativity/evidence_types.yaml",
+    "rge/modules/domain_pack_loader.py"
+  ],
+  "affected_modules": [
+    "rge/modules/domain_pack_loader.py"
+  ],
+  "expected_files": [
+    "rge/modules/domain_pack_loader.py",
+    "tests/unit/test_domain_pack_evidence_types_loader.py",
+    "agent_reports/2026-06-14_ticket-114_domain-pack-evidence-types-loader.md"
+  ],
+  "acceptance_criteria": [
+    "evidence_types.yaml is loaded for creativity domain pack at runtime.",
+    "At least one existing consumer (e.g. claim validator or repositories) reads pack-defined evidence type labels instead of a hardcoded duplicate.",
+    "Temp-pack unit test proves different evidence type list changes validation or display behavior.",
+    "Golden and manual synthnote tests remain green in mock mode.",
+    "Safety audit passes.",
+    "No public export/site changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_domain_pack_evidence_types_loader.py -q",
+    "python -m pytest tests/unit/test_domain_pack_scoring_loader.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No loading all remaining pack files in one ticket.",
+    "No cloud providers or live Ollama changes.",
+    "No public export or site changes.",
+    "No schema migrations.",
+    "No LangGraph/FastAPI/embeddings work."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert evidence_types loader wiring; restore inline evidence type constants.",
+  "status": "proposed"
+}

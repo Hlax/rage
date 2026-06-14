@@ -29,11 +29,20 @@ class DomainPackConcept:
 
 
 @dataclass(frozen=True)
+class ScoreReconciliationOverlay:
+    formula_version: str
+    stronger_evidence_boost: float
+    stronger_claim_confidence_threshold: float
+    stronger_source_reason: str
+
+
+@dataclass(frozen=True)
 class DomainPack:
     pack_id: str
     concepts: tuple[DomainPackConcept, ...]
     aliases: dict[str, tuple[str, ...]]
     alias_to_canonical: dict[str, str]
+    score_reconciliation: ScoreReconciliationOverlay
 
 
 def repo_root() -> Path:
@@ -134,6 +143,91 @@ def parse_aliases_yaml(path: Path) -> dict[str, list[str]]:
     return aliases
 
 
+def _parse_scalar_value(raw: str) -> str | float | bool:
+    value = raw.strip()
+    if value in {"true", "True"}:
+        return True
+    if value in {"false", "False"}:
+        return False
+    try:
+        if "." in value:
+            return float(value)
+        return int(value)
+    except ValueError:
+        return value.strip('"').strip("'")
+
+
+def parse_scoring_yaml(path: Path) -> ScoreReconciliationOverlay:
+    """Parse score reconciliation overlay from a domain pack scoring stub."""
+    if not path.is_file():
+        raise DomainPackError(f"Scoring file not found: {path}")
+
+    text = path.read_text(encoding="utf-8")
+    if not text.strip():
+        raise DomainPackError(f"Scoring file is empty: {path}")
+
+    if "score_reconciliation:" not in text:
+        raise DomainPackError(
+            f"Scoring file must contain top-level 'score_reconciliation:' section: {path}"
+        )
+
+    section_lines: list[str] = []
+    in_section = False
+    for line in text.splitlines():
+        if line.strip() == "score_reconciliation:":
+            in_section = True
+            continue
+        if in_section:
+            if line and not line.startswith(" "):
+                break
+            section_lines.append(line)
+
+    fields: dict[str, Any] = {}
+    idx = 0
+    while idx < len(section_lines):
+        line = section_lines[idx]
+        match = re.match(r"^\s{2}(\w+):\s*(.*)$", line)
+        if not match:
+            idx += 1
+            continue
+        key = match.group(1)
+        raw = match.group(2).strip()
+        if raw in {">-", ">", "|", "|+", "|-"}:
+            value_lines: list[str] = []
+            idx += 1
+            while idx < len(section_lines):
+                continuation = section_lines[idx]
+                if not continuation.startswith("    "):
+                    break
+                value_lines.append(continuation.strip())
+                idx += 1
+            fields[key] = " ".join(value_lines)
+            continue
+        fields[key] = _parse_scalar_value(raw)
+        idx += 1
+
+    required = (
+        "formula_version",
+        "stronger_evidence_boost",
+        "stronger_claim_confidence_threshold",
+        "stronger_source_reason",
+    )
+    missing = [key for key in required if key not in fields]
+    if missing:
+        raise DomainPackError(
+            f"Scoring file missing score_reconciliation keys {missing} in {path}"
+        )
+
+    return ScoreReconciliationOverlay(
+        formula_version=str(fields["formula_version"]),
+        stronger_evidence_boost=float(fields["stronger_evidence_boost"]),
+        stronger_claim_confidence_threshold=float(
+            fields["stronger_claim_confidence_threshold"]
+        ),
+        stronger_source_reason=str(fields["stronger_source_reason"]).strip(),
+    )
+
+
 def build_alias_to_canonical(aliases: dict[str, list[str]]) -> dict[str, str]:
     """Build normalized alias phrase → canonical label reverse map."""
     reverse: dict[str, str] = {}
@@ -161,16 +255,19 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
 
     ontology_path = pack_root / "ontology.yaml"
     aliases_path = pack_root / "aliases.yaml"
+    scoring_path = pack_root / "scoring.yaml"
 
     concepts = parse_ontology_yaml(ontology_path)
     alias_map = parse_aliases_yaml(aliases_path)
     alias_to_canonical = build_alias_to_canonical(alias_map)
+    score_reconciliation = parse_scoring_yaml(scoring_path)
 
     return DomainPack(
         pack_id=pack_id,
         concepts=tuple(concepts),
         aliases={key: tuple(values) for key, values in alias_map.items()},
         alias_to_canonical=alias_to_canonical,
+        score_reconciliation=score_reconciliation,
     )
 
 

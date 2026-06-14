@@ -144,7 +144,8 @@ superseded
 | 110 | ticket-110 | done | Runtime config manual synthnote pipeline proof test cross-link | `phase-2/ticket-110-runtime-config-manual-synthnote-pipeline-proof-test-crosslink` | `agent_reports/2026-06-14_phase-2_ticket-110_runtime-config-manual-synthnote-pipeline-proof-test-crosslink.md` |
 | 111 | ticket-111 | superseded | README manual synthnote pipeline proof test cross-link | | (folded into NM-2 corrective doc pass) |
 | 112 | ticket-112 | done | Arbitrary manual text live extraction fall-through | `phase-2/ticket-112-arbitrary-manual-live-fallthrough` | `agent_reports/2026-06-14_ticket-112_arbitrary-manual-live-fallthrough.md` |
-| 113 | ticket-113 | proposed | Domain pack scoring.yaml loader proof (NM-5 preview) | | |
+| 113 | ticket-113 | done | Domain pack scoring.yaml loader proof (NM-5 preview) | `phase-2/ticket-113-domain-pack-scoring-loader` | `agent_reports/2026-06-14_ticket-113_domain-pack-scoring-loader.md` |
+| 114 | ticket-114 | proposed | Domain pack evidence_types.yaml loader proof (NM-5 continuation) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -874,9 +875,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-113 (proposed) — Domain pack scoring.yaml loader proof (NM-5 preview)
+ticket-114 (proposed) — Domain pack evidence_types.yaml loader proof (NM-5 continuation)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-113 agent)
+
+- Extended `domain_pack_loader` to parse `scoring.yaml` `score_reconciliation` overlay.
+- `score_reconciler` reads boost/threshold/reason/formula from pack per relationship domain.
+- Temp-pack proof: 0.20 boost yields 0.5 → 0.70; creativity values unchanged (GT08, manual synthnote).
+- 6 new unit tests; 406 pytest pass; safety audit pass.
+- Pre-ticket audit: `agent_reports/2026-06-14_pre-ticket-113_domain-pack-scoring-loader-audit.md`.
+- Next: ticket-114 (NM-5 continuation: evidence_types.yaml) requires pre-ticket audit before implementation.
 
 ## Queue Notes (2026-06-14, ticket-112 agent)
 
@@ -900,7 +910,7 @@ directed corrective work **before** ticket-111. **Completed and merged to main @
 | NM-4 / ticket-112 | **done** | Arbitrary manual_text live fall-through |
 | ticket-111 | **superseded** | Folded into NM-2 |
 
-Next product move: **ticket-113** (NM-5 preview: domain pack scoring.yaml).
+Next product move: **ticket-114** (NM-5 continuation: domain pack evidence_types.yaml).
 
 ## Queue Rules
 

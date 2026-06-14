@@ -41,5 +41,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert scoring.yaml loader wiring; restore inline constants.",
-  "status": "proposed"
+  "status": "done"
 }
