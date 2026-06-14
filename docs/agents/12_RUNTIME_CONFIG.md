@@ -218,8 +218,15 @@ recommend `run_scratch_evidence_review`. See also README Operator Quickstart and
 Follow the five-step CLI sequence in README **Operator Quickstart**
 (**Manual synthnote operator spine**): ingest → extract-claims → link-concepts →
 build-relationships → detect-contradictions. Private graph DB:
-`data/db/creative_research.sqlite` (or `--db`). Checksum fixtures resolve from
-`fixtures/manual_source_fixture_map.json`. See also `AGENTS.md` Operator Loop.
+`data/db/creative_research.sqlite` (or `--db`). **Checksum-pinned mock fixtures**
+resolve from `fixtures/manual_source_fixture_map.json` (not live inference). See also
+`AGENTS.md` Operator Loop.
+
+**Live validated extraction write** (NM-1): `extract-claims-live` requires
+`RGE_LLM_MODE=ollama`, `RGE_ALLOW_LIVE_LLM=1`, a source **not** in the checksum
+fixture map, and an explicit evidence DB (default `data/db/live_research_evidence.sqlite`).
+Refuses the default `creative_research.sqlite` graph path. See README **Live validated
+extraction write**.
 
 **Manual synthnote score reconciliation** (after the five-step spine): ingest a
 follow-up `manual_text` source (e.g. `data/sources/manual/creativity/synthnote_followup.txt`),
