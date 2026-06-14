@@ -44,6 +44,14 @@ class ScoreReconciliationOverlay:
 
 
 @dataclass(frozen=True)
+class ClaimSchemaOverlay:
+    required_domain_metadata_keys: tuple[str, ...]
+    allowed_tracks: frozenset[str]
+    allowed_creative_phases: frozenset[str]
+    allowed_measured_dimensions: frozenset[str]
+
+
+@dataclass(frozen=True)
 class DomainPack:
     pack_id: str
     concepts: tuple[DomainPackConcept, ...]
@@ -51,6 +59,7 @@ class DomainPack:
     alias_to_canonical: dict[str, str]
     score_reconciliation: ScoreReconciliationOverlay
     evidence_types: tuple[EvidenceTypeDefinition, ...]
+    claim_schema: ClaimSchemaOverlay
 
 
 def repo_root() -> Path:
@@ -318,6 +327,112 @@ def evidence_type_ids(pack: DomainPack) -> frozenset[str]:
     return frozenset(evidence_type.id.casefold() for evidence_type in pack.evidence_types)
 
 
+def _parse_yaml_list_section(text: str, header: str) -> list[str]:
+    items: list[str] = []
+    in_section = False
+    for line in text.splitlines():
+        if line.strip() == f"{header}:":
+            in_section = True
+            continue
+        if in_section:
+            if line and not line.startswith(" "):
+                break
+            match = re.match(r"^\s{2}- (.+)$", line)
+            if match:
+                items.append(match.group(1).strip())
+    return items
+
+
+def _normalized_allowset(values: list[str]) -> frozenset[str]:
+    return frozenset(_normalize_label(value) for value in values if value.strip())
+
+
+def parse_claim_schema_yaml(path: Path) -> ClaimSchemaOverlay:
+    """Parse claim schema overlay from a domain pack claim_schema stub."""
+    if not path.is_file():
+        raise DomainPackError(f"Claim schema file not found: {path}")
+
+    text = path.read_text(encoding="utf-8")
+    if not text.strip():
+        raise DomainPackError(f"Claim schema file is empty: {path}")
+
+    required_keys = _parse_yaml_list_section(
+        text, "required_domain_metadata_for_creativity_claims"
+    )
+    allowed_tracks = _parse_yaml_list_section(text, "allowed_tracks")
+    allowed_phases = _parse_yaml_list_section(text, "allowed_creative_phases")
+    allowed_dimensions = _parse_yaml_list_section(text, "allowed_measured_dimensions")
+
+    if not required_keys:
+        raise DomainPackError(
+            f"Claim schema file missing required_domain_metadata_for_creativity_claims "
+            f"list in {path}"
+        )
+    if not allowed_tracks:
+        raise DomainPackError(f"Claim schema file missing allowed_tracks list in {path}")
+    if not allowed_phases:
+        raise DomainPackError(
+            f"Claim schema file missing allowed_creative_phases list in {path}"
+        )
+    if not allowed_dimensions:
+        raise DomainPackError(
+            f"Claim schema file missing allowed_measured_dimensions list in {path}"
+        )
+
+    return ClaimSchemaOverlay(
+        required_domain_metadata_keys=tuple(required_keys),
+        allowed_tracks=_normalized_allowset(allowed_tracks),
+        allowed_creative_phases=_normalized_allowset(allowed_phases),
+        allowed_measured_dimensions=_normalized_allowset(allowed_dimensions),
+    )
+
+
+def measured_dimension_allowed(pack: DomainPack, value: str) -> bool:
+    """Check whether a measured_dimension value is allowed by the pack schema."""
+    schema = pack.claim_schema
+    direct = _normalize_label(value)
+    if direct in schema.allowed_measured_dimensions:
+        return True
+    resolved = resolve_canonical_concept_label(pack, value)
+    return _normalize_label(resolved) in schema.allowed_measured_dimensions
+
+
+def validate_link_domain_metadata(
+    pack: DomainPack,
+    metadata: dict[str, Any],
+) -> tuple[bool, str | None]:
+    """Validate present concept-link domain_metadata keys against pack allowlists."""
+    if not metadata:
+        return True, None
+
+    for key, raw_value in metadata.items():
+        if key not in {"track", "creative_phase", "measured_dimension"}:
+            continue
+        if raw_value is None or (isinstance(raw_value, str) and not str(raw_value).strip()):
+            return False, f"domain_metadata key {key!r} is empty"
+        value = str(raw_value).strip()
+        if key == "track":
+            if _normalize_label(value) not in pack.claim_schema.allowed_tracks:
+                return (
+                    False,
+                    f"domain_metadata track {value!r} is not in domain pack allowlist",
+                )
+        elif key == "creative_phase":
+            if _normalize_label(value) not in pack.claim_schema.allowed_creative_phases:
+                return (
+                    False,
+                    f"domain_metadata creative_phase {value!r} is not in domain pack allowlist",
+                )
+        elif key == "measured_dimension":
+            if not measured_dimension_allowed(pack, value):
+                return (
+                    False,
+                    f"domain_metadata measured_dimension {value!r} is not in domain pack allowlist",
+                )
+
+    return True, None
+
+
 def build_alias_to_canonical(aliases: dict[str, list[str]]) -> dict[str, str]:
     """Build normalized alias phrase → canonical label reverse map."""
     reverse: dict[str, str] = {}
@@ -347,12 +462,14 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
     aliases_path = pack_root / "aliases.yaml"
     scoring_path = pack_root / "scoring.yaml"
     evidence_types_path = pack_root / "evidence_types.yaml"
+    claim_schema_path = pack_root / "claim_schema.yaml"
 
     concepts = parse_ontology_yaml(ontology_path)
     alias_map = parse_aliases_yaml(aliases_path)
     alias_to_canonical = build_alias_to_canonical(alias_map)
     score_reconciliation = parse_scoring_yaml(scoring_path)
     evidence_types = parse_evidence_types_yaml(evidence_types_path)
+    claim_schema = parse_claim_schema_yaml(claim_schema_path)
 
     return DomainPack(
         pack_id=pack_id,
@@ -361,6 +478,7 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
         alias_to_canonical=alias_to_canonical,
         score_reconciliation=score_reconciliation,
         evidence_types=evidence_types,
+        claim_schema=claim_schema,
     )
 
 

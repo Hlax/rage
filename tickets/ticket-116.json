@@ -1,0 +1,49 @@
+{
+  "id": "ticket-116",
+  "title": "Domain pack source_preferences.yaml loader proof (NM-5 continuation)",
+  "problem": "Ticket-115 proved claim_schema.yaml drives concept-link domain_metadata validation. The creativity pack still has five other declarative files not loaded at runtime. NM-5 requires incremental proof that domain-pack files beyond ontology, aliases, scoring, evidence_types, and claim_schema are consumed by the engine.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-115_domain-pack-claim-schema-loader.md",
+    "agent_reports/2026-06-14_pre-ticket-115_domain-pack-claim-schema-loader-audit.md",
+    "domain_packs/creativity/source_preferences.yaml",
+    "rge/modules/research_queue.py",
+    "rge/modules/domain_pack_loader.py"
+  ],
+  "affected_modules": [
+    "rge/modules/domain_pack_loader.py",
+    "rge/modules/research_queue.py"
+  ],
+  "expected_files": [
+    "rge/modules/domain_pack_loader.py",
+    "rge/modules/research_queue.py",
+    "tests/unit/test_domain_pack_source_preferences_loader.py",
+    "agent_reports/2026-06-14_ticket-116_domain-pack-source-preferences-loader.md"
+  ],
+  "acceptance_criteria": [
+    "source_preferences.yaml is loaded for creativity domain pack at runtime.",
+    "Research queue ranking demonstrably uses pack-defined source_type_weights instead of hardcoded duplicates.",
+    "Temp-pack unit test proves different weights change queue priority ordering.",
+    "Golden GT09 and manual synthnote tests remain green in mock mode.",
+    "Safety audit passes.",
+    "No public export/site changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_domain_pack_source_preferences_loader.py -q",
+    "python -m pytest tests/unit/test_domain_pack_claim_schema_loader.py -q",
+    "python -m pytest tests/golden/test_09_research_queue.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No loading all remaining pack files in one ticket.",
+    "No applying base_strength priors from evidence_types.",
+    "No cloud providers or live Ollama changes.",
+    "No public export or site changes.",
+    "No schema migrations.",
+    "No LangGraph/FastAPI/embeddings work."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert source_preferences loader wiring; restore inline queue weight constants.",
+  "status": "proposed"
+}

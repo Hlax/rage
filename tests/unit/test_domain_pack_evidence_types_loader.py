@@ -48,6 +48,25 @@ def _evidence_types_yaml(
     return "\n".join(lines) + "\n"
 
 
+def _claim_schema_yaml() -> str:
+    return (
+        "required_domain_metadata_for_creativity_claims:\n"
+        "  - track\n"
+        "  - creative_phase\n"
+        "  - measured_dimension\n"
+        "allowed_tracks:\n"
+        "  - human\n"
+        "  - AI\n"
+        "  - human-AI\n"
+        "allowed_creative_phases:\n"
+        "  - ideation\n"
+        "allowed_measured_dimensions:\n"
+        "  - diversity\n"
+        "  - semantic diversity\n"
+        "  - quality\n"
+    )
+
+
 def _write_demo_pack(
     tmp_path: Path,
     *,
@@ -69,6 +88,7 @@ def _write_demo_pack(
         _evidence_types_yaml(types=evidence_types),
         encoding="utf-8",
     )
+    (pack_dir / "claim_schema.yaml").write_text(_claim_schema_yaml(), encoding="utf-8")
     return pack_dir
 
 
