@@ -172,7 +172,8 @@ superseded
 | 138 | ticket-138 | done | Source discovery stub CLI (Phase 3 entry) | `phase-2/ticket-138-source-discovery-stub-cli` | `agent_reports/2026-06-14_ticket-138_source-discovery-stub-cli.md` |
 | 139 | ticket-139 | done | Source provider registry and OpenAlex discovery proof | `phase-2/ticket-139-source-provider-openalex-discovery` | `agent_reports/2026-06-14_ticket-139_source-provider-openalex-discovery.md` |
 | 140 | ticket-140 | done | Research queue candidate ranking from discovered sources | `phase-2/ticket-140-discovered-source-queue-ranking` | `agent_reports/2026-06-14_ticket-140_discovered-source-queue-ranking.md` |
-| 141 | ticket-141 | proposed | Enqueue discovered candidates to staging research queue | | |
+| 141 | ticket-141 | done | Enqueue discovered candidates to staging research queue | `phase-2/ticket-141-discovered-source-queue-enqueue` | `agent_reports/2026-06-14_ticket-141_discovered-source-queue-enqueue.md` |
+| 142 | ticket-142 | proposed | Fetch staged candidate source from queue URL | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -902,18 +903,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-141 (proposed) — Enqueue discovered candidates to staging research queue
+ticket-142 (proposed) — Fetch staged candidate source from queue URL
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-14, ticket-140 agent)
+## Queue Notes (2026-06-14, ticket-141 agent)
 
-- `discover-sources --rank-only` adds `ranked_candidates[]` with source_preferences credibility,
-  recency, relevance, and priority_score (JSON only; no DB writes).
-- Deterministic source_type inference; marketing titles rejected in ranking output.
-- 12 unit tests; 511 pytest; 142 golden; safety audit pass.
-- ticket-141 seeded: staging enqueue from discovery (`--enqueue`).
-- Next: pre-ticket-141 audit then ticket-141 implementation.
+- `discover-sources --rank-only --enqueue --db` persists to candidate_sources + research_queue.
+- Stable IDs `disc_{provider}_{provider_id}`; idempotent per question+provider; marketing rejected not queued.
+- 8 enqueue unit tests; 519 pytest; 142 golden; safety audit pass.
+- ticket-142 seeded: fetch staged candidate URL (product).
+- Next: pre-ticket-142 audit then ticket-142 implementation.
 
 ## Queue Notes (2026-06-14, ticket-137 agent)
 

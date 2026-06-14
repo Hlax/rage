@@ -836,14 +836,61 @@ def _cmd_model_health(_args: argparse.Namespace) -> int:
 def _cmd_discover_sources(args: argparse.Namespace) -> int:
     from rge.modules.source_discovery import run_discover_sources_command
 
+    rank_only = getattr(args, "rank_only", False)
+    enqueue = getattr(args, "enqueue", False)
+    if enqueue and not rank_only:
+        payload = {
+            "status": "error",
+            "command": "discover-sources",
+            "reason": "enqueue_requires_rank_only",
+            "detail": "--enqueue requires --rank-only.",
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    if enqueue and not args.db:
+        payload = {
+            "status": "error",
+            "command": "discover-sources",
+            "reason": "missing_db",
+            "detail": "--enqueue requires --db <path>.",
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
     payload, exit_code = run_discover_sources_command(
         provider_id=args.provider,
         query=args.query,
         domain_pack=args.domain,
         limit=args.limit,
         health=args.health,
-        rank_only=getattr(args, "rank_only", False),
+        rank_only=rank_only,
     )
+    if exit_code != 0:
+        print(json.dumps(payload, indent=2))
+        return exit_code
+
+    if enqueue and payload.get("ranked_candidates"):
+        from rge.db.connection import ensure_database
+        from rge.modules.research_queue import (
+            DEFAULT_RESEARCH_QUESTION_ID,
+            enqueue_discovered_candidates,
+        )
+
+        question_id = args.question or DEFAULT_RESEARCH_QUESTION_ID
+        conn = ensure_database(Path(args.db))
+        try:
+            enqueue_result = enqueue_discovered_candidates(
+                conn,
+                payload["ranked_candidates"],
+                provider_id=str(args.provider),
+                research_question_id=question_id,
+            )
+            payload.update(enqueue_result)
+            if enqueue_result.get("enqueue_status") == "completed":
+                payload["status"] = "completed"
+        finally:
+            conn.close()
+
     print(json.dumps(payload, indent=2))
     return exit_code
 
@@ -2353,6 +2400,22 @@ def build_parser() -> argparse.ArgumentParser:
             "After discovery, attach ranked_candidates using domain-pack "
             "source_preferences and the queue-priority formula (JSON only)."
         ),
+    )
+    discover_sources_parser.add_argument(
+        "--enqueue",
+        action="store_true",
+        help=(
+            "With --rank-only, persist ranked candidates to candidate_sources "
+            "and research_queue staging tables (requires --db)."
+        ),
+    )
+    discover_sources_parser.add_argument(
+        "--question",
+        help="Research question ID for staging enqueue (default: golden rq id).",
+    )
+    discover_sources_parser.add_argument(
+        "--db",
+        help="SQLite database path for --enqueue staging writes.",
     )
     discover_sources_parser.set_defaults(func=_cmd_discover_sources)
 

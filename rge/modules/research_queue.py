@@ -269,6 +269,105 @@ def rank_discovered_candidates(
     return ranked
 
 
+def discovered_candidate_source_id(provider: str, provider_id: str) -> str:
+    """Stable candidate_sources PK for a provider-discovered work."""
+    normalized_provider = provider.strip().casefold().replace("-", "_")
+    normalized_id = (
+        provider_id.strip()
+        .replace("https://openalex.org/", "")
+        .replace("/", "_")
+        .replace(":", "_")
+    )
+    return f"disc_{normalized_provider}_{normalized_id}"
+
+
+def _discovered_candidate_id_prefix(provider_id: str) -> str:
+    return f"disc_{provider_id.strip().casefold().replace('-', '_')}_"
+
+
+def enqueue_discovered_candidates(
+    conn: Any,
+    ranked: list[dict[str, Any]],
+    *,
+    provider_id: str,
+    research_question_id: str,
+    contract_id: str = DEFAULT_CONTRACT_ID,
+) -> dict[str, Any]:
+    """Persist ranked discovered candidates to staging queue tables."""
+    from rge.db.repositories import CandidateSourceRepository, ResearchQueueRepository
+
+    prefix = _discovered_candidate_id_prefix(provider_id)
+    row = conn.execute(
+        """
+        SELECT COUNT(*) FROM candidate_sources
+        WHERE research_question_id = ? AND id LIKE ?
+        """,
+        (research_question_id, prefix + "%"),
+    ).fetchone()
+    existing_count = int(row[0]) if row else 0
+    queue_repo = ResearchQueueRepository(conn)
+    if existing_count > 0:
+        existing_queue = queue_repo.list_for_question(research_question_id)
+        discovered_queue = [
+            item
+            for item in existing_queue
+            if str(item.get("candidate_source_id", "")).startswith(prefix)
+        ]
+        return {
+            "enqueue_status": "already_queued",
+            "research_question_id": research_question_id,
+            "provider": provider_id,
+            "queue_count": len(discovered_queue),
+            "queue_item_ids": [item["id"] for item in discovered_queue],
+        }
+
+    candidate_repo = CandidateSourceRepository(conn)
+    queue_ids: list[str] = []
+
+    for item in ranked:
+        provider = str(item.get("provider") or provider_id)
+        provider_work_id = str(item.get("provider_id") or "")
+        candidate_id = discovered_candidate_source_id(provider, provider_work_id)
+        url = item.get("landing_page_url") or item.get("open_access_url")
+
+        candidate_repo.insert(
+            candidate_id=candidate_id,
+            research_question_id=research_question_id,
+            contract_id=contract_id,
+            title=str(item.get("title") or ""),
+            source_type=str(item.get("source_type") or "unknown"),
+            reason=str(item.get("reason") or ""),
+            relevance_score=float(item.get("relevance_score", 0)),
+            credibility_prior=float(item.get("credibility_prior", 0)),
+            gap_fill_score=float(item.get("gap_fill_score", 0)),
+            recency_score=float(item.get("recency_score", 0)),
+            source_diversity_score=float(item.get("source_diversity_score", 0)),
+            novelty_score=float(item.get("novelty_score", 0)),
+            drift_risk=float(item.get("drift_risk", 0)),
+            priority_score=float(item.get("priority_score", 0)),
+            status=str(item.get("status") or "queued"),
+            url=url,
+        )
+        if item.get("status") == "queued":
+            queue_item = queue_repo.insert(
+                candidate_source_id=candidate_id,
+                research_question_id=research_question_id,
+                contract_id=contract_id,
+                priority_score=float(item.get("priority_score", 0)),
+                reason=str(item.get("reason") or ""),
+                status="queued",
+            )
+            queue_ids.append(queue_item["id"])
+
+    return {
+        "enqueue_status": "completed",
+        "research_question_id": research_question_id,
+        "provider": provider_id,
+        "queue_count": len(queue_ids),
+        "queue_item_ids": queue_ids,
+    }
+
+
 def compute_priority_score(
     *,
     relevance_score: float,
