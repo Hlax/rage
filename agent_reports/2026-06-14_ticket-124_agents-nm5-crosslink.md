@@ -74,7 +74,7 @@ None.
 
 ## Merge to main
 
-Pending merge in this run.
+Merged to `main` at `38d84f2` and pushed to `origin/main`.
 
 ## Recommended next ticket
 
