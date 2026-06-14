@@ -84,6 +84,12 @@ for steps 6–8 (follow-up ingest → extract-claims → reconcile-scores; expec
 1 `score_events` row and `may_reduce` confidence 0.5 → 0.62). Test copy:
 `fixtures/sources/manual_synthnote_followup.txt`.
 
+**Manual synthnote pipeline proof tests** (mock LLM; tickets 092–093, 105–106):
+automated validation lives in `tests/unit/test_manual_source_pipeline_e2e.py`
+(full spine through reconcile-scores) and
+`tests/unit/test_manual_source_pipeline_idempotency.py` (spine and reconcile
+re-run idempotency). Run with `RGE_LLM_MODE=mock`; no Ollama required.
+
 ## Expected Agent Workflow
 
 1. Read the active ticket from `tickets/TICKET_QUEUE.md` or create the smallest next ticket in `tickets/`.
