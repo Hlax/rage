@@ -27,5 +27,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert idempotency reconcile-scores test extension.",
-  "status": "proposed"
+  "status": "done"
 }
