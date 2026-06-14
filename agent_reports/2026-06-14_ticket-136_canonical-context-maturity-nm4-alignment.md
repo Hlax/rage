@@ -76,7 +76,8 @@ None.
 
 ## Merge to main
 
-Pending merge.
+Merged @ **`46bef33`** (`Merge branch 'phase-2/ticket-136-canonical-context-maturity-nm4-alignment'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
