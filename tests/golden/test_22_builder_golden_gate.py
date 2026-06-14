@@ -13,8 +13,14 @@ BUILDER_MERGE_GATE_COMMAND = "pytest tests/golden"
 
 REQUIRED_GOLDEN_AREAS: dict[str, tuple[str, ...]] = {
     "ingestion": ("tests/golden/test_01_ingestion.py",),
-    "claim_extraction": ("tests/golden/test_02_claim_extraction.py",),
-    "claim_validation": ("tests/golden/test_02_claim_extraction.py",),
+    "claim_extraction": (
+        "tests/golden/test_02_claim_extraction.py",
+        "tests/golden/test_02_claim_extraction_overlap_domain.py",
+    ),
+    "claim_validation": (
+        "tests/golden/test_02_claim_extraction.py",
+        "tests/golden/test_02_claim_extraction_overlap_domain.py",
+    ),
     "concept_linking": ("tests/golden/test_05_concept_linking.py",),
     "relationship_building": ("tests/golden/test_06_relationship_builder.py",),
     "contradiction_detection": ("tests/golden/test_07_contradiction_detection.py",),

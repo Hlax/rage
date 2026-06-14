@@ -1,0 +1,36 @@
+{
+  "id": "ticket-123",
+  "title": "README operator quickstart NM-5 domain pack loading summary",
+  "problem": "Tickets 113–122 completed NM-5 domain pack runtime loading and claim_validator wiring, but README operator quickstart does not document which pack files are loaded or how domain/overlap labels are validated.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-122_golden-overlap-domain-claim.md",
+    "README.md",
+    "domain_packs/creativity/",
+    "rge/modules/domain_pack_loader.py"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-14_ticket-123_readme-nm5-domain-pack-summary.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart lists all creativity pack YAML files loaded at runtime.",
+    "README documents overlap-domain claim labels and claim_validator allowlist behavior.",
+    "No code or test changes beyond README and agent report.",
+    "Golden tests and full pytest remain green.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No new pack files or loader code changes.",
+    "No public site routing or committed JSON changes.",
+    "No schema migrations or live Ollama changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section additions.",
+  "status": "proposed"
+}

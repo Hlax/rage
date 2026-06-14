@@ -38,5 +38,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Remove overlap-domain golden fixture and test file.",
-  "status": "proposed"
+  "status": "done"
 }
