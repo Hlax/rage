@@ -37,7 +37,7 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove staged spine test/fixture; retain ticket-143 ingest-staged.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / source acquisition / product-risk reduction",
   "pre_ticket_audit_required": true
 }
