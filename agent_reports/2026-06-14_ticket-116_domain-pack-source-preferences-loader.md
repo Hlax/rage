@@ -89,7 +89,7 @@ Not required — `queue-sources` CLI path covered by GT09 golden tests.
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merged to `main` at `0cd0f4d496818925bafc946de3f131b6157adecf` and pushed to `origin/main`.
 
 ## Recommended next ticket
 
