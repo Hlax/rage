@@ -1,0 +1,47 @@
+{
+  "id": "ticket-118",
+  "title": "Domain pack search_templates.yaml loader proof (NM-5 continuation)",
+  "problem": "Ticket-117 proved card_templates.yaml drives public export template validation. The creativity pack still has three other declarative files not loaded at runtime. NM-5 requires incremental proof that domain-pack files beyond the seven already loaded are consumed by the engine.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-117_domain-pack-card-templates-loader.md",
+    "agent_reports/2026-06-14_pre-ticket-117_domain-pack-card-templates-loader-audit.md",
+    "domain_packs/creativity/search_templates.yaml",
+    "rge/modules/research_planner.py",
+    "rge/modules/domain_pack_loader.py"
+  ],
+  "affected_modules": [
+    "rge/modules/domain_pack_loader.py",
+    "rge/modules/research_planner.py"
+  ],
+  "expected_files": [
+    "rge/modules/domain_pack_loader.py",
+    "rge/modules/research_planner.py",
+    "tests/unit/test_domain_pack_search_templates_loader.py",
+    "agent_reports/2026-06-14_ticket-118_domain-pack-search-templates-loader.md"
+  ],
+  "acceptance_criteria": [
+    "search_templates.yaml is loaded for creativity domain pack at runtime.",
+    "At least one existing consumer reads pack-defined query templates instead of hardcoded duplicates.",
+    "Temp-pack unit test proves different template config changes planner or queue behavior.",
+    "Golden tests and manual synthnote tests remain green in mock mode.",
+    "Safety audit passes.",
+    "No public export/site changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_domain_pack_search_templates_loader.py -q",
+    "python -m pytest tests/unit/test_domain_pack_card_templates_loader.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No loading all remaining pack files in one ticket.",
+    "No public site routing or committed JSON changes.",
+    "No cloud providers or live Ollama changes.",
+    "No schema migrations.",
+    "No LangGraph/FastAPI/embeddings work."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert search_templates loader wiring; restore inline planner constants.",
+  "status": "proposed"
+}

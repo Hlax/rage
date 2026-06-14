@@ -148,7 +148,8 @@ superseded
 | 114 | ticket-114 | done | Domain pack evidence_types.yaml loader proof (NM-5 continuation) | `phase-2/ticket-114-domain-pack-evidence-types-loader` | `agent_reports/2026-06-14_ticket-114_domain-pack-evidence-types-loader.md` |
 | 115 | ticket-115 | done | Domain pack claim_schema.yaml loader proof (NM-5 continuation) | `phase-2/ticket-115-domain-pack-claim-schema-loader` | `agent_reports/2026-06-14_ticket-115_domain-pack-claim-schema-loader.md` |
 | 116 | ticket-116 | done | Domain pack source_preferences.yaml loader proof (NM-5 continuation) | `phase-2/ticket-116-domain-pack-source-preferences-loader` | `agent_reports/2026-06-14_ticket-116_domain-pack-source-preferences-loader.md` |
-| 117 | ticket-117 | proposed | Domain pack card_templates.yaml loader proof (NM-5 continuation) | | |
+| 117 | ticket-117 | done | Domain pack card_templates.yaml loader proof (NM-5 continuation) | `phase-2/ticket-117-domain-pack-card-templates-loader` | `agent_reports/2026-06-14_ticket-117_domain-pack-card-templates-loader.md` |
+| 118 | ticket-118 | proposed | Domain pack search_templates.yaml loader proof (NM-5 continuation) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -878,9 +879,19 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-117 (proposed) — Domain pack card_templates.yaml loader proof (NM-5 continuation)
+ticket-118 (proposed) — Domain pack search_templates.yaml loader proof (NM-5 continuation)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-117 agent)
+
+- Extended `domain_pack_loader` to parse `card_templates.yaml` (`required_fields` per card type).
+- `export_public_cards()` passes pack templates into `validate_public_export_bundle()`.
+- Template enforcement uses intersection with public allowlist only (cluster-only fields skipped).
+- Pack load falls back to installed repo when temp `repo_root` lacks `domain_packs/`.
+- 7 new unit tests; 432 pytest pass; safety audit pass.
+- Pre-ticket audit: `agent_reports/2026-06-14_pre-ticket-117_domain-pack-card-templates-loader-audit.md`.
+- Next: ticket-118 (NM-5 continuation: search_templates.yaml).
 
 ## Queue Notes (2026-06-14, ticket-116 agent)
 
@@ -941,7 +952,7 @@ directed corrective work **before** ticket-111. **Completed and merged to main @
 | NM-4 / ticket-112 | **done** | Arbitrary manual_text live fall-through |
 | ticket-111 | **superseded** | Folded into NM-2 |
 
-Next product move: **ticket-117** (NM-5 continuation: domain pack card_templates.yaml).
+Next product move: **ticket-118** (NM-5 continuation: domain pack search_templates.yaml).
 
 ## Queue Rules
 

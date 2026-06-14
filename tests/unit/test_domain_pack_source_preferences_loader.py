@@ -100,6 +100,22 @@ def _write_demo_pack(
         _source_preferences_yaml(weights=weights),
         encoding="utf-8",
     )
+    (pack_dir / "card_templates.yaml").write_text(
+        "cards:\n"
+        "  claim_card:\n"
+        "    required_fields:\n"
+        "      - title\n"
+        "      - summary\n"
+        "  cluster_card:\n"
+        "    required_fields:\n"
+        "      - title\n"
+        "      - summary\n"
+        "  theory_card:\n"
+        "    required_fields:\n"
+        "      - title\n"
+        "      - summary\n",
+        encoding="utf-8",
+    )
     return pack_dir
 
 
