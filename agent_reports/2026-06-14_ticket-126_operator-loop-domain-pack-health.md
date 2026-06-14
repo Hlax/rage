@@ -102,7 +102,8 @@ None.
 
 ## Merge to main
 
-Placeholder — updated after merge.
+Merged @ **`a71613a`** (`Merge branch 'phase-2/ticket-126-operator-loop-domain-pack-health'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
