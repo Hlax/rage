@@ -15,7 +15,7 @@ _REPORTS_DIR = _REPO_ROOT / "agent_reports"
 
 _CONSECUTIVE_DONE_THRESHOLD = 3
 _QUEUE_ROW_RE = re.compile(
-    r"^\|\s*(\d+)\s*\|\s*(ticket-\d{3})\s*\|\s*(\w+)\s*\|",
+    r"^\|\s*(\d+)\s*\|\s*(ticket-\d{3})\s*\|\s*(\w+)\s*\|\s*([^|]+?)\s*\|",
     re.MULTILINE,
 )
 _PRINCIPAL_AUDIT_RE = re.compile(
@@ -44,6 +44,7 @@ class QueueTicketRow:
     order: int
     ticket_id: str
     status: str
+    title: str = ""
 
 
 def repo_root() -> Path:
@@ -53,11 +54,13 @@ def repo_root() -> Path:
 def parse_queue_rows(queue_text: str) -> list[QueueTicketRow]:
     rows: list[QueueTicketRow] = []
     for match in _QUEUE_ROW_RE.finditer(queue_text):
+        title = match.group(4).strip() if match.lastindex and match.lastindex >= 4 else ""
         rows.append(
             QueueTicketRow(
                 order=int(match.group(1)),
                 ticket_id=match.group(2),
                 status=match.group(3).strip().lower(),
+                title=title,
             )
         )
     return rows
@@ -152,6 +155,182 @@ def _done_since_checkpoint(
     ]
 
 
+_VALUE_CLASSIFICATIONS = (
+    "product_risk_reduction",
+    "live_research_proof",
+    "test_proof",
+    "safety_hardening",
+    "infrastructure",
+    "docs_corrective",
+    "docs_crosslink",
+    "checkpoint_only",
+)
+
+_LOW_VALUE_CLASSIFICATIONS = frozenset(
+    {"docs_crosslink", "checkpoint_only", "docs_corrective"}
+)
+
+_CORRECTIVE_OVERRIDE_HINTS = (
+    "nm-1",
+    "live extraction",
+    "extract-claims-live",
+    "real live",
+    "arbitrary source",
+    "nm-4",
+)
+
+
+def classify_ticket_value(title: str) -> str:
+    """Deterministic product-value classification from a ticket title."""
+    lowered = title.casefold()
+    if "principal audit checkpoint" in lowered or lowered.startswith("post-ticket-"):
+        return "checkpoint_only"
+    if "cross-link" in lowered or "crosslink" in lowered:
+        return "docs_crosslink"
+    if any(
+        phrase in lowered
+        for phrase in (
+            "alignment audit",
+            "maturity",
+            "relabel",
+            "honest status",
+            "third-party",
+        )
+    ):
+        return "docs_corrective"
+    if any(
+        phrase in lowered
+        for phrase in (
+            "live extraction write",
+            "extract-claims-live",
+            "real live",
+            "live validated",
+            "non-checksum",
+            "non-fixture",
+        )
+    ):
+        return "live_research_proof"
+    if any(
+        phrase in lowered
+        for phrase in (
+            "e2e",
+            "idempotency",
+            "pipeline proof test",
+            "golden test",
+            "builder golden",
+        )
+    ):
+        return "test_proof"
+    if any(
+        phrase in lowered
+        for phrase in ("safety audit", "safety auditor", "prompt-injection", "export policy")
+    ):
+        return "safety_hardening"
+    if any(
+        phrase in lowered
+        for phrase in (
+            "operator loop",
+            "verify",
+            "ci golden",
+            "windows",
+            "npm subprocess",
+            "model-health",
+            "scratch db",
+            "principal audit gate",
+            "cadence gate",
+        )
+    ):
+        return "infrastructure"
+    if any(
+        phrase in lowered
+        for phrase in (
+            "real manual source",
+            "manual source ingestion",
+            "domain pack loader",
+            "claim extraction proof",
+            "concept linking proof",
+            "relationship proof",
+            "contradiction detection proof",
+            "score reconciliation proof",
+            "pipeline e2e",
+            "pipeline idempotency",
+            "ollama",
+            "live probe",
+            "live claim",
+        )
+    ):
+        return "product_risk_reduction"
+    return "infrastructure"
+
+
+def _recent_done_tickets(rows: list[QueueTicketRow], *, limit: int = 8) -> list[QueueTicketRow]:
+    done = [row for row in rows if row.status == "done"]
+    return done[-limit:]
+
+
+def evaluate_value_drift(
+    rows: list[QueueTicketRow],
+    *,
+    next_ticket_id: str | None = None,
+    next_ticket_title: str | None = None,
+) -> dict[str, Any]:
+    """Detect low-value ticket streaks and recommend corrective overrides."""
+    recent = _recent_done_tickets(rows, limit=8)
+    classifications = [
+        {
+            "ticket_id": row.ticket_id,
+            "title": row.title,
+            "value_class": classify_ticket_value(row.title),
+        }
+        for row in recent
+    ]
+    class_values = [item["value_class"] for item in classifications]
+
+    drift_warnings: list[str] = []
+    consecutive_low = 0
+    for value in reversed(class_values):
+        if value in _LOW_VALUE_CLASSIFICATIONS:
+            consecutive_low += 1
+        else:
+            break
+    if consecutive_low >= 3:
+        drift_warnings.append(
+            f"{consecutive_low} consecutive completed tickets are docs/checkpoint work "
+            f"({', '.join(class_values[-consecutive_low:])})."
+        )
+
+    low_in_recent = sum(1 for value in class_values if value in _LOW_VALUE_CLASSIFICATIONS)
+    if low_in_recent >= 5:
+        drift_warnings.append(
+            f"{low_in_recent} of the last {len(class_values)} completed tickets are "
+            "docs/checkpoint work."
+        )
+
+    high_value_recent = any(
+        value in {"product_risk_reduction", "live_research_proof", "test_proof"}
+        for value in class_values[-3:]
+    )
+    if not high_value_recent and len(class_values) >= 3:
+        drift_warnings.append(
+            "No product-risk or live-research proof advanced in the last 3 completed tickets."
+        )
+
+    recommended_override: str | None = None
+    if next_ticket_id and next_ticket_title:
+        next_class = classify_ticket_value(next_ticket_title)
+        if next_class in _LOW_VALUE_CLASSIFICATIONS and drift_warnings:
+            recommended_override = (
+                "Prefer corrective product work (live validated extraction, arbitrary-source "
+                "pipeline, or honest maturity relabel) over the queued doc/checkpoint ticket."
+            )
+
+    return {
+        "recent_ticket_classifications": classifications,
+        "drift_warning": drift_warnings or None,
+        "recommended_override": recommended_override,
+    }
+
+
 def _pre_ticket_report_for(
     reports: list[CheckpointReport], ticket_number: int
 ) -> CheckpointReport | None:
@@ -202,6 +381,7 @@ def checkpoint_status(
 
     next_ticket_number: int | None = None
     next_ticket_risk: str | None = None
+    next_ticket_title: str | None = None
     pre_ticket_path: str | None = None
     implementation_gate = "not_applicable"
 
@@ -210,17 +390,22 @@ def checkpoint_status(
         if ticket_json.is_file():
             payload = json.loads(ticket_json.read_text(encoding="utf-8"))
             next_ticket_risk = payload.get("risk_level")
-            match = re.match(r"ticket-(\d{3})", next_ticket_id)
-            if match:
-                next_ticket_number = int(match.group(1))
-                pre = _pre_ticket_report_for(reports, next_ticket_number)
-                pre_ticket_path = str(pre.path.relative_to(project_root)) if pre else None
-                if next_ticket_risk in {"medium", "high"}:
-                    implementation_gate = (
-                        "satisfied" if pre is not None else "blocked_missing_pre_ticket_audit"
-                    )
-                else:
-                    implementation_gate = "satisfied"
+            next_ticket_title = payload.get("title")
+        for row in rows:
+            if row.ticket_id == next_ticket_id and row.title:
+                next_ticket_title = row.title
+                break
+        match = re.match(r"ticket-(\d{3})", next_ticket_id)
+        if match:
+            next_ticket_number = int(match.group(1))
+            pre = _pre_ticket_report_for(reports, next_ticket_number)
+            pre_ticket_path = str(pre.path.relative_to(project_root)) if pre else None
+            if next_ticket_risk in {"medium", "high"}:
+                implementation_gate = (
+                    "satisfied" if pre is not None else "blocked_missing_pre_ticket_audit"
+                )
+            else:
+                implementation_gate = "satisfied"
 
     overall = cadence_status
     if implementation_gate == "blocked_missing_pre_ticket_audit":
@@ -229,6 +414,12 @@ def checkpoint_status(
         overall = "overdue"
     elif cadence_status in {"satisfied", "not_due"}:
         overall = "satisfied" if implementation_gate != "blocked_missing_pre_ticket_audit" else "blocked"
+
+    value_drift = evaluate_value_drift(
+        rows,
+        next_ticket_id=next_ticket_id,
+        next_ticket_title=next_ticket_title,
+    )
 
     return {
         "report_type": "principal_audit_checkpoint_status",
@@ -246,9 +437,16 @@ def checkpoint_status(
             latest.ticket_number if latest else None
         ),
         "next_ticket_id": next_ticket_id,
+        "next_ticket_title": next_ticket_title,
         "next_ticket_risk_level": next_ticket_risk,
+        "next_ticket_value_class": (
+            classify_ticket_value(next_ticket_title) if next_ticket_title else None
+        ),
         "implementation_gate": implementation_gate,
         "pre_ticket_audit_report": pre_ticket_path,
+        "drift_warning": value_drift["drift_warning"],
+        "recommended_override": value_drift["recommended_override"],
+        "recent_ticket_classifications": value_drift["recent_ticket_classifications"],
         "milestone_triggers": [
             "public export or card_exporter changes",
             "public site or committed public JSON changes",

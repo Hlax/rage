@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from rge.modules.principal_audit_gate import checkpoint_status, parse_queue_rows
+from rge.modules.principal_audit_gate import (
+    checkpoint_status,
+    classify_ticket_value,
+    evaluate_value_drift,
+    parse_queue_rows,
+)
 
 
 def test_parse_queue_rows_reads_done_tickets() -> None:
@@ -156,3 +161,64 @@ def test_medium_risk_ticket_without_pre_audit_remains_blocked(tmp_path: Path) ->
     assert report["cadence_status"] == "satisfied"
     assert report["implementation_gate"] == "blocked_missing_pre_ticket_audit"
     assert report["status"] == "blocked"
+
+
+def test_classify_ticket_value_detects_doc_crosslink() -> None:
+    assert classify_ticket_value("README manual synthnote pipeline proof test cross-link") == "docs_crosslink"
+
+
+def test_classify_ticket_value_detects_product_work() -> None:
+    assert classify_ticket_value("Real manual source ingestion (Level-1)") == "product_risk_reduction"
+
+
+def test_historical_doc_crosslink_pattern_emits_drift_warning(tmp_path: Path) -> None:
+    (tmp_path / "tickets").mkdir()
+    (tmp_path / "agent_reports").mkdir()
+    rows = "\n".join(
+        f"| {num} | ticket-{num:03d} | done | README manual synthnote cross-link | b | r |"
+        for num in range(94, 112)
+    )
+    (tmp_path / "tickets" / "TICKET_QUEUE.md").write_text(rows, encoding="utf-8")
+    (tmp_path / "agent_reports" / "2026-06-14_principal-audit-post-ticket-110.md").write_text(
+        "# audit", encoding="utf-8"
+    )
+    (tmp_path / "tickets" / "ticket-111.json").write_text(
+        '{"id":"ticket-111","title":"README manual synthnote pipeline proof test cross-link","risk_level":"low"}',
+        encoding="utf-8",
+    )
+
+    report = checkpoint_status(root=tmp_path, next_ticket_id="ticket-111")
+    assert report["drift_warning"] is not None
+    assert report["next_ticket_value_class"] == "docs_crosslink"
+    assert report["recommended_override"] is not None
+
+
+def test_product_risk_ticket_reduces_drift_pressure() -> None:
+    crosslink_rows = [
+        type("Row", (), {"ticket_id": f"ticket-{n:03d}", "title": title, "status": "done"})()
+        for n, title in (
+            (108, "Operating protocol manual synthnote pipeline proof test cross-link"),
+            (109, "Cursor build loop manual synthnote pipeline proof test cross-link"),
+            (110, "Runtime config manual synthnote pipeline proof test cross-link"),
+        )
+    ]
+    drift = evaluate_value_drift(crosslink_rows)
+    assert drift["drift_warning"] is not None
+
+    with_product = crosslink_rows + [
+        type(
+            "Row",
+            (),
+            {
+                "ticket_id": "ticket-086",
+                "title": "Real manual source ingestion (Level-1)",
+                "status": "done",
+            },
+        )()
+    ]
+    reduced = evaluate_value_drift(with_product)
+    assert reduced["drift_warning"] is None
+    assert any(
+        item["value_class"] == "product_risk_reduction"
+        for item in reduced["recent_ticket_classifications"]
+    )
