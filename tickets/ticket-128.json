@@ -1,0 +1,48 @@
+{
+  "id": "ticket-128",
+  "title": "Arbitrary manual live concept linking fall-through",
+  "problem": "ticket-127 proved live claim extraction for arbitrary manual_text sources. The NM-4 arbitrary manual pipeline still stops after extract-claims; link-concepts requires checksum-pinned mock fixtures for synthnote sources and has no live fall-through for unmapped manual_text.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-127_arbitrary-manual-live-fallthrough.md",
+    "rge/modules/concept_linker.py",
+    "rge/modules/manual_source_fixtures.py",
+    "fixtures/manual_source_fixture_map.json"
+  ],
+  "affected_modules": [
+    "rge/modules/concept_linker.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/concept_linker.py",
+    "rge/cli.py",
+    "tests/unit/test_manual_live_fallthrough.py",
+    "agent_reports/2026-06-14_ticket-128_arbitrary-manual-live-concept-linking.md"
+  ],
+  "acceptance_criteria": [
+    "After live extract-claims on an unmapped manual_text source, explicit live mode can link concepts via Ollama.",
+    "At least one validated accepted concept link persists to the gitignored evidence DB.",
+    "Checksum-pinned synthnote mock paths remain deterministic.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes.",
+    "Public export/site untouched."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_live_fallthrough.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Cloud providers.",
+    "Public export/site changes.",
+    "Source discovery/fetcher.",
+    "Validator weakening.",
+    "Relationship/contradiction live fall-through.",
+    "Docs cross-link chain."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove live concept-linking fall-through flag; retain ticket-127 extract calibration.",
+  "status": "proposed",
+  "category": "product-risk reduction / NM-4 pipeline continuation",
+  "pre_ticket_audit_required": true
+}

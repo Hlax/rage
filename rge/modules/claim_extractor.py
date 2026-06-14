@@ -115,9 +115,12 @@ def extract_and_validate_for_chunk(
     fixture_name: str | None = None,
     client=None,
     source: Any | None = None,
+    live_manual_fallthrough: bool = False,
 ) -> dict[str, list[dict[str, Any]]]:
     """Extract candidates for one chunk and validate them deterministically."""
     contract: dict[str, Any] = {"domain_pack": domain_pack}
+    if live_manual_fallthrough:
+        contract["manual_text_arbitrary_live"] = True
     candidates = extract_candidate_claims(
         chunk,
         contract,
@@ -195,6 +198,7 @@ def extract_claims_for_source(
             fixture_name=fixture_name,
             client=model_client,
             source=source,
+            live_manual_fallthrough=live_manual_fallthrough,
         )
         for claim in result["accepted"]:
             char_start, char_end = locate_quote_offsets(

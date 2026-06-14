@@ -58,7 +58,7 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert live calibration or prompt changes; retain ticket-112 fall-through gates.",
-  "status": "proposed",
+  "status": "done",
   "category": "product-risk reduction / live-research proof",
   "pre_ticket_audit_required": true,
   "notes": "Hardened scope: ticket-112 landed --live-manual-fallthrough and mock fail-closed. ticket-127 completes NM-4 by achieving live accepted-claim proof on arbitrary real text (prompt/source calibration if needed), not re-plumbing the fall-through path."
