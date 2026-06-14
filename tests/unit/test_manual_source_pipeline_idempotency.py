@@ -1,4 +1,4 @@
-"""Idempotency proof for manual synthnote pipeline (ticket-093)."""
+"""Idempotency proof for manual synthnote pipeline (tickets 093, 106)."""
 
 from __future__ import annotations
 
@@ -8,11 +8,18 @@ from pathlib import Path
 
 import pytest
 
+from rge.modules.score_reconciler import STRONGER_SOURCE_BOOST
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SYNTHNOTE_SOURCE = REPO_ROOT / "fixtures" / "sources" / "manual_synthnote.txt"
+FOLLOWUP_SOURCE = REPO_ROOT / "fixtures" / "sources" / "manual_synthnote_followup.txt"
 SYNTHNOTE_TITLE = (
     "Synthetic Source Note: AI-Assisted Ideation and Semantic Diversity"
 )
+FOLLOWUP_TITLE = (
+    "Synthetic Follow-Up Note: AI Assistance and Semantic Diversity Replication"
+)
+EXPECTED_NEW_CONFIDENCE = round(0.5 + STRONGER_SOURCE_BOOST, 2)
 
 
 @pytest.fixture()
@@ -29,6 +36,13 @@ def mock_llm_mode() -> None:
         os.environ.pop("RGE_LLM_MODE", None)
     else:
         os.environ["RGE_LLM_MODE"] = prior
+
+
+@dataclass(frozen=True)
+class _ReconcileCounts:
+    sources: int
+    score_events: int
+    may_reduce_confidence: float
 
 
 @dataclass(frozen=True)
@@ -137,6 +151,76 @@ def _run_full_spine(db_path: Path) -> str:
     return source_id
 
 
+def _ingest_followup_args(db_path: Path) -> list[str]:
+    return [
+        "ingest",
+        str(FOLLOWUP_SOURCE),
+        "--domain",
+        "creativity",
+        "--source-type",
+        "manual_text",
+        "--source-title",
+        FOLLOWUP_TITLE,
+        "--db",
+        str(db_path),
+    ]
+
+
+def _followup_id(db_path: Path) -> str:
+    from rge.db.connection import connect
+
+    conn = connect(db_path)
+    try:
+        return conn.execute(
+            "SELECT id FROM sources WHERE title = ?",
+            (FOLLOWUP_TITLE,),
+        ).fetchone()[0]
+    finally:
+        conn.close()
+
+
+def _reconcile_counts(db_path: Path) -> _ReconcileCounts:
+    from rge.db.connection import connect
+
+    conn = connect(db_path)
+    try:
+        sources = conn.execute("SELECT COUNT(*) FROM sources").fetchone()[0]
+        score_events = conn.execute("SELECT COUNT(*) FROM score_events").fetchone()[0]
+        relationship = conn.execute(
+            """
+            SELECT r.confidence
+            FROM relationships r
+            JOIN concepts sub ON sub.id = r.subject_concept_id
+            JOIN concepts obj ON obj.id = r.object_concept_id
+            WHERE sub.label = 'AI assistance'
+              AND obj.label = 'semantic diversity'
+              AND r.predicate = 'may_reduce'
+            """
+        ).fetchone()
+        assert relationship is not None
+        return _ReconcileCounts(
+            sources=sources,
+            score_events=score_events,
+            may_reduce_confidence=float(relationship["confidence"]),
+        )
+    finally:
+        conn.close()
+
+
+def _run_followup_reconcile(db_path: Path) -> str:
+    from rge.cli import main
+
+    assert main(_ingest_followup_args(db_path)) == 0
+    followup_id = _followup_id(db_path)
+    assert (
+        main(["extract-claims", "--source", followup_id, "--db", str(db_path)]) == 0
+    )
+    assert (
+        main(["reconcile-scores", "--source", followup_id, "--db", str(db_path)]) == 0
+    )
+    return followup_id
+
+
 def test_manual_synthnote_pipeline_full_spine_twice_is_idempotent(
     temp_db: Path,
 ) -> None:
@@ -176,3 +260,40 @@ def test_manual_synthnote_pipeline_per_command_reruns_are_idempotent(
     ):
         assert main(command) == 0
         assert _pipeline_counts(temp_db, source_id) == baseline
+
+
+def test_manual_synthnote_pipeline_reconcile_followup_twice_is_idempotent(
+    temp_db: Path,
+) -> None:
+    _run_full_spine(temp_db)
+    _run_followup_reconcile(temp_db)
+    first = _reconcile_counts(temp_db)
+
+    assert first.sources == 2
+    assert first.score_events == 1
+    assert first.may_reduce_confidence == EXPECTED_NEW_CONFIDENCE
+
+    _run_followup_reconcile(temp_db)
+    second = _reconcile_counts(temp_db)
+
+    assert second == first
+
+
+def test_manual_synthnote_pipeline_reconcile_per_command_reruns_are_idempotent(
+    temp_db: Path,
+) -> None:
+    from rge.cli import main
+
+    _run_full_spine(temp_db)
+    followup_id = _run_followup_reconcile(temp_db)
+    baseline = _reconcile_counts(temp_db)
+
+    assert main(_ingest_followup_args(temp_db)) == 0
+    assert _reconcile_counts(temp_db) == baseline
+
+    for command in (
+        ["extract-claims", "--source", followup_id, "--db", str(temp_db)],
+        ["reconcile-scores", "--source", followup_id, "--db", str(temp_db)],
+    ):
+        assert main(command) == 0
+        assert _reconcile_counts(temp_db) == baseline
