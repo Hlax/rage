@@ -39,5 +39,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert claim_validator domain allowlist wiring; restore implicit creativity-only checks.",
-  "status": "proposed"
+  "status": "done"
 }

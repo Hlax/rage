@@ -152,7 +152,8 @@ superseded
 | 118 | ticket-118 | done | Domain pack search_templates.yaml loader proof (NM-5 continuation) | `phase-2/ticket-118-domain-pack-search-templates-loader` | `agent_reports/2026-06-14_ticket-118_domain-pack-search-templates-loader.md` |
 | 119 | ticket-119 | done | Domain pack safety_notes.yaml loader proof (NM-5 continuation) | `phase-2/ticket-119-domain-pack-safety-notes-loader` | `agent_reports/2026-06-14_ticket-119_domain-pack-safety-notes-loader.md` |
 | 120 | ticket-120 | done | Domain pack domain.yaml loader proof (NM-5 completion) | `phase-2/ticket-120-domain-pack-domain-yaml-loader` | `agent_reports/2026-06-14_ticket-120_domain-pack-domain-yaml-loader.md` |
-| 121 | ticket-121 | proposed | Wire claim_validator domain checks to pack domain.yaml | | |
+| 121 | ticket-121 | done | Wire claim_validator domain checks to pack domain.yaml | `phase-2/ticket-121-claim-validator-domain-pack` | `agent_reports/2026-06-14_ticket-121_claim-validator-domain-pack.md` |
+| 122 | ticket-122 | proposed | Golden test overlap-domain claim label acceptance (mock) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -882,9 +883,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-121 (proposed) — Wire claim_validator domain checks to pack domain.yaml
+ticket-122 (proposed) — Golden test overlap-domain claim label acceptance (mock)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-121 agent)
+
+- `claim_validator` rejects candidate domain labels outside `allowed_domains_for_pack()`.
+- `extract_and_validate_for_chunk` passes `domain_pack` for overlap label acceptance.
+- Creativity overlap domains (art, design, film, music, digital_media) accepted in mock validation.
+- 3 new unit tests; 452 pytest pass; safety audit pass.
+- Next: ticket-122 (golden overlap-domain claim mock proof).
 
 ## Queue Notes (2026-06-14, ticket-120 agent)
 
@@ -978,7 +987,7 @@ directed corrective work **before** ticket-111. **Completed and merged to main @
 | NM-4 / ticket-112 | **done** | Arbitrary manual_text live fall-through |
 | ticket-111 | **superseded** | Folded into NM-2 |
 
-Next product move: **ticket-121** (claim_validator domain allowlist from pack domain.yaml).
+Next product move: **ticket-122** (golden overlap-domain claim label acceptance in mock extraction).
 
 ## Queue Rules
 

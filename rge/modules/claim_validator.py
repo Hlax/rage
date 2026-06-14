@@ -29,25 +29,39 @@ _OVERGENERALIZED_CLAIM_PATTERNS = (
 )
 
 
-def _evidence_type_pack_message(
-    candidate: dict[str, Any], domain: str
+def _pack_field_validation_message(
+    candidate: dict[str, Any],
+    *,
+    domain_pack: str | None = None,
 ) -> str | None:
+    """Validate candidate domain label and evidence_type against a loaded pack."""
     from rge.modules.domain_pack_loader import (
         DomainPackError,
+        allowed_domains_for_pack,
         evidence_type_ids,
         load_domain_pack,
     )
 
-    evidence_type = str(candidate.get("evidence_type") or "").strip()
-    if not evidence_type:
+    domain_label = str(candidate.get("domain") or "").strip()
+    if not domain_label:
         return None
+
+    pack_id = (domain_pack or "").strip() or domain_label
     try:
-        pack = load_domain_pack(domain)
+        pack = load_domain_pack(pack_id)
     except DomainPackError:
-        return f"domain pack {domain!r} could not be loaded for evidence_type validation"
-    if evidence_type.casefold() not in evidence_type_ids(pack):
+        return f"domain pack {pack_id!r} could not be loaded for pack validation"
+
+    normalized_domain = _normalize(domain_label)
+    if normalized_domain not in allowed_domains_for_pack(pack):
         return (
-            f"evidence_type {evidence_type!r} is not defined in domain pack {domain!r}"
+            f"domain {domain_label!r} is not declared in domain pack {pack_id!r}"
+        )
+
+    evidence_type = str(candidate.get("evidence_type") or "").strip()
+    if evidence_type and evidence_type.casefold() not in evidence_type_ids(pack):
+        return (
+            f"evidence_type {evidence_type!r} is not defined in domain pack {pack_id!r}"
         )
     return None
 
@@ -110,6 +124,7 @@ def validate_candidate_claim(
     candidate: dict[str, Any],
     *,
     chunk_text: str,
+    domain_pack: str | None = None,
 ) -> tuple[str, dict[str, Any] | None, str | None]:
     """Validate one candidate claim.
 
@@ -159,9 +174,11 @@ def validate_candidate_claim(
             return "rejected", None, REJECTION_UNSUPPORTED
 
     domain = str(candidate.get("domain") or "").strip()
-    evidence_type = str(candidate.get("evidence_type") or "").strip()
     if domain:
-        pack_message = _evidence_type_pack_message(candidate, domain)
+        pack_message = _pack_field_validation_message(
+            candidate,
+            domain_pack=domain_pack,
+        )
         if pack_message is not None:
             return "rejected", None, REJECTION_UNSUPPORTED
 
@@ -179,6 +196,7 @@ def validate_candidate_claims(
     candidates: list[dict[str, Any]],
     *,
     chunk_text: str,
+    domain_pack: str | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
     """Split candidates into accepted and rejected buckets with reasons."""
     accepted: list[dict[str, Any]] = []
@@ -186,7 +204,9 @@ def validate_candidate_claims(
 
     for candidate in candidates:
         status, claim_dict, reason = validate_candidate_claim(
-            candidate, chunk_text=chunk_text
+            candidate,
+            chunk_text=chunk_text,
+            domain_pack=domain_pack,
         )
         if status == "accepted" and claim_dict is not None:
             accepted.append(claim_dict)
@@ -206,6 +226,7 @@ def rejection_diagnostic(
     *,
     chunk_text: str,
     rejection_reason: str | None = None,
+    domain_pack: str | None = None,
 ) -> str:
     """Human-readable note for a rejected candidate (probe reporting only)."""
     reason = rejection_reason or REJECTION_UNSUPPORTED
@@ -227,7 +248,10 @@ def rejection_diagnostic(
             return "limitations list is required (use [] if none)"
         domain = str(candidate.get("domain") or "").strip()
         if domain:
-            pack_message = _evidence_type_pack_message(candidate, domain)
+            pack_message = _pack_field_validation_message(
+                candidate,
+                domain_pack=domain_pack,
+            )
             if pack_message is not None:
                 return pack_message
         return "claim failed unsupported_claim checks"

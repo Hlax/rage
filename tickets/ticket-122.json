@@ -1,0 +1,42 @@
+{
+  "id": "ticket-122",
+  "title": "Golden test overlap-domain claim label acceptance (mock)",
+  "problem": "Ticket-121 wired claim_validator to pack domain.yaml allowlists, but golden mock extraction still only proves domain=creativity claims. A golden test should prove overlap labels (e.g. art) survive the extract-and-validate path end-to-end in mock mode.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-121_claim-validator-domain-pack.md",
+    "domain_packs/creativity/domain.yaml",
+    "tests/golden/test_01_ingestion.py",
+    "fixtures/llm_outputs/"
+  ],
+  "affected_modules": [
+    "rge/modules/claim_extractor.py",
+    "rge/modules/claim_validator.py"
+  ],
+  "expected_files": [
+    "fixtures/llm_outputs/claim_extraction_overlap_domain_art.json",
+    "tests/golden/test_02_claim_extraction_overlap_domain.py",
+    "agent_reports/2026-06-14_ticket-122_golden-overlap-domain-claim.md"
+  ],
+  "acceptance_criteria": [
+    "Mock fixture produces at least one accepted claim with domain overlap label (e.g. art).",
+    "Golden test runs extract-and-validate in mock mode without Ollama.",
+    "Existing golden claim extraction tests remain green.",
+    "Full pytest and safety audit pass.",
+    "No public export/site changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden/test_02_claim_extraction_overlap_domain.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No live Ollama or new CLI flags.",
+    "No public site routing or committed JSON changes.",
+    "No schema migrations.",
+    "No LangGraph/FastAPI/embeddings work."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove overlap-domain golden fixture and test file.",
+  "status": "proposed"
+}
