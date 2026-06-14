@@ -8,6 +8,7 @@ Phase 3: staged candidate URL fetch to gitignored artifact paths (ticket-142).
 from __future__ import annotations
 
 import hashlib
+import re
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -18,9 +19,12 @@ from rge.modules.source_network import source_network_enabled
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STAGED_FETCH_DIR = REPO_ROOT / "data" / "sources" / "staged"
 FETCH_CANDIDATE_COMMAND = "fetch-candidate"
+INGEST_STAGED_COMMAND = "ingest-staged"
 BLOCKED_EXIT_CODE = 1
 ERROR_EXIT_CODE = 1
 OK_EXIT_CODE = 0
+_HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
+_WHITESPACE_PATTERN = re.compile(r"\s+")
 
 
 class FetchError(Exception):
@@ -178,6 +182,138 @@ def run_fetch_candidate_command(
     if result.get("status") == "blocked":
         return result, BLOCKED_EXIT_CODE
     return result, OK_EXIT_CODE
+
+
+def html_to_text(html: str) -> str:
+    """Minimal HTML tag stripping for staged artifact ingestion."""
+    without_tags = _HTML_TAG_PATTERN.sub(" ", html)
+    return _WHITESPACE_PATTERN.sub(" ", without_tags).strip()
+
+
+def artifact_bytes_to_text(data: bytes, artifact_path: Path) -> str:
+    text = data.decode("utf-8", errors="replace")
+    if artifact_path.suffix.casefold() == ".html":
+        return html_to_text(text)
+    return text.strip()
+
+
+def resolve_staged_artifact_path(
+    *,
+    candidate_id: str | None = None,
+    artifact_path: Path | None = None,
+    staging_dir: Path | None = None,
+) -> Path:
+    """Resolve a staged artifact file from candidate id or explicit path."""
+    if artifact_path is not None:
+        resolved = artifact_path.resolve()
+        if not resolved.is_file():
+            raise FetchError(f"Staged artifact not found: {resolved}")
+        return resolved
+
+    if not candidate_id:
+        raise FetchError("Either --candidate or --artifact is required.")
+
+    directory = staging_dir or default_staged_fetch_dir()
+    if not directory.is_dir():
+        raise FetchError(f"Staged artifact directory not found: {directory}")
+
+    safe_id = candidate_id.replace("/", "_").replace(":", "_")
+    matches = sorted(directory.glob(f"{safe_id}.*"))
+    if not matches:
+        raise FetchError(
+            f"No staged artifact found for candidate {candidate_id!r} in {directory}."
+        )
+    return matches[0].resolve()
+
+
+def ingest_staged_artifact(
+    conn: Any,
+    *,
+    domain: str,
+    candidate_id: str | None = None,
+    artifact_path: Path | None = None,
+    expected_checksum: str | None = None,
+    staging_dir: Path | None = None,
+    source_type: str | None = None,
+    title: str | None = None,
+) -> dict[str, Any]:
+    """Ingest a staged fetch artifact into sources/chunks with checksum verification."""
+    from rge.db.repositories import CandidateSourceRepository, ingest_local_source
+
+    path = resolve_staged_artifact_path(
+        candidate_id=candidate_id,
+        artifact_path=artifact_path,
+        staging_dir=staging_dir,
+    )
+    data = path.read_bytes()
+    checksum = sha256_bytes(data)
+    if expected_checksum and expected_checksum.casefold() != checksum.casefold():
+        raise FetchError(
+            f"Checksum mismatch for {path}: expected {expected_checksum}, got {checksum}."
+        )
+
+    if candidate_id:
+        candidate = CandidateSourceRepository(conn).get_by_id(candidate_id)
+        if candidate is not None:
+            source_type = source_type or str(candidate.get("source_type") or "")
+            title = title or str(candidate.get("title") or "")
+
+    raw_text = artifact_bytes_to_text(data, path)
+    if not raw_text.strip():
+        raise FetchError(f"Staged artifact produced empty text: {path}")
+
+    effective_source_type = source_type or "staged_fetch"
+    effective_title = title or path.name
+
+    result = ingest_local_source(
+        conn,
+        local_path=path,
+        domain=domain,
+        raw_text=raw_text,
+        title=effective_title,
+        source_type=effective_source_type,
+    )
+    return {
+        **result,
+        "command": INGEST_STAGED_COMMAND,
+        "candidate_id": candidate_id,
+        "artifact_path": str(path),
+        "artifact_checksum": checksum,
+    }
+
+
+def run_ingest_staged_command(
+    conn: Any,
+    *,
+    domain: str,
+    candidate_id: str | None = None,
+    artifact_path: Path | None = None,
+    expected_checksum: str | None = None,
+    staging_dir: Path | None = None,
+    source_type: str | None = None,
+    title: str | None = None,
+) -> tuple[dict[str, Any], int]:
+    try:
+        payload = ingest_staged_artifact(
+            conn,
+            domain=domain,
+            candidate_id=candidate_id,
+            artifact_path=artifact_path,
+            expected_checksum=expected_checksum,
+            staging_dir=staging_dir,
+            source_type=source_type,
+            title=title,
+        )
+        return payload, OK_EXIT_CODE
+    except FetchError as exc:
+        payload = {
+            "status": "error",
+            "command": INGEST_STAGED_COMMAND,
+            "reason": "ingest_failed",
+            "detail": str(exc),
+            "candidate_id": candidate_id,
+        }
+        return payload, ERROR_EXIT_CODE
 
 
 def fetch_local_text_file(path: Path) -> dict[str, Any]:
