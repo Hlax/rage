@@ -85,7 +85,7 @@ None.
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merged to `main` at `181badb` and pushed to `origin/main`.
 
 ## Recommended next ticket
 
