@@ -55,6 +55,13 @@ def _write_demo_pack(
         _scoring_yaml(boost=boost),
         encoding="utf-8",
     )
+    (pack_dir / "evidence_types.yaml").write_text(
+        "evidence_types:\n"
+        "  empirical:\n"
+        "    base_strength: 0.80\n"
+        "    notes: test\n",
+        encoding="utf-8",
+    )
     return pack_dir
 
 

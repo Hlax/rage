@@ -1,0 +1,45 @@
+{
+  "id": "ticket-115",
+  "title": "Domain pack claim_schema.yaml loader proof (NM-5 continuation)",
+  "problem": "Ticket-114 proved evidence_types.yaml drives claim validation allowlists. The creativity pack still has six other declarative files not loaded at runtime. NM-5 requires incremental proof that domain-pack files beyond ontology, aliases, scoring, and evidence types are consumed by the engine.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-114_domain-pack-evidence-types-loader.md",
+    "agent_reports/2026-06-14_pre-ticket-114_domain-pack-evidence-types-loader-audit.md",
+    "domain_packs/creativity/claim_schema.yaml",
+    "rge/modules/domain_pack_loader.py"
+  ],
+  "affected_modules": [
+    "rge/modules/domain_pack_loader.py"
+  ],
+  "expected_files": [
+    "rge/modules/domain_pack_loader.py",
+    "tests/unit/test_domain_pack_claim_schema_loader.py",
+    "agent_reports/2026-06-14_ticket-115_domain-pack-claim-schema-loader.md"
+  ],
+  "acceptance_criteria": [
+    "claim_schema.yaml is loaded for creativity domain pack at runtime.",
+    "At least one existing consumer reads pack-defined claim schema extensions instead of hardcoded duplicates.",
+    "Temp-pack unit test proves different schema extensions change validation behavior.",
+    "Golden and manual synthnote tests remain green in mock mode.",
+    "Safety audit passes.",
+    "No public export/site changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_domain_pack_claim_schema_loader.py -q",
+    "python -m pytest tests/unit/test_domain_pack_evidence_types_loader.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No loading all remaining pack files in one ticket.",
+    "No applying base_strength priors to confidence scoring.",
+    "No cloud providers or live Ollama changes.",
+    "No public export or site changes.",
+    "No schema migrations.",
+    "No LangGraph/FastAPI/embeddings work."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert claim_schema loader wiring; restore inline schema constants.",
+  "status": "proposed"
+}

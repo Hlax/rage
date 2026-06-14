@@ -29,6 +29,13 @@ class DomainPackConcept:
 
 
 @dataclass(frozen=True)
+class EvidenceTypeDefinition:
+    id: str
+    base_strength: float
+    notes: str
+
+
+@dataclass(frozen=True)
 class ScoreReconciliationOverlay:
     formula_version: str
     stronger_evidence_boost: float
@@ -43,6 +50,7 @@ class DomainPack:
     aliases: dict[str, tuple[str, ...]]
     alias_to_canonical: dict[str, str]
     score_reconciliation: ScoreReconciliationOverlay
+    evidence_types: tuple[EvidenceTypeDefinition, ...]
 
 
 def repo_root() -> Path:
@@ -228,6 +236,88 @@ def parse_scoring_yaml(path: Path) -> ScoreReconciliationOverlay:
     )
 
 
+def parse_evidence_types_yaml(path: Path) -> tuple[EvidenceTypeDefinition, ...]:
+    """Parse evidence type definitions from a domain pack evidence_types stub."""
+    if not path.is_file():
+        raise DomainPackError(f"Evidence types file not found: {path}")
+
+    text = path.read_text(encoding="utf-8")
+    if not text.strip():
+        raise DomainPackError(f"Evidence types file is empty: {path}")
+
+    if not re.search(r"^evidence_types:\s*$", text, re.MULTILINE):
+        raise DomainPackError(
+            f"Evidence types file must contain top-level 'evidence_types:' key: {path}"
+        )
+
+    definitions: list[EvidenceTypeDefinition] = []
+    current_id: str | None = None
+    current_fields: dict[str, Any] = {}
+
+    def _finalize_current() -> None:
+        nonlocal current_id, current_fields
+        if current_id is None:
+            return
+        missing = [
+            key
+            for key in ("base_strength", "notes")
+            if key not in current_fields
+        ]
+        if missing:
+            raise DomainPackError(
+                f"Evidence type {current_id!r} missing keys {missing} in {path}"
+            )
+        definitions.append(
+            EvidenceTypeDefinition(
+                id=current_id,
+                base_strength=float(current_fields["base_strength"]),
+                notes=str(current_fields["notes"]).strip(),
+            )
+        )
+        current_id = None
+        current_fields = {}
+
+    for line in text.splitlines():
+        if line.strip() == "evidence_types:" or not line.strip() or line.lstrip().startswith(
+            "#"
+        ):
+            continue
+
+        type_match = re.match(r"^  (\w+):\s*$", line)
+        if type_match:
+            _finalize_current()
+            current_id = type_match.group(1)
+            continue
+
+        field_match = re.match(r"^    (\w+): (.+)$", line)
+        if field_match:
+            if current_id is None:
+                raise DomainPackError(
+                    f"Evidence type field before type id in {path}: {line!r}"
+                )
+            current_fields[field_match.group(1)] = _parse_scalar_value(
+                field_match.group(2)
+            )
+            continue
+
+        if line.startswith("  "):
+            raise DomainPackError(
+                f"Unrecognized evidence_types.yaml line in {path}: {line!r}"
+            )
+
+    _finalize_current()
+
+    if not definitions:
+        raise DomainPackError(f"No evidence type definitions found in {path}")
+
+    return tuple(definitions)
+
+
+def evidence_type_ids(pack: DomainPack) -> frozenset[str]:
+    """Return normalized evidence type ids declared by a domain pack."""
+    return frozenset(evidence_type.id.casefold() for evidence_type in pack.evidence_types)
+
+
 def build_alias_to_canonical(aliases: dict[str, list[str]]) -> dict[str, str]:
     """Build normalized alias phrase → canonical label reverse map."""
     reverse: dict[str, str] = {}
@@ -256,11 +346,13 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
     ontology_path = pack_root / "ontology.yaml"
     aliases_path = pack_root / "aliases.yaml"
     scoring_path = pack_root / "scoring.yaml"
+    evidence_types_path = pack_root / "evidence_types.yaml"
 
     concepts = parse_ontology_yaml(ontology_path)
     alias_map = parse_aliases_yaml(aliases_path)
     alias_to_canonical = build_alias_to_canonical(alias_map)
     score_reconciliation = parse_scoring_yaml(scoring_path)
+    evidence_types = parse_evidence_types_yaml(evidence_types_path)
 
     return DomainPack(
         pack_id=pack_id,
@@ -268,6 +360,7 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
         aliases={key: tuple(values) for key, values in alias_map.items()},
         alias_to_canonical=alias_to_canonical,
         score_reconciliation=score_reconciliation,
+        evidence_types=evidence_types,
     )
 
 
