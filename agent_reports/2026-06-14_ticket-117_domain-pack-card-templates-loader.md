@@ -90,7 +90,7 @@ None. Cluster pack fields outside the public allowlist are not enforced at expor
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merged to `main` at `9c2a723` and pushed to `origin/main`.
 
 ## Recommended next ticket
 
