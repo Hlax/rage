@@ -159,7 +159,8 @@ superseded
 | 125 | ticket-125 | done | Domain pack spec cross-link README NM-5 runtime table | `phase-2/ticket-125-domain-pack-spec-nm5-crosslink` | `agent_reports/2026-06-14_ticket-125_domain-pack-spec-nm5-crosslink.md` |
 | 126 | ticket-126 | done | Operator loop plan surfaces domain pack load health | `phase-2/ticket-126-operator-loop-domain-pack-health` | `agent_reports/2026-06-14_ticket-126_operator-loop-domain-pack-health.md` |
 | 127 | ticket-127 | done | Arbitrary manual text live extraction fall-through (NM-4 recenter) | `phase-2/ticket-127-arbitrary-manual-live-fallthrough` | `agent_reports/2026-06-14_ticket-127_arbitrary-manual-live-fallthrough.md` |
-| 128 | ticket-128 | proposed | Arbitrary manual live concept linking fall-through | | |
+| 128 | ticket-128 | done | Arbitrary manual live concept linking fall-through | `phase-2/ticket-128-arbitrary-manual-live-concept-linking` | `agent_reports/2026-06-14_ticket-128_arbitrary-manual-live-concept-linking.md` |
+| 129 | ticket-129 | proposed | Arbitrary manual live relationship fall-through | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -889,9 +890,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-128 (proposed) — Arbitrary manual live concept linking fall-through
+ticket-129 (proposed) — Arbitrary manual live relationship fall-through
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-128 agent)
+
+- `--live-manual-link-fallthrough` on link-concepts; mock fail-closed for unmapped manual_text.
+- Live proof on ticket-127 evidence source: 2 accepted concept links, 0 rejected.
+- 14 manual_live_fallthrough unit tests; 466 pytest; 142 golden; safety audit pass.
+- Cadence: 1 done since post-ticket-127 principal audit — monitor before ticket-130.
+- Next: ticket-129 (live relationship fall-through); requires pre-ticket audit.
 
 ## Queue Notes (2026-06-14, ticket-127 agent)
 

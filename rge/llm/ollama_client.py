@@ -308,6 +308,39 @@ class OllamaModelClient(ModelClient):
             "Do not include markdown fences or commentary."
         )
 
+    def _manual_text_arbitrary_live_link_calibration(
+        self,
+        *,
+        example_claim_id: str,
+    ) -> str:
+        return (
+            "Manual arbitrary source mode (live link fall-through):\n"
+            "- Link each accepted claim to ontology labels using exact spelling.\n"
+            "- The batch MUST include at least two DISTINCT specific labels "
+            "(not only generic 'ai' or 'creativity').\n"
+            "- For workshop or songwriting claims, prefer labels such as "
+            "'originality', 'brainstorming', 'AI assistance', 'ideation', or "
+            "'semantic diversity' when supported by claim text.\n"
+            "- Propose at least two links across the batch.\n\n"
+            "Positive example (workshop claim — accepted batch shape):\n"
+            "[\n"
+            "  {\n"
+            f'    "claim_id": "{example_claim_id}",\n'
+            '    "concept_label": "originality",\n'
+            '    "role": "object",\n'
+            '    "confidence": 0.78,\n'
+            '    "domain_metadata": {}\n'
+            "  },\n"
+            "  {\n"
+            f'    "claim_id": "{example_claim_id}",\n'
+            '    "concept_label": "AI assistance",\n'
+            '    "role": "method",\n'
+            '    "confidence": 0.8,\n'
+            '    "domain_metadata": {}\n'
+            "  }\n"
+            "]\n\n"
+        )
+
     def _concept_linking_prompt(
         self,
         claims: list[dict[str, Any]],
@@ -315,16 +348,25 @@ class OllamaModelClient(ModelClient):
         schema_version: str,
         *,
         ontology_labels: list[str] | None = None,
+        manual_text_arbitrary_live: bool = False,
     ) -> str:
         labels = ontology_labels or []
         labels_json = json.dumps(labels, ensure_ascii=False)
         claim_ids = [claim.get("id") for claim in claims if claim.get("id")]
         example_claim_id = claim_ids[0] if claim_ids else "claim_example"
+        manual_calibration = (
+            self._manual_text_arbitrary_live_link_calibration(
+                example_claim_id=example_claim_id
+            )
+            if manual_text_arbitrary_live
+            else ""
+        )
         return (
             f"You are a research concept-linking assistant for domain pack "
             f"{domain_pack!r}.\n"
             f"Claims (JSON): {json.dumps(claims, ensure_ascii=False)}\n\n"
             f"Allowed ontology concept labels (use exact spelling): {labels_json}\n\n"
+            f"{manual_calibration}"
             "Rules for each link:\n"
             "- claim_id MUST match an input claim id exactly.\n"
             "- concept_label MUST be one of the allowed ontology labels.\n"
@@ -571,6 +613,8 @@ class OllamaModelClient(ModelClient):
         claims: list[dict[str, Any]],
         domain_pack: str,
         schema_version: str,
+        *,
+        manual_text_arbitrary_live: bool = False,
     ) -> CandidateConceptLinkBatch_v0_1:
         from rge.modules.concept_linker import ontology_labels_for_pack
 
@@ -580,6 +624,7 @@ class OllamaModelClient(ModelClient):
             domain_pack,
             schema_version,
             ontology_labels=labels,
+            manual_text_arbitrary_live=manual_text_arbitrary_live,
         )
         return self._structured_call(
             task_name="concept_linking",
