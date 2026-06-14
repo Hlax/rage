@@ -68,14 +68,26 @@ checklist**). Plan mode surfaces `scratch_evidence_status` and may recommend
 `run_scratch_evidence_review` when reviewed scratch rows exist. See also README
 Operator Quickstart.
 
+**Maturity tiers (honest framing):**
+
+- **MVP-Engine:** mock/fixture-proven — golden tests, safety audit, fixture-mode run.
+- **MVP-Research:** first live validated write proof exists (NM-1 `extract-claims-live`);
+  checksum-pinned manual synthnote spine is **not** arbitrary live extraction.
+- **Arbitrary-source pipeline:** pending NM-4.
+- **Cloud providers:** deferred (ticket-059).
+
 **Manual synthnote operator spine** (mock LLM; tickets 088–099): for Level-1
 `manual_text` research on the creativity synthnote source, follow the five-step
 CLI sequence in README **Operator Quickstart** (**Manual synthnote operator spine**):
 ingest → extract-claims → link-concepts → build-relationships →
-detect-contradictions. Uses checksum fixture map (`fixtures/manual_source_fixture_map.json`);
-no `--fixture` flags for `manual_text`. Operator sources live under gitignored
-`data/sources/manual/creativity/`; committed test copy at
-`fixtures/sources/manual_synthnote.txt`.
+detect-contradictions. Uses **checksum-pinned mock fixtures**
+(`fixtures/manual_source_fixture_map.json`); no `--fixture` flags for `manual_text`.
+Operator sources live under gitignored `data/sources/manual/creativity/`; committed
+test copy at `fixtures/sources/manual_synthnote.txt`.
+
+**Live validated extraction write** (NM-1): `extract-claims-live` with
+`RGE_ALLOW_LIVE_LLM=1`, non-fixture-map source, explicit evidence DB only.
+See README **Live validated extraction write**.
 
 **Manual synthnote score reconciliation** (after the five-step spine): ingest a
 follow-up `manual_text` source, extract claims, then run `reconcile-scores`.

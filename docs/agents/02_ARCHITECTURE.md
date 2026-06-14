@@ -25,11 +25,11 @@ The first domain pack is `creativity`, focused on human creativity, AI creativit
 2. Use domain packs for topic-specific ontology, search, scoring, extraction overlays, aliases, and card templates.
 3. Start with the `creativity` domain pack.
 4. Use Python for the research engine.
-5. Use LangGraph as workflow orchestration, not as the intelligence itself.
+5. Use LangGraph as workflow orchestration, not as the intelligence itself. **Status: planned, not implemented** — Phase 1–2 orchestration is CLI step chaining in `rge/cli.py`.
 6. Use SQLite first for local durable memory.
 7. Treat the database as memory; prompts are not memory.
-8. Use a private local FastAPI app for control and inspection.
-9. Use Next.js/Vercel for the public read-only site.
+8. Use a private local FastAPI app for control and inspection. **Status: planned, not implemented.**
+9. Use Next.js/Vercel for the public read-only site. **Status: static Next.js export implemented** (no live API).
 10. Export static JSON snapshots from the local DB to the public site.
 11. Never connect the public site directly to the private local agent.
 12. Qwen/Ollama proposes small structured outputs; Python validates and writes.
@@ -250,6 +250,10 @@ The MVP must include these modules as implementation boundaries. A module can st
 | `safety_auditor.py` | Run deterministic safety checks | Yes | No |
 
 ## 6. LangGraph Node Layout
+
+> **Implementation status (2026-06-14):** LangGraph is **not present in the repo**.
+> MVP orchestration is `execute_fixture_mode_run()` and discrete CLI commands in
+> `rge/cli.py`. The layout below is the target design, not current code.
 
 LangGraph is the workflow/state machine. It should route state through deterministic and model-assisted nodes.
 
@@ -485,6 +489,9 @@ Rules:
 ## 9. Local App vs Public Site
 
 ### Local FastAPI app
+
+> **Implementation status (2026-06-14):** No FastAPI app exists. Use `python -m rge.cli`
+> and operator modules instead.
 
 MVP local routes may include:
 

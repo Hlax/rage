@@ -1153,6 +1153,55 @@ def _cmd_extract_claims(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_extract_claims_live(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.modules.live_extraction_write import (
+        LiveExtractionWriteError,
+        extract_claims_live_for_source,
+        is_default_graph_db,
+        resolve_live_evidence_db,
+    )
+    from rge.modules.live_probe import LiveProbeGateError
+
+    db_path = resolve_live_evidence_db(Path(args.db) if args.db else None)
+    if is_default_graph_db(db_path):
+        payload = {
+            "status": "error",
+            "command": "extract-claims-live",
+            "detail": (
+                "Refusing to write live validated claims to the default graph DB. "
+                "Pass --db data/db/live_research_evidence.sqlite or another "
+                "explicit gitignored evidence path."
+            ),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+    conn = ensure_database(db_path)
+    try:
+        payload = extract_claims_live_for_source(conn, args.source)
+        print(json.dumps(payload, indent=2))
+        return 0
+    except (LiveExtractionWriteError, LiveProbeGateError) as exc:
+        payload = {
+            "status": "error",
+            "command": "extract-claims-live",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "extract-claims-live",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_link_concepts(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.db.repositories import ClaimConceptRepository
@@ -1560,6 +1609,33 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional mock LLM fixture filename for deterministic extraction tests.",
     )
     extract_parser.set_defaults(func=_cmd_extract_claims)
+
+    extract_live_parser = subparsers.add_parser(
+        "extract-claims-live",
+        help=(
+            "Live Ollama claim extraction with validated DB writes (operator opt-in)."
+        ),
+        description=(
+            "Run live Ollama structured claim extraction, validate candidates "
+            "with the existing Python validator, and persist accepted/rejected "
+            "rows to an explicit gitignored evidence database. Requires "
+            "RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1. Refuses checksum-pinned "
+            "manual fixture sources and the default creative_research.sqlite path."
+        ),
+    )
+    extract_live_parser.add_argument(
+        "--source",
+        required=True,
+        help="Stable source ID to extract claims from (must already be ingested).",
+    )
+    extract_live_parser.add_argument(
+        "--db",
+        help=(
+            "Evidence SQLite path (default: data/db/live_research_evidence.sqlite). "
+            "Must not be the default creative_research.sqlite graph DB."
+        ),
+    )
+    extract_live_parser.set_defaults(func=_cmd_extract_claims_live)
 
     link_parser = subparsers.add_parser(
         "link-concepts",

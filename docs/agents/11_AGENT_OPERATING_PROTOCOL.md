@@ -260,10 +260,15 @@ checklist**). Plan mode surfaces `scratch_evidence_status` and may recommend
 `manual_text` research on the creativity synthnote source, follow the five-step
 CLI sequence in README **Operator Quickstart** (**Manual synthnote operator spine**):
 ingest → extract-claims → link-concepts → build-relationships →
-detect-contradictions. Checksum fixtures resolve from
-`fixtures/manual_source_fixture_map.json` (no `--fixture` flags for `manual_text`).
-Operator sources: gitignored `data/sources/manual/creativity/`; test copy:
-`fixtures/sources/manual_synthnote.txt`. See also `AGENTS.md` Operator Loop.
+detect-contradictions. **Checksum-pinned mock fixtures** resolve from
+`fixtures/manual_source_fixture_map.json` (no `--fixture` flags for `manual_text` —
+this is not arbitrary live inference). Operator sources: gitignored
+`data/sources/manual/creativity/`; test copy: `fixtures/sources/manual_synthnote.txt`.
+See also `AGENTS.md` Operator Loop.
+
+**Live validated extraction write** (NM-1): `extract-claims-live` with explicit
+`RGE_ALLOW_LIVE_LLM=1`, non-fixture-map source, and gitignored evidence DB.
+See README **Live validated extraction write**.
 
 **Manual synthnote score reconciliation** (after the five-step spine): ingest a
 follow-up `manual_text` source, extract claims, then run `reconcile-scores`.
@@ -297,6 +302,13 @@ consecutive tickets are `done` since the latest checkpoint report, before
 medium/high-risk tickets, or before milestone changes listed in
 `.cursor/commands/rge-run-next-ticket.md` step 3.5. CI enforces mock-only
 golden gates via `.github/workflows/golden-gate.yml`.
+
+**Value-based drift detection (NM-3):** the gate now emits `drift_warning` and
+`recommended_override` when recent completed tickets are mostly doc cross-links or
+checkpoints without advancing product risk. If `drift_warning` is non-null and the
+queued next ticket is `docs_crosslink`, prefer corrective product work (live
+validated extraction, arbitrary-source pipeline, honest maturity docs) over another
+doc ceremony ticket. Ticket classifications appear in `recent_ticket_classifications`.
 
 ## Template Versioning
 

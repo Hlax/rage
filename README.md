@@ -20,9 +20,20 @@ Python validates, scores, stages, writes, reports, and audits.
 
 ## Current Status
 
-**Phase 1 MVP is complete.** The repo ships a runnable end-to-end research pipeline in deterministic mock/fixture mode, a static public site, 123 golden tests, a builder merge gate, and a full safety audit.
+Honest two-tier maturity (see ticket-084 master alignment audit and the 2026-06-14
+third-party repo-direction audit):
 
-What is **real and executable today**:
+| Tier | Status | What it means |
+|------|--------|---------------|
+| **MVP-Engine** | **mock/fixture-proven** | Deterministic Python pipeline, validator gate, safety model, public export, golden tests (GT01–GT26), and fixture-mode orchestration are real and green. |
+| **MVP-Research** | **first live write proof landed (NM-1)** | One non-checksum `manual_text` source was ingested and produced ≥1 validator-accepted claim via live Ollama into gitignored `data/db/live_research_evidence.sqlite`. This is not full arbitrary-source research yet. |
+| **Arbitrary-source pipeline** | **pending (NM-4)** | Manual pipeline still uses checksum-keyed mock fixtures for the two committed synthnote files; other files need live extraction fall-through. |
+| **Cloud providers** | **deferred** | OpenAI/OpenRouter/etc. are not wired (ticket-059 placeholder). |
+
+**Phase 1 MVP is complete** for the engine tier. The public site still serves **fixture
+cards** (`source_type: fixture`); do not treat it as live research output.
+
+What is **real deterministic engine plumbing today**:
 
 - SQLite migration harness and private research graph (7 migrations)
 - Source ingestion, claim extraction, concept linking, relationship building, contradiction detection, score reconciliation
@@ -32,12 +43,17 @@ What is **real and executable today**:
 - Deterministic safety auditor and prompt-injection handling
 - Full fixture-mode orchestration: `research run --fixture-mode` (Golden Test 26)
 
-What is **mock or fixture-only**:
+What is **mock or checksum-pinned fixture content** (not arbitrary live inference):
 
 - Golden tests, CI, and `research verify` always use `RGE_LLM_MODE=mock`
 - Fixture-mode orchestration forces mock regardless of `.env` settings
+- Manual synthnote spine (`fixtures/manual_source_fixture_map.json`) ingests real bytes but resolves **canned** LLM candidate JSON by `raw_text_checksum` — the validator runs for real, the candidates are pinned fixtures
 - Live discovery (`research run` without `--fixture-mode`) returns `not_implemented`
-- Cloud providers (OpenAI, OpenRouter, Anthropic, Gemini, Vertex) are **not wired**
+
+What is **live report-only** (no graph writes unless operator explicitly opts in):
+
+- `probe-extract-claims`, `probe-mini-run`, and related live probes write gitignored reports only (`db_writes: false`)
+- **`extract-claims-live`** (NM-1) is the first explicit live validated write path; requires `RGE_LLM_MODE=ollama`, `RGE_ALLOW_LIVE_LLM=1`, a non-fixture-map source, and an explicit evidence DB (default `data/db/live_research_evidence.sqlite`, not the default graph DB)
 
 What requires **explicit live opt-in** (local Ollama only):
 
@@ -134,7 +150,8 @@ Omit `--source-type` to keep golden-test back-compat (`fixture`). Ingest writes 
 
 **Manual synthnote operator spine** (mock LLM; tickets 088–099): after placing
 `synthnote.txt` under gitignored `data/sources/manual/creativity/`, run the full
-pipeline with checksum-based fixtures (no `--fixture` flags for `manual_text` sources).
+pipeline with **checksum-pinned mock fixtures** (no `--fixture` flags for `manual_text`
+sources — candidate JSON is keyed by `raw_text_checksum`, not live inference).
 A committed test copy lives at `fixtures/sources/manual_synthnote.txt`.
 
 ```powershell
@@ -179,9 +196,27 @@ python -m rge.cli reconcile-scores --source src_c5d1add68657e7ec
 ```
 
 Re-running any step is idempotent (stable row counts). Fixture filenames resolve from
-`fixtures/manual_source_fixture_map.json` keyed by `raw_text_checksum`. Use
-`--db <path>` to target a non-default SQLite file. Golden fixture sources still pass
-explicit `--fixture` flags and are unchanged.
+`fixtures/manual_source_fixture_map.json` keyed by `raw_text_checksum` (mock candidates
+only — not arbitrary-source live extraction). Use `--db <path>` to target a non-default
+SQLite file. Golden fixture sources still pass explicit `--fixture` flags and are unchanged.
+
+**Live validated extraction write** (NM-1; local Ollama; operator opt-in): prove real
+inference on a source **not** in the checksum fixture map. Writes only to an explicit
+gitignored evidence DB — never the default graph DB or public export.
+
+```powershell
+$env:RGE_LLM_MODE = "ollama"
+$env:RGE_ALLOW_LIVE_LLM = "1"
+python -m rge.cli model-health
+
+# Place a new .txt/.md under data/sources/manual/creativity/ (not synthnote checksums)
+python -m rge.cli ingest data/sources/manual/creativity/your_new_note.txt `
+  --domain creativity --source-type manual_text --source-title "Your note" `
+  --db data/db/live_research_evidence.sqlite
+
+python -m rge.cli extract-claims-live --source <source_id_from_ingest> `
+  --db data/db/live_research_evidence.sqlite
+```
 
 **Live probe scratch evidence workflow** (local Ollama opt-in; report-only until
 operator persist): use the numbered checklist in
