@@ -147,7 +147,8 @@ superseded
 | 113 | ticket-113 | done | Domain pack scoring.yaml loader proof (NM-5 preview) | `phase-2/ticket-113-domain-pack-scoring-loader` | `agent_reports/2026-06-14_ticket-113_domain-pack-scoring-loader.md` |
 | 114 | ticket-114 | done | Domain pack evidence_types.yaml loader proof (NM-5 continuation) | `phase-2/ticket-114-domain-pack-evidence-types-loader` | `agent_reports/2026-06-14_ticket-114_domain-pack-evidence-types-loader.md` |
 | 115 | ticket-115 | done | Domain pack claim_schema.yaml loader proof (NM-5 continuation) | `phase-2/ticket-115-domain-pack-claim-schema-loader` | `agent_reports/2026-06-14_ticket-115_domain-pack-claim-schema-loader.md` |
-| 116 | ticket-116 | proposed | Domain pack source_preferences.yaml loader proof (NM-5 continuation) | | |
+| 116 | ticket-116 | done | Domain pack source_preferences.yaml loader proof (NM-5 continuation) | `phase-2/ticket-116-domain-pack-source-preferences-loader` | `agent_reports/2026-06-14_ticket-116_domain-pack-source-preferences-loader.md` |
+| 117 | ticket-117 | proposed | Domain pack card_templates.yaml loader proof (NM-5 continuation) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -877,9 +878,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-116 (proposed) — Domain pack source_preferences.yaml loader proof (NM-5 continuation)
+ticket-117 (proposed) — Domain pack card_templates.yaml loader proof (NM-5 continuation)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-116 agent)
+
+- Extended `domain_pack_loader` to parse `source_preferences.yaml` (`source_type_weights`).
+- `research_queue.rank_fixture_candidates()` uses pack credibility priors; marketing still code-rejected.
+- `blog_post` uses 0.40 fallback (pack has no entry); GT09 unchanged.
+- 7 new unit tests; 425 pytest pass; safety audit pass.
+- Pre-ticket audit: `agent_reports/2026-06-14_pre-ticket-116_domain-pack-source-preferences-loader-audit.md`.
+- Next: ticket-117 (NM-5 continuation: card_templates.yaml) requires pre-ticket audit before implementation.
 
 ## Queue Notes (2026-06-14, ticket-115 agent)
 
@@ -931,7 +941,7 @@ directed corrective work **before** ticket-111. **Completed and merged to main @
 | NM-4 / ticket-112 | **done** | Arbitrary manual_text live fall-through |
 | ticket-111 | **superseded** | Folded into NM-2 |
 
-Next product move: **ticket-116** (NM-5 continuation: domain pack source_preferences.yaml).
+Next product move: **ticket-117** (NM-5 continuation: domain pack card_templates.yaml).
 
 ## Queue Rules
 

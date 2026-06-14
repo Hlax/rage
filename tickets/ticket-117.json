@@ -1,0 +1,49 @@
+{
+  "id": "ticket-117",
+  "title": "Domain pack card_templates.yaml loader proof (NM-5 continuation)",
+  "problem": "Ticket-116 proved source_preferences.yaml drives research queue credibility priors. The creativity pack still has four other declarative files not loaded at runtime. NM-5 requires incremental proof that domain-pack files beyond the six already loaded are consumed by the engine.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-116_domain-pack-source-preferences-loader.md",
+    "agent_reports/2026-06-14_pre-ticket-116_domain-pack-source-preferences-loader-audit.md",
+    "domain_packs/creativity/card_templates.yaml",
+    "rge/modules/card_exporter.py",
+    "rge/modules/domain_pack_loader.py"
+  ],
+  "affected_modules": [
+    "rge/modules/domain_pack_loader.py",
+    "rge/modules/card_exporter.py"
+  ],
+  "expected_files": [
+    "rge/modules/domain_pack_loader.py",
+    "rge/modules/card_exporter.py",
+    "tests/unit/test_domain_pack_card_templates_loader.py",
+    "agent_reports/2026-06-14_ticket-117_domain-pack-card-templates-loader.md"
+  ],
+  "acceptance_criteria": [
+    "card_templates.yaml is loaded for creativity domain pack at runtime.",
+    "At least one existing consumer reads pack-defined card template metadata instead of hardcoded duplicates.",
+    "Temp-pack unit test proves different template config changes export or validation behavior.",
+    "Golden GT11/GT12 and manual synthnote tests remain green in mock mode.",
+    "Safety audit passes.",
+    "No public export/site changes beyond reading pack metadata in exporter."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_domain_pack_card_templates_loader.py -q",
+    "python -m pytest tests/unit/test_domain_pack_source_preferences_loader.py -q",
+    "python -m pytest tests/golden/test_11_public_card_export.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No loading all remaining pack files in one ticket.",
+    "No public site routing or committed JSON changes.",
+    "No applying base_strength priors from evidence_types.",
+    "No cloud providers or live Ollama changes.",
+    "No schema migrations.",
+    "No LangGraph/FastAPI/embeddings work."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert card_templates loader wiring; restore inline exporter constants.",
+  "status": "proposed"
+}

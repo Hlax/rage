@@ -52,6 +52,13 @@ class ClaimSchemaOverlay:
 
 
 @dataclass(frozen=True)
+class SourcePreferencesOverlay:
+    source_type_weights: dict[str, float]
+    preferred_sources: tuple[str, ...]
+    avoid_as_primary: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class DomainPack:
     pack_id: str
     concepts: tuple[DomainPackConcept, ...]
@@ -60,6 +67,7 @@ class DomainPack:
     score_reconciliation: ScoreReconciliationOverlay
     evidence_types: tuple[EvidenceTypeDefinition, ...]
     claim_schema: ClaimSchemaOverlay
+    source_preferences: SourcePreferencesOverlay
 
 
 def repo_root() -> Path:
@@ -433,6 +441,69 @@ def validate_link_domain_metadata(
     return True, None
 
 
+UNKNOWN_SOURCE_TYPE_CREDIBILITY_DEFAULT = 0.40
+
+
+def parse_source_preferences_yaml(path: Path) -> SourcePreferencesOverlay:
+    """Parse source preferences overlay from a domain pack source_preferences stub."""
+    if not path.is_file():
+        raise DomainPackError(f"Source preferences file not found: {path}")
+
+    text = path.read_text(encoding="utf-8")
+    if not text.strip():
+        raise DomainPackError(f"Source preferences file is empty: {path}")
+
+    if "source_type_weights:" not in text:
+        raise DomainPackError(
+            f"Source preferences file must contain 'source_type_weights:' section: {path}"
+        )
+
+    weight_lines: list[str] = []
+    in_weights = False
+    for line in text.splitlines():
+        if line.strip() == "source_type_weights:":
+            in_weights = True
+            continue
+        if in_weights:
+            if line and not line.startswith(" "):
+                break
+            weight_lines.append(line)
+
+    source_type_weights: dict[str, float] = {}
+    for line in weight_lines:
+        match = re.match(r"^\s{2}([\w]+):\s*([\d.]+)\s*$", line)
+        if not match:
+            continue
+        source_type_weights[match.group(1).casefold()] = float(match.group(2))
+
+    if not source_type_weights:
+        raise DomainPackError(
+            f"Source preferences file missing source_type_weights entries in {path}"
+        )
+
+    preferred_sources = tuple(_parse_yaml_list_section(text, "preferred_sources"))
+    avoid_as_primary = tuple(_parse_yaml_list_section(text, "avoid_as_primary"))
+
+    return SourcePreferencesOverlay(
+        source_type_weights=source_type_weights,
+        preferred_sources=preferred_sources,
+        avoid_as_primary=avoid_as_primary,
+    )
+
+
+def source_type_credibility_prior(
+    pack: DomainPack,
+    source_type: str,
+    *,
+    default: float = UNKNOWN_SOURCE_TYPE_CREDIBILITY_DEFAULT,
+) -> float:
+    """Return pack-defined credibility prior for a candidate source type."""
+    normalized = source_type.strip().casefold()
+    if not normalized:
+        return default
+    return pack.source_preferences.source_type_weights.get(normalized, default)
+
+
 def build_alias_to_canonical(aliases: dict[str, list[str]]) -> dict[str, str]:
     """Build normalized alias phrase → canonical label reverse map."""
     reverse: dict[str, str] = {}
@@ -463,6 +534,7 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
     scoring_path = pack_root / "scoring.yaml"
     evidence_types_path = pack_root / "evidence_types.yaml"
     claim_schema_path = pack_root / "claim_schema.yaml"
+    source_preferences_path = pack_root / "source_preferences.yaml"
 
     concepts = parse_ontology_yaml(ontology_path)
     alias_map = parse_aliases_yaml(aliases_path)
@@ -470,6 +542,7 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
     score_reconciliation = parse_scoring_yaml(scoring_path)
     evidence_types = parse_evidence_types_yaml(evidence_types_path)
     claim_schema = parse_claim_schema_yaml(claim_schema_path)
+    source_preferences = parse_source_preferences_yaml(source_preferences_path)
 
     return DomainPack(
         pack_id=pack_id,
@@ -479,6 +552,7 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
         score_reconciliation=score_reconciliation,
         evidence_types=evidence_types,
         claim_schema=claim_schema,
+        source_preferences=source_preferences,
     )
 
 

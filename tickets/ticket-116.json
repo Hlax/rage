@@ -45,5 +45,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert source_preferences loader wiring; restore inline queue weight constants.",
-  "status": "proposed"
+  "status": "done"
 }
