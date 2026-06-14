@@ -98,7 +98,8 @@ python -m rge.cli discover-sources --provider openalex --query "human AI creativ
 
 ## Merge to main
 
-Pending merge.
+Merged to `main` as `d9bc490af6c16dadd45c9e8beba70816063337ec` (2026-06-14).
+Post-merge pytest: 511 passed, 6 deselected.
 
 ## Recommended next ticket
 
