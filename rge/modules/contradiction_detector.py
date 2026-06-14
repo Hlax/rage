@@ -16,6 +16,8 @@ from rge.llm.registry import get_model_client
 from rge.modules.manual_source_fixtures import (
     contradiction_claim_hints_for_manual_source,
     contradiction_fixture_for_manual_source,
+    manual_text_lacks_contradiction_fixture,
+    resolve_manual_source_fixture,
 )
 from rge.modules.relationship_builder import VALID_STANCES
 
@@ -32,6 +34,13 @@ REJECTION_INVALID_CLASSIFICATION = "invalid_classification"
 REJECTION_MISSING_QUALIFYING_CLAIM = "missing_qualifying_claim"
 REJECTION_MISSING_OPPOSING_CLAIM = "missing_opposing_claim"
 REJECTION_SAME_CLAIM_PAIR = "same_claim_pair"
+
+_MANUAL_TEXT_NO_CONTRADICTION_FIXTURE_ERROR = (
+    "manual_text source has no checksum-pinned detect_contradictions fixture in "
+    "fixtures/manual_source_fixture_map.json. Use mock detect-contradictions only for "
+    "checksum-pinned synthnote sources, or pass --live-manual-contradiction-fallthrough "
+    "with RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1 on a gitignored evidence DB."
+)
 
 
 def _normalize(text: str) -> str:
@@ -291,6 +300,15 @@ def _apply_contradiction_claim_hints(
     return resolved
 
 
+def _default_contradiction_fixture_for_source(source: Any | None) -> str:
+    mapped = contradiction_fixture_for_manual_source(source)
+    if mapped:
+        return mapped
+    if manual_text_lacks_contradiction_fixture(source):
+        raise ValueError(_MANUAL_TEXT_NO_CONTRADICTION_FIXTURE_ERROR)
+    return "contradiction_detection_creativity_diversity.json"
+
+
 def propose_contradictions(
     claim_dicts: list[dict[str, Any]],
     relationships: list[dict[str, Any]],
@@ -299,6 +317,7 @@ def propose_contradictions(
     client: Any | None = None,
     fixture_name: str | None = None,
     source: Any | None = None,
+    live_manual_contradiction_fallthrough: bool = False,
 ) -> list[dict[str, Any]]:
     """Propose contradiction/qualification links via the configured model client."""
     config = load_config()
@@ -309,10 +328,11 @@ def propose_contradictions(
         "domain_pack": domain_pack,
         "schema_version": config.llm_schema_version,
     }
+    if live_manual_contradiction_fallthrough:
+        detect_kwargs["manual_text_arbitrary_live"] = True
     if isinstance(model_client, MockModelClient):
-        resolved_fixture = fixture_name or contradiction_fixture_for_manual_source(source)
-        detect_kwargs["fixture_name"] = (
-            resolved_fixture or "contradiction_detection_creativity_diversity.json"
+        detect_kwargs["fixture_name"] = fixture_name or _default_contradiction_fixture_for_source(
+            source
         )
     batch = model_client.detect_contradictions(**detect_kwargs)
 
@@ -324,6 +344,9 @@ def detect_contradictions_for_source(
     source_id: str,
     *,
     fixture_name: str | None = None,
+    live_manual_contradiction_fallthrough: bool = False,
+    client: Any | None = None,
+    config: Any | None = None,
 ) -> dict[str, Any]:
     """Detect contradictions for a source against existing graph edges."""
     from rge.db.repositories import (
@@ -362,12 +385,26 @@ def detect_contradictions_for_source(
         }
         for claim in domain_claims
     ]
+    cfg = config if config is not None else load_config()
+    if live_manual_contradiction_fallthrough:
+        if not manual_text_lacks_contradiction_fixture(source_record):
+            raise ValueError(
+                "live_manual_contradiction_fallthrough requires a manual_text source "
+                "absent from fixtures/manual_source_fixture_map.json "
+                "detect_contradictions entries."
+            )
+        model_client = client or get_model_client(cfg, mode="ollama")
+    else:
+        model_client = client
+
     proposed = propose_contradictions(
         claim_dicts,
         active_relationships,
         domain_pack,
         fixture_name=fixture_name,
         source=source_record,
+        client=model_client,
+        live_manual_contradiction_fallthrough=live_manual_contradiction_fallthrough,
     )
     hints = contradiction_claim_hints_for_manual_source(source_record)
     if hints:
@@ -434,6 +471,85 @@ def detect_contradictions_for_source(
         "qualification_ids": qualification_ids,
         "rejected_count": len(validated["rejected"]),
         "rejected": validated["rejected"],
+    }
+
+
+def assert_contradiction_checksum_not_in_fixture_map(checksum: str) -> None:
+    """Refuse sources whose detect_contradictions task is pinned to mock manual fixtures."""
+    from rge.modules.live_extraction_write import LiveExtractionWriteError
+
+    if resolve_manual_source_fixture(checksum, "detect_contradictions"):
+        raise LiveExtractionWriteError(
+            f"Source checksum {checksum!r} is listed in "
+            "fixtures/manual_source_fixture_map.json for detect_contradictions; use mock "
+            "detect-contradictions for checksum-pinned manual sources."
+        )
+
+
+def detect_contradictions_manual_live_fallthrough(
+    conn: Any,
+    source_id: str,
+    *,
+    config: Any | None = None,
+    skip_health_check: bool = False,
+    client: Any | None = None,
+) -> dict[str, Any]:
+    """Live Ollama contradiction detection for manual_text sources absent from the fixture map."""
+    from rge.db.repositories import RelationshipEvidenceRepository, RelationshipRepository, SourceRepository
+    from rge.modules.live_extraction_write import LiveExtractionWriteError
+    from rge.modules.live_probe import assert_live_probe_env, assert_ollama_health
+
+    cfg = assert_live_probe_env(config, command="detect-contradictions")
+    health = assert_ollama_health(cfg) if not skip_health_check else {}
+
+    source = SourceRepository(conn).get_by_id(source_id)
+    if source is None:
+        raise LiveExtractionWriteError(f"Source not found: {source_id}")
+    if getattr(source, "source_type", None) != "manual_text":
+        raise LiveExtractionWriteError(
+            "live_manual_contradiction_fallthrough requires source_type manual_text."
+        )
+
+    checksum = getattr(source, "raw_text_checksum", None)
+    if not checksum:
+        raise LiveExtractionWriteError(f"Source {source_id} has no raw_text_checksum.")
+    assert_contradiction_checksum_not_in_fixture_map(str(checksum))
+
+    model_client = client or get_model_client(cfg, mode="ollama")
+    result = detect_contradictions_for_source(
+        conn,
+        source_id,
+        live_manual_contradiction_fallthrough=True,
+        client=model_client,
+        config=cfg,
+    )
+    relationships = RelationshipRepository(conn).list_active()
+    qualifications = [
+        row
+        for row in RelationshipEvidenceRepository(conn).list_for_source(source_id)
+        if row["stance"] == "qualifies"
+    ]
+    return {
+        "status": result["status"],
+        "command": "detect-contradictions",
+        "live_manual_contradiction_fallthrough": True,
+        "source_id": source_id,
+        "source_title": source.title,
+        "source_type": source.source_type,
+        "raw_text_checksum": checksum,
+        "fixture_map_match": not manual_text_lacks_contradiction_fixture(source),
+        "db_writes": result.get("qualification_count", 0) > 0,
+        "provider": model_client.provider,
+        "model": getattr(model_client, "model", "unknown"),
+        "llm_schema_version": cfg.llm_schema_version,
+        "effective_llm_mode": "ollama",
+        "health": health,
+        "qualification_count": result.get("qualification_count", 0),
+        "qualification_ids": result.get("qualification_ids", []),
+        "qualifications": qualifications,
+        "active_relationships": relationships,
+        "rejected_count": result.get("rejected_count", 0),
+        "rejected": result.get("rejected", []),
     }
 
 

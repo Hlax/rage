@@ -544,12 +544,36 @@ class OllamaModelClient(ModelClient):
             "Do not include markdown fences or commentary."
         )
 
+    def _manual_text_arbitrary_live_contradiction_calibration(
+        self,
+        *,
+        relationship_triples: list[dict[str, Any]],
+    ) -> str:
+        triples_json = json.dumps(relationship_triples, ensure_ascii=False)
+        return (
+            "Manual arbitrary source mode (live contradiction fall-through):\n"
+            "- base_subject_concept/base_predicate/base_object_concept and "
+            "new_subject_concept/new_predicate/new_object_concept MUST match two "
+            "distinct relationship triples from the known triples list exactly.\n"
+            "- If fewer than two active relationship triples exist, or no valid "
+            "qualification pair is supported by source claims, return an empty "
+            '"items" array (explicit no-contradiction result).\n'
+            "- qualifying_claim_id and opposing_claim_id MUST reference distinct "
+            "claim ids from the Claims JSON when proposing a link.\n"
+            "- qualification_stance MUST be qualifies.\n"
+            '- contradiction_classification MUST be '
+            '"apparent_contradiction_metric_or_condition_difference".\n\n'
+            f"Known relationship triples for this source graph: {triples_json}\n\n"
+        )
+
     def _contradiction_detection_prompt(
         self,
         claims: list[dict[str, Any]],
         relationships: list[dict[str, Any]],
         domain_pack: str,
         schema_version: str,
+        *,
+        manual_text_arbitrary_live: bool = False,
     ) -> str:
         relationship_triples = [
             {
@@ -562,6 +586,13 @@ class OllamaModelClient(ModelClient):
         ]
         triples_json = json.dumps(relationship_triples, ensure_ascii=False)
         claim_ids = [claim.get("id") for claim in claims if claim.get("id")]
+        manual_calibration = (
+            self._manual_text_arbitrary_live_contradiction_calibration(
+                relationship_triples=relationship_triples,
+            )
+            if manual_text_arbitrary_live
+            else ""
+        )
         return (
             f"You are a research contradiction-detection assistant for domain pack "
             f"{domain_pack!r}.\n"
@@ -571,6 +602,7 @@ class OllamaModelClient(ModelClient):
             f"{triples_json}\n"
             f"Known claim ids (optional in output): "
             f"{json.dumps(claim_ids, ensure_ascii=False)}\n\n"
+            f"{manual_calibration}"
             "Rules for each contradiction link:\n"
             "- base_subject_concept, base_predicate, base_object_concept MUST match "
             "one existing relationship triple (typically the may_reduce edge).\n"
@@ -702,9 +734,15 @@ class OllamaModelClient(ModelClient):
         relationships: list[dict[str, Any]],
         domain_pack: str,
         schema_version: str,
+        *,
+        manual_text_arbitrary_live: bool = False,
     ) -> CandidateContradictionBatch_v0_1:
         prompt = self._contradiction_detection_prompt(
-            claims, relationships, domain_pack, schema_version
+            claims,
+            relationships,
+            domain_pack,
+            schema_version,
+            manual_text_arbitrary_live=manual_text_arbitrary_live,
         )
         return self._structured_call(
             task_name="contradiction_detection",
