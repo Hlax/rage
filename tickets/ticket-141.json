@@ -43,7 +43,7 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove --enqueue path; retain ticket-140 rank-only JSON output.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / source acquisition / product-risk reduction",
   "pre_ticket_audit_required": true
 }
