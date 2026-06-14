@@ -961,6 +961,29 @@ Public site should work even when local PC is off.
 
 ---
 
+## Current Maturity (honest framing)
+
+Align with README **Current Status** and AGENTS.md maturity tiers (ticket-135). Do not
+overclaim live research from fixture-mode golden proofs or checksum-pinned synthnote
+spines.
+
+| Tier | Status | What it means |
+|------|--------|---------------|
+| **MVP-Engine** | **mock/fixture-proven** | Deterministic Python pipeline, validator gate, safety model, public export, golden tests (GT01–GT26), and fixture-mode orchestration are real and green. |
+| **MVP-Research** | **partial — NM-1 + NM-4 evidence DB** | NM-1: first live validated claim write via `extract-claims-live` on gitignored `data/db/live_research_evidence.sqlite`. NM-4: operator-proven live `manual_text` spine through reconcile on that same evidence DB (tickets 127–133). Default graph DB synthnote path remains checksum-mock — not arbitrary live inference. |
+| **Arbitrary-source pipeline** | **partial** | **Evidence DB:** NM-4 live ingest → extract/link/relationship/contradiction fall-through + deterministic reconcile (`--evidence-db-reconcile`) proven on gitignored evidence DB. **Default graph DB:** committed synthnote files still use checksum-pinned mock fixtures. **Source discovery/fetcher:** pending (Phase 3) — `source_discovery.py` / `fetcher.py` remain stubs; `research run` without `--fixture-mode` returns `not_implemented`. |
+| **Cloud providers** | **deferred** | OpenAI/OpenRouter/etc. are not wired (ticket-059 placeholder). |
+
+**Operator references:** README Operator Quickstart (**NM-4 evidence DB operator spine**,
+**Manual synthnote operator spine**); `docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md`
+(scratch evidence workflow); `python -m rge.modules.operator_loop --mode plan` for
+read-only `nm4_evidence_spine_status`.
+
+The public site still serves **fixture cards** (`source_type: fixture`); do not treat
+it as live research output.
+
+---
+
 ## Golden MVP Proof
 
 The MVP is real only when:
