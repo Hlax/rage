@@ -12,6 +12,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from rge.modules.domain_pack_loader import load_domain_pack, source_type_credibility_prior
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_FIXTURE_PATH = (
     REPO_ROOT / "fixtures" / "candidate_sources" / "source_ranking_fixture.json"
@@ -24,15 +26,9 @@ REJECTED_MARKETING_REASON = (
     "Marketing page with low credibility; excluded from active queue."
 )
 
+_CREATIVITY_SOURCE_WEIGHTS = load_domain_pack("creativity").source_preferences.source_type_weights
 SOURCE_TYPE_CREDIBILITY: dict[str, float] = {
-    "peer_reviewed_empirical": 0.90,
-    "benchmark_paper": 0.80,
-    "expert_interview": 0.70,
-    "case_study": 0.65,
-    "theory_essay": 0.60,
-    "blog_post": 0.35,
-    "product_docs": 0.45,
-    "marketing_page": 0.20,
+    key: value for key, value in _CREATIVITY_SOURCE_WEIGHTS.items()
 }
 
 FIXTURE_CANDIDATE_PROFILES: dict[str, dict[str, Any]] = {
@@ -124,9 +120,11 @@ def rank_fixture_candidates(
     candidates: list[dict[str, Any]],
     *,
     contract: dict[str, Any] | None = None,
+    domain_pack: str = "creativity",
 ) -> list[dict[str, Any]]:
     """Rank fixture candidates deterministically with machine-readable reasons."""
     _ = contract
+    pack = load_domain_pack(domain_pack)
     ranked: list[dict[str, Any]] = []
     for candidate in candidates:
         candidate_id = candidate["id"]
@@ -134,9 +132,7 @@ def rank_fixture_candidates(
         if profile is None:
             continue
         source_type = candidate.get("source_type", "")
-        credibility_prior = SOURCE_TYPE_CREDIBILITY.get(source_type, 0.40)
-        if source_type == "marketing_page":
-            credibility_prior = SOURCE_TYPE_CREDIBILITY["marketing_page"]
+        credibility_prior = source_type_credibility_prior(pack, source_type)
 
         priority_score = compute_priority_score(
             relevance_score=float(profile["relevance_score"]),
@@ -198,7 +194,10 @@ def queue_sources_from_fixture(
         }
 
     fixture = load_candidate_fixture(fixture_path)
-    ranked = rank_fixture_candidates(fixture.get("candidates", []))
+    ranked = rank_fixture_candidates(
+        fixture.get("candidates", []),
+        domain_pack="creativity",
+    )
     candidate_repo = CandidateSourceRepository(conn)
     queue_ids: list[str] = []
 

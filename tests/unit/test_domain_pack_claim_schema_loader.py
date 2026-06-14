@@ -92,6 +92,15 @@ def _write_demo_pack(
         _claim_schema_yaml(phases=phases, dimensions=dimensions),
         encoding="utf-8",
     )
+    (pack_dir / "source_preferences.yaml").write_text(
+        "source_type_weights:\n"
+        "  peer_reviewed_empirical: 0.90\n"
+        "preferred_sources:\n"
+        "  - manual PDFs\n"
+        "avoid_as_primary:\n"
+        "  - marketing landing pages\n",
+        encoding="utf-8",
+    )
     return pack_dir
 
 
