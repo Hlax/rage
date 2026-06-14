@@ -167,7 +167,8 @@ superseded
 | 133 | ticket-133 | done | README NM-4 evidence DB operator quickstart | `phase-2/ticket-133-readme-nm4-evidence-operator-quickstart` | `agent_reports/2026-06-14_ticket-133_readme-nm4-evidence-operator-quickstart.md` |
 | 134 | ticket-134 | done | Principal audit checkpoint post-ticket-133 | | `agent_reports/2026-06-14_principal-audit-post-ticket-133.md` |
 | 135 | ticket-135 | done | README maturity table honest NM-4 relabel | `phase-2/ticket-135-readme-maturity-nm4-relabel` | `agent_reports/2026-06-14_ticket-135_readme-maturity-nm4-relabel.md` |
-| 136 | ticket-136 | proposed | Canonical context maturity NM-4 alignment | | |
+| 136 | ticket-136 | done | Canonical context maturity NM-4 alignment | `phase-2/ticket-136-canonical-context-maturity-nm4-alignment` | `agent_reports/2026-06-14_ticket-136_canonical-context-maturity-nm4-alignment.md` |
+| 137 | ticket-137 | proposed | Principal audit checkpoint post-ticket-136 | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -897,16 +898,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-136 (proposed) — Canonical context maturity NM-4 alignment
+ticket-137 (proposed) — Principal audit checkpoint post-ticket-136
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-14, ticket-135 agent)
+## Queue Notes (2026-06-14, ticket-136 agent)
 
-- Pre-ticket-135 audit GO; README + AGENTS maturity relabel for NM-4 evidence DB vs synthnote mock.
-- ticket-134 closed (principal audit post-133 committed).
+- Canonical context doc: Current Maturity section aligned with README/AGENTS (ticket-135).
+- Docs-only; no code changes.
 - 487 pytest; 142 golden; safety audit pass.
-- Next: ticket-136 (docs/agents/01 maturity alignment).
+- Cadence: 3 done since post-ticket-133 (134–136) — principal audit required before next implementation.
+- Next: ticket-137 (principal audit checkpoint).
 
 ## Queue Notes (2026-06-14, ticket-131 agent)
 

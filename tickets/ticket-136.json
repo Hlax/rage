@@ -30,7 +30,7 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert canonical context maturity section edits.",
-  "status": "proposed",
+  "status": "done",
   "category": "operator documentation / maturity honesty",
   "pre_ticket_audit_required": false
 }

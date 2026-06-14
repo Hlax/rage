@@ -1,0 +1,36 @@
+{
+  "id": "ticket-137",
+  "title": "Principal audit checkpoint post-ticket-136",
+  "problem": "Tickets 134–136 completed principal audit closure, README/AGENTS maturity relabel, and canonical context alignment. Three consecutive done tickets since the post-ticket-133 principal audit require a cadence checkpoint before further implementation.",
+  "evidence": [
+    "agent_reports/2026-06-14_principal-audit-post-ticket-133.md",
+    "agent_reports/2026-06-14_ticket-135_readme-maturity-nm4-relabel.md",
+    "agent_reports/2026-06-14_ticket-136_canonical-context-maturity-nm4-alignment.md",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-14_principal-audit-post-ticket-136.md"
+  ],
+  "acceptance_criteria": [
+    "Read-only principal audit report with GO/NO-GO and cadence assessment.",
+    "Reviews docs maturity alignment chain (133–136) and NM-4 evidence DB status.",
+    "Recommends smallest next product or Phase 3 ticket with gate classification.",
+    "No rge/ or apps/ implementation unless audit-only runner/doc patches."
+  ],
+  "test_plan": [
+    "python -m rge.modules.operator_loop --mode plan",
+    "python -m pytest tests/golden -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Feature implementation.",
+    "Public export/site changes.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove audit report.",
+  "status": "proposed",
+  "category": "principal audit / cadence checkpoint",
+  "pre_ticket_audit_required": false
+}
