@@ -163,7 +163,8 @@ superseded
 | 129 | ticket-129 | done | Arbitrary manual live relationship fall-through | `phase-2/ticket-129-arbitrary-manual-live-relationship-fallthrough` | `agent_reports/2026-06-14_ticket-129_arbitrary-manual-live-relationship-fallthrough.md` |
 | 130 | ticket-130 | done | Arbitrary manual live contradiction fall-through | `phase-2/ticket-130-arbitrary-manual-live-contradiction-fallthrough` | `agent_reports/2026-06-14_ticket-130_arbitrary-manual-live-contradiction-fallthrough.md` |
 | 131 | ticket-131 | done | NM-4 evidence DB score reconciliation operator proof | `phase-2/ticket-131-nm4-evidence-db-score-reconciliation` | `agent_reports/2026-06-14_ticket-131_nm-4-evidence-db-score-reconciliation.md` |
-| 132 | ticket-132 | proposed | Operator loop NM-4 evidence DB spine status | | |
+| 132 | ticket-132 | done | Operator loop NM-4 evidence DB spine status | `phase-2/ticket-132-operator-loop-nm4-evidence-spine-status` | `agent_reports/2026-06-14_ticket-132_operator-loop-nm4-evidence-spine-status.md` |
+| 133 | ticket-133 | proposed | README NM-4 evidence DB operator quickstart | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -893,9 +894,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-132 (proposed) — Operator loop NM-4 evidence DB spine status
+ticket-133 (proposed) — README NM-4 evidence DB operator quickstart
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-132 agent)
+
+- `inspect_nm4_evidence_spine_status` in operator_loop plan (read-only SQLite counts).
+- Relative evidence DB path under `root` (matches scratch DB pattern; fixes test isolation).
+- 3 operator_loop tests; 487 pytest; 142 golden; safety audit pass.
+- Plan mode shows reconciled spine when local evidence DB exists.
+- Next: ticket-133 (README NM-4 evidence operator quickstart, low risk).
 
 ## Queue Notes (2026-06-14, ticket-131 agent)
 

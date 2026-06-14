@@ -1,0 +1,39 @@
+{
+  "id": "ticket-133",
+  "title": "README NM-4 evidence DB operator quickstart",
+  "problem": "Tickets 127–132 completed the NM-4 live manual_text spine and deterministic score reconciliation on the gitignored evidence DB, plus operator_loop plan visibility. README Operator Quickstart still lacks a single documented NM-4 evidence DB spine section tying ingest through reconcile to the configured path.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-132_operator-loop-nm4-evidence-spine-status.md",
+    "agent_reports/2026-06-14_ticket-131_nm-4-evidence-db-score-reconciliation.md",
+    "README.md",
+    "rge/modules/operator_loop.py"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-14_ticket-133_readme-nm4-evidence-operator-quickstart.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart documents NM-4 evidence DB path and CLI spine (ingest, live fall-through extract/link/relationship/contradiction, follow-up reconcile with --evidence-db-reconcile).",
+    "Documents operator_loop plan nm4_evidence_spine_status block.",
+    "No code or schema changes.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "New CLI flags.",
+    "Public export/site changes.",
+    "AGENTS.md rewrite.",
+    "Full docs/agents cross-link chain."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README NM-4 quickstart section.",
+  "status": "proposed",
+  "category": "operator documentation / NM-4 completion",
+  "pre_ticket_audit_required": false
+}

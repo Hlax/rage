@@ -742,6 +742,147 @@ def inspect_domain_pack_status(
     return inspect_domain_pack_load_health(pack_id, root=root or repo_root())
 
 
+def inspect_nm4_evidence_spine_status(
+    *,
+    root: Path | None = None,
+    evidence_db: Path | None = None,
+) -> dict[str, Any]:
+    """Read-only NM-4 gitignored evidence DB spine counts for operator plan mode."""
+    project_root = root or repo_root()
+    db_path = evidence_db if evidence_db is not None else Path(
+        "data/db/live_research_evidence.sqlite"
+    )
+    if not db_path.is_absolute():
+        db_path = project_root / db_path
+    db_path = db_path.resolve()
+    try:
+        rel_path = db_path.relative_to(project_root.resolve()).as_posix()
+    except ValueError:
+        rel_path = db_path.as_posix()
+
+    status: dict[str, Any] = {
+        "evidence_db_path": rel_path,
+        "evidence_db_exists": db_path.is_file(),
+        "readable": False,
+        "source_count": None,
+        "manual_text_source_count": None,
+        "accepted_claim_count": None,
+        "concept_link_count": None,
+        "active_relationship_count": None,
+        "relationship_evidence_count": None,
+        "qualification_link_count": None,
+        "score_event_count": None,
+        "spine_milestones": {
+            "sources": False,
+            "accepted_claims": False,
+            "concept_links": False,
+            "active_relationships": False,
+            "relationship_evidence": False,
+            "qualification_links": False,
+            "score_events": False,
+        },
+        "spine_stage": "missing",
+        "status": "missing",
+        "error": None,
+        "operator_commands": {
+            "ingest": (
+                "python -m rge.cli ingest <manual_text> --domain creativity "
+                "--source-type manual_text --db data/db/live_research_evidence.sqlite"
+            ),
+            "live_extract": (
+                "python -m rge.cli extract-claims --source <id> "
+                "--db data/db/live_research_evidence.sqlite --live-manual-fallthrough"
+            ),
+            "reconcile": (
+                "python -m rge.cli reconcile-scores --source <followup_id> "
+                "--db data/db/live_research_evidence.sqlite --evidence-db-reconcile"
+            ),
+        },
+    }
+
+    if not db_path.is_file():
+        status["error"] = f"evidence DB not found: {rel_path}"
+        return status
+
+    try:
+        conn = sqlite3.connect(f"file:{db_path.as_posix()}?mode=ro", uri=True)
+        conn.row_factory = sqlite3.Row
+        try:
+            source_count = int(
+                conn.execute("SELECT COUNT(*) AS n FROM sources").fetchone()["n"]
+            )
+            manual_text_source_count = int(
+                conn.execute(
+                    "SELECT COUNT(*) AS n FROM sources WHERE source_type = 'manual_text'"
+                ).fetchone()["n"]
+            )
+            accepted_claim_count = int(
+                conn.execute(
+                    "SELECT COUNT(*) AS n FROM claims WHERE status = 'accepted'"
+                ).fetchone()["n"]
+            )
+            concept_link_count = int(
+                conn.execute("SELECT COUNT(*) AS n FROM claim_concepts").fetchone()["n"]
+            )
+            active_relationship_count = int(
+                conn.execute(
+                    "SELECT COUNT(*) AS n FROM relationships WHERE status = 'active'"
+                ).fetchone()["n"]
+            )
+            relationship_evidence_count = int(
+                conn.execute("SELECT COUNT(*) AS n FROM relationship_evidence").fetchone()[
+                    "n"
+                ]
+            )
+            qualification_link_count = int(
+                conn.execute(
+                    "SELECT COUNT(*) AS n FROM relationship_evidence "
+                    "WHERE stance = 'qualifies'"
+                ).fetchone()["n"]
+            )
+            score_event_count = int(
+                conn.execute("SELECT COUNT(*) AS n FROM score_events").fetchone()["n"]
+            )
+        finally:
+            conn.close()
+    except (OSError, sqlite3.Error) as exc:
+        status["status"] = "error"
+        status["spine_stage"] = "error"
+        status["error"] = str(exc)
+        return status
+
+    milestones = {
+        "sources": source_count > 0,
+        "accepted_claims": accepted_claim_count > 0,
+        "concept_links": concept_link_count > 0,
+        "active_relationships": active_relationship_count > 0,
+        "relationship_evidence": relationship_evidence_count > 0,
+        "qualification_links": qualification_link_count > 0,
+        "score_events": score_event_count > 0,
+    }
+    status["readable"] = True
+    status["source_count"] = source_count
+    status["manual_text_source_count"] = manual_text_source_count
+    status["accepted_claim_count"] = accepted_claim_count
+    status["concept_link_count"] = concept_link_count
+    status["active_relationship_count"] = active_relationship_count
+    status["relationship_evidence_count"] = relationship_evidence_count
+    status["qualification_link_count"] = qualification_link_count
+    status["score_event_count"] = score_event_count
+    status["spine_milestones"] = milestones
+
+    if source_count == 0:
+        status["spine_stage"] = "empty"
+        status["status"] = "empty"
+    elif score_event_count > 0:
+        status["spine_stage"] = "reconciled"
+        status["status"] = "ok"
+    else:
+        status["spine_stage"] = "partial"
+        status["status"] = "partial"
+    return status
+
+
 def build_operator_plan(
     *,
     root: Path | None = None,
@@ -779,6 +920,7 @@ def build_operator_plan(
     )
     scratch_evidence = inspect_scratch_evidence_status(root=project_root)
     domain_pack_status = inspect_domain_pack_status(root=project_root)
+    nm4_evidence_spine_status = inspect_nm4_evidence_spine_status(root=project_root)
     action = _action_from_state(
         working_tree=tree,
         active_row=active_row,
@@ -837,6 +979,7 @@ def build_operator_plan(
         "audit_cadence": audit,
         "scratch_evidence_status": scratch_evidence,
         "domain_pack_status": domain_pack_status,
+        "nm4_evidence_spine_status": nm4_evidence_spine_status,
         "pending_improvement_tickets": improvement,
         "next_recommended_action": {
             "action_id": action.action_id,

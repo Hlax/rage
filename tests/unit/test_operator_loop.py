@@ -12,6 +12,7 @@ from rge.modules.operator_loop import (
     detect_documentation_git_drift,
     execute_safe_checks,
     inspect_domain_pack_status,
+    inspect_nm4_evidence_spine_status,
     inspect_scratch_evidence_status,
     is_audit_only_ticket,
     pending_improvement_tickets,
@@ -853,3 +854,85 @@ def test_domain_pack_status_reports_identity_failure(tmp_path: Path) -> None:
     assert status["identity_status"] == "draft"
     assert status["identity_verification_passes"] is False
     assert status["identity_violations"]
+
+
+def test_nm4_evidence_spine_status_missing_db(tmp_path: Path) -> None:
+    evidence_db = tmp_path / "data" / "db" / "live_research_evidence.sqlite"
+    status = inspect_nm4_evidence_spine_status(root=tmp_path, evidence_db=evidence_db)
+
+    assert status["evidence_db_path"] == "data/db/live_research_evidence.sqlite"
+    assert status["evidence_db_exists"] is False
+    assert status["readable"] is False
+    assert status["status"] == "missing"
+    assert status["spine_stage"] == "missing"
+    assert status["score_event_count"] is None
+    assert "not found" in (status["error"] or "")
+
+
+def test_nm4_evidence_spine_status_reconciled_spine(tmp_path: Path) -> None:
+    import os
+
+    from rge.cli import main
+
+    from tests.unit.test_nm4_evidence_score_reconciliation import (
+        _ingest_followup_source,
+        _ingest_primary_source,
+        _run_live_spine,
+    )
+
+    db_path = tmp_path / "live_research_evidence.sqlite"
+    prior_mode = os.environ.get("RGE_LLM_MODE")
+    prior_live = os.environ.get("RGE_ALLOW_LIVE_LLM")
+    os.environ["RGE_LLM_MODE"] = "mock"
+    os.environ["RGE_ALLOW_LIVE_LLM"] = "0"
+    try:
+        source_id = _ingest_primary_source(db_path)
+        _run_live_spine(db_path, source_id)
+        followup_id = _ingest_followup_source(db_path)
+        assert main(["extract-claims", "--source", followup_id, "--db", str(db_path)]) == 0
+        assert (
+            main(
+                [
+                    "reconcile-scores",
+                    "--source",
+                    followup_id,
+                    "--db",
+                    str(db_path),
+                ]
+            )
+            == 0
+        )
+    finally:
+        if prior_mode is None:
+            os.environ.pop("RGE_LLM_MODE", None)
+        else:
+            os.environ["RGE_LLM_MODE"] = prior_mode
+        if prior_live is None:
+            os.environ.pop("RGE_ALLOW_LIVE_LLM", None)
+        else:
+            os.environ["RGE_ALLOW_LIVE_LLM"] = prior_live
+
+    status = inspect_nm4_evidence_spine_status(root=tmp_path, evidence_db=db_path)
+
+    assert status["readable"] is True
+    assert status["status"] == "ok"
+    assert status["spine_stage"] == "reconciled"
+    assert status["score_event_count"] == 1
+    assert status["source_count"] >= 2
+    assert status["accepted_claim_count"] > 0
+    assert status["active_relationship_count"] > 0
+    assert status["spine_milestones"]["score_events"] is True
+    assert status["error"] is None
+
+
+def test_plan_includes_nm4_evidence_spine_status(tmp_path: Path) -> None:
+    _seed_queue(tmp_path, "| 132 | ticket-132 | in_progress | nm4 status | | |\n")
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+
+    assert "nm4_evidence_spine_status" in plan
+    assert plan["nm4_evidence_spine_status"]["status"] == "missing"
+    assert plan["nm4_evidence_spine_status"]["evidence_db_path"].endswith(
+        "live_research_evidence.sqlite"
+    )
