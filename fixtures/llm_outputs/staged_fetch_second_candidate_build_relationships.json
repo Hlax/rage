@@ -1,0 +1,15 @@
+{
+  "task_name": "relationship_drafting",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "subject_concept": "constraint",
+      "predicate": "may_increase",
+      "object_concept": "human control",
+      "stance": "supports",
+      "scope": "AI-assisted creative team workflows",
+      "confidence": "medium",
+      "supporting_claim_ids": ["placeholder"]
+    }
+  ]
+}
