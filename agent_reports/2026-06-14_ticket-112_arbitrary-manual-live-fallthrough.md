@@ -100,7 +100,8 @@ Unit test with stub client proves accepted persistence path.
 
 ## Merge to main
 
-Pending merge in step 12.
+Merged @ **`eda66e3`** (`Merge branch 'phase-2/ticket-112-arbitrary-manual-live-fallthrough'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
