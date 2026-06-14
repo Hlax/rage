@@ -100,7 +100,8 @@ No live LLM, live network, or public export in this ticket.
 
 ## Merge to main
 
-Placeholder — updated after merge.
+Merged @ **`6a668f2`** (`Merge branch 'phase-2/ticket-155-second-staged-build-relationships-spine'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
