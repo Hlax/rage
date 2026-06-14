@@ -75,7 +75,8 @@ python -m rge.modules.safety_auditor --audit full                       # pass
 
 ## Merge to main
 
-(placeholder — updated after merge)
+Merged to `main` as `77a1a259049fe46ae90ac1a4d68849cbfb516313` (2026-06-14).
+Post-merge pytest: 543 passed, 6 deselected.
 
 ## Recommended next ticket
 
