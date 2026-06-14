@@ -62,6 +62,17 @@ def _write_demo_pack(
         "    notes: test\n",
         encoding="utf-8",
     )
+    (pack_dir / "claim_schema.yaml").write_text(
+        "required_domain_metadata_for_creativity_claims:\n"
+        "  - track\n"
+        "allowed_tracks:\n"
+        "  - human\n"
+        "allowed_creative_phases:\n"
+        "  - ideation\n"
+        "allowed_measured_dimensions:\n"
+        "  - diversity\n",
+        encoding="utf-8",
+    )
     return pack_dir
 
 

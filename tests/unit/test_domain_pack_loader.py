@@ -36,6 +36,7 @@ def test_load_creativity_pack_reads_ontology_and_aliases() -> None:
     )
     assert pack.score_reconciliation.stronger_evidence_boost == 0.12
     assert len(pack.evidence_types) == 6
+    assert pack.claim_schema.required_domain_metadata_keys[0] == "track"
 
 
 def test_parse_ontology_yaml_requires_id_and_label(tmp_path: Path) -> None:
@@ -98,6 +99,17 @@ def test_missing_ontology_file_fails_closed(tmp_path: Path) -> None:
         "    notes: test\n",
         encoding="utf-8",
     )
+    (pack_dir / "claim_schema.yaml").write_text(
+        "required_domain_metadata_for_creativity_claims:\n"
+        "  - track\n"
+        "allowed_tracks:\n"
+        "  - human\n"
+        "allowed_creative_phases:\n"
+        "  - ideation\n"
+        "allowed_measured_dimensions:\n"
+        "  - diversity\n",
+        encoding="utf-8",
+    )
     with pytest.raises(DomainPackError, match="Ontology file not found"):
         load_domain_pack("demo", root=tmp_path)
 
@@ -122,6 +134,17 @@ def test_malformed_aliases_file_fails_closed(tmp_path: Path) -> None:
         "  empirical:\n"
         "    base_strength: 0.80\n"
         "    notes: test\n",
+        encoding="utf-8",
+    )
+    (pack_dir / "claim_schema.yaml").write_text(
+        "required_domain_metadata_for_creativity_claims:\n"
+        "  - track\n"
+        "allowed_tracks:\n"
+        "  - human\n"
+        "allowed_creative_phases:\n"
+        "  - ideation\n"
+        "allowed_measured_dimensions:\n"
+        "  - diversity\n",
         encoding="utf-8",
     )
     with pytest.raises(DomainPackError, match="top-level 'aliases:'"):

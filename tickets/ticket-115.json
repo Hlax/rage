@@ -41,5 +41,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert claim_schema loader wiring; restore inline schema constants.",
-  "status": "proposed"
+  "status": "done"
 }

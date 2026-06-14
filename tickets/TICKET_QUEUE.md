@@ -146,7 +146,8 @@ superseded
 | 112 | ticket-112 | done | Arbitrary manual text live extraction fall-through | `phase-2/ticket-112-arbitrary-manual-live-fallthrough` | `agent_reports/2026-06-14_ticket-112_arbitrary-manual-live-fallthrough.md` |
 | 113 | ticket-113 | done | Domain pack scoring.yaml loader proof (NM-5 preview) | `phase-2/ticket-113-domain-pack-scoring-loader` | `agent_reports/2026-06-14_ticket-113_domain-pack-scoring-loader.md` |
 | 114 | ticket-114 | done | Domain pack evidence_types.yaml loader proof (NM-5 continuation) | `phase-2/ticket-114-domain-pack-evidence-types-loader` | `agent_reports/2026-06-14_ticket-114_domain-pack-evidence-types-loader.md` |
-| 115 | ticket-115 | proposed | Domain pack claim_schema.yaml loader proof (NM-5 continuation) | | |
+| 115 | ticket-115 | done | Domain pack claim_schema.yaml loader proof (NM-5 continuation) | `phase-2/ticket-115-domain-pack-claim-schema-loader` | `agent_reports/2026-06-14_ticket-115_domain-pack-claim-schema-loader.md` |
+| 116 | ticket-116 | proposed | Domain pack source_preferences.yaml loader proof (NM-5 continuation) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -876,9 +877,19 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-115 (proposed) — Domain pack claim_schema.yaml loader proof (NM-5 continuation)
+ticket-116 (proposed) — Domain pack source_preferences.yaml loader proof (NM-5 continuation)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-115 agent)
+
+- Extended `domain_pack_loader` to parse `claim_schema.yaml`.
+- `concept_linker` validates present `domain_metadata` against pack allowlists.
+- `measured_dimension: idea diversity` normalized via concept alias (GT07 safe).
+- Partial metadata links (no `measured_dimension`) still accepted.
+- 6 new unit tests; 418 pytest pass; safety audit pass.
+- Pre-ticket audit: `agent_reports/2026-06-14_pre-ticket-115_domain-pack-claim-schema-loader-audit.md`.
+- Next: ticket-116 (NM-5 continuation: source_preferences.yaml) requires pre-ticket audit before implementation.
 
 ## Queue Notes (2026-06-14, ticket-114 agent)
 
@@ -920,7 +931,7 @@ directed corrective work **before** ticket-111. **Completed and merged to main @
 | NM-4 / ticket-112 | **done** | Arbitrary manual_text live fall-through |
 | ticket-111 | **superseded** | Folded into NM-2 |
 
-Next product move: **ticket-115** (NM-5 continuation: domain pack claim_schema.yaml).
+Next product move: **ticket-116** (NM-5 continuation: domain pack source_preferences.yaml).
 
 ## Queue Rules
 

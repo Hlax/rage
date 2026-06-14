@@ -18,6 +18,7 @@ from rge.modules.domain_pack_loader import (
     DomainPackError,
     load_domain_pack,
     resolve_canonical_concept_label,
+    validate_link_domain_metadata,
 )
 from rge.modules.manual_source_fixtures import link_fixture_for_manual_source
 
@@ -131,6 +132,16 @@ def link_rejection_diagnostic(
             "ontology label list exposed to the probe"
         )
 
+    metadata = link.get("domain_metadata") or {}
+    if domain_pack and metadata:
+        try:
+            pack = load_domain_pack(domain_pack)
+            ok, message = validate_link_domain_metadata(pack, metadata)
+            if not ok and message:
+                return message
+        except DomainPackError:
+            return f"domain pack {domain_pack!r} could not be loaded for metadata validation"
+
     return (
         "batch needs at least two distinct specific concept labels across all "
         "proposed links"
@@ -139,6 +150,8 @@ def link_rejection_diagnostic(
 
 def validate_concept_links(
     links: list[dict[str, Any]],
+    *,
+    domain_pack: str | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
     """Validate proposed concept links before persistence."""
     accepted: list[dict[str, Any]] = []
@@ -157,11 +170,27 @@ def validate_concept_links(
             )
         return {"accepted": accepted, "rejected": rejected}
 
+    pack: DomainPack | None = None
+    if domain_pack:
+        try:
+            pack = load_domain_pack(domain_pack)
+        except DomainPackError:
+            pack = None
+
     for link in links:
         if not link.get("claim_id") or not link.get("concept_label"):
             rejected.append({**link, "rejection_reason": "weak_concept_mapping"})
             continue
         if link.get("confidence") is None:
+            rejected.append({**link, "rejection_reason": "weak_concept_mapping"})
+            continue
+        metadata = link.get("domain_metadata") or {}
+        if pack is not None and metadata:
+            ok, _ = validate_link_domain_metadata(pack, metadata)
+            if not ok:
+                rejected.append({**link, "rejection_reason": "weak_concept_mapping"})
+                continue
+        if pack is None and domain_pack and metadata:
             rejected.append({**link, "rejection_reason": "weak_concept_mapping"})
             continue
         accepted.append(link)
@@ -300,7 +329,7 @@ def link_concepts_for_source(
         fixture_name=fixture_name,
         source=source_record,
     )
-    validated = validate_concept_links(proposed)
+    validated = validate_concept_links(proposed, domain_pack=domain_pack)
 
     link_ids: list[str] = []
     for link in validated["accepted"]:
