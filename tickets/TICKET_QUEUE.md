@@ -141,7 +141,8 @@ superseded
 | 107 | ticket-107 | done | AGENTS.md manual synthnote pipeline proof test cross-link | `phase-2/ticket-107-agents-manual-synthnote-pipeline-proof-test-crosslink` | `agent_reports/2026-06-13_phase-2_ticket-107_agents-manual-synthnote-pipeline-proof-test-crosslink.md` |
 | 108 | ticket-108 | done | Operating protocol manual synthnote pipeline proof test cross-link | `phase-2/ticket-108-operating-protocol-manual-synthnote-pipeline-proof-test-crosslink` | `agent_reports/2026-06-14_phase-2_ticket-108_operating-protocol-manual-synthnote-pipeline-proof-test-crosslink.md` |
 | 109 | ticket-109 | done | Cursor build loop manual synthnote pipeline proof test cross-link | `phase-2/ticket-109-cursor-build-loop-manual-synthnote-pipeline-proof-test-crosslink` | `agent_reports/2026-06-14_phase-2_ticket-109_cursor-build-loop-manual-synthnote-pipeline-proof-test-crosslink.md` |
-| 110 | ticket-110 | proposed | Runtime config manual synthnote pipeline proof test cross-link | | |
+| 110 | ticket-110 | done | Runtime config manual synthnote pipeline proof test cross-link | `phase-2/ticket-110-runtime-config-manual-synthnote-pipeline-proof-test-crosslink` | `agent_reports/2026-06-14_phase-2_ticket-110_runtime-config-manual-synthnote-pipeline-proof-test-crosslink.md` |
+| 111 | ticket-111 | proposed | README manual synthnote pipeline proof test cross-link | | |
 
 ## Queue Notes (2026-06-13, ticket-085 ingestion readiness audit)
 
@@ -863,8 +864,8 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-110 (proposed) — Runtime config manual synthnote pipeline proof test cross-link
-(ticket-059 OpenAI placeholder remains deferred)
+ticket-111 (proposed) — README manual synthnote pipeline proof test cross-link
+(ticket-059 OpenAI placeholder remains deferred; principal audit due before ticket-111)
 ```
 
 ## Queue Rules
