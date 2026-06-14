@@ -19,6 +19,10 @@ GOLDEN_SUBJECT = "ai assistance"
 GOLDEN_OBJECT = "semantic diversity"
 GOLDEN_PREDICATE = "may_reduce"
 
+STAGED_INCREASE_PREDICATE = "may_increase"
+STAGED_SUBJECT = "co-creation"
+STAGED_OBJECT = "semantic diversity"
+
 _creativity_overlay = load_domain_pack("creativity").score_reconciliation
 FORMULA_VERSION = _creativity_overlay.formula_version
 STRONGER_SOURCE_BOOST = _creativity_overlay.stronger_evidence_boost
@@ -99,6 +103,33 @@ def _matches_golden_may_reduce_diversity(
     )
 
 
+def _matches_staged_may_increase_co_creation(
+    claim: ClaimRecord, relationship: dict[str, Any]
+) -> bool:
+    """Staged Phase 3 spine: co-creation may_increase semantic diversity edge."""
+    if _normalize(relationship.get("predicate", "")) != STAGED_INCREASE_PREDICATE:
+        return False
+    if _normalize(relationship.get("subject_concept", "")) != STAGED_SUBJECT:
+        return False
+    if _normalize(relationship.get("object_concept", "")) != STAGED_OBJECT:
+        return False
+    text = claim.claim_text.casefold()
+    rel_scope = _normalize(str(relationship.get("scope", "")))
+    claim_scope = _normalize(claim.scope or "")
+    scope_ok = (
+        not rel_scope
+        or rel_scope in text
+        or (claim_scope and rel_scope in claim_scope)
+        or (claim_scope and claim_scope in rel_scope)
+        or ("songwriting" in rel_scope and "songwriting" in text)
+    )
+    return (
+        ("co-creativity" in text or "co-creation" in text)
+        and ("diverse" in text or "diversity" in text)
+        and scope_ok
+    )
+
+
 def _claim_supports_active_relationship_edge(
     claim: ClaimRecord, relationship: dict[str, Any]
 ) -> bool:
@@ -131,6 +162,8 @@ def claim_supports_relationship(
 ) -> bool:
     """Check whether a claim supports an active relationship edge for reconciliation."""
     if _matches_golden_may_reduce_diversity(claim, relationship):
+        return True
+    if _matches_staged_may_increase_co_creation(claim, relationship):
         return True
     return _claim_supports_active_relationship_edge(claim, relationship)
 

@@ -12,7 +12,7 @@
       "object": "diverse songwriting outputs",
       "scope": "diverse songwriting outputs",
       "evidence_type": "empirical",
-      "confidence": 0.65,
+      "confidence": 0.85,
       "limitations": [
         "Staged fetch artifact; operator must verify source provenance."
       ],
