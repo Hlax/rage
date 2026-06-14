@@ -18,6 +18,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
+from rge.modules.domain_pack_loader import inspect_domain_pack_load_health
 from rge.modules.live_probe_scratch import get_scratch_db_path
 from rge.modules.live_probe_scratch_summary import (
     REVIEWED_TABLE,
@@ -732,6 +733,15 @@ def inspect_scratch_evidence_status(
     return status
 
 
+def inspect_domain_pack_status(
+    *,
+    root: Path | None = None,
+    pack_id: str = "creativity",
+) -> dict[str, Any]:
+    """Read-only creativity domain pack load health for operator plan mode."""
+    return inspect_domain_pack_load_health(pack_id, root=root or repo_root())
+
+
 def build_operator_plan(
     *,
     root: Path | None = None,
@@ -768,6 +778,7 @@ def build_operator_plan(
         log_runner=log_runner,
     )
     scratch_evidence = inspect_scratch_evidence_status(root=project_root)
+    domain_pack_status = inspect_domain_pack_status(root=project_root)
     action = _action_from_state(
         working_tree=tree,
         active_row=active_row,
@@ -825,6 +836,7 @@ def build_operator_plan(
         },
         "audit_cadence": audit,
         "scratch_evidence_status": scratch_evidence,
+        "domain_pack_status": domain_pack_status,
         "pending_improvement_tickets": improvement,
         "next_recommended_action": {
             "action_id": action.action_id,

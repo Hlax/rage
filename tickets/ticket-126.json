@@ -35,5 +35,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Remove domain_pack_status from plan output.",
-  "status": "proposed"
+  "status": "done"
 }
