@@ -100,3 +100,10 @@ def manual_text_lacks_relationship_fixture(source: Any | None) -> bool:
     if source is None or getattr(source, "source_type", None) != "manual_text":
         return False
     return relationship_fixture_for_manual_source(source) is None
+
+
+def manual_text_lacks_contradiction_fixture(source: Any | None) -> bool:
+    """Return True when a manual_text source has no checksum-pinned contradiction fixture."""
+    if source is None or getattr(source, "source_type", None) != "manual_text":
+        return False
+    return contradiction_fixture_for_manual_source(source) is None

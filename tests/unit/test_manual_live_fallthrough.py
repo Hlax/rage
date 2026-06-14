@@ -1,4 +1,4 @@
-"""Unit tests for manual_text live extract/link/relationship fall-through (tickets 112, 128, 129)."""
+"""Unit tests for manual_text live extract/link/relationship/contradiction fall-through (tickets 112, 128, 129, 130)."""
 
 from __future__ import annotations
 
@@ -12,10 +12,12 @@ import pytest
 from rge.llm.schemas import (
     CandidateClaimBatch_v0_1,
     CandidateConceptLinkBatch_v0_1,
+    CandidateContradictionBatch_v0_1,
     CandidateRelationshipBatch_v0_1,
     SCHEMA_VERSION_0_1_0,
 )
 from rge.modules.concept_linker import assert_link_checksum_not_in_fixture_map
+from rge.modules.contradiction_detector import assert_contradiction_checksum_not_in_fixture_map
 from rge.modules.live_extraction_write import (
     LiveExtractionWriteError,
     assert_checksum_not_in_fixture_map,
@@ -135,6 +137,15 @@ class _StubLiveOllamaClient(_StubOllamaClient):
                         "supporting_claim_ids": [claim_id],
                     }
                 ],
+            }
+        )
+
+    def detect_contradictions(self, **kwargs: object) -> CandidateContradictionBatch_v0_1:
+        return CandidateContradictionBatch_v0_1.model_validate(
+            {
+                "task_name": "contradiction_detection",
+                "schema_version": SCHEMA_VERSION_0_1_0,
+                "items": [],
             }
         )
 
@@ -809,3 +820,214 @@ def test_assert_relationship_checksum_rejects_synthnote_fixture_map_entry() -> N
     pinned = next(iter(checksums))
     with pytest.raises(LiveExtractionWriteError, match="build_relationships"):
         assert_relationship_checksum_not_in_fixture_map(pinned)
+
+
+def _run_live_extract_link_build(temp_db: Path, source_id: str) -> None:
+    from rge.cli import main
+
+    with patch.dict(
+        os.environ,
+        {"RGE_LLM_MODE": "ollama", "RGE_ALLOW_LIVE_LLM": "1"},
+        clear=False,
+    ):
+        with patch(
+            "rge.modules.live_extraction_write.assert_ollama_health",
+            return_value={"model_available": True},
+        ), patch(
+            "rge.modules.live_probe.assert_ollama_health",
+            return_value={"model_available": True},
+        ):
+            with patch(
+                "rge.modules.live_extraction_write.get_model_client",
+                return_value=_StubLiveOllamaClient(),
+            ), patch(
+                "rge.modules.concept_linker.get_model_client",
+                return_value=_StubLiveOllamaClient(),
+            ), patch(
+                "rge.modules.relationship_builder.get_model_client",
+                return_value=_StubLiveOllamaClient(),
+            ):
+                assert (
+                    main(
+                        [
+                            "extract-claims",
+                            "--source",
+                            source_id,
+                            "--db",
+                            str(temp_db),
+                            "--live-manual-fallthrough",
+                        ]
+                    )
+                    == 0
+                )
+                assert (
+                    main(
+                        [
+                            "link-concepts",
+                            "--source",
+                            source_id,
+                            "--db",
+                            str(temp_db),
+                            "--live-manual-link-fallthrough",
+                        ]
+                    )
+                    == 0
+                )
+                assert (
+                    main(
+                        [
+                            "build-relationships",
+                            "--source",
+                            source_id,
+                            "--db",
+                            str(temp_db),
+                            "--live-manual-relationship-fallthrough",
+                        ]
+                    )
+                    == 0
+                )
+
+
+def test_checksum_pinned_manual_source_still_uses_mock_contradiction_fixture(
+    temp_db: Path,
+) -> None:
+    from rge.cli import main
+    from rge.db.connection import connect
+
+    assert (
+        main(
+            [
+                "ingest",
+                str(SYNTHNOTE_SOURCE),
+                "--domain",
+                "creativity",
+                "--source-type",
+                "manual_text",
+                "--source-title",
+                "Synthetic Source Note",
+                "--db",
+                str(temp_db),
+            ]
+        )
+        == 0
+    )
+    conn = connect(temp_db)
+    try:
+        source_id = conn.execute("SELECT id FROM sources").fetchone()["id"]
+    finally:
+        conn.close()
+
+    assert main(["extract-claims", "--source", source_id, "--db", str(temp_db)]) == 0
+    assert main(["link-concepts", "--source", source_id, "--db", str(temp_db)]) == 0
+    assert main(["build-relationships", "--source", source_id, "--db", str(temp_db)]) == 0
+    assert main(["detect-contradictions", "--source", source_id, "--db", str(temp_db)]) == 0
+
+    conn = connect(temp_db)
+    try:
+        qual_count = conn.execute(
+            "SELECT COUNT(*) AS n FROM relationship_evidence WHERE stance = 'qualifies'"
+        ).fetchone()["n"]
+        assert qual_count >= 1
+    finally:
+        conn.close()
+
+
+def test_unknown_manual_text_contradiction_in_mock_mode_raises_clear_error(
+    temp_db: Path,
+) -> None:
+    from rge.cli import main
+
+    source_id = _ingest_arbitrary_manual_source(temp_db)
+    _run_live_extract_link_build(temp_db, source_id)
+    exit_code = main(
+        ["detect-contradictions", "--source", source_id, "--db", str(temp_db)]
+    )
+    assert exit_code == 1
+
+
+def test_live_manual_contradiction_fallthrough_blocked_without_live_opt_in(
+    temp_db: Path,
+) -> None:
+    from rge.cli import main
+
+    source_id = _ingest_arbitrary_manual_source(temp_db)
+    _run_live_extract_link_build(temp_db, source_id)
+    exit_code = main(
+        [
+            "detect-contradictions",
+            "--source",
+            source_id,
+            "--db",
+            str(temp_db),
+            "--live-manual-contradiction-fallthrough",
+        ]
+    )
+    assert exit_code == 1
+
+
+def test_live_manual_contradiction_fallthrough_blocked_on_default_graph_db(
+    temp_db: Path,
+) -> None:
+    from rge.cli import main
+
+    source_id = _ingest_arbitrary_manual_source(temp_db)
+    _run_live_extract_link_build(temp_db, source_id)
+    with patch.dict(
+        os.environ,
+        {"RGE_LLM_MODE": "ollama", "RGE_ALLOW_LIVE_LLM": "1"},
+        clear=False,
+    ):
+        exit_code = main(
+            [
+                "detect-contradictions",
+                "--source",
+                source_id,
+                "--db",
+                "data/db/creative_research.sqlite",
+                "--live-manual-contradiction-fallthrough",
+            ]
+        )
+    assert exit_code == 1
+
+
+def test_mocked_live_contradiction_fallthrough_returns_no_qualifications(
+    temp_db: Path,
+) -> None:
+    from rge.cli import main
+
+    source_id = _ingest_arbitrary_manual_source(temp_db)
+    _run_live_extract_link_build(temp_db, source_id)
+    with patch.dict(
+        os.environ,
+        {"RGE_LLM_MODE": "ollama", "RGE_ALLOW_LIVE_LLM": "1"},
+        clear=False,
+    ):
+        with patch(
+            "rge.modules.live_extraction_write.assert_ollama_health",
+            return_value={"model_available": True},
+        ), patch(
+            "rge.modules.live_probe.assert_ollama_health",
+            return_value={"model_available": True},
+        ), patch(
+            "rge.modules.contradiction_detector.get_model_client",
+            return_value=_StubLiveOllamaClient(),
+        ):
+            exit_code = main(
+                [
+                    "detect-contradictions",
+                    "--source",
+                    source_id,
+                    "--db",
+                    str(temp_db),
+                    "--live-manual-contradiction-fallthrough",
+                ]
+            )
+    assert exit_code == 0
+
+
+def test_assert_contradiction_checksum_rejects_synthnote_fixture_map_entry() -> None:
+    mapping_path = REPO_ROOT / "fixtures" / "manual_source_fixture_map.json"
+    checksums = json.loads(mapping_path.read_text(encoding="utf-8"))
+    pinned = next(iter(checksums))
+    with pytest.raises(LiveExtractionWriteError, match="detect_contradictions"):
+        assert_contradiction_checksum_not_in_fixture_map(pinned)

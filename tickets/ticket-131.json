@@ -1,0 +1,48 @@
+{
+  "id": "ticket-131",
+  "title": "Arbitrary manual live score reconciliation fall-through",
+  "problem": "ticket-130 proved live contradiction detection for arbitrary manual_text sources. NM-4 pipeline still stops before score reconciliation; reconcile-scores uses checksum-pinned mock fixtures for synthnote and has no live fall-through for unmapped manual_text.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-130_arbitrary-manual-live-contradiction-fallthrough.md",
+    "rge/modules/score_reconciler.py",
+    "rge/modules/manual_source_fixtures.py",
+    "fixtures/manual_source_fixture_map.json"
+  ],
+  "affected_modules": [
+    "rge/modules/score_reconciler.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/score_reconciler.py",
+    "rge/cli.py",
+    "tests/unit/test_manual_live_fallthrough.py",
+    "agent_reports/2026-06-14_ticket-131_arbitrary-manual-live-score-reconciliation-fallthrough.md"
+  ],
+  "acceptance_criteria": [
+    "After live extract through detect-contradictions on an unmapped manual_text source (or explicit no-contradiction result), explicit live mode can reconcile scores via Ollama on a follow-up source.",
+    "At least one validated score_events row persists to the gitignored evidence DB.",
+    "Checksum-pinned synthnote mock paths remain deterministic.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes.",
+    "Public export/site untouched."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_live_fallthrough.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Cloud providers.",
+    "Public export/site changes.",
+    "Source discovery/fetcher.",
+    "Validator weakening.",
+    "Full NM-4 docs chain.",
+    "Public export changes."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove live score reconciliation fall-through flag; retain ticket-127–130 calibration.",
+  "status": "proposed",
+  "category": "product-risk reduction / NM-4 pipeline continuation",
+  "pre_ticket_audit_required": true
+}

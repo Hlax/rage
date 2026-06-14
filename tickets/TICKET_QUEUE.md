@@ -161,7 +161,8 @@ superseded
 | 127 | ticket-127 | done | Arbitrary manual text live extraction fall-through (NM-4 recenter) | `phase-2/ticket-127-arbitrary-manual-live-fallthrough` | `agent_reports/2026-06-14_ticket-127_arbitrary-manual-live-fallthrough.md` |
 | 128 | ticket-128 | done | Arbitrary manual live concept linking fall-through | `phase-2/ticket-128-arbitrary-manual-live-concept-linking` | `agent_reports/2026-06-14_ticket-128_arbitrary-manual-live-concept-linking.md` |
 | 129 | ticket-129 | done | Arbitrary manual live relationship fall-through | `phase-2/ticket-129-arbitrary-manual-live-relationship-fallthrough` | `agent_reports/2026-06-14_ticket-129_arbitrary-manual-live-relationship-fallthrough.md` |
-| 130 | ticket-130 | proposed | Arbitrary manual live contradiction fall-through | | |
+| 130 | ticket-130 | done | Arbitrary manual live contradiction fall-through | `phase-2/ticket-130-arbitrary-manual-live-contradiction-fallthrough` | `agent_reports/2026-06-14_ticket-130_arbitrary-manual-live-contradiction-fallthrough.md` |
+| 131 | ticket-131 | proposed | Arbitrary manual live score reconciliation fall-through | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -891,9 +892,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-130 (proposed) — Arbitrary manual live contradiction fall-through
-(ticket-059 OpenAI placeholder remains deferred)
+ticket-131 (proposed) — Arbitrary manual live score reconciliation fall-through
+(ticket-059 OpenAI placeholder remains deferred; principal audit due before ticket-131)
 ```
+
+## Queue Notes (2026-06-14, ticket-130 agent)
+
+- `--live-manual-contradiction-fallthrough` on detect-contradictions; mock fail-closed for unmapped manual_text.
+- Live proof on ticket-127/128/129 evidence source: `no_qualifications` (1 rejected candidate; single active edge).
+- 26 manual_live_fallthrough unit tests; 478 pytest; 142 golden; safety audit pass.
+- Cadence: 3 done since post-ticket-127 principal audit (128, 129, 130) — **principal audit required before ticket-131**.
+- Next: principal audit post-ticket-130, then ticket-131 (live score reconciliation fall-through).
 
 ## Queue Notes (2026-06-14, ticket-129 agent)
 
