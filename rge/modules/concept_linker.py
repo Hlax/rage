@@ -214,12 +214,21 @@ def _pipeline_model_client(config=None):
     return get_model_client(cfg, mode=effective_llm_mode(cfg))
 
 
+def _is_staged_fetch_spine_source(source: Any | None) -> bool:
+    if source is None:
+        return False
+    title = str(getattr(source, "title", "") or "").casefold()
+    return "human-ai co-creativity" in title and "songwriting" in title
+
+
 def _default_link_fixture_for_source(source: Any | None) -> str:
     mapped = link_fixture_for_manual_source(source)
     if mapped:
         return mapped
     if manual_text_lacks_link_fixture(source):
         raise ValueError(_MANUAL_TEXT_NO_LINK_FIXTURE_ERROR)
+    if _is_staged_fetch_spine_source(source):
+        return "staged_fetch_link_concepts.json"
     return "concept_linking_creativity_diversity.json"
 
 
@@ -236,7 +245,11 @@ def _resolve_link_claim_ids(
     default_claim_id = claims[0].get("id")
     if diversity_heuristic:
         for claim in claims:
-            if "reduced semantic diversity" in claim.get("claim_text", ""):
+            lowered = str(claim.get("claim_text") or "").casefold()
+            if "reduced semantic diversity" in lowered:
+                default_claim_id = claim["id"]
+                break
+            if "human-ai co-creativity" in lowered and "songwriting" in lowered:
                 default_claim_id = claim["id"]
                 break
 

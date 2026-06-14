@@ -176,7 +176,8 @@ superseded
 | 142 | ticket-142 | done | Fetch staged candidate source from queue URL | `phase-2/ticket-142-staged-candidate-fetch` | `agent_reports/2026-06-14_ticket-142_staged-candidate-fetch.md` |
 | 143 | ticket-143 | done | Ingest from staged fetch artifact path | `phase-2/ticket-143-staged-artifact-ingest` | `agent_reports/2026-06-14_ticket-143_staged-artifact-ingest.md` |
 | 144 | ticket-144 | done | Extract claims from staged-ingested source (mock spine step) | `phase-2/ticket-144-staged-ingest-extract-spine` | `agent_reports/2026-06-14_ticket-144_staged-ingest-extract-spine.md` |
-| 145 | ticket-145 | proposed | Link concepts on staged-ingested source (mock spine step) | | |
+| 145 | ticket-145 | done | Link concepts on staged-ingested source (mock spine step) | `phase-2/ticket-145-staged-ingest-link-spine` | `agent_reports/2026-06-14_ticket-145_staged-ingest-link-spine.md` |
+| 146 | ticket-146 | proposed | Build relationships on staged-ingested source (mock spine step) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -906,9 +907,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-145 (proposed) — Link concepts on staged-ingested source (mock spine step)
+ticket-146 (proposed) — Build relationships on staged-ingested source (mock spine step)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-145 agent)
+
+- Mock fixture `staged_fetch_link_concepts.json` + staged title heuristic in concept_linker.
+- E2E unit test: discover enqueue → fetch → ingest-staged → extract → link-concepts.
+- 3 spine tests; 543 pytest; 145 golden; safety audit pass.
+- ticket-146 seeded: build-relationships on staged source.
+- Next: pre-ticket-146 audit then ticket-146 implementation.
 
 ## Queue Notes (2026-06-14, ticket-144 agent)
 
