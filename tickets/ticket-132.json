@@ -37,7 +37,7 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Remove NM-4 evidence spine status block from operator_loop plan output.",
-  "status": "proposed",
+  "status": "done",
   "category": "operator visibility / NM-4 completion",
   "pre_ticket_audit_required": false
 }
