@@ -1,0 +1,38 @@
+{
+  "id": "ticket-150",
+  "title": "Principal audit checkpoint post-ticket-149 (staged Phase 3 spine completion)",
+  "problem": "ticket-149 completes the mock Phase 3 staged source processing spine through generate-run-report. Cadence is overdue (12+ done tickets since ticket-137 principal audit). A principal checkpoint is required before further Phase 3 or product-risk work.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-149_staged-run-report-spine.md",
+    "agent_reports/2026-06-14_pre-ticket-149_staged-run-report-spine-audit.md",
+    "tests/unit/test_staged_ingest_run_report_spine.py",
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-150"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-14_ticket-150_principal-audit-post-ticket-149.md"
+  ],
+  "acceptance_criteria": [
+    "Read-only principal audit report documents staged Phase 3 spine completion state (discover through run report).",
+    "Audit records cadence satisfaction and recommends next smallest product-risk ticket.",
+    "No implementation code changes unless audit finds a blocking gap requiring a hardening ticket.",
+    "Golden/pytest/safety audit status recorded from current main."
+  ],
+  "test_plan": [
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-150",
+    "python -m pytest tests/unit/test_staged_ingest_run_report_spine.py -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Implementation tickets in the same run.",
+    "Public export/site changes.",
+    "Schema migrations.",
+    "Live Ollama.",
+    "Broad docs-only chains."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Delete audit report only; no code rollback.",
+  "status": "proposed",
+  "category": "Phase 3 / principal audit / cadence",
+  "pre_ticket_audit_required": false
+}

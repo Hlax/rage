@@ -180,7 +180,8 @@ superseded
 | 146 | ticket-146 | done | Build relationships on staged-ingested source (mock spine step) | `phase-2/ticket-146-staged-build-relationships-spine` | `agent_reports/2026-06-14_ticket-146_staged-build-relationships-spine.md` |
 | 147 | ticket-147 | done | Detect contradictions on staged-ingested source (mock spine step) | `phase-2/ticket-147-staged-detect-contradictions-spine` | `agent_reports/2026-06-14_ticket-147_staged-detect-contradictions-spine.md` |
 | 148 | ticket-148 | done | Reconcile scores on staged-ingested source (mock spine step) | `phase-2/ticket-148-staged-reconcile-scores-spine` | `agent_reports/2026-06-14_ticket-148_staged-reconcile-scores-spine.md` |
-| 149 | ticket-149 | proposed | Generate run report on staged-ingested source (mock spine step) | | |
+| 149 | ticket-149 | done | Generate run report on staged-ingested source (mock spine step) | `phase-2/ticket-149-staged-run-report-spine` | `agent_reports/2026-06-14_ticket-149_staged-run-report-spine.md` |
+| 150 | ticket-150 | proposed | Principal audit checkpoint post-ticket-149 (staged Phase 3 spine completion) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -910,11 +911,19 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-149 (proposed) — Generate run report on staged-ingested source (mock spine step)
+ticket-150 (proposed) — Principal audit checkpoint post-ticket-149 (staged Phase 3 spine completion)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-14, ticket-148 agent)
+## Queue Notes (2026-06-14, ticket-149 agent)
+
+- Test-forward ticket: no production code changes.
+- E2E: domain seed → staged spine through reconcile → generate-run-report.
+- Report run_id `run_staged_phase3_spine`; counters include discover/ingest/claims/relationships/score_events.
+- 3 run-report spine tests; 556 pytest; 142 golden; safety audit pass.
+- **Staged Phase 3 processing spine complete** through run report (mock-only).
+- ticket-150 seeded: principal audit checkpoint (cadence overdue).
+- Next: `/rge-principal-audit` or ticket-150 before further Phase 3 product-risk work.
 
 - Deterministic score_reconciler staged may_increase matcher + extract confidence 0.85.
 - Reconcile contract fixture `staged_fetch_reconcile_scores.json` (not LLM output).
