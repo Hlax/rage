@@ -186,6 +186,10 @@ def _resolve_qualifying_claim_id(
     for claim in source_claims:
         if QUALIFYING_CLAIM_FRAGMENT in claim.claim_text.casefold():
             return claim.id
+    for claim in source_claims:
+        lowered = claim.claim_text.casefold()
+        if "human-ai co-creativity" in lowered and "songwriting" in lowered:
+            return claim.id
     return source_claims[0].id if source_claims else None
 
 
@@ -300,12 +304,21 @@ def _apply_contradiction_claim_hints(
     return resolved
 
 
+def _is_staged_fetch_spine_source(source: Any | None) -> bool:
+    if source is None:
+        return False
+    title = str(getattr(source, "title", "") or "").casefold()
+    return "human-ai co-creativity" in title and "songwriting" in title
+
+
 def _default_contradiction_fixture_for_source(source: Any | None) -> str:
     mapped = contradiction_fixture_for_manual_source(source)
     if mapped:
         return mapped
     if manual_text_lacks_contradiction_fixture(source):
         raise ValueError(_MANUAL_TEXT_NO_CONTRADICTION_FIXTURE_ERROR)
+    if _is_staged_fetch_spine_source(source):
+        return "staged_fetch_detect_contradictions.json"
     return "contradiction_detection_creativity_diversity.json"
 
 

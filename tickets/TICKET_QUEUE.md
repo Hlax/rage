@@ -178,7 +178,8 @@ superseded
 | 144 | ticket-144 | done | Extract claims from staged-ingested source (mock spine step) | `phase-2/ticket-144-staged-ingest-extract-spine` | `agent_reports/2026-06-14_ticket-144_staged-ingest-extract-spine.md` |
 | 145 | ticket-145 | done | Link concepts on staged-ingested source (mock spine step) | `phase-2/ticket-145-staged-ingest-link-spine` | `agent_reports/2026-06-14_ticket-145_staged-ingest-link-spine.md` |
 | 146 | ticket-146 | done | Build relationships on staged-ingested source (mock spine step) | `phase-2/ticket-146-staged-build-relationships-spine` | `agent_reports/2026-06-14_ticket-146_staged-build-relationships-spine.md` |
-| 147 | ticket-147 | proposed | Detect contradictions on staged-ingested source (mock spine step) | | |
+| 147 | ticket-147 | done | Detect contradictions on staged-ingested source (mock spine step) | `phase-2/ticket-147-staged-detect-contradictions-spine` | `agent_reports/2026-06-14_ticket-147_staged-detect-contradictions-spine.md` |
+| 148 | ticket-148 | proposed | Reconcile scores on staged-ingested source (mock spine step) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -908,11 +909,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-147 (proposed) — Detect contradictions on staged-ingested source (mock spine step)
+ticket-148 (proposed) — Reconcile scores on staged-ingested source (mock spine step)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-14, ticket-146 agent)
+## Queue Notes (2026-06-14, ticket-147 agent)
+
+- Mock fixture `staged_fetch_detect_contradictions.json` + staged title heuristic in contradiction_detector.
+- E2E unit test seeds domain base graph then discover→fetch→ingest→extract→link→build→detect.
+- Qualification: staged co-creation claim qualifies base may_reduce edge (apparent_contradiction_metric_or_condition_difference).
+- 3 spine tests; 549 pytest; 142 golden; safety audit pass.
+- ticket-148 seeded: reconcile-scores on staged source.
+- Next: pre-ticket-148 audit then ticket-148 implementation.
 
 - Mock fixture `staged_fetch_build_relationships.json` + staged title heuristic in relationship_builder.
 - E2E unit test: discover enqueue → fetch → ingest-staged → extract → link → build-relationships.
