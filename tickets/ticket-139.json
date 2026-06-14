@@ -1,0 +1,59 @@
+{
+  "id": "ticket-139",
+  "title": "Source provider registry and OpenAlex discovery proof",
+  "problem": "ticket-138 added a Phase 3 discover-sources stub CLI. Operators need the first real API-first source discovery path: a provider registry and OpenAlex metadata discovery with network opt-in, mocked deterministic tests, and structured candidate metadata output only (no ingest/fetch/extract yet).",
+  "evidence": [
+    "agent_reports/2026-06-14_pre-ticket-139_source-provider-openalex-discovery-audit.md",
+    "agent_reports/2026-06-14_ticket-138_source-discovery-stub-cli.md",
+    "rge/modules/source_discovery.py",
+    "domain_packs/creativity/source_preferences.yaml"
+  ],
+  "affected_modules": [
+    "rge/cli.py",
+    "rge/modules/source_discovery.py",
+    "rge/config.py"
+  ],
+  "expected_files": [
+    "rge/modules/source_providers/__init__.py",
+    "rge/modules/source_providers/registry.py",
+    "rge/modules/source_providers/openalex.py",
+    "rge/modules/source_discovery.py",
+    "rge/cli.py",
+    "rge/config.py",
+    "tests/unit/test_source_provider_openalex.py",
+    "fixtures/source_providers/openalex_works_sample.json",
+    "agent_reports/2026-06-14_ticket-139_source-provider-openalex-discovery.md"
+  ],
+  "acceptance_criteria": [
+    "Provider registry exists with provider id, health check, and discover(query, domain_pack, limit).",
+    "OpenAlex provider configured via env (OPENALEX_MAILTO optional polite contact; no secrets printed).",
+    "discover-sources --provider openalex --query returns structured candidate metadata from mocked OpenAlex response in tests.",
+    "Network blocked unless RGE_ALLOW_SOURCE_NETWORK=1; missing opt-in returns structured blocked JSON.",
+    "Missing/invalid config returns structured JSON, not stack traces.",
+    "Unit tests mock HTTP; no network in CI/golden.",
+    "Golden tests remain mock-only and pass.",
+    "Full pytest passes.",
+    "Safety audit passes.",
+    "No DB writes, ingest, fetch, claim extraction, public export/site changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_source_provider_openalex.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "PDF/HTML fetching or scraping.",
+    "Playwright, Scrapfly, browser automation.",
+    "Claim extraction or NM-4 evidence DB writes.",
+    "Public export/site changes.",
+    "Schema migrations or candidate-source staging tables.",
+    "Cloud LLM providers.",
+    "Automatic credibility final decisions."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove source_providers package and revert discover-sources to stub-only path behind feature flag.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / product-risk reduction",
+  "pre_ticket_audit_required": true
+}

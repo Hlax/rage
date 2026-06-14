@@ -833,6 +833,14 @@ def _cmd_model_health(_args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_discover_sources(_args: argparse.Namespace) -> int:
+    from rge.modules.source_discovery import discover_sources_not_implemented_result
+
+    payload, exit_code = discover_sources_not_implemented_result()
+    print(json.dumps(payload, indent=2))
+    return exit_code
+
+
 def _cmd_probe_extract_claims(args: argparse.Namespace) -> int:
     from rge.modules.live_probe import (
         LiveProbeError,
@@ -2296,6 +2304,17 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     model_health_parser.set_defaults(func=_cmd_model_health)
+
+    discover_sources_parser = subparsers.add_parser(
+        "discover-sources",
+        help="Discover candidate sources for a research contract (Phase 3 stub).",
+        description=(
+            "Phase 3 source discovery entry point. Currently returns structured "
+            "not_implemented JSON with exit code 2. No network calls, ingestion, "
+            "or claim extraction."
+        ),
+    )
+    discover_sources_parser.set_defaults(func=_cmd_discover_sources)
 
     probe_extract_parser = subparsers.add_parser(
         "probe-extract-claims",
