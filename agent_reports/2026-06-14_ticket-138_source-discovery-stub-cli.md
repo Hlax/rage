@@ -96,7 +96,8 @@ None. Source discovery is **not** implemented — command surface only.
 
 ## Merge to main
 
-Pending merge.
+Merged @ **`6fd0356`** (`Merge branch 'phase-2/ticket-138-source-discovery-stub-cli'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
