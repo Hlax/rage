@@ -1,0 +1,45 @@
+{
+  "id": "ticket-113",
+  "title": "Domain pack scoring.yaml loader proof (NM-5 preview)",
+  "problem": "Ticket-112 proved arbitrary manual_text live extraction fall-through. The creativity domain pack still loads only ontology.yaml and aliases.yaml; scoring.yaml and other pack files are declarative-only. NM-5 requires proving the domain-pack abstraction beyond labels before claiming domain-generality.",
+  "evidence": [
+    "agent_reports/2026-06-14_third-party-repo-direction-audit.md",
+    "agent_reports/2026-06-14_ticket-112_arbitrary-manual-live-fallthrough.md",
+    "rge/modules/domain_pack_loader.py",
+    "domain_packs/creativity/scoring.yaml"
+  ],
+  "affected_modules": [
+    "rge/modules/domain_pack_loader.py",
+    "rge/modules/score_reconciler.py"
+  ],
+  "expected_files": [
+    "rge/modules/domain_pack_loader.py",
+    "rge/modules/score_reconciler.py",
+    "tests/unit/test_domain_pack_scoring_loader.py",
+    "agent_reports/2026-06-14_ticket-113_domain-pack-scoring-loader.md"
+  ],
+  "acceptance_criteria": [
+    "scoring.yaml is loaded for creativity domain pack at runtime.",
+    "Score reconciliation behavior demonstrably uses pack-defined boost/threshold values.",
+    "Core engine does not hardcode creativity-specific scoring constants removed from pack.",
+    "Golden and manual synthnote tests remain green in mock mode.",
+    "Safety audit passes.",
+    "No public export/site changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_domain_pack_scoring_loader.py -q",
+    "python -m pytest tests/unit/test_manual_source_pipeline_e2e.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No cloud providers or live Ollama changes.",
+    "No loading all ten domain pack files in one ticket.",
+    "No public export or site changes.",
+    "No LangGraph/FastAPI/embeddings work."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert scoring.yaml loader wiring; restore inline constants.",
+  "status": "proposed"
+}

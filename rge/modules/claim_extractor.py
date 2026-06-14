@@ -20,10 +20,20 @@ from rge.llm.mode import effective_llm_mode
 from rge.llm.registry import get_model_client
 from rge.llm.schemas import CandidateClaimBatch_v0_1
 from rge.modules.claim_validator import locate_quote_offsets, validate_candidate_claims
-from rge.modules.manual_source_fixtures import extract_fixture_for_manual_source
+from rge.modules.manual_source_fixtures import (
+    extract_fixture_for_manual_source,
+    manual_text_lacks_extract_fixture,
+)
 from rge.safety.prompt_injection import source_text_has_prompt_injection_fixture
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
+
+_MANUAL_TEXT_NO_FIXTURE_ERROR = (
+    "manual_text source has no checksum fixture in "
+    "fixtures/manual_source_fixture_map.json. Use extract-claims "
+    "--live-manual-fallthrough with RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1 "
+    "on a gitignored evidence --db, or ingest a checksum-pinned test source."
+)
 
 
 def _candidate_to_dict(item: Any) -> dict[str, Any]:
@@ -84,6 +94,8 @@ def _default_fixture_for_source_chunk(
     mapped = extract_fixture_for_manual_source(source)
     if mapped:
         return mapped
+    if manual_text_lacks_extract_fixture(source):
+        raise ValueError(_MANUAL_TEXT_NO_FIXTURE_ERROR)
     return _default_fixture_for_chunk(chunk)
 
 
@@ -125,6 +137,9 @@ def extract_claims_for_source(
     source_id: str,
     *,
     fixture_name: str | None = None,
+    live_manual_fallthrough: bool = False,
+    client: Any | None = None,
+    config: Any | None = None,
 ) -> dict[str, Any]:
     """Extract, validate, and persist claims for all chunks of a source."""
     from rge.db.repositories import ChunkRepository, ClaimRepository, SourceRepository
@@ -150,10 +165,19 @@ def extract_claims_for_source(
             "rejected_claim_ids": [claim.id for claim in rejected],
         }
 
+    cfg = config if config is not None else load_config()
+    if live_manual_fallthrough:
+        if not manual_text_lacks_extract_fixture(source):
+            raise ValueError(
+                "live_manual_fallthrough requires a manual_text source absent from "
+                "fixtures/manual_source_fixture_map.json."
+            )
+        model_client = client or get_model_client(cfg, mode="ollama")
+    else:
+        model_client = client or _pipeline_model_client(cfg)
+
     accepted_ids: list[str] = []
     rejected_ids: list[str] = []
-    config = load_config()
-    model_client = _pipeline_model_client(config)
     extractor_provider = model_client.provider
     extractor_model = getattr(model_client, "model", "unknown")
 
@@ -183,7 +207,7 @@ def extract_claims_for_source(
                 claim,
                 extractor_provider=extractor_provider,
                 extractor_model=extractor_model,
-                llm_schema_version=config.llm_schema_version,
+                llm_schema_version=cfg.llm_schema_version,
             )
             accepted_ids.append(record.id)
         for claim in result["rejected"]:
@@ -192,7 +216,7 @@ def extract_claims_for_source(
                 rejection_reason=claim["rejection_reason"],
                 extractor_provider=extractor_provider,
                 extractor_model=extractor_model,
-                llm_schema_version=config.llm_schema_version,
+                llm_schema_version=cfg.llm_schema_version,
             )
             rejected_ids.append(record.id)
 

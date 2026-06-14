@@ -51,5 +51,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert claim_extractor live fall-through and CLI flag; extract-claims-live remains available as NM-1 escape hatch.",
-  "status": "proposed"
+  "status": "done"
 }

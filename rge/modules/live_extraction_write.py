@@ -16,7 +16,10 @@ from rge.db.connection import DEFAULT_DB_PATH
 from rge.llm.registry import get_model_client
 from rge.modules.claim_extractor import extract_claims_for_source
 from rge.modules.live_probe import LiveProbeGateError, assert_live_probe_env, assert_ollama_health
-from rge.modules.manual_source_fixtures import resolve_manual_source_fixture
+from rge.modules.manual_source_fixtures import (
+    manual_text_lacks_extract_fixture,
+    resolve_manual_source_fixture,
+)
 
 DEFAULT_LIVE_EVIDENCE_DB = (
     Path(__file__).resolve().parents[2] / "data" / "db" / "live_research_evidence.sqlite"
@@ -33,39 +36,28 @@ def assert_checksum_not_in_fixture_map(checksum: str) -> None:
         raise LiveExtractionWriteError(
             f"Source checksum {checksum!r} is listed in "
             "fixtures/manual_source_fixture_map.json; use mock extract-claims "
-            "for checksum-pinned manual sources. NM-1 requires a non-fixture source."
+            "for checksum-pinned manual sources."
         )
 
 
-def extract_claims_live_for_source(
+def _build_live_extraction_payload(
+    *,
     conn: Any,
     source_id: str,
-    *,
-    config: RgeConfig | None = None,
-    skip_health_check: bool = False,
+    result: dict[str, Any],
+    command: str,
+    model_client: Any,
+    cfg: RgeConfig,
+    health: dict[str, Any],
+    live_manual_fallthrough: bool,
 ) -> dict[str, Any]:
-    """Run live Ollama extraction, validate, and persist claims for one source."""
     from rge.db.repositories import ChunkRepository, ClaimRepository, SourceRepository
-
-    cfg = assert_live_probe_env(config, command="extract-claims-live")
-    health = assert_ollama_health(cfg) if not skip_health_check else {}
 
     source = SourceRepository(conn).get_by_id(source_id)
     if source is None:
         raise LiveExtractionWriteError(f"Source not found: {source_id}")
 
     checksum = getattr(source, "raw_text_checksum", None)
-    if not checksum:
-        raise LiveExtractionWriteError(f"Source {source_id} has no raw_text_checksum.")
-    assert_checksum_not_in_fixture_map(str(checksum))
-
-    model_client = get_model_client(cfg, mode="ollama")
-    result = extract_claims_for_source(
-        conn,
-        source_id,
-        fixture_name=None,
-    )
-
     claim_repo = ClaimRepository(conn)
     chunk_repo = ChunkRepository(conn)
     chunks_by_id = {chunk.id: chunk for chunk in chunk_repo.list_for_source(source_id)}
@@ -109,12 +101,13 @@ def extract_claims_live_for_source(
 
     return {
         "status": result["status"],
-        "command": "extract-claims-live",
+        "command": command,
+        "live_manual_fallthrough": live_manual_fallthrough,
         "source_id": source_id,
         "source_title": source.title,
         "source_type": source.source_type,
         "raw_text_checksum": checksum,
-        "fixture_map_match": False,
+        "fixture_map_match": not manual_text_lacks_extract_fixture(source),
         "db_writes": True,
         "provider": model_client.provider,
         "model": getattr(model_client, "model", "unknown"),
@@ -126,6 +119,72 @@ def extract_claims_live_for_source(
         "accepted_claims": accepted_payload,
         "rejected_claims": rejected_payload,
     }
+
+
+def extract_claims_manual_live_fallthrough(
+    conn: Any,
+    source_id: str,
+    *,
+    config: RgeConfig | None = None,
+    skip_health_check: bool = False,
+    client: Any | None = None,
+) -> dict[str, Any]:
+    """Live Ollama extraction for manual_text sources absent from the fixture map."""
+    from rge.db.repositories import SourceRepository
+
+    cfg = assert_live_probe_env(config, command="extract-claims")
+    health = assert_ollama_health(cfg) if not skip_health_check else {}
+
+    source = SourceRepository(conn).get_by_id(source_id)
+    if source is None:
+        raise LiveExtractionWriteError(f"Source not found: {source_id}")
+    if getattr(source, "source_type", None) != "manual_text":
+        raise LiveExtractionWriteError(
+            "live_manual_fallthrough requires source_type manual_text."
+        )
+
+    checksum = getattr(source, "raw_text_checksum", None)
+    if not checksum:
+        raise LiveExtractionWriteError(f"Source {source_id} has no raw_text_checksum.")
+    assert_checksum_not_in_fixture_map(str(checksum))
+
+    model_client = client or get_model_client(cfg, mode="ollama")
+    result = extract_claims_for_source(
+        conn,
+        source_id,
+        live_manual_fallthrough=True,
+        client=model_client,
+        config=cfg,
+    )
+    return _build_live_extraction_payload(
+        conn=conn,
+        source_id=source_id,
+        result=result,
+        command="extract-claims",
+        model_client=model_client,
+        cfg=cfg,
+        health=health,
+        live_manual_fallthrough=True,
+    )
+
+
+def extract_claims_live_for_source(
+    conn: Any,
+    source_id: str,
+    *,
+    config: RgeConfig | None = None,
+    skip_health_check: bool = False,
+) -> dict[str, Any]:
+    """Run live Ollama extraction, validate, and persist claims for one source."""
+    payload = extract_claims_manual_live_fallthrough(
+        conn,
+        source_id,
+        config=config,
+        skip_health_check=skip_health_check,
+    )
+    payload["command"] = "extract-claims-live"
+    payload["live_manual_fallthrough"] = False
+    return payload
 
 
 def default_live_evidence_db() -> Path:

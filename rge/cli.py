@@ -1118,6 +1118,43 @@ def _cmd_extract_claims(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.db.repositories import ClaimRepository, claim_record_to_public_dict
     from rge.modules.claim_extractor import extract_claims_for_source
+    from rge.modules.live_extraction_write import (
+        LiveExtractionWriteError,
+        extract_claims_manual_live_fallthrough,
+        is_default_graph_db,
+        resolve_live_evidence_db,
+    )
+    from rge.modules.live_probe import LiveProbeGateError
+
+    if getattr(args, "live_manual_fallthrough", False):
+        db_path = resolve_live_evidence_db(Path(args.db) if args.db else None)
+        if is_default_graph_db(db_path):
+            payload = {
+                "status": "error",
+                "command": "extract-claims",
+                "detail": (
+                    "Refusing live manual fall-through on the default graph DB. "
+                    "Pass --db data/db/live_research_evidence.sqlite or another "
+                    "explicit gitignored evidence path."
+                ),
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+        conn = ensure_database(db_path)
+        try:
+            payload = extract_claims_manual_live_fallthrough(conn, args.source)
+            print(json.dumps(payload, indent=2))
+            return 0
+        except (LiveExtractionWriteError, LiveProbeGateError, ValueError) as exc:
+            payload = {
+                "status": "error",
+                "command": "extract-claims",
+                "detail": str(exc),
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+        finally:
+            conn.close()
 
     db_path = Path(args.db) if args.db else None
     conn = ensure_database(db_path)
@@ -1607,6 +1644,15 @@ def build_parser() -> argparse.ArgumentParser:
     extract_parser.add_argument(
         "--fixture",
         help="Optional mock LLM fixture filename for deterministic extraction tests.",
+    )
+    extract_parser.add_argument(
+        "--live-manual-fallthrough",
+        action="store_true",
+        help=(
+            "Live Ollama extraction for manual_text sources absent from the checksum "
+            "fixture map. Requires RGE_LLM_MODE=ollama, RGE_ALLOW_LIVE_LLM=1, and a "
+            "non-default evidence --db (defaults to data/db/live_research_evidence.sqlite)."
+        ),
     )
     extract_parser.set_defaults(func=_cmd_extract_claims)
 
