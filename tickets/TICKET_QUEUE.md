@@ -171,7 +171,8 @@ superseded
 | 137 | ticket-137 | done | Principal audit checkpoint post-ticket-136 | | `agent_reports/2026-06-14_principal-audit-post-ticket-136.md` |
 | 138 | ticket-138 | done | Source discovery stub CLI (Phase 3 entry) | `phase-2/ticket-138-source-discovery-stub-cli` | `agent_reports/2026-06-14_ticket-138_source-discovery-stub-cli.md` |
 | 139 | ticket-139 | done | Source provider registry and OpenAlex discovery proof | `phase-2/ticket-139-source-provider-openalex-discovery` | `agent_reports/2026-06-14_ticket-139_source-provider-openalex-discovery.md` |
-| 140 | ticket-140 | proposed | Research queue candidate ranking from discovered sources | | |
+| 140 | ticket-140 | done | Research queue candidate ranking from discovered sources | `phase-2/ticket-140-discovered-source-queue-ranking` | `agent_reports/2026-06-14_ticket-140_discovered-source-queue-ranking.md` |
+| 141 | ticket-141 | proposed | Enqueue discovered candidates to staging research queue | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -901,17 +902,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-140 (proposed) — Research queue candidate ranking from discovered sources
+ticket-141 (proposed) — Enqueue discovered candidates to staging research queue
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-14, ticket-139 agent)
+## Queue Notes (2026-06-14, ticket-140 agent)
 
-- OpenAlex provider registry + discover-sources CLI with RGE_ALLOW_SOURCE_NETWORK opt-in.
-- Candidate metadata JSON only; no fetch/ingest/DB writes.
-- 9 openalex unit tests; 499 pytest; 142 golden; safety audit pass.
-- ticket-140 seeded: rank discovered candidates via source_preferences (product).
-- Next: pre-ticket-140 audit then ticket-140 implementation.
+- `discover-sources --rank-only` adds `ranked_candidates[]` with source_preferences credibility,
+  recency, relevance, and priority_score (JSON only; no DB writes).
+- Deterministic source_type inference; marketing titles rejected in ranking output.
+- 12 unit tests; 511 pytest; 142 golden; safety audit pass.
+- ticket-141 seeded: staging enqueue from discovery (`--enqueue`).
+- Next: pre-ticket-141 audit then ticket-141 implementation.
 
 ## Queue Notes (2026-06-14, ticket-137 agent)
 

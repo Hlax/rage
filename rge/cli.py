@@ -842,6 +842,7 @@ def _cmd_discover_sources(args: argparse.Namespace) -> int:
         domain_pack=args.domain,
         limit=args.limit,
         health=args.health,
+        rank_only=getattr(args, "rank_only", False),
     )
     print(json.dumps(payload, indent=2))
     return exit_code
@@ -2344,6 +2345,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--health",
         action="store_true",
         help="Report provider readiness without performing discovery.",
+    )
+    discover_sources_parser.add_argument(
+        "--rank-only",
+        action="store_true",
+        help=(
+            "After discovery, attach ranked_candidates using domain-pack "
+            "source_preferences and the queue-priority formula (JSON only)."
+        ),
     )
     discover_sources_parser.set_defaults(func=_cmd_discover_sources)
 

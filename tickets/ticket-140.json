@@ -43,7 +43,7 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove ranking overlay from discover-sources output; retain ticket-139 provider path.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / source acquisition / product-risk reduction",
   "pre_ticket_audit_required": true
 }

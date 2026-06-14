@@ -9,6 +9,8 @@ Ranking uses a versioned formula aligned with
 from __future__ import annotations
 
 import json
+import re
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +27,19 @@ DOMAIN_MATCH_SCORE = 0.85
 REJECTED_MARKETING_REASON = (
     "Marketing page with low credibility; excluded from active queue."
 )
+MARKETING_TITLE_PATTERNS = (
+    "only tool you",
+    "supercharge",
+    "#1",
+)
+DISCOVERED_PEER_REVIEWED_RECENCY_YEARS = 10
+DISCOVERED_DEFAULT_GAP_FILL_SCORE = 0.5
+DISCOVERED_DEFAULT_NOVELTY_SCORE = 0.5
+DISCOVERED_DEFAULT_SOURCE_DIVERSITY_SCORE = 0.5
+DISCOVERED_DEFAULT_DRIFT_RISK = 0.1
+DISCOVERED_MARKETING_DRIFT_RISK = 0.35
+DISCOVERED_RECENCY_DECAY_YEARS = 30
+_TOKEN_PATTERN = re.compile(r"[a-z0-9]+")
 
 _CREATIVITY_SOURCE_WEIGHTS = load_domain_pack("creativity").source_preferences.source_type_weights
 SOURCE_TYPE_CREDIBILITY: dict[str, float] = {
@@ -89,6 +104,169 @@ def load_candidate_fixture(fixture_path: Path | None = None) -> dict[str, Any]:
     """Load a candidate-source fixture from disk."""
     path = fixture_path or DEFAULT_FIXTURE_PATH
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _normalize_tokens(text: str) -> set[str]:
+    return set(_TOKEN_PATTERN.findall(text.casefold()))
+
+
+def _discovered_reference_year(reference_year: int | None) -> int:
+    if reference_year is not None:
+        return reference_year
+    return datetime.now(UTC).year
+
+
+def infer_source_type_for_discovered_candidate(
+    candidate: dict[str, Any],
+    *,
+    reference_year: int | None = None,
+) -> str:
+    """Infer a domain-pack source_type label from provider metadata only."""
+    title = str(candidate.get("title") or "")
+    title_folded = title.casefold()
+    for pattern in MARKETING_TITLE_PATTERNS:
+        if pattern in title_folded:
+            return "marketing_page"
+
+    work_type = str(candidate.get("work_type") or "").casefold()
+    if work_type == "article":
+        return "peer_reviewed_empirical"
+    if work_type in {"book", "book-chapter"}:
+        return "theory_essay"
+
+    doi = candidate.get("doi")
+    year = candidate.get("year")
+    abstract = str(candidate.get("abstract") or "").strip()
+    ref = _discovered_reference_year(reference_year)
+
+    if doi:
+        if isinstance(year, int) and ref - year <= DISCOVERED_PEER_REVIEWED_RECENCY_YEARS:
+            return "peer_reviewed_empirical"
+        return "theory_essay"
+    if abstract:
+        return "case_study"
+    return "unknown"
+
+
+def compute_discovered_relevance_score(
+    *, query: str, title: str, abstract: str
+) -> float:
+    """Deterministic token overlap between query and title+abstract."""
+    query_tokens = _normalize_tokens(query)
+    if not query_tokens:
+        return 0.0
+    text_tokens = _normalize_tokens(f"{title} {abstract}")
+    if not text_tokens:
+        return 0.0
+    overlap = len(query_tokens & text_tokens)
+    return round(min(1.0, overlap / len(query_tokens)), 4)
+
+
+def compute_discovered_recency_score(
+    *, year: int | None, reference_year: int | None = None
+) -> float:
+    """Deterministic recency score from publication year."""
+    if not isinstance(year, int):
+        return 0.5
+    ref = _discovered_reference_year(reference_year)
+    age = max(0, ref - year)
+    score = 1.0 - (age / DISCOVERED_RECENCY_DECAY_YEARS)
+    return round(max(0.0, min(1.0, score)), 4)
+
+
+def score_discovered_candidate(
+    candidate: dict[str, Any],
+    *,
+    query: str,
+    domain_pack: str = "creativity",
+    reference_year: int | None = None,
+) -> dict[str, Any]:
+    """Score one discovered candidate with pack credibility and queue signals."""
+    pack = load_domain_pack(domain_pack)
+    source_type = infer_source_type_for_discovered_candidate(
+        candidate,
+        reference_year=reference_year,
+    )
+    credibility_prior = source_type_credibility_prior(pack, source_type)
+    title = str(candidate.get("title") or "")
+    abstract = str(candidate.get("abstract") or "")
+    relevance_score = compute_discovered_relevance_score(
+        query=query,
+        title=title,
+        abstract=abstract,
+    )
+    recency_score = compute_discovered_recency_score(
+        year=candidate.get("year"),
+        reference_year=reference_year,
+    )
+    gap_fill_score = DISCOVERED_DEFAULT_GAP_FILL_SCORE
+    novelty_score = DISCOVERED_DEFAULT_NOVELTY_SCORE
+    source_diversity_score = DISCOVERED_DEFAULT_SOURCE_DIVERSITY_SCORE
+    drift_risk = (
+        DISCOVERED_MARKETING_DRIFT_RISK
+        if source_type == "marketing_page"
+        else DISCOVERED_DEFAULT_DRIFT_RISK
+    )
+    priority_score = compute_priority_score(
+        relevance_score=relevance_score,
+        credibility_prior=credibility_prior,
+        gap_fill_score=gap_fill_score,
+        source_diversity_score=source_diversity_score,
+        recency_score=recency_score,
+        novelty_score=novelty_score,
+        drift_risk=drift_risk,
+    )
+
+    if source_type == "marketing_page":
+        status = "rejected"
+        reason = REJECTED_MARKETING_REASON
+    else:
+        status = "queued"
+        doi_note = "DOI present" if candidate.get("doi") else "no DOI"
+        reason = (
+            f"Inferred {source_type}; {doi_note}; relevance {relevance_score} "
+            f"from query overlap."
+        )
+
+    scored = dict(candidate)
+    scored.update(
+        {
+            "source_type": source_type,
+            "credibility_prior": credibility_prior,
+            "relevance_score": relevance_score,
+            "recency_score": recency_score,
+            "gap_fill_score": gap_fill_score,
+            "novelty_score": novelty_score,
+            "source_diversity_score": source_diversity_score,
+            "drift_risk": drift_risk,
+            "priority_score": priority_score,
+            "reason": reason,
+            "status": status,
+            "formula_version": FORMULA_VERSION,
+        }
+    )
+    return scored
+
+
+def rank_discovered_candidates(
+    candidates: list[dict[str, Any]],
+    *,
+    query: str,
+    domain_pack: str = "creativity",
+    reference_year: int | None = None,
+) -> list[dict[str, Any]]:
+    """Rank provider-shaped candidates using domain-pack source preferences."""
+    ranked = [
+        score_discovered_candidate(
+            candidate,
+            query=query,
+            domain_pack=domain_pack,
+            reference_year=reference_year,
+        )
+        for candidate in candidates
+    ]
+    ranked.sort(key=lambda item: item["priority_score"], reverse=True)
+    return ranked
 
 
 def compute_priority_score(
