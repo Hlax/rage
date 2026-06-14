@@ -88,7 +88,8 @@ None.
 
 ## Merge to main
 
-Pending merge.
+Merged to `main` as `511236d60bb3027ddcd42d732959af179db705bf` (2026-06-14).
+Post-merge pytest: 519 passed, 6 deselected.
 
 ## Recommended next ticket
 
