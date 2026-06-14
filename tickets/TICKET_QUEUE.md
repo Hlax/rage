@@ -168,7 +168,8 @@ superseded
 | 134 | ticket-134 | done | Principal audit checkpoint post-ticket-133 | | `agent_reports/2026-06-14_principal-audit-post-ticket-133.md` |
 | 135 | ticket-135 | done | README maturity table honest NM-4 relabel | `phase-2/ticket-135-readme-maturity-nm4-relabel` | `agent_reports/2026-06-14_ticket-135_readme-maturity-nm4-relabel.md` |
 | 136 | ticket-136 | done | Canonical context maturity NM-4 alignment | `phase-2/ticket-136-canonical-context-maturity-nm4-alignment` | `agent_reports/2026-06-14_ticket-136_canonical-context-maturity-nm4-alignment.md` |
-| 137 | ticket-137 | proposed | Principal audit checkpoint post-ticket-136 | | |
+| 137 | ticket-137 | done | Principal audit checkpoint post-ticket-136 | | `agent_reports/2026-06-14_principal-audit-post-ticket-136.md` |
+| 138 | ticket-138 | proposed | Source discovery stub CLI (Phase 3 entry) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -898,17 +899,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-137 (proposed) — Principal audit checkpoint post-ticket-136
+ticket-138 (proposed) — Source discovery stub CLI (Phase 3 entry)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-14, ticket-136 agent)
+## Queue Notes (2026-06-14, ticket-137 agent)
 
-- Canonical context doc: Current Maturity section aligned with README/AGENTS (ticket-135).
-- Docs-only; no code changes.
-- 487 pytest; 142 golden; safety audit pass.
-- Cadence: 3 done since post-ticket-133 (134–136) — principal audit required before next implementation.
-- Next: ticket-137 (principal audit checkpoint).
+- Principal audit post-ticket-136: GO; cadence satisfied after docs chain 134–136.
+- Maturity aligned across README, AGENTS, canonical context; NM-4 evidence DB spine unchanged.
+- 487 pytest; 142 golden; safety audit pass; public-site build pass.
+- Next: ticket-138 (source discovery stub CLI, low risk, product-facing).
 
 ## Queue Notes (2026-06-14, ticket-131 agent)
 
