@@ -135,6 +135,13 @@ def test_missing_ontology_file_fails_closed(tmp_path: Path) -> None:
         "      - summary\n",
         encoding="utf-8",
     )
+    (pack_dir / "search_templates.yaml").write_text(
+        "queries:\n"
+        "  demo_query:\n"
+        '    template: "demo search template keywords"\n'
+        "    preferred_source_types: [peer_reviewed_empirical]\n",
+        encoding="utf-8",
+    )
     with pytest.raises(DomainPackError, match="Ontology file not found"):
         load_domain_pack("demo", root=tmp_path)
 
@@ -195,6 +202,13 @@ def test_malformed_aliases_file_fails_closed(tmp_path: Path) -> None:
         "    required_fields:\n"
         "      - title\n"
         "      - summary\n",
+        encoding="utf-8",
+    )
+    (pack_dir / "search_templates.yaml").write_text(
+        "queries:\n"
+        "  demo_query:\n"
+        '    template: "demo search template keywords"\n'
+        "    preferred_source_types: [peer_reviewed_empirical]\n",
         encoding="utf-8",
     )
     with pytest.raises(DomainPackError, match="top-level 'aliases:'"):

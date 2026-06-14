@@ -64,6 +64,18 @@ class CardTemplatesOverlay:
 
 
 @dataclass(frozen=True)
+class SearchQueryTemplate:
+    id: str
+    template: str
+    preferred_source_types: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class SearchTemplatesOverlay:
+    queries: dict[str, SearchQueryTemplate]
+
+
+@dataclass(frozen=True)
 class DomainPack:
     pack_id: str
     concepts: tuple[DomainPackConcept, ...]
@@ -74,6 +86,7 @@ class DomainPack:
     claim_schema: ClaimSchemaOverlay
     source_preferences: SourcePreferencesOverlay
     card_templates: CardTemplatesOverlay
+    search_templates: SearchTemplatesOverlay
 
 
 def repo_root() -> Path:
@@ -583,6 +596,112 @@ def template_required_fields(pack: DomainPack, card_type: str) -> tuple[str, ...
     return pack.card_templates.required_fields_by_type.get(normalized, ())
 
 
+def parse_search_templates_yaml(path: Path) -> SearchTemplatesOverlay:
+    """Parse search query templates from a domain pack search_templates stub."""
+    if not path.is_file():
+        raise DomainPackError(f"Search templates file not found: {path}")
+
+    text = path.read_text(encoding="utf-8")
+    if not text.strip():
+        raise DomainPackError(f"Search templates file is empty: {path}")
+
+    if not re.search(r"^queries:\s*$", text, re.MULTILINE):
+        raise DomainPackError(
+            f"Search templates file must contain top-level 'queries:' key: {path}"
+        )
+
+    queries: dict[str, SearchQueryTemplate] = {}
+    current_id: str | None = None
+    template_text = ""
+    preferred_types: list[str] = []
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped == "queries:":
+            continue
+
+        match_id = re.match(r"^  ([\w]+):\s*$", line)
+        if match_id:
+            if current_id is not None:
+                if not template_text:
+                    raise DomainPackError(
+                        f"Search template {current_id!r} missing template in {path}"
+                    )
+                queries[current_id] = SearchQueryTemplate(
+                    id=current_id,
+                    template=template_text,
+                    preferred_source_types=tuple(preferred_types),
+                )
+            current_id = match_id.group(1)
+            template_text = ""
+            preferred_types = []
+            continue
+
+        if current_id is None:
+            continue
+
+        match_template = re.match(r"^    template:\s*\"(.*)\"\s*$", line)
+        if match_template:
+            template_text = match_template.group(1)
+            continue
+
+        match_types = re.match(r"^    preferred_source_types:\s*\[(.*)\]\s*$", line)
+        if match_types:
+            preferred_types = [
+                item.strip() for item in match_types.group(1).split(",") if item.strip()
+            ]
+
+    if current_id is not None:
+        if not template_text:
+            raise DomainPackError(
+                f"Search template {current_id!r} missing template in {path}"
+            )
+        queries[current_id] = SearchQueryTemplate(
+            id=current_id,
+            template=template_text,
+            preferred_source_types=tuple(preferred_types),
+        )
+
+    if not queries:
+        raise DomainPackError(f"No search query templates found in {path}")
+
+    return SearchTemplatesOverlay(queries=queries)
+
+
+def search_template_topic_signals(pack: DomainPack, question_text: str) -> int:
+    """Count topic-fit signals from pack search template keyword overlap."""
+    question = _normalize_label(question_text)
+    signals = 0
+    for query in pack.search_templates.queries.values():
+        words = [
+            _normalize_label(word)
+            for word in query.template.split()
+            if len(word.strip()) > 3
+        ]
+        matches = sum(1 for word in words if word in question)
+        if matches >= 2:
+            signals += 2
+        elif matches == 1:
+            signals += 1
+    return signals
+
+
+def source_strategy_from_search_templates(pack: DomainPack) -> dict[str, Any]:
+    """Build contract source_strategy search_queries from pack templates."""
+    return {
+        "mode": "pack_search_templates",
+        "search_queries": {
+            query_id: {
+                "template": query.template,
+                "preferred_source_types": list(query.preferred_source_types),
+            }
+            for query_id, query in pack.search_templates.queries.items()
+        },
+    }
+
+
 def build_alias_to_canonical(aliases: dict[str, list[str]]) -> dict[str, str]:
     """Build normalized alias phrase → canonical label reverse map."""
     reverse: dict[str, str] = {}
@@ -615,6 +734,7 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
     claim_schema_path = pack_root / "claim_schema.yaml"
     source_preferences_path = pack_root / "source_preferences.yaml"
     card_templates_path = pack_root / "card_templates.yaml"
+    search_templates_path = pack_root / "search_templates.yaml"
 
     concepts = parse_ontology_yaml(ontology_path)
     alias_map = parse_aliases_yaml(aliases_path)
@@ -624,6 +744,7 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
     claim_schema = parse_claim_schema_yaml(claim_schema_path)
     source_preferences = parse_source_preferences_yaml(source_preferences_path)
     card_templates = parse_card_templates_yaml(card_templates_path)
+    search_templates = parse_search_templates_yaml(search_templates_path)
 
     return DomainPack(
         pack_id=pack_id,
@@ -635,6 +756,7 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
         claim_schema=claim_schema,
         source_preferences=source_preferences,
         card_templates=card_templates,
+        search_templates=search_templates,
     )
 
 
