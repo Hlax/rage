@@ -88,7 +88,8 @@ branch was needed for a report-only checkpoint ticket.
 
 ## Merge to main
 
-Pending merge.
+Merged @ **`e99d614`** (`Merge branch 'phase-2/ticket-135-readme-maturity-nm4-relabel'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
