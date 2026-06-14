@@ -89,7 +89,8 @@ None. `claim_scoring_overlay` section preserved; only `score_reconciliation` add
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merged `phase-2/ticket-113-domain-pack-scoring-loader` to `main` @ `5fc632d`.
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
