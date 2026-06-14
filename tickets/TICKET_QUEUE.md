@@ -158,7 +158,8 @@ superseded
 | 124 | ticket-124 | done | AGENTS.md cross-link README NM-5 domain pack section | `phase-2/ticket-124-agents-nm5-crosslink` | `agent_reports/2026-06-14_ticket-124_agents-nm5-crosslink.md` |
 | 125 | ticket-125 | done | Domain pack spec cross-link README NM-5 runtime table | `phase-2/ticket-125-domain-pack-spec-nm5-crosslink` | `agent_reports/2026-06-14_ticket-125_domain-pack-spec-nm5-crosslink.md` |
 | 126 | ticket-126 | done | Operator loop plan surfaces domain pack load health | `phase-2/ticket-126-operator-loop-domain-pack-health` | `agent_reports/2026-06-14_ticket-126_operator-loop-domain-pack-health.md` |
-| 127 | ticket-127 | proposed | Arbitrary manual text live extraction fall-through (NM-4 recenter) | | |
+| 127 | ticket-127 | done | Arbitrary manual text live extraction fall-through (NM-4 recenter) | `phase-2/ticket-127-arbitrary-manual-live-fallthrough` | `agent_reports/2026-06-14_ticket-127_arbitrary-manual-live-fallthrough.md` |
+| 128 | ticket-128 | proposed | Arbitrary manual live concept linking fall-through | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -888,9 +889,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-127 (proposed) — Arbitrary manual text live extraction fall-through (NM-4 recenter)
+ticket-128 (proposed) — Arbitrary manual live concept linking fall-through
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-127 agent)
+
+- Calibrated Ollama claim prompt v0.1.1 for `manual_text_arbitrary_live` contract mode.
+- Live proof: checksum `1b8354e5…` not in fixture map; 1 accepted / 1 rejected in evidence DB.
+- NM-4 extract proof complete; synthnote mock spine unchanged.
+- 460 pytest pass; 142 golden; safety audit pass.
+- Cadence: 2 done since post-ticket-125 audit (126, 127) — principal audit due after one more done ticket.
+- Next: ticket-128 (live concept linking fall-through); requires pre-ticket audit.
 
 ## Queue Notes (2026-06-14, ticket-126 agent)
 

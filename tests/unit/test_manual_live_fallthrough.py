@@ -273,3 +273,53 @@ def test_assert_checksum_rejects_synthnote_fixture_map_entry() -> None:
     pinned = next(iter(checksums))
     with pytest.raises(LiveExtractionWriteError, match="fixture_map"):
         assert_checksum_not_in_fixture_map(pinned)
+
+
+def test_ticket127_arbitrary_source_not_in_fixture_map() -> None:
+    source_path = REPO_ROOT / "fixtures" / "sources" / "ticket127_arbitrary_manual_live.txt"
+    import hashlib
+
+    checksum = hashlib.sha256(source_path.read_bytes()).hexdigest()
+    assert_checksum_not_in_fixture_map(checksum)
+
+
+def test_live_fallthrough_passes_manual_text_contract_hint(temp_db: Path) -> None:
+    from rge.cli import main
+
+    captured: dict[str, object] = {}
+
+    class _CapturingStub(_StubOllamaClient):
+        def extract_claims(self, **kwargs: object) -> CandidateClaimBatch_v0_1:
+            captured.update(kwargs)
+            return super().extract_claims(**kwargs)
+
+    source_id = _ingest_arbitrary_manual_source(temp_db)
+    with patch.dict(
+        os.environ,
+        {"RGE_LLM_MODE": "ollama", "RGE_ALLOW_LIVE_LLM": "1"},
+        clear=False,
+    ):
+        with patch(
+            "rge.modules.live_extraction_write.assert_ollama_health",
+            return_value={"model_available": True},
+        ):
+            with patch(
+                "rge.modules.live_extraction_write.get_model_client",
+                return_value=_CapturingStub(),
+            ):
+                assert (
+                    main(
+                        [
+                            "extract-claims",
+                            "--source",
+                            source_id,
+                            "--db",
+                            str(temp_db),
+                            "--live-manual-fallthrough",
+                        ]
+                    )
+                    == 0
+                )
+    contract = captured.get("contract")
+    assert isinstance(contract, dict)
+    assert contract.get("manual_text_arbitrary_live") is True

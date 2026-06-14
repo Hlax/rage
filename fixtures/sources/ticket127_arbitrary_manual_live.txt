@@ -1,0 +1,8 @@
+Ticket-127 NM-4 arbitrary manual live extraction calibration source.
+
+In a controlled songwriting workshop with twelve novice participants, human-AI
+pairs completed draft verses in an average of 18 minutes per draft. By contrast,
+solo writers in this workshop setting averaged 27 minutes per draft.
+
+Participants in this songwriting workshop also reused similar rhyme schemes in
+approximately 40 percent of AI-assisted drafts during the session.
