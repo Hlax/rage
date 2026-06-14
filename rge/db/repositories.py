@@ -2234,6 +2234,13 @@ class CandidateSourceRepository:
         assert row is not None
         return dict(row)
 
+    def get_by_id(self, candidate_id: str) -> dict[str, Any] | None:
+        row = self._conn.execute(
+            "SELECT * FROM candidate_sources WHERE id = ?",
+            (candidate_id,),
+        ).fetchone()
+        return dict(row) if row is not None else None
+
     def list_for_question(self, research_question_id: str) -> list[dict[str, Any]]:
         rows = self._conn.execute(
             """

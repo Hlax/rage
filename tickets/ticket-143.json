@@ -1,0 +1,45 @@
+{
+  "id": "ticket-143",
+  "title": "Ingest from staged fetch artifact path",
+  "problem": "ticket-142 writes fetched candidate bytes to data/sources/staged/. Operators cannot ingest a staged artifact into the graph sources table for downstream extract-claims without manual copy into manual source paths.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-142_staged-candidate-fetch.md",
+    "rge/cli.py",
+    "rge/modules/fetcher.py"
+  ],
+  "affected_modules": [
+    "rge/cli.py",
+    "rge/modules/fetcher.py"
+  ],
+  "expected_files": [
+    "rge/cli.py",
+    "rge/modules/fetcher.py",
+    "tests/unit/test_staged_artifact_ingest.py",
+    "agent_reports/2026-06-14_ticket-143_staged-artifact-ingest.md"
+  ],
+  "acceptance_criteria": [
+    "CLI ingest-staged or ingest --from-staged loads artifact by candidate id or path with checksum verification.",
+    "Persists sources/chunks only on explicit operator command; no automatic claim extraction.",
+    "Mocked or fixture-based tests only in default pytest collection.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_staged_artifact_ingest.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Automatic claim extraction pipeline.",
+    "Playwright/Scrapfly/browser automation.",
+    "Schema migrations.",
+    "Public export/site changes.",
+    "Live LLM extraction."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove ingest-staged CLI; retain ticket-142 fetch artifacts.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / product-risk reduction",
+  "pre_ticket_audit_required": true
+}
