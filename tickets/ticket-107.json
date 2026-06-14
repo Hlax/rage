@@ -26,5 +26,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert AGENTS.md test cross-link.",
-  "status": "proposed"
+  "status": "done"
 }
