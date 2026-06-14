@@ -76,6 +76,11 @@ class SearchTemplatesOverlay:
 
 
 @dataclass(frozen=True)
+class SafetyNotesOverlay:
+    notes: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class DomainPack:
     pack_id: str
     concepts: tuple[DomainPackConcept, ...]
@@ -87,6 +92,7 @@ class DomainPack:
     source_preferences: SourcePreferencesOverlay
     card_templates: CardTemplatesOverlay
     search_templates: SearchTemplatesOverlay
+    safety_notes: SafetyNotesOverlay
 
 
 def repo_root() -> Path:
@@ -688,6 +694,89 @@ def search_template_topic_signals(pack: DomainPack, question_text: str) -> int:
     return signals
 
 
+def _parse_yaml_multiline_list(text: str, header: str) -> list[str]:
+    """Parse a YAML list section that may use folded multi-line bullet items."""
+    items: list[str] = []
+    in_section = False
+    current_parts: list[str] = []
+
+    for line in text.splitlines():
+        if line.strip() == f"{header}:":
+            in_section = True
+            continue
+        if not in_section:
+            continue
+        if line and not line.startswith(" "):
+            break
+        match = re.match(r"^  - (.+)$", line)
+        if match:
+            if current_parts:
+                items.append(" ".join(current_parts).strip())
+            current_parts = [match.group(1).strip()]
+            continue
+        if current_parts and line.startswith("    "):
+            current_parts.append(line.strip())
+
+    if current_parts:
+        items.append(" ".join(current_parts).strip())
+    return items
+
+
+def parse_safety_notes_yaml(path: Path) -> SafetyNotesOverlay:
+    """Parse domain safety notes from a domain pack safety_notes stub."""
+    if not path.is_file():
+        raise DomainPackError(f"Safety notes file not found: {path}")
+
+    text = path.read_text(encoding="utf-8")
+    if not text.strip():
+        raise DomainPackError(f"Safety notes file is empty: {path}")
+
+    if not re.search(r"^notes:\s*$", text, re.MULTILINE):
+        raise DomainPackError(
+            f"Safety notes file must contain top-level 'notes:' key: {path}"
+        )
+
+    notes = _parse_yaml_multiline_list(text, "notes")
+    if not notes:
+        raise DomainPackError(f"Safety notes file missing notes list in {path}")
+
+    return SafetyNotesOverlay(notes=tuple(notes))
+
+
+def required_safety_note_themes_for_pack(pack_id: str) -> tuple[str, ...]:
+    """Return guidance substrings the safety auditor must find in pack safety notes."""
+    normalized = pack_id.strip().casefold()
+    if normalized == "creativity":
+        return (
+            "prompt injection",
+            "marketing pages",
+            "scope-sensitive",
+        )
+    return ("prompt injection",)
+
+
+def verify_pack_safety_notes_for_audit(
+    pack: DomainPack,
+    *,
+    required_substrings: tuple[str, ...],
+    minimum_note_count: int = 1,
+) -> list[str]:
+    """Return machine-readable violations when pack safety notes miss audit guidance."""
+    violations: list[str] = []
+    notes = pack.safety_notes.notes
+    if len(notes) < minimum_note_count:
+        violations.append(
+            f"domain pack safety notes below minimum count {minimum_note_count}"
+        )
+    combined = "\n".join(notes).casefold()
+    for substring in required_substrings:
+        if substring.casefold() not in combined:
+            violations.append(
+                f"domain pack safety notes missing guidance substring: {substring!r}"
+            )
+    return violations
+
+
 def source_strategy_from_search_templates(pack: DomainPack) -> dict[str, Any]:
     """Build contract source_strategy search_queries from pack templates."""
     return {
@@ -735,6 +824,7 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
     source_preferences_path = pack_root / "source_preferences.yaml"
     card_templates_path = pack_root / "card_templates.yaml"
     search_templates_path = pack_root / "search_templates.yaml"
+    safety_notes_path = pack_root / "safety_notes.yaml"
 
     concepts = parse_ontology_yaml(ontology_path)
     alias_map = parse_aliases_yaml(aliases_path)
@@ -745,6 +835,7 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
     source_preferences = parse_source_preferences_yaml(source_preferences_path)
     card_templates = parse_card_templates_yaml(card_templates_path)
     search_templates = parse_search_templates_yaml(search_templates_path)
+    safety_notes = parse_safety_notes_yaml(safety_notes_path)
 
     return DomainPack(
         pack_id=pack_id,
@@ -757,6 +848,7 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
         source_preferences=source_preferences,
         card_templates=card_templates,
         search_templates=search_templates,
+        safety_notes=safety_notes,
     )
 
 

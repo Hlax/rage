@@ -42,5 +42,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert safety_notes loader wiring; restore inline auditor constants.",
-  "status": "proposed"
+  "status": "done"
 }

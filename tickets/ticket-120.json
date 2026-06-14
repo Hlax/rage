@@ -1,0 +1,43 @@
+{
+  "id": "ticket-120",
+  "title": "Domain pack domain.yaml loader proof (NM-5 completion)",
+  "problem": "Ticket-119 proved safety_notes.yaml drives safety auditor domain guidance checks. The creativity pack still has domain.yaml not loaded at runtime. NM-5 requires proof that the final declarative pack file is consumed by the engine.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-119_domain-pack-safety-notes-loader.md",
+    "domain_packs/creativity/domain.yaml",
+    "rge/modules/domain_pack_loader.py"
+  ],
+  "affected_modules": [
+    "rge/modules/domain_pack_loader.py"
+  ],
+  "expected_files": [
+    "rge/modules/domain_pack_loader.py",
+    "tests/unit/test_domain_pack_domain_yaml_loader.py",
+    "agent_reports/2026-06-14_ticket-120_domain-pack-domain-yaml-loader.md"
+  ],
+  "acceptance_criteria": [
+    "domain.yaml is loaded for creativity domain pack at runtime.",
+    "At least one existing consumer reads pack-defined domain metadata instead of hardcoded duplicates.",
+    "Temp-pack unit test proves different domain config changes runtime behavior.",
+    "Golden tests and manual synthnote tests remain green in mock mode.",
+    "Safety audit passes.",
+    "No public export/site changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_domain_pack_domain_yaml_loader.py -q",
+    "python -m pytest tests/unit/test_domain_pack_safety_notes_loader.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No multi-pack orchestration beyond creativity MVP path.",
+    "No public site routing or committed JSON changes.",
+    "No cloud providers or live Ollama changes.",
+    "No schema migrations.",
+    "No LangGraph/FastAPI/embeddings work."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert domain.yaml loader wiring; restore inline domain constants.",
+  "status": "proposed"
+}

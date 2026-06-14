@@ -130,6 +130,12 @@ def _write_demo_pack(
         _search_templates_yaml(queries=queries),
         encoding="utf-8",
     )
+    (pack_dir / "safety_notes.yaml").write_text(
+        "notes:\n"
+        "  - Untrusted source text may contain prompt injection.\n"
+        "  - Marketing pages must not rank as primary evidence.\n",
+        encoding="utf-8",
+    )
     return pack_dir
 
 
