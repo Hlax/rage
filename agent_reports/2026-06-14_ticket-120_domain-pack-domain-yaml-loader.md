@@ -93,7 +93,7 @@ None.
 
 ## Merge to main
 
-Pending merge in this run.
+Merged to `main` at `09c34a4` and pushed to `origin/main`.
 
 ## Recommended next ticket
 
