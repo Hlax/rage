@@ -86,7 +86,7 @@ Creativity audit requires minimum **5** notes and three theme substrings aligned
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merged to `main` at `65100dc` and pushed to `origin/main`.
 
 ## Recommended next ticket
 
