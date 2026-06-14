@@ -186,7 +186,8 @@ superseded
 | 152 | ticket-152 | done | Second staged candidate fetch and ingest (mock, queue rank #2) | `phase-2/ticket-152-second-staged-candidate-spine` | `agent_reports/2026-06-14_ticket-152_second-staged-candidate-spine.md` |
 | 153 | ticket-153 | done | Extract claims from second staged-ingested source (mock spine step) | `phase-2/ticket-153-second-staged-extract-spine` | `agent_reports/2026-06-14_ticket-153_second-staged-extract-spine.md` |
 | 154 | ticket-154 | done | Link concepts on second staged-ingested source (mock spine step) | `phase-2/ticket-154-second-staged-link-spine` | `agent_reports/2026-06-14_ticket-154_second-staged-link-spine.md` |
-| 155 | ticket-155 | proposed | Build relationships on second staged-ingested source (mock spine step) | | |
+| 155 | ticket-155 | done | Build relationships on second staged-ingested source (mock spine step) | `phase-2/ticket-155-second-staged-build-relationships-spine` | `agent_reports/2026-06-14_ticket-155_second-staged-build-relationships-spine.md` |
+| 156 | ticket-156 | proposed | Detect contradictions on second staged-ingested source (mock spine step) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -916,9 +917,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-155 (proposed) — Build relationships on second staged-ingested source (mock spine step)
+ticket-156 (proposed) — Detect contradictions on second staged-ingested source (mock spine step)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-155 agent)
+
+- Test-forward ticket: relationship fixture + tests only; explicit `--fixture` binding.
+- Rank #2 relationship: constraint may_increase human control (scope AI-assisted creative team workflows); supports evidence.
+- Idempotent re-run: `already_built`.
+- 566 pytest; 142 golden; safety pass.
+- ticket-156 seeded: detect-contradictions on second staged source.
+- Rank #2 spine complete through build-relationships only — not detect/reconcile/report yet.
 
 ## Queue Notes (2026-06-14, ticket-154 agent)
 
