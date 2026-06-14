@@ -1,0 +1,39 @@
+{
+  "task_name": "concept_linking",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "claim_id": "placeholder",
+      "concept_label": "co-creation",
+      "role": "subject",
+      "confidence": 0.82,
+      "domain_metadata": {
+        "track": "human-AI",
+        "creative_phase": "execution",
+        "measured_dimension": "semantic diversity"
+      }
+    },
+    {
+      "claim_id": "placeholder",
+      "concept_label": "semantic diversity",
+      "role": "object",
+      "confidence": 0.88,
+      "domain_metadata": {
+        "track": "human-AI",
+        "creative_phase": "execution",
+        "measured_dimension": "semantic diversity"
+      }
+    },
+    {
+      "claim_id": "placeholder",
+      "concept_label": "diversity",
+      "role": "context",
+      "confidence": 0.75,
+      "domain_metadata": {
+        "track": "human-AI",
+        "creative_phase": "execution",
+        "measured_dimension": "semantic diversity"
+      }
+    }
+  ]
+}
