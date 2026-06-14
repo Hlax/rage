@@ -1,0 +1,30 @@
+{
+  "id": "ticket-109",
+  "title": "Cursor build loop manual synthnote pipeline proof test cross-link",
+  "problem": "Ticket-108 documented manual synthnote pipeline proof tests in the operating protocol. docs/agents/04_CURSOR_BUILD_LOOP.md should cross-link the same test modules for build-loop-aligned agents.",
+  "evidence": [
+    "agent_reports/2026-06-14_phase-2_ticket-108_operating-protocol-manual-synthnote-pipeline-proof-test-crosslink.md",
+    "tests/unit/test_manual_source_pipeline_e2e.py",
+    "tests/unit/test_manual_source_pipeline_idempotency.py",
+    "docs/agents/04_CURSOR_BUILD_LOOP.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "docs/agents/04_CURSOR_BUILD_LOOP.md"
+  ],
+  "acceptance_criteria": [
+    "04_CURSOR_BUILD_LOOP.md links to manual synthnote pipeline e2e and idempotency unit tests.",
+    "No production code or golden test changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_source_pipeline_e2e.py -q",
+    "python -m pytest tests/unit/test_manual_source_pipeline_idempotency.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "No live Ollama, export, schema migration, or operating protocol rewrite."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert cursor build loop test cross-link.",
+  "status": "proposed"
+}
