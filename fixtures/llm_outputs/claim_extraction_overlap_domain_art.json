@@ -1,0 +1,24 @@
+{
+  "task_name": "claim_extraction",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "claim_text": "Study results may not generalize to film and music in short-form writing tasks.",
+      "source_id": "src_placeholder",
+      "chunk_id": "chk_placeholder",
+      "quote_span": "The results may not generalize to film, music, or professional creative work",
+      "subject": "study results",
+      "predicate": "may not generalize to",
+      "object": "film and music",
+      "scope": "short-form writing tasks",
+      "evidence_type": "empirical",
+      "confidence": 0.6,
+      "limitations": [
+        "Only tested short-form writing tasks.",
+        "Sample consisted of student participants."
+      ],
+      "domain": "art",
+      "domain_metadata": {}
+    }
+  ]
+}

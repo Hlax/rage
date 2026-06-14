@@ -153,7 +153,8 @@ superseded
 | 119 | ticket-119 | done | Domain pack safety_notes.yaml loader proof (NM-5 continuation) | `phase-2/ticket-119-domain-pack-safety-notes-loader` | `agent_reports/2026-06-14_ticket-119_domain-pack-safety-notes-loader.md` |
 | 120 | ticket-120 | done | Domain pack domain.yaml loader proof (NM-5 completion) | `phase-2/ticket-120-domain-pack-domain-yaml-loader` | `agent_reports/2026-06-14_ticket-120_domain-pack-domain-yaml-loader.md` |
 | 121 | ticket-121 | done | Wire claim_validator domain checks to pack domain.yaml | `phase-2/ticket-121-claim-validator-domain-pack` | `agent_reports/2026-06-14_ticket-121_claim-validator-domain-pack.md` |
-| 122 | ticket-122 | proposed | Golden test overlap-domain claim label acceptance (mock) | | |
+| 122 | ticket-122 | done | Golden test overlap-domain claim label acceptance (mock) | `phase-2/ticket-122-golden-overlap-domain-claim` | `agent_reports/2026-06-14_ticket-122_golden-overlap-domain-claim.md` |
+| 123 | ticket-123 | proposed | README operator quickstart NM-5 domain pack loading summary | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -883,9 +884,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-122 (proposed) — Golden test overlap-domain claim label acceptance (mock)
+ticket-123 (proposed) — README operator quickstart NM-5 domain pack loading summary
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-122 agent)
+
+- Added `claim_extraction_overlap_domain_art.json` mock fixture with `domain: art`.
+- Golden tests prove overlap labels survive extract-and-validate and CLI persist paths.
+- GT22 inventory updated; 142 golden pass; 454 pytest pass; safety audit pass.
+- Cadence note: 3 done tickets since post-ticket-119 principal audit after this merge — run `/rge-principal-audit` before ticket-124 implementation.
+- Next: ticket-123 (README NM-5 domain pack summary).
 
 ## Queue Notes (2026-06-14, ticket-121 agent)
 
@@ -987,7 +996,7 @@ directed corrective work **before** ticket-111. **Completed and merged to main @
 | NM-4 / ticket-112 | **done** | Arbitrary manual_text live fall-through |
 | ticket-111 | **superseded** | Folded into NM-2 |
 
-Next product move: **ticket-122** (golden overlap-domain claim label acceptance in mock extraction).
+Next product move: **ticket-123** (README NM-5 domain pack runtime loading summary).
 
 ## Queue Rules
 
