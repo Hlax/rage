@@ -116,7 +116,8 @@ None. Prompt template version bumped to `0.1.1` for calibration traceability.
 
 ## Merge to main
 
-Placeholder — updated after merge.
+Merged @ **`c0a4c3b`** (`Merge branch 'phase-2/ticket-127-arbitrary-manual-live-fallthrough'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
