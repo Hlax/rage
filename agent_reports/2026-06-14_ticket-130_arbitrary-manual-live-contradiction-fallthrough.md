@@ -107,7 +107,8 @@ None.
 
 ## Merge to main
 
-Pending merge (placeholder updated after merge).
+Merged @ **`f47b456`** (`Merge branch 'phase-2/ticket-130-arbitrary-manual-live-contradiction-fallthrough'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
