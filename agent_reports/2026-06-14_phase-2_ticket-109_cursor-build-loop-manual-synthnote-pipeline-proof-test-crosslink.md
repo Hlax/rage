@@ -47,9 +47,10 @@ Safety audit: **not required** (cursor build loop docs-only).
 
 ## Merge
 
-- Implementation SHA: _(pending commit)_
-- Merge commit: _(pending merge)_
-- Pushed: _(pending)_
+- Implementation SHA: `9054373`
+- Merge commit: `ebfcbfa`
+- Pushed: `main -> main`
+- Full pytest: **385 passed**, 6 `live_smoke` deselected
 
 ## Recommended next ticket
 
