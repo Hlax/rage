@@ -88,6 +88,7 @@ def test_cli_top_level_help() -> None:
     for command in (
         "run",
         "ingest",
+        "ingest-staged",
         "extract-claims",
         "link-concepts",
         "build-relationships",

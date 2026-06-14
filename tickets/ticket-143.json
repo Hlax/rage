@@ -39,7 +39,7 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove ingest-staged CLI; retain ticket-142 fetch artifacts.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / source acquisition / product-risk reduction",
   "pre_ticket_audit_required": true
 }

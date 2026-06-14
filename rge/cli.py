@@ -1753,6 +1753,60 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_ingest_staged(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import (
+        ChunkRepository,
+        SourceRepository,
+        source_record_to_public_dict,
+    )
+    from rge.modules.fetcher import run_ingest_staged_command
+
+    if not args.candidate and not args.artifact:
+        payload = {
+            "status": "error",
+            "command": "ingest-staged",
+            "reason": "missing_target",
+            "detail": "Either --candidate or --artifact is required.",
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+    artifact_path = Path(args.artifact) if args.artifact else None
+    if artifact_path is not None and not artifact_path.is_absolute():
+        artifact_path = Path(__file__).resolve().parents[2] / artifact_path
+    staging_dir = Path(args.staging_dir) if getattr(args, "staging_dir", None) else None
+    if staging_dir is not None and not staging_dir.is_absolute():
+        staging_dir = Path(__file__).resolve().parents[2] / staging_dir
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        payload, exit_code = run_ingest_staged_command(
+            conn,
+            domain=args.domain,
+            candidate_id=args.candidate,
+            artifact_path=artifact_path,
+            expected_checksum=args.checksum,
+            staging_dir=staging_dir,
+            source_type=args.source_type,
+            title=args.source_title,
+        )
+        if exit_code == 0:
+            source = SourceRepository(conn).get_by_id(payload["source_id"])
+            chunks = ChunkRepository(conn).list_for_source(payload["source_id"])
+            payload = {
+                **payload,
+                "source": source_record_to_public_dict(source) if source else None,
+                "chunk_count": len(chunks),
+                "chunk_ids": [chunk.id for chunk in chunks],
+            }
+        print(json.dumps(payload, indent=2))
+        return exit_code
+    finally:
+        conn.close()
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="research",
@@ -1838,6 +1892,50 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
     )
     ingest_parser.set_defaults(func=_cmd_ingest)
+
+    ingest_staged_parser = subparsers.add_parser(
+        "ingest-staged",
+        help="Ingest a staged fetch artifact into sources and chunks.",
+        description=(
+            "Load a ticket-142 staged artifact by candidate id or explicit path, "
+            "verify optional checksum, and persist sources/chunks. No claim extraction."
+        ),
+    )
+    ingest_staged_parser.add_argument(
+        "--domain",
+        required=True,
+        help="Primary domain pack ID (e.g. creativity).",
+    )
+    ingest_staged_parser.add_argument(
+        "--candidate",
+        help="candidate_sources id used to resolve artifact and metadata.",
+    )
+    ingest_staged_parser.add_argument(
+        "--artifact",
+        help="Explicit staged artifact path (alternative to --candidate).",
+    )
+    ingest_staged_parser.add_argument(
+        "--checksum",
+        help="Expected sha256 hex checksum of artifact bytes (verification).",
+    )
+    ingest_staged_parser.add_argument(
+        "--staging-dir",
+        help="Directory to resolve artifacts when using --candidate "
+        "(default: data/sources/staged).",
+    )
+    ingest_staged_parser.add_argument(
+        "--source-type",
+        help="Override source type label (default: candidate row or staged_fetch).",
+    )
+    ingest_staged_parser.add_argument(
+        "--source-title",
+        help="Override source title (default: candidate title or filename).",
+    )
+    ingest_staged_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    ingest_staged_parser.set_defaults(func=_cmd_ingest_staged)
 
     extract_parser = subparsers.add_parser(
         "extract-claims",
