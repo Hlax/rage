@@ -39,5 +39,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert domain.yaml loader wiring; restore inline domain constants.",
-  "status": "proposed"
+  "status": "done"
 }

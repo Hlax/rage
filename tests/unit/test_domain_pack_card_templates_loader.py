@@ -117,6 +117,20 @@ def _write_demo_pack(
 ) -> Path:
     pack_dir = tmp_path / "domain_packs" / "demo"
     pack_dir.mkdir(parents=True)
+    (pack_dir / "domain.yaml").write_text(
+        "id: demo\n"
+        "name: Demo Pack\n"
+        "version: 0.1.0\n"
+        "status: active\n"
+        "summary: Demo domain pack for unit tests.\n"
+        "primary_domains:\n"
+        "  - demo\n"
+        "overlap_domains:\n"
+        "  - art\n"
+        "lifecycle_states:\n"
+        "  - active\n",
+        encoding="utf-8",
+    )
     (pack_dir / "ontology.yaml").write_text(
         "concepts:\n  - id: concept_ai\n    label: AI assistance\n",
         encoding="utf-8",

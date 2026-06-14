@@ -495,6 +495,7 @@ def _audit_domain_pack_safety_notes(root: Path) -> tuple[list[str], list[str]]:
     from rge.modules.domain_pack_loader import (
         domain_pack_dir,
         required_safety_note_themes_for_pack,
+        verify_pack_identity_for_audit,
         verify_pack_safety_notes_for_audit,
     )
 
@@ -514,6 +515,8 @@ def _audit_domain_pack_safety_notes(root: Path) -> tuple[list[str], list[str]]:
     pack = _load_creativity_pack_for_audit(root)
     required_themes = required_safety_note_themes_for_pack(pack.pack_id)
     minimum_count = 5 if pack.pack_id == "creativity" else 1
+    for issue in verify_pack_identity_for_audit(pack):
+        blocked.append(issue)
     for issue in verify_pack_safety_notes_for_audit(
         pack,
         required_substrings=required_themes,

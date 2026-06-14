@@ -151,7 +151,8 @@ superseded
 | 117 | ticket-117 | done | Domain pack card_templates.yaml loader proof (NM-5 continuation) | `phase-2/ticket-117-domain-pack-card-templates-loader` | `agent_reports/2026-06-14_ticket-117_domain-pack-card-templates-loader.md` |
 | 118 | ticket-118 | done | Domain pack search_templates.yaml loader proof (NM-5 continuation) | `phase-2/ticket-118-domain-pack-search-templates-loader` | `agent_reports/2026-06-14_ticket-118_domain-pack-search-templates-loader.md` |
 | 119 | ticket-119 | done | Domain pack safety_notes.yaml loader proof (NM-5 continuation) | `phase-2/ticket-119-domain-pack-safety-notes-loader` | `agent_reports/2026-06-14_ticket-119_domain-pack-safety-notes-loader.md` |
-| 120 | ticket-120 | proposed | Domain pack domain.yaml loader proof (NM-5 completion) | | |
+| 120 | ticket-120 | done | Domain pack domain.yaml loader proof (NM-5 completion) | `phase-2/ticket-120-domain-pack-domain-yaml-loader` | `agent_reports/2026-06-14_ticket-120_domain-pack-domain-yaml-loader.md` |
+| 121 | ticket-121 | proposed | Wire claim_validator domain checks to pack domain.yaml | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -881,11 +882,20 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-120 (proposed) — Domain pack domain.yaml loader proof (NM-5 completion)
+ticket-121 (proposed) — Wire claim_validator domain checks to pack domain.yaml
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-14, ticket-119 agent)
+## Queue Notes (2026-06-14, ticket-120 agent)
+
+- Extended `domain_pack_loader` to parse `domain.yaml` (`DomainIdentityOverlay`).
+- `load_domain_pack()` requires domain.yaml; validates pack directory id matches YAML id.
+- Safety auditor verifies pack identity is active via `verify_pack_identity_for_audit()`.
+- 6 new unit tests; domain.yaml stubs in all domain-pack temp-pack tests.
+- 449 pytest pass; safety audit pass. NM-5 declarative pack loading complete.
+- Principal audit: `agent_reports/2026-06-14_principal-audit-post-ticket-119.md`.
+- Pre-ticket audit: `agent_reports/2026-06-14_pre-ticket-120_domain-pack-domain-yaml-loader-audit.md`.
+- Next: ticket-121 (claim_validator domain allowlist from pack).
 
 - Extended `domain_pack_loader` to parse `safety_notes.yaml` (multi-line notes list).
 - Full safety audit verifies creativity pack guidance themes from loaded notes.
@@ -968,7 +978,7 @@ directed corrective work **before** ticket-111. **Completed and merged to main @
 | NM-4 / ticket-112 | **done** | Arbitrary manual_text live fall-through |
 | ticket-111 | **superseded** | Folded into NM-2 |
 
-Next product move: **ticket-120** (NM-5 completion: domain pack domain.yaml).
+Next product move: **ticket-121** (claim_validator domain allowlist from pack domain.yaml).
 
 ## Queue Rules
 

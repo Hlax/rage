@@ -81,8 +81,21 @@ class SafetyNotesOverlay:
 
 
 @dataclass(frozen=True)
+class DomainIdentityOverlay:
+    id: str
+    name: str
+    version: str
+    status: str
+    summary: str
+    primary_domains: tuple[str, ...]
+    overlap_domains: tuple[str, ...]
+    lifecycle_states: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class DomainPack:
     pack_id: str
+    domain_identity: DomainIdentityOverlay
     concepts: tuple[DomainPackConcept, ...]
     aliases: dict[str, tuple[str, ...]]
     alias_to_canonical: dict[str, str]
@@ -722,6 +735,81 @@ def _parse_yaml_multiline_list(text: str, header: str) -> list[str]:
     return items
 
 
+def parse_domain_yaml(path: Path) -> DomainIdentityOverlay:
+    """Parse domain pack identity metadata from a domain.yaml stub."""
+    if not path.is_file():
+        raise DomainPackError(f"Domain file not found: {path}")
+
+    text = path.read_text(encoding="utf-8")
+    if not text.strip():
+        raise DomainPackError(f"Domain file is empty: {path}")
+
+    fields: dict[str, str] = {}
+    for key in ("id", "name", "version", "status"):
+        match = re.search(rf"^{key}: (.+)$", text, re.MULTILINE)
+        if not match:
+            raise DomainPackError(f"Domain file missing required field {key!r}: {path}")
+        fields[key] = match.group(1).strip()
+
+    summary_lines: list[str] = []
+    in_summary = False
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("summary:"):
+            in_summary = True
+            inline = stripped.split(":", 1)[1].strip()
+            if inline and inline != ">":
+                summary_lines.append(inline)
+            continue
+        if in_summary:
+            if line.startswith("  ") and not stripped.endswith(":"):
+                summary_lines.append(stripped)
+            elif stripped and not line.startswith(" "):
+                in_summary = False
+
+    primary_domains = _parse_yaml_list_section(text, "primary_domains")
+    overlap_domains = _parse_yaml_list_section(text, "overlap_domains")
+    lifecycle_states = _parse_yaml_list_section(text, "lifecycle_states")
+
+    if not primary_domains:
+        raise DomainPackError(f"Domain file missing primary_domains list in {path}")
+    if not lifecycle_states:
+        raise DomainPackError(f"Domain file missing lifecycle_states list in {path}")
+
+    return DomainIdentityOverlay(
+        id=fields["id"],
+        name=fields["name"],
+        version=fields["version"],
+        status=fields["status"],
+        summary=" ".join(summary_lines).strip(),
+        primary_domains=tuple(primary_domains),
+        overlap_domains=tuple(overlap_domains),
+        lifecycle_states=tuple(lifecycle_states),
+    )
+
+
+def verify_pack_identity_for_audit(pack: DomainPack) -> list[str]:
+    """Return violations when pack identity metadata is inconsistent or inactive."""
+    violations: list[str] = []
+    identity = pack.domain_identity
+    if pack.pack_id.casefold() != identity.id.casefold():
+        violations.append(
+            "domain pack directory id does not match domain.yaml id "
+            f"({pack.pack_id!r} vs {identity.id!r})"
+        )
+    if identity.status.casefold() != "active":
+        violations.append(f"domain pack status is not active: {identity.status!r}")
+    return violations
+
+
+def allowed_domains_for_pack(pack: DomainPack) -> frozenset[str]:
+    """Return normalized domain labels declared by pack primary and overlap lists."""
+    labels = list(pack.domain_identity.primary_domains) + list(
+        pack.domain_identity.overlap_domains
+    )
+    return frozenset(_normalize_label(label) for label in labels if label.strip())
+
+
 def parse_safety_notes_yaml(path: Path) -> SafetyNotesOverlay:
     """Parse domain safety notes from a domain pack safety_notes stub."""
     if not path.is_file():
@@ -825,6 +913,14 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
     card_templates_path = pack_root / "card_templates.yaml"
     search_templates_path = pack_root / "search_templates.yaml"
     safety_notes_path = pack_root / "safety_notes.yaml"
+    domain_path = pack_root / "domain.yaml"
+
+    domain_identity = parse_domain_yaml(domain_path)
+    if _normalize_label(pack_id) != _normalize_label(domain_identity.id):
+        raise DomainPackError(
+            f"Domain pack id mismatch: directory {pack_id!r} vs "
+            f"domain.yaml id {domain_identity.id!r}"
+        )
 
     concepts = parse_ontology_yaml(ontology_path)
     alias_map = parse_aliases_yaml(aliases_path)
@@ -839,6 +935,7 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
 
     return DomainPack(
         pack_id=pack_id,
+        domain_identity=domain_identity,
         concepts=tuple(concepts),
         aliases={key: tuple(values) for key, values in alias_map.items()},
         alias_to_canonical=alias_to_canonical,
