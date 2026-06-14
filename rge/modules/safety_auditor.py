@@ -482,6 +482,47 @@ def _audit_live_probe_scratch_policy(root: Path) -> tuple[list[str], list[str]]:
     return checked, blocked
 
 
+def _load_creativity_pack_for_audit(root: Path) -> Any:
+    from rge.modules.domain_pack_loader import domain_pack_dir, load_domain_pack
+
+    if domain_pack_dir("creativity", root=root).is_dir():
+        return load_domain_pack("creativity", root=root)
+    return load_domain_pack("creativity")
+
+
+def _audit_domain_pack_safety_notes(root: Path) -> tuple[list[str], list[str]]:
+    """Verify creativity domain pack safety_notes.yaml guidance is loaded and complete."""
+    from rge.modules.domain_pack_loader import (
+        domain_pack_dir,
+        required_safety_note_themes_for_pack,
+        verify_pack_safety_notes_for_audit,
+    )
+
+    checked: list[str] = []
+    blocked: list[str] = []
+    pack_dir = domain_pack_dir("creativity", root=root)
+    if pack_dir.is_dir():
+        notes_path = pack_dir / "safety_notes.yaml"
+        if notes_path.is_file():
+            checked.append(str(notes_path.relative_to(root)))
+        else:
+            blocked.append("missing domain pack file: domain_packs/creativity/safety_notes.yaml")
+            return checked, blocked
+    else:
+        checked.append("domain_packs/creativity/safety_notes.yaml")
+
+    pack = _load_creativity_pack_for_audit(root)
+    required_themes = required_safety_note_themes_for_pack(pack.pack_id)
+    minimum_count = 5 if pack.pack_id == "creativity" else 1
+    for issue in verify_pack_safety_notes_for_audit(
+        pack,
+        required_substrings=required_themes,
+        minimum_note_count=minimum_count,
+    ):
+        blocked.append(issue)
+    return checked, blocked
+
+
 def _audit_ci_golden_gate_policy(root: Path) -> tuple[list[str], list[str]]:
     """Verify CI golden gate workflow and principal audit command evidence."""
     checked = [
@@ -542,6 +583,7 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             "live_smoke_policy",
             "live_probe_scratch_policy",
             "ci_golden_gate_policy",
+            "domain_pack_safety_notes",
         ]
     else:
         checks = [audit_type]
@@ -596,6 +638,10 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             blocked_reasons.extend(blocked)
         elif check == "ci_golden_gate_policy":
             files, blocked = _audit_ci_golden_gate_policy(project_root)
+            checked_files.extend(files)
+            blocked_reasons.extend(blocked)
+        elif check == "domain_pack_safety_notes":
+            files, blocked = _audit_domain_pack_safety_notes(project_root)
             checked_files.extend(files)
             blocked_reasons.extend(blocked)
 

@@ -150,7 +150,8 @@ superseded
 | 116 | ticket-116 | done | Domain pack source_preferences.yaml loader proof (NM-5 continuation) | `phase-2/ticket-116-domain-pack-source-preferences-loader` | `agent_reports/2026-06-14_ticket-116_domain-pack-source-preferences-loader.md` |
 | 117 | ticket-117 | done | Domain pack card_templates.yaml loader proof (NM-5 continuation) | `phase-2/ticket-117-domain-pack-card-templates-loader` | `agent_reports/2026-06-14_ticket-117_domain-pack-card-templates-loader.md` |
 | 118 | ticket-118 | done | Domain pack search_templates.yaml loader proof (NM-5 continuation) | `phase-2/ticket-118-domain-pack-search-templates-loader` | `agent_reports/2026-06-14_ticket-118_domain-pack-search-templates-loader.md` |
-| 119 | ticket-119 | proposed | Domain pack safety_notes.yaml loader proof (NM-5 continuation) | | |
+| 119 | ticket-119 | done | Domain pack safety_notes.yaml loader proof (NM-5 continuation) | `phase-2/ticket-119-domain-pack-safety-notes-loader` | `agent_reports/2026-06-14_ticket-119_domain-pack-safety-notes-loader.md` |
+| 120 | ticket-120 | proposed | Domain pack domain.yaml loader proof (NM-5 completion) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -880,9 +881,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-119 (proposed) — Domain pack safety_notes.yaml loader proof (NM-5 continuation)
+ticket-120 (proposed) — Domain pack domain.yaml loader proof (NM-5 completion)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-119 agent)
+
+- Extended `domain_pack_loader` to parse `safety_notes.yaml` (multi-line notes list).
+- Full safety audit verifies creativity pack guidance themes from loaded notes.
+- 5 new unit tests; 443 pytest pass; safety audit pass.
+- Next: ticket-120 (NM-5 completion: domain.yaml).
 
 ## Queue Notes (2026-06-14, ticket-118 agent)
 
@@ -960,7 +968,7 @@ directed corrective work **before** ticket-111. **Completed and merged to main @
 | NM-4 / ticket-112 | **done** | Arbitrary manual_text live fall-through |
 | ticket-111 | **superseded** | Folded into NM-2 |
 
-Next product move: **ticket-119** (NM-5 continuation: domain pack safety_notes.yaml).
+Next product move: **ticket-120** (NM-5 completion: domain pack domain.yaml).
 
 ## Queue Rules
 
