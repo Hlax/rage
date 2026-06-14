@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "count": 2,
+    "page": 1,
+    "per_page": 25
+  },
+  "results": [
+    {
+      "id": "https://openalex.org/W2741809807",
+      "display_name": "Human-AI co-creativity and semantic diversity in songwriting workshops",
+      "publication_year": 2023,
+      "doi": "https://doi.org/10.1234/rge-openalex-fixture",
+      "authorships": [
+        {
+          "author": {
+            "display_name": "Ada Example"
+          }
+        },
+        {
+          "author": {
+            "display_name": "Alan Sample"
+          }
+        }
+      ],
+      "open_access": {
+        "is_oa": true,
+        "oa_url": "https://example.org/open-access/paper.pdf"
+      },
+      "primary_location": {
+        "landing_page_url": "https://example.org/landing/human-ai-cocreativity"
+      },
+      "abstract_inverted_index": {
+        "Human-AI": [0],
+        "co-creativity": [1],
+        "supports": [2],
+        "diverse": [3],
+        "songwriting": [4],
+        "outputs.": [5]
+      }
+    },
+    {
+      "id": "https://openalex.org/W1234567890",
+      "display_name": "Constraint management in AI-assisted creative teams",
+      "publication_year": 2022,
+      "doi": null,
+      "authorships": [
+        {
+          "author": {
+            "display_name": "Casey Researcher"
+          }
+        }
+      ],
+      "open_access": {
+        "is_oa": false,
+        "oa_url": null
+      },
+      "primary_location": {
+        "landing_page_url": "https://example.org/landing/constraint-management"
+      },
+      "abstract_inverted_index": null
+    }
+  ]
+}

@@ -833,10 +833,16 @@ def _cmd_model_health(_args: argparse.Namespace) -> int:
     return 0
 
 
-def _cmd_discover_sources(_args: argparse.Namespace) -> int:
-    from rge.modules.source_discovery import discover_sources_not_implemented_result
+def _cmd_discover_sources(args: argparse.Namespace) -> int:
+    from rge.modules.source_discovery import run_discover_sources_command
 
-    payload, exit_code = discover_sources_not_implemented_result()
+    payload, exit_code = run_discover_sources_command(
+        provider_id=args.provider,
+        query=args.query,
+        domain_pack=args.domain,
+        limit=args.limit,
+        health=args.health,
+    )
     print(json.dumps(payload, indent=2))
     return exit_code
 
@@ -2307,12 +2313,37 @@ def build_parser() -> argparse.ArgumentParser:
 
     discover_sources_parser = subparsers.add_parser(
         "discover-sources",
-        help="Discover candidate sources for a research contract (Phase 3 stub).",
+        help="Discover candidate sources for a research contract (Phase 3).",
         description=(
-            "Phase 3 source discovery entry point. Currently returns structured "
-            "not_implemented JSON with exit code 2. No network calls, ingestion, "
-            "or claim extraction."
+            "Phase 3 source discovery entry point. Without --provider, returns "
+            "structured not_implemented JSON (exit 2). With --provider openalex, "
+            "returns candidate metadata when RGE_ALLOW_SOURCE_NETWORK=1. No "
+            "ingestion, fetching, or claim extraction."
         ),
+    )
+    discover_sources_parser.add_argument(
+        "--provider",
+        help="Source metadata provider id (e.g. openalex).",
+    )
+    discover_sources_parser.add_argument(
+        "--query",
+        help="Search query passed to the provider.",
+    )
+    discover_sources_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack id for candidate metadata (default: creativity).",
+    )
+    discover_sources_parser.add_argument(
+        "--limit",
+        type=int,
+        default=10,
+        help="Maximum candidate sources to return (default: 10).",
+    )
+    discover_sources_parser.add_argument(
+        "--health",
+        action="store_true",
+        help="Report provider readiness without performing discovery.",
     )
     discover_sources_parser.set_defaults(func=_cmd_discover_sources)
 

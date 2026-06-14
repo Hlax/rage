@@ -170,7 +170,8 @@ superseded
 | 136 | ticket-136 | done | Canonical context maturity NM-4 alignment | `phase-2/ticket-136-canonical-context-maturity-nm4-alignment` | `agent_reports/2026-06-14_ticket-136_canonical-context-maturity-nm4-alignment.md` |
 | 137 | ticket-137 | done | Principal audit checkpoint post-ticket-136 | | `agent_reports/2026-06-14_principal-audit-post-ticket-136.md` |
 | 138 | ticket-138 | done | Source discovery stub CLI (Phase 3 entry) | `phase-2/ticket-138-source-discovery-stub-cli` | `agent_reports/2026-06-14_ticket-138_source-discovery-stub-cli.md` |
-| 139 | ticket-139 | proposed | Source provider registry and OpenAlex discovery proof | | |
+| 139 | ticket-139 | done | Source provider registry and OpenAlex discovery proof | `phase-2/ticket-139-source-provider-openalex-discovery` | `agent_reports/2026-06-14_ticket-139_source-provider-openalex-discovery.md` |
+| 140 | ticket-140 | proposed | Research queue candidate ranking from discovered sources | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -900,16 +901,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-139 (proposed) — Source provider registry and OpenAlex discovery proof
+ticket-140 (proposed) — Research queue candidate ranking from discovered sources
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-14, ticket-138 agent)
+## Queue Notes (2026-06-14, ticket-139 agent)
 
-- `discover-sources` stub CLI: structured not_implemented JSON, exit 2; no network/API.
-- 3 unit tests; 490 pytest; 142 golden; safety audit pass.
-- ticket-139 seeded: OpenAlex provider registry (medium risk); pre-ticket-139 audit GO.
-- **Next implementation must be ticket-139** — first real API-first discovery; no more docs/checkpoint/stub loops.
+- OpenAlex provider registry + discover-sources CLI with RGE_ALLOW_SOURCE_NETWORK opt-in.
+- Candidate metadata JSON only; no fetch/ingest/DB writes.
+- 9 openalex unit tests; 499 pytest; 142 golden; safety audit pass.
+- ticket-140 seeded: rank discovered candidates via source_preferences (product).
+- Next: pre-ticket-140 audit then ticket-140 implementation.
 
 ## Queue Notes (2026-06-14, ticket-137 agent)
 
