@@ -37,7 +37,7 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove second-candidate link fixture/test; retain ticket-153 extract spine.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / source acquisition / product-risk reduction",
   "pre_ticket_audit_required": true
 }

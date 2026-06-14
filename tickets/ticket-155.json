@@ -1,0 +1,43 @@
+{
+  "id": "ticket-155",
+  "title": "Build relationships on second staged-ingested source (mock spine step)",
+  "problem": "ticket-154 proves link-concepts on OpenAlex rank #2. Operators cannot run build-relationships on the second staged source with deterministic mock fixtures to continue the Phase 3 multi-candidate spine.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-154_second-staged-link-spine.md",
+    "rge/modules/relationship_builder.py",
+    "tests/unit/test_staged_ingest_relationship_spine.py",
+    "tests/unit/test_staged_second_candidate_link_spine.py"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "fixtures/llm_outputs/staged_fetch_second_candidate_build_relationships.json",
+    "tests/unit/test_staged_second_candidate_build_relationships_spine.py",
+    "agent_reports/2026-06-14_pre-ticket-155_second-staged-build-relationships-audit.md",
+    "agent_reports/2026-06-14_ticket-155_second-staged-build-relationships-spine.md"
+  ],
+  "acceptance_criteria": [
+    "After ticket-154 spine through link-concepts, build-relationships on rank #2 source persists validated relationships from mock fixture.",
+    "Unit test extends second-candidate link spine through build-relationships.",
+    "No live LLM in default pytest collection.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_staged_second_candidate_build_relationships_spine.py -q",
+    "python -m pytest tests/unit/test_staged_second_candidate_link_spine.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Live Ollama relationship building.",
+    "Detect/reconcile for second source.",
+    "Schema migrations.",
+    "Public export/site changes."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove second-candidate build-relationships test/fixture; retain ticket-154 link spine.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / product-risk reduction",
+  "pre_ticket_audit_required": true
+}
