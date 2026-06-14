@@ -106,7 +106,8 @@ None.
 
 ## Merge to main
 
-Pending merge (placeholder updated after merge).
+Merged @ **`24b14a4`** (`Merge branch 'phase-2/ticket-129-arbitrary-manual-live-relationship-fallthrough'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
