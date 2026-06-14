@@ -1,0 +1,45 @@
+{
+  "id": "ticket-138",
+  "title": "Source discovery stub CLI (Phase 3 entry)",
+  "problem": "Principal audit post-ticket-136 recommends product work after three docs/checkpoint tickets. source_discovery.discover_candidate_sources is a NotImplementedError stub and research run without fixture-mode returns not_implemented. Operators lack a machine-readable discover-sources CLI surface for Phase 3 planning.",
+  "evidence": [
+    "agent_reports/2026-06-14_principal-audit-post-ticket-136.md",
+    "rge/modules/source_discovery.py",
+    "rge/cli.py"
+  ],
+  "affected_modules": [
+    "rge/cli.py",
+    "rge/modules/source_discovery.py"
+  ],
+  "expected_files": [
+    "rge/cli.py",
+    "rge/modules/source_discovery.py",
+    "tests/unit/test_source_discovery_stub.py",
+    "agent_reports/2026-06-14_ticket-138_source-discovery-stub-cli.md"
+  ],
+  "acceptance_criteria": [
+    "discover-sources CLI returns structured not_implemented JSON with Phase 3 hint (no network, no Ollama).",
+    "Unit test asserts JSON shape and exit code.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes.",
+    "Public export/site untouched."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_source_discovery_stub.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Search APIs or HTTP fetching.",
+    "Browser automation.",
+    "Live LLM.",
+    "Schema migrations.",
+    "Public export/site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove discover-sources CLI and revert source_discovery stub changes.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition",
+  "pre_ticket_audit_required": false
+}

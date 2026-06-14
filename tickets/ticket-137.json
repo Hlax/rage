@@ -30,7 +30,7 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Remove audit report.",
-  "status": "proposed",
+  "status": "done",
   "category": "principal audit / cadence checkpoint",
   "pre_ticket_audit_required": false
 }
