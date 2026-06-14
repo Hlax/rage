@@ -155,7 +155,8 @@ superseded
 | 121 | ticket-121 | done | Wire claim_validator domain checks to pack domain.yaml | `phase-2/ticket-121-claim-validator-domain-pack` | `agent_reports/2026-06-14_ticket-121_claim-validator-domain-pack.md` |
 | 122 | ticket-122 | done | Golden test overlap-domain claim label acceptance (mock) | `phase-2/ticket-122-golden-overlap-domain-claim` | `agent_reports/2026-06-14_ticket-122_golden-overlap-domain-claim.md` |
 | 123 | ticket-123 | done | README operator quickstart NM-5 domain pack loading summary | `phase-2/ticket-123-readme-nm5-domain-pack-summary` | `agent_reports/2026-06-14_ticket-123_readme-nm5-domain-pack-summary.md` |
-| 124 | ticket-124 | proposed | AGENTS.md cross-link README NM-5 domain pack section | | |
+| 124 | ticket-124 | done | AGENTS.md cross-link README NM-5 domain pack section | `phase-2/ticket-124-agents-nm5-crosslink` | `agent_reports/2026-06-14_ticket-124_agents-nm5-crosslink.md` |
+| 125 | ticket-125 | proposed | Domain pack spec cross-link README NM-5 runtime table | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -885,9 +886,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-124 (proposed) — AGENTS.md cross-link README NM-5 domain pack section
+ticket-125 (proposed) — Domain pack spec cross-link README NM-5 runtime table
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-124 agent)
+
+- AGENTS.md Operator Loop cross-links README NM-5 domain pack section.
+- One-sentence overlap-domain claim allowlist rule for operators.
+- Docs-only; 142 golden pass; 454 pytest pass; safety audit pass.
+- Next: ticket-125 (06_DOMAIN_PACK_SPEC.md cross-link).
 
 ## Queue Notes (2026-06-14, ticket-123 agent)
 
@@ -1005,7 +1013,7 @@ directed corrective work **before** ticket-111. **Completed and merged to main @
 | NM-4 / ticket-112 | **done** | Arbitrary manual_text live fall-through |
 | ticket-111 | **superseded** | Folded into NM-2 |
 
-Next product move: **ticket-124** (AGENTS.md cross-link to README NM-5 section).
+Next product move: **ticket-125** (06_DOMAIN_PACK_SPEC.md cross-link to README NM-5 table).
 
 ## Queue Rules
 

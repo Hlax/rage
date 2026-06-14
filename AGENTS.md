@@ -102,6 +102,14 @@ automated validation lives in `tests/unit/test_manual_source_pipeline_e2e.py`
 `tests/unit/test_manual_source_pipeline_idempotency.py` (spine and reconcile
 re-run idempotency). Run with `RGE_LLM_MODE=mock`; no Ollama required.
 
+**Creativity domain pack runtime loading (NM-5):** see README **Operator Quickstart**
+(**Creativity domain pack runtime loading (NM-5; tickets 113–122)**) for the full
+table of YAML overlays under `domain_packs/creativity/` and their runtime consumers.
+Candidate claim `domain` labels must fall within the pack allowlist (`primary_domains`
+and `overlap_domains` from `domain.yaml`); overlap labels such as `art` are accepted
+when `extract-claims` validates against `domain_pack=creativity` via
+`claim_validator` — out-of-scope labels are rejected as `unsupported_claim`.
+
 ## Expected Agent Workflow
 
 1. Read the active ticket from `tickets/TICKET_QUEUE.md` or create the smallest next ticket in `tickets/`.
