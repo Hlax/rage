@@ -129,6 +129,7 @@ def extract_and_validate_for_chunk(
     return validate_candidate_claims(
         candidates,
         chunk_text=chunk["chunk_text"],
+        domain_pack=domain_pack,
     )
 
 

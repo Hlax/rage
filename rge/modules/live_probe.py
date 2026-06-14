@@ -202,6 +202,7 @@ def run_probe_extract_claims(
             item,
             chunk_text=chunk_text,
             rejection_reason=item.get("rejection_reason"),
+            domain_pack=domain_pack,
         )
     total = len(accepted) + len(rejected)
     if total == 0:
@@ -1208,6 +1209,7 @@ def run_probe_mini_run(
             item,
             chunk_text=chunk_text,
             rejection_reason=item.get("rejection_reason"),
+            domain_pack=domain_pack,
         )
     if not claim_accepted:
         raise LiveProbeError(
