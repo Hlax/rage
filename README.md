@@ -26,8 +26,8 @@ third-party repo-direction audit):
 | Tier | Status | What it means |
 |------|--------|---------------|
 | **MVP-Engine** | **mock/fixture-proven** | Deterministic Python pipeline, validator gate, safety model, public export, golden tests (GT01–GT26), and fixture-mode orchestration are real and green. |
-| **MVP-Research** | **first live write proof landed (NM-1)** | One non-checksum `manual_text` source was ingested and produced ≥1 validator-accepted claim via live Ollama into gitignored `data/db/live_research_evidence.sqlite`. This is not full arbitrary-source research yet. |
-| **Arbitrary-source pipeline** | **pending (NM-4)** | Manual pipeline still uses checksum-keyed mock fixtures for the two committed synthnote files; other files need live extraction fall-through. |
+| **MVP-Research** | **partial — NM-1 + NM-4 evidence DB** | NM-1: first live validated claim write via `extract-claims-live` on gitignored `data/db/live_research_evidence.sqlite`. NM-4: operator-proven live manual_text spine through reconcile on that same evidence DB (tickets 127–133). Default graph DB synthnote path remains checksum-mock — not arbitrary live inference. |
+| **Arbitrary-source pipeline** | **partial** | **Evidence DB:** NM-4 live ingest → extract/link/relationship/contradiction fall-through + deterministic reconcile (`--evidence-db-reconcile`) proven on gitignored evidence DB. **Default graph DB:** committed synthnote files still use checksum-pinned mock fixtures. **Source discovery/fetcher:** pending (Phase 3). |
 | **Cloud providers** | **deferred** | OpenAI/OpenRouter/etc. are not wired (ticket-059 placeholder). |
 
 **Phase 1 MVP is complete** for the engine tier. The public site still serves **fixture
@@ -54,6 +54,7 @@ What is **live report-only** (no graph writes unless operator explicitly opts in
 
 - `probe-extract-claims`, `probe-mini-run`, and related live probes write gitignored reports only (`db_writes: false`)
 - **`extract-claims-live`** (NM-1) is the first explicit live validated write path; requires `RGE_LLM_MODE=ollama`, `RGE_ALLOW_LIVE_LLM=1`, a non-fixture-map source, and an explicit evidence DB (default `data/db/live_research_evidence.sqlite`, not the default graph DB)
+- **NM-4 evidence DB spine** (tickets 127–133): live `--live-manual-*` fall-through on standard pipeline commands plus deterministic `reconcile-scores --evidence-db-reconcile` on the same gitignored evidence DB — see Operator Quickstart **NM-4 evidence DB operator spine**
 
 What requires **explicit live opt-in** (local Ollama only):
 

@@ -165,7 +165,9 @@ superseded
 | 131 | ticket-131 | done | NM-4 evidence DB score reconciliation operator proof | `phase-2/ticket-131-nm4-evidence-db-score-reconciliation` | `agent_reports/2026-06-14_ticket-131_nm-4-evidence-db-score-reconciliation.md` |
 | 132 | ticket-132 | done | Operator loop NM-4 evidence DB spine status | `phase-2/ticket-132-operator-loop-nm4-evidence-spine-status` | `agent_reports/2026-06-14_ticket-132_operator-loop-nm4-evidence-spine-status.md` |
 | 133 | ticket-133 | done | README NM-4 evidence DB operator quickstart | `phase-2/ticket-133-readme-nm4-evidence-operator-quickstart` | `agent_reports/2026-06-14_ticket-133_readme-nm4-evidence-operator-quickstart.md` |
-| 134 | ticket-134 | proposed | Principal audit checkpoint post-ticket-133 | | |
+| 134 | ticket-134 | done | Principal audit checkpoint post-ticket-133 | | `agent_reports/2026-06-14_principal-audit-post-ticket-133.md` |
+| 135 | ticket-135 | done | README maturity table honest NM-4 relabel | `phase-2/ticket-135-readme-maturity-nm4-relabel` | `agent_reports/2026-06-14_ticket-135_readme-maturity-nm4-relabel.md` |
+| 136 | ticket-136 | proposed | Canonical context maturity NM-4 alignment | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -895,17 +897,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-134 (proposed) — Principal audit checkpoint post-ticket-133
+ticket-136 (proposed) — Canonical context maturity NM-4 alignment
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-14, ticket-133 agent)
+## Queue Notes (2026-06-14, ticket-135 agent)
 
-- README Operator Quickstart: NM-4 evidence DB spine (127–132), reconcile, plan visibility.
-- Docs-only; no code changes.
+- Pre-ticket-135 audit GO; README + AGENTS maturity relabel for NM-4 evidence DB vs synthnote mock.
+- ticket-134 closed (principal audit post-133 committed).
 - 487 pytest; 142 golden; safety audit pass.
-- Cadence: 3 done since post-ticket-130 principal audit (131–133) — principal audit required before next implementation.
-- Next: ticket-134 (principal audit checkpoint).
+- Next: ticket-136 (docs/agents/01 maturity alignment).
 
 ## Queue Notes (2026-06-14, ticket-131 agent)
 
