@@ -31,5 +31,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert 06_DOMAIN_PACK_SPEC.md cross-link paragraph.",
-  "status": "proposed"
+  "status": "done"
 }

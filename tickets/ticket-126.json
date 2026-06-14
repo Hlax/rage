@@ -1,0 +1,39 @@
+{
+  "id": "ticket-126",
+  "title": "Operator loop plan surfaces domain pack load health",
+  "problem": "Tickets 123–125 documented NM-5 runtime loading across README, AGENTS.md, and 06_DOMAIN_PACK_SPEC.md, but operator_loop plan mode does not report whether the creativity pack loads cleanly or which overlays are present.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-125_domain-pack-spec-nm5-crosslink.md",
+    "rge/modules/operator_loop.py",
+    "rge/modules/domain_pack_loader.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop.py",
+    "agent_reports/2026-06-14_ticket-126_operator-loop-domain-pack-health.md"
+  ],
+  "acceptance_criteria": [
+    "operator_loop --mode plan includes domain_pack_status for creativity pack.",
+    "Status reports pack id, active identity, and loaded overlay file names.",
+    "Plan mode remains read-only; no queue or DB writes.",
+    "Golden tests and full pytest remain green.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_loop.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No domain pack loader changes beyond read-only introspection.",
+    "No public site or schema changes.",
+    "No live Ollama changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove domain_pack_status from plan output.",
+  "status": "proposed"
+}
