@@ -106,6 +106,7 @@ def test_cli_top_level_help() -> None:
         "export-public",
         "model-health",
         "discover-sources",
+        "fetch-candidate",
         "probe-extract-claims",
         "verify",
     ):

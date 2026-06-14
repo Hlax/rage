@@ -41,7 +41,7 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove fetch CLI path; retain ticket-141 staging enqueue.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / source acquisition / product-risk reduction",
   "pre_ticket_audit_required": true
 }

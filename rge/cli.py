@@ -895,6 +895,27 @@ def _cmd_discover_sources(args: argparse.Namespace) -> int:
     return exit_code
 
 
+def _cmd_fetch_candidate(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.modules.fetcher import run_fetch_candidate_command
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    output_dir = Path(args.out) if args.out else None
+    if output_dir is not None and not output_dir.is_absolute():
+        output_dir = Path(__file__).resolve().parents[2] / output_dir
+    try:
+        payload, exit_code = run_fetch_candidate_command(
+            conn,
+            candidate_id=args.candidate,
+            output_dir=output_dir,
+        )
+        print(json.dumps(payload, indent=2))
+        return exit_code
+    finally:
+        conn.close()
+
+
 def _cmd_probe_extract_claims(args: argparse.Namespace) -> int:
     from rge.modules.live_probe import (
         LiveProbeError,
@@ -2418,6 +2439,30 @@ def build_parser() -> argparse.ArgumentParser:
         help="SQLite database path for --enqueue staging writes.",
     )
     discover_sources_parser.set_defaults(func=_cmd_discover_sources)
+
+    fetch_candidate_parser = subparsers.add_parser(
+        "fetch-candidate",
+        help="Fetch a staged candidate_sources URL to a gitignored artifact path.",
+        description=(
+            "Load a candidate_sources row by id, fetch its URL bytes when "
+            "RGE_ALLOW_SOURCE_NETWORK=1, and write to data/sources/staged/ "
+            "(or --out). No ingest or claim extraction."
+        ),
+    )
+    fetch_candidate_parser.add_argument(
+        "--candidate",
+        required=True,
+        help="candidate_sources id (e.g. disc_openalex_W2741809807).",
+    )
+    fetch_candidate_parser.add_argument(
+        "--db",
+        help="SQLite database path containing candidate_sources row.",
+    )
+    fetch_candidate_parser.add_argument(
+        "--out",
+        help="Output directory for fetched artifact (default: data/sources/staged).",
+    )
+    fetch_candidate_parser.set_defaults(func=_cmd_fetch_candidate)
 
     probe_extract_parser = subparsers.add_parser(
         "probe-extract-claims",

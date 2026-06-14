@@ -173,7 +173,8 @@ superseded
 | 139 | ticket-139 | done | Source provider registry and OpenAlex discovery proof | `phase-2/ticket-139-source-provider-openalex-discovery` | `agent_reports/2026-06-14_ticket-139_source-provider-openalex-discovery.md` |
 | 140 | ticket-140 | done | Research queue candidate ranking from discovered sources | `phase-2/ticket-140-discovered-source-queue-ranking` | `agent_reports/2026-06-14_ticket-140_discovered-source-queue-ranking.md` |
 | 141 | ticket-141 | done | Enqueue discovered candidates to staging research queue | `phase-2/ticket-141-discovered-source-queue-enqueue` | `agent_reports/2026-06-14_ticket-141_discovered-source-queue-enqueue.md` |
-| 142 | ticket-142 | proposed | Fetch staged candidate source from queue URL | | |
+| 142 | ticket-142 | done | Fetch staged candidate source from queue URL | `phase-2/ticket-142-staged-candidate-fetch` | `agent_reports/2026-06-14_ticket-142_staged-candidate-fetch.md` |
+| 143 | ticket-143 | proposed | Ingest from staged fetch artifact path | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -903,17 +904,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-142 (proposed) — Fetch staged candidate source from queue URL
+ticket-143 (proposed) — Ingest from staged fetch artifact path
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-14, ticket-141 agent)
+## Queue Notes (2026-06-14, ticket-142 agent)
 
-- `discover-sources --rank-only --enqueue --db` persists to candidate_sources + research_queue.
-- Stable IDs `disc_{provider}_{provider_id}`; idempotent per question+provider; marketing rejected not queued.
-- 8 enqueue unit tests; 519 pytest; 142 golden; safety audit pass.
-- ticket-142 seeded: fetch staged candidate URL (product).
-- Next: pre-ticket-142 audit then ticket-142 implementation.
+- `fetch-candidate` CLI fetches staged candidate_sources URL to data/sources/staged/.
+- RGE_ALLOW_SOURCE_NETWORK opt-in; checksum + content-type JSON; idempotent already_fetched.
+- 8 unit tests; 527 pytest; 142 golden; safety audit pass.
+- ticket-143 seeded: ingest from staged artifact.
+- Next: pre-ticket-143 audit then ticket-143 implementation.
 
 ## Queue Notes (2026-06-14, ticket-137 agent)
 
