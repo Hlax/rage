@@ -160,7 +160,8 @@ superseded
 | 126 | ticket-126 | done | Operator loop plan surfaces domain pack load health | `phase-2/ticket-126-operator-loop-domain-pack-health` | `agent_reports/2026-06-14_ticket-126_operator-loop-domain-pack-health.md` |
 | 127 | ticket-127 | done | Arbitrary manual text live extraction fall-through (NM-4 recenter) | `phase-2/ticket-127-arbitrary-manual-live-fallthrough` | `agent_reports/2026-06-14_ticket-127_arbitrary-manual-live-fallthrough.md` |
 | 128 | ticket-128 | done | Arbitrary manual live concept linking fall-through | `phase-2/ticket-128-arbitrary-manual-live-concept-linking` | `agent_reports/2026-06-14_ticket-128_arbitrary-manual-live-concept-linking.md` |
-| 129 | ticket-129 | proposed | Arbitrary manual live relationship fall-through | | |
+| 129 | ticket-129 | done | Arbitrary manual live relationship fall-through | `phase-2/ticket-129-arbitrary-manual-live-relationship-fallthrough` | `agent_reports/2026-06-14_ticket-129_arbitrary-manual-live-relationship-fallthrough.md` |
+| 130 | ticket-130 | proposed | Arbitrary manual live contradiction fall-through | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -890,9 +891,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-129 (proposed) — Arbitrary manual live relationship fall-through
+ticket-130 (proposed) — Arbitrary manual live contradiction fall-through
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-129 agent)
+
+- `--live-manual-relationship-fallthrough` on build-relationships; mock fail-closed for unmapped manual_text.
+- Live proof on ticket-127/128 evidence source: 1 active relationship, 1 evidence row, 0 rejected.
+- 20 manual_live_fallthrough unit tests; 472 pytest; 142 golden; safety audit pass.
+- Cadence: 2 done since post-ticket-127 principal audit (128, 129) — principal audit due before ticket-131.
+- Next: ticket-130 (live contradiction fall-through); requires pre-ticket audit.
 
 ## Queue Notes (2026-06-14, ticket-128 agent)
 

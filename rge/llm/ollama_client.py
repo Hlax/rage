@@ -415,12 +415,41 @@ class OllamaModelClient(ModelClient):
             "Do not include markdown fences or commentary."
         )
 
+    def _manual_text_arbitrary_live_relationship_calibration(
+        self,
+        *,
+        example_claim_id: str,
+        example_scope: str,
+        example_subject: str,
+        example_object: str,
+    ) -> str:
+        return (
+            "Manual arbitrary source mode (live relationship fall-through):\n"
+            "- Use subject_concept and object_concept copied exactly from the allowed "
+            "concept labels list (linked concepts such as 'AI assistance', 'originality').\n"
+            "- scope MUST match or closely follow the claim scope phrase when present.\n"
+            "- supporting_claim_ids MUST reference a valid input claim id exactly.\n"
+            "- confidence MUST be low, medium, or high (string label, not a number).\n\n"
+            "Positive example (workshop claim — accepted shape):\n"
+            "{\n"
+            f'  "subject_concept": "{example_subject}",\n'
+            '  "predicate": "may_reduce",\n'
+            f'  "object_concept": "{example_object}",\n'
+            '  "stance": "supports",\n'
+            f'  "scope": "{example_scope}",\n'
+            '  "confidence": "medium",\n'
+            f'  "supporting_claim_ids": ["{example_claim_id}"]\n'
+            "}\n\n"
+        )
+
     def _relationship_drafting_prompt(
         self,
         claims: list[dict[str, Any]],
         concepts: list[dict[str, Any]],
         domain_pack: str,
         schema_version: str,
+        *,
+        manual_text_arbitrary_live: bool = False,
     ) -> str:
         concept_labels = sorted(
             {
@@ -446,6 +475,16 @@ class OllamaModelClient(ModelClient):
             else example_subject
         )
         labels_json = json.dumps(concept_labels, ensure_ascii=False)
+        manual_calibration = (
+            self._manual_text_arbitrary_live_relationship_calibration(
+                example_claim_id=example_claim_id,
+                example_scope=example_scope,
+                example_subject=example_subject,
+                example_object=example_object,
+            )
+            if manual_text_arbitrary_live
+            else ""
+        )
         return (
             f"You are a research relationship-drafting assistant for domain pack "
             f"{domain_pack!r}.\n"
@@ -455,6 +494,7 @@ class OllamaModelClient(ModelClient):
             f"{labels_json}\n"
             f"Valid claim ids for supporting_claim_ids: "
             f"{json.dumps(claim_ids, ensure_ascii=False)}\n\n"
+            f"{manual_calibration}"
             "Rules for each relationship:\n"
             "- subject_concept and object_concept MUST be copied exactly from the "
             "allowed concept labels list (same spelling and casing).\n"
@@ -639,9 +679,15 @@ class OllamaModelClient(ModelClient):
         concepts: list[dict[str, Any]],
         domain_pack: str,
         schema_version: str,
+        *,
+        manual_text_arbitrary_live: bool = False,
     ) -> CandidateRelationshipBatch_v0_1:
         prompt = self._relationship_drafting_prompt(
-            claims, concepts, domain_pack, schema_version
+            claims,
+            concepts,
+            domain_pack,
+            schema_version,
+            manual_text_arbitrary_live=manual_text_arbitrary_live,
         )
         return self._structured_call(
             task_name="relationship_drafting",

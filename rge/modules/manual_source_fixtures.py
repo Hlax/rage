@@ -93,3 +93,10 @@ def manual_text_lacks_link_fixture(source: Any | None) -> bool:
     if source is None or getattr(source, "source_type", None) != "manual_text":
         return False
     return link_fixture_for_manual_source(source) is None
+
+
+def manual_text_lacks_relationship_fixture(source: Any | None) -> bool:
+    """Return True when a manual_text source has no checksum-pinned relationship fixture."""
+    if source is None or getattr(source, "source_type", None) != "manual_text":
+        return False
+    return relationship_fixture_for_manual_source(source) is None

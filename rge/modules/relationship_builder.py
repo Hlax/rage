@@ -13,7 +13,11 @@ from rge.config import load_config
 from rge.llm.mock_client import MockModelClient
 from rge.llm.mode import effective_llm_mode
 from rge.llm.registry import get_model_client
-from rge.modules.manual_source_fixtures import relationship_fixture_for_manual_source
+from rge.modules.manual_source_fixtures import (
+    manual_text_lacks_relationship_fixture,
+    relationship_fixture_for_manual_source,
+    resolve_manual_source_fixture,
+)
 
 CONFIDENCE_LABEL_TO_REAL: dict[str, float] = {
     "low": 0.25,
@@ -31,6 +35,13 @@ REJECTION_MISSING_EVIDENCE = "missing_evidence_claim"
 REJECTION_INVALID_CONFIDENCE = "invalid_confidence_label"
 
 DIVERSITY_CLAIM_FRAGMENT = "reduced semantic diversity"
+
+_MANUAL_TEXT_NO_RELATIONSHIP_FIXTURE_ERROR = (
+    "manual_text source has no checksum-pinned build_relationships fixture in "
+    "fixtures/manual_source_fixture_map.json. Use mock build-relationships only for "
+    "checksum-pinned synthnote sources, or pass --live-manual-relationship-fallthrough "
+    "with RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1 on a gitignored evidence DB."
+)
 
 
 def confidence_label_to_real(label: str | None) -> float | None:
@@ -181,6 +192,15 @@ def _pipeline_model_client(config=None):
     return get_model_client(cfg, mode=effective_llm_mode(cfg))
 
 
+def _default_relationship_fixture_for_source(source: Any | None) -> str:
+    mapped = relationship_fixture_for_manual_source(source)
+    if mapped:
+        return mapped
+    if manual_text_lacks_relationship_fixture(source):
+        raise ValueError(_MANUAL_TEXT_NO_RELATIONSHIP_FIXTURE_ERROR)
+    return "relationship_drafting_creativity_diversity.json"
+
+
 def propose_relationship_drafts(
     claim_dicts: list[dict[str, Any]],
     concept_dicts: list[dict[str, Any]],
@@ -190,6 +210,7 @@ def propose_relationship_drafts(
     fixture_name: str | None = None,
     diversity_fallback: bool = True,
     source: Any | None = None,
+    live_manual_relationship_fallthrough: bool = False,
 ) -> list[dict[str, Any]]:
     """Propose relationship drafts via the model client without persistence."""
     config = load_config()
@@ -200,10 +221,11 @@ def propose_relationship_drafts(
         "domain_pack": domain_pack,
         "schema_version": config.llm_schema_version,
     }
+    if live_manual_relationship_fallthrough:
+        draft_kwargs["manual_text_arbitrary_live"] = True
     if isinstance(model_client, MockModelClient):
-        resolved_fixture = fixture_name or relationship_fixture_for_manual_source(source)
-        draft_kwargs["fixture_name"] = (
-            resolved_fixture or "relationship_drafting_creativity_diversity.json"
+        draft_kwargs["fixture_name"] = fixture_name or _default_relationship_fixture_for_source(
+            source
         )
     batch = model_client.draft_relationships(**draft_kwargs)
 
@@ -228,6 +250,8 @@ def draft_relationships_for_source(
     *,
     fixture_name: str | None = None,
     source: Any | None = None,
+    client: Any | None = None,
+    live_manual_relationship_fallthrough: bool = False,
 ) -> list[dict[str, Any]]:
     """Propose relationship drafts via the configured model client."""
     return propose_relationship_drafts(
@@ -237,6 +261,8 @@ def draft_relationships_for_source(
         fixture_name=fixture_name,
         diversity_fallback=True,
         source=source,
+        client=client,
+        live_manual_relationship_fallthrough=live_manual_relationship_fallthrough,
     )
 
 
@@ -245,6 +271,9 @@ def build_relationships_for_source(
     source_id: str,
     *,
     fixture_name: str | None = None,
+    live_manual_relationship_fallthrough: bool = False,
+    client: Any | None = None,
+    config: Any | None = None,
 ) -> dict[str, Any]:
     """Build evidence relationships for a source and persist active edges."""
     from rge.db.repositories import (
@@ -293,12 +322,26 @@ def build_relationships_for_source(
     concept_labels = {concept["label"] for concept in concept_dicts}
     accepted_claim_ids = {claim["id"] for claim in claim_dicts}
 
+    cfg = config if config is not None else load_config()
+    if live_manual_relationship_fallthrough:
+        if not manual_text_lacks_relationship_fixture(source_record):
+            raise ValueError(
+                "live_manual_relationship_fallthrough requires a manual_text source "
+                "absent from fixtures/manual_source_fixture_map.json "
+                "build_relationships entries."
+            )
+        model_client = client or get_model_client(cfg, mode="ollama")
+    else:
+        model_client = client
+
     proposed = draft_relationships_for_source(
         claim_dicts,
         concept_dicts,
         domain_pack,
         fixture_name=fixture_name,
         source=source_record,
+        client=model_client,
+        live_manual_relationship_fallthrough=live_manual_relationship_fallthrough,
     )
     validated = validate_relationship_candidates(
         proposed,
@@ -340,6 +383,85 @@ def build_relationships_for_source(
         "relationship_ids": relationship_ids,
         "rejected_relationship_count": len(validated["rejected"]),
         "rejected_relationships": validated["rejected"],
+    }
+
+
+def assert_relationship_checksum_not_in_fixture_map(checksum: str) -> None:
+    """Refuse sources whose build_relationships task is pinned to mock manual fixtures."""
+    from rge.modules.live_extraction_write import LiveExtractionWriteError
+
+    if resolve_manual_source_fixture(checksum, "build_relationships"):
+        raise LiveExtractionWriteError(
+            f"Source checksum {checksum!r} is listed in "
+            "fixtures/manual_source_fixture_map.json for build_relationships; use mock "
+            "build-relationships for checksum-pinned manual sources."
+        )
+
+
+def build_relationships_manual_live_fallthrough(
+    conn: Any,
+    source_id: str,
+    *,
+    config: Any | None = None,
+    skip_health_check: bool = False,
+    client: Any | None = None,
+) -> dict[str, Any]:
+    """Live Ollama relationship drafting for manual_text sources absent from the fixture map."""
+    from rge.db.repositories import (
+        RelationshipEvidenceRepository,
+        RelationshipRepository,
+        SourceRepository,
+    )
+    from rge.modules.live_extraction_write import LiveExtractionWriteError
+    from rge.modules.live_probe import assert_live_probe_env, assert_ollama_health
+
+    cfg = assert_live_probe_env(config, command="build-relationships")
+    health = assert_ollama_health(cfg) if not skip_health_check else {}
+
+    source = SourceRepository(conn).get_by_id(source_id)
+    if source is None:
+        raise LiveExtractionWriteError(f"Source not found: {source_id}")
+    if getattr(source, "source_type", None) != "manual_text":
+        raise LiveExtractionWriteError(
+            "live_manual_relationship_fallthrough requires source_type manual_text."
+        )
+
+    checksum = getattr(source, "raw_text_checksum", None)
+    if not checksum:
+        raise LiveExtractionWriteError(f"Source {source_id} has no raw_text_checksum.")
+    assert_relationship_checksum_not_in_fixture_map(str(checksum))
+
+    model_client = client or get_model_client(cfg, mode="ollama")
+    result = build_relationships_for_source(
+        conn,
+        source_id,
+        live_manual_relationship_fallthrough=True,
+        client=model_client,
+        config=cfg,
+    )
+    relationships = RelationshipRepository(conn).list_for_source(source_id)
+    evidence = RelationshipEvidenceRepository(conn).list_for_source(source_id)
+    return {
+        "status": result["status"],
+        "command": "build-relationships",
+        "live_manual_relationship_fallthrough": True,
+        "source_id": source_id,
+        "source_title": source.title,
+        "source_type": source.source_type,
+        "raw_text_checksum": checksum,
+        "fixture_map_match": not manual_text_lacks_relationship_fixture(source),
+        "db_writes": True,
+        "provider": model_client.provider,
+        "model": getattr(model_client, "model", "unknown"),
+        "llm_schema_version": cfg.llm_schema_version,
+        "effective_llm_mode": "ollama",
+        "health": health,
+        "relationship_count": result["relationship_count"],
+        "rejected_relationship_count": result.get("rejected_relationship_count", 0),
+        "relationships": relationships,
+        "evidence_count": len(evidence),
+        "evidence": evidence,
+        "rejected_relationships": result.get("rejected_relationships", []),
     }
 
 
