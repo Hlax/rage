@@ -91,7 +91,8 @@ Not required — behavior covered by unit and golden tests; no new CLI surface.
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merged `phase-2/ticket-115-domain-pack-claim-schema-loader` to `main` @ `d2f84c3`.
+Pushed to `origin/main`. Includes prior audit commits (`0cdbb29`, `71a1838`).
 
 ## Recommended next ticket
 
