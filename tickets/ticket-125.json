@@ -1,0 +1,35 @@
+{
+  "id": "ticket-125",
+  "title": "Domain pack spec cross-link README NM-5 runtime table",
+  "problem": "Tickets 123–124 documented NM-5 runtime loading in README and AGENTS.md, but docs/agents/06_DOMAIN_PACK_SPEC.md does not point operators to the committed runtime consumer table.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-124_agents-nm5-crosslink.md",
+    "docs/agents/06_DOMAIN_PACK_SPEC.md",
+    "README.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "docs/agents/06_DOMAIN_PACK_SPEC.md",
+    "agent_reports/2026-06-14_ticket-125_domain-pack-spec-nm5-crosslink.md"
+  ],
+  "acceptance_criteria": [
+    "06_DOMAIN_PACK_SPEC.md references README NM-5 pack file table and overlap-domain claim rules.",
+    "No duplication of full table — short pointer with README link.",
+    "No code or test changes.",
+    "Golden tests and full pytest remain green.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No pack loader code changes.",
+    "No README edits beyond optional reciprocal link.",
+    "No public site or schema changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert 06_DOMAIN_PACK_SPEC.md cross-link paragraph.",
+  "status": "proposed"
+}
