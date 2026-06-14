@@ -29,6 +29,29 @@ _OVERGENERALIZED_CLAIM_PATTERNS = (
 )
 
 
+def _evidence_type_pack_message(
+    candidate: dict[str, Any], domain: str
+) -> str | None:
+    from rge.modules.domain_pack_loader import (
+        DomainPackError,
+        evidence_type_ids,
+        load_domain_pack,
+    )
+
+    evidence_type = str(candidate.get("evidence_type") or "").strip()
+    if not evidence_type:
+        return None
+    try:
+        pack = load_domain_pack(domain)
+    except DomainPackError:
+        return f"domain pack {domain!r} could not be loaded for evidence_type validation"
+    if evidence_type.casefold() not in evidence_type_ids(pack):
+        return (
+            f"evidence_type {evidence_type!r} is not defined in domain pack {domain!r}"
+        )
+    return None
+
+
 def _normalize(text: str | None) -> str:
     return (text or "").strip().casefold()
 
@@ -135,6 +158,13 @@ def validate_candidate_claim(
         if value is None or (isinstance(value, str) and not value.strip()):
             return "rejected", None, REJECTION_UNSUPPORTED
 
+    domain = str(candidate.get("domain") or "").strip()
+    evidence_type = str(candidate.get("evidence_type") or "").strip()
+    if domain:
+        pack_message = _evidence_type_pack_message(candidate, domain)
+        if pack_message is not None:
+            return "rejected", None, REJECTION_UNSUPPORTED
+
     if candidate.get("confidence") is None:
         return "rejected", None, REJECTION_UNSUPPORTED
 
@@ -195,6 +225,11 @@ def rejection_diagnostic(
             return "confidence is required"
         if candidate.get("limitations") is None:
             return "limitations list is required (use [] if none)"
+        domain = str(candidate.get("domain") or "").strip()
+        if domain:
+            pack_message = _evidence_type_pack_message(candidate, domain)
+            if pack_message is not None:
+                return pack_message
         return "claim failed unsupported_claim checks"
     if reason == REJECTION_OVERGENERALIZED:
         if not scope or not str(scope).strip():

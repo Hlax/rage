@@ -40,5 +40,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert evidence_types loader wiring; restore inline evidence type constants.",
-  "status": "proposed"
+  "status": "done"
 }

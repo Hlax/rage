@@ -145,7 +145,8 @@ superseded
 | 111 | ticket-111 | superseded | README manual synthnote pipeline proof test cross-link | | (folded into NM-2 corrective doc pass) |
 | 112 | ticket-112 | done | Arbitrary manual text live extraction fall-through | `phase-2/ticket-112-arbitrary-manual-live-fallthrough` | `agent_reports/2026-06-14_ticket-112_arbitrary-manual-live-fallthrough.md` |
 | 113 | ticket-113 | done | Domain pack scoring.yaml loader proof (NM-5 preview) | `phase-2/ticket-113-domain-pack-scoring-loader` | `agent_reports/2026-06-14_ticket-113_domain-pack-scoring-loader.md` |
-| 114 | ticket-114 | proposed | Domain pack evidence_types.yaml loader proof (NM-5 continuation) | | |
+| 114 | ticket-114 | done | Domain pack evidence_types.yaml loader proof (NM-5 continuation) | `phase-2/ticket-114-domain-pack-evidence-types-loader` | `agent_reports/2026-06-14_ticket-114_domain-pack-evidence-types-loader.md` |
+| 115 | ticket-115 | proposed | Domain pack claim_schema.yaml loader proof (NM-5 continuation) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -875,9 +876,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-114 (proposed) — Domain pack evidence_types.yaml loader proof (NM-5 continuation)
+ticket-115 (proposed) — Domain pack claim_schema.yaml loader proof (NM-5 continuation)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-114 agent)
+
+- Extended `domain_pack_loader` to parse `evidence_types.yaml`.
+- `claim_validator` rejects unknown evidence types via pack allowlist per domain.
+- Temp-pack proof: demo pack with only `benchmark` rejects `empirical`.
+- 6 new unit tests; 412 pytest pass; safety audit pass.
+- Pre-ticket audit: `agent_reports/2026-06-14_pre-ticket-114_domain-pack-evidence-types-loader-audit.md`.
+- Next: ticket-115 (NM-5 continuation: claim_schema.yaml) requires pre-ticket audit before implementation.
 
 ## Queue Notes (2026-06-14, ticket-113 agent)
 
@@ -910,7 +920,7 @@ directed corrective work **before** ticket-111. **Completed and merged to main @
 | NM-4 / ticket-112 | **done** | Arbitrary manual_text live fall-through |
 | ticket-111 | **superseded** | Folded into NM-2 |
 
-Next product move: **ticket-114** (NM-5 continuation: domain pack evidence_types.yaml).
+Next product move: **ticket-115** (NM-5 continuation: domain pack claim_schema.yaml).
 
 ## Queue Rules
 

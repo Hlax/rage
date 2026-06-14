@@ -35,6 +35,7 @@ def test_load_creativity_pack_reads_ontology_and_aliases() -> None:
         "AI co-pilot",
     )
     assert pack.score_reconciliation.stronger_evidence_boost == 0.12
+    assert len(pack.evidence_types) == 6
 
 
 def test_parse_ontology_yaml_requires_id_and_label(tmp_path: Path) -> None:
@@ -90,6 +91,13 @@ def test_missing_ontology_file_fails_closed(tmp_path: Path) -> None:
         "  stronger_source_reason: test\n",
         encoding="utf-8",
     )
+    (pack_dir / "evidence_types.yaml").write_text(
+        "evidence_types:\n"
+        "  empirical:\n"
+        "    base_strength: 0.80\n"
+        "    notes: test\n",
+        encoding="utf-8",
+    )
     with pytest.raises(DomainPackError, match="Ontology file not found"):
         load_domain_pack("demo", root=tmp_path)
 
@@ -107,6 +115,13 @@ def test_malformed_aliases_file_fails_closed(tmp_path: Path) -> None:
         "  stronger_evidence_boost: 0.12\n"
         "  stronger_claim_confidence_threshold: 0.8\n"
         "  stronger_source_reason: test\n",
+        encoding="utf-8",
+    )
+    (pack_dir / "evidence_types.yaml").write_text(
+        "evidence_types:\n"
+        "  empirical:\n"
+        "    base_strength: 0.80\n"
+        "    notes: test\n",
         encoding="utf-8",
     )
     with pytest.raises(DomainPackError, match="top-level 'aliases:'"):
