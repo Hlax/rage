@@ -93,7 +93,8 @@ unchanged for real repo runs; fixes test isolation and any non-default project r
 
 ## Merge to main
 
-Pending merge.
+Merged @ **`b7152b9`** (`Merge branch 'phase-2/ticket-132-operator-loop-nm4-evidence-spine-status'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
