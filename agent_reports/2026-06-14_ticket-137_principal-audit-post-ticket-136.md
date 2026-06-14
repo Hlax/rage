@@ -78,7 +78,8 @@ None.
 
 ## Merge to main
 
-Pending merge.
+Merged @ **`703c4fb`** (`Merge branch 'phase-2/ticket-137-principal-audit-post-ticket-136'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
