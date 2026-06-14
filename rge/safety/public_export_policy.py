@@ -103,7 +103,11 @@ def _value_violations(text: str) -> list[str]:
     return violations
 
 
-def validate_public_card(card: dict[str, Any]) -> list[str]:
+def validate_public_card(
+    card: dict[str, Any],
+    *,
+    template_required_fields: tuple[str, ...] = (),
+) -> list[str]:
     """Return machine-readable violations for a single public card."""
     violations: list[str] = []
 
@@ -118,6 +122,12 @@ def validate_public_card(card: dict[str, Any]) -> list[str]:
     for field in REQUIRED_PUBLIC_CARD_FIELDS:
         if field not in card:
             violations.append(f"missing required card field: {field}")
+
+    for field in template_required_fields:
+        if field not in ALLOWED_PUBLIC_CARD_FIELDS:
+            continue
+        if field not in card:
+            violations.append(f"missing template-required card field: {field}")
 
     if "concepts" in card and not isinstance(card["concepts"], list):
         violations.append("concepts must be a list")
@@ -135,11 +145,19 @@ def validate_public_export_bundle(
     cards: list[dict[str, Any]],
     memos: list[dict[str, Any]],
     build_info: dict[str, Any],
+    *,
+    card_templates_by_type: dict[str, tuple[str, ...]] | None = None,
 ) -> list[str]:
     """Validate an entire export bundle before writing files."""
     violations: list[str] = []
+    templates = card_templates_by_type or {}
     for index, card in enumerate(cards):
-        for issue in validate_public_card(card):
+        card_type = str(card.get("type", "")).strip().casefold()
+        template_fields = templates.get(card_type, ())
+        for issue in validate_public_card(
+            card,
+            template_required_fields=template_fields,
+        ):
             violations.append(f"card[{index}] ({card.get('id', '?')}): {issue}")
 
     for index, memo in enumerate(memos):

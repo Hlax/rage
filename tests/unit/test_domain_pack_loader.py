@@ -119,6 +119,22 @@ def test_missing_ontology_file_fails_closed(tmp_path: Path) -> None:
         "  - marketing landing pages\n",
         encoding="utf-8",
     )
+    (pack_dir / "card_templates.yaml").write_text(
+        "cards:\n"
+        "  claim_card:\n"
+        "    required_fields:\n"
+        "      - title\n"
+        "      - summary\n"
+        "  cluster_card:\n"
+        "    required_fields:\n"
+        "      - title\n"
+        "      - summary\n"
+        "  theory_card:\n"
+        "    required_fields:\n"
+        "      - title\n"
+        "      - summary\n",
+        encoding="utf-8",
+    )
     with pytest.raises(DomainPackError, match="Ontology file not found"):
         load_domain_pack("demo", root=tmp_path)
 
@@ -163,6 +179,22 @@ def test_malformed_aliases_file_fails_closed(tmp_path: Path) -> None:
         "  - manual PDFs\n"
         "avoid_as_primary:\n"
         "  - marketing landing pages\n",
+        encoding="utf-8",
+    )
+    (pack_dir / "card_templates.yaml").write_text(
+        "cards:\n"
+        "  claim_card:\n"
+        "    required_fields:\n"
+        "      - title\n"
+        "      - summary\n"
+        "  cluster_card:\n"
+        "    required_fields:\n"
+        "      - title\n"
+        "      - summary\n"
+        "  theory_card:\n"
+        "    required_fields:\n"
+        "      - title\n"
+        "      - summary\n",
         encoding="utf-8",
     )
     with pytest.raises(DomainPackError, match="top-level 'aliases:'"):

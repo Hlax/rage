@@ -16,6 +16,7 @@ from rge.db.repositories import (
     public_card_record_to_export_dict,
     utc_now_iso,
 )
+from rge.modules.domain_pack_loader import DomainPack, domain_pack_dir, load_domain_pack
 from rge.safety.public_export_policy import (
     curated_public_card,
     validate_public_export_bundle,
@@ -386,6 +387,13 @@ def ensure_golden_public_cards(conn: Any) -> list[str]:
     return seeded
 
 
+def _load_export_domain_pack(repo_root: Path) -> DomainPack:
+    """Load creativity pack from repo_root, falling back to the installed repo."""
+    if domain_pack_dir("creativity", root=repo_root).is_dir():
+        return load_domain_pack("creativity", root=repo_root)
+    return load_domain_pack("creativity")
+
+
 def export_public_cards(
     conn: Any,
     *,
@@ -439,7 +447,14 @@ def export_public_cards(
         }
     )
 
-    violations = validate_public_export_bundle(cards, memos, build_info)
+    root = repo_root or _repo_root()
+    pack = _load_export_domain_pack(root)
+    violations = validate_public_export_bundle(
+        cards,
+        memos,
+        build_info,
+        card_templates_by_type=pack.card_templates.required_fields_by_type,
+    )
     if violations:
         raise ValueError(
             "Public export blocked by safety policy: "

@@ -59,6 +59,11 @@ class SourcePreferencesOverlay:
 
 
 @dataclass(frozen=True)
+class CardTemplatesOverlay:
+    required_fields_by_type: dict[str, tuple[str, ...]]
+
+
+@dataclass(frozen=True)
 class DomainPack:
     pack_id: str
     concepts: tuple[DomainPackConcept, ...]
@@ -68,6 +73,7 @@ class DomainPack:
     evidence_types: tuple[EvidenceTypeDefinition, ...]
     claim_schema: ClaimSchemaOverlay
     source_preferences: SourcePreferencesOverlay
+    card_templates: CardTemplatesOverlay
 
 
 def repo_root() -> Path:
@@ -504,6 +510,79 @@ def source_type_credibility_prior(
     return pack.source_preferences.source_type_weights.get(normalized, default)
 
 
+def parse_card_templates_yaml(path: Path) -> CardTemplatesOverlay:
+    """Parse public card template overlay from a domain pack card_templates stub."""
+    if not path.is_file():
+        raise DomainPackError(f"Card templates file not found: {path}")
+
+    text = path.read_text(encoding="utf-8")
+    if not text.strip():
+        raise DomainPackError(f"Card templates file is empty: {path}")
+
+    if not re.search(r"^cards:\s*$", text, re.MULTILINE):
+        raise DomainPackError(
+            f"Card templates file must contain top-level 'cards:' key: {path}"
+        )
+
+    required_by_type: dict[str, list[str]] = {}
+    current_type: str | None = None
+    in_required = False
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped == "cards:":
+            continue
+
+        match_type = re.match(r"^  ([\w]+):\s*$", line)
+        if match_type:
+            current_type = match_type.group(1).casefold()
+            required_by_type[current_type] = []
+            in_required = False
+            continue
+
+        if current_type is None:
+            continue
+
+        if stripped == "required_fields:":
+            in_required = True
+            continue
+
+        if in_required:
+            match_field = re.match(r"^\s{6}- (.+)$", line)
+            if match_field:
+                required_by_type[current_type].append(match_field.group(1).strip())
+                continue
+            if line and not line.startswith(" "):
+                in_required = False
+            elif line.startswith("    ") and not line.startswith("      "):
+                in_required = False
+
+    if not required_by_type:
+        raise DomainPackError(f"No card templates found in {path}")
+
+    for card_type, fields in required_by_type.items():
+        if not fields:
+            raise DomainPackError(
+                f"Card template {card_type!r} missing required_fields in {path}"
+            )
+
+    return CardTemplatesOverlay(
+        required_fields_by_type={
+            card_type: tuple(fields) for card_type, fields in required_by_type.items()
+        }
+    )
+
+
+def template_required_fields(pack: DomainPack, card_type: str) -> tuple[str, ...]:
+    """Return pack-defined required fields for a public card type."""
+    normalized = card_type.strip().casefold()
+    if not normalized:
+        return ()
+    return pack.card_templates.required_fields_by_type.get(normalized, ())
+
+
 def build_alias_to_canonical(aliases: dict[str, list[str]]) -> dict[str, str]:
     """Build normalized alias phrase → canonical label reverse map."""
     reverse: dict[str, str] = {}
@@ -535,6 +614,7 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
     evidence_types_path = pack_root / "evidence_types.yaml"
     claim_schema_path = pack_root / "claim_schema.yaml"
     source_preferences_path = pack_root / "source_preferences.yaml"
+    card_templates_path = pack_root / "card_templates.yaml"
 
     concepts = parse_ontology_yaml(ontology_path)
     alias_map = parse_aliases_yaml(aliases_path)
@@ -543,6 +623,7 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
     evidence_types = parse_evidence_types_yaml(evidence_types_path)
     claim_schema = parse_claim_schema_yaml(claim_schema_path)
     source_preferences = parse_source_preferences_yaml(source_preferences_path)
+    card_templates = parse_card_templates_yaml(card_templates_path)
 
     return DomainPack(
         pack_id=pack_id,
@@ -553,6 +634,7 @@ def load_domain_pack(pack_id: str, *, root: Path | None = None) -> DomainPack:
         evidence_types=evidence_types,
         claim_schema=claim_schema,
         source_preferences=source_preferences,
+        card_templates=card_templates,
     )
 
 

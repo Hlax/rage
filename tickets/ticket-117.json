@@ -45,5 +45,5 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert card_templates loader wiring; restore inline exporter constants.",
-  "status": "proposed"
+  "status": "done"
 }
