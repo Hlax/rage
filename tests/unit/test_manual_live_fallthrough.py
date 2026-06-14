@@ -1,4 +1,4 @@
-"""Unit tests for manual_text live extraction fall-through (ticket-112)."""
+"""Unit tests for manual_text live extraction/link fall-through (tickets 112, 128)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,12 @@ from unittest.mock import patch
 
 import pytest
 
-from rge.llm.schemas import CandidateClaimBatch_v0_1, SCHEMA_VERSION_0_1_0
+from rge.llm.schemas import (
+    CandidateClaimBatch_v0_1,
+    CandidateConceptLinkBatch_v0_1,
+    SCHEMA_VERSION_0_1_0,
+)
+from rge.modules.concept_linker import assert_link_checksum_not_in_fixture_map
 from rge.modules.live_extraction_write import (
     LiveExtractionWriteError,
     assert_checksum_not_in_fixture_map,
@@ -68,6 +73,41 @@ class _StubOllamaClient:
                         "confidence": 0.6,
                         "limitations": [],
                         "domain": "creativity",
+                        "domain_metadata": {},
+                    },
+                ],
+            }
+        )
+
+
+class _StubLiveOllamaClient(_StubOllamaClient):
+    def link_concepts(self, **kwargs: object) -> CandidateConceptLinkBatch_v0_1:
+        claims = kwargs["claims"]
+        claim_id = claims[0]["id"]
+        return CandidateConceptLinkBatch_v0_1.model_validate(
+            {
+                "task_name": "concept_linking",
+                "schema_version": SCHEMA_VERSION_0_1_0,
+                "items": [
+                    {
+                        "claim_id": claim_id,
+                        "concept_label": "originality",
+                        "role": "object",
+                        "confidence": 0.78,
+                        "domain_metadata": {},
+                    },
+                    {
+                        "claim_id": claim_id,
+                        "concept_label": "AI assistance",
+                        "role": "method",
+                        "confidence": 0.8,
+                        "domain_metadata": {},
+                    },
+                    {
+                        "claim_id": claim_id,
+                        "concept_label": "brainstorming",
+                        "role": "context",
+                        "confidence": 0.72,
                         "domain_metadata": {},
                     },
                 ],
@@ -323,3 +363,183 @@ def test_live_fallthrough_passes_manual_text_contract_hint(temp_db: Path) -> Non
     contract = captured.get("contract")
     assert isinstance(contract, dict)
     assert contract.get("manual_text_arbitrary_live") is True
+
+
+def test_checksum_pinned_manual_source_still_uses_mock_link_fixture(
+    temp_db: Path,
+) -> None:
+    from rge.cli import main
+    from rge.db.connection import connect
+
+    assert (
+        main(
+            [
+                "ingest",
+                str(SYNTHNOTE_SOURCE),
+                "--domain",
+                "creativity",
+                "--source-type",
+                "manual_text",
+                "--source-title",
+                "Synthetic Source Note",
+                "--db",
+                str(temp_db),
+            ]
+        )
+        == 0
+    )
+    conn = connect(temp_db)
+    try:
+        source_id = conn.execute("SELECT id FROM sources").fetchone()["id"]
+    finally:
+        conn.close()
+
+    assert main(["extract-claims", "--source", source_id, "--db", str(temp_db)]) == 0
+    assert main(["link-concepts", "--source", source_id, "--db", str(temp_db)]) == 0
+
+    conn = connect(temp_db)
+    try:
+        link_count = conn.execute("SELECT COUNT(*) AS n FROM claim_concepts").fetchone()[
+            "n"
+        ]
+        assert link_count >= 1
+    finally:
+        conn.close()
+
+
+def test_unknown_manual_text_link_in_mock_mode_raises_clear_error(temp_db: Path) -> None:
+    from rge.cli import main
+
+    source_id = _ingest_arbitrary_manual_source(temp_db)
+    with patch.dict(
+        os.environ,
+        {"RGE_LLM_MODE": "ollama", "RGE_ALLOW_LIVE_LLM": "1"},
+        clear=False,
+    ):
+        with patch(
+            "rge.modules.live_extraction_write.assert_ollama_health",
+            return_value={"model_available": True},
+        ):
+            with patch(
+                "rge.modules.live_extraction_write.get_model_client",
+                return_value=_StubOllamaClient(),
+            ):
+                assert (
+                    main(
+                        [
+                            "extract-claims",
+                            "--source",
+                            source_id,
+                            "--db",
+                            str(temp_db),
+                            "--live-manual-fallthrough",
+                        ]
+                    )
+                    == 0
+                )
+    exit_code = main(["link-concepts", "--source", source_id, "--db", str(temp_db)])
+    assert exit_code == 1
+
+
+def test_live_manual_link_fallthrough_blocked_without_live_opt_in(temp_db: Path) -> None:
+    from rge.cli import main
+
+    source_id = _ingest_arbitrary_manual_source(temp_db)
+    exit_code = main(
+        [
+            "link-concepts",
+            "--source",
+            source_id,
+            "--db",
+            str(temp_db),
+            "--live-manual-link-fallthrough",
+        ]
+    )
+    assert exit_code == 1
+
+
+def test_live_manual_link_fallthrough_blocked_on_default_graph_db(temp_db: Path) -> None:
+    from rge.cli import main
+
+    source_id = _ingest_arbitrary_manual_source(temp_db)
+    with patch.dict(
+        os.environ,
+        {"RGE_LLM_MODE": "ollama", "RGE_ALLOW_LIVE_LLM": "1"},
+        clear=False,
+    ):
+        exit_code = main(
+            [
+                "link-concepts",
+                "--source",
+                source_id,
+                "--db",
+                "data/db/creative_research.sqlite",
+                "--live-manual-link-fallthrough",
+            ]
+        )
+    assert exit_code == 1
+
+
+def test_mocked_live_link_fallthrough_persists_validated_links(temp_db: Path) -> None:
+    from rge.cli import main
+    from rge.db.connection import connect
+
+    source_id = _ingest_arbitrary_manual_source(temp_db)
+    with patch.dict(
+        os.environ,
+        {"RGE_LLM_MODE": "ollama", "RGE_ALLOW_LIVE_LLM": "1"},
+        clear=False,
+    ):
+        with patch(
+            "rge.modules.live_extraction_write.assert_ollama_health",
+            return_value={"model_available": True},
+        ), patch(
+            "rge.modules.live_probe.assert_ollama_health",
+            return_value={"model_available": True},
+        ):
+            with patch(
+                "rge.modules.live_extraction_write.get_model_client",
+                return_value=_StubLiveOllamaClient(),
+            ), patch(
+                "rge.modules.concept_linker.get_model_client",
+                return_value=_StubLiveOllamaClient(),
+            ):
+                assert (
+                    main(
+                        [
+                            "extract-claims",
+                            "--source",
+                            source_id,
+                            "--db",
+                            str(temp_db),
+                            "--live-manual-fallthrough",
+                        ]
+                    )
+                    == 0
+                )
+                exit_code = main(
+                    [
+                        "link-concepts",
+                        "--source",
+                        source_id,
+                        "--db",
+                        str(temp_db),
+                        "--live-manual-link-fallthrough",
+                    ]
+                )
+    assert exit_code == 0
+
+    conn = connect(temp_db)
+    try:
+        links = conn.execute("SELECT COUNT(*) AS n FROM claim_concepts").fetchone()["n"]
+        assert links >= 1
+    finally:
+        conn.close()
+
+
+def test_assert_link_checksum_rejects_synthnote_fixture_map_entry() -> None:
+    mapping_path = REPO_ROOT / "fixtures" / "manual_source_fixture_map.json"
+    checksums = json.loads(mapping_path.read_text(encoding="utf-8"))
+    pinned = next(iter(checksums))
+    with pytest.raises(LiveExtractionWriteError, match="link_concepts"):
+        assert_link_checksum_not_in_fixture_map(pinned)

@@ -1,0 +1,48 @@
+{
+  "id": "ticket-129",
+  "title": "Arbitrary manual live relationship fall-through",
+  "problem": "ticket-128 proved live concept linking for arbitrary manual_text sources. NM-4 pipeline still stops before relationships; build-relationships uses checksum-pinned mock fixtures for synthnote and generic diversity fallback for unknown manual_text.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-128_arbitrary-manual-live-concept-linking.md",
+    "rge/modules/relationship_builder.py",
+    "rge/modules/manual_source_fixtures.py",
+    "fixtures/manual_source_fixture_map.json"
+  ],
+  "affected_modules": [
+    "rge/modules/relationship_builder.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/relationship_builder.py",
+    "rge/cli.py",
+    "tests/unit/test_manual_live_fallthrough.py",
+    "agent_reports/2026-06-14_ticket-129_arbitrary-manual-live-relationship-fallthrough.md"
+  ],
+  "acceptance_criteria": [
+    "After live extract + link on an unmapped manual_text source, explicit live mode can draft relationships via Ollama.",
+    "At least one validated active relationship persists to the gitignored evidence DB.",
+    "Checksum-pinned synthnote mock paths remain deterministic.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes.",
+    "Public export/site untouched."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_live_fallthrough.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Cloud providers.",
+    "Public export/site changes.",
+    "Source discovery/fetcher.",
+    "Validator weakening.",
+    "Contradiction live fall-through.",
+    "Docs cross-link chain."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove live relationship fall-through flag; retain ticket-127/128 calibration.",
+  "status": "proposed",
+  "category": "product-risk reduction / NM-4 pipeline continuation",
+  "pre_ticket_audit_required": true
+}

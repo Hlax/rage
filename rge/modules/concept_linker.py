@@ -20,11 +20,22 @@ from rge.modules.domain_pack_loader import (
     resolve_canonical_concept_label,
     validate_link_domain_metadata,
 )
-from rge.modules.manual_source_fixtures import link_fixture_for_manual_source
+from rge.modules.manual_source_fixtures import (
+    link_fixture_for_manual_source,
+    manual_text_lacks_link_fixture,
+    resolve_manual_source_fixture,
+)
 
 _GENERIC_ONLY_LABELS = frozenset({"ai", "creativity"})
 
 REJECTION_WEAK_CONCEPT_MAPPING = "weak_concept_mapping"
+
+_MANUAL_TEXT_NO_LINK_FIXTURE_ERROR = (
+    "manual_text source has no checksum-pinned link_concepts fixture in "
+    "fixtures/manual_source_fixture_map.json. Use mock link-concepts only for "
+    "checksum-pinned synthnote sources, or pass --live-manual-link-fallthrough "
+    "with RGE_LLM_MODE=ollama and RGE_ALLOW_LIVE_LLM=1 on a gitignored evidence DB."
+)
 
 
 def _normalize_label(label: str) -> str:
@@ -203,6 +214,15 @@ def _pipeline_model_client(config=None):
     return get_model_client(cfg, mode=effective_llm_mode(cfg))
 
 
+def _default_link_fixture_for_source(source: Any | None) -> str:
+    mapped = link_fixture_for_manual_source(source)
+    if mapped:
+        return mapped
+    if manual_text_lacks_link_fixture(source):
+        raise ValueError(_MANUAL_TEXT_NO_LINK_FIXTURE_ERROR)
+    return "concept_linking_creativity_diversity.json"
+
+
 def _resolve_link_claim_ids(
     links: list[dict[str, Any]],
     claims: list[dict[str, Any]],
@@ -238,6 +258,7 @@ def propose_concept_links(
     fixture_name: str | None = None,
     diversity_heuristic: bool = False,
     source: Any | None = None,
+    live_manual_link_fallthrough: bool = False,
 ) -> list[dict[str, Any]]:
     """Propose concept links via the model client without persistence."""
     config = load_config()
@@ -247,10 +268,11 @@ def propose_concept_links(
         "domain_pack": domain_pack,
         "schema_version": config.llm_schema_version,
     }
+    if live_manual_link_fallthrough:
+        link_kwargs["manual_text_arbitrary_live"] = True
     if isinstance(model_client, MockModelClient):
-        resolved_fixture = fixture_name or link_fixture_for_manual_source(source)
-        link_kwargs["fixture_name"] = (
-            resolved_fixture or "concept_linking_creativity_diversity.json"
+        link_kwargs["fixture_name"] = fixture_name or _default_link_fixture_for_source(
+            source
         )
     batch = model_client.link_concepts(**link_kwargs)
     links = [item.model_dump() for item in batch.items]
@@ -268,6 +290,8 @@ def link_claim_concepts(
     *,
     fixture_name: str | None = None,
     source: Any | None = None,
+    client: Any | None = None,
+    live_manual_link_fallthrough: bool = False,
 ) -> list[dict[str, Any]]:
     """Propose concept links for claims via the configured model client."""
     return propose_concept_links(
@@ -276,6 +300,8 @@ def link_claim_concepts(
         fixture_name=fixture_name,
         diversity_heuristic=True,
         source=source,
+        client=client,
+        live_manual_link_fallthrough=live_manual_link_fallthrough,
     )
 
 
@@ -284,6 +310,9 @@ def link_concepts_for_source(
     source_id: str,
     *,
     fixture_name: str | None = None,
+    live_manual_link_fallthrough: bool = False,
+    client: Any | None = None,
+    config: Any | None = None,
 ) -> dict[str, Any]:
     """Link accepted claims for a source to domain concepts and persist links."""
     from rge.db.repositories import (
@@ -313,6 +342,17 @@ def link_concepts_for_source(
             "link_ids": [link["id"] for link in existing],
         }
 
+    cfg = config if config is not None else load_config()
+    if live_manual_link_fallthrough:
+        if not manual_text_lacks_link_fixture(source_record):
+            raise ValueError(
+                "live_manual_link_fallthrough requires a manual_text source absent from "
+                "fixtures/manual_source_fixture_map.json link_concepts entries."
+            )
+        model_client = client or get_model_client(cfg, mode="ollama")
+    else:
+        model_client = client
+
     claim_dicts = [
         {
             "id": claim.id,
@@ -328,6 +368,8 @@ def link_concepts_for_source(
         domain_pack,
         fixture_name=fixture_name,
         source=source_record,
+        client=model_client,
+        live_manual_link_fallthrough=live_manual_link_fallthrough,
     )
     validated = validate_concept_links(proposed, domain_pack=domain_pack)
 
@@ -351,4 +393,77 @@ def link_concepts_for_source(
         "link_count": len(link_ids),
         "link_ids": link_ids,
         "rejected_link_count": len(validated["rejected"]),
+        "rejected_links": validated["rejected"],
+    }
+
+
+def assert_link_checksum_not_in_fixture_map(checksum: str) -> None:
+    """Refuse sources whose link_concepts task is pinned to mock manual fixtures."""
+    from rge.modules.live_extraction_write import LiveExtractionWriteError
+
+    if resolve_manual_source_fixture(checksum, "link_concepts"):
+        raise LiveExtractionWriteError(
+            f"Source checksum {checksum!r} is listed in "
+            "fixtures/manual_source_fixture_map.json for link_concepts; use mock "
+            "link-concepts for checksum-pinned manual sources."
+        )
+
+
+def link_concepts_manual_live_fallthrough(
+    conn: Any,
+    source_id: str,
+    *,
+    config: Any | None = None,
+    skip_health_check: bool = False,
+    client: Any | None = None,
+) -> dict[str, Any]:
+    """Live Ollama concept linking for manual_text sources absent from the fixture map."""
+    from rge.db.repositories import ClaimConceptRepository, SourceRepository
+    from rge.modules.live_extraction_write import LiveExtractionWriteError
+    from rge.modules.live_probe import LiveProbeGateError, assert_live_probe_env, assert_ollama_health
+
+    cfg = assert_live_probe_env(config, command="link-concepts")
+    health = assert_ollama_health(cfg) if not skip_health_check else {}
+
+    source = SourceRepository(conn).get_by_id(source_id)
+    if source is None:
+        raise LiveExtractionWriteError(f"Source not found: {source_id}")
+    if getattr(source, "source_type", None) != "manual_text":
+        raise LiveExtractionWriteError(
+            "live_manual_link_fallthrough requires source_type manual_text."
+        )
+
+    checksum = getattr(source, "raw_text_checksum", None)
+    if not checksum:
+        raise LiveExtractionWriteError(f"Source {source_id} has no raw_text_checksum.")
+    assert_link_checksum_not_in_fixture_map(str(checksum))
+
+    model_client = client or get_model_client(cfg, mode="ollama")
+    result = link_concepts_for_source(
+        conn,
+        source_id,
+        live_manual_link_fallthrough=True,
+        client=model_client,
+        config=cfg,
+    )
+    links = ClaimConceptRepository(conn).list_for_source(source_id)
+    return {
+        "status": result["status"],
+        "command": "link-concepts",
+        "live_manual_link_fallthrough": True,
+        "source_id": source_id,
+        "source_title": source.title,
+        "source_type": source.source_type,
+        "raw_text_checksum": checksum,
+        "fixture_map_match": not manual_text_lacks_link_fixture(source),
+        "db_writes": True,
+        "provider": model_client.provider,
+        "model": getattr(model_client, "model", "unknown"),
+        "llm_schema_version": cfg.llm_schema_version,
+        "effective_llm_mode": "ollama",
+        "health": health,
+        "link_count": result["link_count"],
+        "rejected_link_count": result.get("rejected_link_count", 0),
+        "links": links,
+        "rejected_links": result.get("rejected_links", []),
     }

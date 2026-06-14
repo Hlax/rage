@@ -42,7 +42,7 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove live concept-linking fall-through flag; retain ticket-127 extract calibration.",
-  "status": "proposed",
+  "status": "done",
   "category": "product-risk reduction / NM-4 pipeline continuation",
   "pre_ticket_audit_required": true
 }
