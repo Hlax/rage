@@ -185,7 +185,8 @@ superseded
 | 151 | ticket-151 | done | Staged Phase 3 full spine idempotency (mock) | `phase-2/ticket-151-staged-spine-idempotency` | `agent_reports/2026-06-14_ticket-151_staged-spine-idempotency.md` |
 | 152 | ticket-152 | done | Second staged candidate fetch and ingest (mock, queue rank #2) | `phase-2/ticket-152-second-staged-candidate-spine` | `agent_reports/2026-06-14_ticket-152_second-staged-candidate-spine.md` |
 | 153 | ticket-153 | done | Extract claims from second staged-ingested source (mock spine step) | `phase-2/ticket-153-second-staged-extract-spine` | `agent_reports/2026-06-14_ticket-153_second-staged-extract-spine.md` |
-| 154 | ticket-154 | proposed | Link concepts on second staged-ingested source (mock spine step) | | |
+| 154 | ticket-154 | done | Link concepts on second staged-ingested source (mock spine step) | `phase-2/ticket-154-second-staged-link-spine` | `agent_reports/2026-06-14_ticket-154_second-staged-link-spine.md` |
+| 155 | ticket-155 | proposed | Build relationships on second staged-ingested source (mock spine step) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -915,9 +916,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-154 (proposed) — Link concepts on second staged-ingested source (mock spine step)
+ticket-155 (proposed) — Build relationships on second staged-ingested source (mock spine step)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-154 agent)
+
+- Test-forward ticket: link fixture + tests only; explicit `--fixture` binding.
+- Rank #2 link: 3 concept links (constraint, AI assistance, human control); idempotent `already_linked`.
+- Principal audit post-ticket-153 committed with this merge.
+- 564 pytest; 142 golden; safety pass.
+- ticket-155 seeded: build-relationships on second staged source.
 
 ## Queue Notes (2026-06-14, ticket-153 agent)
 
