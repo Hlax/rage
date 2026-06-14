@@ -1313,7 +1313,46 @@ def _cmd_build_relationships(args: argparse.Namespace) -> int:
         RelationshipEvidenceRepository,
         RelationshipRepository,
     )
-    from rge.modules.relationship_builder import build_relationships_for_source
+    from rge.modules.live_extraction_write import (
+        LiveExtractionWriteError,
+        is_default_graph_db,
+        resolve_live_evidence_db,
+    )
+    from rge.modules.live_probe import LiveProbeGateError
+    from rge.modules.relationship_builder import (
+        build_relationships_for_source,
+        build_relationships_manual_live_fallthrough,
+    )
+
+    if getattr(args, "live_manual_relationship_fallthrough", False):
+        db_path = resolve_live_evidence_db(Path(args.db) if args.db else None)
+        if is_default_graph_db(db_path):
+            payload = {
+                "status": "error",
+                "command": "build-relationships",
+                "detail": (
+                    "Refusing live manual relationship fall-through on the default graph DB. "
+                    "Pass --db data/db/live_research_evidence.sqlite or another "
+                    "explicit gitignored evidence path."
+                ),
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+        conn = ensure_database(db_path)
+        try:
+            payload = build_relationships_manual_live_fallthrough(conn, args.source)
+            print(json.dumps(payload, indent=2))
+            return 0
+        except (LiveExtractionWriteError, LiveProbeGateError, ValueError) as exc:
+            payload = {
+                "status": "error",
+                "command": "build-relationships",
+                "detail": str(exc),
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+        finally:
+            conn.close()
 
     db_path = Path(args.db) if args.db else None
     conn = ensure_database(db_path)
@@ -1771,6 +1810,15 @@ def build_parser() -> argparse.ArgumentParser:
     build_parser.add_argument(
         "--fixture",
         help="Optional mock LLM fixture filename for deterministic relationship tests.",
+    )
+    build_parser.add_argument(
+        "--live-manual-relationship-fallthrough",
+        action="store_true",
+        help=(
+            "Live Ollama relationship drafting for manual_text sources absent from "
+            "fixtures/manual_source_fixture_map.json. Requires RGE_LLM_MODE=ollama, "
+            "RGE_ALLOW_LIVE_LLM=1, and an explicit gitignored evidence --db."
+        ),
     )
     build_parser.set_defaults(func=_cmd_build_relationships)
 

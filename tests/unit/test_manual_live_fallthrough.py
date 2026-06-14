@@ -1,4 +1,4 @@
-"""Unit tests for manual_text live extraction/link fall-through (tickets 112, 128)."""
+"""Unit tests for manual_text live extract/link/relationship fall-through (tickets 112, 128, 129)."""
 
 from __future__ import annotations
 
@@ -12,6 +12,7 @@ import pytest
 from rge.llm.schemas import (
     CandidateClaimBatch_v0_1,
     CandidateConceptLinkBatch_v0_1,
+    CandidateRelationshipBatch_v0_1,
     SCHEMA_VERSION_0_1_0,
 )
 from rge.modules.concept_linker import assert_link_checksum_not_in_fixture_map
@@ -19,6 +20,7 @@ from rge.modules.live_extraction_write import (
     LiveExtractionWriteError,
     assert_checksum_not_in_fixture_map,
 )
+from rge.modules.relationship_builder import assert_relationship_checksum_not_in_fixture_map
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SYNTHNOTE_SOURCE = REPO_ROOT / "fixtures" / "sources" / "manual_synthnote.txt"
@@ -110,6 +112,28 @@ class _StubLiveOllamaClient(_StubOllamaClient):
                         "confidence": 0.72,
                         "domain_metadata": {},
                     },
+                ],
+            }
+        )
+
+    def draft_relationships(self, **kwargs: object) -> CandidateRelationshipBatch_v0_1:
+        claims = kwargs["claims"]
+        claim_id = claims[0]["id"]
+        scope = claims[0].get("scope") or "this workshop setting"
+        return CandidateRelationshipBatch_v0_1.model_validate(
+            {
+                "task_name": "relationship_drafting",
+                "schema_version": SCHEMA_VERSION_0_1_0,
+                "items": [
+                    {
+                        "subject_concept": "AI assistance",
+                        "predicate": "may_reduce",
+                        "object_concept": "originality",
+                        "stance": "supports",
+                        "scope": scope,
+                        "confidence": "medium",
+                        "supporting_claim_ids": [claim_id],
+                    }
                 ],
             }
         )
@@ -543,3 +567,245 @@ def test_assert_link_checksum_rejects_synthnote_fixture_map_entry() -> None:
     pinned = next(iter(checksums))
     with pytest.raises(LiveExtractionWriteError, match="link_concepts"):
         assert_link_checksum_not_in_fixture_map(pinned)
+
+
+def test_checksum_pinned_manual_source_still_uses_mock_relationship_fixture(
+    temp_db: Path,
+) -> None:
+    from rge.cli import main
+    from rge.db.connection import connect
+
+    assert (
+        main(
+            [
+                "ingest",
+                str(SYNTHNOTE_SOURCE),
+                "--domain",
+                "creativity",
+                "--source-type",
+                "manual_text",
+                "--source-title",
+                "Synthetic Source Note",
+                "--db",
+                str(temp_db),
+            ]
+        )
+        == 0
+    )
+    conn = connect(temp_db)
+    try:
+        source_id = conn.execute("SELECT id FROM sources").fetchone()["id"]
+    finally:
+        conn.close()
+
+    assert main(["extract-claims", "--source", source_id, "--db", str(temp_db)]) == 0
+    assert main(["link-concepts", "--source", source_id, "--db", str(temp_db)]) == 0
+    assert (
+        main(["build-relationships", "--source", source_id, "--db", str(temp_db)]) == 0
+    )
+
+    conn = connect(temp_db)
+    try:
+        rel_count = conn.execute(
+            "SELECT COUNT(*) AS n FROM relationships"
+        ).fetchone()["n"]
+        assert rel_count >= 1
+    finally:
+        conn.close()
+
+
+def _run_live_extract_and_link(temp_db: Path, source_id: str) -> None:
+    from rge.cli import main
+
+    with patch.dict(
+        os.environ,
+        {"RGE_LLM_MODE": "ollama", "RGE_ALLOW_LIVE_LLM": "1"},
+        clear=False,
+    ):
+        with patch(
+            "rge.modules.live_extraction_write.assert_ollama_health",
+            return_value={"model_available": True},
+        ), patch(
+            "rge.modules.live_probe.assert_ollama_health",
+            return_value={"model_available": True},
+        ):
+            with patch(
+                "rge.modules.live_extraction_write.get_model_client",
+                return_value=_StubLiveOllamaClient(),
+            ), patch(
+                "rge.modules.concept_linker.get_model_client",
+                return_value=_StubLiveOllamaClient(),
+            ):
+                assert (
+                    main(
+                        [
+                            "extract-claims",
+                            "--source",
+                            source_id,
+                            "--db",
+                            str(temp_db),
+                            "--live-manual-fallthrough",
+                        ]
+                    )
+                    == 0
+                )
+                assert (
+                    main(
+                        [
+                            "link-concepts",
+                            "--source",
+                            source_id,
+                            "--db",
+                            str(temp_db),
+                            "--live-manual-link-fallthrough",
+                        ]
+                    )
+                    == 0
+                )
+
+
+def test_unknown_manual_text_relationship_in_mock_mode_raises_clear_error(
+    temp_db: Path,
+) -> None:
+    from rge.cli import main
+
+    source_id = _ingest_arbitrary_manual_source(temp_db)
+    _run_live_extract_and_link(temp_db, source_id)
+    exit_code = main(
+        ["build-relationships", "--source", source_id, "--db", str(temp_db)]
+    )
+    assert exit_code == 1
+
+
+def test_live_manual_relationship_fallthrough_blocked_without_live_opt_in(
+    temp_db: Path,
+) -> None:
+    from rge.cli import main
+
+    source_id = _ingest_arbitrary_manual_source(temp_db)
+    _run_live_extract_and_link(temp_db, source_id)
+    exit_code = main(
+        [
+            "build-relationships",
+            "--source",
+            source_id,
+            "--db",
+            str(temp_db),
+            "--live-manual-relationship-fallthrough",
+        ]
+    )
+    assert exit_code == 1
+
+
+def test_live_manual_relationship_fallthrough_blocked_on_default_graph_db(
+    temp_db: Path,
+) -> None:
+    from rge.cli import main
+
+    source_id = _ingest_arbitrary_manual_source(temp_db)
+    _run_live_extract_and_link(temp_db, source_id)
+    with patch.dict(
+        os.environ,
+        {"RGE_LLM_MODE": "ollama", "RGE_ALLOW_LIVE_LLM": "1"},
+        clear=False,
+    ):
+        exit_code = main(
+            [
+                "build-relationships",
+                "--source",
+                source_id,
+                "--db",
+                "data/db/creative_research.sqlite",
+                "--live-manual-relationship-fallthrough",
+            ]
+        )
+    assert exit_code == 1
+
+
+def test_mocked_live_relationship_fallthrough_persists_validated_relationships(
+    temp_db: Path,
+) -> None:
+    from rge.cli import main
+    from rge.db.connection import connect
+
+    source_id = _ingest_arbitrary_manual_source(temp_db)
+    with patch.dict(
+        os.environ,
+        {"RGE_LLM_MODE": "ollama", "RGE_ALLOW_LIVE_LLM": "1"},
+        clear=False,
+    ):
+        with patch(
+            "rge.modules.live_extraction_write.assert_ollama_health",
+            return_value={"model_available": True},
+        ), patch(
+            "rge.modules.live_probe.assert_ollama_health",
+            return_value={"model_available": True},
+        ):
+            with patch(
+                "rge.modules.live_extraction_write.get_model_client",
+                return_value=_StubLiveOllamaClient(),
+            ), patch(
+                "rge.modules.concept_linker.get_model_client",
+                return_value=_StubLiveOllamaClient(),
+            ), patch(
+                "rge.modules.relationship_builder.get_model_client",
+                return_value=_StubLiveOllamaClient(),
+            ):
+                assert (
+                    main(
+                        [
+                            "extract-claims",
+                            "--source",
+                            source_id,
+                            "--db",
+                            str(temp_db),
+                            "--live-manual-fallthrough",
+                        ]
+                    )
+                    == 0
+                )
+                assert (
+                    main(
+                        [
+                            "link-concepts",
+                            "--source",
+                            source_id,
+                            "--db",
+                            str(temp_db),
+                            "--live-manual-link-fallthrough",
+                        ]
+                    )
+                    == 0
+                )
+                exit_code = main(
+                    [
+                        "build-relationships",
+                        "--source",
+                        source_id,
+                        "--db",
+                        str(temp_db),
+                        "--live-manual-relationship-fallthrough",
+                    ]
+                )
+    assert exit_code == 0
+
+    conn = connect(temp_db)
+    try:
+        rel_count = conn.execute(
+            "SELECT COUNT(*) AS n FROM relationships WHERE status = 'active'"
+        ).fetchone()["n"]
+        evidence_count = conn.execute(
+            "SELECT COUNT(*) AS n FROM relationship_evidence"
+        ).fetchone()["n"]
+        assert rel_count >= 1
+        assert evidence_count >= 1
+    finally:
+        conn.close()
+
+
+def test_assert_relationship_checksum_rejects_synthnote_fixture_map_entry() -> None:
+    mapping_path = REPO_ROOT / "fixtures" / "manual_source_fixture_map.json"
+    checksums = json.loads(mapping_path.read_text(encoding="utf-8"))
+    pinned = next(iter(checksums))
+    with pytest.raises(LiveExtractionWriteError, match="build_relationships"):
+        assert_relationship_checksum_not_in_fixture_map(pinned)
