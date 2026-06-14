@@ -245,6 +245,82 @@ python -m rge.cli extract-claims-live --source <source_id_from_ingest> `
   --db data/db/live_research_evidence.sqlite
 ```
 
+**NM-4 evidence DB operator spine** (tickets 127–132; arbitrary `manual_text` on
+gitignored `data/db/live_research_evidence.sqlite`): extends NM-1 with live
+fall-through on the standard pipeline commands (not checksum-pinned synthnote fixtures).
+Requires `RGE_LLM_MODE=ollama`, `RGE_ALLOW_LIVE_LLM=1`, and `--db
+data/db/live_research_evidence.sqlite` on every step. Mock mode without the
+`--live-manual-*` flags remains fail-closed for sources absent from
+`fixtures/manual_source_fixture_map.json`.
+
+```powershell
+$env:RGE_LLM_MODE = "ollama"
+$env:RGE_ALLOW_LIVE_LLM = "1"
+python -m rge.cli model-health
+
+# 1. Ingest arbitrary manual_text (not in checksum fixture map)
+python -m rge.cli ingest data/sources/manual/creativity/your_new_note.txt `
+  --domain creativity --source-type manual_text --source-title "Your note" `
+  --db data/db/live_research_evidence.sqlite
+# Example proof source: fixtures/sources/ticket127_arbitrary_manual_live.txt
+# Expected example id: src_1b8354e5f2203f82 (checksum-prefixed)
+
+# 2. Extract claims — live Ollama fall-through
+python -m rge.cli extract-claims --source <source_id> `
+  --db data/db/live_research_evidence.sqlite --live-manual-fallthrough
+
+# 3. Link concepts — live fall-through
+python -m rge.cli link-concepts --source <source_id> `
+  --db data/db/live_research_evidence.sqlite --live-manual-link-fallthrough
+
+# 4. Build relationships — live fall-through
+python -m rge.cli build-relationships --source <source_id> `
+  --db data/db/live_research_evidence.sqlite --live-manual-relationship-fallthrough
+
+# 5. Detect contradictions — live fall-through
+python -m rge.cli detect-contradictions --source <source_id> `
+  --db data/db/live_research_evidence.sqlite --live-manual-contradiction-fallthrough
+```
+
+**NM-4 evidence DB score reconciliation** (ticket-131; deterministic — no Ollama):
+after the live spine above, ingest a follow-up `manual_text` source with stronger
+supporting evidence, extract claims (mock fixture map or live per source), then
+reconcile on the evidence DB only via `--evidence-db-reconcile` (blocks default
+graph DB). Committed test copy:
+`fixtures/sources/ticket131_nm4_evidence_followup.txt`.
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+
+# 6. Ingest follow-up on evidence DB
+python -m rge.cli ingest fixtures/sources/ticket131_nm4_evidence_followup.txt `
+  --domain creativity --source-type manual_text `
+  --source-title "Ticket-131 NM-4 evidence follow-up" `
+  --db data/db/live_research_evidence.sqlite
+# Expected example id: src_044a97ae8419e35a
+
+# 7. Extract claims — mock fixture map (checksum-pinned candidate JSON)
+python -m rge.cli extract-claims --source src_044a97ae8419e35a `
+  --db data/db/live_research_evidence.sqlite
+
+# 8. Reconcile scores — 1 score_events row; example edge 0.5 → 0.62
+python -m rge.cli reconcile-scores --source src_044a97ae8419e35a `
+  --db data/db/live_research_evidence.sqlite --evidence-db-reconcile
+```
+
+**NM-4 evidence DB plan visibility** (ticket-132): read-only spine status in operator
+loop plan mode — no writes.
+
+```powershell
+python -m rge.modules.operator_loop --mode plan
+```
+
+Inspect `nm4_evidence_spine_status` in the JSON output: `evidence_db_path`,
+`spine_stage` (`missing` | `empty` | `partial` | `reconciled`), table counts
+(sources, accepted claims, active relationships, `score_event_count`), and
+`spine_milestones`. When the local evidence DB has completed steps 1–8,
+expect `spine_stage: reconciled` and `score_event_count: 1`.
+
 **Live probe scratch evidence workflow** (local Ollama opt-in; report-only until
 operator persist): use the numbered checklist in
 [`docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md`](docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md)

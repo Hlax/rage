@@ -1,0 +1,38 @@
+{
+  "id": "ticket-134",
+  "title": "Principal audit checkpoint post-ticket-133",
+  "problem": "Tickets 131–133 completed NM-4 evidence DB score reconciliation, operator_loop spine visibility, and README operator quickstart. Three consecutive done tickets since the post-ticket-130 principal audit require a cadence checkpoint before further NM-4 or live-path work.",
+  "evidence": [
+    "agent_reports/2026-06-14_principal-audit-post-ticket-130.md",
+    "agent_reports/2026-06-14_ticket-131_nm-4-evidence-db-score-reconciliation.md",
+    "agent_reports/2026-06-14_ticket-132_operator-loop-nm4-evidence-spine-status.md",
+    "agent_reports/2026-06-14_ticket-133_readme-nm4-evidence-operator-quickstart.md",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-14_principal-audit-post-ticket-133.md"
+  ],
+  "acceptance_criteria": [
+    "Read-only principal audit report written with GO/NO-GO and cadence assessment.",
+    "Reviews NM-4 evidence DB spine (127–133), reconcile guard, and operator_loop visibility.",
+    "No implementation changes to rge/ or apps/ unless audit-only runner/doc patches.",
+    "Recommends smallest next ticket with gate classification."
+  ],
+  "test_plan": [
+    "python -m rge.modules.operator_loop --mode plan",
+    "python -m pytest tests/golden -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "New features.",
+    "Queue ticket implementation.",
+    "Public export/site changes.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove audit report; no code rollback required.",
+  "status": "proposed",
+  "category": "principal audit / cadence checkpoint",
+  "pre_ticket_audit_required": false
+}
