@@ -110,7 +110,8 @@ None.
 
 ## Merge to main
 
-Pending merge.
+Merged to `main` as `ea9a4323421fa096999cf9f08f8732e2fe3e2a16` (2026-06-14).
+Post-merge pytest: 499 passed, 6 deselected.
 
 ## Recommended next ticket
 
