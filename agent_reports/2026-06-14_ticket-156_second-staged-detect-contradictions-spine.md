@@ -99,7 +99,8 @@ Not required — test-only ticket with mocked network and explicit fixtures.
 
 ## Merge to main
 
-*(placeholder — updated after merge)*
+Merged to `main` as `3e792569c80cb8925d2eba1e2cb2667dd9bd9760` (2026-06-14).
+Post-merge pytest: 568 passed, 6 deselected.
 
 ## Recommended next ticket
 
