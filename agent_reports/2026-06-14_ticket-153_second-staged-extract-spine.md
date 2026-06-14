@@ -84,7 +84,8 @@ python -m rge.modules.safety_auditor --audit full                               
 
 ## Merge to main
 
-Placeholder — updated after merge.
+Merged @ **`bdcfe14`** (`Merge branch 'phase-2/ticket-153-second-staged-extract-spine'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
