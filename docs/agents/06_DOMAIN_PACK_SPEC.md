@@ -70,6 +70,20 @@ domain_packs/
       cards.json
 ```
 
+### Runtime loading (NM-5; creativity MVP)
+
+Tickets 113–122 load every YAML file in the creativity pack via `load_domain_pack()`.
+The operator table of pack files, runtime consumers, and overlap-domain claim rules
+is maintained in README **Operator Quickstart**
+(**Creativity domain pack runtime loading (NM-5; tickets 113–122)**). See also
+`AGENTS.md` Operator Loop (**Creativity domain pack runtime loading (NM-5)**).
+
+Candidate claim `domain` labels must appear in `domain.yaml` as `primary_domains` or
+`overlap_domains`. During `extract-claims`, `claim_validator` rejects labels outside
+`allowed_domains_for_pack()` (overlap labels such as `art` are accepted when the
+source pack is `creativity`). Golden mock proof:
+`tests/golden/test_02_claim_extraction_overlap_domain.py`.
+
 ## 4. `domain.yaml`
 
 Defines pack identity and lifecycle.
