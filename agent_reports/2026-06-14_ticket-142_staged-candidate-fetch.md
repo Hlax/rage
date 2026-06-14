@@ -88,7 +88,8 @@ python -m rge.cli fetch-candidate --candidate disc_openalex_W2741809807 `
 
 ## Merge to main
 
-Pending merge.
+Merged to `main` as `a2a3e89e99f7b7574b50ce77e57e6cf30996abdb` (2026-06-14).
+Post-merge pytest: 527 passed, 6 deselected.
 
 ## Recommended next ticket
 
