@@ -162,7 +162,7 @@ superseded
 | 128 | ticket-128 | done | Arbitrary manual live concept linking fall-through | `phase-2/ticket-128-arbitrary-manual-live-concept-linking` | `agent_reports/2026-06-14_ticket-128_arbitrary-manual-live-concept-linking.md` |
 | 129 | ticket-129 | done | Arbitrary manual live relationship fall-through | `phase-2/ticket-129-arbitrary-manual-live-relationship-fallthrough` | `agent_reports/2026-06-14_ticket-129_arbitrary-manual-live-relationship-fallthrough.md` |
 | 130 | ticket-130 | done | Arbitrary manual live contradiction fall-through | `phase-2/ticket-130-arbitrary-manual-live-contradiction-fallthrough` | `agent_reports/2026-06-14_ticket-130_arbitrary-manual-live-contradiction-fallthrough.md` |
-| 131 | ticket-131 | proposed | Arbitrary manual live score reconciliation fall-through | | |
+| 131 | ticket-131 | proposed | NM-4 evidence DB score reconciliation operator proof | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -892,9 +892,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-131 (proposed) — Arbitrary manual live score reconciliation fall-through
-(ticket-059 OpenAI placeholder remains deferred; principal audit due before ticket-131)
+ticket-131 (proposed) — NM-4 evidence DB score reconciliation operator proof
+(ticket-059 OpenAI placeholder remains deferred; pre-ticket-131 audit GO)
 ```
+
+## Queue Notes (2026-06-14, principal audit post-ticket-130)
+
+- Cadence satisfied after post-ticket-130 checkpoint.
+- ticket-131 retargeted: deterministic reconcile-scores on evidence DB (not Ollama).
+- Pre-ticket-131 audit GO; matcher hardening required for live-drafted edges.
+- Next: `/rge-run-next-ticket` for ticket-131.
 
 ## Queue Notes (2026-06-14, ticket-130 agent)
 

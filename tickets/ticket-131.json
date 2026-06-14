@@ -1,12 +1,13 @@
 {
   "id": "ticket-131",
-  "title": "Arbitrary manual live score reconciliation fall-through",
-  "problem": "ticket-130 proved live contradiction detection for arbitrary manual_text sources. NM-4 pipeline still stops before score reconciliation; reconcile-scores uses checksum-pinned mock fixtures for synthnote and has no live fall-through for unmapped manual_text.",
+  "title": "NM-4 evidence DB score reconciliation operator proof",
+  "problem": "Tickets 127–130 proved live Ollama fall-through through contradiction on arbitrary manual_text in the gitignored evidence DB. Score reconciliation is deterministic (no model client) and was only proven on checksum-pinned synthnote mock spines. NM-4 still lacks an operator proof that reconcile-scores writes score_events on the evidence DB after the live spine plus a follow-up manual_text source.",
   "evidence": [
+    "agent_reports/2026-06-14_principal-audit-post-ticket-130.md",
     "agent_reports/2026-06-14_ticket-130_arbitrary-manual-live-contradiction-fallthrough.md",
     "rge/modules/score_reconciler.py",
-    "rge/modules/manual_source_fixtures.py",
-    "fixtures/manual_source_fixture_map.json"
+    "tests/unit/test_manual_score_reconciliation.py",
+    "domain_packs/creativity/scoring.yaml"
   ],
   "affected_modules": [
     "rge/modules/score_reconciler.py",
@@ -15,33 +16,38 @@
   "expected_files": [
     "rge/modules/score_reconciler.py",
     "rge/cli.py",
-    "tests/unit/test_manual_live_fallthrough.py",
-    "agent_reports/2026-06-14_ticket-131_arbitrary-manual-live-score-reconciliation-fallthrough.md"
+    "tests/unit/test_nm4_evidence_score_reconciliation.py",
+    "fixtures/sources/ticket131_nm4_evidence_followup.txt",
+    "agent_reports/2026-06-14_ticket-131_nm-4-evidence-db-score-reconciliation.md"
   ],
   "acceptance_criteria": [
-    "After live extract through detect-contradictions on an unmapped manual_text source (or explicit no-contradiction result), explicit live mode can reconcile scores via Ollama on a follow-up source.",
-    "At least one validated score_events row persists to the gitignored evidence DB.",
-    "Checksum-pinned synthnote mock paths remain deterministic.",
+    "After NM-4 live spine on the gitignored evidence DB, a follow-up manual_text source can be ingested and extracted (live or mock per fixture map), then reconcile-scores produces at least one score_events row.",
+    "Relationship confidence updates per domain-pack score_reconciliation overlay (formula_version, stronger_evidence_boost).",
+    "claim_supports_relationship matching covers the evidence DB graph (live-drafted edges), not only the golden may_reduce/semantic diversity triple.",
+    "Checksum-pinned synthnote mock reconcile path remains deterministic (ticket-099 tests pass).",
     "Golden tests remain mock-only and pass.",
     "Safety audit passes.",
-    "Public export/site untouched."
+    "Public export/site untouched.",
+    "No new Ollama flags or model calls in score_reconciler."
   ],
   "test_plan": [
-    "python -m pytest tests/unit/test_manual_live_fallthrough.py -q",
+    "python -m pytest tests/unit/test_nm4_evidence_score_reconciliation.py -q",
+    "python -m pytest tests/unit/test_manual_score_reconciliation.py -q",
     "python -m pytest tests/golden -q",
     "python -m pytest -q",
     "python -m rge.modules.safety_auditor --audit full"
   ],
   "non_goals": [
+    "Ollama or live LLM in score reconciliation.",
+    "New --live-manual-* fall-through flags on reconcile-scores.",
     "Cloud providers.",
     "Public export/site changes.",
     "Source discovery/fetcher.",
     "Validator weakening.",
-    "Full NM-4 docs chain.",
-    "Public export changes."
+    "Full NM-4 docs chain."
   ],
   "risk_level": "medium",
-  "rollback_plan": "Remove live score reconciliation fall-through flag; retain ticket-127–130 calibration.",
+  "rollback_plan": "Revert evidence DB matcher changes in score_reconciler; retain ticket-127–130 live fall-through.",
   "status": "proposed",
   "category": "product-risk reduction / NM-4 pipeline continuation",
   "pre_ticket_audit_required": true
