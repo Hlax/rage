@@ -1,0 +1,55 @@
+{
+  "id": "ticket-112",
+  "title": "Arbitrary manual text live extraction fall-through",
+  "problem": "NM-1 proved live validated writes via extract-claims-live for one non-fixture source, but the standard manual pipeline still checksum-resolves mock fixtures for synthnote sources and falls through to generic golden fixtures for unknown manual_text in mock mode. Operators need a safe, explicit live fall-through when a manual_text checksum is absent from fixtures/manual_source_fixture_map.json, without weakening golden/mock determinism or allowing accidental live writes to the default graph DB.",
+  "evidence": [
+    "agent_reports/2026-06-14_third-party-repo-direction-audit.md",
+    "agent_reports/2026-06-14_nm-1-real-live-extraction-write-proof.md",
+    "agent_reports/2026-06-14_corrective-nm1-nm2-nm3-main-integration.md",
+    "rge/modules/manual_source_fixtures.py",
+    "rge/modules/claim_extractor.py",
+    "rge/modules/live_extraction_write.py",
+    "fixtures/manual_source_fixture_map.json"
+  ],
+  "affected_modules": [
+    "rge/modules/claim_extractor.py",
+    "rge/modules/live_extraction_write.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/claim_extractor.py",
+    "rge/modules/live_extraction_write.py",
+    "rge/cli.py",
+    "tests/unit/test_manual_live_fallthrough.py",
+    "agent_reports/2026-06-14_ticket-112_arbitrary-manual-live-fallthrough.md"
+  ],
+  "acceptance_criteria": [
+    "A new arbitrary .txt or .md source not in the fixture map can be ingested.",
+    "In explicit live mode, absent fixture checksum falls through to Ollama extraction.",
+    "At least one validated accepted claim is persisted to a gitignored DB.",
+    "At least one rejection is preserved if produced; otherwise report honestly.",
+    "Existing fixture/manual synthnote tests remain deterministic.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes.",
+    "Public export/site are untouched."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_live_fallthrough.py -q",
+    "python -m pytest tests/unit/test_manual_source_pipeline_e2e.py -q",
+    "python -m pytest tests/unit/test_live_extraction_write.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No cloud/OpenAI/OpenRouter providers.",
+    "No public export of live results or public site changes.",
+    "No validator weakening.",
+    "No LangGraph/FastAPI/embedding architecture.",
+    "No replacement of golden test fixtures.",
+    "No automatic internet source discovery."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert claim_extractor live fall-through and CLI flag; extract-claims-live remains available as NM-1 escape hatch.",
+  "status": "proposed"
+}

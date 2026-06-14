@@ -143,6 +143,15 @@ superseded
 | 109 | ticket-109 | done | Cursor build loop manual synthnote pipeline proof test cross-link | `phase-2/ticket-109-cursor-build-loop-manual-synthnote-pipeline-proof-test-crosslink` | `agent_reports/2026-06-14_phase-2_ticket-109_cursor-build-loop-manual-synthnote-pipeline-proof-test-crosslink.md` |
 | 110 | ticket-110 | done | Runtime config manual synthnote pipeline proof test cross-link | `phase-2/ticket-110-runtime-config-manual-synthnote-pipeline-proof-test-crosslink` | `agent_reports/2026-06-14_phase-2_ticket-110_runtime-config-manual-synthnote-pipeline-proof-test-crosslink.md` |
 | 111 | ticket-111 | superseded | README manual synthnote pipeline proof test cross-link | | (folded into NM-2 corrective doc pass) |
+| 112 | ticket-112 | proposed | Arbitrary manual text live extraction fall-through | | |
+
+## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
+
+- Merged `phase-2/corrective-nm1-nm2-nm3-audit-driven` to `main` @ `4a62c99`.
+- Post-merge: 140 golden, 394 pytest, safety audit pass.
+- Ollama `qwen2.5:7b` available; no model pull required.
+- ticket-111 superseded; ticket-112 seeded as NM-4.
+- Pre-ticket audit GO for ticket-112.
 
 ## Queue Notes (2026-06-13, ticket-085 ingestion readiness audit)
 
@@ -864,24 +873,24 @@ superseded
 ## Current Active Ticket
 
 ```txt
-corrective NM-1/NM-2/NM-3 (audit-driven) — supersede ticket-111 as primary work
-ticket-111 (superseded) — README manual synthnote pipeline proof test cross-link
-(ticket-059 OpenAI placeholder remains deferred)
+ticket-112 (proposed) — Arbitrary manual text live extraction fall-through (NM-4)
+(ticket-111 superseded; ticket-059 OpenAI placeholder remains deferred)
 ```
 
 ## Corrective queue override (2026-06-14, third-party audit)
 
 The third-party repo-direction audit (`agent_reports/2026-06-14_third-party-repo-direction-audit.md`)
-directs corrective work **before** ticket-111:
+directed corrective work **before** ticket-111. **Completed and merged to main @ 4a62c99.**
 
 | Move | Status | Notes |
 |------|--------|-------|
-| NM-1 | in_progress | Live validated extraction write (`extract-claims-live`) |
-| NM-2 | in_progress | Honest maturity relabel in README/status docs |
-| NM-3 | in_progress | Value-based cadence gate drift detection |
-| ticket-111 | **superseded** | Folded into NM-2; do not consume another audit cycle |
+| NM-1 | **done** | Live validated extraction write (`extract-claims-live`) |
+| NM-2 | **done** | Honest maturity relabel; ticket-111 superseded |
+| NM-3 | **done** | Value-based cadence gate drift detection |
+| ticket-111 | **superseded** | Folded into NM-2 |
 
-Next product move after corrective pass: **NM-4** (arbitrary manual_text live fall-through).
+Next product move: **ticket-112 / NM-4** (arbitrary manual_text live fall-through).
+Pre-ticket audit: `agent_reports/2026-06-14_pre-ticket-112_arbitrary-manual-live-fallthrough-audit.md` (GO).
 
 ## Queue Rules
 
