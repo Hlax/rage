@@ -11,6 +11,7 @@ from rge.modules.operator_loop import (
     build_operator_plan,
     detect_documentation_git_drift,
     execute_safe_checks,
+    inspect_domain_pack_status,
     inspect_scratch_evidence_status,
     is_audit_only_ticket,
     pending_improvement_tickets,
@@ -790,3 +791,65 @@ def test_evidence_review_deferred_for_open_ticket(tmp_path: Path) -> None:
     plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
 
     assert plan["next_recommended_action"]["action_id"] == "begin_ticket_implementation"
+
+
+def test_plan_includes_domain_pack_status(tmp_path: Path) -> None:
+    from rge.modules.domain_pack_loader import DOMAIN_PACK_OVERLAY_FILES, repo_root
+
+    _seed_queue(tmp_path, "| 126 | ticket-126 | in_progress | domain pack health | | |\n")
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    plan = build_operator_plan(root=repo_root(), working_tree=clean_tree)
+
+    assert "domain_pack_status" in plan
+    status = plan["domain_pack_status"]
+    assert status["pack_id"] == "creativity"
+    assert status["load_status"] == "ok"
+    assert status["identity_status"] == "active"
+    assert status["identity_verification_passes"] is True
+    assert status["identity_violations"] == []
+    assert set(status["loaded_overlay_files"]) == set(DOMAIN_PACK_OVERLAY_FILES)
+    assert status["missing_overlay_files"] == []
+
+
+def test_domain_pack_status_reports_missing_overlays(tmp_path: Path) -> None:
+    pack_root = tmp_path / "domain_packs" / "demo"
+    pack_root.mkdir(parents=True)
+    (pack_root / "domain.yaml").write_text(
+        "id: demo\nname: Demo\nversion: 0.1.0\nstatus: active\n"
+        "summary: demo\nprimary_domains:\n  - demo\n"
+        "overlap_domains: []\nlifecycle_states:\n  - active\n",
+        encoding="utf-8",
+    )
+
+    status = inspect_domain_pack_status(root=tmp_path, pack_id="demo")
+
+    assert status["load_status"] == "incomplete"
+    assert "ontology.yaml" in status["missing_overlay_files"]
+    assert status["loaded_overlay_files"] == ["domain.yaml"]
+    assert status["error"]
+
+
+def test_domain_pack_status_reports_identity_failure(tmp_path: Path) -> None:
+    import shutil
+
+    from rge.modules.domain_pack_loader import DOMAIN_PACK_OVERLAY_FILES, repo_root
+
+    pack_root = tmp_path / "domain_packs" / "demo"
+    creativity_root = repo_root() / "domain_packs" / "creativity"
+    pack_root.mkdir(parents=True)
+    for filename in DOMAIN_PACK_OVERLAY_FILES:
+        if filename == "domain.yaml":
+            domain_text = (creativity_root / filename).read_text(encoding="utf-8")
+            domain_text = domain_text.replace("id: creativity", "id: demo")
+            domain_text = domain_text.replace("status: active", "status: draft")
+            (pack_root / filename).write_text(domain_text, encoding="utf-8")
+        else:
+            shutil.copy2(creativity_root / filename, pack_root / filename)
+
+    status = inspect_domain_pack_status(root=tmp_path, pack_id="demo")
+
+    assert status["load_status"] == "identity_failed"
+    assert status["identity_status"] == "draft"
+    assert status["identity_verification_passes"] is False
+    assert status["identity_violations"]

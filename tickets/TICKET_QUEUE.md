@@ -157,7 +157,8 @@ superseded
 | 123 | ticket-123 | done | README operator quickstart NM-5 domain pack loading summary | `phase-2/ticket-123-readme-nm5-domain-pack-summary` | `agent_reports/2026-06-14_ticket-123_readme-nm5-domain-pack-summary.md` |
 | 124 | ticket-124 | done | AGENTS.md cross-link README NM-5 domain pack section | `phase-2/ticket-124-agents-nm5-crosslink` | `agent_reports/2026-06-14_ticket-124_agents-nm5-crosslink.md` |
 | 125 | ticket-125 | done | Domain pack spec cross-link README NM-5 runtime table | `phase-2/ticket-125-domain-pack-spec-nm5-crosslink` | `agent_reports/2026-06-14_ticket-125_domain-pack-spec-nm5-crosslink.md` |
-| 126 | ticket-126 | proposed | Operator loop plan surfaces domain pack load health | | |
+| 126 | ticket-126 | done | Operator loop plan surfaces domain pack load health | `phase-2/ticket-126-operator-loop-domain-pack-health` | `agent_reports/2026-06-14_ticket-126_operator-loop-domain-pack-health.md` |
+| 127 | ticket-127 | proposed | Arbitrary manual text live extraction fall-through (NM-4 recenter) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -887,9 +888,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-126 (proposed) — Operator loop plan surfaces domain pack load health
+ticket-127 (proposed) — Arbitrary manual text live extraction fall-through (NM-4 recenter)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-126 agent)
+
+- `operator_loop --mode plan` adds read-only `domain_pack_status` for creativity pack.
+- Reports pack id, identity status, loaded/missing overlay files, identity verification.
+- Recenter: tickets 123–125 docs-only; next ticket is NM-4 ticket-127 (pre-ticket audit GO).
+- 37 operator_loop unit tests; 142 golden; 457 pytest; safety audit pass.
+- No more NM-5 docs/operator chain to be seeded.
 
 ## Queue Notes (2026-06-14, ticket-125 agent)
 

@@ -788,6 +788,84 @@ def parse_domain_yaml(path: Path) -> DomainIdentityOverlay:
     )
 
 
+DOMAIN_PACK_OVERLAY_FILES: tuple[str, ...] = (
+    "domain.yaml",
+    "ontology.yaml",
+    "aliases.yaml",
+    "scoring.yaml",
+    "evidence_types.yaml",
+    "claim_schema.yaml",
+    "source_preferences.yaml",
+    "card_templates.yaml",
+    "search_templates.yaml",
+    "safety_notes.yaml",
+)
+
+
+def inspect_domain_pack_load_health(
+    pack_id: str,
+    *,
+    root: Path | None = None,
+) -> dict[str, Any]:
+    """Read-only domain pack overlay presence and identity verification for operators."""
+    project_root = root or _REPO_ROOT
+    pack_root = domain_pack_dir(pack_id, root=project_root)
+    try:
+        rel_pack_dir = pack_root.relative_to(project_root.resolve()).as_posix()
+    except ValueError:
+        rel_pack_dir = pack_root.as_posix()
+
+    loaded: list[str] = []
+    missing: list[str] = []
+    for filename in DOMAIN_PACK_OVERLAY_FILES:
+        if (pack_root / filename).is_file():
+            loaded.append(filename)
+        else:
+            missing.append(filename)
+
+    status: dict[str, Any] = {
+        "pack_id": pack_id,
+        "pack_dir": rel_pack_dir,
+        "pack_dir_exists": pack_root.is_dir(),
+        "identity_status": None,
+        "loaded_overlay_files": loaded,
+        "missing_overlay_files": missing,
+        "identity_verification_passes": False,
+        "identity_violations": [],
+        "load_status": "missing",
+        "error": None,
+    }
+
+    if not pack_root.is_dir():
+        status["error"] = f"domain pack directory not found: {rel_pack_dir}"
+        return status
+
+    if missing:
+        status["load_status"] = "incomplete"
+        status["error"] = (
+            f"missing overlay file(s): {', '.join(missing)}"
+        )
+        return status
+
+    try:
+        pack = load_domain_pack(pack_id, root=project_root)
+    except DomainPackError as exc:
+        status["load_status"] = "error"
+        status["error"] = str(exc)
+        return status
+
+    status["identity_status"] = pack.domain_identity.status
+    violations = verify_pack_identity_for_audit(pack)
+    status["identity_violations"] = violations
+    status["identity_verification_passes"] = len(violations) == 0
+    if violations:
+        status["load_status"] = "identity_failed"
+        status["error"] = "; ".join(violations)
+    else:
+        status["load_status"] = "ok"
+    return status
+
+
 def verify_pack_identity_for_audit(pack: DomainPack) -> list[str]:
     """Return violations when pack identity metadata is inconsistent or inactive."""
     violations: list[str] = []

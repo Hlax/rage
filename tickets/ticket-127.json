@@ -1,0 +1,65 @@
+{
+  "id": "ticket-127",
+  "title": "Arbitrary manual text live extraction fall-through",
+  "problem": "Tickets 123–125 were docs-only; NM-4 fall-through plumbing landed in ticket-112 but live operator proof on arbitrary real text still yielded 0 accepted claims (2 rejected overgeneralized_scope). Product-risk reduction requires arbitrary real text → live Ollama → Python validator → at least one accepted graph row in a gitignored DB, without weakening mock/golden determinism.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-112_arbitrary-manual-live-fallthrough.md",
+    "agent_reports/2026-06-14_pre-ticket-112_arbitrary-manual-live-fallthrough-audit.md",
+    "agent_reports/2026-06-14_ticket-126_operator-loop-domain-pack-health.md",
+    "agent_reports/2026-06-14_principal-audit-post-ticket-125.md",
+    "fixtures/manual_source_fixture_map.json",
+    "rge/modules/claim_extractor.py",
+    "rge/modules/live_extraction_write.py",
+    "tests/unit/test_manual_live_fallthrough.py"
+  ],
+  "affected_modules": [
+    "rge/modules/claim_extractor.py",
+    "rge/modules/live_extraction_write.py",
+    "rge/cli.py",
+    "rge/llm/ollama_client.py"
+  ],
+  "expected_files": [
+    "rge/modules/claim_extractor.py",
+    "rge/modules/live_extraction_write.py",
+    "rge/cli.py",
+    "tests/unit/test_manual_live_fallthrough.py",
+    "agent_reports/2026-06-14_ticket-127_arbitrary-manual-live-fallthrough.md"
+  ],
+  "acceptance_criteria": [
+    "A fresh arbitrary .txt or .md source not in the fixture map can be ingested.",
+    "In explicit live mode, absent fixture checksum falls through to Ollama extraction instead of silently returning no candidates.",
+    "At least one validated accepted claim is persisted to a gitignored DB.",
+    "Rejections are preserved if produced; if none are produced, the report says so honestly.",
+    "Existing fixture/manual synthnote tests remain deterministic.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes.",
+    "Public export/site are untouched.",
+    "Evidence report committed: agent_reports/2026-06-14_ticket-127_arbitrary-manual-live-fallthrough.md"
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_manual_live_fallthrough.py -q",
+    "python -m pytest tests/unit/test_manual_source_pipeline_e2e.py -q",
+    "python -m pytest tests/unit/test_live_extraction_write.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Cloud/OpenAI/OpenRouter.",
+    "Public export of live results.",
+    "Public site changes.",
+    "Broad source discovery/fetcher.",
+    "Playwright/Scrapfly.",
+    "Internet browsing/crawling.",
+    "Weakening validator rules.",
+    "Replacing fixture behavior in golden tests.",
+    "LangGraph/FastAPI/embedding architecture.",
+    "Another NM-5 docs/operator polish chain."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert live calibration or prompt changes; retain ticket-112 fall-through gates.",
+  "status": "proposed",
+  "category": "product-risk reduction / live-research proof",
+  "pre_ticket_audit_required": true,
+  "notes": "Hardened scope: ticket-112 landed --live-manual-fallthrough and mock fail-closed. ticket-127 completes NM-4 by achieving live accepted-claim proof on arbitrary real text (prompt/source calibration if needed), not re-plumbing the fall-through path."
+}
