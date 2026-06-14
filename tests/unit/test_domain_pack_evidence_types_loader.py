@@ -114,6 +114,13 @@ def _write_demo_pack(
         "      - summary\n",
         encoding="utf-8",
     )
+    (pack_dir / "search_templates.yaml").write_text(
+        "queries:\n"
+        "  demo_query:\n"
+        '    template: "demo search template keywords"\n'
+        "    preferred_source_types: [peer_reviewed_empirical]\n",
+        encoding="utf-8",
+    )
     return pack_dir
 
 

@@ -1,0 +1,46 @@
+{
+  "id": "ticket-119",
+  "title": "Domain pack safety_notes.yaml loader proof (NM-5 continuation)",
+  "problem": "Ticket-118 proved search_templates.yaml drives research planner follow-up scoring and contract source_strategy. The creativity pack still has two other declarative files not loaded at runtime. NM-5 requires incremental proof that domain-pack files beyond the eight already loaded are consumed by the engine.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-118_domain-pack-search-templates-loader.md",
+    "domain_packs/creativity/safety_notes.yaml",
+    "rge/modules/safety_auditor.py",
+    "rge/modules/domain_pack_loader.py"
+  ],
+  "affected_modules": [
+    "rge/modules/domain_pack_loader.py",
+    "rge/modules/safety_auditor.py"
+  ],
+  "expected_files": [
+    "rge/modules/domain_pack_loader.py",
+    "rge/modules/safety_auditor.py",
+    "tests/unit/test_domain_pack_safety_notes_loader.py",
+    "agent_reports/2026-06-14_ticket-119_domain-pack-safety-notes-loader.md"
+  ],
+  "acceptance_criteria": [
+    "safety_notes.yaml is loaded for creativity domain pack at runtime.",
+    "At least one existing consumer reads pack-defined safety guidance instead of hardcoded duplicates.",
+    "Temp-pack unit test proves different safety note config changes audit or validation behavior.",
+    "Golden tests and manual synthnote tests remain green in mock mode.",
+    "Safety audit passes.",
+    "No public export/site changes beyond reading pack metadata in auditor."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_domain_pack_safety_notes_loader.py -q",
+    "python -m pytest tests/unit/test_domain_pack_search_templates_loader.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No loading domain.yaml in the same ticket.",
+    "No public site routing or committed JSON changes.",
+    "No cloud providers or live Ollama changes.",
+    "No schema migrations.",
+    "No LangGraph/FastAPI/embeddings work."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert safety_notes loader wiring; restore inline auditor constants.",
+  "status": "proposed"
+}

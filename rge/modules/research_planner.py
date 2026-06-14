@@ -11,6 +11,13 @@ import json
 from pathlib import Path
 from typing import Any
 
+from rge.modules.domain_pack_loader import (
+    DomainPack,
+    load_domain_pack,
+    search_template_topic_signals,
+    source_strategy_from_search_templates,
+)
+
 REASON_OUT_OF_SCOPE = "out_of_scope_topic_drift"
 REASON_ON_SCOPE = "On-scope follow-up aligned with contract concepts."
 REASON_ADJACENT_OUT_OF_SCOPE = "adjacent_out_of_scope_topic"
@@ -96,18 +103,22 @@ def _matches_out_of_scope(question_text: str, out_of_scope_concepts: list[str]) 
     return False
 
 
-def _score_followup(question_text: str, allowed_concepts: list[str]) -> dict[str, float]:
+def _pack_for_contract(contract: dict[str, Any]) -> DomainPack:
+    pack_id = str(contract.get("domain_pack", "creativity")).strip() or "creativity"
+    return load_domain_pack(pack_id)
+
+
+def _score_followup(
+    question_text: str,
+    allowed_concepts: list[str],
+    pack: DomainPack,
+) -> dict[str, float]:
     question = _normalize(question_text)
     topic_signals = 0
     for concept in allowed_concepts:
         if _normalize(concept) in question:
             topic_signals += 1
-    if "divergent prompting" in question:
-        topic_signals += 2
-    if "semantic convergence" in question or "semantic diversity" in question:
-        topic_signals += 1
-    if "originality" in question:
-        topic_signals += 1
+    topic_signals += search_template_topic_signals(pack, question_text)
 
     if topic_signals >= 3:
         return {
@@ -167,7 +178,7 @@ def validate_followup_question(
             "priority_score": 0.0,
         }
 
-    scores = _score_followup(question_text, allowed)
+    scores = _score_followup(question_text, allowed, _pack_for_contract(contract))
     if (
         scores["topic_fit"] >= 0.65
         and scores["evidence_fit"] >= 0.60
@@ -245,7 +256,10 @@ def ensure_golden_contract(conn: Any) -> dict[str, Any]:
     existing = repo.get_by_id(GOLDEN_CONTRACT_ID)
     if existing is not None:
         return existing
-    return repo.insert(GOLDEN_CONTRACT)
+    contract = dict(GOLDEN_CONTRACT)
+    pack = load_domain_pack(str(contract["domain_pack"]))
+    contract["source_strategy"] = source_strategy_from_search_templates(pack)
+    return repo.insert(contract)
 
 
 def create_research_contract(topic: str, domain_pack: str) -> dict[str, Any]:

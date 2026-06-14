@@ -149,7 +149,8 @@ superseded
 | 115 | ticket-115 | done | Domain pack claim_schema.yaml loader proof (NM-5 continuation) | `phase-2/ticket-115-domain-pack-claim-schema-loader` | `agent_reports/2026-06-14_ticket-115_domain-pack-claim-schema-loader.md` |
 | 116 | ticket-116 | done | Domain pack source_preferences.yaml loader proof (NM-5 continuation) | `phase-2/ticket-116-domain-pack-source-preferences-loader` | `agent_reports/2026-06-14_ticket-116_domain-pack-source-preferences-loader.md` |
 | 117 | ticket-117 | done | Domain pack card_templates.yaml loader proof (NM-5 continuation) | `phase-2/ticket-117-domain-pack-card-templates-loader` | `agent_reports/2026-06-14_ticket-117_domain-pack-card-templates-loader.md` |
-| 118 | ticket-118 | proposed | Domain pack search_templates.yaml loader proof (NM-5 continuation) | | |
+| 118 | ticket-118 | done | Domain pack search_templates.yaml loader proof (NM-5 continuation) | `phase-2/ticket-118-domain-pack-search-templates-loader` | `agent_reports/2026-06-14_ticket-118_domain-pack-search-templates-loader.md` |
+| 119 | ticket-119 | proposed | Domain pack safety_notes.yaml loader proof (NM-5 continuation) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -879,9 +880,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-118 (proposed) — Domain pack search_templates.yaml loader proof (NM-5 continuation)
+ticket-119 (proposed) — Domain pack safety_notes.yaml loader proof (NM-5 continuation)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-118 agent)
+
+- Extended `domain_pack_loader` to parse `search_templates.yaml` (query templates + preferred_source_types).
+- `research_planner` follow-up scoring uses pack template keyword overlap; golden contract seeds `source_strategy.search_queries`.
+- 6 new unit tests; 438 pytest pass; safety audit pass.
+- Next: ticket-119 (NM-5 continuation: safety_notes.yaml).
 
 ## Queue Notes (2026-06-14, ticket-117 agent)
 
@@ -952,7 +960,7 @@ directed corrective work **before** ticket-111. **Completed and merged to main @
 | NM-4 / ticket-112 | **done** | Arbitrary manual_text live fall-through |
 | ticket-111 | **superseded** | Folded into NM-2 |
 
-Next product move: **ticket-118** (NM-5 continuation: domain pack search_templates.yaml).
+Next product move: **ticket-119** (NM-5 continuation: domain pack safety_notes.yaml).
 
 ## Queue Rules
 

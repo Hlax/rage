@@ -43,5 +43,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert search_templates loader wiring; restore inline planner constants.",
-  "status": "proposed"
+  "status": "done"
 }
