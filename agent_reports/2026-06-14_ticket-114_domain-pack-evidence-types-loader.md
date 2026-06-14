@@ -89,7 +89,8 @@ Not required — no new CLI surface; behavior covered by unit and golden tests.
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merged `phase-2/ticket-114-domain-pack-evidence-types-loader` to `main` @ `7dc32ca`.
+Pushed to `origin/main`. Pre-ticket audit commit `e85dcc3` included in push.
 
 ## Recommended next ticket
 
