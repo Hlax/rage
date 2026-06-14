@@ -48,7 +48,7 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert evidence DB matcher changes in score_reconciler; retain ticket-127–130 live fall-through.",
-  "status": "proposed",
+  "status": "done",
   "category": "product-risk reduction / NM-4 pipeline continuation",
   "pre_ticket_audit_required": true
 }

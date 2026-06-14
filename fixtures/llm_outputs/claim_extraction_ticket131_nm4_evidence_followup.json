@@ -1,0 +1,29 @@
+{
+  "task_name": "claim_extraction",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "claim_text": "In this songwriting workshop follow-up, AI assistance improved teams' management of time constraints during draft verse completion.",
+      "source_id": "src_placeholder",
+      "chunk_id": "chk_placeholder",
+      "quote_span": "AI assistance reported stronger adherence to time constraints while completing draft verses",
+      "subject": "AI assistance",
+      "predicate": "improved",
+      "object": "time constraint management",
+      "scope": "this songwriting workshop",
+      "evidence_type": "empirical",
+      "confidence": 0.85,
+      "limitations": [
+        "Single workshop replication.",
+        "Short-form songwriting tasks only."
+      ],
+      "domain": "creativity",
+      "domain_metadata": {
+        "track": "human-AI",
+        "creative_phase": "iteration",
+        "measured_dimension": "constraint",
+        "source_credibility_tier": "high"
+      }
+    }
+  ]
+}

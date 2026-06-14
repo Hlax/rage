@@ -11,5 +11,8 @@
   },
   "c5d1add68657e7ece8286c956cc5b3c494a45d33495ceb48927dd6d9ce628a16": {
     "extract_claims": "claim_extraction_manual_synthnote_followup.json"
+  },
+  "044a97ae8419e35a20a8abd645c458e5128660c43eb891cd8c1b52384ad5139e": {
+    "extract_claims": "claim_extraction_ticket131_nm4_evidence_followup.json"
   }
 }

@@ -37,6 +37,86 @@ def _normalize(text: str) -> str:
     return text.strip().casefold()
 
 
+def _concept_label_in_claim(label: str, claim: ClaimRecord) -> bool:
+    normalized = _normalize(label)
+    if not normalized:
+        return False
+    haystacks = (
+        claim.claim_text.casefold(),
+        _normalize(claim.subject or ""),
+        _normalize(claim.object or ""),
+    )
+    return any(normalized in hay for hay in haystacks)
+
+
+def _scope_aligns(claim: ClaimRecord, relationship: dict[str, Any]) -> bool:
+    rel_scope = _normalize(str(relationship.get("scope", "")))
+    if not rel_scope:
+        return True
+    claim_scope = _normalize(claim.scope or "")
+    claim_text = claim.claim_text.casefold()
+    return (
+        rel_scope in claim_text
+        or (claim_scope and rel_scope in claim_scope)
+        or (claim_scope and claim_scope in rel_scope)
+    )
+
+
+def _predicate_supported_by_claim(claim: ClaimRecord, predicate: str) -> bool:
+    pred = _normalize(predicate)
+    text = claim.claim_text.casefold()
+    claim_pred = _normalize(claim.predicate or "")
+    if pred and (pred in text or pred in claim_pred):
+        return True
+    if pred == "supports":
+        support_tokens = (
+            "support",
+            "supported",
+            "reinforc",
+            "confirm",
+            "improv",
+            "strengthen",
+        )
+        return any(token in text for token in support_tokens)
+    if pred == "may_reduce":
+        return "reduce" in text or "reduced" in text or "narrow" in text
+    return False
+
+
+def _matches_golden_may_reduce_diversity(
+    claim: ClaimRecord, relationship: dict[str, Any]
+) -> bool:
+    """Golden Test 8 / synthnote may_reduce semantic diversity edge."""
+    if _normalize(relationship.get("predicate", "")) != GOLDEN_PREDICATE:
+        return False
+    if _normalize(relationship.get("subject_concept", "")) != GOLDEN_SUBJECT:
+        return False
+    if _normalize(relationship.get("object_concept", "")) != GOLDEN_OBJECT:
+        return False
+    text = claim.claim_text.casefold()
+    return "semantic diversity" in text and (
+        "reduced" in text or "reduce" in text
+    )
+
+
+def _claim_supports_active_relationship_edge(
+    claim: ClaimRecord, relationship: dict[str, Any]
+) -> bool:
+    """Match follow-up claims to live-drafted or non-golden active edges."""
+    subject = relationship.get("subject_concept")
+    obj = relationship.get("object_concept")
+    predicate = relationship.get("predicate")
+    if not subject or not obj or not predicate:
+        return False
+    if not _concept_label_in_claim(str(subject), claim):
+        return False
+    if not _concept_label_in_claim(str(obj), claim):
+        return False
+    if not _scope_aligns(claim, relationship):
+        return False
+    return _predicate_supported_by_claim(claim, str(predicate))
+
+
 def is_stronger_supporting_claim(
     claim: ClaimRecord,
     overlay: ScoreReconciliationOverlay | None = None,
@@ -49,17 +129,10 @@ def is_stronger_supporting_claim(
 def claim_supports_relationship(
     claim: ClaimRecord, relationship: dict[str, Any]
 ) -> bool:
-    """Check whether a claim supports an existing may_reduce diversity edge."""
-    if _normalize(relationship.get("predicate", "")) != GOLDEN_PREDICATE:
-        return False
-    if _normalize(relationship.get("subject_concept", "")) != GOLDEN_SUBJECT:
-        return False
-    if _normalize(relationship.get("object_concept", "")) != GOLDEN_OBJECT:
-        return False
-    text = claim.claim_text.casefold()
-    return "semantic diversity" in text and (
-        "reduced" in text or "reduce" in text
-    )
+    """Check whether a claim supports an active relationship edge for reconciliation."""
+    if _matches_golden_may_reduce_diversity(claim, relationship):
+        return True
+    return _claim_supports_active_relationship_edge(claim, relationship)
 
 
 def compute_relationship_score(

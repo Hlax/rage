@@ -1,0 +1,8 @@
+Ticket-131 NM-4 evidence follow-up note.
+
+In a follow-up replication of this songwriting workshop, teams using AI assistance
+reported stronger adherence to time constraints while completing draft verses.
+Independent reviewers rated constraint management higher than in the baseline
+workshop cohort.
+
+Limitations: single workshop replication; short-form songwriting tasks only.
