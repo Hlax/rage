@@ -1570,9 +1570,26 @@ def _cmd_queue_sources(args: argparse.Namespace) -> int:
 def _cmd_reconcile_scores(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.db.repositories import RelationshipRepository, ScoreEventRepository
+    from rge.modules.live_extraction_write import is_default_graph_db, resolve_live_evidence_db
     from rge.modules.score_reconciler import reconcile_scores_for_source
 
-    db_path = Path(args.db) if args.db else None
+    if getattr(args, "evidence_db_reconcile", False):
+        db_path = resolve_live_evidence_db(Path(args.db) if args.db else None)
+        if is_default_graph_db(db_path):
+            payload = {
+                "status": "error",
+                "command": "reconcile-scores",
+                "detail": (
+                    "Refusing NM-4 evidence DB reconcile on the default graph DB. "
+                    "Pass --db data/db/live_research_evidence.sqlite or another "
+                    "explicit gitignored evidence path."
+                ),
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+    else:
+        db_path = Path(args.db) if args.db else None
+
     conn = ensure_database(db_path)
     try:
         result = reconcile_scores_for_source(conn, args.source)
@@ -1587,6 +1604,9 @@ def _cmd_reconcile_scores(args: argparse.Namespace) -> int:
             "score_events": score_events,
             "active_relationships": relationships,
         }
+        if getattr(args, "evidence_db_reconcile", False):
+            payload["evidence_db_reconcile"] = True
+            payload["db_path"] = str(db_path)
         if result.get("skipped"):
             payload["skipped"] = result["skipped"]
         print(json.dumps(payload, indent=2))
@@ -1877,6 +1897,15 @@ def build_parser() -> argparse.ArgumentParser:
     reconcile_parser.add_argument(
         "--db",
         help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    reconcile_parser.add_argument(
+        "--evidence-db-reconcile",
+        action="store_true",
+        help=(
+            "NM-4 operator reconcile on the gitignored evidence DB. Resolves "
+            "data/db/live_research_evidence.sqlite when --db is omitted and "
+            "refuses the default graph DB."
+        ),
     )
     reconcile_parser.set_defaults(func=_cmd_reconcile_scores)
 

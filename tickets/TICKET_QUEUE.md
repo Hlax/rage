@@ -162,7 +162,8 @@ superseded
 | 128 | ticket-128 | done | Arbitrary manual live concept linking fall-through | `phase-2/ticket-128-arbitrary-manual-live-concept-linking` | `agent_reports/2026-06-14_ticket-128_arbitrary-manual-live-concept-linking.md` |
 | 129 | ticket-129 | done | Arbitrary manual live relationship fall-through | `phase-2/ticket-129-arbitrary-manual-live-relationship-fallthrough` | `agent_reports/2026-06-14_ticket-129_arbitrary-manual-live-relationship-fallthrough.md` |
 | 130 | ticket-130 | done | Arbitrary manual live contradiction fall-through | `phase-2/ticket-130-arbitrary-manual-live-contradiction-fallthrough` | `agent_reports/2026-06-14_ticket-130_arbitrary-manual-live-contradiction-fallthrough.md` |
-| 131 | ticket-131 | proposed | NM-4 evidence DB score reconciliation operator proof | | |
+| 131 | ticket-131 | done | NM-4 evidence DB score reconciliation operator proof | `phase-2/ticket-131-nm4-evidence-db-score-reconciliation` | `agent_reports/2026-06-14_ticket-131_nm-4-evidence-db-score-reconciliation.md` |
+| 132 | ticket-132 | proposed | Operator loop NM-4 evidence DB spine status | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -892,9 +893,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-131 (proposed) — NM-4 evidence DB score reconciliation operator proof
-(ticket-059 OpenAI placeholder remains deferred; pre-ticket-131 audit GO)
+ticket-132 (proposed) — Operator loop NM-4 evidence DB spine status
+(ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-131 agent)
+
+- Extended score_reconciler matcher for live-drafted active edges; `--evidence-db-reconcile` on reconcile-scores.
+- Evidence DB operator proof: follow-up reconcile 0.5 → 0.62 on AI assistance → constraint edge; 1 score_events row.
+- 6 nm4 evidence tests; 484 pytest; 142 golden; safety audit pass.
+- NM-4 live spine + deterministic reconcile complete on gitignored evidence DB.
+- Next: ticket-132 (operator_loop evidence spine status, low risk).
 
 ## Queue Notes (2026-06-14, principal audit post-ticket-130)
 

@@ -1,0 +1,43 @@
+{
+  "id": "ticket-132",
+  "title": "Operator loop NM-4 evidence DB spine status",
+  "problem": "ticket-131 completed deterministic score reconciliation on the gitignored evidence DB. Operators running operator_loop --mode plan cannot see whether the NM-4 evidence DB spine (extract through reconcile) has been exercised on the configured evidence path.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-131_nm-4-evidence-db-score-reconciliation.md",
+    "rge/modules/operator_loop.py",
+    "rge/modules/live_extraction_write.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop.py",
+    "agent_reports/2026-06-14_ticket-132_operator-loop-nm4-evidence-spine-status.md"
+  ],
+  "acceptance_criteria": [
+    "operator_loop --mode plan surfaces read-only NM-4 evidence DB spine status (sources, relationships, score_events counts on gitignored evidence path).",
+    "No writes from plan mode.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes.",
+    "Public export/site untouched."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_loop.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "New live LLM flags.",
+    "Public export/site changes.",
+    "Source discovery/fetcher.",
+    "Docs cross-link chain.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove NM-4 evidence spine status block from operator_loop plan output.",
+  "status": "proposed",
+  "category": "operator visibility / NM-4 completion",
+  "pre_ticket_audit_required": false
+}
