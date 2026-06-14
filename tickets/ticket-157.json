@@ -1,0 +1,44 @@
+{
+  "id": "ticket-157",
+  "title": "Reconcile scores on second staged-ingested source (mock spine step)",
+  "problem": "ticket-156 proves detect-contradictions on OpenAlex rank #2. Operators cannot run reconcile-scores on that source with deterministic mock fixtures to continue the Phase 3 multi-candidate spine toward score history.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-156_second-staged-detect-contradictions-spine.md",
+    "rge/modules/score_reconciler.py",
+    "tests/unit/test_staged_ingest_reconcile_spine.py",
+    "tests/unit/test_staged_second_candidate_detect_contradictions_spine.py"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "fixtures/llm_outputs/staged_fetch_second_candidate_reconcile_scores.json",
+    "tests/unit/test_staged_second_candidate_reconcile_spine.py",
+    "agent_reports/2026-06-14_pre-ticket-157_second-staged-reconcile-scores-audit.md",
+    "agent_reports/2026-06-14_ticket-157_second-staged-reconcile-scores-spine.md"
+  ],
+  "acceptance_criteria": [
+    "After ticket-156 spine through detect-contradictions, reconcile-scores on rank #2 source persists at least one score_events row or confidence update from mock fixture.",
+    "Unit test extends second-candidate detect spine through reconcile-scores.",
+    "No live LLM in default pytest collection.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_staged_second_candidate_reconcile_spine.py -q",
+    "python -m pytest tests/unit/test_staged_second_candidate_detect_contradictions_spine.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Live Ollama score reconciliation.",
+    "Cross-source run report.",
+    "Schema migrations.",
+    "Public export/site changes.",
+    "Full research run automation."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove second-candidate reconcile fixture/test; retain ticket-156 detect spine.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / product-risk reduction",
+  "pre_ticket_audit_required": true
+}
