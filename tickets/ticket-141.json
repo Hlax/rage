@@ -1,0 +1,49 @@
+{
+  "id": "ticket-141",
+  "title": "Enqueue discovered candidates to staging research queue",
+  "problem": "ticket-140 ranks discovered OpenAlex candidates in discover-sources JSON only. Operators cannot persist ranked candidates to candidate_sources and research_queue staging tables for operator review before fetch or ingest.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-140_discovered-source-queue-ranking.md",
+    "agent_reports/2026-06-14_pre-ticket-140_discovered-source-queue-ranking-audit.md",
+    "rge/modules/research_queue.py",
+    "docs/agents/05_DATA_MODEL.md"
+  ],
+  "affected_modules": [
+    "rge/cli.py",
+    "rge/modules/source_discovery.py",
+    "rge/modules/research_queue.py"
+  ],
+  "expected_files": [
+    "rge/cli.py",
+    "rge/modules/source_discovery.py",
+    "rge/modules/research_queue.py",
+    "tests/unit/test_discovered_source_queue_enqueue.py",
+    "agent_reports/2026-06-14_ticket-141_discovered-source-queue-enqueue.md"
+  ],
+  "acceptance_criteria": [
+    "discover-sources --rank-only --enqueue --db <path> --question <rq_id> persists ranked candidates to candidate_sources and research_queue (staging only).",
+    "Idempotent re-run per research_question_id and provider_id (no duplicate queue rows).",
+    "No writes to accepted sources or claims tables; no automatic ingest.",
+    "Mocked unit tests only in default pytest collection.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_discovered_source_queue_enqueue.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "PDF/HTML fetch or ingest.",
+    "Playwright/Scrapfly/browser automation.",
+    "Schema migrations.",
+    "Public export/site changes.",
+    "Automatic credibility final decisions without operator review."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove --enqueue path; retain ticket-140 rank-only JSON output.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / product-risk reduction",
+  "pre_ticket_audit_required": true
+}

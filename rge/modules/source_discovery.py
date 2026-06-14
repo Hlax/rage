@@ -71,6 +71,8 @@ def run_discover_sources_command(
     domain_pack: str,
     limit: int,
     health: bool,
+    rank_only: bool = False,
+    reference_year: int | None = None,
 ) -> tuple[dict[str, Any], int]:
     """Execute discover-sources CLI logic with structured JSON responses."""
     if not provider_id:
@@ -132,6 +134,15 @@ def run_discover_sources_command(
         "candidate_count": len(candidates),
         "candidates": candidates,
     }
+    if rank_only:
+        from rge.modules.research_queue import rank_discovered_candidates
+
+        payload["ranked_candidates"] = rank_discovered_candidates(
+            candidates,
+            query=query,
+            domain_pack=domain_pack,
+            reference_year=reference_year,
+        )
     return payload, OK_EXIT_CODE
 
 
