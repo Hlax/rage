@@ -78,7 +78,8 @@ None.
 
 ## Merge to main
 
-Placeholder — updated after merge.
+Merged @ **`0112129`** (`Merge branch 'phase-2/ticket-150-principal-audit-post-ticket-149'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 

@@ -182,7 +182,8 @@ superseded
 | 148 | ticket-148 | done | Reconcile scores on staged-ingested source (mock spine step) | `phase-2/ticket-148-staged-reconcile-scores-spine` | `agent_reports/2026-06-14_ticket-148_staged-reconcile-scores-spine.md` |
 | 149 | ticket-149 | done | Generate run report on staged-ingested source (mock spine step) | `phase-2/ticket-149-staged-run-report-spine` | `agent_reports/2026-06-14_ticket-149_staged-run-report-spine.md` |
 | 150 | ticket-150 | done | Principal audit checkpoint post-ticket-149 (staged Phase 3 spine completion) | `phase-2/ticket-150-principal-audit-post-ticket-149` | `agent_reports/2026-06-14_ticket-150_principal-audit-post-ticket-149.md` |
-| 151 | ticket-151 | proposed | Staged Phase 3 full spine idempotency (mock) | | |
+| 151 | ticket-151 | done | Staged Phase 3 full spine idempotency (mock) | `phase-2/ticket-151-staged-spine-idempotency` | `agent_reports/2026-06-14_ticket-151_staged-spine-idempotency.md` |
+| 152 | ticket-152 | proposed | Second staged candidate fetch and ingest (mock, queue rank #2) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -912,9 +913,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-151 (proposed) — Staged Phase 3 full spine idempotency (mock)
+ticket-152 (proposed) — Second staged candidate fetch and ingest (mock, queue rank #2)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-151 agent)
+
+- Test-forward ticket: no production code changes.
+- 2 idempotency tests: full spine twice + per-command reruns (discover→report).
+- Stable staged counts documented; 558 pytest; 142 golden; safety pass.
+- ticket-152 seeded: second staged candidate fetch/ingest (rank #2).
 
 ## Queue Notes (2026-06-14, ticket-150 agent)
 
