@@ -96,7 +96,8 @@ Mock LLM only. OpenAlex/HTML fetch mocked in unit tests. Domain base seed uses c
 
 ## Merge to main
 
-(placeholder — updated after merge)
+Merged to `main` as `6d2f78da05748f3f3747845e96739cf4b527c1f4` (2026-06-14).
+Post-merge pytest: 549 passed, 6 deselected.
 
 ## Recommended next ticket
 
