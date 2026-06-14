@@ -143,7 +143,8 @@ superseded
 | 109 | ticket-109 | done | Cursor build loop manual synthnote pipeline proof test cross-link | `phase-2/ticket-109-cursor-build-loop-manual-synthnote-pipeline-proof-test-crosslink` | `agent_reports/2026-06-14_phase-2_ticket-109_cursor-build-loop-manual-synthnote-pipeline-proof-test-crosslink.md` |
 | 110 | ticket-110 | done | Runtime config manual synthnote pipeline proof test cross-link | `phase-2/ticket-110-runtime-config-manual-synthnote-pipeline-proof-test-crosslink` | `agent_reports/2026-06-14_phase-2_ticket-110_runtime-config-manual-synthnote-pipeline-proof-test-crosslink.md` |
 | 111 | ticket-111 | superseded | README manual synthnote pipeline proof test cross-link | | (folded into NM-2 corrective doc pass) |
-| 112 | ticket-112 | proposed | Arbitrary manual text live extraction fall-through | | |
+| 112 | ticket-112 | done | Arbitrary manual text live extraction fall-through | `phase-2/ticket-112-arbitrary-manual-live-fallthrough` | `agent_reports/2026-06-14_ticket-112_arbitrary-manual-live-fallthrough.md` |
+| 113 | ticket-113 | proposed | Domain pack scoring.yaml loader proof (NM-5 preview) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -873,9 +874,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-112 (proposed) — Arbitrary manual text live extraction fall-through (NM-4)
-(ticket-111 superseded; ticket-059 OpenAI placeholder remains deferred)
+ticket-113 (proposed) — Domain pack scoring.yaml loader proof (NM-5 preview)
+(ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-112 agent)
+
+- Added `extract-claims --live-manual-fallthrough` for unmapped `manual_text` sources.
+- Mock mode fails closed for unknown manual_text (no generic golden fixture fallback).
+- 6 new unit tests; 400 pytest pass; safety audit pass.
+- Live proof: fall-through works; 0 accepted / 2 rejected on arbitrary source (validator honest).
+- Pre-ticket audit: `agent_reports/2026-06-14_pre-ticket-112_arbitrary-manual-live-fallthrough-audit.md`.
+- Next: ticket-113 (NM-5 preview) requires pre-ticket audit before implementation.
 
 ## Corrective queue override (2026-06-14, third-party audit)
 
@@ -887,10 +897,10 @@ directed corrective work **before** ticket-111. **Completed and merged to main @
 | NM-1 | **done** | Live validated extraction write (`extract-claims-live`) |
 | NM-2 | **done** | Honest maturity relabel; ticket-111 superseded |
 | NM-3 | **done** | Value-based cadence gate drift detection |
+| NM-4 / ticket-112 | **done** | Arbitrary manual_text live fall-through |
 | ticket-111 | **superseded** | Folded into NM-2 |
 
-Next product move: **ticket-112 / NM-4** (arbitrary manual_text live fall-through).
-Pre-ticket audit: `agent_reports/2026-06-14_pre-ticket-112_arbitrary-manual-live-fallthrough-audit.md` (GO).
+Next product move: **ticket-113** (NM-5 preview: domain pack scoring.yaml).
 
 ## Queue Rules
 

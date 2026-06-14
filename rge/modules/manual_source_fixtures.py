@@ -79,3 +79,10 @@ def extract_fixture_for_manual_source(source: Any | None) -> str | None:
     if not checksum:
         return None
     return resolve_manual_source_fixture(str(checksum), "extract_claims")
+
+
+def manual_text_lacks_extract_fixture(source: Any | None) -> bool:
+    """Return True when a manual_text source has no checksum-pinned extract fixture."""
+    if source is None or getattr(source, "source_type", None) != "manual_text":
+        return False
+    return extract_fixture_for_manual_source(source) is None
