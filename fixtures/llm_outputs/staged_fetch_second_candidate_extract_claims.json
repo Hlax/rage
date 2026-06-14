@@ -1,0 +1,40 @@
+{
+  "task_name": "claim_extraction",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "claim_text": "Constraint management improves AI-assisted creative team workflows.",
+      "source_id": "src_placeholder",
+      "chunk_id": "chk_placeholder",
+      "quote_span": "Constraint management improves AI-assisted creative team workflows.",
+      "subject": "Constraint management",
+      "predicate": "improves",
+      "object": "AI-assisted creative team workflows",
+      "scope": "AI-assisted creative team workflows",
+      "evidence_type": "empirical",
+      "confidence": 0.7,
+      "limitations": [
+        "Staged fetch artifact; operator must verify source provenance."
+      ],
+      "domain": "creativity",
+      "domain_metadata": {
+        "measured_dimension": "team workflow"
+      }
+    },
+    {
+      "claim_text": "Constraint management always increases creative output.",
+      "source_id": "src_placeholder",
+      "chunk_id": "chk_placeholder",
+      "quote_span": null,
+      "subject": "Constraint management",
+      "predicate": "increases",
+      "object": "creative output",
+      "scope": "all creative teams",
+      "evidence_type": "empirical",
+      "confidence": 0.9,
+      "limitations": [],
+      "domain": "creativity",
+      "domain_metadata": {}
+    }
+  ]
+}

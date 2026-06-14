@@ -184,7 +184,8 @@ superseded
 | 150 | ticket-150 | done | Principal audit checkpoint post-ticket-149 (staged Phase 3 spine completion) | `phase-2/ticket-150-principal-audit-post-ticket-149` | `agent_reports/2026-06-14_ticket-150_principal-audit-post-ticket-149.md` |
 | 151 | ticket-151 | done | Staged Phase 3 full spine idempotency (mock) | `phase-2/ticket-151-staged-spine-idempotency` | `agent_reports/2026-06-14_ticket-151_staged-spine-idempotency.md` |
 | 152 | ticket-152 | done | Second staged candidate fetch and ingest (mock, queue rank #2) | `phase-2/ticket-152-second-staged-candidate-spine` | `agent_reports/2026-06-14_ticket-152_second-staged-candidate-spine.md` |
-| 153 | ticket-153 | proposed | Extract claims from second staged-ingested source (mock spine step) | | |
+| 153 | ticket-153 | done | Extract claims from second staged-ingested source (mock spine step) | `phase-2/ticket-153-second-staged-extract-spine` | `agent_reports/2026-06-14_ticket-153_second-staged-extract-spine.md` |
+| 154 | ticket-154 | proposed | Link concepts on second staged-ingested source (mock spine step) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -914,9 +915,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-153 (proposed) — Extract claims from second staged-ingested source (mock spine step)
+ticket-154 (proposed) — Link concepts on second staged-ingested source (mock spine step)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-153 agent)
+
+- Test-forward ticket: fixture + extract tests only; explicit `--fixture` binding.
+- Rank #2 extract: 1 accepted, 1 rejected (`missing_quote_span`); scope must match claim_text verbatim.
+- 562 pytest; 142 golden; safety pass.
+- ticket-154 seeded: link-concepts on second staged source.
+- **Principal cadence overdue after this ticket** — run `/rge-principal-audit` before or with ticket-154.
 
 ## Queue Notes (2026-06-14, ticket-152 agent)
 
