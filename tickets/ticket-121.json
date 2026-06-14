@@ -1,0 +1,43 @@
+{
+  "id": "ticket-121",
+  "title": "Wire claim_validator domain checks to pack domain.yaml",
+  "problem": "Ticket-120 loaded domain.yaml and exposed allowed_domains_for_pack(), but claim_validator still does not use pack primary/overlap domains when validating candidate claim domain fields. NM-5 completion should drive at least one validation path from pack identity metadata.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-120_domain-pack-domain-yaml-loader.md",
+    "rge/modules/claim_validator.py",
+    "rge/modules/domain_pack_loader.py"
+  ],
+  "affected_modules": [
+    "rge/modules/claim_validator.py",
+    "rge/modules/domain_pack_loader.py"
+  ],
+  "expected_files": [
+    "rge/modules/claim_validator.py",
+    "tests/unit/test_claim_validator_domain_pack.py",
+    "agent_reports/2026-06-14_ticket-121_claim-validator-domain-pack.md"
+  ],
+  "acceptance_criteria": [
+    "validate_candidate_claim rejects domain values outside pack allowed_domains_for_pack when pack loads.",
+    "Creativity pack allows creativity and overlap domains from domain.yaml.",
+    "Temp-pack unit test proves different primary_domains changes acceptance/rejection.",
+    "Golden tests and manual synthnote tests remain green in mock mode.",
+    "Safety audit passes.",
+    "No public export/site changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_claim_validator_domain_pack.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No multi-pack orchestration beyond creativity MVP path.",
+    "No public site routing or committed JSON changes.",
+    "No cloud providers or live Ollama changes.",
+    "No schema migrations.",
+    "No LangGraph/FastAPI/embeddings work."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert claim_validator domain allowlist wiring; restore implicit creativity-only checks.",
+  "status": "proposed"
+}
