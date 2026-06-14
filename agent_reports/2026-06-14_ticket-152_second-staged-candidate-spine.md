@@ -83,7 +83,8 @@ python -m rge.modules.safety_auditor --audit full                       # pass
 
 ## Merge to main
 
-Placeholder — updated after merge.
+Merged @ **`5b29f72`** (`Merge branch 'phase-2/ticket-152-second-staged-candidate-spine'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
