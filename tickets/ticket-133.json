@@ -33,7 +33,7 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert README NM-4 quickstart section.",
-  "status": "proposed",
+  "status": "done",
   "category": "operator documentation / NM-4 completion",
   "pre_ticket_audit_required": false
 }
