@@ -104,7 +104,8 @@ None.
 
 ## Merge to main
 
-Placeholder — updated after merge.
+Merged @ **`ed2d6d9`** (`Merge branch 'phase-2/ticket-128-arbitrary-manual-live-concept-linking'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
