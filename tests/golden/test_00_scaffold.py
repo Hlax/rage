@@ -105,6 +105,7 @@ def test_cli_top_level_help() -> None:
         "promote-improvement-ticket",
         "export-public",
         "model-health",
+        "discover-sources",
         "probe-extract-claims",
         "verify",
     ):
