@@ -59,9 +59,10 @@ None.
 
 ## Merge
 
-- Implementation SHA: _pending_
-- Merge commit: _pending_
-- Pushed: _pending_
+- Implementation SHA: `cf4fa19`
+- Merge commit: `16a5e66`
+- Pushed: `main -> main`
+- Full pytest: **385 passed**, 6 `live_smoke` deselected
 
 ## Principal audit cadence note
 
