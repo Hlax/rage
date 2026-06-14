@@ -87,7 +87,8 @@ python -m rge.modules.safety_auditor --audit full                   # pass
 
 ## Merge to main
 
-Placeholder — updated after merge.
+Merged @ **`f20854d`** (`Merge branch 'phase-2/ticket-151-staged-spine-idempotency'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
