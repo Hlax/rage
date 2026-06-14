@@ -181,7 +181,8 @@ superseded
 | 147 | ticket-147 | done | Detect contradictions on staged-ingested source (mock spine step) | `phase-2/ticket-147-staged-detect-contradictions-spine` | `agent_reports/2026-06-14_ticket-147_staged-detect-contradictions-spine.md` |
 | 148 | ticket-148 | done | Reconcile scores on staged-ingested source (mock spine step) | `phase-2/ticket-148-staged-reconcile-scores-spine` | `agent_reports/2026-06-14_ticket-148_staged-reconcile-scores-spine.md` |
 | 149 | ticket-149 | done | Generate run report on staged-ingested source (mock spine step) | `phase-2/ticket-149-staged-run-report-spine` | `agent_reports/2026-06-14_ticket-149_staged-run-report-spine.md` |
-| 150 | ticket-150 | proposed | Principal audit checkpoint post-ticket-149 (staged Phase 3 spine completion) | | |
+| 150 | ticket-150 | done | Principal audit checkpoint post-ticket-149 (staged Phase 3 spine completion) | `phase-2/ticket-150-principal-audit-post-ticket-149` | `agent_reports/2026-06-14_ticket-150_principal-audit-post-ticket-149.md` |
+| 151 | ticket-151 | proposed | Staged Phase 3 full spine idempotency (mock) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -911,9 +912,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-150 (proposed) — Principal audit checkpoint post-ticket-149 (staged Phase 3 spine completion)
+ticket-151 (proposed) — Staged Phase 3 full spine idempotency (mock)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-150 agent)
+
+- Principal audit checkpoint post-ticket-149: **GO** (`agent_reports/2026-06-14_principal-audit-post-ticket-149.md`).
+- Cadence satisfied (13 done tickets since post-136); 142 golden, 556 pytest, safety pass.
+- ticket-151 seeded: staged Phase 3 full spine idempotency (product-risk priority #1).
 
 ## Queue Notes (2026-06-14, ticket-149 agent)
 

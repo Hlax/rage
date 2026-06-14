@@ -1,0 +1,42 @@
+{
+  "id": "ticket-151",
+  "title": "Staged Phase 3 full spine idempotency (mock)",
+  "problem": "Tickets 144–149 prove each staged spine step individually and generate-run-report is idempotent in isolation. Operators lack a single unit test proving re-running discover→report on the same DB does not duplicate rows across the full Phase 3 mock spine.",
+  "evidence": [
+    "agent_reports/2026-06-14_principal-audit-post-ticket-149.md",
+    "tests/unit/test_manual_source_pipeline_idempotency.py",
+    "tests/unit/test_staged_ingest_run_report_spine.py"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "tests/unit/test_staged_ingest_idempotency.py",
+    "agent_reports/2026-06-14_pre-ticket-151_staged-spine-idempotency-audit.md",
+    "agent_reports/2026-06-14_ticket-151_staged-spine-idempotency.md"
+  ],
+  "acceptance_criteria": [
+    "Unit test runs full staged mock spine (discover through generate-run-report) twice on the same DB and asserts stable row counts.",
+    "Per-command re-run idempotency test covers discover, fetch, ingest-staged, extract, link, build, detect, reconcile, and generate-run-report.",
+    "No live LLM or live network in default pytest collection.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_staged_ingest_idempotency.py -q",
+    "python -m pytest tests/unit/test_staged_ingest_*_spine.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Live Ollama or live OpenAlex network.",
+    "Public export/site changes.",
+    "Schema migrations.",
+    "Second candidate fetch (ticket-152).",
+    "Full research run orchestration."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove staged idempotency test file; retain ticket-149 run-report spine.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / product-risk reduction",
+  "pre_ticket_audit_required": true
+}
