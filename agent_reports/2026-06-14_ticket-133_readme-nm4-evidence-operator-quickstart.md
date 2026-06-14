@@ -79,7 +79,8 @@ None.
 
 ## Merge to main
 
-Pending merge.
+Merged @ **`2793896`** (`Merge branch 'phase-2/ticket-133-readme-nm4-evidence-operator-quickstart'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
