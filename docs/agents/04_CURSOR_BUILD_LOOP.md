@@ -199,6 +199,14 @@ for steps 6–8 (follow-up ingest → extract-claims → reconcile-scores; expec
 `fixtures/sources/manual_synthnote_followup.txt`. See also `AGENTS.md` Operator Loop
 and `docs/agents/11_AGENT_OPERATING_PROTOCOL.md` Operator Loop.
 
+**Manual synthnote pipeline proof tests** (mock LLM; tickets 092–093, 105–106):
+automated validation lives in `tests/unit/test_manual_source_pipeline_e2e.py`
+(full spine through reconcile-scores) and
+`tests/unit/test_manual_source_pipeline_idempotency.py` (spine and reconcile
+re-run idempotency). Run with `RGE_LLM_MODE=mock`; no Ollama required. See also
+`AGENTS.md` Operator Loop and
+`docs/agents/11_AGENT_OPERATING_PROTOCOL.md` Operator Loop.
+
 ## 8. Build Phases
 
 ### Phase 0: Repo scaffold
