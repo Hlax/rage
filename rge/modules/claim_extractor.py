@@ -49,6 +49,11 @@ def _is_creativity_diversity_chunk(chunk_text: str) -> bool:
     )
 
 
+def _is_staged_fetch_spine_chunk(chunk_text: str) -> bool:
+    lowered = chunk_text.casefold()
+    return "human-ai co-creativity" in lowered and "songwriting" in lowered
+
+
 def _pipeline_model_client(config=None):
     cfg = config if config is not None else load_config()
     return get_model_client(cfg, mode=effective_llm_mode(cfg))
@@ -103,6 +108,8 @@ def _default_fixture_for_chunk(chunk: dict[str, Any]) -> str:
     chunk_text = chunk.get("chunk_text", "")
     if source_text_has_prompt_injection_fixture(chunk_text):
         return "claim_extraction_prompt_injection.json"
+    if _is_staged_fetch_spine_chunk(chunk_text):
+        return "staged_fetch_extract_claims.json"
     if _is_creativity_diversity_chunk(chunk_text):
         return "claim_extraction_creativity_scoped.json"
     return "claim_extraction_valid_and_missing_quote.json"

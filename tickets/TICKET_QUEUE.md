@@ -175,7 +175,8 @@ superseded
 | 141 | ticket-141 | done | Enqueue discovered candidates to staging research queue | `phase-2/ticket-141-discovered-source-queue-enqueue` | `agent_reports/2026-06-14_ticket-141_discovered-source-queue-enqueue.md` |
 | 142 | ticket-142 | done | Fetch staged candidate source from queue URL | `phase-2/ticket-142-staged-candidate-fetch` | `agent_reports/2026-06-14_ticket-142_staged-candidate-fetch.md` |
 | 143 | ticket-143 | done | Ingest from staged fetch artifact path | `phase-2/ticket-143-staged-artifact-ingest` | `agent_reports/2026-06-14_ticket-143_staged-artifact-ingest.md` |
-| 144 | ticket-144 | proposed | Extract claims from staged-ingested source (mock spine step) | | |
+| 144 | ticket-144 | done | Extract claims from staged-ingested source (mock spine step) | `phase-2/ticket-144-staged-ingest-extract-spine` | `agent_reports/2026-06-14_ticket-144_staged-ingest-extract-spine.md` |
+| 145 | ticket-145 | proposed | Link concepts on staged-ingested source (mock spine step) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -905,17 +906,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-144 (proposed) — Extract claims from staged-ingested source (mock spine step)
+ticket-145 (proposed) — Link concepts on staged-ingested source (mock spine step)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-14, ticket-143 agent)
+## Queue Notes (2026-06-14, ticket-144 agent)
 
-- `ingest-staged` CLI ingests ticket-142 artifacts into sources/chunks with checksum verify.
-- HTML minimal text extraction; idempotent via ingest_local_source checksum.
-- 9 unit tests; 536 pytest; 142 golden; safety audit pass.
-- ticket-144 seeded: mock extract-claims spine after ingest-staged.
-- Next: pre-ticket-144 audit then ticket-144 implementation.
+- Mock fixture `staged_fetch_extract_claims.json` + auto-select in claim_extractor.
+- E2E unit test: discover enqueue → fetch → ingest-staged → extract-claims.
+- 4 spine tests; 540 pytest; 142 golden; safety audit pass.
+- ticket-145 seeded: link-concepts on staged source.
+- Next: pre-ticket-145 audit then ticket-145 implementation.
 
 ## Queue Notes (2026-06-14, ticket-137 agent)
 
