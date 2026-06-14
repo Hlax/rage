@@ -1,0 +1,35 @@
+{
+  "id": "ticket-124",
+  "title": "AGENTS.md cross-link README NM-5 domain pack section",
+  "problem": "Ticket-123 documented NM-5 domain pack runtime loading in README Operator Quickstart, but AGENTS.md operator spine does not point operators to the pack file table or overlap-domain claim rules.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-123_readme-nm5-domain-pack-summary.md",
+    "AGENTS.md",
+    "README.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "AGENTS.md",
+    "agent_reports/2026-06-14_ticket-124_agents-nm5-crosslink.md"
+  ],
+  "acceptance_criteria": [
+    "AGENTS.md Operator Quickstart references README NM-5 domain pack section.",
+    "AGENTS.md lists overlap-domain claim label rule in one sentence with README link.",
+    "No code or test changes.",
+    "Golden tests and full pytest remain green.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "No README content duplication beyond a short AGENTS.md pointer.",
+    "No pack loader or validator code changes.",
+    "No public site or schema changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert AGENTS.md cross-link paragraph.",
+  "status": "proposed"
+}

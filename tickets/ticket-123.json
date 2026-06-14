@@ -32,5 +32,5 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert README section additions.",
-  "status": "proposed"
+  "status": "done"
 }

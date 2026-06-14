@@ -200,6 +200,33 @@ Re-running any step is idempotent (stable row counts). Fixture filenames resolve
 only — not arbitrary-source live extraction). Use `--db <path>` to target a non-default
 SQLite file. Golden fixture sources still pass explicit `--fixture` flags and are unchanged.
 
+**Creativity domain pack runtime loading (NM-5; tickets 113–122):** `load_domain_pack("creativity")`
+loads every YAML overlay under `domain_packs/creativity/`. Domain-specific validation,
+scoring, and export rules come from these files — not hardcoded creativity fields in
+core engine modules.
+
+| Pack file | Loaded at runtime | Primary consumer |
+| --- | --- | --- |
+| `domain.yaml` | yes | pack identity; `claim_validator` domain allowlist |
+| `ontology.yaml` | yes | concept linking (canonical labels) |
+| `aliases.yaml` | yes | concept linking (phrase → canonical) |
+| `scoring.yaml` | yes | score reconciliation / relationship scoring |
+| `evidence_types.yaml` | yes | `claim_validator` evidence_type allowlist |
+| `claim_schema.yaml` | yes | `concept_linker` `domain_metadata` allowlists |
+| `source_preferences.yaml` | yes | research queue credibility priors |
+| `card_templates.yaml` | yes | public export template field checks |
+| `search_templates.yaml` | yes | research planner follow-up query scoring |
+| `safety_notes.yaml` | yes | full safety audit domain guidance themes |
+
+**Overlap-domain claim labels:** candidate claims may use `domain` values declared in
+`domain.yaml` as `primary_domains` or `overlap_domains`. For creativity that includes
+`creativity`, `art`, `design`, `film`, `music`, and `digital_media`. During
+`extract-claims`, the pipeline passes `source.domain` (the pack id, e.g. `creativity`)
+into validation; `claim_validator` rejects candidate `domain` labels outside
+`allowed_domains_for_pack()`. Out-of-scope labels fail with `unsupported_claim`.
+Golden mock proof: `tests/golden/test_02_claim_extraction_overlap_domain.py` and fixture
+`fixtures/llm_outputs/claim_extraction_overlap_domain_art.json`.
+
 **Live validated extraction write** (NM-1; local Ollama; operator opt-in): prove real
 inference on a source **not** in the checksum fixture map. Writes only to an explicit
 gitignored evidence DB — never the default graph DB or public export.
