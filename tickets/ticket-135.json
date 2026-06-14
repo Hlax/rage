@@ -1,0 +1,41 @@
+{
+  "id": "ticket-135",
+  "title": "README maturity table honest NM-4 relabel",
+  "problem": "Principal audit post-ticket-133 found README Current Status still labels Arbitrary-source pipeline as pending (NM-4) while Operator Quickstart documents a complete NM-4 evidence DB spine (tickets 127–133). External maturity claims must distinguish evidence DB proofs from default graph synthnote mock path and pending source discovery.",
+  "evidence": [
+    "agent_reports/2026-06-14_principal-audit-post-ticket-133.md",
+    "agent_reports/2026-06-14_pre-ticket-135_readme-maturity-nm4-relabel-audit.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "README.md",
+    "AGENTS.md",
+    "agent_reports/2026-06-14_ticket-135_readme-maturity-nm4-relabel.md"
+  ],
+  "acceptance_criteria": [
+    "README Current Status distinguishes evidence DB NM-4 spine (127–133) from default graph synthnote checksum-mock path.",
+    "README labels source discovery/fetcher as still pending (Phase 3).",
+    "AGENTS.md maturity bullets aligned with README (no full rewrite).",
+    "No code or schema changes.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "New CLI flags.",
+    "Public export/site changes.",
+    "Full docs/agents cross-link chain.",
+    "Claiming NM-4 on default graph DB or public site."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README and AGENTS maturity table/bullet changes.",
+  "status": "done",
+  "category": "operator documentation / maturity honesty",
+  "pre_ticket_audit_required": false
+}

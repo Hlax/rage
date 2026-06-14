@@ -1,0 +1,36 @@
+{
+  "id": "ticket-136",
+  "title": "Canonical context maturity NM-4 alignment",
+  "problem": "ticket-135 updated README and AGENTS maturity framing for NM-4 evidence DB completion. docs/agents/01_RESEARCH_GRAPH_ENGINE_CANONICAL_CONTEXT_v1.md may still describe NM-4 or arbitrary-source pipeline as pending without the evidence DB vs default graph DB distinction.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-135_readme-maturity-nm4-relabel.md",
+    "docs/agents/01_RESEARCH_GRAPH_ENGINE_CANONICAL_CONTEXT_v1.md",
+    "README.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "docs/agents/01_RESEARCH_GRAPH_ENGINE_CANONICAL_CONTEXT_v1.md",
+    "agent_reports/2026-06-14_ticket-136_canonical-context-maturity-nm4-alignment.md"
+  ],
+  "acceptance_criteria": [
+    "Canonical context doc maturity section matches README/AGENTS NM-4 evidence DB vs synthnote mock vs source discovery pending framing.",
+    "No code or schema changes.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Full docs/agents cross-link chain.",
+    "Public export/site changes.",
+    "New CLI flags."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert canonical context maturity section edits.",
+  "status": "proposed",
+  "category": "operator documentation / maturity honesty",
+  "pre_ticket_audit_required": false
+}
