@@ -56,6 +56,10 @@ def _resolve_diversity_claim_id(claim_dicts: list[dict[str, Any]]) -> str | None
     for claim in claim_dicts:
         if DIVERSITY_CLAIM_FRAGMENT in claim.get("claim_text", ""):
             return claim["id"]
+    for claim in claim_dicts:
+        lowered = str(claim.get("claim_text") or "").casefold()
+        if "human-ai co-creativity" in lowered and "songwriting" in lowered:
+            return claim["id"]
     return claim_dicts[0]["id"] if claim_dicts else None
 
 
@@ -192,12 +196,21 @@ def _pipeline_model_client(config=None):
     return get_model_client(cfg, mode=effective_llm_mode(cfg))
 
 
+def _is_staged_fetch_spine_source(source: Any | None) -> bool:
+    if source is None:
+        return False
+    title = str(getattr(source, "title", "") or "").casefold()
+    return "human-ai co-creativity" in title and "songwriting" in title
+
+
 def _default_relationship_fixture_for_source(source: Any | None) -> str:
     mapped = relationship_fixture_for_manual_source(source)
     if mapped:
         return mapped
     if manual_text_lacks_relationship_fixture(source):
         raise ValueError(_MANUAL_TEXT_NO_RELATIONSHIP_FIXTURE_ERROR)
+    if _is_staged_fetch_spine_source(source):
+        return "staged_fetch_build_relationships.json"
     return "relationship_drafting_creativity_diversity.json"
 
 

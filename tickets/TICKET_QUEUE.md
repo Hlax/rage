@@ -177,7 +177,8 @@ superseded
 | 143 | ticket-143 | done | Ingest from staged fetch artifact path | `phase-2/ticket-143-staged-artifact-ingest` | `agent_reports/2026-06-14_ticket-143_staged-artifact-ingest.md` |
 | 144 | ticket-144 | done | Extract claims from staged-ingested source (mock spine step) | `phase-2/ticket-144-staged-ingest-extract-spine` | `agent_reports/2026-06-14_ticket-144_staged-ingest-extract-spine.md` |
 | 145 | ticket-145 | done | Link concepts on staged-ingested source (mock spine step) | `phase-2/ticket-145-staged-ingest-link-spine` | `agent_reports/2026-06-14_ticket-145_staged-ingest-link-spine.md` |
-| 146 | ticket-146 | proposed | Build relationships on staged-ingested source (mock spine step) | | |
+| 146 | ticket-146 | done | Build relationships on staged-ingested source (mock spine step) | `phase-2/ticket-146-staged-build-relationships-spine` | `agent_reports/2026-06-14_ticket-146_staged-build-relationships-spine.md` |
+| 147 | ticket-147 | proposed | Detect contradictions on staged-ingested source (mock spine step) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -907,11 +908,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-146 (proposed) — Build relationships on staged-ingested source (mock spine step)
+ticket-147 (proposed) — Detect contradictions on staged-ingested source (mock spine step)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-14, ticket-145 agent)
+## Queue Notes (2026-06-14, ticket-146 agent)
+
+- Mock fixture `staged_fetch_build_relationships.json` + staged title heuristic in relationship_builder.
+- E2E unit test: discover enqueue → fetch → ingest-staged → extract → link → build-relationships.
+- Relationship: co-creation may_increase semantic diversity (songwriting workshops, supports).
+- 3 spine tests; 546 pytest; 142 golden; safety audit pass.
+- ticket-147 seeded: detect-contradictions on staged source.
+- Next: pre-ticket-147 audit then ticket-147 implementation.
 
 - Mock fixture `staged_fetch_link_concepts.json` + staged title heuristic in concept_linker.
 - E2E unit test: discover enqueue → fetch → ingest-staged → extract → link-concepts.
