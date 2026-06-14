@@ -10,26 +10,40 @@ from __future__ import annotations
 from typing import Any
 
 from rge.db.repositories import ClaimRecord
-
-FORMULA_VERSION = "golden_v0.1.0"
-STRONGER_SOURCE_BOOST = 0.12
-STRONGER_SOURCE_REASON = (
-    "New supporting empirical claim from higher-credibility source."
+from rge.modules.domain_pack_loader import (
+    ScoreReconciliationOverlay,
+    load_domain_pack,
 )
-STRONGER_CLAIM_CONFIDENCE_THRESHOLD = 0.8
 
 GOLDEN_SUBJECT = "ai assistance"
 GOLDEN_OBJECT = "semantic diversity"
 GOLDEN_PREDICATE = "may_reduce"
+
+_creativity_overlay = load_domain_pack("creativity").score_reconciliation
+FORMULA_VERSION = _creativity_overlay.formula_version
+STRONGER_SOURCE_BOOST = _creativity_overlay.stronger_evidence_boost
+STRONGER_SOURCE_REASON = _creativity_overlay.stronger_source_reason
+STRONGER_CLAIM_CONFIDENCE_THRESHOLD = (
+    _creativity_overlay.stronger_claim_confidence_threshold
+)
+
+
+def _overlay_for_domain(domain: str | None) -> ScoreReconciliationOverlay:
+    pack_id = (domain or "creativity").strip() or "creativity"
+    return load_domain_pack(pack_id).score_reconciliation
 
 
 def _normalize(text: str) -> str:
     return text.strip().casefold()
 
 
-def is_stronger_supporting_claim(claim: ClaimRecord) -> bool:
+def is_stronger_supporting_claim(
+    claim: ClaimRecord,
+    overlay: ScoreReconciliationOverlay | None = None,
+) -> bool:
     """Deterministic gate for Golden Test 8 stronger follow-up evidence."""
-    return float(claim.confidence) >= STRONGER_CLAIM_CONFIDENCE_THRESHOLD
+    active = overlay or _creativity_overlay
+    return float(claim.confidence) >= active.stronger_claim_confidence_threshold
 
 
 def claim_supports_relationship(
@@ -48,11 +62,16 @@ def claim_supports_relationship(
     )
 
 
-def compute_relationship_score(old_score: float, claim: ClaimRecord) -> float:
+def compute_relationship_score(
+    old_score: float,
+    claim: ClaimRecord,
+    overlay: ScoreReconciliationOverlay | None = None,
+) -> float:
     """Deterministic score update for stronger supporting evidence."""
-    if not is_stronger_supporting_claim(claim):
+    active = overlay or _creativity_overlay
+    if not is_stronger_supporting_claim(claim, overlay=active):
         return old_score
-    return round(min(1.0, old_score + STRONGER_SOURCE_BOOST), 2)
+    return round(min(1.0, old_score + active.stronger_evidence_boost), 2)
 
 
 def reconcile_scores_for_source(conn: Any, source_id: str) -> dict[str, Any]:
@@ -96,7 +115,9 @@ def reconcile_scores_for_source(conn: Any, source_id: str) -> dict[str, Any]:
                     }
                 )
                 continue
-            if not is_stronger_supporting_claim(claim):
+            if not is_stronger_supporting_claim(
+                claim, overlay=_overlay_for_domain(relationship.get("domain"))
+            ):
                 skipped.append(
                     {
                         "relationship_id": relationship["id"],
@@ -106,8 +127,9 @@ def reconcile_scores_for_source(conn: Any, source_id: str) -> dict[str, Any]:
                 )
                 continue
 
+            overlay = _overlay_for_domain(relationship.get("domain"))
             old_score = float(relationship["confidence"])
-            new_score = compute_relationship_score(old_score, claim)
+            new_score = compute_relationship_score(old_score, claim, overlay=overlay)
             if new_score <= old_score:
                 skipped.append(
                     {
@@ -130,8 +152,8 @@ def reconcile_scores_for_source(conn: Any, source_id: str) -> dict[str, Any]:
                 new_score=new_score,
                 triggering_claim_id=claim.id,
                 triggering_source_id=claim.source_id,
-                reason=STRONGER_SOURCE_REASON,
-                formula_version=FORMULA_VERSION,
+                reason=overlay.stronger_source_reason,
+                formula_version=overlay.formula_version,
                 add_evidence=needs_evidence,
                 evidence_relevance_score=new_score,
             )
@@ -161,21 +183,24 @@ def reconcile_scores_for_source(conn: Any, source_id: str) -> dict[str, Any]:
 
 def reconcile_scores(new_claims: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Legacy entry point for module contract checks."""
+    overlay = _creativity_overlay
     results: list[dict[str, Any]] = []
     for claim in new_claims:
         old_score = float(claim.get("relationship_old_score", 0.52))
         confidence = float(claim.get("confidence", 0.0))
-        if confidence < STRONGER_CLAIM_CONFIDENCE_THRESHOLD:
+        if confidence < overlay.stronger_claim_confidence_threshold:
             continue
-        new_score = round(min(1.0, old_score + STRONGER_SOURCE_BOOST), 2)
+        new_score = round(
+            min(1.0, old_score + overlay.stronger_evidence_boost), 2
+        )
         if new_score > old_score:
             results.append(
                 {
                     "old_score": old_score,
                     "new_score": new_score,
                     "triggering_claim_id": claim.get("id"),
-                    "reason": STRONGER_SOURCE_REASON,
-                    "formula_version": FORMULA_VERSION,
+                    "reason": overlay.stronger_source_reason,
+                    "formula_version": overlay.formula_version,
                 }
             )
     return results

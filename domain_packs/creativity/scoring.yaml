@@ -15,3 +15,10 @@ claim_scoring_overlay:
     mixed_methods_support: 0.05
   contradiction_handling:
     metric_difference_should_qualify_not_flatten: true
+
+score_reconciliation:
+  formula_version: golden_v0.1.0
+  stronger_evidence_boost: 0.12
+  stronger_claim_confidence_threshold: 0.8
+  stronger_source_reason: >-
+    New supporting empirical claim from higher-credibility source.
