@@ -115,7 +115,8 @@ None.
 
 ## Merge to main
 
-Pending merge (placeholder updated after merge).
+Merged @ **`a103ff5`** (`Merge branch 'phase-2/ticket-131-nm4-evidence-db-score-reconciliation'`).
+Pushed to `origin/main`.
 
 ## Recommended next ticket
 
