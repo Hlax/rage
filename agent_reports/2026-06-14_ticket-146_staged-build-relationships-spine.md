@@ -97,7 +97,8 @@ public export, public site, live Ollama, or real network calls.
 
 ## Merge to main
 
-(placeholder — updated after merge)
+Merged to `main` as `f3831be133ad08d57cda658132bbe3913bbbc3e8` (2026-06-14).
+Post-merge pytest: 546 passed, 6 deselected.
 
 ## Recommended next ticket
 
