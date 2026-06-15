@@ -68,7 +68,7 @@ python -m rge.modules.operator_autocycle --mode plan --max-cycles 10
 
 ## Merge to main
 
-Pending merge (see post-merge commit for hash).
+Merged to `main` as `77bdeed` (2026-06-15). Follow-up fix: `1934755`.
 
 ## Recommended next ticket
 
