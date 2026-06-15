@@ -1,0 +1,53 @@
+{
+  "id": "ticket-195",
+  "title": "Fix live staged pytest candidate ordering column",
+  "problem": "ticket-193 fixed orchestrator candidate selection to ORDER BY priority_score DESC, but per-step live_network tests still query ORDER BY rank ASC on candidate_sources (no rank column). Live operator runs would fail at candidate selection.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-193_live-staged-orchestrator-mock-spine.md",
+    "rge/cli.py _staged_rank_candidate_ids",
+    "tests/unit/test_live_staged_report_mock_spine.py"
+  ],
+  "affected_modules": [
+    "tests/unit/test_live_staged_fetch_validation.py",
+    "tests/unit/test_live_staged_ingest_validation.py",
+    "tests/unit/test_live_staged_extract_mock_spine.py",
+    "tests/unit/test_live_staged_link_mock_spine.py",
+    "tests/unit/test_live_staged_build_mock_spine.py",
+    "tests/unit/test_live_staged_detect_mock_spine.py",
+    "tests/unit/test_live_staged_reconcile_mock_spine.py",
+    "tests/unit/test_live_staged_report_mock_spine.py",
+    "tests/unit/test_live_staged_rank2_report_mock_spine.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_live_staged_fetch_validation.py",
+    "tests/unit/test_live_staged_ingest_validation.py",
+    "tests/unit/test_live_staged_extract_mock_spine.py",
+    "tests/unit/test_live_staged_link_mock_spine.py",
+    "tests/unit/test_live_staged_build_mock_spine.py",
+    "tests/unit/test_live_staged_detect_mock_spine.py",
+    "tests/unit/test_live_staged_reconcile_mock_spine.py",
+    "tests/unit/test_live_staged_report_mock_spine.py",
+    "tests/unit/test_live_staged_rank2_report_mock_spine.py",
+    "agent_reports/2026-06-15_ticket-195_live-staged-candidate-ordering-fix.md"
+  ],
+  "acceptance_criteria": [
+    "All live staged tests use priority_score DESC (or equivalent) for candidate ordering.",
+    "Default pytest collection unchanged.",
+    "Golden pass.",
+    "Safety audit pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Schema migrations.",
+    "CI live network.",
+    "Public export/site."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert test SQL ordering changes.",
+  "status": "proposed",
+  "category": "Phase 3 / hygiene / operator ergonomics"
+}

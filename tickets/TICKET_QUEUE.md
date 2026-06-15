@@ -225,7 +225,8 @@ superseded
 | 191 | ticket-191 | done | README and AGENTS.md live staged rank-2 opt-in proof docs | `phase-2/ticket-191-live-staged-rank2-opt-in-docs` | `agent_reports/2026-06-15_ticket-191_live-staged-rank2-opt-in-docs.md` |
 | 192 | ticket-192 | done | Pre-ticket audit: single-command live staged orchestrator proof | `phase-2/ticket-192-pre-ticket-live-staged-orchestrator-audit` | `agent_reports/2026-06-15_ticket-192_pre-ticket-live-staged-orchestrator-audit.md` |
 | 193 | ticket-193 | done | Live staged orchestrator mock spine (opt-in network) | `phase-2/ticket-193-live-staged-orchestrator-mock-spine` | `agent_reports/2026-06-15_ticket-193_live-staged-orchestrator-mock-spine.md` |
-| 194 | ticket-194 | proposed | README and AGENTS.md live staged orchestrator opt-in proof docs | | |
+| 194 | ticket-194 | done | README and AGENTS.md live staged orchestrator opt-in proof docs | `phase-2/ticket-194-live-staged-orchestrator-opt-in-docs` | `agent_reports/2026-06-15_ticket-194_live-staged-orchestrator-opt-in-docs.md` |
+| 195 | ticket-195 | proposed | Fix live staged pytest candidate ordering column | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -955,11 +956,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-194 (proposed) — README and AGENTS.md live staged orchestrator opt-in proof docs
+ticket-195 (proposed) — Fix live staged pytest candidate ordering column
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-15, ticket-193 agent)
+## Queue Notes (2026-06-15, ticket-194 agent)
+
+- Documented `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR` in README/AGENTS (ticket-194).
+- Principal audit post-ticket-193 bundled (cadence reset).
+- ticket-195 seeded: live staged pytest ORDER BY priority_score hygiene.
 
 - Live staged orchestrator opt-in pytest + env-gated cli branch (ticket-193).
 - Operator live OpenAlex run not verified in this environment (timeout); mock gates green.
