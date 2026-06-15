@@ -44,7 +44,9 @@ Golden tests and the builder agent should set `RGE_LLM_MODE=mock` explicitly.
 | `RGE_ALLOW_LIVE_STAGED_LINK_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama link on staged ingest |
 | `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama build on staged ingest |
 | `RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama detect on staged ingest |
-| `RGE_ALLOW_LIVE_STAGED_*` (mock spine) | optional (default `0`) | no | yes | no | Live OpenAlex + mock LLM staged proofs (see README) |
+| `RGE_ALLOW_LIVE_STAGED_RECONCILE` | optional (default `0`) | no | yes | no | Live OpenAlex network spine through deterministic reconcile (ticket-184); **no live LLM gate** |
+| `RGE_ALLOW_LIVE_STAGED_REPORT` | optional (default `0`) | no | yes | no | Live OpenAlex network spine through deterministic generate-run-report (ticket-187); **no live LLM gate** |
+| `RGE_ALLOW_LIVE_STAGED_*` (other mock spine) | optional (default `0`) | no | yes | no | Live OpenAlex + mock LLM staged proofs: FETCH, INGEST, EXTRACT, LINK, BUILD, DETECT, RANK2, ORCHESTRATOR (see README) |
 
 Valid `RGE_LLM_MODE` values: `mock`, `ollama` only. Anything else fails closed.
 
@@ -153,6 +155,16 @@ API keys, mailto values, or other secrets.
 | link | `RGE_ALLOW_LIVE_STAGED_LINK_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_LINK=1` |
 | build | `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_BUILD=1` |
 | detect | `RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_DETECT=1` |
+| reconcile-scores | — (deterministic Python; **no** `*_LIVE_LLM` gate) | `RGE_ALLOW_LIVE_STAGED_RECONCILE=1` |
+| generate-run-report | — (deterministic Python; **no** `*_LIVE_LLM` gate) | `RGE_ALLOW_LIVE_STAGED_REPORT=1` |
+
+**Reconcile/report boundary (tickets 184/187; pre-ticket audits 221/222):** `reconcile-scores`
+(`score_reconciler.py`) and `generate-run-report` (`run_evaluator.py`) are deterministic
+Python — no model client, no CLI fallthrough flags. `RGE_ALLOW_LIVE_STAGED_RECONCILE` and
+`RGE_ALLOW_LIVE_STAGED_REPORT` opt into **live OpenAlex network** pytest spines only (mock
+LLM upstream through detect). Staged rank-1 per-step live Ollama surface is **closed at
+detect** (204/208/212/217); do not add `RGE_ALLOW_LIVE_STAGED_RECONCILE_LIVE_LLM` or
+`RGE_ALLOW_LIVE_STAGED_REPORT_LIVE_LLM` without a new pre-ticket audit.
 
 All staged proofs also require `RGE_ALLOW_SOURCE_NETWORK=1` and `OPENALEX_MAILTO`.
 Per-step live Ollama gates are **separate** from mock-spine gates. Live detect
