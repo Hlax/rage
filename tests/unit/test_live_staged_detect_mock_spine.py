@@ -23,9 +23,9 @@ import pytest
 from rge.cli import main
 from rge.db.connection import connect
 from tests.unit.live_staged_candidates import select_rank1_candidate_id
+from tests.unit.staged_domain_seed import seed_domain_opposing_context
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DOMAIN_BASE_SOURCE = REPO_ROOT / "fixtures" / "sources" / "creativity_ai_diversity_short.txt"
 TEST_QUESTION_ID = "rq_live_staged_detect_mock_spine"
 STAGED_EXTRACT_FIXTURE = "staged_fetch_extract_claims.json"
 STAGED_LINK_FIXTURE = "staged_fetch_link_concepts.json"
@@ -52,30 +52,6 @@ def test_require_live_staged_detect_skips_without_opt_in(
     with pytest.raises(pytest.skip.Exception):
         require_live_staged_detect_env()
 
-
-def _seed_domain_opposing_context(temp_db: Path) -> None:
-    """Seed GT7-style base graph so staged qualification has an opposing domain edge."""
-    assert (
-        main(
-            [
-                "ingest",
-                str(DOMAIN_BASE_SOURCE),
-                "--domain",
-                "creativity",
-                "--db",
-                str(temp_db),
-            ]
-        )
-        == 0
-    )
-    conn = connect(temp_db)
-    try:
-        base_source_id = conn.execute("SELECT id FROM sources").fetchone()["id"]
-    finally:
-        conn.close()
-    assert main(["extract-claims", "--source", base_source_id, "--db", str(temp_db)]) == 0
-    assert main(["link-concepts", "--source", base_source_id, "--db", str(temp_db)]) == 0
-    assert main(["build-relationships", "--source", base_source_id, "--db", str(temp_db)]) == 0
 
 
 @pytest.fixture(autouse=True)
@@ -113,7 +89,7 @@ def test_live_openalex_discover_through_detect_mock_fixture(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     require_live_staged_detect_env()
-    _seed_domain_opposing_context(temp_db)
+    seed_domain_opposing_context(temp_db)
 
     qualifications_before = 0
     conn = connect(temp_db)
