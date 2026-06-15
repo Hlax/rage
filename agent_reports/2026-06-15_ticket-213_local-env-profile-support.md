@@ -70,7 +70,7 @@ None.
 
 ## Merge to main
 
-Pending merge commit.
+Merged @ `0c3210d`. Pushed to `origin/main`.
 
 ## Recommended next ticket
 
