@@ -18,6 +18,16 @@ FIXTURE_RUN_ID = "run_golden_fixture_mvp"
 GOLDEN_MVP_TOPIC = (
     "Does AI improve creative output while reducing diversity?"
 )
+STAGED_FIXTURE_RUN_ID = "run_staged_fixture_mode_spine"
+STAGED_FIXTURE_QUESTION_ID = "rq_staged_fixture_mode_run"
+STAGED_RANK1_CANDIDATE_ID = "disc_openalex_W2741809807"
+STAGED_RANK2_CANDIDATE_ID = "disc_openalex_W1234567890"
+_STAGED_RANK2_LLM = {
+    "extract": "staged_fetch_second_candidate_extract_claims.json",
+    "link": "staged_fetch_second_candidate_link_concepts.json",
+    "relationship": "staged_fetch_second_candidate_build_relationships.json",
+    "detect": "staged_fetch_second_candidate_detect_contradictions.json",
+}
 
 _FIXTURE_SOURCE_PATHS = {
     "base": _REPO_ROOT
@@ -82,6 +92,21 @@ def _source_id_by_title(conn: Any, title: str) -> str:
     ).fetchone()
     if row is None:
         raise ValueError(f"ingested source not found for title: {title}")
+    return row[0]
+
+
+def _source_id_by_title_fragment(conn: Any, fragment: str) -> str:
+    row = conn.execute(
+        """
+        SELECT id FROM sources
+        WHERE title LIKE ?
+        ORDER BY rowid DESC
+        LIMIT 1
+        """,
+        (f"%{fragment}%",),
+    ).fetchone()
+    if row is None:
+        raise ValueError(f"ingested source not found for title fragment: {fragment}")
     return row[0]
 
 
@@ -402,6 +427,359 @@ def execute_fixture_mode_run(
             os.environ["RGE_LLM_MODE"] = prior_mode
 
 
+def execute_staged_fixture_mode_run(
+    *,
+    topic: str,
+    domain: str,
+    db_path: Path | None = None,
+    run_id: str = STAGED_FIXTURE_RUN_ID,
+    report_dir: Path | None = None,
+    staging_dir: Path | None = None,
+    question_id: str = STAGED_FIXTURE_QUESTION_ID,
+) -> dict[str, Any]:
+    """Run the deterministic Phase 3 staged discover→report spine (mock LLM)."""
+    from rge.db.connection import ensure_database, get_db_path
+    from rge.db.repositories import RunReportRepository
+
+    prior_mode = os.environ.get("RGE_LLM_MODE")
+    prior_network = os.environ.get("RGE_ALLOW_SOURCE_NETWORK")
+    prior_mailto = os.environ.get("OPENALEX_MAILTO")
+    root = _REPO_ROOT
+    resolved_db = get_db_path(db_path)
+    resolved_reports = report_dir or (root / "data" / "reports")
+    resolved_staging = staging_dir or (root / "data" / "sources" / "staged")
+    resolved_staging.mkdir(parents=True, exist_ok=True)
+    resolved_reports.mkdir(parents=True, exist_ok=True)
+    db_args = _db_cli_args(db_path)
+    rank1_run_id = f"{run_id}_rank1"
+    rank2_run_id = f"{run_id}_rank2"
+    steps_completed: list[str] = []
+
+    os.environ["RGE_LLM_MODE"] = "mock"
+    os.environ["RGE_ALLOW_SOURCE_NETWORK"] = "1"
+    if not prior_mailto:
+        os.environ["OPENALEX_MAILTO"] = "operator@example.com"
+
+    try:
+        conn = ensure_database(db_path)
+        try:
+            _run_cli_step(
+                [
+                    "ingest",
+                    str(_FIXTURE_SOURCE_PATHS["base"]),
+                    "--domain",
+                    domain,
+                    *db_args,
+                ]
+            )
+            base_id = _source_id_by_title(
+                conn, _SOURCE_TITLE_BY_KEY["base"]
+            )
+            _run_cli_step(["extract-claims", "--source", base_id, *db_args])
+            _run_cli_step(["link-concepts", "--source", base_id, *db_args])
+            _run_cli_step(
+                ["build-relationships", "--source", base_id, *db_args]
+            )
+            steps_completed.append("seed_domain_opposing_context")
+
+            _run_cli_step(
+                [
+                    "discover-sources",
+                    "--provider",
+                    "openalex",
+                    "--query",
+                    "human AI creativity",
+                    "--rank-only",
+                    "--enqueue",
+                    "--question",
+                    question_id,
+                    *db_args,
+                ]
+            )
+            steps_completed.append("discover_openalex_candidates")
+
+            for candidate_id, rank_label in (
+                (STAGED_RANK1_CANDIDATE_ID, "rank1"),
+                (STAGED_RANK2_CANDIDATE_ID, "rank2"),
+            ):
+                _run_cli_step(
+                    [
+                        "fetch-candidate",
+                        "--candidate",
+                        candidate_id,
+                        "--out",
+                        str(resolved_staging),
+                        *db_args,
+                    ]
+                )
+                _run_cli_step(
+                    [
+                        "ingest-staged",
+                        "--domain",
+                        domain,
+                        "--candidate",
+                        candidate_id,
+                        "--staging-dir",
+                        str(resolved_staging),
+                        *db_args,
+                    ]
+                )
+                steps_completed.append(f"{rank_label}_fetch_ingest")
+
+            rank1_id = _source_id_by_title_fragment(conn, "songwriting")
+            rank2_id = _source_id_by_title_fragment(conn, "Constraint management")
+
+            _run_cli_step(["extract-claims", "--source", rank1_id, *db_args])
+            _run_cli_step(["link-concepts", "--source", rank1_id, *db_args])
+            _run_cli_step(
+                ["build-relationships", "--source", rank1_id, *db_args]
+            )
+            _run_cli_step(
+                ["detect-contradictions", "--source", rank1_id, *db_args]
+            )
+            _run_cli_step(["reconcile-scores", "--source", rank1_id, *db_args])
+            _run_cli_step(
+                [
+                    "generate-run-report",
+                    "--run-id",
+                    rank1_run_id,
+                    "--topic",
+                    f"{topic} (rank #1 staged candidate)",
+                    "--domain",
+                    domain,
+                    "--output-dir",
+                    str(resolved_reports),
+                    *db_args,
+                ]
+            )
+            steps_completed.append("rank1_spine_and_report")
+
+            _run_cli_step(
+                [
+                    "extract-claims",
+                    "--source",
+                    rank2_id,
+                    "--fixture",
+                    _STAGED_RANK2_LLM["extract"],
+                    *db_args,
+                ]
+            )
+            _run_cli_step(
+                [
+                    "link-concepts",
+                    "--source",
+                    rank2_id,
+                    "--fixture",
+                    _STAGED_RANK2_LLM["link"],
+                    *db_args,
+                ]
+            )
+            _run_cli_step(
+                [
+                    "build-relationships",
+                    "--source",
+                    rank2_id,
+                    "--fixture",
+                    _STAGED_RANK2_LLM["relationship"],
+                    *db_args,
+                ]
+            )
+            _run_cli_step(
+                [
+                    "detect-contradictions",
+                    "--source",
+                    rank2_id,
+                    "--fixture",
+                    _STAGED_RANK2_LLM["detect"],
+                    *db_args,
+                ]
+            )
+            _run_cli_step(["reconcile-scores", "--source", rank2_id, *db_args])
+            _run_cli_step(
+                [
+                    "generate-run-report",
+                    "--run-id",
+                    rank2_run_id,
+                    "--topic",
+                    f"{topic} (rank #2 staged candidate)",
+                    "--domain",
+                    domain,
+                    "--output-dir",
+                    str(resolved_reports),
+                    *db_args,
+                ]
+            )
+            steps_completed.append("rank2_spine_and_report")
+
+            sources = int(
+                conn.execute("SELECT COUNT(*) FROM sources").fetchone()[0]
+            )
+            candidate_sources = int(
+                conn.execute(
+                    "SELECT COUNT(*) FROM candidate_sources"
+                ).fetchone()[0]
+            )
+            research_queue = int(
+                conn.execute(
+                    "SELECT COUNT(*) FROM research_queue"
+                ).fetchone()[0]
+            )
+            score_events = int(
+                conn.execute("SELECT COUNT(*) FROM score_events").fetchone()[0]
+            )
+            run_reports = RunReportRepository(conn).count()
+            qualifies = int(
+                conn.execute(
+                    """
+                    SELECT COUNT(*) FROM relationship_evidence
+                    WHERE stance = 'qualifies'
+                    """
+                ).fetchone()[0]
+            )
+            rank1_accepted = int(
+                conn.execute(
+                    """
+                    SELECT COUNT(*) FROM claims
+                    WHERE source_id = ? AND status = 'accepted'
+                    """,
+                    (rank1_id,),
+                ).fetchone()[0]
+            )
+            rank1_rejected = int(
+                conn.execute(
+                    """
+                    SELECT COUNT(*) FROM claims
+                    WHERE source_id = ? AND status = 'rejected'
+                    """,
+                    (rank1_id,),
+                ).fetchone()[0]
+            )
+            rank2_accepted = int(
+                conn.execute(
+                    """
+                    SELECT COUNT(*) FROM claims
+                    WHERE source_id = ? AND status = 'accepted'
+                    """,
+                    (rank2_id,),
+                ).fetchone()[0]
+            )
+            rank2_rejected = int(
+                conn.execute(
+                    """
+                    SELECT COUNT(*) FROM claims
+                    WHERE source_id = ? AND status = 'rejected'
+                    """,
+                    (rank2_id,),
+                ).fetchone()[0]
+            )
+            rank1_relationships = int(
+                conn.execute(
+                    """
+                    SELECT COUNT(DISTINCT r.id)
+                    FROM relationships r
+                    JOIN relationship_evidence re ON re.relationship_id = r.id
+                    JOIN claims c ON c.id = re.claim_id
+                    WHERE c.source_id = ?
+                    """,
+                    (rank1_id,),
+                ).fetchone()[0]
+            )
+            rank2_relationships = int(
+                conn.execute(
+                    """
+                    SELECT COUNT(DISTINCT r.id)
+                    FROM relationships r
+                    JOIN relationship_evidence re ON re.relationship_id = r.id
+                    JOIN claims c ON c.id = re.claim_id
+                    WHERE c.source_id = ?
+                    """,
+                    (rank2_id,),
+                ).fetchone()[0]
+            )
+
+            expected = {
+                "sources": 3,
+                "candidate_sources": 2,
+                "research_queue": 2,
+                "score_events": 2,
+                "run_reports": 2,
+                "qualifies_evidence": 2,
+                "rank1_accepted": 1,
+                "rank1_rejected": 1,
+                "rank2_accepted": 1,
+                "rank2_rejected": 1,
+                "rank1_relationships": 2,
+                "rank2_relationships": 2,
+            }
+            actual = {
+                "sources": sources,
+                "candidate_sources": candidate_sources,
+                "research_queue": research_queue,
+                "score_events": score_events,
+                "run_reports": run_reports,
+                "qualifies_evidence": qualifies,
+                "rank1_accepted": rank1_accepted,
+                "rank1_rejected": rank1_rejected,
+                "rank2_accepted": rank2_accepted,
+                "rank2_rejected": rank2_rejected,
+                "rank1_relationships": rank1_relationships,
+                "rank2_relationships": rank2_relationships,
+            }
+            mismatches = {
+                key: (actual[key], expected[key])
+                for key in expected
+                if actual[key] != expected[key]
+            }
+            if mismatches:
+                raise ValueError(
+                    "staged fixture run counts mismatch: "
+                    + ", ".join(
+                        f"{key}={actual[key]} expected {expected[key]}"
+                        for key in mismatches
+                    )
+                )
+
+            return {
+                "status": "completed",
+                "command": "run",
+                "mode": "fixture_staged",
+                "topic": topic,
+                "domain": domain,
+                "run_id": run_id,
+                "rank1_run_id": rank1_run_id,
+                "rank2_run_id": rank2_run_id,
+                "question_id": question_id,
+                "database_path": str(resolved_db),
+                "staging_dir": str(resolved_staging),
+                "steps_completed": steps_completed,
+                **actual,
+                "rank1_source_id": rank1_id,
+                "rank2_source_id": rank2_id,
+                "artifacts": {
+                    "database": str(resolved_db),
+                    "rank1_run_report": str(
+                        resolved_reports / "run_report_latest.json"
+                    ),
+                    "staging_dir": str(resolved_staging),
+                },
+            }
+        finally:
+            conn.close()
+    finally:
+        if prior_mode is None:
+            os.environ.pop("RGE_LLM_MODE", None)
+        else:
+            os.environ["RGE_LLM_MODE"] = prior_mode
+        if prior_network is None:
+            os.environ.pop("RGE_ALLOW_SOURCE_NETWORK", None)
+        else:
+            os.environ["RGE_ALLOW_SOURCE_NETWORK"] = prior_network
+        if prior_mailto is None:
+            os.environ.pop("OPENALEX_MAILTO", None)
+        else:
+            os.environ["OPENALEX_MAILTO"] = prior_mailto
+
+
 def _cmd_run(args: argparse.Namespace) -> int:
     if not args.fixture_mode:
         return _not_implemented(
@@ -435,15 +813,30 @@ def _cmd_run(args: argparse.Namespace) -> int:
             if getattr(args, "export_dir", None)
             else None
         )
-        result = execute_fixture_mode_run(
-            topic=args.topic,
-            domain=args.domain,
-            db_path=db_path,
-            run_id=args.run_id or FIXTURE_RUN_ID,
-            report_dir=report_dir,
-            ticket_dir=ticket_dir,
-            export_dirs=export_dirs,
-        )
+        if getattr(args, "staged_spine", False):
+            staging_dir = (
+                Path(args.staging_dir) if getattr(args, "staging_dir", None) else None
+            )
+            result = execute_staged_fixture_mode_run(
+                topic=args.topic,
+                domain=args.domain,
+                db_path=db_path,
+                run_id=args.run_id or STAGED_FIXTURE_RUN_ID,
+                report_dir=report_dir,
+                staging_dir=staging_dir,
+                question_id=getattr(args, "question_id", None)
+                or STAGED_FIXTURE_QUESTION_ID,
+            )
+        else:
+            result = execute_fixture_mode_run(
+                topic=args.topic,
+                domain=args.domain,
+                db_path=db_path,
+                run_id=args.run_id or FIXTURE_RUN_ID,
+                report_dir=report_dir,
+                ticket_dir=ticket_dir,
+                export_dirs=export_dirs,
+            )
         print(json.dumps(result, indent=2))
         return 0
     except (ValueError, RuntimeError, FileNotFoundError) as exc:
@@ -1833,6 +2226,22 @@ def build_parser() -> argparse.ArgumentParser:
         "--fixture-mode",
         action="store_true",
         help="Use deterministic fixture sources instead of live discovery.",
+    )
+    run_parser.add_argument(
+        "--staged-spine",
+        action="store_true",
+        help=(
+            "With --fixture-mode, run Phase 3 staged discover→report spine "
+            "(mock LLM; network env required for discover/fetch)."
+        ),
+    )
+    run_parser.add_argument(
+        "--staging-dir",
+        help="Staging directory for staged-spine fetch/ingest (defaults to data/sources/staged/).",
+    )
+    run_parser.add_argument(
+        "--question-id",
+        help=f"Research question id for staged discover enqueue (default: {STAGED_FIXTURE_QUESTION_ID}).",
     )
     run_parser.add_argument(
         "--db",

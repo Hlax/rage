@@ -1,0 +1,42 @@
+{
+  "id": "ticket-163",
+  "title": "Staged fixture-mode run orchestrator idempotency (mock)",
+  "problem": "ticket-162 adds execute_staged_fixture_mode_run and CLI --staged-spine entry. Operators lack proof that re-running the orchestrator on the same DB does not duplicate rows.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-162_fixture-mode-staged-run-spine.md",
+    "tests/unit/test_staged_fixture_mode_run_spine.py",
+    "tests/unit/test_staged_dual_candidate_idempotency.py"
+  ],
+  "affected_modules": [
+    "tests/unit/test_staged_fixture_mode_run_spine.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_staged_fixture_mode_run_spine.py",
+    "agent_reports/2026-06-14_pre-ticket-163_staged-run-orchestrator-idempotency-audit.md",
+    "agent_reports/2026-06-14_ticket-163_staged-run-orchestrator-idempotency.md"
+  ],
+  "acceptance_criteria": [
+    "Unit test runs execute_staged_fixture_mode_run twice on one DB with patched network and asserts stable dual-spine counts.",
+    "No live LLM or live network in default pytest collection.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_staged_fixture_mode_run_spine.py -q",
+    "python -m pytest tests/unit/test_staged_dual_candidate_idempotency.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Live OpenAlex network.",
+    "Public export/site changes.",
+    "Schema migrations.",
+    "Changes to execute_staged_fixture_mode_run step order."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove idempotency test; retain ticket-162 orchestrator.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / product-risk reduction",
+  "pre_ticket_audit_required": true
+}
