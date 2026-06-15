@@ -45,6 +45,8 @@ def test_pyproject_excludes_live_smoke_by_default() -> None:
     text = pyproject.read_text(encoding="utf-8")
     assert "live_smoke" in text
     assert "not live_smoke" in text
+    assert "live_network" in text
+    assert "not live_network" in text
 
 
 def test_default_pytest_deselects_live_smoke() -> None:
@@ -70,3 +72,6 @@ def test_default_pytest_deselects_live_smoke() -> None:
         )
     assert result.returncode == pytest.ExitCode.OK
     assert "tests/smoke/" not in combined
+    assert (
+        "test_live_openalex_discover_and_fetch_writes_staged_artifact" not in combined
+    )
