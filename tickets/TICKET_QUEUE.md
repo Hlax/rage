@@ -257,7 +257,8 @@ superseded
 | 223 | ticket-223 | done | Principal audit post-ticket-222 staged spine LLM surface closure | | `agent_reports/2026-06-15_ticket-223_principal-audit-post-ticket-222.md` |
 | 224 | ticket-224 | done | README and AGENTS staged reconcile and report deterministic boundary docs | `phase-2/ticket-224-staged-reconcile-report-deterministic-docs` | `agent_reports/2026-06-15_ticket-224_staged-reconcile-report-deterministic-docs.md` |
 | 225 | ticket-225 | done | Runtime config staged reconcile and report network-only gate docs | `phase-2/ticket-225-runtime-config-staged-reconcile-report-gates` | `agent_reports/2026-06-15_ticket-225_runtime-config-staged-reconcile-report-gates.md` |
-| 226 | ticket-226 | proposed | README operator one-time live orchestrator checklist post-LLM-closure refresh | | |
+| 226 | ticket-226 | done | README operator one-time live orchestrator checklist post-LLM-closure refresh | `phase-2/ticket-226-orchestrator-checklist-llm-closure-refresh` | `agent_reports/2026-06-15_ticket-226_orchestrator-checklist-llm-closure-refresh.md` |
+| 227 | ticket-227 | proposed | Principal audit post-ticket-226 staged docs closure checkpoint | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -987,9 +988,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-226 (proposed) — README operator one-time live orchestrator checklist post-LLM-closure refresh
+ticket-227 (proposed) — Principal audit post-ticket-226 staged docs closure checkpoint
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-226 orchestrator checklist LLM closure refresh)
+
+- README one-time orchestrator checklist: LLM boundary, not-in-scope table, deterministic reconcile/report notes.
+- Staged rank-1 LLM documentation complete (224 README/AGENTS, 225 runtime config, 226 orchestrator checklist).
+- ticket-227 seeded: principal audit cadence (224–226 since ticket-223).
 
 ## Queue Notes (2026-06-15, ticket-225 runtime config staged reconcile/report gates)
 
