@@ -1,0 +1,32 @@
+{
+  "id": "ticket-231",
+  "title": "Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint",
+  "problem": "Three consecutive done tickets (227, 228, 229) since ticket-227 principal audit. Cadence overdue before rank-2 live extract (ticket-230).",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-227_principal-audit-post-ticket-226.md",
+    "agent_reports/2026-06-15_pre-ticket-228_rank-2-staged-live-llm-audit.md",
+    "agent_reports/2026-06-15_ticket-229_rank-2-staged-spine-heuristics.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report with verification baseline.",
+    "Cadence reset; ticket-230 pre-ticket requirement documented.",
+    "Golden pass if audit patches runner/docs only."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Implementation changes.",
+    "Ticket-230 implementation."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert audit report only.",
+  "status": "done",
+  "category": "Phase 2 / principal audit checkpoint"
+}
