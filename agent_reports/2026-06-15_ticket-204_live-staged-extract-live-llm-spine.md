@@ -88,7 +88,7 @@ None.
 
 ## Merge to main
 
-Placeholder — updated after merge.
+Merged @ `fd7b887`. Pushed to `origin/main`.
 
 ## Recommended next ticket
 
