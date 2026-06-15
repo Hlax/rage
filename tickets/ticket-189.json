@@ -29,7 +29,7 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Defer rank-2 extension; retain rank-1 live proof only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / source acquisition / audit",
   "pre_ticket_audit_required": true
 }
