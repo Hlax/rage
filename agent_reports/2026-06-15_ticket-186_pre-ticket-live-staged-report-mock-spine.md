@@ -46,7 +46,7 @@ Safety audit not required (audit-only).
 
 ## Merge to main
 
-Pending merge.
+Merged @ `aedb760`. Pushed to `origin/main`.
 
 ## Recommended next ticket
 

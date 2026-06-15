@@ -218,7 +218,8 @@ superseded
 | 184 | ticket-184 | done | Live staged reconcile-scores spine (opt-in network) | `phase-2/ticket-184-live-staged-reconcile-mock-spine` | `agent_reports/2026-06-15_ticket-184_live-staged-reconcile-mock-spine.md` |
 | 185 | ticket-185 | done | README and AGENTS.md live staged reconcile opt-in proof docs | `phase-2/ticket-185-live-staged-reconcile-opt-in-docs` | `agent_reports/2026-06-15_ticket-185_live-staged-reconcile-opt-in-docs.md` |
 | 186 | ticket-186 | done | Pre-ticket audit: live staged run-report mock spine | `phase-2/ticket-186-pre-ticket-live-staged-report-mock-spine-audit` | `agent_reports/2026-06-15_ticket-186_pre-ticket-live-staged-report-mock-spine.md` |
-| 187 | ticket-187 | proposed | Live staged generate-run-report spine (opt-in network) | | |
+| 187 | ticket-187 | done | Live staged generate-run-report spine (opt-in network) | `phase-2/ticket-187-live-staged-report-mock-spine` | `agent_reports/2026-06-15_ticket-187_live-staged-report-mock-spine.md` |
+| 188 | ticket-188 | proposed | README and AGENTS.md live staged report opt-in proof docs | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -948,9 +949,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-187 (proposed) — Live staged generate-run-report spine (opt-in network)
+ticket-188 (proposed) — README and AGENTS.md live staged report opt-in proof docs
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-187 agent)
+
+- Opt-in `live_network` pytest: discover through generate-run-report (deterministic).
+- Domain opposing-context seed before live network (ticket-181 pattern).
+- Env: `RGE_ALLOW_LIVE_STAGED_REPORT=1`, `RGE_ALLOW_SOURCE_NETWORK=1`, `OPENALEX_MAILTO`.
+- 597 pytest; 14 deselected; 142 golden; safety pass.
+- ticket-188 seeded: report opt-in docs.
 
 ## Queue Notes (2026-06-15, ticket-186 agent)
 
