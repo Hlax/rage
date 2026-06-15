@@ -53,6 +53,7 @@ Before coordinating the next ticket manually, run the bounded operator loop:
 ```bash
 python -m rge.modules.operator_loop --mode plan
 python -m rge.modules.operator_loop --mode execute-safe
+python -m rge.modules.operator_autocycle --mode plan --max-cycles 10
 ```
 
 Plan mode is read-only and recommends the next action with gate classification
