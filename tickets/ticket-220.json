@@ -1,0 +1,38 @@
+{
+  "id": "ticket-220",
+  "title": ".env.example and runtime config live staged detect live LLM gate",
+  "problem": "ticket-217 adds RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM but .env.example and 12_RUNTIME_CONFIG.md staged gate matrix only document extract/link/build live gates (ticket-213).",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-219_principal-audit-post-ticket-217.md",
+    "agent_reports/2026-06-15_ticket-217_live-staged-detect-live-llm-spine.md",
+    ".env.example",
+    "docs/agents/12_RUNTIME_CONFIG.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    ".env.example",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "agent_reports/2026-06-15_ticket-220_live-staged-detect-env-profile.md"
+  ],
+  "acceptance_criteria": [
+    ".env.example documents RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM with ticket-217 reference.",
+    "12_RUNTIME_CONFIG.md staged gate matrix includes detect live row.",
+    "Golden pass.",
+    "No runtime code changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Implementation changes.",
+    "Live reconcile pre-ticket audit.",
+    "CI Ollama.",
+    "Public export/site.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert doc/env template changes only.",
+  "status": "proposed",
+  "category": "Phase 3 / live LLM / operator env profile"
+}
