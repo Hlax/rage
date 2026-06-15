@@ -115,6 +115,11 @@ def _default_fixture_for_chunk(chunk: dict[str, Any]) -> str:
     return "claim_extraction_valid_and_missing_quote.json"
 
 
+def source_has_staged_fetch_spine(chunks: list[Any]) -> bool:
+    """Return True when any chunk matches the staged OpenAlex fetch spine marker."""
+    return any(_is_staged_fetch_spine_chunk(c.chunk_text) for c in chunks)
+
+
 def extract_and_validate_for_chunk(
     chunk: dict[str, Any],
     *,
@@ -123,6 +128,7 @@ def extract_and_validate_for_chunk(
     client=None,
     source: Any | None = None,
     live_manual_fallthrough: bool = False,
+    live_staged_fallthrough: bool = False,
 ) -> dict[str, list[dict[str, Any]]]:
     """Extract candidates for one chunk and validate them deterministically."""
     contract: dict[str, Any] = {"domain_pack": domain_pack}
@@ -149,6 +155,7 @@ def extract_claims_for_source(
     *,
     fixture_name: str | None = None,
     live_manual_fallthrough: bool = False,
+    live_staged_fallthrough: bool = False,
     client: Any | None = None,
     config: Any | None = None,
 ) -> dict[str, Any]:
@@ -176,8 +183,25 @@ def extract_claims_for_source(
             "rejected_claim_ids": [claim.id for claim in rejected],
         }
 
+    if live_manual_fallthrough and live_staged_fallthrough:
+        raise ValueError(
+            "live_manual_fallthrough and live_staged_fallthrough are mutually exclusive."
+        )
+
     cfg = config if config is not None else load_config()
-    if live_manual_fallthrough:
+    if live_staged_fallthrough:
+        if fixture_name:
+            raise ValueError(
+                "live_staged_fallthrough cannot be combined with --fixture; "
+                "live Ollama extraction uses the ingested chunk text."
+            )
+        if not source_has_staged_fetch_spine(chunks):
+            raise ValueError(
+                "live_staged_fallthrough requires staged OpenAlex ingest chunk text "
+                "(human-ai co-creativity / songwriting marker)."
+            )
+        model_client = client or get_model_client(cfg, mode="ollama")
+    elif live_manual_fallthrough:
         if not manual_text_lacks_extract_fixture(source):
             raise ValueError(
                 "live_manual_fallthrough requires a manual_text source absent from "
@@ -206,6 +230,7 @@ def extract_claims_for_source(
             client=model_client,
             source=source,
             live_manual_fallthrough=live_manual_fallthrough,
+            live_staged_fallthrough=live_staged_fallthrough,
         )
         for claim in result["accepted"]:
             char_start, char_end = locate_quote_offsets(

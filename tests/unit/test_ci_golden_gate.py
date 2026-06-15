@@ -111,3 +111,7 @@ def test_default_pytest_deselects_live_smoke() -> None:
         "test_live_staged_fixture_mode_orchestrator_dual_spine"
         not in combined
     )
+    assert (
+        "test_live_openalex_discover_fetch_ingest_live_extract"
+        not in combined
+    )
