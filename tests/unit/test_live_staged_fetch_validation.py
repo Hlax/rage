@@ -21,6 +21,7 @@ import pytest
 
 from rge.cli import main
 from rge.db.connection import connect
+from tests.unit.live_staged_candidates import select_rank1_candidate_id
 
 TEST_QUESTION_ID = "rq_live_staged_fetch_validation"
 
@@ -101,18 +102,7 @@ def test_live_openalex_discover_and_fetch_writes_staged_artifact(
 
     conn = connect(temp_db)
     try:
-        candidate_row = conn.execute(
-            """
-            SELECT id, landing_page_url, open_access_url
-            FROM candidate_sources
-            WHERE research_question_id = ?
-            ORDER BY priority_score DESC
-            LIMIT 1
-            """,
-            (TEST_QUESTION_ID,),
-        ).fetchone()
-        assert candidate_row is not None
-        candidate_id = candidate_row["id"]
+        candidate_id = select_rank1_candidate_id(conn, TEST_QUESTION_ID)
         assert candidate_id.startswith("disc_openalex_")
         queue_count = conn.execute(
             "SELECT COUNT(*) FROM research_queue WHERE research_question_id = ?",

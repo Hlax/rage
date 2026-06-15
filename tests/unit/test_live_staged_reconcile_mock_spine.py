@@ -22,6 +22,7 @@ import pytest
 
 from rge.cli import main
 from rge.db.connection import connect
+from tests.unit.live_staged_candidates import select_rank1_candidate_id
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DOMAIN_BASE_SOURCE = REPO_ROOT / "fixtures" / "sources" / "creativity_ai_diversity_short.txt"
@@ -141,18 +142,7 @@ def test_live_openalex_discover_through_reconcile_mock_spine(
 
     conn = connect(temp_db)
     try:
-        candidate_row = conn.execute(
-            """
-            SELECT id
-            FROM candidate_sources
-            WHERE research_question_id = ?
-            ORDER BY priority_score DESC
-            LIMIT 1
-            """,
-            (TEST_QUESTION_ID,),
-        ).fetchone()
-        assert candidate_row is not None
-        candidate_id = candidate_row["id"]
+        candidate_id = select_rank1_candidate_id(conn, TEST_QUESTION_ID)
     finally:
         conn.close()
 

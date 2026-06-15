@@ -22,6 +22,7 @@ import pytest
 
 from rge.cli import main
 from rge.db.connection import connect
+from tests.unit.live_staged_candidates import select_rank2_candidate_id
 from rge.db.repositories import RunReportRepository
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -145,26 +146,7 @@ def test_live_openalex_rank2_through_report_mock_spine(
 
     conn = connect(temp_db)
     try:
-        candidate_count = conn.execute(
-            """
-            SELECT COUNT(*) FROM candidate_sources
-            WHERE research_question_id = ?
-            """,
-            (TEST_QUESTION_ID,),
-        ).fetchone()[0]
-        assert candidate_count >= 2, "live discover must enqueue at least 2 candidates"
-        candidate_row = conn.execute(
-            """
-            SELECT id
-            FROM candidate_sources
-            WHERE research_question_id = ?
-            ORDER BY priority_score DESC
-            LIMIT 1 OFFSET 1
-            """,
-            (TEST_QUESTION_ID,),
-        ).fetchone()
-        assert candidate_row is not None
-        candidate_id = candidate_row["id"]
+        candidate_id = select_rank2_candidate_id(conn, TEST_QUESTION_ID)
     finally:
         conn.close()
 

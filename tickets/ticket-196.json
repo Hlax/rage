@@ -50,6 +50,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert helper and inline SQL in tests.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / hygiene / operator ergonomics"
 }

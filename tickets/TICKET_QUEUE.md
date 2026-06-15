@@ -227,7 +227,8 @@ superseded
 | 193 | ticket-193 | done | Live staged orchestrator mock spine (opt-in network) | `phase-2/ticket-193-live-staged-orchestrator-mock-spine` | `agent_reports/2026-06-15_ticket-193_live-staged-orchestrator-mock-spine.md` |
 | 194 | ticket-194 | done | README and AGENTS.md live staged orchestrator opt-in proof docs | `phase-2/ticket-194-live-staged-orchestrator-opt-in-docs` | `agent_reports/2026-06-15_ticket-194_live-staged-orchestrator-opt-in-docs.md` |
 | 195 | ticket-195 | done | Fix live staged pytest candidate ordering column | `phase-2/ticket-195-live-staged-candidate-ordering-fix` | `agent_reports/2026-06-15_ticket-195_live-staged-candidate-ordering-fix.md` |
-| 196 | ticket-196 | proposed | Shared live staged candidate query test helper | | |
+| 196 | ticket-196 | done | Shared live staged candidate query test helper | `phase-2/ticket-196-live-staged-candidate-helper` | `agent_reports/2026-06-15_ticket-196_live-staged-candidate-helper.md` |
+| 197 | ticket-197 | proposed | Shared staged domain opposing-context seed test helper | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -957,9 +958,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-196 (proposed) — Shared live staged candidate query test helper
+ticket-197 (proposed) — Shared staged domain opposing-context seed test helper
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-196 agent)
+
+- Shared `live_staged_candidates` helper; all nine live staged tests refactored (ticket-196).
+- ticket-197 seeded: shared `_seed_domain_opposing_context` DRY helper.
 
 ## Queue Notes (2026-06-15, ticket-195 agent)
 
