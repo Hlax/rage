@@ -208,7 +208,8 @@ superseded
 | 174 | ticket-174 | done | Pre-ticket audit: live staged link mock-fixture spine | `phase-2/ticket-174-pre-ticket-live-staged-link-mock-spine-audit` | `agent_reports/2026-06-15_ticket-174_pre-ticket-live-staged-link-mock-spine.md` |
 | 175 | ticket-175 | done | Live staged link mock-fixture spine (opt-in network) | `phase-2/ticket-175-live-staged-link-mock-spine` | `agent_reports/2026-06-15_ticket-175_live-staged-link-mock-spine.md` |
 | 176 | ticket-176 | done | README and AGENTS.md live staged link opt-in proof docs | `phase-2/ticket-176-live-staged-link-opt-in-docs` | `agent_reports/2026-06-15_ticket-176_live-staged-link-opt-in-docs.md` |
-| 177 | ticket-177 | proposed | Pre-ticket audit: live staged build-relationships mock spine | | |
+| 177 | ticket-177 | done | Pre-ticket audit: live staged build-relationships mock spine | `phase-2/ticket-177-pre-ticket-live-staged-build-mock-spine-audit` | `agent_reports/2026-06-15_ticket-177_pre-ticket-live-staged-build-mock-spine.md` |
+| 178 | ticket-178 | proposed | Live staged build mock-fixture spine (opt-in network) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -938,16 +939,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-177 (proposed) — Pre-ticket audit: live staged build-relationships mock spine
+ticket-178 (proposed) — Live staged build mock-fixture spine (opt-in network)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-15, ticket-176 agent)
+## Queue Notes (2026-06-15, ticket-177 agent)
 
-- Principal audit post-ticket-175 committed.
-- README + AGENTS: `RGE_ALLOW_LIVE_STAGED_LINK` opt-in pytest docs.
-- 593 pytest; 10 deselected; 142 golden; safety pass.
-- ticket-177 seeded: pre-ticket audit for build mock spine.
+- Pre-ticket audit GO for ticket-178 live staged build mock spine.
+- ticket-178 seeded.
 
 ## Queue Notes (2026-06-15, ticket-166 agent)
 
