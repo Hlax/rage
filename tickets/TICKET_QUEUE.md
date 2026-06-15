@@ -204,7 +204,8 @@ superseded
 | 170 | ticket-170 | done | AGENTS.md cross-link live staged opt-in operator proofs | `phase-2/ticket-170-agents-live-staged-opt-in` | `agent_reports/2026-06-15_ticket-170_agents-live-staged-opt-in.md` |
 | 171 | ticket-171 | done | Pre-ticket audit: live staged extract mock-fixture spine | `phase-2/ticket-171-pre-ticket-live-staged-extract-mock-spine-audit` | `agent_reports/2026-06-15_ticket-171_pre-ticket-live-staged-extract-mock-spine.md` |
 | 172 | ticket-172 | done | Live staged extract mock-fixture spine (opt-in network) | `phase-2/ticket-172-live-staged-extract-mock-spine` | `agent_reports/2026-06-15_ticket-172_live-staged-extract-mock-spine.md` |
-| 173 | ticket-173 | proposed | README and AGENTS.md live staged extract opt-in proof docs | | |
+| 173 | ticket-173 | done | README and AGENTS.md live staged extract opt-in proof docs | `phase-2/ticket-173-live-staged-extract-opt-in-docs` | `agent_reports/2026-06-15_ticket-173_live-staged-extract-opt-in-docs.md` |
+| 174 | ticket-174 | proposed | Pre-ticket audit: live staged link mock-fixture spine | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -934,16 +935,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-173 (proposed) — README and AGENTS.md live staged extract opt-in proof docs
+ticket-174 (proposed) — Pre-ticket audit: live staged link mock-fixture spine
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-15, ticket-172 agent)
+## Queue Notes (2026-06-15, ticket-173 agent)
 
-- Opt-in `live_network` pytest: discover→fetch→ingest→extract --fixture (mock only).
-- Env: `RGE_ALLOW_LIVE_STAGED_EXTRACT=1`, `RGE_ALLOW_SOURCE_NETWORK=1`, `OPENALEX_MAILTO`.
+- Principal audit post-ticket-172 committed (overdue cadence reset).
+- README + AGENTS: `RGE_ALLOW_LIVE_STAGED_EXTRACT` opt-in pytest docs.
 - 592 pytest; 9 deselected; 142 golden; safety pass.
-- ticket-173 seeded: doc cross-link for extract opt-in proof.
+- ticket-174 seeded: pre-ticket audit for link mock-fixture spine.
 
 ## Queue Notes (2026-06-15, ticket-166 agent)
 
