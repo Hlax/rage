@@ -93,7 +93,7 @@ None for implementation. Live operator proof not completed in session due to Ope
 
 ## Merge to main
 
-Pending merge commit (see below).
+Merged @ `c292bc0`. Pushed to `origin/main`.
 
 ## Recommended next ticket
 

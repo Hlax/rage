@@ -1,0 +1,37 @@
+{
+  "id": "ticket-213",
+  "title": "Local env profile support for live staged operator runs",
+  "problem": "Staged live LLM gates (extract/link/build) and model alias overrides (e.g. qwen3.5:9b via RGE_LOCAL_LLM) are documented across README/AGENTS but not consolidated in .env.example. Operators must manually set many env vars per run.",
+  "evidence": [
+    ".env.example",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "agent_reports/2026-06-15_pre-ticket-211_live-staged-build-live-llm-audit.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    ".env.example",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "README.md",
+    "agent_reports/2026-06-15_ticket-213_local-env-profile-support.md"
+  ],
+  "acceptance_criteria": [
+    ".env.example documents RGE_LLM_MODE, RGE_ALLOW_LIVE_LLM, RGE_LOCAL_LLM, OLLAMA_BASE_URL, RGE_ALLOW_SOURCE_NETWORK, OPENALEX_MAILTO, and staged live gates (extract/link/build) as commented placeholders.",
+    ".env.local remains gitignored; no secrets committed.",
+    "model-health does not print secrets.",
+    "No change to default model behavior or live fallthrough implementation."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Implementing live staged build fallthrough.",
+    "Changing default RGE_LOCAL_LLM.",
+    "Adding python-dotenv dependency.",
+    "Committing operator secrets."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert .env.example and doc changes only.",
+  "status": "proposed",
+  "category": "Phase 3 / operator ergonomics"
+}
