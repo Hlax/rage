@@ -1,0 +1,39 @@
+{
+  "id": "ticket-159",
+  "title": "Principal audit checkpoint post-ticket-158 (rank #2 staged Phase 3 spine completion)",
+  "problem": "ticket-158 completes the OpenAlex rank #2 mock Phase 3 spine. Cadence is overdue (9 done tickets since ticket-150 principal audit). A read-only principal audit checkpoint is required before further Phase 3 multi-candidate work.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-158_second-staged-run-report-spine.md",
+    "agent_reports/2026-06-14_ticket-150_principal-audit-post-ticket-149.md",
+    "rge/modules/principal_audit_gate.py",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-14_ticket-159_principal-audit-post-ticket-158.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report documents rank #1 and rank #2 staged spine completion state.",
+    "Cadence gate reset with honest drift/value-class assessment.",
+    "No implementation scope beyond audit report and queue updates.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-160",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "New Phase 3 feature implementation.",
+    "Public export/site changes.",
+    "Schema migrations.",
+    "Live Ollama paths."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove audit report; queue notes unchanged.",
+  "status": "proposed",
+  "category": "checkpoint / governance",
+  "pre_ticket_audit_required": false
+}

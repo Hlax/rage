@@ -189,7 +189,8 @@ superseded
 | 155 | ticket-155 | done | Build relationships on second staged-ingested source (mock spine step) | `phase-2/ticket-155-second-staged-build-relationships-spine` | `agent_reports/2026-06-14_ticket-155_second-staged-build-relationships-spine.md` |
 | 156 | ticket-156 | done | Detect contradictions on second staged-ingested source (mock spine step) | `phase-2/ticket-156-second-staged-detect-contradictions-spine` | `agent_reports/2026-06-14_ticket-156_second-staged-detect-contradictions-spine.md` |
 | 157 | ticket-157 | done | Reconcile scores on second staged-ingested source (mock spine step) | `phase-2/ticket-157-second-staged-reconcile-scores-spine` | `agent_reports/2026-06-14_ticket-157_second-staged-reconcile-scores-spine.md` |
-| 158 | ticket-158 | proposed | Generate run report on second staged-ingested source (mock spine step) | | |
+| 158 | ticket-158 | done | Generate run report on second staged-ingested source (mock spine step) | `phase-2/ticket-158-second-staged-run-report-spine` | `agent_reports/2026-06-14_ticket-158_second-staged-run-report-spine.md` |
+| 159 | ticket-159 | proposed | Principal audit checkpoint post-ticket-158 (rank #2 staged Phase 3 spine completion) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -919,9 +920,19 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-158 (proposed) — Generate run report on second staged-ingested source (mock spine step)
+ticket-159 (proposed) — Principal audit checkpoint post-ticket-158 (rank #2 staged Phase 3 spine completion)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-158 agent)
+
+- Test-forward ticket: rank #2 spine through generate-run-report only; no production changes.
+- Run id `run_second_staged_phase3_spine`; counters match ticket-149 minimums on rank #2 DB state.
+- Idempotent re-run: one run_reports row.
+- 575 pytest; 142 golden; safety pass.
+- **Rank #2 mock spine complete** (discover → report).
+- ticket-159 seeded: principal audit checkpoint (cadence overdue).
+- Principal audit strongly recommended before further Phase 3 tickets.
 
 ## Queue Notes (2026-06-14, ticket-157 agent)
 
