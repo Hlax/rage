@@ -27,7 +27,7 @@ third-party repo-direction audit):
 |------|--------|---------------|
 | **MVP-Engine** | **mock/fixture-proven** | Deterministic Python pipeline, validator gate, safety model, public export, golden tests (GT01–GT26), and fixture-mode orchestration are real and green. |
 | **MVP-Research** | **partial — NM-1 + NM-4 evidence DB** | NM-1: first live validated claim write via `extract-claims-live` on gitignored `data/db/live_research_evidence.sqlite`. NM-4: operator-proven live manual_text spine through reconcile on that same evidence DB (tickets 127–133). Default graph DB synthnote path remains checksum-mock — not arbitrary live inference. |
-| **Arbitrary-source pipeline** | **partial** | **Phase 3 staged spine (mock/fixture-proven):** discover → fetch → ingest-staged → extract → link → build → detect → reconcile → report for rank #1 and #2 OpenAlex candidates, dual-candidate idempotency, and `research run --fixture-mode --staged-spine` orchestration (tickets 144–164). Unit tests patch OpenAlex/fetcher I/O; operator runs require `RGE_ALLOW_SOURCE_NETWORK=1`. **Opt-in operator proofs (not CI):** per-step live OpenAlex proofs (tickets 167–190) and single-command orchestrator proof via `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1` (ticket-193) as `pytest -m live_network` — see Operator Quickstart. Per-step **live Ollama extract** on staged rank-1 ingest is operator opt-in only (ticket-204; `--live-staged-fallthrough`; orchestrator still mock). **Not proven in CI/default pytest:** live OpenAlex (operator opt-in only); live LLM on full staged orchestrator or link/build/detect. **Evidence DB:** NM-4 live ingest → extract/link/relationship/contradiction fall-through + deterministic reconcile (`--evidence-db-reconcile`) on gitignored evidence DB. **Default graph DB:** committed synthnote files still use checksum-pinned mock fixtures. `research run` without `--fixture-mode` remains `not_implemented`. |
+| **Arbitrary-source pipeline** | **partial** | **Phase 3 staged spine (mock/fixture-proven):** discover → fetch → ingest-staged → extract → link → build → detect → reconcile → report for rank #1 and #2 OpenAlex candidates, dual-candidate idempotency, and `research run --fixture-mode --staged-spine` orchestration (tickets 144–164). Unit tests patch OpenAlex/fetcher I/O; operator runs require `RGE_ALLOW_SOURCE_NETWORK=1`. **Opt-in operator proofs (not CI):** per-step live OpenAlex proofs (tickets 167–190) and single-command orchestrator proof via `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1` (ticket-193) as `pytest -m live_network` — see Operator Quickstart. Per-step **live Ollama extract** on staged rank-1 ingest is operator opt-in only (ticket-204; `--live-staged-fallthrough`; orchestrator still mock). Per-step **live Ollama link** after mock extract is operator opt-in only (ticket-208; `--live-staged-link-fallthrough`). **Not proven in CI/default pytest:** live OpenAlex (operator opt-in only); live LLM on full staged orchestrator or build/detect. **Evidence DB:** NM-4 live ingest → extract/link/relationship/contradiction fall-through + deterministic reconcile (`--evidence-db-reconcile`) on gitignored evidence DB. **Default graph DB:** committed synthnote files still use checksum-pinned mock fixtures. `research run` without `--fixture-mode` remains `not_implemented`. |
 | **Cloud providers** | **deferred** | OpenAI/OpenRouter/etc. are not wired (ticket-059 placeholder). |
 
 **Phase 1 MVP is complete** for the engine tier. The public site still serves **fixture
@@ -57,6 +57,7 @@ What is **live report-only** (no graph writes unless operator explicitly opts in
 - **`extract-claims-live`** (NM-1) is the first explicit live validated write path; requires `RGE_LLM_MODE=ollama`, `RGE_ALLOW_LIVE_LLM=1`, a non-fixture-map source, and an explicit evidence DB (default `data/db/live_research_evidence.sqlite`, not the default graph DB)
 - **NM-4 evidence DB spine** (tickets 127–133): live `--live-manual-*` fall-through on standard pipeline commands plus deterministic `reconcile-scores --evidence-db-reconcile` on the same gitignored evidence DB — see Operator Quickstart **NM-4 evidence DB operator spine**
 - **Per-step live staged extract** (ticket-204): live Ollama `extract-claims --live-staged-fallthrough` on rank-1 staged OpenAlex ingest (temp `--db` only; separate env gate from mock-fixture extract) — see Operator Quickstart **Live staged extract (live Ollama)**
+- **Per-step live staged link** (ticket-208): live Ollama `link-concepts --live-staged-link-fallthrough` after mock extract on rank-1 staged source (temp `--db` only; separate env gate from mock link) — see Operator Quickstart **Live staged link (live Ollama)**
 
 What requires **explicit live opt-in** (local Ollama only):
 
@@ -195,7 +196,8 @@ second-candidate mock fixtures; ticket-193 adds single-command
 `research run --fixture-mode --staged-spine` on real OpenAlex via
 `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1` (orchestrator **always** forces mock LLM).
 **Per-step live Ollama extract** on staged rank-1 ingest is a separate operator opt-in
-(ticket-204; not orchestrator-wide). These proofs write to temp DB and report paths
+(ticket-204; not orchestrator-wide). **Per-step live Ollama link** after mock extract is
+a separate operator opt-in (ticket-208; not orchestrator-wide). These proofs write to temp DB and report paths
 only — they do **not** public-export results. Patched-network orchestrator proof remains
 `tests/unit/test_staged_fixture_mode_run_spine.py` (ticket-162).
 
@@ -265,6 +267,28 @@ $env:RGE_ALLOW_SOURCE_NETWORK = "1"
 $env:OPENALEX_MAILTO = "operator@example.com"
 
 python -m pytest tests/unit/test_live_staged_link_mock_spine.py -m live_network -q
+```
+
+**Live staged link (live Ollama; ticket-208):** per-step rank-1 proof after live
+OpenAlex ingest and **mock-fixture extract** — uses `link-concepts --live-staged-link-fallthrough`
+(bypasses staged-fetch auto-mock). Requires local Ollama; orchestrator still forces mock LLM.
+Temp `--db` only — refuses default graph DB. Markers: `live_network` **and** `live_smoke`.
+
+```powershell
+$env:RGE_ALLOW_LIVE_STAGED_LINK_LIVE_LLM = "1"
+$env:RGE_ALLOW_LIVE_LLM = "1"
+$env:RGE_LLM_MODE = "ollama"
+$env:RGE_ALLOW_SOURCE_NETWORK = "1"
+$env:OPENALEX_MAILTO = "operator@example.com"
+
+python -m pytest tests/unit/test_live_staged_link_live_llm_spine.py -m "live_network and live_smoke" -q
+```
+
+CLI equivalent after discover → fetch → ingest-staged → mock extract on a temp DB:
+
+```powershell
+python -m rge.cli link-concepts --source <source_id> `
+  --db <temp.sqlite> --live-staged-link-fallthrough
 ```
 
 *Discover + fetch + ingest-staged + mock extract + mock link + mock build* (ticket-178; writes `relationships` via fixture):
