@@ -1,0 +1,39 @@
+{
+  "id": "ticket-209",
+  "title": "README and AGENTS live staged link live LLM operator docs",
+  "problem": "ticket-208 adds --live-staged-link-fallthrough and RGE_ALLOW_LIVE_STAGED_LINK_LIVE_LLM but operator docs still describe mock-only staged link after extract.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-208_live-staged-link-live-llm-spine.md",
+    "agent_reports/2026-06-15_pre-ticket-207_live-staged-link-live-llm-audit.md",
+    "tests/unit/test_live_staged_link_live_llm_spine.py"
+  ],
+  "affected_modules": [
+    "README.md",
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "AGENTS.md",
+    "agent_reports/2026-06-15_ticket-209_live-staged-link-live-llm-docs.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart documents live staged link env gates and pytest command.",
+    "AGENTS.md references per-step live staged link opt-in without implying orchestrator live LLM.",
+    "Golden pass and safety audit pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Changing link-concepts behavior.",
+    "Live build/detect docs.",
+    "CI Ollama.",
+    "Public export/site."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert doc edits only.",
+  "status": "proposed",
+  "category": "Phase 3 / live LLM / operator docs"
+}
