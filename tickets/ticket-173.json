@@ -34,6 +34,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert doc paragraphs.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / documentation / operator ergonomics"
 }

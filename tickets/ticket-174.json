@@ -1,0 +1,35 @@
+{
+  "id": "ticket-174",
+  "title": "Pre-ticket audit: live staged link mock-fixture spine",
+  "problem": "ticket-172 proves live ingest + mock extract. No scoped plan for link-concepts with mock fixture after live extract path before broader spine extension.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-172_live-staged-extract-mock-spine.md",
+    "tests/unit/test_staged_ingest_extract_spine.py",
+    "tests/unit/test_staged_ingest_link_spine.py"
+  ],
+  "affected_modules": [
+    "agent_reports/2026-06-15_pre-ticket-174_live-staged-link-mock-spine-audit.md"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-15_pre-ticket-174_live-staged-link-mock-spine-audit.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit defines hardened scope for mock-fixture link after live extract path.",
+    "No live LLM in proposed scope.",
+    "GO/NO-GO verdict with rollback plan."
+  ],
+  "test_plan": [
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-174"
+  ],
+  "non_goals": [
+    "Implementation in audit ticket.",
+    "Live LLM.",
+    "Public export/site.",
+    "Schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Defer link extension; retain extract proof only.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / audit",
+  "pre_ticket_audit_required": true
+}

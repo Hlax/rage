@@ -77,19 +77,21 @@ Operator Quickstart.
   default graph synthnote path remains checksum-pinned mock — not arbitrary live extraction.
 - **Arbitrary-source pipeline:** partial — Phase 3 staged mock spine fixture-proven through
   `--staged-spine` orchestration (operator network env required; tests patch I/O); opt-in
-  operator live discover→fetch (ticket-167) and discover→fetch→ingest-staged (ticket-168)
-  via `pytest -m live_network` (not CI); live arbitrary-source staged discover→report not
+  operator live discover→fetch (ticket-167), discover→fetch→ingest-staged (ticket-168),
+  and discover→fetch→ingest→mock extract (ticket-172) via `pytest -m live_network`
+  (not CI); live arbitrary-source staged discover→report not
   proven; evidence DB NM-4 proven; default graph synthnote checksum-mock; `research run`
   without `--fixture-mode` remains `not_implemented`.
 - **Cloud providers:** deferred (ticket-059).
 
-**Live staged network proofs** (operator opt-in; tickets 167–169): real OpenAlex HTTP
+**Live staged network proofs** (operator opt-in; tickets 167–173): real OpenAlex HTTP
 pytest proofs on temp DB paths. **Not** run in CI or default `pytest` (`live_network`
-marker excluded in `pyproject.toml`). No live LLM; proofs stop before `extract-claims`.
-Env gates: `RGE_ALLOW_SOURCE_NETWORK=1`, `OPENALEX_MAILTO`, plus
-`RGE_ALLOW_LIVE_STAGED_FETCH=1` (discover→fetch) or `RGE_ALLOW_LIVE_STAGED_INGEST=1`
-(discover→fetch→ingest-staged). See README **Operator Quickstart**
-(**Live staged network proofs**) for commands.
+marker excluded in `pyproject.toml`). No live LLM; ticket-172 uses explicit mock fixture
+for `extract-claims` after live ingest. Env gates: `RGE_ALLOW_SOURCE_NETWORK=1`,
+`OPENALEX_MAILTO`, plus `RGE_ALLOW_LIVE_STAGED_FETCH=1` (discover→fetch),
+`RGE_ALLOW_LIVE_STAGED_INGEST=1` (discover→fetch→ingest-staged), or
+`RGE_ALLOW_LIVE_STAGED_EXTRACT=1` (discover→fetch→ingest→mock extract). See README
+**Operator Quickstart** (**Live staged network proofs**) for commands.
 
 **Manual synthnote operator spine** (mock LLM; tickets 088–099): for Level-1
 `manual_text` research on the creativity synthnote source, follow the five-step
