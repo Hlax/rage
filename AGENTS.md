@@ -113,7 +113,9 @@ detect), `RGE_ALLOW_LIVE_STAGED_RECONCILE=1`
 (rank-2 discover→fetch→ingest→second-candidate mock extract→…→generate-run-report), or
 `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1`
 (single-command discover→dual-candidate report via `research run --fixture-mode --staged-spine`).
-See README **Operator Quickstart** (**Live staged network proofs**) for commands.
+See README **Operator Quickstart** (**Live staged network proofs**) for per-step commands
+and **One-time live orchestrator verification (operator checklist)** for the recommended
+one-time orchestrator `pytest -m live_network` checklist (temp DB only; not CI-enforced).
 
 **Manual synthnote operator spine** (mock LLM; tickets 088–099): for Level-1
 `manual_text` research on the creativity synthnote source, follow the five-step

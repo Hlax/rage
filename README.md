@@ -302,6 +302,29 @@ $env:OPENALEX_MAILTO = "operator@example.com"
 python -m pytest tests/unit/test_live_staged_orchestrator_mock_spine.py -m live_network -q
 ```
 
+**One-time live orchestrator verification (operator checklist; ticket-199):** after per-step
+proofs or when validating a fresh operator environment, run the orchestrator proof once on
+a **temp `--db` path** (pytest `tmp_path` — never the default graph DB). **Not CI-enforced:**
+default `pytest` and GitHub Golden Gate exclude `live_network`; this is operator opt-in only.
+
+| Prerequisite | Required value |
+| --- | --- |
+| `RGE_LLM_MODE` | `mock` (no live LLM) |
+| `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR` | `1` |
+| `RGE_ALLOW_SOURCE_NETWORK` | `1` |
+| `OPENALEX_MAILTO` | valid contact email (OpenAlex polite pool) |
+| Network | outbound HTTPS to OpenAlex (may time out in restricted builder sandboxes) |
+
+**Checklist:**
+
+1. Set env vars from the orchestrator block above.
+2. Run: `python -m pytest tests/unit/test_live_staged_orchestrator_mock_spine.py -m live_network -q`
+3. Confirm **1 passed** (not skipped). Skips mean a missing env gate — see test module docstring.
+4. Confirm stdout JSON includes `"status": "completed"`, `"mode": "fixture_staged"`, and stable dual-spine counts: `sources` 3, `candidate_sources` 2, `research_queue` 2, `score_events` 2, `run_reports` 2, `qualifies_evidence` 2.
+5. Confirm temp report artifact: `run_report_latest.json` under the test temp output dir (not committed).
+
+If the run times out, retry from a network-unrestricted machine; do **not** enable live network in CI. Patched-network regression remains `tests/unit/test_staged_fixture_mode_run_spine.py`.
+
 **Manual source ingestion** (Level-1): place operator `.txt`/`.md` files under gitignored `data/sources/manual/<domain>/` (e.g. `data/sources/manual/creativity/`) and ingest with:
 
 ```powershell
