@@ -252,7 +252,8 @@ superseded
 | 218 | ticket-218 | done | README and AGENTS live staged detect live LLM operator docs | `phase-2/ticket-218-live-staged-detect-live-llm-docs` | `agent_reports/2026-06-15_ticket-218_live-staged-detect-live-llm-docs.md` |
 | 219 | ticket-219 | done | Principal audit post-ticket-217 staged live detect checkpoint | | `agent_reports/2026-06-15_ticket-219_principal-audit-post-ticket-217.md` |
 | 220 | ticket-220 | done | .env.example and runtime config live staged detect live LLM gate | `phase-2/ticket-220-live-staged-detect-env-profile` | `agent_reports/2026-06-15_ticket-220_live-staged-detect-env-profile.md` |
-| 221 | ticket-221 | proposed | Pre-ticket audit: live staged reconcile on staged spine (per-step) | | |
+| 221 | ticket-221 | done | Pre-ticket audit: live staged reconcile on staged spine (per-step) | `phase-2/ticket-221-pre-ticket-live-staged-reconcile-audit` | `agent_reports/2026-06-15_ticket-221_pre-ticket-live-staged-reconcile-audit.md` |
+| 222 | ticket-222 | proposed | Pre-ticket audit: live staged generate-run-report on staged spine (per-step) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -982,9 +983,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-221 (proposed) — Pre-ticket audit: live staged reconcile on staged spine (per-step)
+ticket-222 (proposed) — Pre-ticket audit: live staged generate-run-report on staged spine (per-step)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-221 pre-ticket live staged reconcile audit)
+
+- Pre-ticket audit **NO-GO** for live Ollama reconcile: `score_reconciler.py` is deterministic; no LLM task.
+- `RGE_ALLOW_LIVE_STAGED_RECONCILE` remains network spine gate only (ticket-184).
+- No live reconcile implementation ticket seeded.
+- ticket-222 seeded: pre-ticket audit for generate-run-report live LLM surface.
 
 ## Queue Notes (2026-06-15, ticket-220 live staged detect env profile)
 

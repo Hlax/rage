@@ -1,0 +1,36 @@
+{
+  "id": "ticket-222",
+  "title": "Pre-ticket audit: live staged generate-run-report on staged spine (per-step)",
+  "problem": "Staged spine uses deterministic generate-run-report after reconcile. Pre-ticket audit should confirm whether any live LLM report path is valid before broader milestones.",
+  "evidence": [
+    "agent_reports/2026-06-15_pre-ticket-221_live-staged-reconcile-live-llm-audit.md",
+    "agent_reports/2026-06-15_ticket-187_live-staged-report-mock-spine.md",
+    "rge/modules/run_evaluator.py",
+    "tests/unit/test_live_staged_report_mock_spine.py"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-15_pre-ticket-222_live-staged-report-live-llm-audit.md",
+    "agent_reports/2026-06-15_ticket-222_pre-ticket-live-staged-report-audit.md"
+  ],
+  "acceptance_criteria": [
+    "Audit documents NO-GO or narrow scope for live LLM report on staged spine.",
+    "Orchestrator mock-only boundary reaffirmed.",
+    "Distinguishes deterministic generate-run-report from draft_run_summary LLM task (Phase 0 stub)."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Report implementation changes.",
+    "Orchestrator live LLM.",
+    "Public export/site.",
+    "Schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove audit reports only.",
+  "status": "proposed",
+  "category": "Phase 3 / live LLM / staged spine product-risk",
+  "pre_ticket_audit_required": true
+}
