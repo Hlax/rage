@@ -58,13 +58,20 @@ Local gates: **142 golden**, **605 pytest** (17 deselected), **safety audit pass
 
 ## Checkpoint status (post-audit)
 
-This report satisfies **ticket-206** and resets cadence. After commit to `main`, re-run:
+This report satisfies **ticket-206** and resets cadence. Post-commit gate check:
 
-```powershell
-python -m rge.modules.principal_audit_gate --next-ticket ticket-207
+```json
+{
+  "status": "blocked",
+  "cadence_status": "satisfied",
+  "done_tickets_since_latest_checkpoint": 1,
+  "latest_checkpoint_report": "agent_reports/2026-06-15_ticket-206_principal-audit-post-ticket-205.md",
+  "next_ticket_id": "ticket-207",
+  "implementation_gate": "blocked_missing_pre_ticket_audit"
+}
 ```
 
-Expected: `cadence_status: satisfied` or `not_due`.
+`cadence_status: satisfied`. **ticket-207** is medium-risk — requires pre-ticket audit before implementation.
 
 ## Repo and queue
 

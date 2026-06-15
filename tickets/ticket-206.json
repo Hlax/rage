@@ -9,7 +9,7 @@
   ],
   "affected_modules": [],
   "expected_files": [
-    "agent_reports/2026-06-15_principal-audit-post-ticket-205.md"
+    "agent_reports/2026-06-15_ticket-206_principal-audit-post-ticket-205.md"
   ],
   "acceptance_criteria": [
     "Principal audit report documents ticket-203 through ticket-205 outcomes and live LLM boundaries.",

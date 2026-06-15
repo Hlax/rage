@@ -237,7 +237,7 @@ superseded
 | 203 | ticket-203 | done | Pre-ticket audit: live LLM on staged research run spine | | `agent_reports/2026-06-15_pre-ticket-203_live-llm-staged-run-audit.md` |
 | 204 | ticket-204 | done | Live staged extract live LLM opt-in proof (per-step) | `phase-2/ticket-204-live-staged-extract-live-llm-spine` | `agent_reports/2026-06-15_ticket-204_live-staged-extract-live-llm-spine.md` |
 | 205 | ticket-205 | done | README and AGENTS live staged extract live LLM operator docs | `phase-2/ticket-205-live-staged-extract-live-llm-docs` | `agent_reports/2026-06-15_ticket-205_live-staged-extract-live-llm-docs.md` |
-| 206 | ticket-206 | done | Principal audit post-ticket-205 staged live extract checkpoint | | `agent_reports/2026-06-15_principal-audit-post-ticket-205.md` |
+| 206 | ticket-206 | done | Principal audit post-ticket-205 staged live extract checkpoint | | `agent_reports/2026-06-15_ticket-206_principal-audit-post-ticket-205.md` |
 | 207 | ticket-207 | proposed | Pre-ticket audit: live staged link on staged spine (per-step) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
@@ -975,7 +975,7 @@ ticket-207 (proposed) — Pre-ticket audit: live staged link on staged spine (pe
 ## Queue Notes (2026-06-15, principal audit post-ticket-205)
 
 - Cadence reset; tickets 202–205 reviewed; live staged extract boundaries confirmed.
-- Authoritative audit: `agent_reports/2026-06-15_principal-audit-post-ticket-205.md`.
+- Authoritative audit: `agent_reports/2026-06-15_ticket-206_principal-audit-post-ticket-205.md`.
 - ticket-207 seeded: pre-ticket audit for live staged link (per-step).
 
 ## Queue Notes (2026-06-15, ticket-205 agent)
