@@ -62,7 +62,7 @@ Live network test not run in CI/default suite (operator opt-in only).
 
 ## Merge to main
 
-Pending merge (see post-merge commit for hash).
+Merge commit: `82613c031bc50894f4f766382b3f3fb0bbf87243`
 
 ## Recommended next ticket
 
