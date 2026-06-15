@@ -168,14 +168,13 @@ def _is_docs_only_title(title: str | None) -> bool:
 
 
 def _queue_gate_disagreement(
-    plan: dict[str, Any],
     audit: dict[str, Any],
+    resolved_ticket_id: str | None,
 ) -> str | None:
-    plan_ticket = (plan.get("current_ticket") or {}).get("ticket_id")
     audit_ticket = audit.get("next_ticket_id")
-    if plan_ticket and audit_ticket and plan_ticket != audit_ticket:
+    if resolved_ticket_id and audit_ticket and resolved_ticket_id != audit_ticket:
         return (
-            f"Queue active ticket {plan_ticket!r} disagrees with gate next ticket "
+            f"Resolved ticket {resolved_ticket_id!r} disagrees with gate next ticket "
             f"{audit_ticket!r}."
         )
     return None
@@ -265,7 +264,7 @@ def evaluate_autocycle_cycle(
             next_cmd="python -m rge.modules.operator_loop --mode plan",
         )
 
-    disagreement = _queue_gate_disagreement(plan, audit)
+    disagreement = _queue_gate_disagreement(audit, ticket_id)
     if disagreement:
         return stop(f"queue_gate_disagreement: {disagreement}")
 
@@ -348,8 +347,24 @@ def evaluate_autocycle_cycle(
             or "/rge-principal-audit",
         )
 
+    action = plan.get("next_recommended_action") or {}
     action_id = action.get("action_id")
     gate = action.get("gate")
+
+    active_row = next((row for row in rows if row.ticket_id == ticket_id), None)
+    if active_row and active_row.status in {"proposed", "ready"}:
+        result["run_next_ticket_allowed"] = True
+        return stop(
+            "ticket_implementation_requires_agent: /rge-run-next-ticket is prompt-only",
+            next_cmd="/rge-run-next-ticket",
+            commands=["/rge-run-next-ticket"],
+        )
+
+    if active_row and active_row.status == "in_progress":
+        return stop(
+            "operator_action_blocked_automation: continue_ticket_implementation",
+            next_cmd="Review latest agent report and resume ticket branch",
+        )
 
     if action_id == "begin_ticket_implementation" and ticket_id:
         result["run_next_ticket_allowed"] = True
