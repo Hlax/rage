@@ -250,7 +250,8 @@ superseded
 | 216 | ticket-216 | done | Pre-ticket audit: live staged detect on staged spine (per-step) | `phase-2/ticket-216-pre-ticket-live-staged-detect-audit` | `agent_reports/2026-06-15_ticket-216_pre-ticket-live-staged-detect-audit.md` |
 | 217 | ticket-217 | done | Live staged detect live LLM opt-in proof (per-step) | `phase-2/ticket-217-live-staged-detect-live-llm-spine` | `agent_reports/2026-06-15_ticket-217_live-staged-detect-live-llm-spine.md` |
 | 218 | ticket-218 | done | README and AGENTS live staged detect live LLM operator docs | `phase-2/ticket-218-live-staged-detect-live-llm-docs` | `agent_reports/2026-06-15_ticket-218_live-staged-detect-live-llm-docs.md` |
-| 219 | ticket-219 | proposed | Principal audit post-ticket-217 staged live detect checkpoint | | |
+| 219 | ticket-219 | done | Principal audit post-ticket-217 staged live detect checkpoint | | `agent_reports/2026-06-15_ticket-219_principal-audit-post-ticket-217.md` |
+| 220 | ticket-220 | proposed | .env.example and runtime config live staged detect live LLM gate | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -980,9 +981,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-219 (proposed) — Principal audit post-ticket-217 staged live detect checkpoint
+ticket-220 (proposed) — .env.example and runtime config live staged detect live LLM gate
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-219 principal audit post-ticket-217)
+
+- Cadence reset; GO for continued staged spine work with boundaries intact.
+- Per-step live detect (217) + docs (218) verified in mock gates; live Ollama proof operator opt-in.
+- Hygiene gap: `.env.example` missing detect live gate — ticket-220 seeded.
+- Deferred: live reconcile/report on staged spine without pre-ticket audit.
 
 ## Queue Notes (2026-06-15, ticket-218 live staged detect docs)
 
