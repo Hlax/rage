@@ -73,7 +73,8 @@ None.
 
 ## Merge to main
 
-<!-- merge hash recorded in follow-up commit -->
+Merge commit: `15c7be1` (`Merge branch 'phase-2/ticket-224-staged-reconcile-report-deterministic-docs'`).
+Post-merge pytest: 621 passed, 20 deselected.
 
 ## Recommended next ticket
 
