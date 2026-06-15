@@ -248,7 +248,7 @@ superseded
 | 214 | ticket-214 | done | README and AGENTS live staged build live LLM operator docs | `phase-2/ticket-214-live-staged-build-live-llm-docs` | `agent_reports/2026-06-15_ticket-214_live-staged-build-live-llm-docs.md` |
 | 215 | ticket-215 | done | Principal audit post-ticket-213 staged live build checkpoint | | `agent_reports/2026-06-15_ticket-215_principal-audit-post-ticket-213.md` |
 | 216 | ticket-216 | done | Pre-ticket audit: live staged detect on staged spine (per-step) | `phase-2/ticket-216-pre-ticket-live-staged-detect-audit` | `agent_reports/2026-06-15_ticket-216_pre-ticket-live-staged-detect-audit.md` |
-| 217 | ticket-217 | proposed | Live staged detect live LLM opt-in proof (per-step) | | |
+| 217 | ticket-217 | done | Live staged detect live LLM opt-in proof (per-step) | `phase-2/ticket-217-live-staged-detect-live-llm-spine` | `agent_reports/2026-06-15_ticket-217_live-staged-detect-live-llm-spine.md` |
 | 218 | ticket-218 | proposed | README and AGENTS live staged detect live LLM operator docs | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
@@ -979,9 +979,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-217 (proposed) — Live staged detect live LLM opt-in proof (per-step)
+ticket-218 (proposed) — README and AGENTS live staged detect live LLM operator docs
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-217 live staged detect live LLM spine)
+
+- Per-step rank-1 live detect: `--live-staged-detect-fallthrough` +
+  `RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM=1` (separate from mock detect gate).
+- Mock upstream (extract/link/build) + `seed_domain_opposing_context` in pytest.
+- Orchestrator unchanged (mock LLM forced).
 
 ## Queue Notes (2026-06-15, ticket-216 pre-ticket live staged detect audit)
 
