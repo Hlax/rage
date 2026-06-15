@@ -245,7 +245,9 @@ superseded
 | 211 | ticket-211 | done | Pre-ticket audit: live staged build on staged spine (per-step) | | `agent_reports/2026-06-15_ticket-211_pre-ticket-live-staged-build-audit.md` |
 | 212 | ticket-212 | done | Live staged build live LLM opt-in proof (per-step) | `phase-2/ticket-212-live-staged-build-live-llm-spine` | `agent_reports/2026-06-15_ticket-212_live-staged-build-live-llm-spine.md` |
 | 213 | ticket-213 | done | Local env profile support for live staged operator runs | `phase-2/ticket-213-local-env-profile-support` | `agent_reports/2026-06-15_ticket-213_local-env-profile-support.md` |
-| 214 | ticket-214 | proposed | README and AGENTS live staged build live LLM operator docs | | |
+| 214 | ticket-214 | done | README and AGENTS live staged build live LLM operator docs | `phase-2/ticket-214-live-staged-build-live-llm-docs` | `agent_reports/2026-06-15_ticket-214_live-staged-build-live-llm-docs.md` |
+| 215 | ticket-215 | done | Principal audit post-ticket-213 staged live build checkpoint | | `agent_reports/2026-06-15_ticket-215_principal-audit-post-ticket-213.md` |
+| 216 | ticket-216 | proposed | Pre-ticket audit: live staged detect on staged spine (per-step) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -975,9 +977,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-214 (proposed) — README and AGENTS live staged build live LLM operator docs
+ticket-216 (proposed) — Pre-ticket audit: live staged detect on staged spine (per-step)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-214 live staged build docs)
+
+- README/AGENTS document live staged build: `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM=1`,
+  `--live-staged-build-fallthrough`, pytest `live_network and live_smoke`; mock extract + mock link upstream.
+- ticket-216 seeded: pre-ticket audit for live staged detect.
 
 ## Queue Notes (2026-06-15, ticket-213 local env profile)
 

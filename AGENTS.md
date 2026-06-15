@@ -133,8 +133,15 @@ not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_LINK_LIVE_LLM=1`,
 `RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama`, network gates above, temp `--db`, mock
 extract upstream in pytest, and `link-concepts --live-staged-link-fallthrough` (or
 chained pytest in `tests/unit/test_live_staged_link_live_llm_spine.py` with
-`live_network` and `live_smoke` markers). Build/detect on staged spine remain mock-only
-until separate tickets.
+`live_network` and `live_smoke` markers).
+
+**Live staged build (live Ollama; ticket-212):** separate per-step operator proof —
+not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM=1`,
+`RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama`, network gates above, temp `--db`, mock
+extract + mock link upstream in pytest, and `build-relationships --live-staged-build-fallthrough`
+(or chained pytest in `tests/unit/test_live_staged_build_live_llm_spine.py` with
+`live_network` and `live_smoke` markers). Detect/reconcile on staged spine remain
+mock-only until separate tickets.
 
 **Manual synthnote operator spine** (mock LLM; tickets 088–099): for Level-1
 `manual_text` research on the creativity synthnote source, follow the five-step
