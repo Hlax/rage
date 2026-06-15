@@ -221,7 +221,8 @@ superseded
 | 187 | ticket-187 | done | Live staged generate-run-report spine (opt-in network) | `phase-2/ticket-187-live-staged-report-mock-spine` | `agent_reports/2026-06-15_ticket-187_live-staged-report-mock-spine.md` |
 | 188 | ticket-188 | done | README and AGENTS.md live staged report opt-in proof docs | `phase-2/ticket-188-live-staged-report-opt-in-docs` | `agent_reports/2026-06-15_ticket-188_live-staged-report-opt-in-docs.md` |
 | 189 | ticket-189 | done | Pre-ticket audit: live staged rank-2 candidate mock spine | `phase-2/ticket-189-pre-ticket-live-staged-rank2-mock-spine-audit` | `agent_reports/2026-06-15_ticket-189_pre-ticket-live-staged-rank2-mock-spine.md` |
-| 190 | ticket-190 | proposed | Live staged rank-2 candidate mock spine (opt-in network) | | |
+| 190 | ticket-190 | done | Live staged rank-2 candidate mock spine (opt-in network) | `phase-2/ticket-190-live-staged-rank2-mock-spine` | `agent_reports/2026-06-15_ticket-190_live-staged-rank2-mock-spine.md` |
+| 191 | ticket-191 | proposed | README and AGENTS.md live staged rank-2 opt-in proof docs | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -951,9 +952,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-190 (proposed) — Live staged rank-2 candidate mock spine (opt-in network)
+ticket-191 (proposed) — README and AGENTS.md live staged rank-2 opt-in proof docs
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-190 agent)
+
+- Opt-in `live_network` pytest: live rank-2 candidate through generate-run-report.
+- Uses `staged_fetch_second_candidate_*` fixtures after live ingest.
+- Env: `RGE_ALLOW_LIVE_STAGED_RANK2=1`.
+- 598 pytest; 15 deselected; 142 golden; safety pass.
+- ticket-191 seeded: rank-2 opt-in docs.
 
 ## Queue Notes (2026-06-15, ticket-189 agent)
 

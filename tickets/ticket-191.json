@@ -1,0 +1,39 @@
+{
+  "id": "ticket-191",
+  "title": "README and AGENTS.md live staged rank-2 opt-in proof docs",
+  "problem": "ticket-190 adds opt-in live_network pytest for rank-2 candidate. README/AGENTS lack RGE_ALLOW_LIVE_STAGED_RANK2 operator commands.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-190_live-staged-rank2-mock-spine.md",
+    "tests/unit/test_live_staged_rank2_report_mock_spine.py",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [
+    "README.md",
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "AGENTS.md",
+    "agent_reports/2026-06-15_ticket-191_live-staged-rank2-opt-in-docs.md"
+  ],
+  "acceptance_criteria": [
+    "README and AGENTS.md document RGE_ALLOW_LIVE_STAGED_RANK2 opt-in pytest command.",
+    "Golden tests pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Code changes.",
+    "CI live network.",
+    "Public export/site."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert doc paragraphs.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation / operator ergonomics"
+}
