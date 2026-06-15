@@ -31,6 +31,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert audit report only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 2 / principal audit checkpoint"
 }

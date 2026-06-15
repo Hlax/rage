@@ -258,7 +258,8 @@ superseded
 | 224 | ticket-224 | done | README and AGENTS staged reconcile and report deterministic boundary docs | `phase-2/ticket-224-staged-reconcile-report-deterministic-docs` | `agent_reports/2026-06-15_ticket-224_staged-reconcile-report-deterministic-docs.md` |
 | 225 | ticket-225 | done | Runtime config staged reconcile and report network-only gate docs | `phase-2/ticket-225-runtime-config-staged-reconcile-report-gates` | `agent_reports/2026-06-15_ticket-225_runtime-config-staged-reconcile-report-gates.md` |
 | 226 | ticket-226 | done | README operator one-time live orchestrator checklist post-LLM-closure refresh | `phase-2/ticket-226-orchestrator-checklist-llm-closure-refresh` | `agent_reports/2026-06-15_ticket-226_orchestrator-checklist-llm-closure-refresh.md` |
-| 227 | ticket-227 | proposed | Principal audit post-ticket-226 staged docs closure checkpoint | | |
+| 227 | ticket-227 | done | Principal audit post-ticket-226 staged docs closure checkpoint | | `agent_reports/2026-06-15_ticket-227_principal-audit-post-ticket-226.md` |
+| 228 | ticket-228 | proposed | Pre-ticket audit: rank-2 staged per-step live Ollama on staged spine | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -988,9 +989,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-227 (proposed) — Principal audit post-ticket-226 staged docs closure checkpoint
+none — pause recommended for operator live proof sessions
+(ticket-228 pre-ticket rank-2 live LLM audit proposed when rank-2 scope is desired)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-227 principal audit post-ticket-226)
+
+- Cadence reset; staged rank-1 LLM docs trilogy complete (224–226).
+- Drift note: no product-risk code since detect (217); pause recommended.
+- ticket-228 seeded: pre-ticket rank-2 live LLM audit (medium; when scoped).
 
 ## Queue Notes (2026-06-15, ticket-226 orchestrator checklist LLM closure refresh)
 
