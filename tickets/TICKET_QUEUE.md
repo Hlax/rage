@@ -238,7 +238,8 @@ superseded
 | 204 | ticket-204 | done | Live staged extract live LLM opt-in proof (per-step) | `phase-2/ticket-204-live-staged-extract-live-llm-spine` | `agent_reports/2026-06-15_ticket-204_live-staged-extract-live-llm-spine.md` |
 | 205 | ticket-205 | done | README and AGENTS live staged extract live LLM operator docs | `phase-2/ticket-205-live-staged-extract-live-llm-docs` | `agent_reports/2026-06-15_ticket-205_live-staged-extract-live-llm-docs.md` |
 | 206 | ticket-206 | done | Principal audit post-ticket-205 staged live extract checkpoint | | `agent_reports/2026-06-15_ticket-206_principal-audit-post-ticket-205.md` |
-| 207 | ticket-207 | proposed | Pre-ticket audit: live staged link on staged spine (per-step) | | |
+| 207 | ticket-207 | done | Pre-ticket audit: live staged link on staged spine (per-step) | `phase-2/ticket-207-pre-ticket-live-staged-link-audit` | `agent_reports/2026-06-15_ticket-207_pre-ticket-live-staged-link-audit.md` |
+| 208 | ticket-208 | proposed | Live staged link live LLM opt-in proof (per-step) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -968,9 +969,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-207 (proposed) — Pre-ticket audit: live staged link on staged spine (per-step)
+ticket-208 (proposed) — Live staged link live LLM opt-in proof (per-step)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-207 pre-ticket audit)
+
+- Pre-ticket audit GO for ticket-208: per-step live Ollama link on rank-1 staged source (mock extract upstream).
+- Authoritative audit: `agent_reports/2026-06-15_pre-ticket-207_live-staged-link-live-llm-audit.md`.
 
 ## Queue Notes (2026-06-15, principal audit post-ticket-205)
 
