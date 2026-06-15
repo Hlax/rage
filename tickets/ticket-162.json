@@ -1,0 +1,43 @@
+{
+  "id": "ticket-162",
+  "title": "Fixture-mode staged research run orchestration spine (mock)",
+  "problem": "Tickets 144–161 prove each staged CLI step and dual-candidate idempotency in unit tests. Operators cannot run a single fixture-mode research run command that orchestrates discover→report for staged Phase 3 candidates without live LLM or network.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-161_dual-candidate-staged-idempotency.md",
+    "agent_reports/2026-06-14_principal-audit-post-ticket-158.md",
+    "rge/cli.py",
+    "tests/unit/test_staged_dual_candidate_idempotency.py"
+  ],
+  "affected_modules": [
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_staged_fixture_mode_run_spine.py",
+    "agent_reports/2026-06-14_pre-ticket-162_fixture-mode-staged-run-audit.md",
+    "agent_reports/2026-06-14_ticket-162_fixture-mode-staged-run-spine.md"
+  ],
+  "acceptance_criteria": [
+    "Fixture-mode or explicit mock orchestration runs staged Phase 3 spine on temp DB with deterministic outcomes matching dual-candidate unit spine counts.",
+    "No live LLM or live network in default pytest collection.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_staged_fixture_mode_run_spine.py -q",
+    "python -m pytest tests/unit/test_staged_dual_candidate_idempotency.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Live OpenAlex network.",
+    "Public export/site changes.",
+    "Schema migrations.",
+    "Live Ollama paths."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove fixture-mode staged run test; retain ticket-161 dual idempotency.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / product-risk reduction",
+  "pre_ticket_audit_required": true
+}

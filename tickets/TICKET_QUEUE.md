@@ -192,7 +192,8 @@ superseded
 | 158 | ticket-158 | done | Generate run report on second staged-ingested source (mock spine step) | `phase-2/ticket-158-second-staged-run-report-spine` | `agent_reports/2026-06-14_ticket-158_second-staged-run-report-spine.md` |
 | 159 | ticket-159 | proposed | Principal audit checkpoint post-ticket-158 (rank #2 staged Phase 3 spine completion) | | |
 | 160 | ticket-160 | done | Second staged candidate full spine idempotency (mock) | `phase-2/ticket-160-second-staged-spine-idempotency` | `agent_reports/2026-06-14_ticket-160_second-staged-spine-idempotency.md` |
-| 161 | ticket-161 | proposed | Dual-candidate staged Phase 3 idempotency on one DB (mock) | | |
+| 161 | ticket-161 | done | Dual-candidate staged Phase 3 idempotency on one DB (mock) | `phase-2/ticket-161-dual-candidate-staged-idempotency` | `agent_reports/2026-06-14_ticket-161_dual-candidate-staged-idempotency.md` |
+| 162 | ticket-162 | proposed | Fixture-mode staged research run orchestration spine (mock) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -922,9 +923,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-161 (proposed) — Dual-candidate staged Phase 3 idempotency on one DB (mock)
+ticket-162 (proposed) — Fixture-mode staged research run orchestration spine (mock)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-161 agent)
+
+- Test-forward ticket: rank #1 then rank #2 full spines on one DB; re-run without re-seeding domain.
+- Stable dual counts: 3 sources, 2 score_events, 2 run_reports, 2 qualifies.
+- 579 pytest; 142 golden; safety pass.
+- ticket-162 seeded: fixture-mode staged research run orchestration.
+- Phase 3 mock idempotency complete for rank #1, rank #2, and dual-candidate shared DB.
 
 ## Queue Notes (2026-06-14, ticket-160 agent)
 
