@@ -32,6 +32,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert .env.example and doc changes only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / operator ergonomics"
 }

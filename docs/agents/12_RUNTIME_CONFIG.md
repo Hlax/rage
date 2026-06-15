@@ -37,6 +37,13 @@ Golden tests and the builder agent should set `RGE_LLM_MODE=mock` explicitly.
 | `RGE_LLM_SCHEMA_VERSION` | optional | no | yes | no | Candidate JSON schema version |
 | `RGE_EMBEDDING_MODE` | optional | no | yes | no | Future embeddings (not used in Phase 1) |
 | `RGE_EMBEDDING_MODEL` | optional | no | yes | no | Future embeddings (not used in Phase 1) |
+| `RGE_ALLOW_SOURCE_NETWORK` | optional (default `0`) | no | yes | no | OpenAlex discover/fetch network gate |
+| `OPENALEX_MAILTO` | optional | no | yes | no | Polite OpenAlex contact (not a secret) |
+| `OPENALEX_API_KEY` | optional | yes | yes | no | OpenAlex authenticated tier (never commit) |
+| `RGE_ALLOW_LIVE_STAGED_EXTRACT_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama extract on staged ingest |
+| `RGE_ALLOW_LIVE_STAGED_LINK_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama link on staged ingest |
+| `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama build on staged ingest |
+| `RGE_ALLOW_LIVE_STAGED_*` (mock spine) | optional (default `0`) | no | yes | no | Live OpenAlex + mock LLM staged proofs (see README) |
 
 Valid `RGE_LLM_MODE` values: `mock`, `ollama` only. Anything else fails closed.
 
@@ -113,6 +120,44 @@ python -m rge.cli model-health
 
 Copy `.env.smoke.example` → `.env.smoke.local` for a committed smoke profile
 template. Cloud mode is **not implemented** (future ticket-059+).
+
+## Live staged operator env profile (ticket-213)
+
+For per-step live Ollama proofs on staged rank-1 OpenAlex ingest (extract/link/build),
+operators typically set env vars in a gitignored `.env.local` (copy from
+`.env.example`) or export them in the shell. The repo loader reads optional root
+`.env` automatically; process env always wins. No `python-dotenv` dependency.
+
+**Base live model settings:**
+
+```powershell
+# Copy once: cp .env.example .env.local  (PowerShell: Copy-Item .env.example .env.local)
+# Edit .env.local — never commit it.
+
+$env:OLLAMA_BASE_URL = "http://127.0.0.1:11434"
+$env:RGE_LOCAL_LLM = "qwen3.5:9b-q4_K_M"   # or qwen2.5:7b; must match `ollama list`
+$env:RGE_LLM_MODE = "ollama"
+$env:RGE_ALLOW_LIVE_LLM = "1"
+python -m rge.cli model-health
+```
+
+`model-health` reports reachability and model tags only — it does **not** print
+API keys, mailto values, or other secrets.
+
+**Staged network + per-step live LLM gates** (rank-1 only; temp `--db` required):
+
+| Step | Live Ollama gate | Mock spine gate (live OpenAlex + mock LLM) |
+|------|------------------|--------------------------------------------|
+| extract | `RGE_ALLOW_LIVE_STAGED_EXTRACT_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_EXTRACT=1` |
+| link | `RGE_ALLOW_LIVE_STAGED_LINK_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_LINK=1` |
+| build | `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_BUILD=1` |
+
+All staged proofs also require `RGE_ALLOW_SOURCE_NETWORK=1` and `OPENALEX_MAILTO`.
+Per-step live Ollama gates are **separate** from mock-spine gates. The staged
+orchestrator (`research run --staged-spine`) always forces `RGE_LLM_MODE=mock`.
+
+See README Operator Quickstart for pytest commands (`live_network` + `live_smoke`
+markers excluded from default pytest).
 
 ## Live structured probe (ticket-060)
 
