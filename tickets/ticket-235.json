@@ -1,0 +1,32 @@
+{
+  "id": "ticket-235",
+  "title": "README operator proof-layer runbook (unsuitable_live_artifact)",
+  "problem": "Operators lack documented guidance for three-layer live staged proofs and how to interpret unsuitable_live_artifact skips after ticket-234.",
+  "evidence": [
+    "agent_reports/2026-06-15_phase-3_ticket-234_live-staged-proof-layers.md",
+    "agent_reports/2026-06-15_principal-audit-staged-spine-acquisition-checkpoint.md"
+  ],
+  "affected_modules": [
+    "README.md",
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "README.md"
+  ],
+  "acceptance_criteria": [
+    "Document layer 1 acquisition, layer 2 fixture mock spine, layer 3 combined live proof.",
+    "Document unsuitable_live_artifact skip JSON and operator retry guidance.",
+    "No product code changes."
+  ],
+  "test_plan": [
+    "python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Implementation of ticket-230 rank-2 live extract.",
+    "Changing live test behavior."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README/AGENTS doc edits.",
+  "status": "proposed",
+  "category": "Phase 3 / operator documentation"
+}

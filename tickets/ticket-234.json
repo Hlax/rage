@@ -1,0 +1,35 @@
+{
+  "id": "ticket-234",
+  "title": "Decouple live staged mock-spine proofs from fixture phrases",
+  "problem": "Combined live proofs failed or misread as regressions when fetchable live artifacts lacked checksum-pinned mock fixture marker phrases.",
+  "evidence": [
+    "agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md",
+    "agent_reports/2026-06-15_principal-audit-staged-spine-acquisition-checkpoint.md"
+  ],
+  "affected_modules": [
+    "tests/unit/live_staged_proof_layers.py",
+    "tests/unit/live_staged_candidates.py"
+  ],
+  "expected_files": [
+    "tests/unit/live_staged_proof_layers.py",
+    "tests/unit/test_live_staged_proof_layers.py",
+    "agent_reports/2026-06-15_phase-3_ticket-234_live-staged-proof-layers.md"
+  ],
+  "acceptance_criteria": [
+    "Layer 1 acquisition tests pass without fixture phrase coupling.",
+    "Layer 3 combined proofs skip with unsuitable_live_artifact when fetchable but incompatible.",
+    "Default CI unchanged; live_network tests remain env-gated."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_live_staged_proof_layers.py -q",
+    "python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Changing mock fixture claim validation rules.",
+    "README operator documentation (ticket-235)."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert proof layer helpers; restore single combined live tests.",
+  "status": "done",
+  "category": "Phase 3 / live proof layering"
+}

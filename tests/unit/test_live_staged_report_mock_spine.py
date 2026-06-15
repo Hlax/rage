@@ -1,8 +1,14 @@
-"""Opt-in live network + deterministic generate-run-report spine (ticket-187).
+"""Opt-in live network + deterministic generate-run-report spine (ticket-187; layers ticket-234).
 
 Default pytest collection excludes ``live_network`` tests (see ``pyproject.toml``).
 
-Operator opt-in (real OpenAlex HTTP through reconcile; deterministic report only):
+Proof layers:
+- Layer 1 (``test_live_openalex_source_acquisition_for_report_spine``): discover + top-N fetch.
+- Layer 2: fixture-backed staged run-report tests (network-free).
+- Layer 3 (``test_live_openalex_combined_report_mock_spine``): full live spine when compatible;
+  otherwise skips with ``unsuitable_live_artifact``.
+
+Operator opt-in:
 
 ```powershell
 $env:RGE_ALLOW_LIVE_STAGED_REPORT = "1"
@@ -22,11 +28,15 @@ import pytest
 
 from rge.cli import main
 from rge.db.connection import connect
-from tests.unit.live_staged_candidates import select_rank1_candidate_id
 from rge.db.repositories import RunReportRepository
+from tests.unit.live_staged_candidates import MOCK_STAGED_ARTIFACT_MARKERS
+from tests.unit.live_staged_proof_layers import (
+    require_mock_spine_compatible_fetch_or_skip,
+    run_live_openalex_discover,
+    run_live_source_acquisition,
+)
 from tests.unit.staged_domain_seed import seed_domain_opposing_context
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
 TEST_QUESTION_ID = "rq_live_staged_report_mock_spine"
 STAGED_RUN_ID = "run_live_staged_report_mock_spine"
 STAGED_TOPIC = "Human-AI co-creativity live staged report proof"
@@ -54,7 +64,6 @@ def test_require_live_staged_report_skips_without_opt_in(
     monkeypatch.delenv("RGE_ALLOW_LIVE_STAGED_REPORT", raising=False)
     with pytest.raises(pytest.skip.Exception):
         require_live_staged_report_env()
-
 
 
 @pytest.fixture(autouse=True)
@@ -92,55 +101,53 @@ def report_dir(tmp_path: Path) -> Path:
 
 
 @pytest.mark.live_network
-def test_live_openalex_discover_through_report_mock_spine(
+def test_live_openalex_source_acquisition_for_report_spine(
+    live_staged_report_env: None,
+    temp_db: Path,
+    staging_dir: Path,
+) -> None:
+    """Layer 1: live discover + top-N fetch without mock-spine phrase coupling."""
+    require_live_staged_report_env()
+    run_live_openalex_discover(temp_db, TEST_QUESTION_ID)
+
+    conn = connect(temp_db)
+    try:
+        candidate_id, fetch_payload = run_live_source_acquisition(
+            conn,
+            research_question_id=TEST_QUESTION_ID,
+            staging_dir=staging_dir,
+        )
+        assert candidate_id.startswith("disc_openalex_")
+        assert Path(str(fetch_payload["artifact_path"])).stat().st_size > 0
+    finally:
+        conn.close()
+
+
+@pytest.mark.live_network
+def test_live_openalex_combined_report_mock_spine(
     live_staged_report_env: None,
     temp_db: Path,
     staging_dir: Path,
     report_dir: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
+    """Layer 3: full live report spine when artifact satisfies mock preconditions."""
     require_live_staged_report_env()
     seed_domain_opposing_context(temp_db)
 
-    assert (
-        main(
-            [
-                "discover-sources",
-                "--provider",
-                "openalex",
-                "--query",
-                "human AI creativity",
-                "--rank-only",
-                "--enqueue",
-                "--question",
-                TEST_QUESTION_ID,
-                "--db",
-                str(temp_db),
-            ]
-        )
-        == 0
-    )
+    run_live_openalex_discover(temp_db, TEST_QUESTION_ID)
+    capsys.readouterr()
 
     conn = connect(temp_db)
     try:
-        candidate_id = select_rank1_candidate_id(conn, TEST_QUESTION_ID)
+        candidate_id, _fetch_payload = require_mock_spine_compatible_fetch_or_skip(
+            conn,
+            research_question_id=TEST_QUESTION_ID,
+            staging_dir=staging_dir,
+            artifact_text_markers=MOCK_STAGED_ARTIFACT_MARKERS,
+        )
     finally:
         conn.close()
-
-    assert (
-        main(
-            [
-                "fetch-candidate",
-                "--candidate",
-                candidate_id,
-                "--db",
-                str(temp_db),
-                "--out",
-                str(staging_dir),
-            ]
-        )
-        == 0
-    )
 
     assert (
         main(

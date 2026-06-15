@@ -28,7 +28,14 @@ from rge.cli import main
 from rge.db.connection import connect, ensure_database
 from rge.llm.schemas import CandidateRelationshipBatch_v0_1, SCHEMA_VERSION_0_1_0
 from rge.modules.live_probe import LiveProbeGateError
-from tests.unit.live_staged_candidates import select_rank1_candidate_id
+from tests.unit.live_staged_candidates import (
+    MOCK_STAGED_ARTIFACT_MARKERS,
+    select_rank1_candidate_id,
+)
+from tests.unit.live_staged_proof_layers import (
+    require_mock_spine_compatible_fetch_or_skip,
+    run_live_openalex_discover,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OPENALEX_FIXTURE = REPO_ROOT / "fixtures" / "source_providers" / "openalex_works_sample.json"
@@ -372,48 +379,22 @@ def test_live_openalex_discover_through_live_build(
     require_live_staged_build_live_llm_env()
     _assert_ollama_or_skip()
 
-    assert (
-        main(
-            [
-                "discover-sources",
-                "--provider",
-                "openalex",
-                "--query",
-                "human AI creativity",
-                "--rank-only",
-                "--enqueue",
-                "--question",
-                TEST_QUESTION_ID,
-                "--db",
-                str(temp_db),
-            ]
-        )
-        == 0
-    )
+    run_live_openalex_discover(temp_db, TEST_QUESTION_ID)
+    capsys.readouterr()
 
     conn = connect(temp_db)
     try:
-        candidate_id = select_rank1_candidate_id(conn, TEST_QUESTION_ID)
         relationships_before = conn.execute(
             "SELECT COUNT(*) FROM relationships"
         ).fetchone()[0]
+        candidate_id, _fetch_payload = require_mock_spine_compatible_fetch_or_skip(
+            conn,
+            research_question_id=TEST_QUESTION_ID,
+            staging_dir=staging_dir,
+            artifact_text_markers=MOCK_STAGED_ARTIFACT_MARKERS,
+        )
     finally:
         conn.close()
-
-    assert (
-        main(
-            [
-                "fetch-candidate",
-                "--candidate",
-                candidate_id,
-                "--db",
-                str(temp_db),
-                "--out",
-                str(staging_dir),
-            ]
-        )
-        == 0
-    )
 
     assert (
         main(

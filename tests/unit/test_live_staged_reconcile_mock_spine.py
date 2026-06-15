@@ -1,8 +1,14 @@
-"""Opt-in live network + deterministic reconcile spine (ticket-184).
+"""Opt-in live network + deterministic reconcile spine (ticket-184; layers ticket-234).
 
 Default pytest collection excludes ``live_network`` tests (see ``pyproject.toml``).
 
-Operator opt-in (real OpenAlex HTTP through mock detect; deterministic reconcile only):
+Proof layers:
+- Layer 1 (``test_live_openalex_source_acquisition_for_reconcile_spine``): discover + top-N fetch.
+- Layer 2: fixture-backed ``tests/unit/test_staged_ingest_reconcile_spine.py`` (network-free).
+- Layer 3 (``test_live_openalex_combined_reconcile_mock_spine``): full live spine when artifact
+  matches mock markers; otherwise skips with ``unsuitable_live_artifact``.
+
+Operator opt-in:
 
 ```powershell
 $env:RGE_ALLOW_LIVE_STAGED_RECONCILE = "1"
@@ -22,10 +28,14 @@ import pytest
 
 from rge.cli import main
 from rge.db.connection import connect
-from tests.unit.live_staged_candidates import select_rank1_candidate_id
+from tests.unit.live_staged_candidates import MOCK_STAGED_ARTIFACT_MARKERS
+from tests.unit.live_staged_proof_layers import (
+    require_mock_spine_compatible_fetch_or_skip,
+    run_live_openalex_discover,
+    run_live_source_acquisition,
+)
 from tests.unit.staged_domain_seed import seed_domain_opposing_context
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
 TEST_QUESTION_ID = "rq_live_staged_reconcile_mock_spine"
 STAGED_EXTRACT_FIXTURE = "staged_fetch_extract_claims.json"
 STAGED_LINK_FIXTURE = "staged_fetch_link_concepts.json"
@@ -51,7 +61,6 @@ def test_require_live_staged_reconcile_skips_without_opt_in(
     monkeypatch.delenv("RGE_ALLOW_LIVE_STAGED_RECONCILE", raising=False)
     with pytest.raises(pytest.skip.Exception):
         require_live_staged_reconcile_env()
-
 
 
 @pytest.fixture(autouse=True)
@@ -82,12 +91,44 @@ def staging_dir(tmp_path: Path) -> Path:
 
 
 @pytest.mark.live_network
-def test_live_openalex_discover_through_reconcile_mock_spine(
+def test_live_openalex_source_acquisition_for_reconcile_spine(
+    live_staged_reconcile_env: None,
+    temp_db: Path,
+    staging_dir: Path,
+) -> None:
+    """Layer 1: live discover + top-N fetch without mock-spine phrase coupling."""
+    require_live_staged_reconcile_env()
+    run_live_openalex_discover(temp_db, TEST_QUESTION_ID)
+
+    conn = connect(temp_db)
+    try:
+        queue_count = conn.execute(
+            "SELECT COUNT(*) FROM research_queue WHERE research_question_id = ?",
+            (TEST_QUESTION_ID,),
+        ).fetchone()[0]
+        assert queue_count >= 1
+        candidate_id, fetch_payload = run_live_source_acquisition(
+            conn,
+            research_question_id=TEST_QUESTION_ID,
+            staging_dir=staging_dir,
+        )
+        assert candidate_id.startswith("disc_openalex_")
+        assert fetch_payload.get("selected_url_kind")
+        artifact = Path(str(fetch_payload["artifact_path"]))
+        assert artifact.is_file()
+        assert artifact.stat().st_size > 0
+    finally:
+        conn.close()
+
+
+@pytest.mark.live_network
+def test_live_openalex_combined_reconcile_mock_spine(
     live_staged_reconcile_env: None,
     temp_db: Path,
     staging_dir: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
+    """Layer 3: full live reconcile spine when artifact satisfies mock preconditions."""
     require_live_staged_reconcile_env()
     seed_domain_opposing_context(temp_db)
 
@@ -97,45 +138,19 @@ def test_live_openalex_discover_through_reconcile_mock_spine(
     finally:
         conn.close()
 
-    assert (
-        main(
-            [
-                "discover-sources",
-                "--provider",
-                "openalex",
-                "--query",
-                "human AI creativity",
-                "--rank-only",
-                "--enqueue",
-                "--question",
-                TEST_QUESTION_ID,
-                "--db",
-                str(temp_db),
-            ]
-        )
-        == 0
-    )
+    run_live_openalex_discover(temp_db, TEST_QUESTION_ID)
+    capsys.readouterr()
 
     conn = connect(temp_db)
     try:
-        candidate_id = select_rank1_candidate_id(conn, TEST_QUESTION_ID)
+        candidate_id, _fetch_payload = require_mock_spine_compatible_fetch_or_skip(
+            conn,
+            research_question_id=TEST_QUESTION_ID,
+            staging_dir=staging_dir,
+            artifact_text_markers=MOCK_STAGED_ARTIFACT_MARKERS,
+        )
     finally:
         conn.close()
-
-    assert (
-        main(
-            [
-                "fetch-candidate",
-                "--candidate",
-                candidate_id,
-                "--db",
-                str(temp_db),
-                "--out",
-                str(staging_dir),
-            ]
-        )
-        == 0
-    )
 
     assert (
         main(

@@ -22,7 +22,12 @@ import pytest
 
 from rge.cli import main
 from rge.db.connection import connect
-from tests.unit.live_staged_candidates import select_rank1_candidate_id
+from tests.unit.live_staged_candidates import MOCK_STAGED_ARTIFACT_MARKERS
+from tests.unit.live_staged_proof_layers import (
+    require_mock_spine_compatible_fetch_or_skip,
+    run_live_openalex_discover,
+    run_live_source_acquisition,
+)
 
 TEST_QUESTION_ID = "rq_live_staged_build_mock_spine"
 STAGED_EXTRACT_FIXTURE = "staged_fetch_extract_claims.json"
@@ -78,7 +83,29 @@ def staging_dir(tmp_path: Path) -> Path:
 
 
 @pytest.mark.live_network
-def test_live_openalex_discover_through_build_mock_fixture(
+def test_live_openalex_source_acquisition_for_build_spine(
+    live_staged_build_env: None,
+    temp_db: Path,
+    staging_dir: Path,
+) -> None:
+    require_live_staged_build_env()
+    run_live_openalex_discover(temp_db, TEST_QUESTION_ID)
+
+    conn = connect(temp_db)
+    try:
+        candidate_id, fetch_payload = run_live_source_acquisition(
+            conn,
+            research_question_id=TEST_QUESTION_ID,
+            staging_dir=staging_dir,
+        )
+        assert candidate_id.startswith("disc_openalex_")
+        assert Path(str(fetch_payload["artifact_path"])).stat().st_size > 0
+    finally:
+        conn.close()
+
+
+@pytest.mark.live_network
+def test_live_openalex_combined_build_mock_fixture(
     live_staged_build_env: None,
     temp_db: Path,
     staging_dir: Path,
@@ -86,48 +113,22 @@ def test_live_openalex_discover_through_build_mock_fixture(
 ) -> None:
     require_live_staged_build_env()
 
-    assert (
-        main(
-            [
-                "discover-sources",
-                "--provider",
-                "openalex",
-                "--query",
-                "human AI creativity",
-                "--rank-only",
-                "--enqueue",
-                "--question",
-                TEST_QUESTION_ID,
-                "--db",
-                str(temp_db),
-            ]
-        )
-        == 0
-    )
+    run_live_openalex_discover(temp_db, TEST_QUESTION_ID)
+    capsys.readouterr()
 
     conn = connect(temp_db)
     try:
-        candidate_id = select_rank1_candidate_id(conn, TEST_QUESTION_ID)
         relationships_before = conn.execute(
             "SELECT COUNT(*) FROM relationships"
         ).fetchone()[0]
+        candidate_id, _fetch_payload = require_mock_spine_compatible_fetch_or_skip(
+            conn,
+            research_question_id=TEST_QUESTION_ID,
+            staging_dir=staging_dir,
+            artifact_text_markers=MOCK_STAGED_ARTIFACT_MARKERS,
+        )
     finally:
         conn.close()
-
-    assert (
-        main(
-            [
-                "fetch-candidate",
-                "--candidate",
-                candidate_id,
-                "--db",
-                str(temp_db),
-                "--out",
-                str(staging_dir),
-            ]
-        )
-        == 0
-    )
 
     assert (
         main(

@@ -19,9 +19,11 @@ from pathlib import Path
 
 import pytest
 
-from rge.cli import main
 from rge.db.connection import connect
-from tests.unit.live_staged_candidates import select_rank1_candidate_id
+from tests.unit.live_staged_proof_layers import (
+    run_live_openalex_discover,
+    run_live_source_acquisition,
+)
 
 TEST_QUESTION_ID = "rq_live_staged_fetch_validation"
 
@@ -81,29 +83,10 @@ def test_live_openalex_discover_and_fetch_writes_staged_artifact(
 ) -> None:
     require_live_staged_fetch_env()
 
-    assert (
-        main(
-            [
-                "discover-sources",
-                "--provider",
-                "openalex",
-                "--query",
-                "human AI creativity",
-                "--rank-only",
-                "--enqueue",
-                "--question",
-                TEST_QUESTION_ID,
-                "--db",
-                str(temp_db),
-            ]
-        )
-        == 0
-    )
+    run_live_openalex_discover(temp_db, TEST_QUESTION_ID)
 
     conn = connect(temp_db)
     try:
-        candidate_id = select_rank1_candidate_id(conn, TEST_QUESTION_ID)
-        assert candidate_id.startswith("disc_openalex_")
         queue_count = conn.execute(
             "SELECT COUNT(*) FROM research_queue WHERE research_question_id = ?",
             (TEST_QUESTION_ID,),
@@ -111,23 +94,14 @@ def test_live_openalex_discover_and_fetch_writes_staged_artifact(
         assert queue_count >= 1
         sources_before = conn.execute("SELECT COUNT(*) FROM sources").fetchone()[0]
         claims_before = conn.execute("SELECT COUNT(*) FROM claims").fetchone()[0]
+        candidate_id, _fetch_payload = run_live_source_acquisition(
+            conn,
+            research_question_id=TEST_QUESTION_ID,
+            staging_dir=staging_dir,
+        )
+        assert candidate_id.startswith("disc_openalex_")
     finally:
         conn.close()
-
-    assert (
-        main(
-            [
-                "fetch-candidate",
-                "--candidate",
-                candidate_id,
-                "--db",
-                str(temp_db),
-                "--out",
-                str(staging_dir),
-            ]
-        )
-        == 0
-    )
 
     artifacts = list(staging_dir.glob(f"{candidate_id}.*"))
     assert artifacts, "fetch-candidate must write a staged artifact file"

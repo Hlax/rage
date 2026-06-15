@@ -264,6 +264,9 @@ superseded
 | 230 | ticket-230 | proposed | Live staged rank-2 extract live LLM opt-in proof (per-step) | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | proposed | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | | |
+| 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
+| 234 | ticket-234 | done | Decouple live staged mock-spine proofs from fixture phrases | `phase-3/ticket-234-live-staged-proof-layers` | `agent_reports/2026-06-15_phase-3_ticket-234_live-staged-proof-layers.md` |
+| 235 | ticket-235 | proposed | README operator proof-layer runbook (unsuitable_live_artifact) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -993,10 +996,20 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-232 (proposed) — Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo)
-(ticket-230 blocked until pre-ticket-230 report exists)
+ticket-235 (proposed) — README operator proof-layer runbook (unsuitable_live_artifact)
+ticket-232 (proposed) — Pre-ticket audit for ticket-230 rank-2 live extract
+ticket-230 (proposed) — NO-GO until pre-ticket-230 report exists
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-233/234 staged spine acquisition)
+
+- ticket-233: OA-first URL ordering, multi-URL fetch retry, migration 0008 `url_candidates_json`, top-N live fetch helper.
+- ticket-234: three proof layers; combined live tests skip with `unsuitable_live_artifact` when catalog text ≠ mock markers.
+- Operator brief: `agent_reports/2026-06-15_operator-live-staged-fetch-403-parallel-audit-brief.md`.
+- Principal audit: `agent_reports/2026-06-15_principal-audit-staged-spine-acquisition-checkpoint.md`.
+- ticket-235 seeded: README proof-layer runbook.
+- ticket-230 remains blocked until pre-ticket-230 (ticket-232 echo audit).
 
 ## Queue Notes (2026-06-15, ticket-231 principal audit post-ticket-229)
 
