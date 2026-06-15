@@ -1,0 +1,43 @@
+{
+  "id": "ticket-175",
+  "title": "Live staged link mock-fixture spine (opt-in network)",
+  "problem": "ticket-172 proves live ingest + mock extract. No opt-in proof that mock-fixture link-concepts runs after live extract path without live LLM.",
+  "evidence": [
+    "agent_reports/2026-06-15_pre-ticket-174_live-staged-link-mock-spine-audit.md",
+    "tests/unit/test_live_staged_extract_mock_spine.py",
+    "tests/unit/test_staged_ingest_link_spine.py"
+  ],
+  "affected_modules": [
+    "tests/unit/test_live_staged_link_mock_spine.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_live_staged_link_mock_spine.py",
+    "agent_reports/2026-06-15_ticket-175_live-staged-link-mock-spine.md"
+  ],
+  "acceptance_criteria": [
+    "Opt-in live_network test runs discover through link-concepts --fixture on temp DB.",
+    "Mock fixtures only; no live LLM.",
+    "Default pytest excludes live_network proof.",
+    "Golden tests pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_live_staged_link_mock_spine.py -q",
+    "python -m pytest tests/unit/test_live_staged_extract_mock_spine.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Live LLM.",
+    "build/detect/reconcile.",
+    "Public export/site.",
+    "Schema migrations.",
+    "CI live network by default."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove live link mock spine test.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / product-risk reduction",
+  "pre_ticket_audit_required": true
+}
