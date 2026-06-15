@@ -1,0 +1,42 @@
+{
+  "id": "ticket-161",
+  "title": "Dual-candidate staged Phase 3 idempotency on one DB (mock)",
+  "problem": "Tickets 151 and 160 prove idempotency for rank #1 and rank #2 spines separately. Operators lack proof that processing both OpenAlex candidates on the same DB through full spines does not duplicate rows when commands re-run.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-160_second-staged-spine-idempotency.md",
+    "tests/unit/test_staged_ingest_idempotency.py",
+    "tests/unit/test_staged_second_candidate_idempotency.py"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "tests/unit/test_staged_dual_candidate_idempotency.py",
+    "agent_reports/2026-06-14_pre-ticket-161_dual-candidate-staged-idempotency-audit.md",
+    "agent_reports/2026-06-14_ticket-161_dual-candidate-staged-idempotency.md"
+  ],
+  "acceptance_criteria": [
+    "Unit test runs rank #1 then rank #2 full mock spines on one DB and re-runs both without duplicate row growth.",
+    "Per-command idempotency spot-check on shared DB after dual spine completion.",
+    "No live LLM or live network in default pytest collection.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_staged_dual_candidate_idempotency.py -q",
+    "python -m pytest tests/unit/test_staged_second_candidate_idempotency.py -q",
+    "python -m pytest tests/unit/test_staged_ingest_idempotency.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Live OpenAlex network.",
+    "Public export/site changes.",
+    "Schema migrations.",
+    "Fixture-mode research run orchestration."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove dual-candidate idempotency test; retain ticket-160 rank #2 idempotency.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / product-risk reduction",
+  "pre_ticket_audit_required": true
+}
