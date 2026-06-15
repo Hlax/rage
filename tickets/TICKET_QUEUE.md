@@ -210,7 +210,8 @@ superseded
 | 176 | ticket-176 | done | README and AGENTS.md live staged link opt-in proof docs | `phase-2/ticket-176-live-staged-link-opt-in-docs` | `agent_reports/2026-06-15_ticket-176_live-staged-link-opt-in-docs.md` |
 | 177 | ticket-177 | done | Pre-ticket audit: live staged build-relationships mock spine | `phase-2/ticket-177-pre-ticket-live-staged-build-mock-spine-audit` | `agent_reports/2026-06-15_ticket-177_pre-ticket-live-staged-build-mock-spine.md` |
 | 178 | ticket-178 | done | Live staged build mock-fixture spine (opt-in network) | `phase-2/ticket-178-live-staged-build-mock-spine` | `agent_reports/2026-06-15_ticket-178_live-staged-build-mock-spine.md` |
-| 179 | ticket-179 | proposed | README and AGENTS.md live staged build opt-in proof docs | | |
+| 179 | ticket-179 | done | README and AGENTS.md live staged build opt-in proof docs | `phase-2/ticket-179-live-staged-build-opt-in-docs` | `agent_reports/2026-06-15_ticket-179_live-staged-build-opt-in-docs.md` |
+| 180 | ticket-180 | proposed | Pre-ticket audit: live staged detect-contradictions mock spine | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -940,9 +941,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-179 (proposed) — README and AGENTS.md live staged build opt-in proof docs
+ticket-180 (proposed) — Pre-ticket audit: live staged detect-contradictions mock spine
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-179 agent)
+
+- Docs-only: README + AGENTS.md `RGE_ALLOW_LIVE_STAGED_BUILD` opt-in pytest.
+- Principal audit post-ticket-178 committed (overdue cadence reset).
+- 594 pytest; 11 deselected; 142 golden; safety pass.
+- ticket-180 seeded: pre-ticket audit for live staged detect mock spine.
 
 ## Queue Notes (2026-06-15, ticket-178 agent)
 
