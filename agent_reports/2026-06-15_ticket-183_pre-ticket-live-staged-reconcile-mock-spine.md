@@ -46,7 +46,7 @@ Safety audit not required (audit-only).
 
 ## Merge to main
 
-Pending merge.
+Merged @ `d7bdb09` (ticket-183 audit). Pushed to `origin/main`.
 
 ## Recommended next ticket
 

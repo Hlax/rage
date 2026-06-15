@@ -95,3 +95,7 @@ def test_default_pytest_deselects_live_smoke() -> None:
         "test_live_openalex_discover_through_detect_mock_fixture"
         not in combined
     )
+    assert (
+        "test_live_openalex_discover_through_reconcile_mock_spine"
+        not in combined
+    )

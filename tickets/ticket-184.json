@@ -38,7 +38,7 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove live reconcile mock spine test.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / source acquisition / product-risk reduction",
   "pre_ticket_audit_required": true
 }
