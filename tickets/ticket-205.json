@@ -1,0 +1,39 @@
+{
+  "id": "ticket-205",
+  "title": "README and AGENTS live staged extract live LLM operator docs",
+  "problem": "ticket-204 adds --live-staged-fallthrough and RGE_ALLOW_LIVE_STAGED_EXTRACT_LIVE_LLM but operator docs still describe mock-only staged extract after ingest.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-204_live-staged-extract-live-llm-spine.md",
+    "agent_reports/2026-06-15_pre-ticket-203_live-llm-staged-run-audit.md",
+    "tests/unit/test_live_staged_extract_live_llm_spine.py"
+  ],
+  "affected_modules": [
+    "README.md",
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "AGENTS.md",
+    "agent_reports/2026-06-15_ticket-205_live-staged-extract-live-llm-docs.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart documents live staged extract env gates and pytest command.",
+    "AGENTS.md references per-step live staged extract opt-in without implying orchestrator live LLM.",
+    "Golden pass and safety audit pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Changing extract-claims behavior.",
+    "Live link/build/detect docs.",
+    "CI Ollama.",
+    "Public export/site."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert doc edits only.",
+  "status": "proposed",
+  "category": "Phase 3 / live LLM / operator docs"
+}

@@ -235,7 +235,8 @@ superseded
 | 201 | ticket-201 | done | Live staged research run CLI entry without fixture-mode flag | `phase-2/ticket-201-live-staged-run-without-fixture-mode` | `agent_reports/2026-06-15_ticket-201_live-staged-run-without-fixture-mode.md` |
 | 202 | ticket-202 | done | Principal audit post-ticket-201 research run contract checkpoint | | `agent_reports/2026-06-15_principal-audit-post-ticket-201.md` |
 | 203 | ticket-203 | done | Pre-ticket audit: live LLM on staged research run spine | | `agent_reports/2026-06-15_pre-ticket-203_live-llm-staged-run-audit.md` |
-| 204 | ticket-204 | proposed | Live staged extract live LLM opt-in proof (per-step) | | |
+| 204 | ticket-204 | done | Live staged extract live LLM opt-in proof (per-step) | `phase-2/ticket-204-live-staged-extract-live-llm-spine` | `agent_reports/2026-06-15_ticket-204_live-staged-extract-live-llm-spine.md` |
+| 205 | ticket-205 | proposed | README and AGENTS live staged extract live LLM operator docs | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -965,9 +966,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-204 (proposed) — Live staged extract live LLM opt-in proof (per-step)
+ticket-205 (proposed) — README and AGENTS live staged extract live LLM operator docs
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-204 agent)
+
+- Live staged extract fallthrough: `--live-staged-fallthrough` + `RGE_ALLOW_LIVE_STAGED_EXTRACT_LIVE_LLM=1`.
+- Orchestrator and default pytest remain mock-only; opt-in live proof in `test_live_staged_extract_live_llm_spine.py`.
+- ticket-205 seeded: operator docs for live staged extract.
 
 ## Queue Notes (2026-06-15, ticket-203 pre-ticket audit)
 
