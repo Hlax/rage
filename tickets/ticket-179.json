@@ -1,0 +1,39 @@
+{
+  "id": "ticket-179",
+  "title": "README and AGENTS.md live staged build opt-in proof docs",
+  "problem": "ticket-178 adds opt-in live_network pytest through mock build. README/AGENTS lack RGE_ALLOW_LIVE_STAGED_BUILD operator commands.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-178_live-staged-build-mock-spine.md",
+    "tests/unit/test_live_staged_build_mock_spine.py",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [
+    "README.md",
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "AGENTS.md",
+    "agent_reports/2026-06-15_ticket-179_live-staged-build-opt-in-docs.md"
+  ],
+  "acceptance_criteria": [
+    "README and AGENTS.md document RGE_ALLOW_LIVE_STAGED_BUILD opt-in pytest command.",
+    "Golden tests pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Code changes.",
+    "CI live network.",
+    "Public export/site."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert doc paragraphs.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation / operator ergonomics"
+}

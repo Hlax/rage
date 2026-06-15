@@ -27,7 +27,7 @@ mock-fixture `build-relationships`.
 
 ## Merge to main
 
-Pending merge.
+Merge commit: `02dac53` (ticket-177 audit merge; ticket-178 pending).
 
 ## Recommended next ticket
 

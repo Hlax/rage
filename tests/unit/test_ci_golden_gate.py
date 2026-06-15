@@ -87,3 +87,7 @@ def test_default_pytest_deselects_live_smoke() -> None:
         "test_live_openalex_discover_through_link_mock_fixture"
         not in combined
     )
+    assert (
+        "test_live_openalex_discover_through_build_mock_fixture"
+        not in combined
+    )
