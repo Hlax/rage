@@ -86,7 +86,8 @@ Operator Quickstart.
   (ticket-187) and rank-2 discover→…→generate-run-report (ticket-190) and
   single-command orchestrator proof (ticket-193) via `pytest -m live_network` (not CI);
   per-step live Ollama extract on staged rank-1 ingest (ticket-204; operator opt-in;
-  orchestrator still mock); evidence DB NM-4 proven; default graph
+  orchestrator still mock); per-step live Ollama link after mock extract (ticket-208;
+  operator opt-in); evidence DB NM-4 proven; default graph
   synthnote checksum-mock; bare `research run --topic --domain` (no flags) remains
   `not_implemented`; full live MVP without golden fixtures remains out of scope.
 - **Cloud providers:** deferred (ticket-059).
@@ -125,8 +126,15 @@ not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_EXTRACT_LIVE_LLM=1`,
 `RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama`, network gates above, temp `--db`, and
 `extract-claims --live-staged-fallthrough` (or chained pytest in
 `tests/unit/test_live_staged_extract_live_llm_spine.py` with `live_network` and
-`live_smoke` markers). Link/build/detect on staged spine remain mock-only until
-separate tickets.
+`live_smoke` markers).
+
+**Live staged link (live Ollama; ticket-208):** separate per-step operator proof —
+not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_LINK_LIVE_LLM=1`,
+`RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama`, network gates above, temp `--db`, mock
+extract upstream in pytest, and `link-concepts --live-staged-link-fallthrough` (or
+chained pytest in `tests/unit/test_live_staged_link_live_llm_spine.py` with
+`live_network` and `live_smoke` markers). Build/detect on staged spine remain mock-only
+until separate tickets.
 
 **Manual synthnote operator spine** (mock LLM; tickets 088–099): for Level-1
 `manual_text` research on the creativity synthnote source, follow the five-step
