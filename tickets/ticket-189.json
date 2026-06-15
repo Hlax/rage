@@ -1,0 +1,35 @@
+{
+  "id": "ticket-189",
+  "title": "Pre-ticket audit: live staged rank-2 candidate mock spine",
+  "problem": "ticket-187 proves live rank-1 path through generate-run-report. No scoped plan for rank-2 OpenAlex candidate on live network with mock fixtures.",
+  "evidence": [
+    "agent_reports/2026-06-15_principal-audit-post-ticket-187.md",
+    "agent_reports/2026-06-15_ticket-187_live-staged-report-mock-spine.md",
+    "tests/unit/test_staged_second_candidate_run_report_spine.py"
+  ],
+  "affected_modules": [
+    "agent_reports/2026-06-15_pre-ticket-189_live-staged-rank2-mock-spine-audit.md"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-15_pre-ticket-189_live-staged-rank2-mock-spine-audit.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit defines hardened scope for rank-2 live staged mock spine.",
+    "No live LLM in proposed scope.",
+    "GO/NO-GO verdict with rollback plan."
+  ],
+  "test_plan": [
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-189"
+  ],
+  "non_goals": [
+    "Implementation in audit ticket.",
+    "Live LLM.",
+    "Public export/site.",
+    "Schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Defer rank-2 extension; retain rank-1 live proof only.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / audit",
+  "pre_ticket_audit_required": true
+}
