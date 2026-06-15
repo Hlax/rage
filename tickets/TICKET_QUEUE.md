@@ -196,7 +196,8 @@ superseded
 | 162 | ticket-162 | done | Fixture-mode staged research run orchestration spine (mock) | `phase-2/ticket-162-fixture-mode-staged-run-spine` | `agent_reports/2026-06-14_ticket-162_fixture-mode-staged-run-spine.md` |
 | 163 | ticket-163 | done | Staged fixture-mode run orchestrator idempotency (mock) | `phase-2/ticket-163-staged-run-orchestrator-idempotency` | `agent_reports/2026-06-14_ticket-163_staged-run-orchestrator-idempotency.md` |
 | 164 | ticket-164 | done | README operator quickstart for staged Phase 3 --staged-spine | `phase-2/ticket-164-readme-staged-spine-quickstart` | `agent_reports/2026-06-14_ticket-164_readme-staged-spine-quickstart.md` |
-| 165 | ticket-165 | proposed | README maturity table Phase 3 staged mock spine status | | |
+| 165 | ticket-165 | done | README maturity table Phase 3 staged mock spine status | `phase-2/ticket-165-readme-phase3-staged-maturity` | `agent_reports/2026-06-15_ticket-165_readme-phase3-staged-maturity.md` |
+| 166 | ticket-166 | proposed | Safe autocycle command for audit + run-next-ticket loop | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -926,11 +927,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-165 (proposed) — README maturity table Phase 3 staged mock spine status
+ticket-166 (proposed) — Safe autocycle command for audit + run-next-ticket loop
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-15, principal audit post-ticket-164)
+## Queue Notes (2026-06-15, ticket-165 agent)
+
+- Docs-only: README + AGENTS.md maturity relabel for Phase 3 staged mock spine.
+- 582 pytest; 142 golden; safety pass.
+- ticket-166 seeded: safe autocycle command.
 
 - Cadence checkpoint satisfied: `agent_reports/2026-06-15_principal-audit-post-ticket-164.md`.
 - ticket-159 superseded (post-158 audit was on main; this audit covers tickets 160–164).

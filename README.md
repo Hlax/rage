@@ -27,7 +27,7 @@ third-party repo-direction audit):
 |------|--------|---------------|
 | **MVP-Engine** | **mock/fixture-proven** | Deterministic Python pipeline, validator gate, safety model, public export, golden tests (GT01–GT26), and fixture-mode orchestration are real and green. |
 | **MVP-Research** | **partial — NM-1 + NM-4 evidence DB** | NM-1: first live validated claim write via `extract-claims-live` on gitignored `data/db/live_research_evidence.sqlite`. NM-4: operator-proven live manual_text spine through reconcile on that same evidence DB (tickets 127–133). Default graph DB synthnote path remains checksum-mock — not arbitrary live inference. |
-| **Arbitrary-source pipeline** | **partial** | **Evidence DB:** NM-4 live ingest → extract/link/relationship/contradiction fall-through + deterministic reconcile (`--evidence-db-reconcile`) proven on gitignored evidence DB. **Default graph DB:** committed synthnote files still use checksum-pinned mock fixtures. **Source discovery/fetcher:** pending (Phase 3). |
+| **Arbitrary-source pipeline** | **partial** | **Phase 3 staged spine (mock/fixture-proven):** discover → fetch → ingest-staged → extract → link → build → detect → reconcile → report for rank #1 and #2 OpenAlex candidates, dual-candidate idempotency, and `research run --fixture-mode --staged-spine` orchestration (tickets 144–164). Unit tests patch OpenAlex/fetcher I/O; operator runs require `RGE_ALLOW_SOURCE_NETWORK=1`. **Not proven:** live arbitrary-source staged discover→report on real network without test patches. **Evidence DB:** NM-4 live ingest → extract/link/relationship/contradiction fall-through + deterministic reconcile (`--evidence-db-reconcile`) on gitignored evidence DB. **Default graph DB:** committed synthnote files still use checksum-pinned mock fixtures. `research run` without `--fixture-mode` remains `not_implemented`. |
 | **Cloud providers** | **deferred** | OpenAI/OpenRouter/etc. are not wired (ticket-059 placeholder). |
 
 **Phase 1 MVP is complete** for the engine tier. The public site still serves **fixture
@@ -42,6 +42,7 @@ What is **real deterministic engine plumbing today**:
 - Fail-closed public card export and static Next.js public site
 - Deterministic safety auditor and prompt-injection handling
 - Full fixture-mode orchestration: `research run --fixture-mode` (Golden Test 26)
+- Phase 3 staged fixture-mode orchestration: `research run --fixture-mode --staged-spine` (mock LLM; network env for discover/fetch; see Operator Quickstart)
 
 What is **mock or checksum-pinned fixture content** (not arbitrary live inference):
 
