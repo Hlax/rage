@@ -207,7 +207,8 @@ superseded
 | 173 | ticket-173 | done | README and AGENTS.md live staged extract opt-in proof docs | `phase-2/ticket-173-live-staged-extract-opt-in-docs` | `agent_reports/2026-06-15_ticket-173_live-staged-extract-opt-in-docs.md` |
 | 174 | ticket-174 | done | Pre-ticket audit: live staged link mock-fixture spine | `phase-2/ticket-174-pre-ticket-live-staged-link-mock-spine-audit` | `agent_reports/2026-06-15_ticket-174_pre-ticket-live-staged-link-mock-spine.md` |
 | 175 | ticket-175 | done | Live staged link mock-fixture spine (opt-in network) | `phase-2/ticket-175-live-staged-link-mock-spine` | `agent_reports/2026-06-15_ticket-175_live-staged-link-mock-spine.md` |
-| 176 | ticket-176 | proposed | README and AGENTS.md live staged link opt-in proof docs | | |
+| 176 | ticket-176 | done | README and AGENTS.md live staged link opt-in proof docs | `phase-2/ticket-176-live-staged-link-opt-in-docs` | `agent_reports/2026-06-15_ticket-176_live-staged-link-opt-in-docs.md` |
+| 177 | ticket-177 | proposed | Pre-ticket audit: live staged build-relationships mock spine | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -937,16 +938,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-176 (proposed) — README and AGENTS.md live staged link opt-in proof docs
+ticket-177 (proposed) — Pre-ticket audit: live staged build-relationships mock spine
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-15, ticket-175 agent)
+## Queue Notes (2026-06-15, ticket-176 agent)
 
-- Opt-in `live_network` pytest: discover→fetch→ingest→extract→link (mock fixtures).
-- Env: `RGE_ALLOW_LIVE_STAGED_LINK=1`, `RGE_ALLOW_SOURCE_NETWORK=1`, `OPENALEX_MAILTO`.
+- Principal audit post-ticket-175 committed.
+- README + AGENTS: `RGE_ALLOW_LIVE_STAGED_LINK` opt-in pytest docs.
 - 593 pytest; 10 deselected; 142 golden; safety pass.
-- ticket-176 seeded: link opt-in docs.
+- ticket-177 seeded: pre-ticket audit for build mock spine.
 
 ## Queue Notes (2026-06-15, ticket-166 agent)
 
