@@ -1,0 +1,47 @@
+{
+  "id": "ticket-204",
+  "title": "Live staged extract live LLM opt-in proof (per-step)",
+  "problem": "Staged spine uses mock LLM for extract after live OpenAlex ingest. Pre-ticket-203 GO defines a per-step live Ollama extract proof on rank-1 staged source without changing orchestrator defaults.",
+  "evidence": [
+    "agent_reports/2026-06-15_pre-ticket-203_live-llm-staged-run-audit.md",
+    "agent_reports/2026-06-15_pre-ticket-204_live-staged-extract-live-llm-audit.md",
+    "tests/unit/test_live_staged_extract_mock_spine.py",
+    "rge/modules/claim_extractor.py"
+  ],
+  "affected_modules": [
+    "rge/modules/claim_extractor.py",
+    "rge/cli.py",
+    "tests/unit/test_live_staged_extract_live_llm_spine.py",
+    "tests/unit/test_ci_golden_gate.py"
+  ],
+  "expected_files": [
+    "rge/modules/claim_extractor.py",
+    "rge/cli.py",
+    "tests/unit/test_live_staged_extract_live_llm_spine.py",
+    "tests/unit/test_ci_golden_gate.py",
+    "agent_reports/2026-06-15_ticket-204_live-staged-extract-live-llm-spine.md"
+  ],
+  "acceptance_criteria": [
+    "Live staged extract fallthrough bypasses staged-fetch auto-mock when env gate set.",
+    "Opt-in pytest (live_network + live_smoke) proves discover→ingest→live extract on temp DB.",
+    "Default pytest and staged orchestrator remain mock-only.",
+    "Golden pass.",
+    "Safety audit pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Live LLM in execute_staged_fixture_mode_run.",
+    "Live link/build/detect on staged spine.",
+    "CI Ollama.",
+    "Public export/site.",
+    "Schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert fallthrough gate, test, and ci deselect entry.",
+  "status": "proposed",
+  "category": "Phase 3 / live LLM / staged spine product-risk"
+}

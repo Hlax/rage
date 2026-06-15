@@ -234,7 +234,8 @@ superseded
 | 200 | ticket-200 | done | Pre-ticket audit: research run without fixture-mode | | `agent_reports/2026-06-15_pre-ticket-200_research-run-non-fixture-audit.md` |
 | 201 | ticket-201 | done | Live staged research run CLI entry without fixture-mode flag | `phase-2/ticket-201-live-staged-run-without-fixture-mode` | `agent_reports/2026-06-15_ticket-201_live-staged-run-without-fixture-mode.md` |
 | 202 | ticket-202 | done | Principal audit post-ticket-201 research run contract checkpoint | | `agent_reports/2026-06-15_principal-audit-post-ticket-201.md` |
-| 203 | ticket-203 | proposed | Pre-ticket audit: live LLM on staged research run spine | | |
+| 203 | ticket-203 | done | Pre-ticket audit: live LLM on staged research run spine | | `agent_reports/2026-06-15_pre-ticket-203_live-llm-staged-run-audit.md` |
+| 204 | ticket-204 | proposed | Live staged extract live LLM opt-in proof (per-step) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -964,9 +965,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-203 (proposed) — Pre-ticket audit: live LLM on staged research run spine
+ticket-204 (proposed) — Live staged extract live LLM opt-in proof (per-step)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-203 pre-ticket audit)
+
+- Pre-ticket audit GO for ticket-204: per-step live Ollama extract on staged rank-1 source.
+- Authoritative audit: `agent_reports/2026-06-15_pre-ticket-203_live-llm-staged-run-audit.md`.
 
 ## Queue Notes (2026-06-15, principal audit post-ticket-201)
 

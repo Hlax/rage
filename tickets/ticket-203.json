@@ -33,6 +33,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove audit report; retain mock-only staged orchestration.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / product-risk / live LLM orchestration"
 }
