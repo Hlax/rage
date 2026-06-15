@@ -1,0 +1,35 @@
+{
+  "id": "ticket-226",
+  "title": "README operator one-time live orchestrator checklist post-LLM-closure refresh",
+  "problem": "Tickets 223–225 closed staged rank-1 LLM inventory and documented deterministic reconcile/report, but README Operator Quickstart one-time orchestrator verification checklist may still imply broader live LLM scope than detect.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-225_runtime-config-staged-reconcile-report-gates.md",
+    "agent_reports/2026-06-15_ticket-223_principal-audit-post-ticket-222.md",
+    "README.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-15_ticket-226_orchestrator-checklist-llm-closure-refresh.md"
+  ],
+  "acceptance_criteria": [
+    "README one-time live orchestrator verification checklist reflects closed rank-1 LLM inventory (extract/link/build/detect only; orchestrator mock LLM forced).",
+    "Checklist notes reconcile/report are deterministic and not part of per-step live Ollama proofs.",
+    "Golden pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Implementation changes.",
+    "New LLM tasks or fallthrough flags.",
+    "CI Ollama.",
+    "Public export/site.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert doc changes only.",
+  "status": "proposed",
+  "category": "Phase 3 / live LLM / staged spine documentation"
+}

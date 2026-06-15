@@ -256,7 +256,8 @@ superseded
 | 222 | ticket-222 | done | Pre-ticket audit: live staged generate-run-report on staged spine (per-step) | `phase-2/ticket-222-pre-ticket-live-staged-report-audit` | `agent_reports/2026-06-15_ticket-222_pre-ticket-live-staged-report-audit.md` |
 | 223 | ticket-223 | done | Principal audit post-ticket-222 staged spine LLM surface closure | | `agent_reports/2026-06-15_ticket-223_principal-audit-post-ticket-222.md` |
 | 224 | ticket-224 | done | README and AGENTS staged reconcile and report deterministic boundary docs | `phase-2/ticket-224-staged-reconcile-report-deterministic-docs` | `agent_reports/2026-06-15_ticket-224_staged-reconcile-report-deterministic-docs.md` |
-| 225 | ticket-225 | proposed | Runtime config staged reconcile and report network-only gate docs | | |
+| 225 | ticket-225 | done | Runtime config staged reconcile and report network-only gate docs | `phase-2/ticket-225-runtime-config-staged-reconcile-report-gates` | `agent_reports/2026-06-15_ticket-225_runtime-config-staged-reconcile-report-gates.md` |
+| 226 | ticket-226 | proposed | README operator one-time live orchestrator checklist post-LLM-closure refresh | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -986,9 +987,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-225 (proposed) — Runtime config staged reconcile and report network-only gate docs
+ticket-226 (proposed) — README operator one-time live orchestrator checklist post-LLM-closure refresh
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-225 runtime config staged reconcile/report gates)
+
+- `12_RUNTIME_CONFIG.md`: RECONCILE/REPORT variable rows; staged gate matrix includes deterministic steps.
+- `.env.example`: network-only comments; no `*_LIVE_LLM` for reconcile/report.
+- Staged rank-1 LLM documentation trilogy complete (224 README/AGENTS, 225 runtime config).
+- ticket-226 seeded: operator orchestrator checklist refresh.
 
 ## Queue Notes (2026-06-15, ticket-224 staged reconcile/report deterministic docs)
 
