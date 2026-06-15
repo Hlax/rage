@@ -191,6 +191,8 @@ superseded
 | 157 | ticket-157 | done | Reconcile scores on second staged-ingested source (mock spine step) | `phase-2/ticket-157-second-staged-reconcile-scores-spine` | `agent_reports/2026-06-14_ticket-157_second-staged-reconcile-scores-spine.md` |
 | 158 | ticket-158 | done | Generate run report on second staged-ingested source (mock spine step) | `phase-2/ticket-158-second-staged-run-report-spine` | `agent_reports/2026-06-14_ticket-158_second-staged-run-report-spine.md` |
 | 159 | ticket-159 | proposed | Principal audit checkpoint post-ticket-158 (rank #2 staged Phase 3 spine completion) | | |
+| 160 | ticket-160 | done | Second staged candidate full spine idempotency (mock) | `phase-2/ticket-160-second-staged-spine-idempotency` | `agent_reports/2026-06-14_ticket-160_second-staged-spine-idempotency.md` |
+| 161 | ticket-161 | proposed | Dual-candidate staged Phase 3 idempotency on one DB (mock) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -920,9 +922,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-159 (proposed) — Principal audit checkpoint post-ticket-158 (rank #2 staged Phase 3 spine completion)
+ticket-161 (proposed) — Dual-candidate staged Phase 3 idempotency on one DB (mock)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-160 agent)
+
+- Test-forward ticket: rank #2 full spine idempotency (mirror ticket-151).
+- Explicit `--fixture` on extract/link/build/detect; relationships_staged=2 (qualifies on base edge).
+- Principal audit post-ticket-158 committed with this merge (cadence checkpoint).
+- 577 pytest; 142 golden; safety pass.
+- ticket-161 seeded: dual-candidate idempotency on one DB.
+- ticket-159 remains proposed — principal audit deliverable now on main via ticket-160 merge.
 
 ## Queue Notes (2026-06-14, ticket-158 agent)
 
