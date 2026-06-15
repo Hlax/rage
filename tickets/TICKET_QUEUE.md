@@ -195,7 +195,8 @@ superseded
 | 161 | ticket-161 | done | Dual-candidate staged Phase 3 idempotency on one DB (mock) | `phase-2/ticket-161-dual-candidate-staged-idempotency` | `agent_reports/2026-06-14_ticket-161_dual-candidate-staged-idempotency.md` |
 | 162 | ticket-162 | done | Fixture-mode staged research run orchestration spine (mock) | `phase-2/ticket-162-fixture-mode-staged-run-spine` | `agent_reports/2026-06-14_ticket-162_fixture-mode-staged-run-spine.md` |
 | 163 | ticket-163 | done | Staged fixture-mode run orchestrator idempotency (mock) | `phase-2/ticket-163-staged-run-orchestrator-idempotency` | `agent_reports/2026-06-14_ticket-163_staged-run-orchestrator-idempotency.md` |
-| 164 | ticket-164 | proposed | README operator quickstart for staged Phase 3 --staged-spine | | |
+| 164 | ticket-164 | done | README operator quickstart for staged Phase 3 --staged-spine | `phase-2/ticket-164-readme-staged-spine-quickstart` | `agent_reports/2026-06-14_ticket-164_readme-staged-spine-quickstart.md` |
+| 165 | ticket-165 | proposed | README maturity table Phase 3 staged mock spine status | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -925,9 +926,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-164 (proposed) — README operator quickstart for staged Phase 3 --staged-spine
-(ticket-059 OpenAI placeholder remains deferred)
+ticket-165 (proposed) — README maturity table Phase 3 staged mock spine status
+(ticket-059 OpenAI placeholder remains deferred; ticket-159 principal audit checkpoint remains proposed)
 ```
+
+## Queue Notes (2026-06-14, ticket-164 agent)
+
+- Docs-only: README Operator Quickstart for `run --fixture-mode --staged-spine`.
+- Documents mock LLM, network env, temp `--db`, expected counts, idempotency note.
+- 582 pytest; 142 golden; safety pass.
+- ticket-165 seeded: README maturity table Phase 3 staged spine status.
 
 ## Queue Notes (2026-06-14, ticket-163 agent)
 

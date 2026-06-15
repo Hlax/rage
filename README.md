@@ -141,6 +141,44 @@ cd apps/public-site && npm run build
 
 After ticket-034, repeated fixture-mode runs leave `git status --short` empty. Runtime output goes under gitignored `data/`; only reviewed public snapshots under `apps/public-site/public/data/` are committed.
 
+**Staged Phase 3 fixture-mode spine** (mock LLM; tickets 144–163): run discover → fetch →
+ingest-staged → extract → link → build → detect → reconcile → report for **two** OpenAlex
+candidates on one DB. Uses mock LLM only (`RGE_LLM_MODE=mock`); **does not** run public
+export, theory, cluster report, or improvement tickets (unlike the MVP fixture run above).
+Requires live OpenAlex HTTP for `discover-sources` and `fetch-candidate` unless you are
+running unit tests (which patch network I/O).
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+$env:RGE_ALLOW_SOURCE_NETWORK = "1"
+$env:OPENALEX_MAILTO = "operator@example.com"
+
+python -m rge.cli run `
+  --fixture-mode `
+  --staged-spine `
+  --topic "Does AI improve creative output while reducing diversity?" `
+  --domain creativity `
+  --db data/db/staged_spine_demo.sqlite `
+  --staging-dir data/sources/staged `
+  --output-dir data/reports/staged_spine_demo `
+  --run-id run_staged_fixture_mode_spine
+```
+
+Expected stable counts after one pass (dual-candidate mock spine):
+
+| Metric | Expected |
+| --- | --- |
+| `sources` | 3 (domain opposing context + 2 staged candidates) |
+| `candidate_sources` / `research_queue` | 2 each |
+| `score_events` | 2 |
+| `run_reports` | 2 (`{run_id}_rank1`, `{run_id}_rank2`) |
+| `qualifies` relationship evidence | 2 |
+
+Re-running the same command on the same `--db` is idempotent (stable row counts; ticket-163).
+Rank #1 staged steps use auto mock routing; rank #2 uses explicit `--fixture` bindings
+inside the orchestrator. Automated proof:
+`tests/unit/test_staged_fixture_mode_run_spine.py`.
+
 **Manual source ingestion** (Level-1): place operator `.txt`/`.md` files under gitignored `data/sources/manual/<domain>/` (e.g. `data/sources/manual/creativity/`) and ingest with:
 
 ```powershell
@@ -340,6 +378,7 @@ operator persist): use the numbered checklist in
 | `python -m pytest` | Full test suite |
 | `python -m rge.modules.safety_auditor --audit full` | Deterministic safety audit |
 | `python -m rge.cli run --fixture-mode ...` | End-to-end fixture MVP |
+| `python -m rge.cli run --fixture-mode --staged-spine ...` | Phase 3 staged discover→report (mock LLM; network env required) |
 | `python -m rge.cli export-public --limit 100` | Export public-safe cards |
 | `cd apps/public-site && npm run build` | Static public site build |
 
