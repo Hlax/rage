@@ -61,7 +61,7 @@ No live network pytest run (SQL-only hygiene fix).
 
 ## Merge to main
 
-Pending merge in this run.
+Merged @ `d5003f0`. Pushed to `origin/main`.
 
 ## Recommended next ticket
 
