@@ -1,0 +1,33 @@
+{
+  "id": "ticket-219",
+  "title": "Principal audit post-ticket-217 staged live detect checkpoint",
+  "problem": "Four done tickets (214–217) since principal audit ticket-215; cadence requires a read-only checkpoint before further live LLM staged spine work.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-218_live-staged-detect-live-llm-docs.md",
+    "agent_reports/2026-06-15_ticket-217_live-staged-detect-live-llm-spine.md",
+    "agent_reports/2026-06-15_ticket-215_principal-audit-post-ticket-213.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-15_ticket-219_principal-audit-post-ticket-217.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report documents ticket-216 through ticket-218 outcomes and live LLM boundaries.",
+    "Cadence gate reset with recommended next implementation ticket.",
+    "No implementation scope in audit run."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Implementation tickets.",
+    "Live Ollama in CI.",
+    "Public export/site changes.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove audit report only.",
+  "status": "proposed",
+  "category": "Phase 2 / principal audit checkpoint"
+}

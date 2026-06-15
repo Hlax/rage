@@ -59,6 +59,7 @@ What is **live report-only** (no graph writes unless operator explicitly opts in
 - **Per-step live staged extract** (ticket-204): live Ollama `extract-claims --live-staged-fallthrough` on rank-1 staged OpenAlex ingest (temp `--db` only; separate env gate from mock-fixture extract) — see Operator Quickstart **Live staged extract (live Ollama)**
 - **Per-step live staged link** (ticket-208): live Ollama `link-concepts --live-staged-link-fallthrough` after mock extract on rank-1 staged source (temp `--db` only; separate env gate from mock link) — see Operator Quickstart **Live staged link (live Ollama)**
 - **Per-step live staged build** (ticket-212): live Ollama `build-relationships --live-staged-build-fallthrough` after mock extract + mock link on rank-1 staged source (temp `--db` only; separate env gate from mock build) — see Operator Quickstart **Live staged build (live Ollama)**
+- **Per-step live staged detect** (ticket-217): live Ollama `detect-contradictions --live-staged-detect-fallthrough` after mock extract + mock link + mock build on rank-1 staged source (temp `--db` only; separate env gate from mock detect; domain opposing context seed required) — see Operator Quickstart **Live staged detect (live Ollama)**
 
 What requires **explicit live opt-in** (local Ollama only):
 
@@ -332,6 +333,32 @@ CLI equivalent after discover → fetch → ingest-staged → mock extract → m
 ```powershell
 python -m rge.cli build-relationships --source <source_id> `
   --db <temp.sqlite> --live-staged-build-fallthrough
+```
+
+**Live staged detect (live Ollama; ticket-217):** per-step rank-1 proof after live
+OpenAlex ingest and **mock-fixture extract + mock link + mock build** — uses
+`detect-contradictions --live-staged-detect-fallthrough` (bypasses staged-fetch auto-mock).
+Requires **domain opposing context** seeded on the temp DB before live discover (pytest
+uses `seed_domain_opposing_context()` from `tests/unit/staged_domain_seed.py`; same
+requirement as ticket-181 mock detect spine). Requires local Ollama; orchestrator still
+forces mock LLM. Temp `--db` only — refuses default graph DB. Markers: `live_network`
+**and** `live_smoke`. Separate env gate from mock detect (`RGE_ALLOW_LIVE_STAGED_DETECT`).
+
+```powershell
+$env:RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM = "1"
+$env:RGE_ALLOW_LIVE_LLM = "1"
+$env:RGE_LLM_MODE = "ollama"
+$env:RGE_ALLOW_SOURCE_NETWORK = "1"
+$env:OPENALEX_MAILTO = "operator@example.com"
+
+python -m pytest tests/unit/test_live_staged_detect_live_llm_spine.py -m "live_network and live_smoke" -q
+```
+
+CLI equivalent after discover → fetch → ingest-staged → mock extract → mock link → mock build on a temp DB (with domain seed applied first):
+
+```powershell
+python -m rge.cli detect-contradictions --source <source_id> `
+  --db <temp.sqlite> --live-staged-detect-fallthrough
 ```
 
 *Discover + fetch + ingest-staged + mock extract + mock link + mock build + mock detect* (ticket-181; writes `relationship_evidence` qualifications via fixture; seeds domain opposing context locally before live discover):
