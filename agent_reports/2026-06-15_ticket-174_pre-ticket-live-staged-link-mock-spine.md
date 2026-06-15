@@ -27,7 +27,7 @@ explicit mock-fixture `link-concepts`.
 
 ## Merge to main
 
-Pending merge.
+Merge commit: `fc59b54` (ticket-174 audit merge; ticket-175 pending).
 
 ## Recommended next ticket
 
