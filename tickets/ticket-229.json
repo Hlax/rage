@@ -39,6 +39,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert heuristic module and tests.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / live LLM / staged spine"
 }

@@ -260,7 +260,8 @@ superseded
 | 226 | ticket-226 | done | README operator one-time live orchestrator checklist post-LLM-closure refresh | `phase-2/ticket-226-orchestrator-checklist-llm-closure-refresh` | `agent_reports/2026-06-15_ticket-226_orchestrator-checklist-llm-closure-refresh.md` |
 | 227 | ticket-227 | done | Principal audit post-ticket-226 staged docs closure checkpoint | | `agent_reports/2026-06-15_ticket-227_principal-audit-post-ticket-226.md` |
 | 228 | ticket-228 | done | Pre-ticket audit: rank-2 staged per-step live Ollama on staged spine | `phase-2/ticket-228-pre-ticket-rank-2-staged-live-llm-audit` | `agent_reports/2026-06-15_ticket-228_pre-ticket-rank-2-staged-live-llm-audit.md` |
-| 229 | ticket-229 | proposed | Rank-2 staged source and chunk heuristic for live LLM fallthrough eligibility | | |
+| 229 | ticket-229 | done | Rank-2 staged source and chunk heuristic for live LLM fallthrough eligibility | `phase-2/ticket-229-rank-2-staged-spine-heuristics` | `agent_reports/2026-06-15_ticket-229_rank-2-staged-spine-heuristics.md` |
+| 230 | ticket-230 | proposed | Live staged rank-2 extract live LLM opt-in proof (per-step) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -990,9 +991,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-229 (proposed) — Rank-2 staged source and chunk heuristic for live LLM fallthrough eligibility
+ticket-230 (proposed) — Live staged rank-2 extract live LLM opt-in proof (per-step)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-229 rank-2 staged spine heuristics)
+
+- `staged_spine_heuristics.py`: rank-2 `constraint management` source/chunk helpers.
+- Rank-1 auto-mock routing unchanged; 7 unit tests prove disjointness.
+- ticket-230 seeded: rank-2 live extract per-step proof.
 
 ## Queue Notes (2026-06-15, ticket-228 pre-ticket rank-2 staged live LLM audit)
 
