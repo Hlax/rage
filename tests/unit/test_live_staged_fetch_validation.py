@@ -106,7 +106,7 @@ def test_live_openalex_discover_and_fetch_writes_staged_artifact(
             SELECT id, landing_page_url, open_access_url
             FROM candidate_sources
             WHERE research_question_id = ?
-            ORDER BY rank ASC
+            ORDER BY priority_score DESC
             LIMIT 1
             """,
             (TEST_QUESTION_ID,),
