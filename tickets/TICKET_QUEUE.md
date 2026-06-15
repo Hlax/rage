@@ -255,7 +255,8 @@ superseded
 | 221 | ticket-221 | done | Pre-ticket audit: live staged reconcile on staged spine (per-step) | `phase-2/ticket-221-pre-ticket-live-staged-reconcile-audit` | `agent_reports/2026-06-15_ticket-221_pre-ticket-live-staged-reconcile-audit.md` |
 | 222 | ticket-222 | done | Pre-ticket audit: live staged generate-run-report on staged spine (per-step) | `phase-2/ticket-222-pre-ticket-live-staged-report-audit` | `agent_reports/2026-06-15_ticket-222_pre-ticket-live-staged-report-audit.md` |
 | 223 | ticket-223 | done | Principal audit post-ticket-222 staged spine LLM surface closure | | `agent_reports/2026-06-15_ticket-223_principal-audit-post-ticket-222.md` |
-| 224 | ticket-224 | proposed | README and AGENTS staged reconcile and report deterministic boundary docs | | |
+| 224 | ticket-224 | done | README and AGENTS staged reconcile and report deterministic boundary docs | `phase-2/ticket-224-staged-reconcile-report-deterministic-docs` | `agent_reports/2026-06-15_ticket-224_staged-reconcile-report-deterministic-docs.md` |
+| 225 | ticket-225 | proposed | Runtime config staged reconcile and report network-only gate docs | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -985,9 +986,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-224 (proposed) — README and AGENTS staged reconcile and report deterministic boundary docs
+ticket-225 (proposed) — Runtime config staged reconcile and report network-only gate docs
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-224 staged reconcile/report deterministic docs)
+
+- README/AGENTS: reconcile-scores and generate-run-report are deterministic Python; no live LLM fallthrough.
+- Network gates (`RGE_ALLOW_LIVE_STAGED_RECONCILE` / `_REPORT`) distinguished from per-step live Ollama gates.
+- Staged rank-1 LLM inventory closed at detect (204/208/212/217).
+- ticket-225 seeded: runtime config + `.env.example` network-only gate callouts.
 
 ## Queue Notes (2026-06-15, ticket-223 principal audit post-ticket-222)
 

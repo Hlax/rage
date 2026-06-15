@@ -34,6 +34,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert doc changes only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / live LLM / staged spine documentation"
 }
