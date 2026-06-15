@@ -50,7 +50,7 @@ python -m rge.modules.safety_auditor --audit full                          # pas
 
 ## Merge to main
 
-Pending merge.
+Merged @ `155d0b5`. Pushed to `origin/main`.
 
 ## Recommended next ticket
 
