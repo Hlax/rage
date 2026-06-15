@@ -27,7 +27,7 @@ third-party repo-direction audit):
 |------|--------|---------------|
 | **MVP-Engine** | **mock/fixture-proven** | Deterministic Python pipeline, validator gate, safety model, public export, golden tests (GT01–GT26), and fixture-mode orchestration are real and green. |
 | **MVP-Research** | **partial — NM-1 + NM-4 evidence DB** | NM-1: first live validated claim write via `extract-claims-live` on gitignored `data/db/live_research_evidence.sqlite`. NM-4: operator-proven live manual_text spine through reconcile on that same evidence DB (tickets 127–133). Default graph DB synthnote path remains checksum-mock — not arbitrary live inference. |
-| **Arbitrary-source pipeline** | **partial** | **Phase 3 staged spine (mock/fixture-proven):** discover → fetch → ingest-staged → extract → link → build → detect → reconcile → report for rank #1 and #2 OpenAlex candidates, dual-candidate idempotency, and `research run --fixture-mode --staged-spine` orchestration (tickets 144–164). Unit tests patch OpenAlex/fetcher I/O; operator runs require `RGE_ALLOW_SOURCE_NETWORK=1`. **Opt-in operator proofs (not CI):** live OpenAlex discover→fetch (ticket-167) through rank-1 discover→…→generate-run-report (ticket-187) and rank-2 discover→…→generate-run-report (ticket-190) as chained `pytest -m live_network` proofs with explicit env gates — see Operator Quickstart. **Not proven:** single-command live `research run --staged-spine` on real network without test patches or live LLM. **Evidence DB:** NM-4 live ingest → extract/link/relationship/contradiction fall-through + deterministic reconcile (`--evidence-db-reconcile`) on gitignored evidence DB. **Default graph DB:** committed synthnote files still use checksum-pinned mock fixtures. `research run` without `--fixture-mode` remains `not_implemented`. |
+| **Arbitrary-source pipeline** | **partial** | **Phase 3 staged spine (mock/fixture-proven):** discover → fetch → ingest-staged → extract → link → build → detect → reconcile → report for rank #1 and #2 OpenAlex candidates, dual-candidate idempotency, and `research run --fixture-mode --staged-spine` orchestration (tickets 144–164). Unit tests patch OpenAlex/fetcher I/O; operator runs require `RGE_ALLOW_SOURCE_NETWORK=1`. **Opt-in operator proofs (not CI):** per-step live OpenAlex proofs (tickets 167–190) and single-command orchestrator proof via `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1` (ticket-193) as `pytest -m live_network` — see Operator Quickstart. **Not proven in CI/default pytest:** live OpenAlex (operator opt-in only); live LLM on staged spine. **Evidence DB:** NM-4 live ingest → extract/link/relationship/contradiction fall-through + deterministic reconcile (`--evidence-db-reconcile`) on gitignored evidence DB. **Default graph DB:** committed synthnote files still use checksum-pinned mock fixtures. `research run` without `--fixture-mode` remains `not_implemented`. |
 | **Cloud providers** | **deferred** | OpenAI/OpenRouter/etc. are not wired (ticket-059 placeholder). |
 
 **Phase 1 MVP is complete** for the engine tier. The public site still serves **fixture
@@ -180,17 +180,17 @@ Rank #1 staged steps use auto mock routing; rank #2 uses explicit `--fixture` bi
 inside the orchestrator. Automated proof:
 `tests/unit/test_staged_fixture_mode_run_spine.py`.
 
-**Live staged network proofs** (operator opt-in; tickets 167–190): pytest proofs on
+**Live staged network proofs** (operator opt-in; tickets 167–193): pytest proofs on
 real OpenAlex HTTP with temp DB paths. **Not** run in CI or default `pytest`
 (collection excludes `live_network`; see `pyproject.toml`). No live LLM; fetch/ingest
 proofs stop before `extract-claims`; tickets 172/175/178/181 add mock-fixture extract,
 link, build, and detect after live ingest; tickets 184/187 add deterministic
 reconcile-scores and generate-run-report for rank-1; ticket-190 adds rank-2 candidate
-discover (`OFFSET 1`) through generate-run-report with second-candidate mock fixtures.
-These proofs write to temp DB and report paths only — they do **not** public-export
-results and do **not** prove single-command orchestrated live
-`research run --fixture-mode --staged-spine` (that path remains mock/fixture-proven with
-patched network in unit tests).
+discover through generate-run-report with second-candidate mock fixtures; ticket-193
+adds single-command `research run --fixture-mode --staged-spine` on real OpenAlex via
+`RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1`. These proofs write to temp DB and report paths
+only — they do **not** public-export results. Patched-network orchestrator proof remains
+`tests/unit/test_staged_fixture_mode_run_spine.py` (ticket-162).
 
 *Discover + fetch* (ticket-167):
 
@@ -289,6 +289,17 @@ $env:RGE_ALLOW_SOURCE_NETWORK = "1"
 $env:OPENALEX_MAILTO = "operator@example.com"
 
 python -m pytest tests/unit/test_live_staged_rank2_report_mock_spine.py -m live_network -q
+```
+
+*Single-command orchestrated discover → dual-candidate report* (ticket-193; `research run --fixture-mode --staged-spine` on real OpenAlex with env-gated dynamic candidate selection; mock fixtures after live ingest; temp DB/output only):
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+$env:RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR = "1"
+$env:RGE_ALLOW_SOURCE_NETWORK = "1"
+$env:OPENALEX_MAILTO = "operator@example.com"
+
+python -m pytest tests/unit/test_live_staged_orchestrator_mock_spine.py -m live_network -q
 ```
 
 **Manual source ingestion** (Level-1): place operator `.txt`/`.md` files under gitignored `data/sources/manual/<domain>/` (e.g. `data/sources/manual/creativity/`) and ingest with:
