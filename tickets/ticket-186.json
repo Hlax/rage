@@ -1,0 +1,35 @@
+{
+  "id": "ticket-186",
+  "title": "Pre-ticket audit: live staged run-report mock spine",
+  "problem": "ticket-184 proves live ingest through reconcile-scores. No scoped plan for run-report after live reconcile path.",
+  "evidence": [
+    "agent_reports/2026-06-15_principal-audit-post-ticket-184.md",
+    "agent_reports/2026-06-15_ticket-184_live-staged-reconcile-mock-spine.md",
+    "tests/unit/test_staged_ingest_run_report_spine.py"
+  ],
+  "affected_modules": [
+    "agent_reports/2026-06-15_pre-ticket-186_live-staged-report-mock-spine-audit.md"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-15_pre-ticket-186_live-staged-report-mock-spine-audit.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit defines hardened scope for run-report after live reconcile path.",
+    "No live LLM in proposed scope.",
+    "GO/NO-GO verdict with rollback plan."
+  ],
+  "test_plan": [
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-186"
+  ],
+  "non_goals": [
+    "Implementation in audit ticket.",
+    "Live LLM.",
+    "Public export/site.",
+    "Schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Defer report extension; retain reconcile proof only.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / audit",
+  "pre_ticket_audit_required": true
+}
