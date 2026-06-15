@@ -15,10 +15,10 @@ from rge.modules.score_reconciler import (
     FORMULA_VERSION,
     STRONGER_SOURCE_REASON,
 )
+from tests.unit.staged_domain_seed import seed_domain_opposing_context
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OPENALEX_FIXTURE = REPO_ROOT / "fixtures" / "source_providers" / "openalex_works_sample.json"
-DOMAIN_BASE_SOURCE = REPO_ROOT / "fixtures" / "sources" / "creativity_ai_diversity_short.txt"
 RECONCILE_CONTRACT = (
     REPO_ROOT
     / "fixtures"
@@ -91,32 +91,9 @@ def _mock_html_urlopen(html: bytes, content_type: str = "text/html; charset=utf-
     return _urlopen
 
 
-def _seed_domain_opposing_context(temp_db: Path) -> None:
-    assert (
-        main(
-            [
-                "ingest",
-                str(DOMAIN_BASE_SOURCE),
-                "--domain",
-                "creativity",
-                "--db",
-                str(temp_db),
-            ]
-        )
-        == 0
-    )
-    conn = connect(temp_db)
-    try:
-        base_source_id = conn.execute("SELECT id FROM sources").fetchone()["id"]
-    finally:
-        conn.close()
-    assert main(["extract-claims", "--source", base_source_id, "--db", str(temp_db)]) == 0
-    assert main(["link-concepts", "--source", base_source_id, "--db", str(temp_db)]) == 0
-    assert main(["build-relationships", "--source", base_source_id, "--db", str(temp_db)]) == 0
-
 
 def _run_spine_through_detect_contradictions(temp_db: Path, staging_dir: Path) -> str:
-    _seed_domain_opposing_context(temp_db)
+    seed_domain_opposing_context(temp_db)
     fixture_payload = json.loads(OPENALEX_FIXTURE.read_text())
     discover_args = [
         "discover-sources",

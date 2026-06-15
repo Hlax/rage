@@ -13,10 +13,10 @@ import pytest
 from rge.cli import main
 from rge.db.connection import connect
 from rge.db.repositories import RunReportRepository
+from tests.unit.staged_domain_seed import seed_domain_opposing_context
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OPENALEX_FIXTURE = REPO_ROOT / "fixtures" / "source_providers" / "openalex_works_sample.json"
-DOMAIN_BASE_SOURCE = REPO_ROOT / "fixtures" / "sources" / "creativity_ai_diversity_short.txt"
 RANK1_CANDIDATE_ID = "disc_openalex_W2741809807"
 RANK2_CANDIDATE_ID = "disc_openalex_W1234567890"
 RANK1_HTML = (
@@ -107,29 +107,6 @@ def _mock_html_urlopen(html: bytes, content_type: str = "text/html; charset=utf-
 
     return _urlopen
 
-
-def _seed_domain_opposing_context(temp_db: Path) -> None:
-    assert (
-        main(
-            [
-                "ingest",
-                str(DOMAIN_BASE_SOURCE),
-                "--domain",
-                "creativity",
-                "--db",
-                str(temp_db),
-            ]
-        )
-        == 0
-    )
-    conn = connect(temp_db)
-    try:
-        base_source_id = conn.execute("SELECT id FROM sources").fetchone()["id"]
-    finally:
-        conn.close()
-    assert main(["extract-claims", "--source", base_source_id, "--db", str(temp_db)]) == 0
-    assert main(["link-concepts", "--source", base_source_id, "--db", str(temp_db)]) == 0
-    assert main(["build-relationships", "--source", base_source_id, "--db", str(temp_db)]) == 0
 
 
 def _discover_args(temp_db: Path) -> list[str]:
@@ -407,7 +384,7 @@ def _run_dual_spine(
     seed_domain: bool,
 ) -> tuple[str, str]:
     if seed_domain:
-        _seed_domain_opposing_context(temp_db)
+        seed_domain_opposing_context(temp_db)
     _discover_candidates(temp_db)
     rank1_id = _run_rank1_spine(temp_db, staging_dir, report_dir)
     rank2_id = _run_rank2_spine(temp_db, staging_dir, report_dir)

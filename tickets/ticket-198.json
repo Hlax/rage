@@ -1,0 +1,37 @@
+{
+  "id": "ticket-198",
+  "title": "Principal audit post-ticket-197 staged test hygiene checkpoint",
+  "problem": "Three consecutive done tickets (195–197) since the last principal audit (post-ticket-194). Cadence requires a read-only checkpoint before further implementation on live staged or product-risk surfaces.",
+  "evidence": [
+    "agent_reports/2026-06-15_principal-audit-post-ticket-194.md",
+    "agent_reports/2026-06-15_ticket-197_staged-domain-seed-helper.md",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [
+    "agent_reports/"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-15_principal-audit-post-ticket-197.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report covers live staged spine state, test hygiene (196–197), and next-ticket gate.",
+    "Verdict documents cadence reset and any GO/NO-GO for follow-on work.",
+    "Golden pass.",
+    "Safety audit pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Implementation tickets.",
+    "Production code changes.",
+    "Schema migrations.",
+    "CI live network."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove audit report; retain hygiene helpers.",
+  "status": "proposed",
+  "category": "Phase 3 / principal audit / cadence checkpoint"
+}

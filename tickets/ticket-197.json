@@ -58,6 +58,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert helper and restore inline seed functions in tests.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / hygiene / operator ergonomics"
 }
