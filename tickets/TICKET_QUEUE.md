@@ -231,7 +231,8 @@ superseded
 | 197 | ticket-197 | done | Shared staged domain opposing-context seed test helper | `phase-2/ticket-197-staged-domain-seed-helper` | `agent_reports/2026-06-15_ticket-197_staged-domain-seed-helper.md` |
 | 198 | ticket-198 | done | Principal audit post-ticket-197 staged test hygiene checkpoint | | `agent_reports/2026-06-15_principal-audit-post-ticket-197.md` |
 | 199 | ticket-199 | done | README and AGENTS live staged operator verification runbook | `phase-2/ticket-199-live-staged-operator-verification-runbook` | `agent_reports/2026-06-15_ticket-199_live-staged-operator-verification-runbook.md` |
-| 200 | ticket-200 | proposed | Pre-ticket audit: research run without fixture-mode | | |
+| 200 | ticket-200 | done | Pre-ticket audit: research run without fixture-mode | | `agent_reports/2026-06-15_pre-ticket-200_research-run-non-fixture-audit.md` |
+| 201 | ticket-201 | proposed | Live staged research run CLI entry without fixture-mode flag | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -961,9 +962,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-200 (proposed) — Pre-ticket audit: research run without fixture-mode
+ticket-201 (proposed) — Live staged research run CLI entry without fixture-mode flag
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-200 pre-ticket audit)
+
+- Pre-ticket audit GO for ticket-201: `--staged-spine` without `--fixture-mode`; full live MVP deferred.
+- Authoritative audit: `agent_reports/2026-06-15_pre-ticket-200_research-run-non-fixture-audit.md`.
 
 ## Queue Notes (2026-06-15, ticket-199 agent)
 

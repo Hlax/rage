@@ -33,6 +33,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove audit report; retain fixture-mode paths.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / product-risk / research run contract"
 }

@@ -1,0 +1,50 @@
+{
+  "id": "ticket-201",
+  "title": "Live staged research run CLI entry without fixture-mode flag",
+  "problem": "Phase 3 staged discover→report works via `research run --fixture-mode --staged-spine`, but bare non-fixture run returns not_implemented. Operators expect `research run --staged-spine` without the misleading fixture-mode flag for live discovery entry.",
+  "evidence": [
+    "agent_reports/2026-06-15_pre-ticket-200_research-run-non-fixture-audit.md",
+    "agent_reports/2026-06-15_pre-ticket-201_research-run-live-staged-entry-audit.md",
+    "rge/cli.py _cmd_run",
+    "tests/golden/test_26_full_mvp_run.py",
+    "tests/unit/test_staged_fixture_mode_run_spine.py"
+  ],
+  "affected_modules": [
+    "rge/cli.py",
+    "tests/unit/test_staged_fixture_mode_run_spine.py",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "rge/cli.py",
+    "tests/unit/test_staged_fixture_mode_run_spine.py",
+    "README.md",
+    "AGENTS.md",
+    "agent_reports/2026-06-15_ticket-201_live-staged-run-without-fixture-mode.md"
+  ],
+  "acceptance_criteria": [
+    "research run --staged-spine works without --fixture-mode (routes to execute_staged_fixture_mode_run).",
+    "Bare run --topic --domain without flags remains not_implemented (GT26).",
+    "Patched-network unit test covers new CLI entry.",
+    "Docs clarify staged-spine vs fixture-mode MVP.",
+    "Golden pass.",
+    "Safety audit pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden/test_26_full_mvp_run.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Full live MVP run replacing execute_fixture_mode_run.",
+    "Live Ollama in orchestration.",
+    "CI live network.",
+    "Public export/site.",
+    "Schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert _cmd_run routing; restore prior parser help and tests.",
+  "status": "proposed",
+  "category": "Phase 3 / research run contract / product-risk reduction"
+}
