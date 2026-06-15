@@ -81,27 +81,31 @@ Operator Quickstart.
   and discover→fetch→ingest→mock extract (ticket-172), discover→fetch→ingest→extract→mock
   link (ticket-175), discover→fetch→ingest→extract→link→mock build (ticket-178),
   discover→fetch→ingest→extract→link→build→mock detect (ticket-181),
-  discover→fetch→ingest→extract→link→build→detect→reconcile-scores (ticket-184) via
-  `pytest -m live_network` (not CI); live arbitrary-source staged discover→report not
-  proven; evidence DB NM-4 proven; default graph synthnote checksum-mock; `research run`
-  without `--fixture-mode` remains `not_implemented`.
+  discover→fetch→ingest→extract→link→build→detect→reconcile-scores (ticket-184),
+  discover→fetch→ingest→extract→link→build→detect→reconcile→generate-run-report
+  (ticket-187) via `pytest -m live_network` (not CI); single-command live
+  `research run --staged-spine` not proven; evidence DB NM-4 proven; default graph
+  synthnote checksum-mock; `research run` without `--fixture-mode` remains
+  `not_implemented`.
 - **Cloud providers:** deferred (ticket-059).
 
-**Live staged network proofs** (operator opt-in; tickets 167–185): real OpenAlex HTTP
+**Live staged network proofs** (operator opt-in; tickets 167–188): real OpenAlex HTTP
 pytest proofs on temp DB paths. **Not** run in CI or default `pytest` (`live_network`
 marker excluded in `pyproject.toml`). No live LLM; tickets 172/175/178/181 use explicit
 mock fixtures for `extract-claims`, `link-concepts`, `build-relationships`, and
-`detect-contradictions` after live ingest; ticket-184 adds deterministic
-`reconcile-scores`. Env gates: `RGE_ALLOW_SOURCE_NETWORK=1`, `OPENALEX_MAILTO`, plus
-`RGE_ALLOW_LIVE_STAGED_FETCH=1` (discover→fetch),
+`detect-contradictions` after live ingest; tickets 184/187 add deterministic
+`reconcile-scores` and `generate-run-report`. Env gates: `RGE_ALLOW_SOURCE_NETWORK=1`,
+`OPENALEX_MAILTO`, plus `RGE_ALLOW_LIVE_STAGED_FETCH=1` (discover→fetch),
 `RGE_ALLOW_LIVE_STAGED_INGEST=1` (discover→fetch→ingest-staged),
 `RGE_ALLOW_LIVE_STAGED_EXTRACT=1` (discover→fetch→ingest→mock extract),
 `RGE_ALLOW_LIVE_STAGED_LINK=1` (discover→fetch→ingest→extract→mock link),
 `RGE_ALLOW_LIVE_STAGED_BUILD=1` (discover→fetch→ingest→extract→link→mock build),
 `RGE_ALLOW_LIVE_STAGED_DETECT=1` (discover→fetch→ingest→extract→link→build→mock
-detect), or `RGE_ALLOW_LIVE_STAGED_RECONCILE=1`
-(discover→fetch→ingest→extract→link→build→detect→reconcile-scores). See README
-**Operator Quickstart** (**Live staged network proofs**) for commands.
+detect), `RGE_ALLOW_LIVE_STAGED_RECONCILE=1`
+(discover→fetch→ingest→extract→link→build→detect→reconcile-scores), or
+`RGE_ALLOW_LIVE_STAGED_REPORT=1`
+(discover→fetch→ingest→extract→link→build→detect→reconcile→generate-run-report).
+See README **Operator Quickstart** (**Live staged network proofs**) for commands.
 
 **Manual synthnote operator spine** (mock LLM; tickets 088–099): for Level-1
 `manual_text` research on the creativity synthnote source, follow the five-step
