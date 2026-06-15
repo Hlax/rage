@@ -69,7 +69,8 @@ None.
 
 ## Merge to main
 
-<!-- merge hash recorded in follow-up commit -->
+Merge commit: `b5001b7` (`Merge branch 'phase-2/ticket-226-orchestrator-checklist-llm-closure-refresh'`).
+Post-merge pytest: 621 passed, 20 deselected.
 
 ## Recommended next ticket
 
