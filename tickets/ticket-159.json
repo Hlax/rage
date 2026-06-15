@@ -33,7 +33,8 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Remove audit report; queue notes unchanged.",
-  "status": "proposed",
+  "status": "superseded",
+  "superseded_by": "agent_reports/2026-06-15_principal-audit-post-ticket-164.md",
   "category": "checkpoint / governance",
   "pre_ticket_audit_required": false
 }

@@ -190,7 +190,7 @@ superseded
 | 156 | ticket-156 | done | Detect contradictions on second staged-ingested source (mock spine step) | `phase-2/ticket-156-second-staged-detect-contradictions-spine` | `agent_reports/2026-06-14_ticket-156_second-staged-detect-contradictions-spine.md` |
 | 157 | ticket-157 | done | Reconcile scores on second staged-ingested source (mock spine step) | `phase-2/ticket-157-second-staged-reconcile-scores-spine` | `agent_reports/2026-06-14_ticket-157_second-staged-reconcile-scores-spine.md` |
 | 158 | ticket-158 | done | Generate run report on second staged-ingested source (mock spine step) | `phase-2/ticket-158-second-staged-run-report-spine` | `agent_reports/2026-06-14_ticket-158_second-staged-run-report-spine.md` |
-| 159 | ticket-159 | proposed | Principal audit checkpoint post-ticket-158 (rank #2 staged Phase 3 spine completion) | | |
+| 159 | ticket-159 | superseded | Principal audit checkpoint post-ticket-158 (rank #2 staged Phase 3 spine completion) | | `agent_reports/2026-06-15_principal-audit-post-ticket-164.md` |
 | 160 | ticket-160 | done | Second staged candidate full spine idempotency (mock) | `phase-2/ticket-160-second-staged-spine-idempotency` | `agent_reports/2026-06-14_ticket-160_second-staged-spine-idempotency.md` |
 | 161 | ticket-161 | done | Dual-candidate staged Phase 3 idempotency on one DB (mock) | `phase-2/ticket-161-dual-candidate-staged-idempotency` | `agent_reports/2026-06-14_ticket-161_dual-candidate-staged-idempotency.md` |
 | 162 | ticket-162 | done | Fixture-mode staged research run orchestration spine (mock) | `phase-2/ticket-162-fixture-mode-staged-run-spine` | `agent_reports/2026-06-14_ticket-162_fixture-mode-staged-run-spine.md` |
@@ -927,8 +927,16 @@ superseded
 
 ```txt
 ticket-165 (proposed) — README maturity table Phase 3 staged mock spine status
-(ticket-059 OpenAI placeholder remains deferred; ticket-159 principal audit checkpoint remains proposed)
+(ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, principal audit post-ticket-164)
+
+- Cadence checkpoint satisfied: `agent_reports/2026-06-15_principal-audit-post-ticket-164.md`.
+- ticket-159 superseded (post-158 audit was on main; this audit covers tickets 160–164).
+- 142 golden; 582 pytest; 63 staged unit tests; safety pass; public-site build pass.
+- Gate filename sort hygiene: post-ticket-149 reference sorts after post-ticket-158 — noted for future fix.
+- Next: ticket-165 README maturity table relabel.
 
 ## Queue Notes (2026-06-14, ticket-164 agent)
 
