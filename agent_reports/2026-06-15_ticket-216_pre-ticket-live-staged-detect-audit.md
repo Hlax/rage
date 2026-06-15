@@ -52,7 +52,7 @@ python -m rge.modules.principal_audit_gate --next-ticket ticket-217  # satisfied
 
 ## Merge to main
 
-Pending merge commit.
+Merge commit: `8f12385`.
 
 ## Recommended next ticket
 

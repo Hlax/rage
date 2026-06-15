@@ -44,7 +44,7 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert fallthrough gate, test, and ci deselect entry.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / live LLM / staged spine product-risk",
   "pre_ticket_audit_required": true,
   "pre_ticket_audit_report": "agent_reports/2026-06-15_pre-ticket-216_live-staged-detect-live-llm-audit.md"

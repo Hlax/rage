@@ -7,6 +7,7 @@ without deleting or flattening opposing claims.
 
 from __future__ import annotations
 
+import os
 from typing import Any
 
 from rge.config import load_config
@@ -331,6 +332,7 @@ def propose_contradictions(
     fixture_name: str | None = None,
     source: Any | None = None,
     live_manual_contradiction_fallthrough: bool = False,
+    live_staged_detect_fallthrough: bool = False,
 ) -> list[dict[str, Any]]:
     """Propose contradiction/qualification links via the configured model client."""
     config = load_config()
@@ -358,6 +360,7 @@ def detect_contradictions_for_source(
     *,
     fixture_name: str | None = None,
     live_manual_contradiction_fallthrough: bool = False,
+    live_staged_detect_fallthrough: bool = False,
     client: Any | None = None,
     config: Any | None = None,
 ) -> dict[str, Any]:
@@ -399,7 +402,24 @@ def detect_contradictions_for_source(
         for claim in domain_claims
     ]
     cfg = config if config is not None else load_config()
-    if live_manual_contradiction_fallthrough:
+    if live_manual_contradiction_fallthrough and live_staged_detect_fallthrough:
+        raise ValueError(
+            "live_manual_contradiction_fallthrough and live_staged_detect_fallthrough "
+            "are mutually exclusive."
+        )
+    if live_staged_detect_fallthrough:
+        if fixture_name:
+            raise ValueError(
+                "live_staged_detect_fallthrough cannot be combined with --fixture; "
+                "live Ollama contradiction detection uses domain graph context."
+            )
+        if not _is_staged_fetch_spine_source(source_record):
+            raise ValueError(
+                "live_staged_detect_fallthrough requires staged OpenAlex ingest source title "
+                "(human-ai co-creativity / songwriting marker)."
+            )
+        model_client = client or get_model_client(cfg, mode="ollama")
+    elif live_manual_contradiction_fallthrough:
         if not manual_text_lacks_contradiction_fixture(source_record):
             raise ValueError(
                 "live_manual_contradiction_fallthrough requires a manual_text source "
@@ -550,6 +570,93 @@ def detect_contradictions_manual_live_fallthrough(
         "source_title": source.title,
         "source_type": source.source_type,
         "raw_text_checksum": checksum,
+        "fixture_map_match": not manual_text_lacks_contradiction_fixture(source),
+        "db_writes": result.get("qualification_count", 0) > 0,
+        "provider": model_client.provider,
+        "model": getattr(model_client, "model", "unknown"),
+        "llm_schema_version": cfg.llm_schema_version,
+        "effective_llm_mode": "ollama",
+        "health": health,
+        "qualification_count": result.get("qualification_count", 0),
+        "qualification_ids": result.get("qualification_ids", []),
+        "qualifications": qualifications,
+        "active_relationships": relationships,
+        "rejected_count": result.get("rejected_count", 0),
+        "rejected": result.get("rejected", []),
+    }
+
+
+def assert_live_staged_detect_live_env(
+    config: Any | None = None,
+    *,
+    command: str = "detect-contradictions",
+) -> Any:
+    """Require staged-family live LLM opt-in in addition to standard live probe gates."""
+    from rge.modules.live_extraction_write import LiveExtractionWriteError
+    from rge.modules.live_probe import assert_live_probe_env
+
+    allow = os.environ.get("RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM", "0").strip().casefold()
+    if allow not in ("1", "true", "yes"):
+        raise LiveExtractionWriteError(
+            f"{command} live staged detect fallthrough requires "
+            "RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM=1."
+        )
+    return assert_live_probe_env(config, command=command)
+
+
+def detect_contradictions_staged_live_fallthrough(
+    conn: Any,
+    source_id: str,
+    *,
+    config: Any | None = None,
+    skip_health_check: bool = False,
+    client: Any | None = None,
+) -> dict[str, Any]:
+    """Live Ollama contradiction detection for staged OpenAlex ingest sources (no auto-mock)."""
+    from rge.db.repositories import (
+        RelationshipEvidenceRepository,
+        RelationshipRepository,
+        SourceRepository,
+    )
+    from rge.modules.live_extraction_write import LiveExtractionWriteError
+    from rge.modules.live_probe import assert_ollama_health
+    from rge.modules.relationship_builder import is_staged_fetch_spine_source
+
+    cfg = assert_live_staged_detect_live_env(config, command="detect-contradictions")
+    health = assert_ollama_health(cfg) if not skip_health_check else {}
+
+    source = SourceRepository(conn).get_by_id(source_id)
+    if source is None:
+        raise LiveExtractionWriteError(f"Source not found: {source_id}")
+    if not is_staged_fetch_spine_source(source):
+        raise LiveExtractionWriteError(
+            "live_staged_detect_fallthrough requires staged OpenAlex ingest source title "
+            "(human-ai co-creativity / songwriting marker)."
+        )
+
+    model_client = client or get_model_client(cfg, mode="ollama")
+    result = detect_contradictions_for_source(
+        conn,
+        source_id,
+        live_staged_detect_fallthrough=True,
+        client=model_client,
+        config=cfg,
+    )
+    relationships = RelationshipRepository(conn).list_active()
+    qualifications = [
+        row
+        for row in RelationshipEvidenceRepository(conn).list_for_source(source_id)
+        if row["stance"] == "qualifies"
+    ]
+    return {
+        "status": result["status"],
+        "command": "detect-contradictions",
+        "live_manual_contradiction_fallthrough": False,
+        "live_staged_detect_fallthrough": True,
+        "source_id": source_id,
+        "source_title": source.title,
+        "source_type": source.source_type,
+        "raw_text_checksum": getattr(source, "raw_text_checksum", None),
         "fixture_map_match": not manual_text_lacks_contradiction_fixture(source),
         "db_writes": result.get("qualification_count", 0) > 0,
         "provider": model_client.provider,
