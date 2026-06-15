@@ -32,6 +32,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Remove audit report; retain hygiene helpers.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / principal audit / cadence checkpoint"
 }

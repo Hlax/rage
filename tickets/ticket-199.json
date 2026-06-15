@@ -1,0 +1,42 @@
+{
+  "id": "ticket-199",
+  "title": "README and AGENTS live staged operator verification runbook",
+  "problem": "Live staged spine code and test hygiene are complete (tickets 167–197), but operators lack a single checklist for one-time manual OpenAlex verification of the orchestrator proof outside CI.",
+  "evidence": [
+    "agent_reports/2026-06-15_principal-audit-post-ticket-197.md",
+    "agent_reports/2026-06-15_ticket-194_live-staged-orchestrator-opt-in-docs.md",
+    "tests/unit/test_live_staged_orchestrator_mock_spine.py",
+    "README.md Operator Quickstart"
+  ],
+  "affected_modules": [
+    "README.md",
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "AGENTS.md",
+    "agent_reports/2026-06-15_ticket-199_live-staged-operator-verification-runbook.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart documents one-time orchestrator live_network verification steps.",
+    "AGENTS.md references the runbook and env prerequisites.",
+    "Docs state temp DB only and not CI-enforced.",
+    "Golden pass.",
+    "Safety audit pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "CI live network.",
+    "Production code changes.",
+    "Schema migrations.",
+    "Running live OpenAlex in builder/CI."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README/AGENTS runbook sections.",
+  "status": "proposed",
+  "category": "Phase 3 / operator ergonomics / documentation"
+}

@@ -229,7 +229,8 @@ superseded
 | 195 | ticket-195 | done | Fix live staged pytest candidate ordering column | `phase-2/ticket-195-live-staged-candidate-ordering-fix` | `agent_reports/2026-06-15_ticket-195_live-staged-candidate-ordering-fix.md` |
 | 196 | ticket-196 | done | Shared live staged candidate query test helper | `phase-2/ticket-196-live-staged-candidate-helper` | `agent_reports/2026-06-15_ticket-196_live-staged-candidate-helper.md` |
 | 197 | ticket-197 | done | Shared staged domain opposing-context seed test helper | `phase-2/ticket-197-staged-domain-seed-helper` | `agent_reports/2026-06-15_ticket-197_staged-domain-seed-helper.md` |
-| 198 | ticket-198 | proposed | Principal audit post-ticket-197 staged test hygiene checkpoint | | |
+| 198 | ticket-198 | done | Principal audit post-ticket-197 staged test hygiene checkpoint | | `agent_reports/2026-06-15_principal-audit-post-ticket-197.md` |
+| 199 | ticket-199 | proposed | README and AGENTS live staged operator verification runbook | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -959,9 +960,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-198 (proposed) — Principal audit post-ticket-197 staged test hygiene checkpoint
+ticket-199 (proposed) — README and AGENTS live staged operator verification runbook
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, principal audit post-ticket-197)
+
+- Principal audit checkpoint complete; cadence reset (ticket-198).
+- Hygiene arc 195–197 verified: candidate ordering, shared candidate helper, shared domain seed.
+- ticket-199 seeded: operator live verification runbook (docs).
 
 ## Queue Notes (2026-06-15, ticket-197 agent)
 
