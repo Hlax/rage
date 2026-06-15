@@ -75,7 +75,7 @@ None.
 
 ## Merge to main
 
-Pending merge commit.
+Merged @ `770b340`. Pushed to `origin/main`.
 
 ## Recommended next ticket
 
