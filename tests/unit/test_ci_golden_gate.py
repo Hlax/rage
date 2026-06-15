@@ -107,3 +107,7 @@ def test_default_pytest_deselects_live_smoke() -> None:
         "test_live_openalex_rank2_through_report_mock_spine"
         not in combined
     )
+    assert (
+        "test_live_staged_fixture_mode_orchestrator_dual_spine"
+        not in combined
+    )

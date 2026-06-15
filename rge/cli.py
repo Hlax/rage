@@ -22,6 +22,12 @@ STAGED_FIXTURE_RUN_ID = "run_staged_fixture_mode_spine"
 STAGED_FIXTURE_QUESTION_ID = "rq_staged_fixture_mode_run"
 STAGED_RANK1_CANDIDATE_ID = "disc_openalex_W2741809807"
 STAGED_RANK2_CANDIDATE_ID = "disc_openalex_W1234567890"
+_STAGED_RANK1_LLM = {
+    "extract": "staged_fetch_extract_claims.json",
+    "link": "staged_fetch_link_concepts.json",
+    "relationship": "staged_fetch_build_relationships.json",
+    "detect": "staged_fetch_detect_contradictions.json",
+}
 _STAGED_RANK2_LLM = {
     "extract": "staged_fetch_second_candidate_extract_claims.json",
     "link": "staged_fetch_second_candidate_link_concepts.json",
@@ -108,6 +114,49 @@ def _source_id_by_title_fragment(conn: Any, fragment: str) -> str:
     if row is None:
         raise ValueError(f"ingested source not found for title fragment: {fragment}")
     return row[0]
+
+
+def _env_flag_enabled(name: str) -> bool:
+    value = os.environ.get(name, "0").strip().casefold()
+    return value in ("1", "true", "yes")
+
+
+def _live_staged_orchestrator_enabled() -> bool:
+    return _env_flag_enabled("RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR")
+
+
+def _staged_rank_candidate_ids(conn: Any, question_id: str) -> tuple[str, str]:
+    rows = conn.execute(
+        """
+        SELECT id FROM candidate_sources
+        WHERE research_question_id = ?
+        ORDER BY rank ASC
+        LIMIT 2
+        """,
+        (question_id,),
+    ).fetchall()
+    if len(rows) < 2:
+        raise ValueError(
+            "staged orchestrator requires at least 2 discovered candidates for "
+            f"question {question_id}, found {len(rows)}"
+        )
+    return rows[0][0], rows[1][0]
+
+
+def _source_id_for_candidate(conn: Any, candidate_id: str) -> str:
+    row = conn.execute(
+        "SELECT title FROM candidate_sources WHERE id = ?",
+        (candidate_id,),
+    ).fetchone()
+    if row is None:
+        raise ValueError(f"candidate not found: {candidate_id}")
+    title = str(row["title"] or "").strip()
+    if not title:
+        raise ValueError(f"candidate {candidate_id} has no title")
+    try:
+        return _source_id_by_title(conn, title)
+    except ValueError:
+        return _source_id_by_title_fragment(conn, title[:48])
 
 
 def execute_fixture_mode_run(
@@ -498,10 +547,22 @@ def execute_staged_fixture_mode_run(
             )
             steps_completed.append("discover_openalex_candidates")
 
-            for candidate_id, rank_label in (
-                (STAGED_RANK1_CANDIDATE_ID, "rank1"),
-                (STAGED_RANK2_CANDIDATE_ID, "rank2"),
-            ):
+            live_orchestrator = _live_staged_orchestrator_enabled()
+            if live_orchestrator:
+                rank1_candidate_id, rank2_candidate_id = _staged_rank_candidate_ids(
+                    conn, question_id
+                )
+                candidate_pairs = (
+                    (rank1_candidate_id, "rank1"),
+                    (rank2_candidate_id, "rank2"),
+                )
+            else:
+                candidate_pairs = (
+                    (STAGED_RANK1_CANDIDATE_ID, "rank1"),
+                    (STAGED_RANK2_CANDIDATE_ID, "rank2"),
+                )
+
+            for candidate_id, rank_label in candidate_pairs:
                 _run_cli_step(
                     [
                         "fetch-candidate",
@@ -526,17 +587,63 @@ def execute_staged_fixture_mode_run(
                 )
                 steps_completed.append(f"{rank_label}_fetch_ingest")
 
-            rank1_id = _source_id_by_title_fragment(conn, "songwriting")
-            rank2_id = _source_id_by_title_fragment(conn, "Constraint management")
+            if live_orchestrator:
+                rank1_id = _source_id_for_candidate(conn, rank1_candidate_id)
+                rank2_id = _source_id_for_candidate(conn, rank2_candidate_id)
+            else:
+                rank1_id = _source_id_by_title_fragment(conn, "songwriting")
+                rank2_id = _source_id_by_title_fragment(conn, "Constraint management")
 
-            _run_cli_step(["extract-claims", "--source", rank1_id, *db_args])
-            _run_cli_step(["link-concepts", "--source", rank1_id, *db_args])
-            _run_cli_step(
-                ["build-relationships", "--source", rank1_id, *db_args]
-            )
-            _run_cli_step(
-                ["detect-contradictions", "--source", rank1_id, *db_args]
-            )
+            if live_orchestrator:
+                _run_cli_step(
+                    [
+                        "extract-claims",
+                        "--source",
+                        rank1_id,
+                        "--fixture",
+                        _STAGED_RANK1_LLM["extract"],
+                        *db_args,
+                    ]
+                )
+                _run_cli_step(
+                    [
+                        "link-concepts",
+                        "--source",
+                        rank1_id,
+                        "--fixture",
+                        _STAGED_RANK1_LLM["link"],
+                        *db_args,
+                    ]
+                )
+                _run_cli_step(
+                    [
+                        "build-relationships",
+                        "--source",
+                        rank1_id,
+                        "--fixture",
+                        _STAGED_RANK1_LLM["relationship"],
+                        *db_args,
+                    ]
+                )
+                _run_cli_step(
+                    [
+                        "detect-contradictions",
+                        "--source",
+                        rank1_id,
+                        "--fixture",
+                        _STAGED_RANK1_LLM["detect"],
+                        *db_args,
+                    ]
+                )
+            else:
+                _run_cli_step(["extract-claims", "--source", rank1_id, *db_args])
+                _run_cli_step(["link-concepts", "--source", rank1_id, *db_args])
+                _run_cli_step(
+                    ["build-relationships", "--source", rank1_id, *db_args]
+                )
+                _run_cli_step(
+                    ["detect-contradictions", "--source", rank1_id, *db_args]
+                )
             _run_cli_step(["reconcile-scores", "--source", rank1_id, *db_args])
             _run_cli_step(
                 [
@@ -730,7 +837,7 @@ def execute_staged_fixture_mode_run(
                 for key in expected
                 if actual[key] != expected[key]
             }
-            if mismatches:
+            if mismatches and not live_orchestrator:
                 raise ValueError(
                     "staged fixture run counts mismatch: "
                     + ", ".join(
