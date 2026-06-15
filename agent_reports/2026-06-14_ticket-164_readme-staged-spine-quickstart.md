@@ -64,7 +64,8 @@ Not performed — docs-only ticket; automated proof remains in `tests/unit/test_
 
 ## Merge to main
 
-Pending merge (see post-merge commit for hash).
+Merged to `main` as `c5ca5a3bd7f4b53d2ae90e0beacae10f134c30ae` (2026-06-14).
+Post-merge pytest: 582 passed, 6 deselected.
 
 ## Recommended next ticket
 
