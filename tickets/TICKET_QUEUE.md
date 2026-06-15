@@ -217,7 +217,8 @@ superseded
 | 183 | ticket-183 | done | Pre-ticket audit: live staged reconcile-scores mock spine | `phase-2/ticket-183-pre-ticket-live-staged-reconcile-mock-spine-audit` | `agent_reports/2026-06-15_ticket-183_pre-ticket-live-staged-reconcile-mock-spine.md` |
 | 184 | ticket-184 | done | Live staged reconcile-scores spine (opt-in network) | `phase-2/ticket-184-live-staged-reconcile-mock-spine` | `agent_reports/2026-06-15_ticket-184_live-staged-reconcile-mock-spine.md` |
 | 185 | ticket-185 | done | README and AGENTS.md live staged reconcile opt-in proof docs | `phase-2/ticket-185-live-staged-reconcile-opt-in-docs` | `agent_reports/2026-06-15_ticket-185_live-staged-reconcile-opt-in-docs.md` |
-| 186 | ticket-186 | proposed | Pre-ticket audit: live staged run-report mock spine | | |
+| 186 | ticket-186 | done | Pre-ticket audit: live staged run-report mock spine | `phase-2/ticket-186-pre-ticket-live-staged-report-mock-spine-audit` | `agent_reports/2026-06-15_ticket-186_pre-ticket-live-staged-report-mock-spine.md` |
+| 187 | ticket-187 | proposed | Live staged generate-run-report spine (opt-in network) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -947,9 +948,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-186 (proposed) — Pre-ticket audit: live staged run-report mock spine
+ticket-187 (proposed) — Live staged generate-run-report spine (opt-in network)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-186 agent)
+
+- Pre-ticket audit GO for live staged generate-run-report spine (ticket-187).
+- Report step is deterministic Python; temp DB + output-dir only.
+- ticket-187 seeded: live staged report implementation.
 
 ## Queue Notes (2026-06-15, ticket-185 agent)
 
