@@ -73,7 +73,8 @@ None.
 
 ## Merge to main
 
-<!-- merge hash recorded in follow-up commit -->
+Merge commit: `11eef80` (`Merge branch 'phase-2/ticket-225-runtime-config-staged-reconcile-report-gates'`).
+Post-merge pytest: 621 passed, 20 deselected.
 
 ## Recommended next ticket
 
