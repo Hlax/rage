@@ -45,7 +45,7 @@ python -m rge.modules.safety_auditor --audit full  # pass
 
 ## Merge to main
 
-Pending merge.
+Merge commit: `c16744531d19d20f743b39ff800b918895fd4e26`
 
 ## Recommended next ticket
 
