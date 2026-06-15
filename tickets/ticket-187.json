@@ -1,0 +1,44 @@
+{
+  "id": "ticket-187",
+  "title": "Live staged generate-run-report spine (opt-in network)",
+  "problem": "ticket-184 proves live ingest through reconcile-scores. No opt-in proof that generate-run-report runs after live reconcile path on temp DB.",
+  "evidence": [
+    "agent_reports/2026-06-15_pre-ticket-186_live-staged-report-mock-spine-audit.md",
+    "tests/unit/test_live_staged_reconcile_mock_spine.py",
+    "tests/unit/test_staged_ingest_run_report_spine.py"
+  ],
+  "affected_modules": [
+    "tests/unit/test_live_staged_report_mock_spine.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_live_staged_report_mock_spine.py",
+    "agent_reports/2026-06-15_ticket-187_live-staged-report-mock-spine.md"
+  ],
+  "acceptance_criteria": [
+    "Opt-in live_network test runs discover through generate-run-report on temp DB.",
+    "Domain opposing-context seed before live network (local mock only).",
+    "Mock LLM fixtures through detect; deterministic reconcile and report (no live LLM).",
+    "Default pytest excludes live_network proof.",
+    "Golden tests pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_live_staged_report_mock_spine.py -q",
+    "python -m pytest tests/unit/test_live_staged_reconcile_mock_spine.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Live LLM.",
+    "export-public.",
+    "Public site.",
+    "Schema migrations.",
+    "CI live network by default."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove live report mock spine test.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / product-risk reduction",
+  "pre_ticket_audit_required": true
+}
