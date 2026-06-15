@@ -1,0 +1,33 @@
+{
+  "id": "ticket-223",
+  "title": "Principal audit post-ticket-222 staged spine LLM surface closure",
+  "problem": "Four done tickets (219–222) since principal audit ticket-219; pre-ticket audits 221/222 closed reconcile and report as non-LLM. Cadence requires checkpoint documenting complete staged rank-1 LLM inventory.",
+  "evidence": [
+    "agent_reports/2026-06-15_pre-ticket-221_live-staged-reconcile-live-llm-audit.md",
+    "agent_reports/2026-06-15_pre-ticket-222_live-staged-report-live-llm-audit.md",
+    "agent_reports/2026-06-15_ticket-219_principal-audit-post-ticket-217.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-15_ticket-223_principal-audit-post-ticket-222.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit documents ticket-220 through ticket-222 outcomes and closed staged-spine LLM table.",
+    "Cadence gate reset with recommended next implementation ticket.",
+    "No implementation scope in audit run."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Implementation tickets.",
+    "Live Ollama in CI.",
+    "Public export/site changes.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove audit report only.",
+  "status": "proposed",
+  "category": "Phase 2 / principal audit checkpoint"
+}

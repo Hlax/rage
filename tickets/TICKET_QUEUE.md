@@ -253,7 +253,8 @@ superseded
 | 219 | ticket-219 | done | Principal audit post-ticket-217 staged live detect checkpoint | | `agent_reports/2026-06-15_ticket-219_principal-audit-post-ticket-217.md` |
 | 220 | ticket-220 | done | .env.example and runtime config live staged detect live LLM gate | `phase-2/ticket-220-live-staged-detect-env-profile` | `agent_reports/2026-06-15_ticket-220_live-staged-detect-env-profile.md` |
 | 221 | ticket-221 | done | Pre-ticket audit: live staged reconcile on staged spine (per-step) | `phase-2/ticket-221-pre-ticket-live-staged-reconcile-audit` | `agent_reports/2026-06-15_ticket-221_pre-ticket-live-staged-reconcile-audit.md` |
-| 222 | ticket-222 | proposed | Pre-ticket audit: live staged generate-run-report on staged spine (per-step) | | |
+| 222 | ticket-222 | done | Pre-ticket audit: live staged generate-run-report on staged spine (per-step) | `phase-2/ticket-222-pre-ticket-live-staged-report-audit` | `agent_reports/2026-06-15_ticket-222_pre-ticket-live-staged-report-audit.md` |
+| 223 | ticket-223 | proposed | Principal audit post-ticket-222 staged spine LLM surface closure | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -983,9 +984,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-222 (proposed) — Pre-ticket audit: live staged generate-run-report on staged spine (per-step)
+ticket-223 (proposed) — Principal audit post-ticket-222 staged spine LLM surface closure
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-222 pre-ticket live staged report audit)
+
+- Pre-ticket audit **NO-GO** for live Ollama generate-run-report: `run_evaluator.py` is deterministic.
+- `draft_run_summary` is Phase 0 stub; not wired to staged spine CLI.
+- Staged rank-1 LLM surface closed: extract/link/build/detect only; reconcile/report deterministic.
+- ticket-223 seeded: principal audit cadence (219–222 since ticket-219).
 
 ## Queue Notes (2026-06-15, ticket-221 pre-ticket live staged reconcile audit)
 
