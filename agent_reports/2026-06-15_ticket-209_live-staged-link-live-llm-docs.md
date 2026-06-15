@@ -70,7 +70,7 @@ None.
 
 ## Merge to main
 
-Placeholder — updated after merge.
+Merged @ `ba6453e`. Pushed to `origin/main`.
 
 ## Recommended next ticket
 
