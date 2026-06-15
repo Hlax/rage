@@ -100,6 +100,14 @@ $env:RGE_LLM_MODE = "mock"
 export RGE_LLM_MODE=mock
 ```
 
+**Local operator env profile (ticket-213):** copy `.env.example` → `.env.local`
+(gitignored). Set `RGE_LLM_MODE`, `RGE_ALLOW_LIVE_LLM`, `RGE_LOCAL_LLM`,
+`OLLAMA_BASE_URL`, `RGE_ALLOW_SOURCE_NETWORK`, `OPENALEX_MAILTO`, and staged live
+gates there for live operator runs. The repo reads optional root `.env` via
+`rge/config.py`; shell exports override file values. Full variable table and staged
+gate matrix: `docs/agents/12_RUNTIME_CONFIG.md` (**Live staged operator env profile**).
+Run `python -m rge.cli model-health` before live pipeline work (does not print secrets).
+
 Run the default verification suite (preferred — one command):
 
 ```bash

@@ -244,7 +244,8 @@ superseded
 | 210 | ticket-210 | done | Principal audit post-ticket-209 staged live link checkpoint | | `agent_reports/2026-06-15_ticket-210_principal-audit-post-ticket-209.md` |
 | 211 | ticket-211 | done | Pre-ticket audit: live staged build on staged spine (per-step) | | `agent_reports/2026-06-15_ticket-211_pre-ticket-live-staged-build-audit.md` |
 | 212 | ticket-212 | done | Live staged build live LLM opt-in proof (per-step) | `phase-2/ticket-212-live-staged-build-live-llm-spine` | `agent_reports/2026-06-15_ticket-212_live-staged-build-live-llm-spine.md` |
-| 213 | ticket-213 | proposed | Local env profile support for live staged operator runs | | |
+| 213 | ticket-213 | done | Local env profile support for live staged operator runs | `phase-2/ticket-213-local-env-profile-support` | `agent_reports/2026-06-15_ticket-213_local-env-profile-support.md` |
+| 214 | ticket-214 | proposed | README and AGENTS live staged build live LLM operator docs | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -974,9 +975,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-213 (proposed) — Local env profile support for live staged operator runs
+ticket-214 (proposed) — README and AGENTS live staged build live LLM operator docs
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-213 local env profile)
+
+- `.env.example` consolidates staged mock + live Ollama gates; README/12_RUNTIME_CONFIG document `.env.local` workflow.
+- Principal audit cadence overdue (210–212 since ticket-210); recommend audit after ticket-214.
+- ticket-214 active: live staged build operator docs.
 
 ## Queue Notes (2026-06-15, ticket-212 live staged build live LLM)
 
