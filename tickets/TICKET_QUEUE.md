@@ -212,7 +212,8 @@ superseded
 | 178 | ticket-178 | done | Live staged build mock-fixture spine (opt-in network) | `phase-2/ticket-178-live-staged-build-mock-spine` | `agent_reports/2026-06-15_ticket-178_live-staged-build-mock-spine.md` |
 | 179 | ticket-179 | done | README and AGENTS.md live staged build opt-in proof docs | `phase-2/ticket-179-live-staged-build-opt-in-docs` | `agent_reports/2026-06-15_ticket-179_live-staged-build-opt-in-docs.md` |
 | 180 | ticket-180 | done | Pre-ticket audit: live staged detect-contradictions mock spine | `phase-2/ticket-180-pre-ticket-live-staged-detect-mock-spine-audit` | `agent_reports/2026-06-15_ticket-180_pre-ticket-live-staged-detect-mock-spine.md` |
-| 181 | ticket-181 | proposed | Live staged detect mock-fixture spine (opt-in network) | | |
+| 181 | ticket-181 | done | Live staged detect mock-fixture spine (opt-in network) | `phase-2/ticket-181-live-staged-detect-mock-spine` | `agent_reports/2026-06-15_ticket-181_live-staged-detect-mock-spine.md` |
+| 182 | ticket-182 | proposed | README and AGENTS.md live staged detect opt-in proof docs | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -942,9 +943,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-181 (proposed) — Live staged detect mock-fixture spine (opt-in network)
+ticket-182 (proposed) — README and AGENTS.md live staged detect opt-in proof docs
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-181 agent)
+
+- Opt-in `live_network` pytest: discover through detect-contradictions (mock fixtures).
+- Domain opposing-context seed before live network (ticket-147 pattern).
+- Env: `RGE_ALLOW_LIVE_STAGED_DETECT=1`, `RGE_ALLOW_SOURCE_NETWORK=1`, `OPENALEX_MAILTO`.
+- 595 pytest; 12 deselected; 142 golden; safety pass.
+- Added `pre-ticket-181` gate alias for principal_audit_gate filename match.
+- ticket-182 seeded: detect opt-in docs.
 
 ## Queue Notes (2026-06-15, ticket-180 agent)
 
