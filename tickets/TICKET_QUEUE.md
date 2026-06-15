@@ -230,7 +230,8 @@ superseded
 | 196 | ticket-196 | done | Shared live staged candidate query test helper | `phase-2/ticket-196-live-staged-candidate-helper` | `agent_reports/2026-06-15_ticket-196_live-staged-candidate-helper.md` |
 | 197 | ticket-197 | done | Shared staged domain opposing-context seed test helper | `phase-2/ticket-197-staged-domain-seed-helper` | `agent_reports/2026-06-15_ticket-197_staged-domain-seed-helper.md` |
 | 198 | ticket-198 | done | Principal audit post-ticket-197 staged test hygiene checkpoint | | `agent_reports/2026-06-15_principal-audit-post-ticket-197.md` |
-| 199 | ticket-199 | proposed | README and AGENTS live staged operator verification runbook | | |
+| 199 | ticket-199 | done | README and AGENTS live staged operator verification runbook | `phase-2/ticket-199-live-staged-operator-verification-runbook` | `agent_reports/2026-06-15_ticket-199_live-staged-operator-verification-runbook.md` |
+| 200 | ticket-200 | proposed | Pre-ticket audit: research run without fixture-mode | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -960,9 +961,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-199 (proposed) — README and AGENTS live staged operator verification runbook
+ticket-200 (proposed) — Pre-ticket audit: research run without fixture-mode
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-199 agent)
+
+- README/AGENTS one-time live orchestrator verification runbook (ticket-199).
+- ticket-200 seeded: pre-ticket audit for non-fixture research run.
 
 ## Queue Notes (2026-06-15, principal audit post-ticket-197)
 

@@ -1,0 +1,38 @@
+{
+  "id": "ticket-200",
+  "title": "Pre-ticket audit: research run without fixture-mode",
+  "problem": "Live staged orchestrator and operator verification runbook are complete, but `research run` without `--fixture-mode` remains not_implemented. A focused pre-ticket audit should define hardened scope before any implementation.",
+  "evidence": [
+    "agent_reports/2026-06-15_principal-audit-post-ticket-197.md",
+    "agent_reports/2026-06-15_ticket-199_live-staged-operator-verification-runbook.md",
+    "rge/cli.py",
+    "docs/agents/09_RESEARCH_RUN_CONTRACT.md"
+  ],
+  "affected_modules": [
+    "agent_reports/"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-15_pre-ticket-200_research-run-non-fixture-audit.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit defines scope, env gates, mock vs live boundaries, and rollback for non-fixture research run.",
+    "Verdict GO or NO-GO with hardened scope for follow-on implementation ticket.",
+    "Golden pass.",
+    "Safety audit pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Implementation of non-fixture research run.",
+    "Live Ollama in CI.",
+    "Public export/site changes.",
+    "Schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove audit report; retain fixture-mode paths.",
+  "status": "proposed",
+  "category": "Phase 3 / product-risk / research run contract"
+}

@@ -37,6 +37,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert README/AGENTS runbook sections.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / operator ergonomics / documentation"
 }
