@@ -46,7 +46,7 @@ python -m rge.modules.safety_auditor --audit full  # pass
 
 ## Merge to main
 
-Pending merge in this run.
+Merged @ `571b61a`. Pushed to `origin/main`.
 
 ## Recommended next ticket
 
