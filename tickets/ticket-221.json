@@ -1,0 +1,37 @@
+{
+  "id": "ticket-221",
+  "title": "Pre-ticket audit: live staged reconcile on staged spine (per-step)",
+  "problem": "Staged spine uses deterministic mock reconcile-scores after live OpenAlex ingest. Per-step live Ollama reconcile (if any) would be a new product-risk boundary; medium-risk milestone requires pre-ticket audit before implementation.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-219_principal-audit-post-ticket-217.md",
+    "agent_reports/2026-06-15_ticket-184_live-staged-reconcile-mock-spine.md",
+    "tests/unit/test_live_staged_reconcile_mock_spine.py",
+    "rge/modules/score_reconciler.py"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-15_pre-ticket-221_live-staged-reconcile-live-llm-audit.md",
+    "agent_reports/2026-06-15_ticket-221_pre-ticket-live-staged-reconcile-audit.md"
+  ],
+  "acceptance_criteria": [
+    "Audit defines per-step live reconcile scope (rank-1 only) or documents NO-GO for live LLM reconcile.",
+    "Env gates separate from mock RGE_ALLOW_LIVE_STAGED_RECONCILE.",
+    "Orchestrator mock-only boundary reaffirmed.",
+    "GO/NO-GO with hardened scope for follow-on implementation ticket if GO."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Live reconcile implementation.",
+    "Orchestrator live LLM.",
+    "Public export/site.",
+    "Schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove audit reports only.",
+  "status": "proposed",
+  "category": "Phase 3 / live LLM / staged spine product-risk",
+  "pre_ticket_audit_required": true
+}

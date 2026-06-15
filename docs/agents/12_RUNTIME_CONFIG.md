@@ -43,6 +43,7 @@ Golden tests and the builder agent should set `RGE_LLM_MODE=mock` explicitly.
 | `RGE_ALLOW_LIVE_STAGED_EXTRACT_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama extract on staged ingest |
 | `RGE_ALLOW_LIVE_STAGED_LINK_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama link on staged ingest |
 | `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama build on staged ingest |
+| `RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama detect on staged ingest |
 | `RGE_ALLOW_LIVE_STAGED_*` (mock spine) | optional (default `0`) | no | yes | no | Live OpenAlex + mock LLM staged proofs (see README) |
 
 Valid `RGE_LLM_MODE` values: `mock`, `ollama` only. Anything else fails closed.
@@ -123,7 +124,7 @@ template. Cloud mode is **not implemented** (future ticket-059+).
 
 ## Live staged operator env profile (ticket-213)
 
-For per-step live Ollama proofs on staged rank-1 OpenAlex ingest (extract/link/build),
+For per-step live Ollama proofs on staged rank-1 OpenAlex ingest (extract/link/build/detect),
 operators typically set env vars in a gitignored `.env.local` (copy from
 `.env.example`) or export them in the shell. The repo loader reads optional root
 `.env` automatically; process env always wins. No `python-dotenv` dependency.
@@ -151,9 +152,12 @@ API keys, mailto values, or other secrets.
 | extract | `RGE_ALLOW_LIVE_STAGED_EXTRACT_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_EXTRACT=1` |
 | link | `RGE_ALLOW_LIVE_STAGED_LINK_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_LINK=1` |
 | build | `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_BUILD=1` |
+| detect | `RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_DETECT=1` |
 
 All staged proofs also require `RGE_ALLOW_SOURCE_NETWORK=1` and `OPENALEX_MAILTO`.
-Per-step live Ollama gates are **separate** from mock-spine gates. The staged
+Per-step live Ollama gates are **separate** from mock-spine gates. Live detect
+requires domain opposing context seeded on the temp DB before live discover (see
+README **Live staged detect (live Ollama)**). The staged orchestrator
 orchestrator (`research run --staged-spine`) always forces `RGE_LLM_MODE=mock`.
 
 See README Operator Quickstart for pytest commands (`live_network` + `live_smoke`
