@@ -1,0 +1,35 @@
+{
+  "id": "ticket-228",
+  "title": "Pre-ticket audit: rank-2 staged per-step live Ollama on staged spine",
+  "problem": "Rank-2 staged spine has mock-fixture proofs through generate-run-report (ticket-190) but no per-step live Ollama fallthrough. Before any rank-2 live LLM implementation, a focused pre-ticket audit must define scope, env gates, and NO-GO boundaries.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-227_principal-audit-post-ticket-226.md",
+    "agent_reports/2026-06-15_ticket-223_principal-audit-post-ticket-222.md",
+    "tests/unit/test_live_staged_rank2_report_mock_spine.py",
+    "README.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-15_pre-ticket-228_rank-2-staged-live-llm-audit.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit documents rank-2 staged spine current state (mock LLM after live ingest).",
+    "Audit defines GO/NO-GO for rank-2 per-step live Ollama with env gate recommendations.",
+    "Reconcile/report remain deterministic on rank-2 path (no LLM).",
+    "Golden pass if audit patches runner/docs only."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Implementation changes.",
+    "New fallthrough flags without audit GO.",
+    "CI Ollama.",
+    "Orchestrator live LLM."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert audit report only.",
+  "status": "proposed",
+  "category": "Phase 3 / live LLM / staged spine audit"
+}
