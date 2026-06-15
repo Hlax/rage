@@ -158,7 +158,7 @@ def test_live_openalex_rank2_through_report_mock_spine(
             SELECT id
             FROM candidate_sources
             WHERE research_question_id = ?
-            ORDER BY rank ASC
+            ORDER BY priority_score DESC
             LIMIT 1 OFFSET 1
             """,
             (TEST_QUESTION_ID,),

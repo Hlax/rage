@@ -108,7 +108,7 @@ def test_live_openalex_discover_fetch_ingest_writes_source_and_chunks(
             SELECT id
             FROM candidate_sources
             WHERE research_question_id = ?
-            ORDER BY rank ASC
+            ORDER BY priority_score DESC
             LIMIT 1
             """,
             (TEST_QUESTION_ID,),
