@@ -200,7 +200,8 @@ superseded
 | 166 | ticket-166 | done | Safe autocycle command for audit + run-next-ticket loop | `phase-2/ticket-166-safe-autocycle` | `agent_reports/2026-06-15_ticket-166_safe-autocycle.md` |
 | 167 | ticket-167 | done | Live staged fetch validation proof | `phase-2/ticket-167-live-staged-fetch-validation` | `agent_reports/2026-06-15_ticket-167_live-staged-fetch-validation.md` |
 | 168 | ticket-168 | done | Live staged ingest validation proof (opt-in network) | `phase-2/ticket-168-live-staged-ingest-validation` | `agent_reports/2026-06-15_ticket-168_live-staged-ingest-validation.md` |
-| 169 | ticket-169 | proposed | README operator quickstart for live staged spine opt-in proofs | | |
+| 169 | ticket-169 | done | README operator quickstart for live staged spine opt-in proofs | `phase-2/ticket-169-readme-live-staged-opt-in` | `agent_reports/2026-06-15_ticket-169_readme-live-staged-opt-in.md` |
+| 170 | ticket-170 | proposed | AGENTS.md cross-link live staged opt-in operator proofs | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -930,16 +931,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-169 (proposed) — README operator quickstart for live staged spine opt-in proofs
+ticket-170 (proposed) — AGENTS.md cross-link live staged opt-in operator proofs
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-15, ticket-168 agent)
+## Queue Notes (2026-06-15, ticket-169 agent)
 
-- Opt-in `live_network` pytest: real OpenAlex discover → fetch → ingest-staged on temp DB.
-- Env: `RGE_ALLOW_LIVE_STAGED_INGEST=1`, `RGE_ALLOW_SOURCE_NETWORK=1`, `OPENALEX_MAILTO`.
+- Principal audit post-ticket-168 committed on main before branch (`f7626a2`).
+- README Operator Quickstart: live staged fetch + ingest opt-in pytest commands.
+- Maturity table: opt-in operator proofs (not CI).
 - 591 pytest; 8 deselected; 142 golden; safety pass.
-- ticket-169 seeded: README live staged opt-in operator docs.
+- ticket-170 seeded: AGENTS.md cross-link.
 
 ## Queue Notes (2026-06-15, ticket-166 agent)
 
