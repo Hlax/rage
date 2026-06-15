@@ -211,7 +211,8 @@ superseded
 | 177 | ticket-177 | done | Pre-ticket audit: live staged build-relationships mock spine | `phase-2/ticket-177-pre-ticket-live-staged-build-mock-spine-audit` | `agent_reports/2026-06-15_ticket-177_pre-ticket-live-staged-build-mock-spine.md` |
 | 178 | ticket-178 | done | Live staged build mock-fixture spine (opt-in network) | `phase-2/ticket-178-live-staged-build-mock-spine` | `agent_reports/2026-06-15_ticket-178_live-staged-build-mock-spine.md` |
 | 179 | ticket-179 | done | README and AGENTS.md live staged build opt-in proof docs | `phase-2/ticket-179-live-staged-build-opt-in-docs` | `agent_reports/2026-06-15_ticket-179_live-staged-build-opt-in-docs.md` |
-| 180 | ticket-180 | proposed | Pre-ticket audit: live staged detect-contradictions mock spine | | |
+| 180 | ticket-180 | done | Pre-ticket audit: live staged detect-contradictions mock spine | `phase-2/ticket-180-pre-ticket-live-staged-detect-mock-spine-audit` | `agent_reports/2026-06-15_ticket-180_pre-ticket-live-staged-detect-mock-spine.md` |
+| 181 | ticket-181 | proposed | Live staged detect mock-fixture spine (opt-in network) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -941,9 +942,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-180 (proposed) — Pre-ticket audit: live staged detect-contradictions mock spine
+ticket-181 (proposed) — Live staged detect mock-fixture spine (opt-in network)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-180 agent)
+
+- Pre-ticket audit GO for live staged detect mock spine (ticket-181).
+- Domain opposing-context seed required before live network (ticket-147 pattern).
+- `principal_audit_gate --next-ticket ticket-180` satisfied.
+- ticket-181 seeded: live staged detect mock-fixture implementation.
 
 ## Queue Notes (2026-06-15, ticket-179 agent)
 
