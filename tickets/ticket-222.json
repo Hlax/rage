@@ -30,7 +30,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove audit reports only.",
-  "status": "proposed",
-  "category": "Phase 3 / live LLM / staged spine product-risk",
-  "pre_ticket_audit_required": true
+  "status": "done",
+  "pre_ticket_audit_report": "agent_reports/2026-06-15_pre-ticket-222_live-staged-report-live-llm-audit.md"
 }
