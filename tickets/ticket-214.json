@@ -1,0 +1,36 @@
+{
+  "id": "ticket-214",
+  "title": "README and AGENTS live staged build live LLM operator docs",
+  "problem": "ticket-212 adds --live-staged-build-fallthrough and RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM but operator docs still describe mock-only staged build after link.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-212_live-staged-build-live-llm-spine.md",
+    "tests/unit/test_live_staged_build_live_llm_spine.py",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "README.md",
+    "AGENTS.md",
+    "agent_reports/2026-06-15_ticket-214_live-staged-build-live-llm-docs.md"
+  ],
+  "acceptance_criteria": [
+    "README and AGENTS.md document RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM opt-in pytest command.",
+    "Docs preserve orchestrator mock-only boundary.",
+    "Mock extract + mock link upstream chain documented."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Implementation changes.",
+    "CI Ollama.",
+    "Public export/site.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert doc changes only.",
+  "status": "proposed",
+  "category": "Phase 3 / live LLM / staged spine product-risk"
+}

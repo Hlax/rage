@@ -242,7 +242,9 @@ superseded
 | 208 | ticket-208 | done | Live staged link live LLM opt-in proof (per-step) | `phase-2/ticket-208-live-staged-link-live-llm-spine` | `agent_reports/2026-06-15_ticket-208_live-staged-link-live-llm-spine.md` |
 | 209 | ticket-209 | done | README and AGENTS live staged link live LLM operator docs | `phase-2/ticket-209-live-staged-link-live-llm-docs` | `agent_reports/2026-06-15_ticket-209_live-staged-link-live-llm-docs.md` |
 | 210 | ticket-210 | done | Principal audit post-ticket-209 staged live link checkpoint | | `agent_reports/2026-06-15_ticket-210_principal-audit-post-ticket-209.md` |
-| 211 | ticket-211 | proposed | Pre-ticket audit: live staged build on staged spine (per-step) | | |
+| 211 | ticket-211 | done | Pre-ticket audit: live staged build on staged spine (per-step) | | `agent_reports/2026-06-15_ticket-211_pre-ticket-live-staged-build-audit.md` |
+| 212 | ticket-212 | done | Live staged build live LLM opt-in proof (per-step) | `phase-2/ticket-212-live-staged-build-live-llm-spine` | `agent_reports/2026-06-15_ticket-212_live-staged-build-live-llm-spine.md` |
+| 213 | ticket-213 | proposed | Local env profile support for live staged operator runs | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -972,9 +974,24 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-211 (proposed) — Pre-ticket audit: live staged build on staged spine (per-step)
+ticket-213 (proposed) — Local env profile support for live staged operator runs
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-212 live staged build live LLM)
+
+- Live staged build fallthrough: `--live-staged-build-fallthrough` + `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM=1`.
+- Pytest chain uses mock extract + mock link upstream; orchestrator remains mock-only.
+- Operator live proof with `qwen3.5:9b-q4_K_M`: model-health ok; live pytest blocked by OpenAlex network timeout in builder session.
+- ticket-214 recommended: README/AGENTS operator docs for live staged build.
+
+## Queue Notes (2026-06-15, ticket-211 pre-ticket audit)
+
+- Pre-ticket audit GO: `agent_reports/2026-06-15_pre-ticket-211_live-staged-build-live-llm-audit.md`.
+- Per-step rank-1 live build with mock extract + mock link upstream; orchestrator unchanged.
+- Env gate: `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM=1` (separate from mock `RGE_ALLOW_LIVE_STAGED_BUILD`).
+- ticket-212 seeded: implementation; ticket-213 seeded: env docs (low-risk, after 212).
+- Ollama `qwen2.5:7b` healthy; `qwen3.5:9b` not local — no pull performed.
 
 ## Queue Notes (2026-06-15, principal audit post-ticket-209)
 
