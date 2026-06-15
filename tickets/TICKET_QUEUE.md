@@ -236,7 +236,8 @@ superseded
 | 202 | ticket-202 | done | Principal audit post-ticket-201 research run contract checkpoint | | `agent_reports/2026-06-15_principal-audit-post-ticket-201.md` |
 | 203 | ticket-203 | done | Pre-ticket audit: live LLM on staged research run spine | | `agent_reports/2026-06-15_pre-ticket-203_live-llm-staged-run-audit.md` |
 | 204 | ticket-204 | done | Live staged extract live LLM opt-in proof (per-step) | `phase-2/ticket-204-live-staged-extract-live-llm-spine` | `agent_reports/2026-06-15_ticket-204_live-staged-extract-live-llm-spine.md` |
-| 205 | ticket-205 | proposed | README and AGENTS live staged extract live LLM operator docs | | |
+| 205 | ticket-205 | done | README and AGENTS live staged extract live LLM operator docs | `phase-2/ticket-205-live-staged-extract-live-llm-docs` | `agent_reports/2026-06-15_ticket-205_live-staged-extract-live-llm-docs.md` |
+| 206 | ticket-206 | proposed | Principal audit post-ticket-205 staged live extract checkpoint | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -966,9 +967,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-205 (proposed) — README and AGENTS live staged extract live LLM operator docs
+ticket-206 (proposed) — Principal audit post-ticket-205 staged live extract checkpoint
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-205 agent)
+
+- README/AGENTS document live staged extract: `RGE_ALLOW_LIVE_STAGED_EXTRACT_LIVE_LLM=1`,
+  `--live-staged-fallthrough`, pytest `live_network and live_smoke`.
+- Orchestrator mock-only boundary clarified in both docs.
+- ticket-206 seeded: principal audit cadence (203–205 since ticket-202).
 
 ## Queue Notes (2026-06-15, ticket-204 agent)
 
