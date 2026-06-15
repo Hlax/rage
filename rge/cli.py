@@ -130,7 +130,7 @@ def _staged_rank_candidate_ids(conn: Any, question_id: str) -> tuple[str, str]:
         """
         SELECT id FROM candidate_sources
         WHERE research_question_id = ?
-        ORDER BY rank ASC
+        ORDER BY priority_score DESC
         LIMIT 2
         """,
         (question_id,),
