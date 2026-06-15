@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import io
 import json
+from dataclasses import dataclass
+from itertools import cycle
 from pathlib import Path
 from unittest.mock import patch
 
@@ -25,6 +27,55 @@ RANK2_HTML = (
     b"<html><body><p>Constraint management improves AI-assisted creative team workflows.</p></body></html>"
 )
 STAGED_TOPIC = "Staged fixture-mode run orchestration spine (mock)"
+
+
+@dataclass(frozen=True)
+class _OrchestratorCounts:
+    sources: int
+    candidate_sources: int
+    research_queue: int
+    score_events: int
+    run_reports: int
+    qualifies_evidence: int
+    rank1_accepted: int
+    rank1_rejected: int
+    rank1_relationships: int
+    rank2_accepted: int
+    rank2_rejected: int
+    rank2_relationships: int
+
+
+def _orchestrator_counts(result: dict) -> _OrchestratorCounts:
+    return _OrchestratorCounts(
+        sources=result["sources"],
+        candidate_sources=result["candidate_sources"],
+        research_queue=result["research_queue"],
+        score_events=result["score_events"],
+        run_reports=result["run_reports"],
+        qualifies_evidence=result["qualifies_evidence"],
+        rank1_accepted=result["rank1_accepted"],
+        rank1_rejected=result["rank1_rejected"],
+        rank1_relationships=result["rank1_relationships"],
+        rank2_accepted=result["rank2_accepted"],
+        rank2_rejected=result["rank2_rejected"],
+        rank2_relationships=result["rank2_relationships"],
+    )
+
+
+def _run_staged_orchestrator(
+    temp_db: Path,
+    staging_dir: Path,
+    report_dir: Path,
+) -> dict:
+    return execute_staged_fixture_mode_run(
+        topic=STAGED_TOPIC,
+        domain="creativity",
+        db_path=temp_db,
+        run_id=STAGED_FIXTURE_RUN_ID,
+        report_dir=report_dir,
+        staging_dir=staging_dir,
+        question_id=STAGED_FIXTURE_QUESTION_ID,
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -65,14 +116,14 @@ def report_dir(tmp_path: Path) -> Path:
 
 
 def _staged_network_urlopen(openalex_payload: dict, html_sequence: list[bytes]):
-    html_queue = list(html_sequence)
+    html_cycle = cycle(html_sequence)
 
     def _urlopen(request, timeout=30):  # noqa: ARG001
         url = request.full_url if hasattr(request, "full_url") else str(request)
         if "api.openalex.org" in url:
             return io.BytesIO(json.dumps(openalex_payload).encode("utf-8"))
 
-        html = html_queue.pop(0) if html_queue else html_sequence[-1]
+        html = next(html_cycle)
 
         class _Response(io.BytesIO):
             headers = {"Content-Type": "text/html; charset=utf-8"}
@@ -103,30 +154,40 @@ def test_execute_staged_fixture_mode_run_matches_dual_spine_counts(
     staging_dir: Path,
     report_dir: Path,
 ) -> None:
-    result = execute_staged_fixture_mode_run(
-        topic=STAGED_TOPIC,
-        domain="creativity",
-        db_path=temp_db,
-        run_id=STAGED_FIXTURE_RUN_ID,
-        report_dir=report_dir,
-        staging_dir=staging_dir,
-        question_id=STAGED_FIXTURE_QUESTION_ID,
-    )
+    result = _run_staged_orchestrator(temp_db, staging_dir, report_dir)
 
     assert result["status"] == "completed"
     assert result["mode"] == "fixture_staged"
-    assert result["sources"] == 3
-    assert result["candidate_sources"] == 2
-    assert result["research_queue"] == 2
-    assert result["score_events"] == 2
-    assert result["run_reports"] == 2
-    assert result["qualifies_evidence"] == 2
-    assert result["rank1_accepted"] == 1
-    assert result["rank1_rejected"] == 1
-    assert result["rank2_accepted"] == 1
-    assert result["rank2_rejected"] == 1
-    assert result["rank1_relationships"] == 2
-    assert result["rank2_relationships"] == 2
+    assert _orchestrator_counts(result) == _OrchestratorCounts(
+        sources=3,
+        candidate_sources=2,
+        research_queue=2,
+        score_events=2,
+        run_reports=2,
+        qualifies_evidence=2,
+        rank1_accepted=1,
+        rank1_rejected=1,
+        rank1_relationships=2,
+        rank2_accepted=1,
+        rank2_rejected=1,
+        rank2_relationships=2,
+    )
+
+
+def test_execute_staged_fixture_mode_run_twice_is_idempotent(
+    mock_network_env: None,
+    patched_staged_network: None,
+    temp_db: Path,
+    staging_dir: Path,
+    report_dir: Path,
+) -> None:
+    first = _orchestrator_counts(
+        _run_staged_orchestrator(temp_db, staging_dir, report_dir)
+    )
+    second = _orchestrator_counts(
+        _run_staged_orchestrator(temp_db, staging_dir, report_dir)
+    )
+    assert second == first
 
 
 def test_staged_fixture_mode_run_cli_entry(

@@ -194,7 +194,8 @@ superseded
 | 160 | ticket-160 | done | Second staged candidate full spine idempotency (mock) | `phase-2/ticket-160-second-staged-spine-idempotency` | `agent_reports/2026-06-14_ticket-160_second-staged-spine-idempotency.md` |
 | 161 | ticket-161 | done | Dual-candidate staged Phase 3 idempotency on one DB (mock) | `phase-2/ticket-161-dual-candidate-staged-idempotency` | `agent_reports/2026-06-14_ticket-161_dual-candidate-staged-idempotency.md` |
 | 162 | ticket-162 | done | Fixture-mode staged research run orchestration spine (mock) | `phase-2/ticket-162-fixture-mode-staged-run-spine` | `agent_reports/2026-06-14_ticket-162_fixture-mode-staged-run-spine.md` |
-| 163 | ticket-163 | proposed | Staged fixture-mode run orchestrator idempotency (mock) | | |
+| 163 | ticket-163 | done | Staged fixture-mode run orchestrator idempotency (mock) | `phase-2/ticket-163-staged-run-orchestrator-idempotency` | `agent_reports/2026-06-14_ticket-163_staged-run-orchestrator-idempotency.md` |
+| 164 | ticket-164 | proposed | README operator quickstart for staged Phase 3 --staged-spine | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -924,9 +925,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-163 (proposed) — Staged fixture-mode run orchestrator idempotency (mock)
+ticket-164 (proposed) — README operator quickstart for staged Phase 3 --staged-spine
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-163 agent)
+
+- Test-forward ticket: `execute_staged_fixture_mode_run` twice on one DB; stable dual-spine counts.
+- HTML fetch mock cycles rank #1/#2 across two orchestrator passes.
+- 582 pytest; 142 golden; safety pass.
+- ticket-164 seeded: README staged Phase 3 `--staged-spine` operator quickstart.
+- Phase 3 mock spine complete: per-step, idempotency, dual-candidate, orchestrator, orchestrator idempotency.
 
 ## Queue Notes (2026-06-14, ticket-162 agent)
 
