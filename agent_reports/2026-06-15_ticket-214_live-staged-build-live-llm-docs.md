@@ -73,7 +73,7 @@ None.
 
 ## Merge to main
 
-Pending merge commit.
+Merged @ `6a3070e`. Pushed to `origin/main`.
 
 ## Recommended next ticket
 
