@@ -199,7 +199,8 @@ superseded
 | 165 | ticket-165 | done | README maturity table Phase 3 staged mock spine status | `phase-2/ticket-165-readme-phase3-staged-maturity` | `agent_reports/2026-06-15_ticket-165_readme-phase3-staged-maturity.md` |
 | 166 | ticket-166 | done | Safe autocycle command for audit + run-next-ticket loop | `phase-2/ticket-166-safe-autocycle` | `agent_reports/2026-06-15_ticket-166_safe-autocycle.md` |
 | 167 | ticket-167 | done | Live staged fetch validation proof | `phase-2/ticket-167-live-staged-fetch-validation` | `agent_reports/2026-06-15_ticket-167_live-staged-fetch-validation.md` |
-| 168 | ticket-168 | proposed | Live staged ingest validation proof (opt-in network) | | |
+| 168 | ticket-168 | done | Live staged ingest validation proof (opt-in network) | `phase-2/ticket-168-live-staged-ingest-validation` | `agent_reports/2026-06-15_ticket-168_live-staged-ingest-validation.md` |
+| 169 | ticket-169 | proposed | README operator quickstart for live staged spine opt-in proofs | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -929,16 +930,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-168 (proposed) — Live staged ingest validation proof (opt-in network)
+ticket-169 (proposed) — README operator quickstart for live staged spine opt-in proofs
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-15, ticket-167 agent)
+## Queue Notes (2026-06-15, ticket-168 agent)
 
-- Opt-in `live_network` pytest: real OpenAlex discover + fetch on temp DB.
-- Env: `RGE_ALLOW_LIVE_STAGED_FETCH=1`, `RGE_ALLOW_SOURCE_NETWORK=1`, `OPENALEX_MAILTO`.
-- 590 pytest; 7 deselected (live_smoke + live_network); 142 golden; safety pass.
-- ticket-168 seeded: live staged ingest validation.
+- Opt-in `live_network` pytest: real OpenAlex discover → fetch → ingest-staged on temp DB.
+- Env: `RGE_ALLOW_LIVE_STAGED_INGEST=1`, `RGE_ALLOW_SOURCE_NETWORK=1`, `OPENALEX_MAILTO`.
+- 591 pytest; 8 deselected; 142 golden; safety pass.
+- ticket-169 seeded: README live staged opt-in operator docs.
 
 ## Queue Notes (2026-06-15, ticket-166 agent)
 
