@@ -87,7 +87,9 @@ Operator Quickstart.
   single-command orchestrator proof (ticket-193) via `pytest -m live_network` (not CI);
   per-step live Ollama extract on staged rank-1 ingest (ticket-204; operator opt-in;
   orchestrator still mock); per-step live Ollama link after mock extract (ticket-208;
-  operator opt-in); evidence DB NM-4 proven; default graph
+  operator opt-in); per-step live Ollama build after mock extract + mock link
+  (ticket-212; operator opt-in); per-step live Ollama detect after mock extract +
+  mock link + mock build (ticket-217; operator opt-in); evidence DB NM-4 proven; default graph
   synthnote checksum-mock; bare `research run --topic --domain` (no flags) remains
   `not_implemented`; full live MVP without golden fixtures remains out of scope.
 - **Cloud providers:** deferred (ticket-059).
@@ -140,8 +142,18 @@ not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM=1`,
 `RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama`, network gates above, temp `--db`, mock
 extract + mock link upstream in pytest, and `build-relationships --live-staged-build-fallthrough`
 (or chained pytest in `tests/unit/test_live_staged_build_live_llm_spine.py` with
-`live_network` and `live_smoke` markers). Detect/reconcile on staged spine remain
-mock-only until separate tickets.
+`live_network` and `live_smoke` markers).
+
+**Live staged detect (live Ollama; ticket-217):** separate per-step operator proof —
+not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM=1` (separate from
+mock `RGE_ALLOW_LIVE_STAGED_DETECT=1`), `RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama`,
+network gates above, temp `--db`, mock extract + mock link + mock build upstream in
+pytest, **domain opposing context seed** on the temp DB before live discover
+(`seed_domain_opposing_context()` in `tests/unit/staged_domain_seed.py`), and
+`detect-contradictions --live-staged-detect-fallthrough` (or chained pytest in
+`tests/unit/test_live_staged_detect_live_llm_spine.py` with `live_network` and
+`live_smoke` markers). Reconcile/report on staged spine remain mock-only until separate
+tickets.
 
 **Manual synthnote operator spine** (mock LLM; tickets 088–099): for Level-1
 `manual_text` research on the creativity synthnote source, follow the five-step
