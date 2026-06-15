@@ -29,7 +29,7 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Defer extract extension; retain ingest proof only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / source acquisition / audit",
   "pre_ticket_audit_required": true
 }
