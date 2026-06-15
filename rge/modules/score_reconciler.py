@@ -23,6 +23,9 @@ STAGED_INCREASE_PREDICATE = "may_increase"
 STAGED_SUBJECT = "co-creation"
 STAGED_OBJECT = "semantic diversity"
 
+SECOND_STAGED_SUBJECT = "constraint"
+SECOND_STAGED_OBJECT = "human control"
+
 _creativity_overlay = load_domain_pack("creativity").score_reconciliation
 FORMULA_VERSION = _creativity_overlay.formula_version
 STRONGER_SOURCE_BOOST = _creativity_overlay.stronger_evidence_boost
@@ -130,6 +133,33 @@ def _matches_staged_may_increase_co_creation(
     )
 
 
+def _matches_staged_second_candidate_may_increase_human_control(
+    claim: ClaimRecord, relationship: dict[str, Any]
+) -> bool:
+    """OpenAlex rank #2 staged spine: constraint may_increase human control edge."""
+    if _normalize(relationship.get("predicate", "")) != STAGED_INCREASE_PREDICATE:
+        return False
+    if _normalize(relationship.get("subject_concept", "")) != SECOND_STAGED_SUBJECT:
+        return False
+    if _normalize(relationship.get("object_concept", "")) != SECOND_STAGED_OBJECT:
+        return False
+    text = claim.claim_text.casefold()
+    rel_scope = _normalize(str(relationship.get("scope", "")))
+    claim_scope = _normalize(claim.scope or "")
+    scope_ok = (
+        not rel_scope
+        or rel_scope in text
+        or (claim_scope and rel_scope in claim_scope)
+        or (claim_scope and claim_scope in rel_scope)
+        or ("creative team" in rel_scope and "creative team" in text)
+    )
+    return (
+        ("constraint" in text or "constraint management" in text)
+        and ("improv" in text or "increase" in text or "workflow" in text)
+        and scope_ok
+    )
+
+
 def _claim_supports_active_relationship_edge(
     claim: ClaimRecord, relationship: dict[str, Any]
 ) -> bool:
@@ -164,6 +194,8 @@ def claim_supports_relationship(
     if _matches_golden_may_reduce_diversity(claim, relationship):
         return True
     if _matches_staged_may_increase_co_creation(claim, relationship):
+        return True
+    if _matches_staged_second_candidate_may_increase_human_control(claim, relationship):
         return True
     return _claim_supports_active_relationship_edge(claim, relationship)
 

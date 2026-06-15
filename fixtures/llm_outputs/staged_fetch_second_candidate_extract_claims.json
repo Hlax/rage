@@ -12,7 +12,7 @@
       "object": "AI-assisted creative team workflows",
       "scope": "AI-assisted creative team workflows",
       "evidence_type": "empirical",
-      "confidence": 0.7,
+      "confidence": 0.85,
       "limitations": [
         "Staged fetch artifact; operator must verify source provenance."
       ],
