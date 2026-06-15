@@ -425,28 +425,46 @@ $env:OPENALEX_MAILTO = "operator@example.com"
 python -m pytest tests/unit/test_live_staged_orchestrator_mock_spine.py -m live_network -q
 ```
 
-**One-time live orchestrator verification (operator checklist; ticket-199):** after per-step
-proofs or when validating a fresh operator environment, run the orchestrator proof once on
-a **temp `--db` path** (pytest `tmp_path` — never the default graph DB). **Not CI-enforced:**
-default `pytest` and GitHub Golden Gate exclude `live_network`; this is operator opt-in only.
+**One-time live orchestrator verification (operator checklist; ticket-199; refreshed
+ticket-226):** after per-step **network** proofs or when validating a fresh operator
+environment, run the orchestrator proof once on a **temp `--db` path** (pytest `tmp_path`
+— never the default graph DB). **Not CI-enforced:** default `pytest` and GitHub Golden
+Gate exclude `live_network`; this is operator opt-in only.
+
+**LLM boundary (post ticket-223 closure):** this checklist validates **live OpenAlex +
+mock LLM** only. The orchestrator (`execute_staged_fixture_mode_run`) **always forces**
+`RGE_LLM_MODE=mock` regardless of operator `.env`. It does **not** exercise per-step live
+Ollama fallthrough (extract/link/build/detect — tickets 204/208/212/217); those are
+separate operator proofs with `RGE_ALLOW_LIVE_STAGED_*_LIVE_LLM=1`. **`reconcile-scores`**
+and **`generate-run-report`** inside the orchestrator path are **deterministic Python**
+(`score_reconciler.py`, `run_evaluator.py`) — not model-assisted steps and not part of
+per-step live Ollama proofs (pre-ticket audits 221/222).
 
 | Prerequisite | Required value |
 | --- | --- |
-| `RGE_LLM_MODE` | `mock` (no live LLM) |
+| `RGE_LLM_MODE` | `mock` (orchestrator forces mock; no live LLM on this path) |
 | `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR` | `1` |
 | `RGE_ALLOW_SOURCE_NETWORK` | `1` |
 | `OPENALEX_MAILTO` | valid contact email (OpenAlex polite pool) |
 | Network | outbound HTTPS to OpenAlex (may time out in restricted builder sandboxes) |
 
+**Not in scope for this checklist:**
+
+| Item | Why |
+| --- | --- |
+| Per-step live Ollama (204/208/212/217) | Separate `*_LIVE_LLM` gates and CLI fallthrough flags |
+| Live LLM on reconcile/report | Deterministic only — no `*_LIVE_LLM` gate exists |
+| Default graph DB | Temp `--db` only (pytest `tmp_path`) |
+
 **Checklist:**
 
-1. Set env vars from the orchestrator block above.
+1. Set env vars from the orchestrator block above (`RGE_LLM_MODE=mock` — do not enable live Ollama for this proof).
 2. Run: `python -m pytest tests/unit/test_live_staged_orchestrator_mock_spine.py -m live_network -q`
 3. Confirm **1 passed** (not skipped). Skips mean a missing env gate — see test module docstring.
-4. Confirm stdout JSON includes `"status": "completed"`, `"mode": "fixture_staged"`, and stable dual-spine counts: `sources` 3, `candidate_sources` 2, `research_queue` 2, `score_events` 2, `run_reports` 2, `qualifies_evidence` 2.
+4. Confirm stdout JSON includes `"status": "completed"`, `"mode": "fixture_staged"`, and stable dual-spine counts: `sources` 3, `candidate_sources` 2, `research_queue` 2, `score_events` 2, `run_reports` 2, `qualifies_evidence` 2. The `score_events` and `run_reports` rows come from deterministic reconcile/report — not Ollama.
 5. Confirm temp report artifact: `run_report_latest.json` under the test temp output dir (not committed).
 
-If the run times out, retry from a network-unrestricted machine; do **not** enable live network in CI. Patched-network regression remains `tests/unit/test_staged_fixture_mode_run_spine.py`.
+If the run times out, retry from a network-unrestricted machine; do **not** enable live network in CI. Patched-network regression remains `tests/unit/test_staged_fixture_mode_run_spine.py`. For per-step live Ollama proofs after mock ingest, see **Live staged extract/link/build/detect** sections above.
 
 **Manual source ingestion** (Level-1): place operator `.txt`/`.md` files under gitignored `data/sources/manual/<domain>/` (e.g. `data/sources/manual/creativity/`) and ingest with:
 

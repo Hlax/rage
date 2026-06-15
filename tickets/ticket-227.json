@@ -1,0 +1,36 @@
+{
+  "id": "ticket-227",
+  "title": "Principal audit post-ticket-226 staged docs closure checkpoint",
+  "problem": "Three consecutive done tickets (224, 225, 226) since ticket-223 principal audit completed staged rank-1 LLM documentation trilogy. Cadence requires a principal audit checkpoint before further implementation.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-223_principal-audit-post-ticket-222.md",
+    "agent_reports/2026-06-15_ticket-224_staged-reconcile-report-deterministic-docs.md",
+    "agent_reports/2026-06-15_ticket-225_runtime-config-staged-reconcile-report-gates.md",
+    "agent_reports/2026-06-15_ticket-226_orchestrator-checklist-llm-closure-refresh.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-15_ticket-227_principal-audit-post-ticket-226.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report documents verification baseline (golden, pytest, safety, site).",
+    "Cadence reset with staged rank-1 LLM docs closure assessment.",
+    "Recommendations for next smallest ticket or pause for operator live proofs.",
+    "Golden pass if audit patches runner/docs only."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Implementation changes beyond audit runner/docs patches.",
+    "New LLM tasks or fallthrough flags.",
+    "CI Ollama.",
+    "Queue ticket implementation."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert audit report only.",
+  "status": "proposed",
+  "category": "Phase 2 / principal audit checkpoint"
+}
