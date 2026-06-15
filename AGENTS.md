@@ -112,9 +112,9 @@ DB/output only — no public export. Env gates: `RGE_ALLOW_SOURCE_NETWORK=1`,
 `RGE_ALLOW_LIVE_STAGED_BUILD=1` (discover→fetch→ingest→extract→link→mock build),
 `RGE_ALLOW_LIVE_STAGED_DETECT=1` (discover→fetch→ingest→extract→link→build→mock
 detect), `RGE_ALLOW_LIVE_STAGED_RECONCILE=1`
-(discover→fetch→ingest→extract→link→build→detect→reconcile-scores),
+(discover→fetch→ingest→…→deterministic reconcile-scores; **network gate only — no LLM**),
 `RGE_ALLOW_LIVE_STAGED_REPORT=1`
-(discover→fetch→ingest→extract→link→build→detect→reconcile→generate-run-report),
+(discover→fetch→ingest→…→deterministic generate-run-report; **network gate only — no LLM**),
 `RGE_ALLOW_LIVE_STAGED_RANK2=1`
 (rank-2 discover→fetch→ingest→second-candidate mock extract→…→generate-run-report), or
 `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1`
@@ -152,8 +152,17 @@ pytest, **domain opposing context seed** on the temp DB before live discover
 (`seed_domain_opposing_context()` in `tests/unit/staged_domain_seed.py`), and
 `detect-contradictions --live-staged-detect-fallthrough` (or chained pytest in
 `tests/unit/test_live_staged_detect_live_llm_spine.py` with `live_network` and
-`live_smoke` markers). Reconcile/report on staged spine remain mock-only until separate
-tickets.
+`live_smoke` markers). **Staged rank-1 per-step live Ollama surface is closed at detect**
+(204/208/212/217); no further fallthrough flags are planned on the staged spine.
+
+**Staged reconcile and report (deterministic Python; tickets 184/187):** separate from
+live Ollama per-step proofs. `reconcile-scores` (`score_reconciler.py`) and
+`generate-run-report` (`run_evaluator.py`) are deterministic — no model client, no
+`--live-staged-*-fallthrough` flags. Pre-ticket audits 221/222: **NO-GO** for live LLM on
+these steps. `RGE_ALLOW_LIVE_STAGED_RECONCILE` and `RGE_ALLOW_LIVE_STAGED_REPORT` opt into
+**live OpenAlex network** pytest spines (mock LLM upstream through detect); they are **not**
+analogous to `RGE_ALLOW_LIVE_STAGED_*_LIVE_LLM` gates. Future narrative
+`draft_run_summary` (Ollama Phase 0 stub) is a separate milestone — not wired to staged CLI.
 
 **Manual synthnote operator spine** (mock LLM; tickets 088–099): for Level-1
 `manual_text` research on the creativity synthnote source, follow the five-step
