@@ -52,7 +52,7 @@ python -m pytest -q                 # 621 passed, 20 deselected
 
 ## Merge to main
 
-Pending merge commit.
+Merged @ `b6bf903`. Pushed to `origin/main`.
 
 ## Recommended next ticket
 
