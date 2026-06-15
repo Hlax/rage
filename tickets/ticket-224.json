@@ -1,0 +1,39 @@
+{
+  "id": "ticket-224",
+  "title": "README and AGENTS staged reconcile and report deterministic boundary docs",
+  "problem": "Pre-ticket audits 221/222 confirmed reconcile-scores and generate-run-report are deterministic with no live LLM path, but README/AGENTS still frame RGE_ALLOW_LIVE_STAGED_RECONCILE/REPORT primarily as spine gates without explicit no-LLM boundary.",
+  "evidence": [
+    "agent_reports/2026-06-15_pre-ticket-221_live-staged-reconcile-live-llm-audit.md",
+    "agent_reports/2026-06-15_pre-ticket-222_live-staged-report-live-llm-audit.md",
+    "agent_reports/2026-06-15_ticket-223_principal-audit-post-ticket-222.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "README.md",
+    "AGENTS.md",
+    "agent_reports/2026-06-15_ticket-224_staged-reconcile-report-deterministic-docs.md"
+  ],
+  "acceptance_criteria": [
+    "README and AGENTS document that reconcile-scores and generate-run-report are deterministic Python (no live LLM fallthrough).",
+    "Docs distinguish network spine gates from per-step live Ollama gates.",
+    "Staged rank-1 LLM inventory (extract/link/build/detect only) referenced.",
+    "Golden pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Implementation changes.",
+    "New LLM tasks or fallthrough flags.",
+    "CI Ollama.",
+    "Public export/site.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert doc changes only.",
+  "status": "proposed",
+  "category": "Phase 3 / live LLM / staged spine documentation"
+}
