@@ -74,7 +74,8 @@ non_goals defer wiring to ticket-230+. Heuristic-only delivery matches ticket JS
 
 ## Merge to main
 
-<!-- merge hash recorded in follow-up commit -->
+Merge commit: `3493fc0` (`Merge branch 'phase-2/ticket-229-rank-2-staged-spine-heuristics'`).
+Post-merge pytest: 628 passed, 20 deselected.
 
 ## Recommended next ticket
 
