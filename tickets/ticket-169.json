@@ -1,0 +1,38 @@
+{
+  "id": "ticket-169",
+  "title": "README operator quickstart for live staged spine opt-in proofs",
+  "problem": "ticket-167/168 add opt-in live_network pytest proofs for discover→fetch and discover→fetch→ingest-staged. README lacks operator commands and env gates for these proofs.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-168_live-staged-ingest-validation.md",
+    "tests/unit/test_live_staged_fetch_validation.py",
+    "tests/unit/test_live_staged_ingest_validation.py",
+    "README.md"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-15_ticket-169_readme-live-staged-opt-in.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart documents env gates and pytest commands for ticket-167 and ticket-168 live proofs.",
+    "Maturity table notes live staged fetch/ingest as opt-in operator proof (not CI default).",
+    "Golden tests pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Live LLM.",
+    "Public export/site code changes.",
+    "CI live network by default."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation / operator ergonomics"
+}

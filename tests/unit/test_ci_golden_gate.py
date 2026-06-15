@@ -75,3 +75,7 @@ def test_default_pytest_deselects_live_smoke() -> None:
     assert (
         "test_live_openalex_discover_and_fetch_writes_staged_artifact" not in combined
     )
+    assert (
+        "test_live_openalex_discover_fetch_ingest_writes_source_and_chunks"
+        not in combined
+    )

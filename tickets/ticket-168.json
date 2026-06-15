@@ -37,7 +37,7 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove live ingest proof test; retain ticket-167 fetch proof.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / source acquisition / product-risk reduction",
   "pre_ticket_audit_required": true
 }
