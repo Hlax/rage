@@ -220,3 +220,33 @@ def test_staged_fixture_mode_run_cli_entry(
         ]
     )
     assert exit_code == 0
+
+
+def test_staged_spine_run_cli_entry_without_fixture_mode(
+    mock_network_env: None,
+    patched_staged_network: None,
+    temp_db: Path,
+    staging_dir: Path,
+    report_dir: Path,
+) -> None:
+    exit_code = main(
+        [
+            "run",
+            "--staged-spine",
+            "--topic",
+            STAGED_TOPIC,
+            "--domain",
+            "creativity",
+            "--db",
+            str(temp_db),
+            "--staging-dir",
+            str(staging_dir),
+            "--output-dir",
+            str(report_dir),
+            "--run-id",
+            STAGED_FIXTURE_RUN_ID,
+            "--question-id",
+            STAGED_FIXTURE_QUESTION_ID,
+        ]
+    )
+    assert exit_code == 0

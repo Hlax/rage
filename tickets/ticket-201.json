@@ -45,6 +45,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert _cmd_run routing; restore prior parser help and tests.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / research run contract / product-risk reduction"
 }

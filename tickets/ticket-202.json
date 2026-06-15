@@ -1,0 +1,36 @@
+{
+  "id": "ticket-202",
+  "title": "Principal audit post-ticket-201 research run contract checkpoint",
+  "problem": "Four consecutive done tickets (198–201) since principal audit post-ticket-197. Cadence requires a read-only checkpoint before further implementation.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-201_live-staged-run-without-fixture-mode.md",
+    "agent_reports/2026-06-15_principal-audit-post-ticket-197.md",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [
+    "agent_reports/"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-15_principal-audit-post-ticket-201.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report covers research run contract change (ticket-201) and next-ticket gate.",
+    "Verdict documents cadence reset and GO/NO-GO for follow-on work.",
+    "Golden pass.",
+    "Safety audit pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Implementation tickets.",
+    "Production code changes.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove audit report.",
+  "status": "proposed",
+  "category": "Phase 3 / principal audit / cadence checkpoint"
+}
