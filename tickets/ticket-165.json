@@ -1,0 +1,39 @@
+{
+  "id": "ticket-165",
+  "title": "README maturity table Phase 3 staged mock spine status",
+  "problem": "ticket-164 documents the staged --staged-spine operator path. The README maturity table still lists source discovery/fetcher as pending without noting mock/fixture-proven Phase 3 staged orchestration.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-164_readme-staged-spine-quickstart.md",
+    "README.md",
+    "tests/unit/test_staged_fixture_mode_run_spine.py"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-14_ticket-165_readme-maturity-staged-spine-status.md"
+  ],
+  "acceptance_criteria": [
+    "README maturity table honestly reflects mock/fixture-proven Phase 3 staged discover→report orchestration vs live-only network paths.",
+    "No code changes.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Code changes.",
+    "Public site changes.",
+    "Principal audit checkpoint ticket (ticket-159).",
+    "Live Ollama documentation."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README maturity table edits.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / docs corrective",
+  "pre_ticket_audit_required": false
+}
