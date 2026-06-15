@@ -31,5 +31,6 @@ include = ["rge*"]
 testpaths = ["tests"]
 markers = [
     "live_smoke: optional live Ollama smoke tests; excluded from default pytest runs",
+    "live_network: optional live OpenAlex/fetch network proofs; excluded from default pytest runs",
 ]
-addopts = "-m 'not live_smoke'"
+addopts = "-m 'not live_smoke and not live_network'"
