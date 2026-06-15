@@ -1,0 +1,35 @@
+{
+  "id": "ticket-218",
+  "title": "README and AGENTS live staged detect live LLM operator docs",
+  "problem": "ticket-217 will add --live-staged-detect-fallthrough and RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM but operator docs will still describe mock-only staged detect after build.",
+  "evidence": [
+    "agent_reports/2026-06-15_pre-ticket-216_live-staged-detect-live-llm-audit.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "README.md",
+    "AGENTS.md",
+    "agent_reports/2026-06-15_ticket-218_live-staged-detect-live-llm-docs.md"
+  ],
+  "acceptance_criteria": [
+    "README and AGENTS.md document RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM opt-in pytest command.",
+    "Docs preserve orchestrator mock-only boundary.",
+    "Domain seed + mock upstream chain documented."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Implementation changes.",
+    "CI Ollama.",
+    "Public export/site.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert doc changes only.",
+  "status": "proposed",
+  "category": "Phase 3 / live LLM / staged spine product-risk"
+}
