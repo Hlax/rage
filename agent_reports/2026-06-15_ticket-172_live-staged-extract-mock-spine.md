@@ -62,7 +62,7 @@ Live network test not run in CI/default suite (operator opt-in only).
 
 ## Merge to main
 
-Pending merge.
+Merge commit: `9beb87a65335aef431795003d03dc55a090322f5`
 
 ## Recommended next ticket
 
