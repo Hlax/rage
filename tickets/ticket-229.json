@@ -1,0 +1,44 @@
+{
+  "id": "ticket-229",
+  "title": "Rank-2 staged source and chunk heuristic for live LLM fallthrough eligibility",
+  "problem": "Pre-ticket audit 228: rank-1 staged heuristics (human-ai co-creativity/songwriting) do not match rank-2 sources (Constraint management). Live rank-2 fallthrough requires rank-2 eligibility helpers before per-step live Ollama proofs.",
+  "evidence": [
+    "agent_reports/2026-06-15_pre-ticket-228_rank-2-staged-live-llm-audit.md",
+    "tests/unit/live_staged_candidates.py",
+    "rge/modules/concept_linker.py",
+    "fixtures/source_providers/openalex_works_sample.json"
+  ],
+  "affected_modules": [
+    "rge/modules/claim_extractor.py",
+    "rge/modules/concept_linker.py",
+    "rge/modules/relationship_builder.py"
+  ],
+  "expected_files": [
+    "rge/modules/staged_spine_heuristics.py",
+    "tests/unit/test_staged_rank2_spine_heuristics.py",
+    "agent_reports/2026-06-15_ticket-229_rank-2-staged-spine-heuristics.md"
+  ],
+  "acceptance_criteria": [
+    "is_staged_rank2_fetch_spine_source/chunk helpers match rank-2 OpenAlex fixture markers.",
+    "Rank-1 heuristics unchanged; rank-2 helpers are separate public functions.",
+    "Unit tests cover positive rank-2 and negative rank-1 cases.",
+    "Golden pass; no live Ollama pytest yet."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_staged_rank2_spine_heuristics.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Live Ollama fallthrough implementation.",
+    "New env gates or CLI flags.",
+    "Broadening rank-1 auto-mock routing to rank-2.",
+    "Orchestrator changes.",
+    "Public export/site.",
+    "Schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert heuristic module and tests.",
+  "status": "proposed",
+  "category": "Phase 3 / live LLM / staged spine"
+}
