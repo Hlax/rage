@@ -1,0 +1,17 @@
+{
+  "task_name": "score_reconciliation_contract",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "subject_concept": "constraint",
+      "predicate": "may_increase",
+      "object_concept": "human control",
+      "scope": "AI-assisted creative team workflows",
+      "initial_confidence": 0.5,
+      "expected_boost": 0.12,
+      "expected_confidence": 0.62,
+      "formula_version": "golden_v0.1.0",
+      "reason": "New supporting empirical claim from higher-credibility source."
+    }
+  ]
+}

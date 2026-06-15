@@ -38,7 +38,7 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove second-candidate reconcile fixture/test; retain ticket-156 detect spine.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / source acquisition / product-risk reduction",
   "pre_ticket_audit_required": true
 }

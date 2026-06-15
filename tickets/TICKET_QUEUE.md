@@ -188,7 +188,8 @@ superseded
 | 154 | ticket-154 | done | Link concepts on second staged-ingested source (mock spine step) | `phase-2/ticket-154-second-staged-link-spine` | `agent_reports/2026-06-14_ticket-154_second-staged-link-spine.md` |
 | 155 | ticket-155 | done | Build relationships on second staged-ingested source (mock spine step) | `phase-2/ticket-155-second-staged-build-relationships-spine` | `agent_reports/2026-06-14_ticket-155_second-staged-build-relationships-spine.md` |
 | 156 | ticket-156 | done | Detect contradictions on second staged-ingested source (mock spine step) | `phase-2/ticket-156-second-staged-detect-contradictions-spine` | `agent_reports/2026-06-14_ticket-156_second-staged-detect-contradictions-spine.md` |
-| 157 | ticket-157 | proposed | Reconcile scores on second staged-ingested source (mock spine step) | | |
+| 157 | ticket-157 | done | Reconcile scores on second staged-ingested source (mock spine step) | `phase-2/ticket-157-second-staged-reconcile-scores-spine` | `agent_reports/2026-06-14_ticket-157_second-staged-reconcile-scores-spine.md` |
+| 158 | ticket-158 | proposed | Generate run report on second staged-ingested source (mock spine step) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -918,9 +919,19 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-157 (proposed) — Reconcile scores on second staged-ingested source (mock spine step)
+ticket-158 (proposed) — Generate run report on second staged-ingested source (mock spine step)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-157 agent)
+
+- Reconcile contract fixture + rank #2 edge matcher in score_reconciler (ticket-148 precedent).
+- Extract claim confidence 0.7 → 0.85 to meet pack threshold 0.8.
+- constraint may_increase human control boosted 0.5 → 0.62; one score_events row.
+- Idempotent re-run: no duplicate events.
+- 572 pytest; 142 golden; safety pass.
+- ticket-158 seeded: generate-run-report on second staged source.
+- Rank #2 spine complete through reconcile-scores only — not run report yet.
 
 ## Queue Notes (2026-06-14, ticket-156 agent)
 
