@@ -1,0 +1,47 @@
+{
+  "id": "ticket-166",
+  "title": "Safe autocycle command for audit + run-next-ticket loop",
+  "problem": "Operators lack a bounded machine-readable command that combines principal gate inspection, audit/run-next-ticket planning, and safe verification without blind autonomous multi-ticket merges.",
+  "evidence": [
+    "agent_reports/2026-06-15_principal-audit-post-ticket-164.md",
+    "rge/modules/operator_loop.py",
+    "rge/modules/principal_audit_gate.py",
+    ".cursor/commands/rge-run-next-ticket"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_autocycle.py"
+  ],
+  "expected_files": [
+    "rge/modules/operator_autocycle.py",
+    "tests/unit/test_operator_autocycle.py",
+    "agent_reports/2026-06-15_pre-ticket-166_safe-autocycle-audit.md",
+    "agent_reports/2026-06-15_ticket-166_safe-autocycle.md"
+  ],
+  "acceptance_criteria": [
+    "operator_autocycle --mode plan emits structured JSON with gate, stop_reason, and next_command.",
+    "execute-safe mode runs allowlisted verification only and stops before ticket implementation.",
+    "Hard stop on dirty tree, overdue cadence without audit, missing pre-ticket audit, medium/high risk without flags, drift warnings, and docs-only streaks.",
+    "max-cycles default 1, hard cap 10.",
+    "Unit tests cover plan read-only, caps, and stop conditions.",
+    "No git push, merge, or autonomous ticket implementation.",
+    "Golden and safety audit pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_autocycle.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Autonomous 10-ticket merge loop.",
+    "git push or merge conflict resolution.",
+    "Live network/Ollama/cloud/browser automation.",
+    "Public export/site changes.",
+    "Replacing /rge-run-next-ticket agent workflow."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove operator_autocycle module and tests; retain operator_loop.",
+  "status": "done",
+  "category": "operator loop / workflow safety",
+  "pre_ticket_audit_required": true
+}
