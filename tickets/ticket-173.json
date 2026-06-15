@@ -1,0 +1,39 @@
+{
+  "id": "ticket-173",
+  "title": "README and AGENTS.md live staged extract opt-in proof docs",
+  "problem": "ticket-172 adds opt-in live_network pytest for discover→fetch→ingest→mock extract. README/AGENTS lack operator commands for RGE_ALLOW_LIVE_STAGED_EXTRACT.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-172_live-staged-extract-mock-spine.md",
+    "tests/unit/test_live_staged_extract_mock_spine.py",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [
+    "README.md",
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "AGENTS.md",
+    "agent_reports/2026-06-15_ticket-173_live-staged-extract-opt-in-docs.md"
+  ],
+  "acceptance_criteria": [
+    "README and AGENTS.md document RGE_ALLOW_LIVE_STAGED_EXTRACT opt-in pytest command.",
+    "Golden tests pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Code changes.",
+    "CI live network.",
+    "Public export/site."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert doc paragraphs.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation / operator ergonomics"
+}

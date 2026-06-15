@@ -45,7 +45,7 @@ python -m rge.modules.principal_audit_gate --next-ticket ticket-171
 
 ## Merge to main
 
-Pending merge.
+Merge commit: `7d0a1c6` (ticket-171 audit merge; ticket-172 pending).
 
 ## Recommended next ticket
 
