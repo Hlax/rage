@@ -76,7 +76,7 @@ No live network pytest was run (docs-only ticket).
 
 ## Merge to main
 
-Pending merge in this run.
+Merged @ `67ee331`. Pushed to `origin/main`.
 
 ## Recommended next ticket
 

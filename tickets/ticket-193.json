@@ -1,0 +1,43 @@
+{
+  "id": "ticket-193",
+  "title": "Live staged orchestrator mock spine (opt-in network)",
+  "problem": "Per-step live proofs exist; single-command `research run --fixture-mode --staged-spine` on real OpenAlex without test patches is not proven.",
+  "evidence": [
+    "agent_reports/2026-06-15_pre-ticket-192_live-staged-orchestrator-audit.md",
+    "rge/cli.py execute_staged_fixture_mode_run",
+    "tests/unit/test_staged_fixture_mode_run_spine.py"
+  ],
+  "affected_modules": [
+    "tests/unit/test_live_staged_orchestrator_mock_spine.py",
+    "tests/unit/test_ci_golden_gate.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_live_staged_orchestrator_mock_spine.py",
+    "tests/unit/test_ci_golden_gate.py",
+    "agent_reports/2026-06-15_ticket-193_live-staged-orchestrator-mock-spine.md"
+  ],
+  "acceptance_criteria": [
+    "Opt-in live_network pytest runs orchestrator on real OpenAlex with temp DB.",
+    "Env gate RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1 required.",
+    "Stable dual-spine counts match ticket-162.",
+    "Default pytest excludes live_network.",
+    "Golden pass.",
+    "Safety audit pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_live_staged_orchestrator_mock_spine.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Public export/site.",
+    "Live LLM.",
+    "Schema migrations.",
+    "Cloud providers."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove test file and CI deselect entry.",
+  "status": "proposed",
+  "category": "Phase 3 / live staged orchestration / product-risk reduction"
+}

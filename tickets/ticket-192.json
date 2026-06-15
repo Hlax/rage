@@ -1,0 +1,42 @@
+{
+  "id": "ticket-192",
+  "title": "Pre-ticket audit: single-command live staged orchestrator proof",
+  "problem": "Per-step live staged proofs exist for rank-1 (ticket-187) and rank-2 (ticket-190), but single-command live `research run --fixture-mode --staged-spine` on real OpenAlex without test patches is not proven.",
+  "evidence": [
+    "agent_reports/2026-06-15_principal-audit-post-ticket-190.md",
+    "agent_reports/2026-06-14_ticket-162_fixture-mode-staged-run-spine.md",
+    "rge/cli.py execute_staged_fixture_mode_run",
+    "tests/unit/test_staged_fixture_mode_run_spine.py",
+    "tests/unit/test_live_staged_report_mock_spine.py",
+    "tests/unit/test_live_staged_rank2_report_mock_spine.py"
+  ],
+  "affected_modules": [
+    "agent_reports/"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-15_pre-ticket-192_live-staged-orchestrator-audit.md",
+    "agent_reports/2026-06-15_ticket-192_pre-ticket-live-staged-orchestrator-audit.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit answers orchestrator scope, env gates, CI exclusion, and rollback.",
+    "Verdict GO or NO-GO with hardened scope for follow-on implementation ticket.",
+    "Golden tests pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Implementation of live orchestrator proof.",
+    "Public export/site.",
+    "Live LLM.",
+    "Schema migrations.",
+    "Cloud providers."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove audit report; retain per-step live proofs.",
+  "status": "proposed",
+  "category": "Phase 3 / live staged orchestration / product-risk reduction"
+}
