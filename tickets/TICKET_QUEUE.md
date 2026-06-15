@@ -206,7 +206,8 @@ superseded
 | 172 | ticket-172 | done | Live staged extract mock-fixture spine (opt-in network) | `phase-2/ticket-172-live-staged-extract-mock-spine` | `agent_reports/2026-06-15_ticket-172_live-staged-extract-mock-spine.md` |
 | 173 | ticket-173 | done | README and AGENTS.md live staged extract opt-in proof docs | `phase-2/ticket-173-live-staged-extract-opt-in-docs` | `agent_reports/2026-06-15_ticket-173_live-staged-extract-opt-in-docs.md` |
 | 174 | ticket-174 | done | Pre-ticket audit: live staged link mock-fixture spine | `phase-2/ticket-174-pre-ticket-live-staged-link-mock-spine-audit` | `agent_reports/2026-06-15_ticket-174_pre-ticket-live-staged-link-mock-spine.md` |
-| 175 | ticket-175 | proposed | Live staged link mock-fixture spine (opt-in network) | | |
+| 175 | ticket-175 | done | Live staged link mock-fixture spine (opt-in network) | `phase-2/ticket-175-live-staged-link-mock-spine` | `agent_reports/2026-06-15_ticket-175_live-staged-link-mock-spine.md` |
+| 176 | ticket-176 | proposed | README and AGENTS.md live staged link opt-in proof docs | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -936,14 +937,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-175 (proposed) — Live staged link mock-fixture spine (opt-in network)
+ticket-176 (proposed) — README and AGENTS.md live staged link opt-in proof docs
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-15, ticket-174 agent)
+## Queue Notes (2026-06-15, ticket-175 agent)
 
-- Pre-ticket audit GO for ticket-175 live staged link mock spine.
-- ticket-175 seeded.
+- Opt-in `live_network` pytest: discover→fetch→ingest→extract→link (mock fixtures).
+- Env: `RGE_ALLOW_LIVE_STAGED_LINK=1`, `RGE_ALLOW_SOURCE_NETWORK=1`, `OPENALEX_MAILTO`.
+- 593 pytest; 10 deselected; 142 golden; safety pass.
+- ticket-176 seeded: link opt-in docs.
 
 ## Queue Notes (2026-06-15, ticket-166 agent)
 
