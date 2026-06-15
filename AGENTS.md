@@ -86,8 +86,8 @@ Operator Quickstart.
   (ticket-187) and rank-2 discover→…→generate-run-report (ticket-190) and
   single-command orchestrator proof (ticket-193) via `pytest -m live_network` (not CI);
   evidence DB NM-4 proven; default graph
-  synthnote checksum-mock; `research run` without `--fixture-mode` remains
-  `not_implemented`.
+  synthnote checksum-mock; bare `research run --topic --domain` (no flags) remains
+  `not_implemented`; full live MVP without golden fixtures remains out of scope.
 - **Cloud providers:** deferred (ticket-059).
 
 **Live staged network proofs** (operator opt-in; tickets 167–193): real OpenAlex HTTP
@@ -97,7 +97,7 @@ mock fixtures for `extract-claims`, `link-concepts`, `build-relationships`, and
 `detect-contradictions` after live ingest; tickets 184/187 add deterministic
 `reconcile-scores` and generate-run-report for rank-1; ticket-190 adds rank-2 candidate
 discover through generate-run-report with second-candidate mock fixtures; ticket-193 adds
-single-command `research run --fixture-mode --staged-spine` via
+single-command `research run --staged-spine` (or legacy `--fixture-mode --staged-spine`) via
 `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1`. Temp DB/output only — no public export. Env
 gates: `RGE_ALLOW_SOURCE_NETWORK=1`, `OPENALEX_MAILTO`, plus `RGE_ALLOW_LIVE_STAGED_FETCH=1`
 (discover→fetch), `RGE_ALLOW_LIVE_STAGED_INGEST=1` (discover→fetch→ingest-staged),
@@ -112,7 +112,7 @@ detect), `RGE_ALLOW_LIVE_STAGED_RECONCILE=1`
 `RGE_ALLOW_LIVE_STAGED_RANK2=1`
 (rank-2 discover→fetch→ingest→second-candidate mock extract→…→generate-run-report), or
 `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1`
-(single-command discover→dual-candidate report via `research run --fixture-mode --staged-spine`).
+(single-command discover→dual-candidate report via `research run --staged-spine`).
 See README **Operator Quickstart** (**Live staged network proofs**) for per-step commands
 and **One-time live orchestrator verification (operator checklist)** for the recommended
 one-time orchestrator `pytest -m live_network` checklist (temp DB only; not CI-enforced).

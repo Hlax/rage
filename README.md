@@ -42,7 +42,7 @@ What is **real deterministic engine plumbing today**:
 - Fail-closed public card export and static Next.js public site
 - Deterministic safety auditor and prompt-injection handling
 - Full fixture-mode orchestration: `research run --fixture-mode` (Golden Test 26)
-- Phase 3 staged fixture-mode orchestration: `research run --fixture-mode --staged-spine` (mock LLM; network env for discover/fetch; see Operator Quickstart)
+- Phase 3 staged orchestration: `research run --staged-spine` (mock LLM; network env for discover/fetch; `--fixture-mode` optional legacy alias; see Operator Quickstart)
 
 What is **mock or checksum-pinned fixture content** (not arbitrary live inference):
 
@@ -149,13 +149,16 @@ export, theory, cluster report, or improvement tickets (unlike the MVP fixture r
 Requires live OpenAlex HTTP for `discover-sources` and `fetch-candidate` unless you are
 running unit tests (which patch network I/O).
 
+Use `--staged-spine` alone for Phase 3 live discovery entry; `--fixture-mode --staged-spine`
+remains a backward-compatible alias. `--fixture-mode` without `--staged-spine` runs the
+golden MVP fixture pipeline instead.
+
 ```powershell
 $env:RGE_LLM_MODE = "mock"
 $env:RGE_ALLOW_SOURCE_NETWORK = "1"
 $env:OPENALEX_MAILTO = "operator@example.com"
 
 python -m rge.cli run `
-  --fixture-mode `
   --staged-spine `
   --topic "Does AI improve creative output while reducing diversity?" `
   --domain creativity `
@@ -524,7 +527,8 @@ operator persist): use the numbered checklist in
 | `python -m pytest` | Full test suite |
 | `python -m rge.modules.safety_auditor --audit full` | Deterministic safety audit |
 | `python -m rge.cli run --fixture-mode ...` | End-to-end fixture MVP |
-| `python -m rge.cli run --fixture-mode --staged-spine ...` | Phase 3 staged discover→report (mock LLM; network env required) |
+| `python -m rge.cli run --staged-spine ...` | Phase 3 staged discover→report (mock LLM; network env required) |
+| `python -m rge.cli run --fixture-mode --staged-spine ...` | Same staged spine (legacy alias) |
 | `python -m rge.cli export-public --limit 100` | Export public-safe cards |
 | `cd apps/public-site && npm run build` | Static public site build |
 

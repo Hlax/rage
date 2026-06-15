@@ -888,17 +888,19 @@ def execute_staged_fixture_mode_run(
 
 
 def _cmd_run(args: argparse.Namespace) -> int:
-    if not args.fixture_mode:
+    staged_spine = getattr(args, "staged_spine", False)
+    if not args.fixture_mode and not staged_spine:
         return _not_implemented(
             "run",
-            "Live discovery runs are not implemented. Use --fixture-mode for the "
-            "deterministic MVP pipeline.",
+            "Live discovery MVP runs are not implemented. Use --fixture-mode for the "
+            "deterministic MVP pipeline or --staged-spine for Phase 3 staged "
+            "discover→report.",
         )
     if not args.topic:
         payload = {
             "status": "error",
             "command": "run",
-            "detail": "--topic is required for fixture-mode runs.",
+            "detail": "--topic is required for research run.",
         }
         print(json.dumps(payload, indent=2))
         return 1
@@ -906,7 +908,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
         payload = {
             "status": "error",
             "command": "run",
-            "detail": "--domain is required for fixture-mode runs.",
+            "detail": "--domain is required for research run.",
         }
         print(json.dumps(payload, indent=2))
         return 1
@@ -920,7 +922,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
             if getattr(args, "export_dir", None)
             else None
         )
-        if getattr(args, "staged_spine", False):
+        if staged_spine:
             staging_dir = (
                 Path(args.staging_dir) if getattr(args, "staging_dir", None) else None
             )
@@ -2323,8 +2325,10 @@ def build_parser() -> argparse.ArgumentParser:
         "run",
         help="Run a research workflow for a topic.",
         description=(
-            "Run a fixture-mode research workflow from contract through public "
-            "export and improvement tickets. Live discovery is not implemented."
+            "Run a research workflow. --fixture-mode runs the deterministic MVP pipeline "
+            "from contract through public export. --staged-spine runs Phase 3 staged "
+            "discover→report (mock LLM; network env for discover/fetch). Bare run without "
+            "either flag is not implemented."
         ),
     )
     run_parser.add_argument("--topic", help="Root research topic.")
@@ -2332,14 +2336,14 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument(
         "--fixture-mode",
         action="store_true",
-        help="Use deterministic fixture sources instead of live discovery.",
+        help="Use deterministic golden MVP fixture sources (full pipeline).",
     )
     run_parser.add_argument(
         "--staged-spine",
         action="store_true",
         help=(
-            "With --fixture-mode, run Phase 3 staged discover→report spine "
-            "(mock LLM; network env required for discover/fetch)."
+            "Run Phase 3 staged discover→report spine (mock LLM; network env required "
+            "for discover/fetch). Does not require --fixture-mode."
         ),
     )
     run_parser.add_argument(
