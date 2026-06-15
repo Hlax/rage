@@ -54,7 +54,7 @@ Safety audit not required (audit-only; no code/safety surface changes).
 
 ## Merge to main
 
-Placeholder — updated after merge.
+Merged @ `9680279`. Pushed to `origin/main`.
 
 ## Recommended next ticket
 
