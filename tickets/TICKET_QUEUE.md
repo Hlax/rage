@@ -259,7 +259,8 @@ superseded
 | 225 | ticket-225 | done | Runtime config staged reconcile and report network-only gate docs | `phase-2/ticket-225-runtime-config-staged-reconcile-report-gates` | `agent_reports/2026-06-15_ticket-225_runtime-config-staged-reconcile-report-gates.md` |
 | 226 | ticket-226 | done | README operator one-time live orchestrator checklist post-LLM-closure refresh | `phase-2/ticket-226-orchestrator-checklist-llm-closure-refresh` | `agent_reports/2026-06-15_ticket-226_orchestrator-checklist-llm-closure-refresh.md` |
 | 227 | ticket-227 | done | Principal audit post-ticket-226 staged docs closure checkpoint | | `agent_reports/2026-06-15_ticket-227_principal-audit-post-ticket-226.md` |
-| 228 | ticket-228 | proposed | Pre-ticket audit: rank-2 staged per-step live Ollama on staged spine | | |
+| 228 | ticket-228 | done | Pre-ticket audit: rank-2 staged per-step live Ollama on staged spine | `phase-2/ticket-228-pre-ticket-rank-2-staged-live-llm-audit` | `agent_reports/2026-06-15_ticket-228_pre-ticket-rank-2-staged-live-llm-audit.md` |
+| 229 | ticket-229 | proposed | Rank-2 staged source and chunk heuristic for live LLM fallthrough eligibility | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -989,10 +990,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-none — pause recommended for operator live proof sessions
-(ticket-228 pre-ticket rank-2 live LLM audit proposed when rank-2 scope is desired)
+ticket-229 (proposed) — Rank-2 staged source and chunk heuristic for live LLM fallthrough eligibility
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-228 pre-ticket rank-2 staged live LLM audit)
+
+- Pre-ticket audit **GO (conditional)**: rank-2 live LLM requires separate gates + rank-2 heuristics.
+- Rank-1 fallthrough heuristics do not match rank-2 sources (Constraint management vs co-creativity/songwriting).
+- Reconcile/report on rank-2: deterministic only (NO-GO for LLM).
+- ticket-229 seeded: rank-2 heuristic prerequisite before live Ollama proofs.
 
 ## Queue Notes (2026-06-15, ticket-227 principal audit post-ticket-226)
 
