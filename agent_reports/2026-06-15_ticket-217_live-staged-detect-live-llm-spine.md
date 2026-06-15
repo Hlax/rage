@@ -70,7 +70,7 @@ Live Ollama proof (`live_network` + `live_smoke`) not run in this session (opera
 
 ## Merge to main
 
-Pending merge commit.
+Merge commit: `1ac9537`.
 
 ## Recommended next ticket
 
