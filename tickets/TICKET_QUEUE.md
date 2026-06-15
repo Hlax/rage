@@ -193,7 +193,8 @@ superseded
 | 159 | ticket-159 | proposed | Principal audit checkpoint post-ticket-158 (rank #2 staged Phase 3 spine completion) | | |
 | 160 | ticket-160 | done | Second staged candidate full spine idempotency (mock) | `phase-2/ticket-160-second-staged-spine-idempotency` | `agent_reports/2026-06-14_ticket-160_second-staged-spine-idempotency.md` |
 | 161 | ticket-161 | done | Dual-candidate staged Phase 3 idempotency on one DB (mock) | `phase-2/ticket-161-dual-candidate-staged-idempotency` | `agent_reports/2026-06-14_ticket-161_dual-candidate-staged-idempotency.md` |
-| 162 | ticket-162 | proposed | Fixture-mode staged research run orchestration spine (mock) | | |
+| 162 | ticket-162 | done | Fixture-mode staged research run orchestration spine (mock) | `phase-2/ticket-162-fixture-mode-staged-run-spine` | `agent_reports/2026-06-14_ticket-162_fixture-mode-staged-run-spine.md` |
+| 163 | ticket-163 | proposed | Staged fixture-mode run orchestrator idempotency (mock) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -923,9 +924,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-162 (proposed) — Fixture-mode staged research run orchestration spine (mock)
+ticket-163 (proposed) — Staged fixture-mode run orchestrator idempotency (mock)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-14, ticket-162 agent)
+
+- Added `execute_staged_fixture_mode_run` and `research run --fixture-mode --staged-spine`.
+- URL-aware network mock in unit tests (OpenAlex JSON + staged HTML fetches).
+- Stable dual counts match ticket-161: 3 sources, 2 score_events, 2 run_reports, 2 qualifies.
+- 581 pytest; 142 golden; safety pass.
+- ticket-163 seeded: staged fixture-mode run orchestrator idempotency.
 
 ## Queue Notes (2026-06-14, ticket-161 agent)
 
