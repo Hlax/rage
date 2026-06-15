@@ -254,7 +254,8 @@ superseded
 | 220 | ticket-220 | done | .env.example and runtime config live staged detect live LLM gate | `phase-2/ticket-220-live-staged-detect-env-profile` | `agent_reports/2026-06-15_ticket-220_live-staged-detect-env-profile.md` |
 | 221 | ticket-221 | done | Pre-ticket audit: live staged reconcile on staged spine (per-step) | `phase-2/ticket-221-pre-ticket-live-staged-reconcile-audit` | `agent_reports/2026-06-15_ticket-221_pre-ticket-live-staged-reconcile-audit.md` |
 | 222 | ticket-222 | done | Pre-ticket audit: live staged generate-run-report on staged spine (per-step) | `phase-2/ticket-222-pre-ticket-live-staged-report-audit` | `agent_reports/2026-06-15_ticket-222_pre-ticket-live-staged-report-audit.md` |
-| 223 | ticket-223 | proposed | Principal audit post-ticket-222 staged spine LLM surface closure | | |
+| 223 | ticket-223 | done | Principal audit post-ticket-222 staged spine LLM surface closure | | `agent_reports/2026-06-15_ticket-223_principal-audit-post-ticket-222.md` |
+| 224 | ticket-224 | proposed | README and AGENTS staged reconcile and report deterministic boundary docs | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -984,9 +985,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-223 (proposed) — Principal audit post-ticket-222 staged spine LLM surface closure
+ticket-224 (proposed) — README and AGENTS staged reconcile and report deterministic boundary docs
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-223 principal audit post-ticket-222)
+
+- Cadence reset; staged rank-1 LLM surface **closed** (extract/link/build/detect only).
+- Pre-ticket 221/222: reconcile and report are deterministic — no live LLM fallthrough.
+- ticket-224 seeded: docs hygiene for deterministic boundary callouts.
 
 ## Queue Notes (2026-06-15, ticket-222 pre-ticket live staged report audit)
 
