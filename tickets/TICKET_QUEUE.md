@@ -262,6 +262,8 @@ superseded
 | 228 | ticket-228 | done | Pre-ticket audit: rank-2 staged per-step live Ollama on staged spine | `phase-2/ticket-228-pre-ticket-rank-2-staged-live-llm-audit` | `agent_reports/2026-06-15_ticket-228_pre-ticket-rank-2-staged-live-llm-audit.md` |
 | 229 | ticket-229 | done | Rank-2 staged source and chunk heuristic for live LLM fallthrough eligibility | `phase-2/ticket-229-rank-2-staged-spine-heuristics` | `agent_reports/2026-06-15_ticket-229_rank-2-staged-spine-heuristics.md` |
 | 230 | ticket-230 | proposed | Live staged rank-2 extract live LLM opt-in proof (per-step) | | |
+| 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
+| 232 | ticket-232 | proposed | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -991,9 +993,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-230 (proposed) — Live staged rank-2 extract live LLM opt-in proof (per-step)
+ticket-232 (proposed) — Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo)
+(ticket-230 blocked until pre-ticket-230 report exists)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-231 principal audit post-ticket-229)
+
+- Cadence reset; rank-2 heuristics complete (229); ticket-230 needs pre-ticket-230 mechanical gate.
+- ticket-232 seeded: pre-ticket-230 echo audit (GO scope from 228 + ticket-204 pattern).
 
 ## Queue Notes (2026-06-15, ticket-229 rank-2 staged spine heuristics)
 

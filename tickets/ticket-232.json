@@ -1,0 +1,33 @@
+{
+  "id": "ticket-232",
+  "title": "Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo)",
+  "problem": "principal_audit_gate requires agent_reports/*pre-ticket-230* before ticket-230 implementation. Pre-ticket-228 defines rank-2 live LLM GO (conditional); this echo audit satisfies the mechanical gate for extract-only scope.",
+  "evidence": [
+    "agent_reports/2026-06-15_pre-ticket-228_rank-2-staged-live-llm-audit.md",
+    "agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md",
+    "agent_reports/2026-06-15_ticket-229_rank-2-staged-spine-heuristics.md",
+    "tests/unit/test_live_staged_extract_live_llm_spine.py"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit GO for rank-2 extract live LLM with hardened scope echoing 228 and ticket-204 pattern.",
+    "Documents env gate RGE_ALLOW_LIVE_STAGED_RANK2_EXTRACT_LIVE_LLM and rank-2 candidate selection.",
+    "Golden pass if audit-only."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Implementation changes.",
+    "Rank-2 link/build/detect live LLM.",
+    "CI Ollama."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert audit report only.",
+  "status": "proposed",
+  "category": "Phase 3 / live LLM / staged spine audit"
+}
