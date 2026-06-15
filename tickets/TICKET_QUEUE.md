@@ -222,7 +222,9 @@ superseded
 | 188 | ticket-188 | done | README and AGENTS.md live staged report opt-in proof docs | `phase-2/ticket-188-live-staged-report-opt-in-docs` | `agent_reports/2026-06-15_ticket-188_live-staged-report-opt-in-docs.md` |
 | 189 | ticket-189 | done | Pre-ticket audit: live staged rank-2 candidate mock spine | `phase-2/ticket-189-pre-ticket-live-staged-rank2-mock-spine-audit` | `agent_reports/2026-06-15_ticket-189_pre-ticket-live-staged-rank2-mock-spine.md` |
 | 190 | ticket-190 | done | Live staged rank-2 candidate mock spine (opt-in network) | `phase-2/ticket-190-live-staged-rank2-mock-spine` | `agent_reports/2026-06-15_ticket-190_live-staged-rank2-mock-spine.md` |
-| 191 | ticket-191 | proposed | README and AGENTS.md live staged rank-2 opt-in proof docs | | |
+| 191 | ticket-191 | done | README and AGENTS.md live staged rank-2 opt-in proof docs | `phase-2/ticket-191-live-staged-rank2-opt-in-docs` | `agent_reports/2026-06-15_ticket-191_live-staged-rank2-opt-in-docs.md` |
+| 192 | ticket-192 | proposed | Pre-ticket audit: single-command live staged orchestrator proof | | |
+| 193 | ticket-193 | proposed | Live staged orchestrator mock spine (opt-in network) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -952,9 +954,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-191 (proposed) — README and AGENTS.md live staged rank-2 opt-in proof docs
+ticket-192 (proposed) — Pre-ticket audit: single-command live staged orchestrator proof
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-191 agent)
+
+- Documented `RGE_ALLOW_LIVE_STAGED_RANK2` in README/AGENTS (ticket-191).
+- Pre-ticket orchestrator audit written: `agent_reports/2026-06-15_pre-ticket-192_live-staged-orchestrator-audit.md` (GO for ticket-193 implementation).
+- ticket-192 seeded: formalize pre-ticket audit ticket in queue.
 
 ## Queue Notes (2026-06-15, ticket-190 agent)
 
