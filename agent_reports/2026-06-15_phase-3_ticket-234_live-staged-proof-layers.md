@@ -56,7 +56,7 @@ $env:RGE_LLM_MODE = "mock"
 python -m rge.cli verify --skip-site
 ```
 
-**Result:** PASS — golden 142, full pytest **642** passed, safety audit ok.
+**Result:** PASS — golden 142, full pytest **642** passed, safety audit ok (post-merge `85363d6`).
 
 Focused:
 
@@ -96,4 +96,4 @@ python -m pytest tests/unit/test_live_staged_reconcile_mock_spine.py -m live_net
 
 ## Merge checkpoint
 
-Not merged (awaiting operator review).
+- ticket-234 merge: `85363d6` on `main` (includes ticket-233 @ `1d71ba7`)
