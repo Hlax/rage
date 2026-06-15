@@ -76,6 +76,9 @@ def test_map_openalex_work_shapes_candidate_metadata() -> None:
     assert candidate["doi"] == "https://doi.org/10.1234/rge-openalex-fixture"
     assert candidate["open_access_url"] == "https://example.org/open-access/paper.pdf"
     assert candidate["landing_page_url"] == "https://example.org/landing/human-ai-cocreativity"
+    assert candidate["url"] == "https://example.org/open-access/paper.pdf"
+    assert candidate["selected_url_kind"] == "best_oa_location.pdf_url"
+    assert candidate["fetch_url_candidates"][0]["kind"] == "best_oa_location.pdf_url"
     assert candidate["domain_pack"] == "creativity"
     assert candidate["discovered_at"].endswith("Z")
     assert "Human-AI" in candidate["abstract"]

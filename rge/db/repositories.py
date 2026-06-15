@@ -2194,16 +2194,18 @@ class CandidateSourceRepository:
         priority_score: float,
         status: str,
         url: str | None = None,
+        url_candidates_json: str | None = None,
     ) -> dict[str, Any]:
         now = utc_now_iso()
         self._conn.execute(
             """
             INSERT INTO candidate_sources (
-                id, research_question_id, contract_id, title, url, source_type,
+                id, research_question_id, contract_id, title, url, url_candidates_json,
+                source_type,
                 reason, relevance_score, credibility_prior, gap_fill_score,
                 recency_score, source_diversity_score, novelty_score, drift_risk,
                 priority_score, status, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO NOTHING
             """,
             (
@@ -2212,6 +2214,7 @@ class CandidateSourceRepository:
                 contract_id,
                 title,
                 url,
+                url_candidates_json,
                 source_type,
                 reason,
                 relevance_score,

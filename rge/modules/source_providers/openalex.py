@@ -9,6 +9,12 @@ import urllib.request
 from datetime import UTC, datetime
 from typing import Any
 
+from rge.modules.source_providers.openalex_urls import (
+    build_openalex_fetch_url_candidates,
+    primary_fetch_url,
+    primary_fetch_url_kind,
+)
+
 OPENALEX_WORKS_API = "https://api.openalex.org/works"
 
 
@@ -33,6 +39,8 @@ def map_openalex_work(work: dict[str, Any], *, domain_pack: str) -> dict[str, An
     ]
     open_access = work.get("open_access") or {}
     primary_location = work.get("primary_location") or {}
+    best_oa_location = work.get("best_oa_location") or {}
+    fetch_url_candidates = build_openalex_fetch_url_candidates(work)
     provider_id = str(work.get("id") or "")
     if provider_id.startswith("https://openalex.org/"):
         provider_id = provider_id.rsplit("/", 1)[-1]
@@ -46,6 +54,11 @@ def map_openalex_work(work: dict[str, Any], *, domain_pack: str) -> dict[str, An
         "doi": work.get("doi"),
         "open_access_url": open_access.get("oa_url"),
         "landing_page_url": primary_location.get("landing_page_url"),
+        "best_oa_pdf_url": best_oa_location.get("pdf_url"),
+        "best_oa_landing_page_url": best_oa_location.get("landing_page_url"),
+        "fetch_url_candidates": fetch_url_candidates,
+        "selected_url_kind": primary_fetch_url_kind(fetch_url_candidates),
+        "url": primary_fetch_url(fetch_url_candidates),
         "abstract": reconstruct_abstract(work.get("abstract_inverted_index")),
         "domain_pack": domain_pack,
         "discovered_at": datetime.now(UTC).replace(microsecond=0).isoformat().replace(

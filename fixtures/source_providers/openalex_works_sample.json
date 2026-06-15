@@ -26,8 +26,13 @@
         "is_oa": true,
         "oa_url": "https://example.org/open-access/paper.pdf"
       },
+      "best_oa_location": {
+        "pdf_url": "https://example.org/open-access/paper.pdf",
+        "landing_page_url": "https://example.org/open-access/landing"
+      },
       "primary_location": {
-        "landing_page_url": "https://example.org/landing/human-ai-cocreativity"
+        "landing_page_url": "https://example.org/landing/human-ai-cocreativity",
+        "pdf_url": "https://example.org/publisher/human-ai-cocreativity.pdf"
       },
       "abstract_inverted_index": {
         "Human-AI": [0],

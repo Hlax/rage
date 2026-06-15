@@ -167,7 +167,7 @@ def test_run_fetch_candidate_command_missing_url(
     conn = ensure_database(staged_db_with_candidate)
     try:
         conn.execute(
-            "UPDATE candidate_sources SET url = NULL WHERE id = ?",
+            "UPDATE candidate_sources SET url = NULL, url_candidates_json = NULL WHERE id = ?",
             (CANDIDATE_ID,),
         )
         conn.commit()
@@ -178,7 +178,7 @@ def test_run_fetch_candidate_command_missing_url(
     finally:
         conn.close()
     assert exit_code == ERROR_EXIT_CODE
-    assert payload["reason"] == "fetch_failed"
+    assert payload["reason"] == "no_fetchable_url"
 
 
 def test_fetch_staged_candidate_artifact_idempotent(

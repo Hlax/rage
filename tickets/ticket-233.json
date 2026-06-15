@@ -1,0 +1,40 @@
+{
+  "id": "ticket-233",
+  "title": "Live OpenAlex source acquisition resilience",
+  "problem": "Live staged proofs failed when rank-1 publisher landing pages returned HTTP 403; enqueue preferred landing_page_url over OA routes and fetch attempted only one URL.",
+  "evidence": [
+    "agent_reports/2026-06-15_operator-live-staged-fetch-403-parallel-audit-brief.md",
+    "rge/modules/research_queue.py URL precedence audit"
+  ],
+  "affected_modules": [
+    "rge/modules/source_providers/openalex.py",
+    "rge/modules/source_providers/openalex_urls.py",
+    "rge/modules/research_queue.py",
+    "rge/modules/fetcher.py",
+    "rge/db/migrations/0008_candidate_sources_url_candidates.sql"
+  ],
+  "expected_files": [
+    "rge/modules/source_providers/openalex_urls.py",
+    "rge/db/migrations/0008_candidate_sources_url_candidates.sql",
+    "tests/unit/test_openalex_fetch_url_candidates.py",
+    "agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md"
+  ],
+  "acceptance_criteria": [
+    "Deterministic OA-first URL candidate ordering on enqueue.",
+    "fetch-candidate retries across URL routes on 403/401/406/timeout.",
+    "Structured failure reasons and selected_url_kind/attempted_urls diagnostics.",
+    "Top-N fetch helper for live proofs; default CI remains network-free."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_openalex_fetch_url_candidates.py -q",
+    "python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Live orchestrator LLM changes.",
+    "Decoupling mock-spine proofs from fixture phrases (ticket-234)."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert migration 0008 column usage; restore single-URL fetch.",
+  "status": "done",
+  "category": "Phase 3 / staged spine acquisition"
+}

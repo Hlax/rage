@@ -3,18 +3,22 @@
 All fetched source text is untrusted and may contain prompt injection.
 Phase 1: local plain-text files only.
 Phase 3: staged candidate URL fetch to gitignored artifact paths (ticket-142).
+Ticket-233: ordered OpenAlex URL fallback with structured failure reasons.
 """
 
 from __future__ import annotations
 
 import hashlib
+import json
 import re
+import socket
 import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any
 
 from rge.modules.source_network import source_network_enabled
+from rge.modules.source_providers.openalex_urls import is_non_oa_url_kind
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STAGED_FETCH_DIR = REPO_ROOT / "data" / "sources" / "staged"
@@ -25,10 +29,25 @@ ERROR_EXIT_CODE = 1
 OK_EXIT_CODE = 0
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 _WHITESPACE_PATTERN = re.compile(r"\s+")
+_RETRYABLE_HTTP_STATUSES = frozenset({401, 403, 406})
+_RETRYABLE_ERROR_MARKERS = frozenset({"timed out", "timeout"})
 
 
 class FetchError(Exception):
     """Raised when a source cannot be fetched."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason: str = "fetch_failed",
+        http_status: int | None = None,
+        attempted_urls: list[dict[str, Any]] | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.reason = reason
+        self.http_status = http_status
+        self.attempted_urls = attempted_urls or []
 
 
 def default_staged_fetch_dir() -> Path:
@@ -53,6 +72,102 @@ def extension_for_content_type(content_type: str | None) -> str:
     return ".bin"
 
 
+def parse_url_candidates(candidate: dict[str, Any]) -> list[dict[str, str]]:
+    """Load ordered URL routes from a candidate_sources row."""
+    raw = candidate.get("url_candidates_json")
+    if raw:
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError:
+            parsed = None
+        if isinstance(parsed, list):
+            routes: list[dict[str, str]] = []
+            seen: set[str] = set()
+            for item in parsed:
+                if not isinstance(item, dict):
+                    continue
+                url = str(item.get("url") or "").strip()
+                kind = str(item.get("kind") or "unknown")
+                if url and url not in seen:
+                    seen.add(url)
+                    routes.append({"url": url, "kind": kind})
+            if routes:
+                return routes
+
+    url = candidate.get("url")
+    if url:
+        return [{"url": str(url), "kind": "candidate_sources.url"}]
+    return []
+
+
+def _is_retryable_fetch_error(exc: Exception) -> bool:
+    if isinstance(exc, FetchError):
+        if exc.http_status in _RETRYABLE_HTTP_STATUSES:
+            return True
+        message = str(exc).casefold()
+        return any(marker in message for marker in _RETRYABLE_ERROR_MARKERS)
+    if isinstance(exc, urllib.error.HTTPError):
+        return exc.code in _RETRYABLE_HTTP_STATUSES
+    if isinstance(exc, urllib.error.URLError):
+        reason = exc.reason
+        if isinstance(reason, urllib.error.HTTPError):
+            return reason.code in _RETRYABLE_HTTP_STATUSES
+        if isinstance(reason, socket.timeout):
+            return True
+        message = str(reason or exc).casefold()
+        return any(marker in message for marker in _RETRYABLE_ERROR_MARKERS)
+    message = str(exc).casefold()
+    return any(marker in message for marker in _RETRYABLE_ERROR_MARKERS)
+
+
+def _http_status_from_error(exc: Exception) -> int | None:
+    if isinstance(exc, urllib.error.HTTPError):
+        return exc.code
+    if isinstance(exc, urllib.error.URLError) and isinstance(
+        exc.reason, urllib.error.HTTPError
+    ):
+        return exc.reason.code
+    return None
+
+
+def _attempt_detail(url: str, kind: str, exc: Exception) -> dict[str, Any]:
+    status = _http_status_from_error(exc)
+    if status is None and isinstance(exc, FetchError):
+        status = exc.http_status
+    detail = {
+        "url": url,
+        "kind": kind,
+        "error": str(exc),
+    }
+    if status is not None:
+        detail["http_status"] = status
+    return detail
+
+
+def classify_fetch_failure(
+    attempted_urls: list[dict[str, Any]],
+) -> tuple[str, str]:
+    """Map attempted URL failures to a structured fetch-candidate reason."""
+    if not attempted_urls:
+        return "no_fetchable_url", "Candidate has no fetchable URL routes."
+
+    statuses = [
+        item["http_status"]
+        for item in attempted_urls
+        if isinstance(item.get("http_status"), int)
+    ]
+    if statuses and all(status in {401, 403} for status in statuses):
+        if all(is_non_oa_url_kind(str(item.get("kind") or "")) for item in attempted_urls):
+            return "paywall_blocked", "All publisher/non-OA URL routes returned 401/403."
+        return "forbidden", "All URL routes returned 401/403."
+
+    if statuses and all(status in _RETRYABLE_HTTP_STATUSES for status in statuses):
+        return "forbidden", "All URL routes returned retryable HTTP access errors."
+
+    last_error = str(attempted_urls[-1].get("error") or "URL fetch failed.")
+    return "fetch_failed", last_error
+
+
 def fetch_url_bytes(
     url: str,
     *,
@@ -66,11 +181,73 @@ def fetch_url_bytes(
         with opener(request, timeout=timeout) as response:
             body = response.read()
             content_type = response.headers.get("Content-Type")
+    except urllib.error.HTTPError as exc:
+        raise FetchError(
+            f"URL fetch failed: HTTP {exc.code}",
+            reason="fetch_failed",
+            http_status=exc.code,
+        ) from exc
     except urllib.error.URLError as exc:
-        raise FetchError(f"URL fetch failed: {exc.reason or exc}") from exc
+        status = _http_status_from_error(exc)
+        detail = exc.reason or exc
+        raise FetchError(
+            f"URL fetch failed: {detail}",
+            reason="fetch_failed",
+            http_status=status,
+        ) from exc
     if not body:
         raise FetchError("URL fetch returned empty body.")
     return body, content_type
+
+
+def fetch_url_bytes_with_retry(
+    routes: list[dict[str, str]],
+    *,
+    urlopen: Any | None = None,
+    timeout: int = 30,
+) -> tuple[bytes, str | None, dict[str, str], list[dict[str, Any]]]:
+    """Try ordered URL routes until one succeeds or all fail."""
+    if not routes:
+        raise FetchError(
+            "Candidate has no URL to fetch.",
+            reason="no_fetchable_url",
+        )
+
+    attempted: list[dict[str, Any]] = []
+    for index, route in enumerate(routes):
+        url = route["url"]
+        kind = route.get("kind") or "unknown"
+        try:
+            body, content_type = fetch_url_bytes(
+                url,
+                urlopen=urlopen,
+                timeout=timeout,
+            )
+            return body, content_type, {"url": url, "kind": kind}, attempted
+        except FetchError as exc:
+            attempted.append(_attempt_detail(url, kind, exc))
+            if _is_retryable_fetch_error(exc) and index < len(routes) - 1:
+                continue
+            reason, detail = classify_fetch_failure(attempted)
+            raise FetchError(
+                detail,
+                reason=reason,
+                http_status=exc.http_status,
+                attempted_urls=attempted,
+            ) from exc
+        except Exception as exc:
+            attempted.append(_attempt_detail(url, kind, exc))
+            if _is_retryable_fetch_error(exc) and index < len(routes) - 1:
+                continue
+            reason, detail = classify_fetch_failure(attempted)
+            raise FetchError(
+                detail,
+                reason=reason,
+                attempted_urls=attempted,
+            ) from exc
+
+    reason, detail = classify_fetch_failure(attempted)
+    raise FetchError(detail, reason=reason, attempted_urls=attempted)
 
 
 def staged_artifact_path(
@@ -91,11 +268,14 @@ def fetch_staged_candidate_artifact(
 ) -> dict[str, Any]:
     """Fetch a staged candidate_sources row URL to a gitignored artifact file."""
     candidate_id = str(candidate.get("id") or "")
-    url = candidate.get("url")
+    routes = parse_url_candidates(candidate)
     if not candidate_id:
         raise FetchError("Candidate row is missing id.")
-    if not url:
-        raise FetchError(f"Candidate {candidate_id!r} has no URL to fetch.")
+    if not routes:
+        raise FetchError(
+            f"Candidate {candidate_id!r} has no URL to fetch.",
+            reason="no_fetchable_url",
+        )
 
     if not source_network_enabled():
         return {
@@ -109,7 +289,12 @@ def fetch_staged_candidate_artifact(
     target_dir = output_dir or default_staged_fetch_dir()
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    body, content_type = fetch_url_bytes(str(url), urlopen=urlopen)
+    body, content_type, selected_route, attempted_urls = fetch_url_bytes_with_retry(
+        routes,
+        urlopen=urlopen,
+    )
+    url = selected_route["url"]
+    selected_url_kind = selected_route["kind"]
     checksum = sha256_bytes(body)
     artifact_path = staged_artifact_path(target_dir, candidate_id, content_type)
 
@@ -121,6 +306,8 @@ def fetch_staged_candidate_artifact(
                 "command": FETCH_CANDIDATE_COMMAND,
                 "candidate_id": candidate_id,
                 "url": url,
+                "selected_url_kind": selected_url_kind,
+                "attempted_urls": attempted_urls,
                 "checksum": checksum,
                 "content_type": content_type,
                 "artifact_path": str(artifact_path.resolve()),
@@ -134,6 +321,8 @@ def fetch_staged_candidate_artifact(
         "command": FETCH_CANDIDATE_COMMAND,
         "candidate_id": candidate_id,
         "url": url,
+        "selected_url_kind": selected_url_kind,
+        "attempted_urls": attempted_urls,
         "checksum": checksum,
         "content_type": content_type,
         "artifact_path": str(artifact_path.resolve()),
@@ -173,9 +362,10 @@ def run_fetch_candidate_command(
         payload = {
             "status": "error",
             "command": FETCH_CANDIDATE_COMMAND,
-            "reason": "fetch_failed",
+            "reason": exc.reason,
             "candidate_id": candidate_id,
             "detail": str(exc),
+            "attempted_urls": exc.attempted_urls,
         }
         return payload, ERROR_EXIT_CODE
 

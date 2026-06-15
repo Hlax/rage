@@ -9,6 +9,7 @@ Ranking uses a versioned formula aligned with
 from __future__ import annotations
 
 import json
+import json
 import re
 from datetime import UTC, datetime
 from pathlib import Path
@@ -328,7 +329,17 @@ def enqueue_discovered_candidates(
         provider = str(item.get("provider") or provider_id)
         provider_work_id = str(item.get("provider_id") or "")
         candidate_id = discovered_candidate_source_id(provider, provider_work_id)
-        url = item.get("landing_page_url") or item.get("open_access_url")
+        fetch_url_candidates = item.get("fetch_url_candidates") or []
+        url = item.get("url")
+        if not url and fetch_url_candidates:
+            url = fetch_url_candidates[0].get("url")
+        if not url:
+            url = item.get("landing_page_url") or item.get("open_access_url")
+        url_candidates_json = (
+            json.dumps(fetch_url_candidates, separators=(",", ":"))
+            if fetch_url_candidates
+            else None
+        )
 
         candidate_repo.insert(
             candidate_id=candidate_id,
@@ -347,6 +358,7 @@ def enqueue_discovered_candidates(
             priority_score=float(item.get("priority_score", 0)),
             status=str(item.get("status") or "queued"),
             url=url,
+            url_candidates_json=url_candidates_json,
         )
         if item.get("status") == "queued":
             queue_item = queue_repo.insert(

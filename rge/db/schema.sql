@@ -183,6 +183,7 @@ CREATE TABLE IF NOT EXISTS candidate_sources (
     contract_id TEXT,
     title TEXT NOT NULL,
     url TEXT,
+    url_candidates_json TEXT,
     source_type TEXT NOT NULL,
     reason TEXT NOT NULL,
     relevance_score REAL NOT NULL,

@@ -159,6 +159,7 @@ def test_second_candidate_discover_enqueue_fetch_ingest(
 
     urlopen = _mock_html_urlopen_by_url(
         {
+            "open-access/paper.pdf": FIRST_HTML,
             "human-ai-cocreativity": FIRST_HTML,
             "constraint-management": SECOND_HTML,
         }
