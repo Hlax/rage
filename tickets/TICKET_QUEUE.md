@@ -215,7 +215,8 @@ superseded
 | 181 | ticket-181 | done | Live staged detect mock-fixture spine (opt-in network) | `phase-2/ticket-181-live-staged-detect-mock-spine` | `agent_reports/2026-06-15_ticket-181_live-staged-detect-mock-spine.md` |
 | 182 | ticket-182 | done | README and AGENTS.md live staged detect opt-in proof docs | `phase-2/ticket-182-live-staged-detect-opt-in-docs` | `agent_reports/2026-06-15_ticket-182_live-staged-detect-opt-in-docs.md` |
 | 183 | ticket-183 | done | Pre-ticket audit: live staged reconcile-scores mock spine | `phase-2/ticket-183-pre-ticket-live-staged-reconcile-mock-spine-audit` | `agent_reports/2026-06-15_ticket-183_pre-ticket-live-staged-reconcile-mock-spine.md` |
-| 184 | ticket-184 | proposed | Live staged reconcile-scores spine (opt-in network) | | |
+| 184 | ticket-184 | done | Live staged reconcile-scores spine (opt-in network) | `phase-2/ticket-184-live-staged-reconcile-mock-spine` | `agent_reports/2026-06-15_ticket-184_live-staged-reconcile-mock-spine.md` |
+| 185 | ticket-185 | proposed | README and AGENTS.md live staged reconcile opt-in proof docs | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -945,9 +946,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-184 (proposed) — Live staged reconcile-scores spine (opt-in network)
+ticket-185 (proposed) — README and AGENTS.md live staged reconcile opt-in proof docs
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-184 agent)
+
+- Opt-in `live_network` pytest: discover through reconcile-scores (deterministic Python).
+- Domain opposing-context seed before live network (ticket-181 pattern).
+- Env: `RGE_ALLOW_LIVE_STAGED_RECONCILE=1`, `RGE_ALLOW_SOURCE_NETWORK=1`, `OPENALEX_MAILTO`.
+- 596 pytest; 13 deselected; 142 golden; safety pass.
+- ticket-185 seeded: reconcile opt-in docs.
 
 ## Queue Notes (2026-06-15, ticket-183 agent)
 
