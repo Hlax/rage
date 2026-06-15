@@ -22,6 +22,7 @@ import pytest
 
 from rge.cli import main
 from rge.db.connection import connect
+from tests.unit.live_staged_candidates import select_rank1_candidate_id
 
 TEST_QUESTION_ID = "rq_live_staged_build_mock_spine"
 STAGED_EXTRACT_FIXTURE = "staged_fetch_extract_claims.json"
@@ -106,18 +107,7 @@ def test_live_openalex_discover_through_build_mock_fixture(
 
     conn = connect(temp_db)
     try:
-        candidate_row = conn.execute(
-            """
-            SELECT id
-            FROM candidate_sources
-            WHERE research_question_id = ?
-            ORDER BY priority_score DESC
-            LIMIT 1
-            """,
-            (TEST_QUESTION_ID,),
-        ).fetchone()
-        assert candidate_row is not None
-        candidate_id = candidate_row["id"]
+        candidate_id = select_rank1_candidate_id(conn, TEST_QUESTION_ID)
         relationships_before = conn.execute(
             "SELECT COUNT(*) FROM relationships"
         ).fetchone()[0]

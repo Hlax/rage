@@ -1,0 +1,63 @@
+{
+  "id": "ticket-197",
+  "title": "Shared staged domain opposing-context seed test helper",
+  "problem": "Fourteen staged mock/idempotency tests duplicate nearly identical `_seed_domain_opposing_context` helpers. A shared module would reduce drift when domain pack or opposing-claim fixtures change.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-196_live-staged-candidate-helper.md",
+    "tests/unit/test_live_staged_report_mock_spine.py",
+    "tests/unit/test_staged_dual_candidate_idempotency.py"
+  ],
+  "affected_modules": [
+    "tests/unit/staged_domain_seed.py",
+    "tests/unit/test_live_staged_report_mock_spine.py",
+    "tests/unit/test_live_staged_detect_mock_spine.py",
+    "tests/unit/test_live_staged_reconcile_mock_spine.py",
+    "tests/unit/test_live_staged_rank2_report_mock_spine.py",
+    "tests/unit/test_staged_ingest_idempotency.py",
+    "tests/unit/test_staged_ingest_reconcile_spine.py",
+    "tests/unit/test_staged_ingest_contradiction_spine.py",
+    "tests/unit/test_staged_ingest_run_report_spine.py",
+    "tests/unit/test_staged_second_candidate_idempotency.py",
+    "tests/unit/test_staged_second_candidate_detect_contradictions_spine.py",
+    "tests/unit/test_staged_second_candidate_reconcile_spine.py",
+    "tests/unit/test_staged_second_candidate_run_report_spine.py",
+    "tests/unit/test_staged_dual_candidate_idempotency.py"
+  ],
+  "expected_files": [
+    "tests/unit/staged_domain_seed.py",
+    "tests/unit/test_live_staged_report_mock_spine.py",
+    "tests/unit/test_live_staged_detect_mock_spine.py",
+    "tests/unit/test_live_staged_reconcile_mock_spine.py",
+    "tests/unit/test_live_staged_rank2_report_mock_spine.py",
+    "tests/unit/test_staged_ingest_idempotency.py",
+    "tests/unit/test_staged_ingest_reconcile_spine.py",
+    "tests/unit/test_staged_ingest_contradiction_spine.py",
+    "tests/unit/test_staged_ingest_run_report_spine.py",
+    "tests/unit/test_staged_second_candidate_idempotency.py",
+    "tests/unit/test_staged_second_candidate_detect_contradictions_spine.py",
+    "tests/unit/test_staged_second_candidate_reconcile_spine.py",
+    "tests/unit/test_staged_second_candidate_run_report_spine.py",
+    "tests/unit/test_staged_dual_candidate_idempotency.py",
+    "agent_reports/2026-06-15_ticket-197_staged-domain-seed-helper.md"
+  ],
+  "acceptance_criteria": [
+    "Shared helper seeds opposing domain context identically to current per-test copies.",
+    "All listed staged tests import the shared helper.",
+    "Golden pass.",
+    "Safety audit pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Production code changes.",
+    "Schema migrations.",
+    "CI live network."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert helper and restore inline seed functions in tests.",
+  "status": "proposed",
+  "category": "Phase 3 / hygiene / operator ergonomics"
+}
