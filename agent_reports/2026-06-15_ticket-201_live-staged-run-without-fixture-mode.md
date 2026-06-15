@@ -76,7 +76,7 @@ None.
 
 ## Merge to main
 
-Pending merge in this run.
+Merged @ `036701e`. Pushed to `origin/main`.
 
 ## Recommended next ticket
 
