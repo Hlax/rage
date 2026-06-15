@@ -1,0 +1,41 @@
+{
+  "id": "ticket-164",
+  "title": "README operator quickstart for staged Phase 3 --staged-spine",
+  "problem": "ticket-162 and ticket-163 prove fixture-mode staged discover→report orchestration and idempotency in tests. Operators lack README documentation for running the staged Phase 3 spine via research run --fixture-mode --staged-spine.",
+  "evidence": [
+    "agent_reports/2026-06-14_ticket-163_staged-run-orchestrator-idempotency.md",
+    "rge/cli.py",
+    "tests/unit/test_staged_fixture_mode_run_spine.py"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-14_pre-ticket-164_readme-staged-spine-quickstart-audit.md",
+    "agent_reports/2026-06-14_ticket-164_readme-staged-spine-quickstart.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart documents staged Phase 3 fixture-mode run with --staged-spine, temp --db, and network env prerequisites.",
+    "No live LLM required for documented mock path.",
+    "Golden tests remain mock-only and pass.",
+    "Safety audit passes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_staged_fixture_mode_run_spine.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Live OpenAlex network in default tests.",
+    "Public site changes.",
+    "Schema migrations.",
+    "Changes to execute_staged_fixture_mode_run."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section; retain ticket-162/163 orchestrator and tests.",
+  "status": "proposed",
+  "category": "Phase 3 / source acquisition / product-risk reduction",
+  "pre_ticket_audit_required": false
+}
