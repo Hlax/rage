@@ -33,7 +33,7 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert README maturity table edits.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / source acquisition / docs corrective",
   "pre_ticket_audit_required": false
 }

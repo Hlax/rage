@@ -74,8 +74,10 @@ Operator Quickstart.
 - **MVP-Research:** NM-1 live validated write proof (`extract-claims-live`) plus NM-4
   evidence DB operator spine (127–133) on gitignored `live_research_evidence.sqlite`;
   default graph synthnote path remains checksum-pinned mock — not arbitrary live extraction.
-- **Arbitrary-source pipeline:** partial — evidence DB NM-4 proven; default graph synthnote
-  checksum-mock; source discovery/fetcher pending (Phase 3).
+- **Arbitrary-source pipeline:** partial — Phase 3 staged mock spine fixture-proven through
+  `--staged-spine` orchestration (operator network env required; tests patch I/O); live
+  arbitrary-source staged discover→report not proven; evidence DB NM-4 proven; default graph
+  synthnote checksum-mock; `research run` without `--fixture-mode` remains `not_implemented`.
 - **Cloud providers:** deferred (ticket-059).
 
 **Manual synthnote operator spine** (mock LLM; tickets 088–099): for Level-1
