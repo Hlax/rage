@@ -1,0 +1,38 @@
+{
+  "id": "ticket-203",
+  "title": "Pre-ticket audit: live LLM on staged research run spine",
+  "problem": "Staged research run (`--staged-spine`) forces mock LLM. Advancing arbitrary-source product tier requires a scoped pre-ticket audit before any live Ollama integration in run orchestration.",
+  "evidence": [
+    "agent_reports/2026-06-15_principal-audit-post-ticket-201.md",
+    "agent_reports/2026-06-15_pre-ticket-200_research-run-non-fixture-audit.md",
+    "docs/agents/13_MODEL_ESCALATION_POLICY.md",
+    "rge/cli.py execute_staged_fixture_mode_run"
+  ],
+  "affected_modules": [
+    "agent_reports/"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-15_pre-ticket-203_live-llm-staged-run-audit.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit defines env gates, mock vs live boundaries, CI exclusion, and rollback for live LLM on staged run.",
+    "Verdict GO or NO-GO with hardened scope for follow-on implementation.",
+    "Golden pass.",
+    "Safety audit pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Implementation of live LLM staged run.",
+    "CI live Ollama.",
+    "Public export/site changes.",
+    "Schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove audit report; retain mock-only staged orchestration.",
+  "status": "proposed",
+  "category": "Phase 3 / product-risk / live LLM orchestration"
+}
