@@ -65,7 +65,8 @@ Safety audit not required — audit report only.
 
 ## Merge to main
 
-<!-- merge hash recorded in follow-up commit -->
+Merge commit: `cd0c77c` (`Merge branch 'phase-2/ticket-228-pre-ticket-rank-2-staged-live-llm-audit'`).
+Post-merge pytest: 621 passed, 20 deselected.
 
 ## Recommended next ticket
 
