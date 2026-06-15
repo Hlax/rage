@@ -78,7 +78,7 @@ None.
 
 ## Merge to main
 
-Placeholder — updated after merge.
+Merged @ `254321b`. Pushed to `origin/main`.
 
 ## Recommended next ticket
 
