@@ -37,6 +37,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove audit report; retain per-step live proofs.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / live staged orchestration / product-risk reduction"
 }
