@@ -241,7 +241,8 @@ superseded
 | 207 | ticket-207 | done | Pre-ticket audit: live staged link on staged spine (per-step) | `phase-2/ticket-207-pre-ticket-live-staged-link-audit` | `agent_reports/2026-06-15_ticket-207_pre-ticket-live-staged-link-audit.md` |
 | 208 | ticket-208 | done | Live staged link live LLM opt-in proof (per-step) | `phase-2/ticket-208-live-staged-link-live-llm-spine` | `agent_reports/2026-06-15_ticket-208_live-staged-link-live-llm-spine.md` |
 | 209 | ticket-209 | done | README and AGENTS live staged link live LLM operator docs | `phase-2/ticket-209-live-staged-link-live-llm-docs` | `agent_reports/2026-06-15_ticket-209_live-staged-link-live-llm-docs.md` |
-| 210 | ticket-210 | proposed | Principal audit post-ticket-209 staged live link checkpoint | | |
+| 210 | ticket-210 | done | Principal audit post-ticket-209 staged live link checkpoint | | `agent_reports/2026-06-15_ticket-210_principal-audit-post-ticket-209.md` |
+| 211 | ticket-211 | proposed | Pre-ticket audit: live staged build on staged spine (per-step) | | |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -971,9 +972,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-210 (proposed) — Principal audit post-ticket-209 staged live link checkpoint
+ticket-211 (proposed) — Pre-ticket audit: live staged build on staged spine (per-step)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, principal audit post-ticket-209)
+
+- Cadence reset; tickets 206–209 reviewed; live staged extract + link boundaries confirmed.
+- Authoritative audit: `agent_reports/2026-06-15_ticket-210_principal-audit-post-ticket-209.md`.
+- ticket-211 seeded: pre-ticket audit for live staged build (per-step).
 
 ## Queue Notes (2026-06-15, ticket-209 agent)
 

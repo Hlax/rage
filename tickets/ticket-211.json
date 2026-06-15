@@ -1,0 +1,36 @@
+{
+  "id": "ticket-211",
+  "title": "Pre-ticket audit: live staged build on staged spine (per-step)",
+  "problem": "ticket-208 proved per-step live Ollama link on staged rank-1 ingest. Build still auto-mocks via staged-fetch fixtures. Principal audit post-ticket-209 recommends a focused GO/NO-GO before live build fallthrough.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-210_principal-audit-post-ticket-209.md",
+    "agent_reports/2026-06-15_pre-ticket-207_live-staged-link-live-llm-audit.md",
+    "agent_reports/2026-06-15_ticket-208_live-staged-link-live-llm-spine.md",
+    "rge/modules/relationship_builder.py"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-15_pre-ticket-211_live-staged-build-live-llm-audit.md"
+  ],
+  "acceptance_criteria": [
+    "Audit defines per-step live build scope (rank-1 only vs rank-2).",
+    "Audit specifies env gates separate from mock build gate RGE_ALLOW_LIVE_STAGED_BUILD.",
+    "Orchestrator mock-only boundary reaffirmed.",
+    "GO/NO-GO verdict with hardened scope for follow-on implementation ticket if GO."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Implementation of live build fallthrough.",
+    "Live orchestrator LLM.",
+    "CI Ollama.",
+    "Public export/site.",
+    "Schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove audit report only.",
+  "status": "proposed",
+  "category": "Phase 3 / live LLM / staged spine product-risk"
+}
