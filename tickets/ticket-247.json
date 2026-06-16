@@ -1,0 +1,30 @@
+{
+  "id": "ticket-247",
+  "title": "Runtime config detect seed mock isolation cross-reference",
+  "problem": "Tickets 245/246 documented GT7 domain seed mock isolation in README and AGENTS. docs/agents/12_RUNTIME_CONFIG.md live staged operator profile should cross-reference the seed note for operator discoverability.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-246_agents-detect-seed-note.md",
+    "README.md",
+    "docs/agents/12_RUNTIME_CONFIG.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "agent_reports/2026-06-16_phase-3_ticket-247_runtime-config-detect-seed-note.md"
+  ],
+  "acceptance_criteria": [
+    "12_RUNTIME_CONFIG live staged section notes seed mock isolation (ticket-243) with README cross-link.",
+    "Golden pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Product code changes.",
+    "Live Ollama operator proofs."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert runtime config doc edits.",
+  "status": "proposed",
+  "category": "Phase 3 / docs / operator"
+}
