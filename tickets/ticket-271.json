@@ -1,0 +1,35 @@
+{
+  "id": "ticket-271",
+  "title": "Principal audit post-ticket-270 proof bundle visibility checkpoint",
+  "problem": "Three consecutive done tickets (268–270) since pre-ticket audit ticket-267; cadence requires a read-only principal audit checkpoint before further implementation.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-270_verify-proof-bundle-checklist.md",
+    "agent_reports/2026-06-16_pre-ticket-267_arbitrary-source-operator-proof-bundle-audit.md",
+    "tickets/ticket-268.json",
+    "tickets/ticket-269.json",
+    "tickets/ticket-270.json"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-16_principal-audit-post-ticket-270.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report written with cadence reset.",
+    "Mock golden gate green at audit time.",
+    "No implementation code changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Ticket implementation.",
+    "Public export or site changes.",
+    "Live Ollama proofs."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove audit report only.",
+  "status": "proposed",
+  "category": "Phase 3 / principal audit checkpoint"
+}
