@@ -18,6 +18,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
+from rge.config import load_config
 from rge.modules.domain_pack_loader import inspect_domain_pack_load_health
 from rge.modules.live_probe_scratch import get_scratch_db_path
 from rge.modules.live_probe_scratch_summary import (
@@ -921,6 +922,7 @@ def build_operator_plan(
     scratch_evidence = inspect_scratch_evidence_status(root=project_root)
     domain_pack_status = inspect_domain_pack_status(root=project_root)
     nm4_evidence_spine_status = inspect_nm4_evidence_spine_status(root=project_root)
+    runtime_config = load_config()
     action = _action_from_state(
         working_tree=tree,
         active_row=active_row,
@@ -978,6 +980,7 @@ def build_operator_plan(
         },
         "audit_cadence": audit,
         "scratch_evidence_status": scratch_evidence,
+        "staged_rank2_scan_max": runtime_config.staged_rank2_scan_max,
         "domain_pack_status": domain_pack_status,
         "nm4_evidence_spine_status": nm4_evidence_spine_status,
         "pending_improvement_tickets": improvement,
