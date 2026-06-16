@@ -274,7 +274,8 @@ superseded
 | 245 | ticket-245 | done | README rank-2 checklist detect seed isolation note | `phase-3/ticket-245-readme-detect-seed-note` | `agent_reports/2026-06-16_phase-3_ticket-245_readme-detect-seed-note.md` |
 | 246 | ticket-246 | done | AGENTS detect seed mock isolation cross-reference | `phase-3/ticket-246-agents-detect-seed-note` | `agent_reports/2026-06-16_phase-3_ticket-246_agents-detect-seed-note.md` |
 | 247 | ticket-247 | done | Runtime config detect seed mock isolation cross-reference | `phase-3/ticket-247-runtime-config-detect-seed-note` | `agent_reports/2026-06-16_phase-3_ticket-247_runtime-config-detect-seed-note.md` |
-| 248 | ticket-248 | proposed | README maturity tier detect seed doc triangle closure | | |
+| 248 | ticket-248 | done | README maturity tier detect seed doc triangle closure | `phase-3/ticket-248-readme-maturity-detect-seed-triangle` | `agent_reports/2026-06-16_phase-3_ticket-248_readme-maturity-detect-seed-triangle.md` |
+| 249 | ticket-249 | proposed | Operator proof report addendum post detect seed doc triangle | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1009,9 +1010,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-248 (proposed) — README maturity tier detect seed doc triangle closure
+ticket-249 (proposed) — Operator proof report addendum post detect seed doc triangle
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-248 README maturity detect seed triangle)
+
+- Arbitrary-source pipeline maturity row notes detect seed doc triangle (245–247)
+- ticket-249 seeded: operator proof report addendum
 
 ## Queue Notes (2026-06-16, ticket-247 runtime config detect seed note)
 

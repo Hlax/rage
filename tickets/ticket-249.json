@@ -1,0 +1,31 @@
+{
+  "id": "ticket-249",
+  "title": "Operator proof report addendum post detect seed doc triangle",
+  "problem": "Ticket-248 closed the detect seed operator doc triangle in README maturity tier. The 2026-06-16 operator proof report should be updated with post-243 seed fix and doc triangle status without requiring a live Ollama re-run.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-248_readme-maturity-detect-seed-triangle.md",
+    "agent_reports/2026-06-16_operator-proof-rank2-live-ollama-checklist.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-16_operator-proof-rank2-live-ollama-checklist.md",
+    "agent_reports/2026-06-16_phase-3_ticket-249_operator-proof-addendum.md"
+  ],
+  "acceptance_criteria": [
+    "Operator proof report addendum documents seed fix (243) and doc triangle (245–248).",
+    "Catalog drift skip interpretation unchanged.",
+    "Golden pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Product code changes.",
+    "Live Ollama operator proof session.",
+    "README/AGENTS/runtime config duplication."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert operator proof report addendum.",
+  "status": "proposed",
+  "category": "Phase 3 / docs / operator"
+}
