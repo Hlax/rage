@@ -280,7 +280,8 @@ superseded
 | 251 | ticket-251 | done | Rank-2 staged candidate heuristic scan for catalog drift resilience | `phase-3/ticket-251-rank-2-candidate-heuristic-scan` | `agent_reports/2026-06-16_phase-3_ticket-251_rank-2-candidate-heuristic-scan.md` |
 | 252 | ticket-252 | done | Scratch evidence review gate in operator autocycle plan | `phase-3/ticket-252-operator-autocycle-scratch-evidence-gate` | `agent_reports/2026-06-16_phase-3_ticket-252_operator-autocycle-scratch-evidence-gate.md` |
 | 253 | ticket-253 | done | Runbook autocycle scratch evidence review operator note | `phase-3/ticket-253-runbook-autocycle-scratch-note` | `agent_reports/2026-06-16_phase-3_ticket-253_runbook-autocycle-scratch-note.md` |
-| 254 | ticket-254 | proposed | Configurable rank-2 staged candidate scan window env | | |
+| 254 | ticket-254 | done | Configurable rank-2 staged candidate scan window env | `phase-3/ticket-254-rank-2-scan-window-env` | `agent_reports/2026-06-16_phase-3_ticket-254_rank-2-scan-window-env.md` |
+| 255 | ticket-255 | proposed | Principal audit post-ticket-254 staged spine env hardening checkpoint | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1015,9 +1016,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-254 (proposed) — Configurable rank-2 staged candidate scan window env
+ticket-255 (proposed) — Principal audit post-ticket-254 staged spine env hardening checkpoint
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-254 rank-2 scan window env)
+
+- `RGE_STAGED_RANK2_SCAN_MAX` env (default 10, bounded 1–50) for rank-2 title heuristic scan
+- ticket-255 seeded: principal audit (cadence after 252–254)
 
 ## Queue Notes (2026-06-16, ticket-253 runbook autocycle scratch note)
 

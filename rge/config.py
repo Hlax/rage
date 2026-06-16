@@ -21,6 +21,10 @@ class ConfigError(Exception):
 
 VALID_LLM_MODES = ("mock", "ollama")
 
+MIN_STAGED_RANK2_SCAN_MAX = 1
+MAX_STAGED_RANK2_SCAN_MAX = 50
+DEFAULT_STAGED_RANK2_SCAN_MAX = 10
+
 _DEFAULTS = {
     "OLLAMA_BASE_URL": "http://127.0.0.1:11434",
     "RGE_LOCAL_LLM": "qwen2.5:7b",
@@ -35,6 +39,7 @@ _DEFAULTS = {
     "RGE_LLM_SCHEMA_VERSION": "0.1.0",
     "RGE_EMBEDDING_MODE": "local_sentence_transformer",
     "RGE_EMBEDDING_MODEL": "sentence-transformers/all-MiniLM-L6-v2",
+    "RGE_STAGED_RANK2_SCAN_MAX": str(DEFAULT_STAGED_RANK2_SCAN_MAX),
 }
 
 
@@ -69,6 +74,30 @@ class RgeConfig:
     llm_schema_version: str
     embedding_mode: str
     embedding_model: str
+    staged_rank2_scan_max: int
+
+
+def parse_staged_rank2_scan_max(raw: str | int | None = None) -> int:
+    """Resolve bounded rank-2 staged candidate title scan window."""
+    if raw is None:
+        value_raw = os.environ.get(
+            "RGE_STAGED_RANK2_SCAN_MAX",
+            str(DEFAULT_STAGED_RANK2_SCAN_MAX),
+        )
+    else:
+        value_raw = str(raw)
+    try:
+        value = int(str(value_raw).strip())
+    except ValueError as exc:
+        raise ConfigError(
+            f"Invalid RGE_STAGED_RANK2_SCAN_MAX={value_raw!r}. Must be an integer."
+        ) from exc
+    if value < MIN_STAGED_RANK2_SCAN_MAX or value > MAX_STAGED_RANK2_SCAN_MAX:
+        raise ConfigError(
+            f"RGE_STAGED_RANK2_SCAN_MAX={value} out of range "
+            f"[{MIN_STAGED_RANK2_SCAN_MAX}, {MAX_STAGED_RANK2_SCAN_MAX}]."
+        )
+    return value
 
 
 def load_config(env_file: Path | None = None) -> RgeConfig:
@@ -127,4 +156,7 @@ def load_config(env_file: Path | None = None) -> RgeConfig:
         llm_schema_version=merged["RGE_LLM_SCHEMA_VERSION"],
         embedding_mode=merged["RGE_EMBEDDING_MODE"],
         embedding_model=merged["RGE_EMBEDDING_MODEL"],
+        staged_rank2_scan_max=parse_staged_rank2_scan_max(
+            merged.get("RGE_STAGED_RANK2_SCAN_MAX")
+        ),
     )

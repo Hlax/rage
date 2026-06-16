@@ -5,9 +5,10 @@ from __future__ import annotations
 from types import SimpleNamespace
 from typing import Any
 
+from rge.config import DEFAULT_STAGED_RANK2_SCAN_MAX, parse_staged_rank2_scan_max
 from rge.modules.staged_spine_heuristics import is_staged_rank2_fetch_spine_source
 
-DEFAULT_RANK2_SCAN_WINDOW = 10
+DEFAULT_RANK2_SCAN_WINDOW = DEFAULT_STAGED_RANK2_SCAN_MAX
 
 
 class Rank2StagedCandidateNotFoundError(ValueError):
@@ -80,9 +81,14 @@ def select_rank2_staged_candidate_id(
     research_question_id: str,
     *,
     min_candidates: int = 2,
-    max_scan: int = DEFAULT_RANK2_SCAN_WINDOW,
+    max_scan: int | None = None,
 ) -> str:
     """Return the first rank-2+ candidate whose title matches rank-2 spine heuristic."""
+    effective_max_scan = (
+        parse_staged_rank2_scan_max(max_scan)
+        if max_scan is not None
+        else parse_staged_rank2_scan_max()
+    )
     count = count_staged_candidates(conn, research_question_id)
     if count < min_candidates:
         raise ValueError(
@@ -97,7 +103,7 @@ def select_rank2_staged_candidate_id(
         ORDER BY priority_score DESC
         LIMIT ? OFFSET 1
         """,
-        (research_question_id, max_scan),
+        (research_question_id, effective_max_scan),
     ).fetchall()
 
     scanned_ids: list[str] = []
@@ -113,5 +119,5 @@ def select_rank2_staged_candidate_id(
         scanned_candidates=len(scanned_ids),
         candidate_ids=scanned_ids,
         min_candidates=min_candidates,
-        max_scan=max_scan,
+        max_scan=effective_max_scan,
     )

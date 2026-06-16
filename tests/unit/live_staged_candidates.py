@@ -77,7 +77,7 @@ def select_rank2_candidate_id(
     research_question_id: str,
     *,
     min_candidates: int = 2,
-    max_scan: int = 10,
+    max_scan: int | None = None,
 ) -> str:
     """Return rank-2 staged candidate id using title heuristic scan."""
     try:

@@ -34,6 +34,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert env override; restore fixed window.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / staged spine product hardening"
 }

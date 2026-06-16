@@ -1,0 +1,32 @@
+{
+  "id": "ticket-255",
+  "title": "Principal audit post-ticket-254 staged spine env hardening checkpoint",
+  "problem": "Three consecutive done tickets (252, 253, 254) since pre-ticket audit 251. Cadence threshold reached after scratch workflow docs and rank-2 scan env product work.",
+  "evidence": [
+    "agent_reports/2026-06-16_pre-ticket-251_rank-2-staged-candidate-heuristic-scan-audit.md",
+    "agent_reports/2026-06-16_phase-3_ticket-254_rank-2-scan-window-env.md",
+    "python -m rge.modules.principal_audit_gate"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-16_principal-audit-post-ticket-254.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report with verification baseline.",
+    "Cadence reset documented.",
+    "Golden pass if audit patches runner/docs only."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Product implementation.",
+    "Live Ollama operator proofs."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert audit report only.",
+  "status": "proposed",
+  "category": "Phase 3 / principal audit checkpoint"
+}
