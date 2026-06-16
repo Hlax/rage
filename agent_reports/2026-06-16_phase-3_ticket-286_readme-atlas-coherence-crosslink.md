@@ -55,7 +55,7 @@ None.
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `15eb112`
 
 ## Recommended next ticket
 
