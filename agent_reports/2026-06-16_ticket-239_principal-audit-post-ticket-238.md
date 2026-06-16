@@ -147,3 +147,8 @@ All three mirror proven rank-1 patterns (208/212/217) with rank-2 heuristics, mo
 ## Suggested next prompt
 
 `/rge-run-next-ticket` for **ticket-240** (README rank-2 live Ollama closure checklist).
+
+## Merge to main
+
+- Merge commit: `22fdd3ef22c9afaeef98033f494bf42fa1f881eb`
+- Post-merge pytest: 666 passed, 30 deselected
