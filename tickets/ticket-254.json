@@ -1,0 +1,39 @@
+{
+  "id": "ticket-254",
+  "title": "Configurable rank-2 staged candidate scan window env",
+  "problem": "Ticket-251 hardcodes DEFAULT_RANK2_SCAN_WINDOW=10 in staged_candidate_selection. Operators hitting catalog drift may need a bounded env override without code changes.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-251_rank-2-candidate-heuristic-scan.md",
+    "rge/modules/staged_candidate_selection.py",
+    "docs/agents/12_RUNTIME_CONFIG.md"
+  ],
+  "affected_modules": [
+    "rge/modules/staged_candidate_selection.py",
+    "rge/config.py"
+  ],
+  "expected_files": [
+    "rge/modules/staged_candidate_selection.py",
+    "tests/unit/test_staged_rank2_candidate_heuristic_scan.py",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "agent_reports/2026-06-16_phase-3_ticket-254_rank-2-scan-window-env.md"
+  ],
+  "acceptance_criteria": [
+    "RGE_STAGED_RANK2_SCAN_MAX env overrides default scan window with sane bounds.",
+    "CLI and live pytest helpers honor override.",
+    "Unit tests cover default and override.",
+    "Golden pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_staged_rank2_candidate_heuristic_scan.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama proofs.",
+    "Broadening rank-2 heuristic markers.",
+    "Orchestrator live LLM."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert env override; restore fixed window.",
+  "status": "proposed",
+  "category": "Phase 3 / staged spine product hardening"
+}
