@@ -1,0 +1,34 @@
+{
+  "id": "ticket-260",
+  "title": "Staged spine CLI candidate-id wiring smoke test",
+  "problem": "Ticket-258 added focused unit coverage for `_staged_rank_candidate_ids`, but there is no small CLI smoke test that validates orchestrator fixture-mode path wiring against candidate-id selection on a temp DB.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-258_cli-staged-rank2-candidate-selection-test.md",
+    "rge/cli.py _staged_rank_candidate_ids"
+  ],
+  "affected_modules": [
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_cli_staged_spine_candidate_id_wiring.py"
+  ],
+  "acceptance_criteria": [
+    "Test exercises fixture-mode staged spine helper path on temp DB and asserts candidate-id wiring stays deterministic",
+    "No production logic changes unless test reveals a bug",
+    "Golden pass"
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_cli_staged_spine_candidate_id_wiring.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Live Ollama proofs",
+    "Public export/site changes",
+    "Schema migrations"
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert unit test file only.",
+  "status": "proposed",
+  "category": "Phase 3 / staged spine product hardening"
+}

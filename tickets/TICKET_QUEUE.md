@@ -284,8 +284,9 @@ superseded
 | 255 | ticket-255 | done | Principal audit post-ticket-254 staged spine env hardening checkpoint | `main` | `agent_reports/2026-06-16_principal-audit-post-ticket-254.md` |
 | 256 | ticket-256 | done | Operator loop plan surfaces staged rank-2 scan window config | `phase-3/ticket-256-operator-loop-rank2-scan-config` | `agent_reports/2026-06-16_phase-3_ticket-256_operator-loop-rank2-scan-config.md` |
 | 257 | ticket-257 | done | Operator autocycle plan surfaces staged rank-2 scan window config | `phase-3/ticket-257-operator-autocycle-rank2-scan-config` | `agent_reports/2026-06-16_phase-3_ticket-257_operator-autocycle-rank2-scan-config.md` |
-| 258 | ticket-258 | proposed | CLI staged spine rank-2 candidate selection unit test | | |
+| 258 | ticket-258 | done | CLI staged spine rank-2 candidate selection unit test | `phase-3/ticket-258-cli-staged-rank2-candidate-selection-test` | `agent_reports/2026-06-16_phase-3_ticket-258_cli-staged-rank2-candidate-selection-test.md` |
 | 259 | ticket-259 | done | Principal audit post-ticket-257 operator visibility parity checkpoint | `main` | `agent_reports/2026-06-16_principal-audit-post-ticket-257.md` |
+| 260 | ticket-260 | proposed | Staged spine CLI candidate-id wiring smoke test | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1020,9 +1021,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-258 (proposed) — CLI staged spine rank-2 candidate selection unit test
+ticket-260 (proposed) — Staged spine CLI candidate-id wiring smoke test
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, principal audit post-ticket-258)
+
+- Principal checkpoint report written: `agent_reports/2026-06-16_principal-audit-post-ticket-258.md`
+- Reconciled queue drift: ticket-258 marked done to match merged code + report
+- ticket-260 seeded as next low-risk staged spine hardening test
 
 ## Queue Notes (2026-06-16, ticket-259 principal audit post-ticket-257)
 
