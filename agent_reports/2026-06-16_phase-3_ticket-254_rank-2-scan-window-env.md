@@ -5,7 +5,7 @@
 **Ticket:** ticket-254  
 **Branch:** `phase-3/ticket-254-rank-2-scan-window-env`  
 **Main tip before branch:** `a7ad1c02d95780c7be4623323a2e21202436f1ca`  
-**Status:** implemented
+**Status:** done
 
 ## Summary
 
@@ -64,8 +64,9 @@ None.
 
 ## Merge to main
 
-- Merge commit: _(pending)_
-- Post-merge pytest: _(pending)_
+- Merge commit: `2d4de39a8aa45f66ae83bdec6d72048805a24f0b`
+- Post-merge pytest: `681 passed, 30 deselected`
+- Push: `origin/main` updated (`a7ad1c0..2d4de39`)
 
 ## Recommended next ticket
 
