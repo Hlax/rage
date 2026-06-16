@@ -1,0 +1,44 @@
+{
+  "id": "ticket-289",
+  "title": "Live Atlas coherence proof v0 (operator human-readable report)",
+  "problem": "Ticket-285 added opt-in pytest thresholds for live staged orchestrator → private atlas export. We still lack a product-centered operator artifact that answers whether real research output coherently populates the full atlas contract for future frontend use — not just pydantic pass/min counts.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-285_live-staged-atlas-coherence-proof.md",
+    "agent_reports/2026-06-16_phase-3_ticket-287_agents-atlas-coherence-crosslink.md",
+    "tests/unit/test_live_staged_atlas_snapshot_coherence.py",
+    "rge/modules/atlas_snapshot_builder.py",
+    "rge/contracts/atlas_snapshot_v0.py"
+  ],
+  "affected_modules": [
+    "rge/modules/atlas_coherence_report.py",
+    "tests/unit/test_live_staged_atlas_coherence_report.py"
+  ],
+  "expected_files": [
+    "rge/modules/atlas_coherence_report.py",
+    "tests/unit/test_live_staged_atlas_coherence_report.py",
+    "agent_reports/2026-06-16_phase-3_ticket-289_live-atlas-coherence-proof-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Opt-in live_network operator flow: existing staged orchestrator gates → export private atlas snapshot → emit human-readable coherence report JSON/markdown to temp path.",
+    "Report audits population of runs[], nodes[], edges[], cards[], reports[], follow_up_questions[], lineage fields, domain fields, and private-field scan with explicit coherence verdict sections.",
+    "Verdict answers: meaningful atlas data from live loop? claims linked to sources/concepts? reports/hypotheses clear enough for future frontend? missing fields creating refactor risk?",
+    "Default pytest and golden unchanged (live_network excluded); no public export/site/schema changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_atlas_coherence_report.py -q",
+    "python -m pytest tests/unit/test_live_staged_atlas_coherence_report.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "CI enforcement of live_network proof.",
+    "Public atlas route or public-site UI.",
+    "Schema migrations or review_batch persistence.",
+    "Live Ollama per-step fallthrough.",
+    "Further README/AGENTS cross-links."
+  ],
+  "risk_level": "high",
+  "rollback_plan": "Remove atlas_coherence_report module and live_network test only.",
+  "status": "proposed",
+  "category": "Phase 3 / live research proof / Research Atlas product validation"
+}
