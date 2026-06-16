@@ -421,6 +421,31 @@ python -m rge.cli link-concepts --source <source_id> `
   --db <temp.sqlite> --live-staged-rank2-link-fallthrough
 ```
 
+**Live staged rank-2 build (live Ollama; ticket-237):** per-step rank-2 proof after live
+discover (≥2 candidates) → fetch rank-2 → ingest → **mock extract** + **mock link**
+(`staged_fetch_second_candidate_extract_claims.json`,
+`staged_fetch_second_candidate_link_concepts.json`) — uses
+`build-relationships --live-staged-rank2-build-fallthrough`. Requires `RGE_ALLOW_LIVE_STAGED_RANK2=1`.
+Temp `--db` only. Markers: `live_network` **and** `live_smoke`.
+
+```powershell
+$env:RGE_ALLOW_LIVE_STAGED_RANK2_BUILD_LIVE_LLM = "1"
+$env:RGE_ALLOW_LIVE_STAGED_RANK2 = "1"
+$env:RGE_ALLOW_LIVE_LLM = "1"
+$env:RGE_LLM_MODE = "ollama"
+$env:RGE_ALLOW_SOURCE_NETWORK = "1"
+$env:OPENALEX_MAILTO = "operator@example.com"
+
+python -m pytest tests/unit/test_live_staged_rank2_build_live_llm_spine.py -m "live_network and live_smoke" -q
+```
+
+CLI equivalent after discover → fetch rank-2 → ingest → mock extract + mock link on a temp DB:
+
+```powershell
+python -m rge.cli build-relationships --source <source_id> `
+  --db <temp.sqlite> --live-staged-rank2-build-fallthrough
+```
+
 *Discover + fetch + ingest-staged + mock extract + mock link + mock build* (ticket-178; writes `relationships` via fixture):
 
 ```powershell
