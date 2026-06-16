@@ -294,7 +294,8 @@ superseded
 | 265 | ticket-265 | done | README documents staged run rank candidate id output fields | `phase-3/ticket-265-readme-staged-run-candidate-ids` | `agent_reports/2026-06-16_phase-3_ticket-265_readme-staged-run-candidate-ids.md` |
 | 266 | ticket-266 | done | Principal audit post-ticket-265 staged spine docs checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-265.md` |
 | 267 | ticket-267 | done | End-to-end arbitrary-source operator proof bundle | `phase-3/ticket-267-arbitrary-source-operator-proof-bundle` | `agent_reports/2026-06-16_phase-3_ticket-267_arbitrary-source-operator-proof-bundle.md` |
-| 268 | ticket-268 | proposed | Operator loop plan surfaces arbitrary-source proof bundle command | | |
+| 268 | ticket-268 | done | Operator loop plan surfaces arbitrary-source proof bundle command | `phase-3/ticket-268-operator-loop-proof-bundle` | `agent_reports/2026-06-16_phase-3_ticket-268_operator-loop-proof-bundle.md` |
+| 269 | ticket-269 | proposed | Operator autocycle plan surfaces arbitrary-source proof bundle status | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1029,9 +1030,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-268 (proposed) — Operator loop plan surfaces arbitrary-source proof bundle command
+ticket-269 (proposed) — Operator autocycle plan surfaces arbitrary-source proof bundle status
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-268 operator loop proof bundle status)
+
+- `arbitrary_source_proof_bundle_status` in operator_loop plan JSON
+- Recommends `run_arbitrary_source_proof_bundle` when product drift and no open ticket
+- ticket-269 seeded: operator autocycle plan parity
 
 ## Queue Notes (2026-06-16, ticket-267 arbitrary-source operator proof bundle)
 
