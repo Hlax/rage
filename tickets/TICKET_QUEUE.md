@@ -281,7 +281,8 @@ superseded
 | 252 | ticket-252 | done | Scratch evidence review gate in operator autocycle plan | `phase-3/ticket-252-operator-autocycle-scratch-evidence-gate` | `agent_reports/2026-06-16_phase-3_ticket-252_operator-autocycle-scratch-evidence-gate.md` |
 | 253 | ticket-253 | done | Runbook autocycle scratch evidence review operator note | `phase-3/ticket-253-runbook-autocycle-scratch-note` | `agent_reports/2026-06-16_phase-3_ticket-253_runbook-autocycle-scratch-note.md` |
 | 254 | ticket-254 | done | Configurable rank-2 staged candidate scan window env | `phase-3/ticket-254-rank-2-scan-window-env` | `agent_reports/2026-06-16_phase-3_ticket-254_rank-2-scan-window-env.md` |
-| 255 | ticket-255 | proposed | Principal audit post-ticket-254 staged spine env hardening checkpoint | | |
+| 255 | ticket-255 | done | Principal audit post-ticket-254 staged spine env hardening checkpoint | `main` | `agent_reports/2026-06-16_principal-audit-post-ticket-254.md` |
+| 256 | ticket-256 | proposed | Operator loop plan surfaces staged rank-2 scan window config | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1016,9 +1017,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-255 (proposed) — Principal audit post-ticket-254 staged spine env hardening checkpoint
+ticket-256 (proposed) — Operator loop plan surfaces staged rank-2 scan window config
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-255 principal audit post-ticket-254)
+
+- Cadence reset after 252–254; mock golden gate green (142 golden, 681 pytest)
+- ticket-256 seeded: operator loop plan exposes `staged_rank2_scan_max`
 
 ## Queue Notes (2026-06-16, ticket-254 rank-2 scan window env)
 

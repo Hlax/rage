@@ -1,0 +1,37 @@
+{
+  "id": "ticket-256",
+  "title": "Operator loop plan surfaces staged rank-2 scan window config",
+  "problem": "Ticket-254 added RGE_STAGED_RANK2_SCAN_MAX but operator_loop plan JSON does not expose the resolved scan window; operators must read runtime config docs to know active rank-2 selection depth.",
+  "evidence": [
+    "agent_reports/2026-06-16_principal-audit-post-ticket-254.md",
+    "rge/config.py parse_staged_rank2_scan_max",
+    "rge/modules/operator_loop.py plan output"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "rge/config.py"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop_plan.py"
+  ],
+  "acceptance_criteria": [
+    "operator_loop --mode plan JSON includes staged_rank2_scan_max from load_config",
+    "Unit test asserts default and env override appear in plan output",
+    "Golden pass; no live LLM or public export changes"
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_loop_plan.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Runbook or README duplication",
+    "Live Ollama operator proofs",
+    "Changing rank-2 selection logic"
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert operator_loop plan field and unit test.",
+  "status": "proposed",
+  "category": "Phase 3 / operator loop product hardening"
+}
