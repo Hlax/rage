@@ -72,8 +72,8 @@ Not applicable — no CLI surface changes.
 
 ## Merge to main
 
-- Merge commit: _(pending)_
-- Post-merge pytest: _(pending)_
+- Merge commit: `6828ae5355b52c57b1a979a9216a707345775b65`
+- Post-merge pytest: 668 passed, 30 deselected
 
 ## Recommended next ticket
 
