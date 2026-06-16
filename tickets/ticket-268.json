@@ -1,0 +1,38 @@
+{
+  "id": "ticket-268",
+  "title": "Operator loop plan surfaces arbitrary-source proof bundle command",
+  "problem": "Ticket-267 added prove-arbitrary-source-bundle for mock arbitrary-source maturity proof, but operator_loop plan mode does not surface the command or proof-bundle readiness for operators.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-267_arbitrary-source-operator-proof-bundle.md",
+    "rge/modules/operator_loop.py",
+    "tickets/ticket-256.json"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop_plan.py",
+    "agent_reports/2026-06-16_phase-3_ticket-268_operator-loop-proof-bundle.md"
+  ],
+  "acceptance_criteria": [
+    "operator_loop --mode plan includes arbitrary_source_proof_bundle status or recommended action when appropriate.",
+    "No live LLM or live_network changes.",
+    "Golden pass.",
+    "Full pytest pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_loop_plan.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "README or AGENTS.md docs.",
+    "Autocycle execute-safe changes.",
+    "Public site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert operator_loop plan fields and tests.",
+  "status": "proposed",
+  "category": "Phase 3 / operator visibility"
+}
