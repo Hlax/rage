@@ -229,8 +229,13 @@ def evaluate_autocycle_cycle(
         "pre_ticket_audit_required": pre_ticket_required,
         "drift_warning": drift_warning,
         "scratch_evidence_status": plan.get("scratch_evidence_status") or {},
+        "arbitrary_source_proof_bundle_status": plan.get(
+            "arbitrary_source_proof_bundle_status"
+        )
+        or {},
         "staged_rank2_scan_max": plan.get("staged_rank2_scan_max"),
         "scratch_evidence_review_recommended": False,
+        "proof_bundle_recommended": False,
         "run_next_ticket_allowed": False,
         "next_command": None,
         "next_commands": [],
@@ -308,6 +313,20 @@ def evaluate_autocycle_cycle(
         result["recommended_action"] = action
         return stop(
             "operator_action_blocked_automation: run_scratch_evidence_review",
+            next_cmd=commands[0] if commands else None,
+            commands=commands,
+        )
+
+    proof_bundle_status = plan.get("arbitrary_source_proof_bundle_status") or {}
+    if (
+        proof_bundle_status.get("proof_bundle_recommended")
+        and action_id == "run_arbitrary_source_proof_bundle"
+    ):
+        commands = [_shell_command(cmd) for cmd in action.get("commands", [])]
+        result["proof_bundle_recommended"] = True
+        result["recommended_action"] = action
+        return stop(
+            "operator_action_blocked_automation: run_arbitrary_source_proof_bundle",
             next_cmd=commands[0] if commands else None,
             commands=commands,
         )
@@ -402,6 +421,7 @@ def evaluate_autocycle_cycle(
         "resolve_documentation_git_drift",
         "resolve_dirty_working_tree",
         "run_scratch_evidence_review",
+        "run_arbitrary_source_proof_bundle",
     }:
         commands = [_shell_command(cmd) for cmd in action.get("commands", [])]
         return stop(
@@ -504,10 +524,15 @@ def run_autocycle(
         "pre_ticket_audit_required": last.get("pre_ticket_audit_required"),
         "drift_warning": last.get("drift_warning"),
         "scratch_evidence_status": last.get("scratch_evidence_status") or {},
+        "arbitrary_source_proof_bundle_status": last.get(
+            "arbitrary_source_proof_bundle_status"
+        )
+        or {},
         "staged_rank2_scan_max": last.get("staged_rank2_scan_max"),
         "scratch_evidence_review_recommended": last.get(
             "scratch_evidence_review_recommended", False
         ),
+        "proof_bundle_recommended": last.get("proof_bundle_recommended", False),
         "run_next_ticket_allowed": last.get("run_next_ticket_allowed"),
         "stop_reason": final_stop_reason or last.get("stop_reason"),
         "next_command": last.get("next_command"),
