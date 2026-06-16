@@ -57,7 +57,8 @@ Safety audit not required — live LLM opt-in only; no public export or schema c
 
 ## Merge to main
 
-Pending merge commit hash (recorded after step 12).
+- Merge commit: `b668617d4a0817e8c2498b27d1fadbf4c7852e72`
+- Post-merge pytest: 666 passed, 30 deselected
 
 ## Recommended next ticket
 
