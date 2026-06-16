@@ -64,8 +64,8 @@ class _StubOllamaClient:
         )
 
     def link_concepts(self, **kwargs: object) -> CandidateConceptLinkBatch_v0_1:
-        claim = kwargs["claim"]
-        claim_id = claim["id"]
+        claims = kwargs["claims"]
+        claim_id = claims[0]["id"]
         return CandidateConceptLinkBatch_v0_1.model_validate(
             {
                 "task_name": "concept_linking",
@@ -140,6 +140,7 @@ def _ingest_ticket127(temp_db: Path) -> str:
 
 
 def _run_mock_live_spine(temp_db: Path, source_id: str) -> None:
+    stub = _StubOllamaClient()
     with patch.dict(
         os.environ,
         {"RGE_LLM_MODE": "ollama", "RGE_ALLOW_LIVE_LLM": "1"},
@@ -148,10 +149,16 @@ def _run_mock_live_spine(temp_db: Path, source_id: str) -> None:
         with patch(
             "rge.modules.live_extraction_write.assert_ollama_health",
             return_value={"model_available": True},
+        ), patch(
+            "rge.modules.live_probe.assert_ollama_health",
+            return_value={"model_available": True},
         ):
             with patch(
-                "rge.llm.registry.get_model_client",
-                return_value=_StubOllamaClient(),
+                "rge.modules.live_extraction_write.get_model_client",
+                return_value=stub,
+            ), patch(
+                "rge.modules.concept_linker.get_model_client",
+                return_value=stub,
             ):
                 assert (
                     main(
