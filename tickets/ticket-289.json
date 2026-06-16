@@ -39,6 +39,6 @@
   ],
   "risk_level": "high",
   "rollback_plan": "Remove atlas_coherence_report module and live_network test only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / live research proof / Research Atlas product validation"
 }

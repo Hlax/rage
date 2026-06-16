@@ -1,0 +1,39 @@
+{
+  "id": "ticket-290",
+  "title": "Atlas coherence report CLI (operator snapshot in → report out)",
+  "problem": "Ticket-289 added atlas_coherence_report as a Python module used from pytest. Operators need a CLI to run coherence verdict generation on an existing private atlas_snapshot.json without writing custom scripts.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-289_live-atlas-coherence-proof-v0.md",
+    "rge/modules/atlas_coherence_report.py",
+    "rge/cli.py"
+  ],
+  "affected_modules": [
+    "rge/cli.py",
+    "tests/unit/test_atlas_coherence_report_cli.py"
+  ],
+  "expected_files": [
+    "rge/cli.py",
+    "tests/unit/test_atlas_coherence_report_cli.py",
+    "agent_reports/2026-06-16_phase-3_ticket-290_atlas-coherence-report-cli.md"
+  ],
+  "acceptance_criteria": [
+    "CLI subcommand reads private atlas snapshot JSON from --snapshot and writes --out-json (+ optional --out-md) coherence report.",
+    "Machine-readable stdout JSON includes overall_coherence_verdict and output paths.",
+    "Fixture creativity snapshot CLI run passes; golden + full pytest green.",
+    "No public export, public-site, or schema changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_atlas_coherence_report_cli.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "CI live_network enforcement.",
+    "Public atlas route or site UI.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove CLI subcommand and test only.",
+  "status": "proposed",
+  "category": "Phase 3 / operator tooling / Research Atlas"
+}
