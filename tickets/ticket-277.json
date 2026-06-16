@@ -1,38 +1,8 @@
 {
   "id": "ticket-277",
   "title": "Operator proof bundle module-level export JSON stable on second run",
-  "problem": "Ticket-276 proved CLI export_path disk idempotency; module-level execute_arbitrary_source_proof_bundle second-run export JSON stability is not explicitly asserted.",
-  "evidence": [
-    "agent_reports/2026-06-16_phase-3_ticket-276_export-json-disk-idempotency.md",
-    "tests/unit/test_operator_proof_bundle.py"
-  ],
-  "affected_modules": [
-    "tests/unit/test_operator_proof_bundle.py"
-  ],
-  "expected_files": [
-    "tests/unit/test_operator_proof_bundle.py",
-    "agent_reports/2026-06-16_phase-3_ticket-277_module-export-json-idempotency.md"
-  ],
-  "acceptance_criteria": [
-    "Unit test runs execute_arbitrary_source_proof_bundle twice on same temp paths.",
-    "Second on-disk export_path JSON card count and stable card ids match first run.",
-    "Mock LLM only; no live_network.",
-    "Golden pass.",
-    "Full pytest pass."
-  ],
-  "test_plan": [
-    "python -m pytest tests/unit/test_operator_proof_bundle.py -q",
-    "python -m pytest tests/golden -q",
-    "python -m pytest -q"
-  ],
-  "non_goals": [
-    "README or AGENTS.md docs.",
-    "Production code changes.",
-    "Live LLM.",
-    "Public site changes."
-  ],
-  "risk_level": "low",
-  "rollback_plan": "Remove module export-path idempotency test only.",
-  "status": "proposed",
+  "problem": "Superseded by operator direction toward Research Atlas export contract work (ticket-278).",
+  "status": "superseded",
+  "superseded_by": "ticket-278",
   "category": "Phase 3 / arbitrary-source pipeline / product hardening"
 }

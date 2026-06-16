@@ -1,0 +1,40 @@
+{
+  "id": "ticket-279",
+  "title": "Atlas snapshot v0 population from fixture-mode DB (read-only projection)",
+  "problem": "ticket-278 defined atlas_snapshot_v0.1.0 shape and inventory gaps; no exporter maps accepted graph rows into nodes/edges/cards arrays yet.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-278_research-atlas-export-contract.md",
+    "docs/contracts/research_atlas_export_contract_inventory_v0.md",
+    "rge/contracts/atlas_snapshot_v0.py"
+  ],
+  "affected_modules": [
+    "rge/modules/atlas_snapshot_builder.py"
+  ],
+  "expected_files": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json",
+    "tests/unit/test_atlas_snapshot_builder.py",
+    "agent_reports/2026-06-16_phase-3_ticket-279_atlas-snapshot-population.md"
+  ],
+  "acceptance_criteria": [
+    "Builder projects fixture-mode creativity DB into atlas_snapshot_v0.1.0 with non-empty cards and nodes.",
+    "Output passes validate_atlas_snapshot; no private fields leak.",
+    "Mock LLM only; temp DB.",
+    "Golden pass and full pytest pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_atlas_snapshot_builder.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Public-site UI.",
+    "Public export route changes.",
+    "review_batch object.",
+    "Schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove builder module and tests only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / product contract"
+}

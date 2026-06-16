@@ -1,0 +1,52 @@
+{
+  "id": "ticket-278",
+  "title": "Research Atlas export contract inventory and snapshot schema v0",
+  "problem": "Cards-only export cannot power a graph/atlas frontend; the repo lacks a documented contract inventory and a tested public atlas snapshot envelope for Research Atlas + Agent Lab planning.",
+  "evidence": [
+    "agent_reports/2026-06-16_principal-audit-post-ticket-274.md",
+    "docs/agents/08_REPORTING_SPEC.md",
+    "docs/agents/10_SAFETY_MODEL.md",
+    "rge/modules/card_exporter.py",
+    "apps/public-site/lib/publicCards.ts"
+  ],
+  "affected_modules": [
+    "rge/contracts/atlas_snapshot_v0.py",
+    "rge/modules/atlas_contract_inventory.py"
+  ],
+  "expected_files": [
+    "rge/contracts/__init__.py",
+    "rge/contracts/atlas_snapshot_v0.py",
+    "rge/modules/atlas_contract_inventory.py",
+    "fixtures/atlas/atlas_snapshot_v0_minimal.json",
+    "docs/contracts/research_atlas_export_contract_inventory_v0.md",
+    "docs/contracts/research_atlas_export_contract_inventory_v0.json",
+    "tests/unit/test_atlas_snapshot_contract.py",
+    "agent_reports/2026-06-16_pre-ticket-278_research-atlas-export-contract-audit.md",
+    "agent_reports/2026-06-16_phase-3_ticket-278_research-atlas-export-contract.md"
+  ],
+  "acceptance_criteria": [
+    "Repo inventory report lists DB tables, schema files, report/export shapes, public-site readers, golden coverage, safety classification, and Research Atlas gaps.",
+    "atlas_snapshot_v0.1.0 pydantic contract validates minimal fixture.",
+    "Unit tests cover validator fail-closed behavior and inventory sections.",
+    "No production export or public-site wiring changes.",
+    "Golden pass and full pytest pass.",
+    "Pre-ticket audit GO for medium-risk contract work."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_atlas_snapshot_contract.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Public-site UI work.",
+    "Atlas snapshot DB population or export CLI.",
+    "review_batch / synthesis_batch implementation.",
+    "Schema migrations.",
+    "Image/media dependency in core graph."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove contracts module, inventory module, fixture, docs inventory, and tests only.",
+  "status": "done",
+  "category": "Phase 3 / Research Atlas / product contract"
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": "atlas_snapshot_v0.1.0",
+  "generated_at": "2026-06-16T00:00:00Z",
+  "snapshot_id": "snap_fixture_minimal_001",
+  "root": {
+    "topic": "Does AI improve creative output while reducing diversity?",
+    "primary_question": "Does AI improve creative output while reducing diversity?",
+    "domain_pack": "creativity"
+  },
+  "domains": [],
+  "runs": [],
+  "nodes": [],
+  "edges": [],
+  "clusters": [],
+  "reports": [],
+  "cards": [],
+  "safety": {
+    "public_safe": true,
+    "safety_audit_id": "audit_fixture_minimal_001"
+  }
+}
