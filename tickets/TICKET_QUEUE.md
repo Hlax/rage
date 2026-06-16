@@ -293,7 +293,7 @@ superseded
 | 264 | ticket-264 | done | Staged spine CLI stdout asserts rank candidate ids | `phase-3/ticket-264-staged-spine-cli-stdout-candidate-ids` | `agent_reports/2026-06-16_phase-3_ticket-264_staged-spine-cli-stdout-candidate-ids.md` |
 | 265 | ticket-265 | done | README documents staged run rank candidate id output fields | `phase-3/ticket-265-readme-staged-run-candidate-ids` | `agent_reports/2026-06-16_phase-3_ticket-265_readme-staged-run-candidate-ids.md` |
 | 266 | ticket-266 | done | Principal audit post-ticket-265 staged spine docs checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-265.md` |
-| 267 | ticket-267 | proposed | AGENTS.md staged spine candidate-id operator docs cross-link | | |
+| 267 | ticket-267 | ready | End-to-end arbitrary-source operator proof bundle | | `agent_reports/2026-06-16_pre-ticket-267_arbitrary-source-operator-proof-bundle-audit.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1028,15 +1028,22 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-267 (proposed) — AGENTS.md staged spine candidate-id operator docs cross-link
+ticket-267 (ready) — End-to-end arbitrary-source operator proof bundle
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-267 reprioritized — arbitrary-source proof bundle)
+
+- Supersedes proposed AGENTS.md candidate-id cross-link (thread closed by tickets 263–265)
+- Pre-ticket audit: `agent_reports/2026-06-16_pre-ticket-267_arbitrary-source-operator-proof-bundle-audit.md` — **GO**
+- Scope: mock-only staged rank-1 spine through report + fixture export; machine-readable `operator_proof_bundle.json`
+- Principal audit drift pivot: product-facing work, not more docs
 
 ## Queue Notes (2026-06-16, principal audit post-ticket-265)
 
 - Principal checkpoint report: `agent_reports/2026-06-16_principal-audit-post-ticket-265.md`
 - Cadence reset after tickets 263–265; mock golden gate green (142 golden, 689 pytest)
-- ticket-267 seeded: AGENTS.md cross-link for staged spine candidate-id operator docs
+- ~~ticket-267 seeded: AGENTS.md cross-link~~ — reprioritized to operator proof bundle (see above)
 
 ## Queue Notes (2026-06-16, ticket-265 README staged run candidate ids)
 

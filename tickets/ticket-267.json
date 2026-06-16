@@ -1,32 +1,52 @@
 {
   "id": "ticket-267",
-  "title": "AGENTS.md staged spine candidate-id operator docs cross-link",
-  "problem": "Ticket-265 documented rank1/rank2 candidate ids in README staged spine section, but AGENTS.md operator quickstart does not cross-link operators to that section.",
+  "title": "End-to-end arbitrary-source operator proof bundle",
+  "problem": "Staged mock spine and manual synthnote paths prove individual steps or dual-rank orchestrator counts, but operators lack one mock-only, machine-readable proof bundle that answers whether source intake through export produced usable research output. Principal audit post-ticket-265 drift warning calls for product-facing work; staged rank candidate-id docs thread (263–265) is closed.",
   "evidence": [
     "agent_reports/2026-06-16_principal-audit-post-ticket-265.md",
-    "README.md staged spine candidate-id table",
-    "AGENTS.md operator quickstart cross-link pattern (tickets 077–082)"
+    "agent_reports/2026-06-16_pre-ticket-267_arbitrary-source-operator-proof-bundle-audit.md",
+    "rge/cli.py execute_staged_fixture_mode_run",
+    "tests/unit/test_manual_source_pipeline_e2e.py",
+    "tests/unit/test_staged_fixture_mode_run_spine.py"
   ],
-  "affected_modules": [],
+  "affected_modules": [
+    "rge/cli.py",
+    "rge/modules/operator_proof_bundle.py"
+  ],
   "expected_files": [
-    "AGENTS.md"
+    "rge/modules/operator_proof_bundle.py",
+    "rge/cli.py",
+    "tests/unit/test_operator_proof_bundle.py",
+    "agent_reports/2026-06-16_phase-3_ticket-267_arbitrary-source-operator-proof-bundle.md"
   ],
   "acceptance_criteria": [
-    "AGENTS.md operator section cross-links README staged spine rank candidate id fields",
-    "No code or export surface changes",
-    "Golden pass"
+    "Mock LLM only; temp or scratch --db; no default graph DB writes unless existing protocol requires seed fixtures in isolated temp path.",
+    "Operator CLI path runs ingest/source registration through extract-claims, link-concepts, build-relationships, detect-contradictions, reconcile-scores, generate-run-report, and export-public (fixture-mode to temp export dir) for the primary staged rank-1 source.",
+    "Writes a machine-readable proof bundle JSON summarizing source_id, claim_count, concept_link_count, relationship_count, qualification_count, reconcile result, report_path, and export/card paths when available.",
+    "Proof bundle includes explicit status, pipeline_mode, and failure detail when any step fails.",
+    "Unit tests assert proof bundle schema, happy-path counts aligned with staged fixture spine, and failure clarity without live_network.",
+    "Golden tests pass.",
+    "Full pytest passes.",
+    "Safety audit passes.",
+    "Public site build passes only if public export/site files changed."
   ],
   "test_plan": [
+    "python -m pytest tests/unit/test_operator_proof_bundle.py -q",
     "python -m pytest tests/golden -q",
-    "python -m pytest -q"
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
   ],
   "non_goals": [
-    "Production logic changes",
-    "Public site changes",
-    "Live Ollama proofs"
+    "AGENTS.md or README docs-only cross-links.",
+    "Detect-seed or candidate-id documentation.",
+    "Live LLM in orchestrator, reconcile, or report.",
+    "live_network in default CI.",
+    "Schema migrations.",
+    "Cloud providers.",
+    "Bare research run without fixture/staged flags."
   ],
-  "risk_level": "low",
-  "rollback_plan": "Revert AGENTS.md cross-link only.",
-  "status": "proposed",
-  "category": "Phase 3 / staged spine operator docs"
+  "risk_level": "medium",
+  "rollback_plan": "Remove operator_proof_bundle module, CLI entry, and unit tests; revert staged run hook if added.",
+  "status": "ready",
+  "category": "Phase 3 / arbitrary-source pipeline / product-risk reduction"
 }
