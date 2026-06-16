@@ -1,0 +1,35 @@
+{
+  "id": "ticket-264",
+  "title": "Staged spine CLI stdout asserts rank candidate ids",
+  "problem": "Tickets 261–262 assert rank candidate ids on execute_staged_fixture_mode_run result and spine helpers, but CLI entry tests only check exit code and do not verify stdout JSON includes the new fields.",
+  "evidence": [
+    "agent_reports/2026-06-16_principal-audit-post-ticket-262.md",
+    "tests/unit/test_staged_fixture_mode_run_spine.py",
+    "rge/cli.py _cmd_run staged-spine print(json.dumps(result))"
+  ],
+  "affected_modules": [
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_staged_fixture_mode_run_spine.py"
+  ],
+  "acceptance_criteria": [
+    "CLI staged-spine entry test captures stdout and asserts rank1_candidate_id and rank2_candidate_id",
+    "Applies to both --fixture-mode --staged-spine and --staged-spine without fixture-mode entry paths",
+    "Golden pass"
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_staged_fixture_mode_run_spine.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Production logic changes",
+    "Live Ollama proofs",
+    "Public export/site changes"
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert unit test assertions only.",
+  "status": "proposed",
+  "category": "Phase 3 / staged spine product hardening"
+}

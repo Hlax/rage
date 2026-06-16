@@ -289,7 +289,8 @@ superseded
 | 260 | ticket-260 | done | Staged spine CLI candidate-id wiring smoke test | `phase-3/ticket-260-cli-staged-spine-candidate-id-wiring` | `agent_reports/2026-06-16_phase-3_ticket-260_cli-staged-spine-candidate-id-wiring.md` |
 | 261 | ticket-261 | done | Staged fixture run JSON exposes rank candidate ids | `phase-3/ticket-261-staged-fixture-rank-candidate-ids-json` | `agent_reports/2026-06-16_phase-3_ticket-261_staged-fixture-rank-candidate-ids.md` |
 | 262 | ticket-262 | done | Staged fixture spine test asserts rank candidate ids | `phase-3/ticket-262-staged-spine-candidate-id-assertions` | `agent_reports/2026-06-16_phase-3_ticket-262_staged-spine-candidate-id-assertions.md` |
-| 263 | ticket-263 | proposed | Principal audit post-ticket-262 staged spine candidate-id checkpoint | | |
+| 263 | ticket-263 | done | Principal audit post-ticket-262 staged spine candidate-id checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-262.md` |
+| 264 | ticket-264 | proposed | Staged spine CLI stdout asserts rank candidate ids | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1024,9 +1025,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-263 (proposed) — Principal audit post-ticket-262 staged spine candidate-id checkpoint
+ticket-264 (proposed) — Staged spine CLI stdout asserts rank candidate ids
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, principal audit post-ticket-262)
+
+- Principal checkpoint report: `agent_reports/2026-06-16_principal-audit-post-ticket-262.md`
+- Cadence reset after tickets 259–262; mock golden gate green (142 golden, 689 pytest)
+- ticket-264 seeded: CLI stdout JSON assertions for rank candidate ids
 
 ## Queue Notes (2026-06-16, ticket-262 staged spine candidate id assertions)
 
