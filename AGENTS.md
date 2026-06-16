@@ -137,6 +137,14 @@ not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_EXTRACT_LIVE_LLM=1`,
 `tests/unit/test_live_staged_extract_live_llm_spine.py` with `live_network` and
 `live_smoke` markers).
 
+**Live staged rank-2 extract (live Ollama; ticket-230):** separate per-step rank-2 operator
+proof — not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_RANK2_EXTRACT_LIVE_LLM=1`,
+`RGE_ALLOW_LIVE_STAGED_RANK2=1`, `RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama`, network
+gates, temp `--db`, rank-2 candidate selection (`select_rank2_candidate_id`), and
+`extract-claims --live-staged-rank2-extract-fallthrough` (or chained pytest in
+`tests/unit/test_live_staged_rank2_extract_live_llm_spine.py` with `live_network` and
+`live_smoke` markers). Rank-1 `--live-staged-fallthrough` unchanged.
+
 **Live staged link (live Ollama; ticket-208):** separate per-step operator proof —
 not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_LINK_LIVE_LLM=1`,
 `RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama`, network gates above, temp `--db`, mock

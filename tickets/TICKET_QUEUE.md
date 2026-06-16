@@ -261,7 +261,8 @@ superseded
 | 227 | ticket-227 | done | Principal audit post-ticket-226 staged docs closure checkpoint | | `agent_reports/2026-06-15_ticket-227_principal-audit-post-ticket-226.md` |
 | 228 | ticket-228 | done | Pre-ticket audit: rank-2 staged per-step live Ollama on staged spine | `phase-2/ticket-228-pre-ticket-rank-2-staged-live-llm-audit` | `agent_reports/2026-06-15_ticket-228_pre-ticket-rank-2-staged-live-llm-audit.md` |
 | 229 | ticket-229 | done | Rank-2 staged source and chunk heuristic for live LLM fallthrough eligibility | `phase-2/ticket-229-rank-2-staged-spine-heuristics` | `agent_reports/2026-06-15_ticket-229_rank-2-staged-spine-heuristics.md` |
-| 230 | ticket-230 | proposed | Live staged rank-2 extract live LLM opt-in proof (per-step) | | |
+| 230 | ticket-230 | done | Live staged rank-2 extract live LLM opt-in proof (per-step) | `phase-3/ticket-230-rank2-extract-live-llm-spine` | `agent_reports/2026-06-15_ticket-230_live-staged-rank2-extract-live-llm-spine.md` |
+| 236 | ticket-236 | proposed | Live staged rank-2 link live LLM opt-in proof (per-step) | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -996,9 +997,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-230 (proposed) — Live staged rank-2 extract live LLM opt-in proof (pre-ticket-230 GO)
+ticket-236 (proposed) — Live staged rank-2 link live LLM opt-in proof (per-step)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-230 rank-2 extract live LLM)
+
+- `RGE_ALLOW_LIVE_STAGED_RANK2_EXTRACT_LIVE_LLM=1` + `--live-staged-rank2-extract-fallthrough`
+- Rank-2 heuristic wiring via `is_staged_rank2_fetch_spine_*`; rank-1 fallthrough unchanged
+- ticket-236 seeded: rank-2 link live LLM (mirror ticket-208)
 
 ## Queue Notes (2026-06-15, ticket-235 proof-layer runbook)
 

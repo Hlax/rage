@@ -1707,6 +1707,7 @@ def _cmd_extract_claims(args: argparse.Namespace) -> int:
         LiveExtractionWriteError,
         extract_claims_manual_live_fallthrough,
         extract_claims_staged_live_fallthrough,
+        extract_claims_staged_rank2_live_fallthrough,
         is_default_graph_db,
         resolve_live_evidence_db,
     )
@@ -1729,6 +1730,50 @@ def _cmd_extract_claims(args: argparse.Namespace) -> int:
         conn = ensure_database(db_path)
         try:
             payload = extract_claims_manual_live_fallthrough(conn, args.source)
+            print(json.dumps(payload, indent=2))
+            return 0
+        except (LiveExtractionWriteError, LiveProbeGateError, ValueError) as exc:
+            payload = {
+                "status": "error",
+                "command": "extract-claims",
+                "detail": str(exc),
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+        finally:
+            conn.close()
+
+    if getattr(args, "live_staged_fallthrough", False) and getattr(
+        args, "live_staged_rank2_extract_fallthrough", False
+    ):
+        payload = {
+            "status": "error",
+            "command": "extract-claims",
+            "detail": (
+                "--live-staged-fallthrough and --live-staged-rank2-extract-fallthrough "
+                "are mutually exclusive."
+            ),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+    if getattr(args, "live_staged_rank2_extract_fallthrough", False):
+        db_path = resolve_live_evidence_db(Path(args.db) if args.db else None)
+        if is_default_graph_db(db_path):
+            payload = {
+                "status": "error",
+                "command": "extract-claims",
+                "detail": (
+                    "Refusing live staged rank-2 fall-through on the default graph DB. "
+                    "Pass --db data/db/live_research_evidence.sqlite or another "
+                    "explicit gitignored evidence path."
+                ),
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+        conn = ensure_database(db_path)
+        try:
+            payload = extract_claims_staged_rank2_live_fallthrough(conn, args.source)
             print(json.dumps(payload, indent=2))
             return 0
         except (LiveExtractionWriteError, LiveProbeGateError, ValueError) as exc:
@@ -2625,6 +2670,16 @@ def build_parser() -> argparse.ArgumentParser:
             "Live Ollama extraction for manual_text sources absent from the checksum "
             "fixture map. Requires RGE_LLM_MODE=ollama, RGE_ALLOW_LIVE_LLM=1, and a "
             "non-default evidence --db (defaults to data/db/live_research_evidence.sqlite)."
+        ),
+    )
+    extract_parser.add_argument(
+        "--live-staged-rank2-extract-fallthrough",
+        action="store_true",
+        help=(
+            "Live Ollama extraction for rank-2 staged OpenAlex ingest sources "
+            "(bypasses staged-fetch auto-mock). Requires "
+            "RGE_ALLOW_LIVE_STAGED_RANK2_EXTRACT_LIVE_LLM=1, RGE_LLM_MODE=ollama, "
+            "RGE_ALLOW_LIVE_LLM=1, and a non-default --db."
         ),
     )
     extract_parser.add_argument(
