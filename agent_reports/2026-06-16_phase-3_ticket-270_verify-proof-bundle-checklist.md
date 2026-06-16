@@ -60,7 +60,7 @@ Checklist logic lives in `verify_runner.py` (verify implementation module) rathe
 
 ## Merge to main
 
-_Pending merge._
+Merge commit: `14fbeb60f395fb4d21ab579f0d20b516542b3ff6`
 
 ## Recommended next ticket
 
