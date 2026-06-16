@@ -1,0 +1,31 @@
+{
+  "id": "ticket-248",
+  "title": "README maturity tier detect seed doc triangle closure",
+  "problem": "Tickets 245–247 completed detect seed operator doc triangle (README, AGENTS, 12_RUNTIME_CONFIG). README maturity tier table should note triangle closure so operators see docs completeness at a glance.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-247_runtime-config-detect-seed-note.md",
+    "agent_reports/2026-06-16_principal-audit-post-ticket-246.md",
+    "README.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-16_phase-3_ticket-248_readme-maturity-detect-seed-triangle.md"
+  ],
+  "acceptance_criteria": [
+    "README maturity tier row notes detect seed doc triangle complete (245/246/247).",
+    "Golden pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Product code changes.",
+    "Live Ollama operator proofs.",
+    "Further doc duplication beyond maturity row."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README maturity row edit.",
+  "status": "proposed",
+  "category": "Phase 3 / docs / operator"
+}

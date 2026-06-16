@@ -25,6 +25,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert runtime config doc edits.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / docs / operator"
 }
