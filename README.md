@@ -508,6 +508,14 @@ Run each pytest with `-m "live_network and live_smoke"`. Rank-2 live proofs requ
 queued candidates (`select_rank2_candidate_id`) and rank-2 title heuristic
 (`constraint management` marker).
 
+**Domain seed (detect step; ticket-243):** live detect pytest calls
+`seed_domain_opposing_context()` before live OpenAlex discover. That helper **forces mock LLM**
+for GT7 seed spine steps (extract → link → build) even when operator env has
+`RGE_LLM_MODE=ollama` — only the detect fallthrough step uses live Ollama. Implementation:
+`tests/unit/staged_domain_seed.py` (`_mock_llm_seed_env`). A detect failure at
+`link-concepts` with zero accepted claims under live env was a **pre-243 seed bug**, not catalog
+drift.
+
 **Not in scope for this checklist:**
 
 | Item | Why |

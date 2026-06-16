@@ -132,7 +132,12 @@ def _latest_checkpoint(
     reports: list[CheckpointReport], rows: list[QueueTicketRow]
 ) -> CheckpointReport | None:
     valid = [report for report in reports if _checkpoint_is_valid(report, rows)]
-    return valid[-1] if valid else None
+    if not valid:
+        return None
+    numbered = [report for report in valid if report.ticket_number is not None]
+    if numbered:
+        return max(numbered, key=lambda report: report.ticket_number)
+    return valid[-1]
 
 
 def _done_since_checkpoint(

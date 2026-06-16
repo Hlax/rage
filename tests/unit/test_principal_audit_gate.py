@@ -91,6 +91,35 @@ def test_post_ticket_principal_audit_satisfies_cadence(tmp_path: Path) -> None:
     assert report["status"] == "satisfied"
 
 
+def test_latest_checkpoint_uses_highest_ticket_number_not_filename_order(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "tickets").mkdir()
+    (tmp_path / "agent_reports").mkdir()
+    (tmp_path / "tickets" / "TICKET_QUEUE.md").write_text(
+        """
+| 238 | ticket-238 | done | detect | | |
+| 243 | ticket-243 | done | seed | | |
+| 244 | ticket-244 | done | audit | | |
+| 245 | ticket-245 | proposed | next | | |
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "agent_reports" / "2026-06-16_principal-audit-post-ticket-243.md").write_text(
+        "# latest by ticket number", encoding="utf-8"
+    )
+    (tmp_path / "agent_reports" / "2026-06-16_ticket-239_principal-audit-post-ticket-238.md").write_text(
+        "# older filename sorts later", encoding="utf-8"
+    )
+
+    report = checkpoint_status(root=tmp_path, next_ticket_id="ticket-245")
+    assert report["latest_checkpoint_ticket_number"] == 243
+    assert report["cadence_status"] == "satisfied"
+    assert report["done_tickets_since_latest_checkpoint"] == 1
+    assert report["done_ticket_ids_since_latest_checkpoint"] == ["ticket-244"]
+    assert report["status"] == "satisfied"
+
+
 def test_three_done_tickets_after_checkpoint_becomes_overdue(tmp_path: Path) -> None:
     (tmp_path / "tickets").mkdir()
     (tmp_path / "agent_reports").mkdir()

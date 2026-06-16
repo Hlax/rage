@@ -271,7 +271,8 @@ superseded
 | 242 | ticket-242 | done | AGENTS runtime config rank-2 live closure cross-reference | `phase-3/ticket-242-agents-runtime-config-rank2-closure` | `agent_reports/2026-06-16_ticket-242_agents-runtime-config-rank2-closure.md` |
 | 243 | ticket-243 | done | Detect seed mock isolation for live Ollama operator proofs | `phase-3/ticket-243-detect-seed-mock-isolation` | `agent_reports/2026-06-16_phase-3_ticket-243_detect-seed-mock-isolation.md` |
 | 244 | ticket-244 | done | Principal audit post-ticket-243 detect seed mock isolation | `main` | `agent_reports/2026-06-16_principal-audit-post-ticket-243.md` |
-| 245 | ticket-245 | proposed | README rank-2 checklist detect seed isolation note | | |
+| 245 | ticket-245 | done | README rank-2 checklist detect seed isolation note | `phase-3/ticket-245-readme-detect-seed-note` | `agent_reports/2026-06-16_phase-3_ticket-245_readme-detect-seed-note.md` |
+| 246 | ticket-246 | proposed | AGENTS detect seed mock isolation cross-reference | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1006,9 +1007,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-245 (proposed) — README rank-2 checklist detect seed isolation note
+ticket-246 (proposed) — AGENTS detect seed mock isolation cross-reference
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-245 README detect seed note)
+
+- README rank-2 checklist documents GT7 seed mock isolation (ticket-243)
+- principal_audit_gate latest checkpoint fix (max ticket number)
+- ticket-246 seeded: AGENTS cross-reference
 
 ## Queue Notes (2026-06-16, ticket-244 principal audit post-ticket-243)
 
