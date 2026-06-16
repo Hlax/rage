@@ -52,6 +52,7 @@ def _build_live_extraction_payload(
     health: dict[str, Any],
     live_manual_fallthrough: bool,
     live_staged_fallthrough: bool = False,
+    live_staged_rank2_fallthrough: bool = False,
 ) -> dict[str, Any]:
     from rge.db.repositories import ChunkRepository, ClaimRepository, SourceRepository
 
@@ -106,6 +107,7 @@ def _build_live_extraction_payload(
         "command": command,
         "live_manual_fallthrough": live_manual_fallthrough,
         "live_staged_fallthrough": live_staged_fallthrough,
+        "live_staged_rank2_fallthrough": live_staged_rank2_fallthrough,
         "source_id": source_id,
         "source_title": source.title,
         "source_type": source.source_type,
@@ -187,6 +189,72 @@ def extract_claims_manual_live_fallthrough(
     )
 
 
+def assert_live_staged_rank2_extract_live_env(
+    config: RgeConfig | None = None,
+    *,
+    command: str = "extract-claims",
+) -> RgeConfig:
+    """Require rank-2 staged-family live LLM opt-in in addition to live probe gates."""
+    allow = os.environ.get(
+        "RGE_ALLOW_LIVE_STAGED_RANK2_EXTRACT_LIVE_LLM", "0"
+    ).strip().casefold()
+    if allow not in ("1", "true", "yes"):
+        raise LiveExtractionWriteError(
+            f"{command} live staged rank-2 fallthrough requires "
+            "RGE_ALLOW_LIVE_STAGED_RANK2_EXTRACT_LIVE_LLM=1."
+        )
+    return assert_live_probe_env(config, command=command)
+
+
+def extract_claims_staged_rank2_live_fallthrough(
+    conn: Any,
+    source_id: str,
+    *,
+    config: RgeConfig | None = None,
+    skip_health_check: bool = False,
+    client: Any | None = None,
+) -> dict[str, Any]:
+    """Live Ollama extraction for rank-2 staged OpenAlex ingest sources."""
+    from rge.db.repositories import ChunkRepository, SourceRepository
+    from rge.modules.claim_extractor import extract_claims_for_source
+    from rge.modules.staged_spine_heuristics import source_has_staged_rank2_fetch_spine
+
+    cfg = assert_live_staged_rank2_extract_live_env(config, command="extract-claims")
+    health = assert_ollama_health(cfg) if not skip_health_check else {}
+
+    source = SourceRepository(conn).get_by_id(source_id)
+    if source is None:
+        raise LiveExtractionWriteError(f"Source not found: {source_id}")
+
+    chunks = ChunkRepository(conn).list_for_source(source_id)
+    if not source_has_staged_rank2_fetch_spine(chunks):
+        raise LiveExtractionWriteError(
+            "live_staged_rank2_fallthrough requires staged OpenAlex rank-2 ingest "
+            "chunk text (constraint management marker)."
+        )
+
+    model_client = client or get_model_client(cfg, mode="ollama")
+    result = extract_claims_for_source(
+        conn,
+        source_id,
+        live_staged_rank2_fallthrough=True,
+        client=model_client,
+        config=cfg,
+    )
+    return _build_live_extraction_payload(
+        conn=conn,
+        source_id=source_id,
+        result=result,
+        command="extract-claims",
+        model_client=model_client,
+        cfg=cfg,
+        health=health,
+        live_manual_fallthrough=False,
+        live_staged_fallthrough=False,
+        live_staged_rank2_fallthrough=True,
+    )
+
+
 def extract_claims_staged_live_fallthrough(
     conn: Any,
     source_id: str,
@@ -234,6 +302,7 @@ def extract_claims_staged_live_fallthrough(
         health=health,
         live_manual_fallthrough=False,
         live_staged_fallthrough=True,
+        live_staged_rank2_fallthrough=False,
     )
 
 

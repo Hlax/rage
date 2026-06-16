@@ -156,6 +156,7 @@ def extract_claims_for_source(
     fixture_name: str | None = None,
     live_manual_fallthrough: bool = False,
     live_staged_fallthrough: bool = False,
+    live_staged_rank2_fallthrough: bool = False,
     client: Any | None = None,
     config: Any | None = None,
 ) -> dict[str, Any]:
@@ -183,13 +184,34 @@ def extract_claims_for_source(
             "rejected_claim_ids": [claim.id for claim in rejected],
         }
 
-    if live_manual_fallthrough and live_staged_fallthrough:
+    if live_manual_fallthrough and (
+        live_staged_fallthrough or live_staged_rank2_fallthrough
+    ):
         raise ValueError(
-            "live_manual_fallthrough and live_staged_fallthrough are mutually exclusive."
+            "live_manual_fallthrough cannot be combined with staged live fallthrough."
+        )
+    if live_staged_fallthrough and live_staged_rank2_fallthrough:
+        raise ValueError(
+            "live_staged_fallthrough and live_staged_rank2_fallthrough are mutually "
+            "exclusive."
         )
 
     cfg = config if config is not None else load_config()
-    if live_staged_fallthrough:
+    if live_staged_rank2_fallthrough:
+        from rge.modules.staged_spine_heuristics import source_has_staged_rank2_fetch_spine
+
+        if fixture_name:
+            raise ValueError(
+                "live_staged_rank2_fallthrough cannot be combined with --fixture; "
+                "live Ollama extraction uses the ingested chunk text."
+            )
+        if not source_has_staged_rank2_fetch_spine(chunks):
+            raise ValueError(
+                "live_staged_rank2_fallthrough requires staged OpenAlex rank-2 ingest "
+                "chunk text (constraint management marker)."
+            )
+        model_client = client or get_model_client(cfg, mode="ollama")
+    elif live_staged_fallthrough:
         if fixture_name:
             raise ValueError(
                 "live_staged_fallthrough cannot be combined with --fixture; "

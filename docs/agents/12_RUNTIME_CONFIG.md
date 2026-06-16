@@ -40,7 +40,8 @@ Golden tests and the builder agent should set `RGE_LLM_MODE=mock` explicitly.
 | `RGE_ALLOW_SOURCE_NETWORK` | optional (default `0`) | no | yes | no | OpenAlex discover/fetch network gate |
 | `OPENALEX_MAILTO` | optional | no | yes | no | Polite OpenAlex contact (not a secret) |
 | `OPENALEX_API_KEY` | optional | yes | yes | no | OpenAlex authenticated tier (never commit) |
-| `RGE_ALLOW_LIVE_STAGED_EXTRACT_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama extract on staged ingest |
+| `RGE_ALLOW_LIVE_STAGED_EXTRACT_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama extract on rank-1 staged ingest |
+| `RGE_ALLOW_LIVE_STAGED_RANK2_EXTRACT_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama extract on rank-2 staged ingest (ticket-230) |
 | `RGE_ALLOW_LIVE_STAGED_LINK_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama link on staged ingest |
 | `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama build on staged ingest |
 | `RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama detect on staged ingest |
@@ -147,11 +148,12 @@ python -m rge.cli model-health
 `model-health` reports reachability and model tags only — it does **not** print
 API keys, mailto values, or other secrets.
 
-**Staged network + per-step live LLM gates** (rank-1 only; temp `--db` required):
+**Staged network + per-step live LLM gates** (rank-1 and rank-2 extract; temp `--db` required):
 
 | Step | Live Ollama gate | Mock spine gate (live OpenAlex + mock LLM) |
 |------|------------------|--------------------------------------------|
-| extract | `RGE_ALLOW_LIVE_STAGED_EXTRACT_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_EXTRACT=1` |
+| extract (rank-1) | `RGE_ALLOW_LIVE_STAGED_EXTRACT_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_EXTRACT=1` |
+| extract (rank-2) | `RGE_ALLOW_LIVE_STAGED_RANK2_EXTRACT_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_RANK2=1` |
 | link | `RGE_ALLOW_LIVE_STAGED_LINK_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_LINK=1` |
 | build | `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_BUILD=1` |
 | detect | `RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_DETECT=1` |
