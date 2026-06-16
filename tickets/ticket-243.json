@@ -1,0 +1,40 @@
+{
+  "id": "ticket-243",
+  "title": "Detect seed mock isolation for live Ollama operator proofs",
+  "problem": "Operator proof session (2026-06-16) showed rank-2 live detect pytest fails when seed_domain_opposing_context runs extract-claims under global RGE_LLM_MODE=ollama — live model rejects GT7 seed claims. Seed steps should force mock LLM while detect step remains live.",
+  "evidence": [
+    "agent_reports/2026-06-16_operator-proof-rank2-live-ollama-checklist.md",
+    "tests/unit/staged_domain_seed.py",
+    "tests/unit/test_live_staged_rank2_detect_live_llm_spine.py"
+  ],
+  "affected_modules": [
+    "tests/unit/staged_domain_seed.py"
+  ],
+  "expected_files": [
+    "tests/unit/staged_domain_seed.py",
+    "tests/unit/test_live_staged_rank2_detect_live_llm_spine.py",
+    "tests/unit/test_live_staged_detect_live_llm_spine.py",
+    "agent_reports/2026-06-16_phase-3_ticket-243_detect-seed-mock-isolation.md"
+  ],
+  "acceptance_criteria": [
+    "seed_domain_opposing_context completes with 0 accepted claims under global live Ollama env.",
+    "Rank-1 and rank-2 live detect pytest modules pass or skip only on catalog drift — not seed failure.",
+    "Default mock pytest collection unchanged.",
+    "Golden pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_live_staged_detect_live_llm_spine.py -q",
+    "python -m pytest tests/unit/test_live_staged_rank2_detect_live_llm_spine.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Changing live detect fallthrough CLI behavior.",
+    "Orchestrator live LLM.",
+    "Public export.",
+    "Fixing catalog drift skips (unsuitable_live_rank2_artifact)."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert staged_domain_seed and detect test edits.",
+  "status": "proposed",
+  "category": "Phase 3 / operator / test hardening"
+}
