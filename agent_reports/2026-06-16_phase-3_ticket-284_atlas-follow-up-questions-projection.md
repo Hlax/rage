@@ -60,7 +60,7 @@ None.
 
 ## Merge to main
 
-*(pending merge)*
+Merge commit: `930e45d`
 
 ## Drift note — stop Atlas-only infrastructure streak
 
