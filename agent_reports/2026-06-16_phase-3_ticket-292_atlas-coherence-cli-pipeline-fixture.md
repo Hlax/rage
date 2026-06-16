@@ -106,4 +106,4 @@ coherence report with human-readable quality verdict (GO/PARTIAL/NO-GO).
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `1aa0171`
