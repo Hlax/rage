@@ -1,0 +1,35 @@
+{
+  "id": "ticket-286",
+  "title": "README operator quickstart live staged atlas coherence proof cross-link",
+  "problem": "Ticket-285 added an opt-in live_network pytest for staged orchestrator → private atlas export coherence. Operators need the env gates and pytest command documented in README Operator Quickstart alongside other live staged proof layers.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-285_live-staged-atlas-coherence-proof.md",
+    "tests/unit/test_live_staged_atlas_snapshot_coherence.py",
+    "README.md"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-16_phase-3_ticket-286_readme-atlas-coherence-crosslink.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart documents RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR env gate and live_network pytest command for atlas coherence proof.",
+    "Documents unsuitable_live_artifact skip semantics consistent with ticket-234 proof layers.",
+    "No code or public-site changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "AGENTS.md cross-link (separate ticket if needed).",
+    "Public atlas route or public-site UI.",
+    "CI enforcement of live_network proof."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section only.",
+  "status": "proposed",
+  "category": "Phase 3 / operator documentation / Research Atlas"
+}
