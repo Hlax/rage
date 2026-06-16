@@ -51,7 +51,8 @@ Safety audit not required — docs-only ticket.
 
 ## Merge to main
 
-Pending merge commit hash (recorded after step 12).
+- Merge commit: `0addd85141b11a49a1618eebf9e248bd90f48cc8`
+- Post-merge pytest: 666 passed, 30 deselected
 
 ## Recommended next ticket
 
