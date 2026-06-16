@@ -185,7 +185,12 @@ extract/link/build/detect** sections.
 All staged proofs also require `RGE_ALLOW_SOURCE_NETWORK=1` and `OPENALEX_MAILTO`.
 Per-step live Ollama gates are **separate** from mock-spine gates. Live detect
 requires domain opposing context seeded on the temp DB before live discover (see
-README **Live staged detect (live Ollama)**). The staged orchestrator
+README **Live staged detect (live Ollama)**). **`seed_domain_opposing_context()`**
+(`tests/unit/staged_domain_seed.py`) **forces mock LLM** for GT7 seed extract/link/build
+even when operator env has `RGE_LLM_MODE=ollama` — only the detect fallthrough step uses
+live Ollama (ticket-243). See README **One-time rank-2 per-step live Ollama verification**
+→ **Domain seed** note (ticket-245) and AGENTS rank-1/rank-2 live detect sections
+(ticket-246). The staged orchestrator
 orchestrator (`research run --staged-spine`) always forces `RGE_LLM_MODE=mock`.
 
 See README **Operator Quickstart** for pytest commands (`live_network` + `live_smoke`
