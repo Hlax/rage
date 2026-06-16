@@ -1322,6 +1322,36 @@ def _cmd_prove_arbitrary_source_bundle(args: argparse.Namespace) -> int:
     return 0 if result.get("status") == "completed" else 1
 
 
+def _cmd_export_atlas_snapshot(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.modules.atlas_snapshot_builder import export_atlas_snapshot_to_path
+
+    db_path = Path(args.db) if args.db else None
+    output_path = Path(args.out)
+    conn = ensure_database(db_path)
+    try:
+        result = export_atlas_snapshot_to_path(
+            conn,
+            output_path,
+            topic=args.topic,
+            primary_question=args.primary_question,
+            domain_pack=args.domain,
+            fixture_mode=bool(args.fixture_mode),
+        )
+        print(json.dumps(result, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "export-atlas-snapshot",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_export_public(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.modules.card_exporter import export_public_cards
@@ -3425,6 +3455,45 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     export_parser.set_defaults(func=_cmd_export_public)
+
+    atlas_export_parser = subparsers.add_parser(
+        "export-atlas-snapshot",
+        help="Export validated Research Atlas snapshot JSON (operator-private).",
+        description=(
+            "Project a public-safe atlas_snapshot_v0.1.0 JSON file from the current "
+            "research database. Validation and private-field checks run before write. "
+            "Use --fixture-mode for deterministic metadata when exporting fixture MVP DBs."
+        ),
+    )
+    atlas_export_parser.add_argument(
+        "--out",
+        required=True,
+        help="Path to write atlas snapshot JSON (operator-private).",
+    )
+    atlas_export_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    atlas_export_parser.add_argument(
+        "--topic",
+        default=GOLDEN_MVP_TOPIC,
+        help="Root topic for snapshot metadata.",
+    )
+    atlas_export_parser.add_argument(
+        "--primary-question",
+        help="Primary research question (defaults to --topic).",
+    )
+    atlas_export_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack id (default: creativity).",
+    )
+    atlas_export_parser.add_argument(
+        "--fixture-mode",
+        action="store_true",
+        help="Use pinned snapshot metadata for deterministic byte-identical re-exports.",
+    )
+    atlas_export_parser.set_defaults(func=_cmd_export_atlas_snapshot)
 
     proof_bundle_parser = subparsers.add_parser(
         "prove-arbitrary-source-bundle",

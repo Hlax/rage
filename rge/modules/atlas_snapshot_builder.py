@@ -446,6 +446,52 @@ def build_atlas_snapshot_from_db(
     return snapshot_dict
 
 
+def export_atlas_snapshot_to_path(
+    conn: sqlite3.Connection,
+    output_path: Path,
+    *,
+    topic: str,
+    primary_question: str | None = None,
+    domain_pack: str = "creativity",
+    snapshot_id: str | None = None,
+    generated_at: str | None = None,
+    safety_audit_id: str | None = None,
+    fixture_mode: bool = False,
+    repo_root: Path | None = None,
+) -> dict[str, Any]:
+    """Build, validate, and write an atlas snapshot JSON file (operator-private)."""
+    snapshot = build_atlas_snapshot_from_db(
+        conn,
+        topic=topic,
+        primary_question=primary_question,
+        domain_pack=domain_pack,
+        snapshot_id=snapshot_id,
+        generated_at=generated_at,
+        safety_audit_id=safety_audit_id,
+        fixture_mode=fixture_mode,
+        repo_root=repo_root,
+    )
+    leak_violations = assert_no_private_fields(snapshot)
+    if leak_violations:
+        raise ValueError(
+            "Atlas snapshot export blocked by private-field policy: "
+            + "; ".join(leak_violations[:5])
+        )
+    validate_atlas_snapshot(snapshot)
+    payload = json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n"
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(payload, encoding="utf-8")
+    return {
+        "status": "completed",
+        "command": "export-atlas-snapshot",
+        "output_path": str(output_path),
+        "snapshot_id": snapshot["snapshot_id"],
+        "schema_version": snapshot["schema_version"],
+        "byte_length": len(payload.encode("utf-8")),
+    }
+
+
 def build_atlas_snapshot_model(
     conn: sqlite3.Connection,
     **kwargs: Any,

@@ -1,0 +1,40 @@
+{
+  "id": "ticket-283",
+  "title": "Atlas contract inventory refresh for export-atlas-snapshot producer",
+  "problem": "ticket-282 added private atlas snapshot export CLI; inventory still lists atlas_snapshot.json producer as contract-only / export TBD.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-282_atlas-snapshot-export-cli.md",
+    "rge/modules/atlas_contract_inventory.py",
+    "docs/contracts/research_atlas_export_contract_inventory_v0.md"
+  ],
+  "affected_modules": [
+    "rge/modules/atlas_contract_inventory.py"
+  ],
+  "expected_files": [
+    "rge/modules/atlas_contract_inventory.py",
+    "docs/contracts/research_atlas_export_contract_inventory_v0.md",
+    "docs/contracts/research_atlas_export_contract_inventory_v0.json",
+    "tests/unit/test_atlas_snapshot_contract.py",
+    "agent_reports/2026-06-16_phase-3_ticket-283_atlas-inventory-export-producer.md"
+  ],
+  "acceptance_criteria": [
+    "Inventory documents export-atlas-snapshot as operator-private atlas_snapshot producer.",
+    "no_explicit_public_atlas_snapshot_export gap note clarified (private vs public).",
+    "Golden pass and full pytest pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_atlas_snapshot_contract.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Public export route.",
+    "Public-site UI.",
+    "Schema migrations.",
+    "Agent Lab persistence."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert inventory doc strings only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / inventory"
+}
