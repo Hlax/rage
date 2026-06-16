@@ -5,7 +5,7 @@
 **Ticket:** ticket-256  
 **Branch:** `phase-3/ticket-256-operator-loop-rank2-scan-config`  
 **Main tip before branch:** `40052fb91deb2923f6e3507b70d559ac036ff177`  
-**Status:** implemented
+**Status:** done
 
 ## Summary
 
@@ -61,8 +61,9 @@ None.
 
 ## Merge to main
 
-- Merge commit: _(pending)_
-- Post-merge pytest: _(pending)_
+- Merge commit: `991693ced8f3386e18fe49211d96003d854e4f31`
+- Post-merge pytest: `683 passed, 30 deselected`
+- Push: `origin/main` updated
 
 ## Recommended next ticket
 
