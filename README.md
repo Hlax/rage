@@ -192,6 +192,21 @@ Expected stable counts after one pass (dual-candidate mock spine):
 | `run_reports` | 2 (`{run_id}_rank1`, `{run_id}_rank2`) |
 | `qualifies` relationship evidence | 2 |
 
+The **final** stdout JSON document from `research run --staged-spine` (after any
+intermediate step JSON from sub-CLI invocations) also includes candidate wiring metadata:
+
+| Field | Meaning |
+| --- | --- |
+| `rank1_candidate_id` | OpenAlex discover candidate id used for rank-1 fetch/spine steps |
+| `rank2_candidate_id` | OpenAlex discover candidate id used for rank-2 fetch/spine steps |
+
+On the default mock orchestrator path (without `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR`),
+these are the fixed fixture ids `disc_openalex_W2741809807` (rank-1) and
+`disc_openalex_W1234567890` (rank-2). With the live orchestrator gate enabled, the
+orchestrator selects ids via `_staged_rank_candidate_ids` (rank-1 selection +
+rank-2 title heuristic). Re-runs on the same `--db` keep the same candidate ids
+(ticket-262).
+
 Re-running the same command on the same `--db` is idempotent (stable row counts; ticket-163).
 Rank #1 staged steps use auto mock routing; rank #2 uses explicit `--fixture` bindings
 inside the orchestrator. Automated proof:
@@ -704,7 +719,7 @@ per-step live Ollama proofs (pre-ticket audits 221/222).
 1. Set env vars from the orchestrator block above (`RGE_LLM_MODE=mock` — do not enable live Ollama for this proof).
 2. Run: `python -m pytest tests/unit/test_live_staged_orchestrator_mock_spine.py -m live_network -q`
 3. Confirm **1 passed** (not skipped). Skips mean a missing env gate — see test module docstring.
-4. Confirm stdout JSON includes `"status": "completed"`, `"mode": "fixture_staged"`, and stable dual-spine counts: `sources` 3, `candidate_sources` 2, `research_queue` 2, `score_events` 2, `run_reports` 2, `qualifies_evidence` 2. The `score_events` and `run_reports` rows come from deterministic reconcile/report — not Ollama.
+4. Confirm stdout JSON includes `"status": "completed"`, `"mode": "fixture_staged"`, `rank1_candidate_id` / `rank2_candidate_id` (candidate wiring metadata on the final run document), and stable dual-spine counts: `sources` 3, `candidate_sources` 2, `research_queue` 2, `score_events` 2, `run_reports` 2, `qualifies_evidence` 2. The `score_events` and `run_reports` rows come from deterministic reconcile/report — not Ollama.
 5. Confirm temp report artifact: `run_report_latest.json` under the test temp output dir (not committed).
 
 If the run times out, retry from a network-unrestricted machine; do **not** enable live network in CI. Patched-network regression remains `tests/unit/test_staged_fixture_mode_run_spine.py`. For per-step live Ollama proofs after mock ingest, see **Live staged extract/link/build/detect** (rank-1) and **One-time rank-2 per-step live Ollama verification** (rank-2) above.

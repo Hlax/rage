@@ -291,7 +291,8 @@ superseded
 | 262 | ticket-262 | done | Staged fixture spine test asserts rank candidate ids | `phase-3/ticket-262-staged-spine-candidate-id-assertions` | `agent_reports/2026-06-16_phase-3_ticket-262_staged-spine-candidate-id-assertions.md` |
 | 263 | ticket-263 | done | Principal audit post-ticket-262 staged spine candidate-id checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-262.md` |
 | 264 | ticket-264 | done | Staged spine CLI stdout asserts rank candidate ids | `phase-3/ticket-264-staged-spine-cli-stdout-candidate-ids` | `agent_reports/2026-06-16_phase-3_ticket-264_staged-spine-cli-stdout-candidate-ids.md` |
-| 265 | ticket-265 | proposed | README documents staged run rank candidate id output fields | | |
+| 265 | ticket-265 | done | README documents staged run rank candidate id output fields | `phase-3/ticket-265-readme-staged-run-candidate-ids` | `agent_reports/2026-06-16_phase-3_ticket-265_readme-staged-run-candidate-ids.md` |
+| 266 | ticket-266 | proposed | Principal audit post-ticket-265 staged spine docs checkpoint | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1026,9 +1027,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-265 (proposed) — README documents staged run rank candidate id output fields
+ticket-266 (proposed) — Principal audit post-ticket-265 staged spine docs checkpoint
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-265 README staged run candidate ids)
+
+- README staged spine section documents rank1_candidate_id / rank2_candidate_id in stdout JSON
+- ticket-266 seeded: principal audit checkpoint (cadence after tickets 263–265)
 
 ## Queue Notes (2026-06-16, ticket-264 staged spine CLI stdout candidate ids)
 
