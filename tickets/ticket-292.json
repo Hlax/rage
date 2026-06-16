@@ -1,0 +1,37 @@
+{
+  "id": "ticket-292",
+  "title": "Fixture-mode export + atlas coherence CLI pipeline e2e",
+  "problem": "Ticket-291 proved live_network CLI pipeline chaining. Default pytest should also prove export-atlas-snapshot → atlas-coherence-report on a fixture-mode MVP DB without network (CI-parity operator spine).",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-291_live-atlas-coherence-cli-pipeline.md",
+    "tests/unit/test_atlas_coherence_report_cli.py",
+    "tests/unit/test_atlas_snapshot_export_cli.py"
+  ],
+  "affected_modules": [
+    "tests/unit/test_atlas_coherence_cli_pipeline_fixture.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_atlas_coherence_cli_pipeline_fixture.py",
+    "agent_reports/2026-06-16_phase-3_ticket-292_atlas-coherence-cli-pipeline-fixture.md"
+  ],
+  "acceptance_criteria": [
+    "Network-free pytest builds fixture-mode MVP DB, runs export-atlas-snapshot CLI then atlas-coherence-report CLI.",
+    "Asserts overall_coherence_verdict pass/partial and report JSON population thresholds.",
+    "Golden + full pytest green; no public export/site/schema changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_atlas_coherence_cli_pipeline_fixture.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "live_network proof.",
+    "Public atlas route or site UI.",
+    "Schema migrations.",
+    "README/AGENTS cross-links."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove fixture pipeline test module only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / operator pipeline validation"
+}

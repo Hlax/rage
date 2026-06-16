@@ -33,6 +33,6 @@
   ],
   "risk_level": "high",
   "rollback_plan": "Remove live_network pipeline test module only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / live research proof / Research Atlas operator pipeline"
 }
