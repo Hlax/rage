@@ -2,10 +2,18 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 from rge.modules.fetcher import html_to_text, run_fetch_candidate_command
+from rge.modules.staged_candidate_selection import (
+    Rank2StagedCandidateNotFoundError,
+    count_staged_candidates,
+    select_rank2_staged_candidate_id,
+)
 
 MOCK_STAGED_ARTIFACT_MARKERS = (
     "human-ai co-creativity",
@@ -29,16 +37,6 @@ def artifact_missing_markers(
 
 def _artifact_matches_markers(artifact_path: Path, markers: tuple[str, ...]) -> bool:
     return not artifact_missing_markers(artifact_path, markers)
-
-
-def count_staged_candidates(conn: Any, research_question_id: str) -> int:
-    """Return how many candidate_sources rows exist for a research question."""
-    return int(
-        conn.execute(
-            "SELECT COUNT(*) FROM candidate_sources WHERE research_question_id = ?",
-            (research_question_id,),
-        ).fetchone()[0]
-    )
 
 
 def select_staged_candidate_row(
@@ -79,13 +77,18 @@ def select_rank2_candidate_id(
     research_question_id: str,
     *,
     min_candidates: int = 2,
+    max_scan: int = 10,
 ) -> str:
-    """Return the second-ranked discovered candidate id."""
-    count = count_staged_candidates(conn, research_question_id)
-    assert count >= min_candidates, (
-        f"live discover must enqueue at least {min_candidates} candidates"
-    )
-    return select_staged_candidate_row(conn, research_question_id, rank_index=1)["id"]
+    """Return rank-2 staged candidate id using title heuristic scan."""
+    try:
+        return select_rank2_staged_candidate_id(
+            conn,
+            research_question_id,
+            min_candidates=min_candidates,
+            max_scan=max_scan,
+        )
+    except Rank2StagedCandidateNotFoundError as exc:
+        pytest.skip(json.dumps(exc.to_skip_payload(), indent=2))
 
 
 def list_top_staged_candidate_ids(

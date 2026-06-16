@@ -125,22 +125,16 @@ def _live_staged_orchestrator_enabled() -> bool:
     return _env_flag_enabled("RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR")
 
 
+from rge.modules.staged_candidate_selection import (
+    select_rank1_staged_candidate_id,
+    select_rank2_staged_candidate_id,
+)
+
+
 def _staged_rank_candidate_ids(conn: Any, question_id: str) -> tuple[str, str]:
-    rows = conn.execute(
-        """
-        SELECT id FROM candidate_sources
-        WHERE research_question_id = ?
-        ORDER BY priority_score DESC
-        LIMIT 2
-        """,
-        (question_id,),
-    ).fetchall()
-    if len(rows) < 2:
-        raise ValueError(
-            "staged orchestrator requires at least 2 discovered candidates for "
-            f"question {question_id}, found {len(rows)}"
-        )
-    return rows[0][0], rows[1][0]
+    rank1_candidate_id = select_rank1_staged_candidate_id(conn, question_id)
+    rank2_candidate_id = select_rank2_staged_candidate_id(conn, question_id)
+    return rank1_candidate_id, rank2_candidate_id
 
 
 def _source_id_for_candidate(conn: Any, candidate_id: str) -> str:
