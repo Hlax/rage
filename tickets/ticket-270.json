@@ -1,0 +1,38 @@
+{
+  "id": "ticket-270",
+  "title": "Verify CLI lists prove-arbitrary-source-bundle in mock gate",
+  "problem": "Ticket-267 added prove-arbitrary-source-bundle but python -m rge.cli verify does not surface the command in its mock gate checklist output for operators.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-269_operator-autocycle-proof-bundle.md",
+    "rge/cli.py verify command",
+    "agent_reports/2026-06-16_phase-3_ticket-267_arbitrary-source-operator-proof-bundle.md"
+  ],
+  "affected_modules": [
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/cli.py",
+    "tests/unit/test_cli_verify.py",
+    "agent_reports/2026-06-16_phase-3_ticket-270_verify-proof-bundle-checklist.md"
+  ],
+  "acceptance_criteria": [
+    "verify --skip-site JSON/checklist references prove-arbitrary-source-bundle.",
+    "No live LLM or live_network changes.",
+    "Golden pass.",
+    "Full pytest pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_cli_verify.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "README or AGENTS.md docs.",
+    "Running proof bundle inside verify by default.",
+    "Public site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert verify checklist entry and test.",
+  "status": "proposed",
+  "category": "Phase 3 / operator visibility"
+}
