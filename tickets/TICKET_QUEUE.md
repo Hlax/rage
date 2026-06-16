@@ -287,7 +287,8 @@ superseded
 | 258 | ticket-258 | done | CLI staged spine rank-2 candidate selection unit test | `phase-3/ticket-258-cli-staged-rank2-candidate-selection-test` | `agent_reports/2026-06-16_phase-3_ticket-258_cli-staged-rank2-candidate-selection-test.md` |
 | 259 | ticket-259 | done | Principal audit post-ticket-257 operator visibility parity checkpoint | `main` | `agent_reports/2026-06-16_principal-audit-post-ticket-257.md` |
 | 260 | ticket-260 | done | Staged spine CLI candidate-id wiring smoke test | `phase-3/ticket-260-cli-staged-spine-candidate-id-wiring` | `agent_reports/2026-06-16_phase-3_ticket-260_cli-staged-spine-candidate-id-wiring.md` |
-| 261 | ticket-261 | proposed | Staged fixture run JSON exposes rank candidate ids | | |
+| 261 | ticket-261 | done | Staged fixture run JSON exposes rank candidate ids | `phase-3/ticket-261-staged-fixture-rank-candidate-ids-json` | `agent_reports/2026-06-16_phase-3_ticket-261_staged-fixture-rank-candidate-ids.md` |
+| 262 | ticket-262 | proposed | Staged fixture spine test asserts rank candidate ids | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1022,9 +1023,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-261 (proposed) — Staged fixture run JSON exposes rank candidate ids
+ticket-262 (proposed) — Staged fixture spine test asserts rank candidate ids
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-261 staged fixture rank candidate ids)
+
+- `execute_staged_fixture_mode_run` result JSON includes `rank1_candidate_id` and `rank2_candidate_id`
+- Wiring tests assert fields on default + live-orchestrator paths
+- ticket-262 seeded: spine/idempotency test assertions for candidate ids
 
 ## Queue Notes (2026-06-16, ticket-260 staged spine candidate-id wiring smoke test)
 

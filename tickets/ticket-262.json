@@ -1,0 +1,34 @@
+{
+  "id": "ticket-262",
+  "title": "Staged fixture spine test asserts rank candidate ids",
+  "problem": "Ticket-261 added rank1/rank2 candidate ids to execute_staged_fixture_mode_run result JSON, but ticket-162 orchestrator spine/idempotency tests do not assert the new fields.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-261_staged-fixture-rank-candidate-ids.md",
+    "tests/unit/test_staged_fixture_mode_run_spine.py"
+  ],
+  "affected_modules": [
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_staged_fixture_mode_run_spine.py"
+  ],
+  "acceptance_criteria": [
+    "test_staged_fixture_mode_run_spine asserts rank1_candidate_id and rank2_candidate_id on default orchestrator path",
+    "Idempotency re-run test still passes with stable candidate ids",
+    "Golden pass"
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_staged_fixture_mode_run_spine.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Production logic changes",
+    "Live Ollama proofs",
+    "Public export/site changes"
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert unit test assertions only.",
+  "status": "proposed",
+  "category": "Phase 3 / staged spine product hardening"
+}
