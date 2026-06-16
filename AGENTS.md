@@ -182,7 +182,9 @@ gates, temp `--db`, **domain opposing context seed** before live discover
 
 **Rank-2 per-step live Ollama closure checklist (ticket-240):** consolidated operator
 checklist with shared env, per-step gate table, and pytest commands — see README
-Operator Quickstart **One-time rank-2 per-step live Ollama verification**. Reconcile/report
+Operator Quickstart **One-time rank-2 per-step live Ollama verification**. Full staged
+operator env variable table and per-step gate matrix:
+`docs/agents/12_RUNTIME_CONFIG.md` (**Live staged operator env profile**). Reconcile/report
 remain deterministic on both ranks.
 
 **Live staged build (live Ollama; ticket-212):** separate per-step operator proof —
