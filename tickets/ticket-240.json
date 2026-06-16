@@ -1,0 +1,36 @@
+{
+  "id": "ticket-240",
+  "title": "README operator rank-2 per-step live LLM closure checklist",
+  "problem": "Ticket-239 principal audit closed rank-2 per-step live Ollama at detect (230/236/237/238). Operators need a single README checklist mirroring ticket-226 orchestrator refresh but for rank-2 live env gates and pytest commands.",
+  "evidence": [
+    "agent_reports/2026-06-16_ticket-239_principal-audit-post-ticket-238.md",
+    "agent_reports/2026-06-15_phase-3_ticket-235_proof-layer-runbook.md",
+    "README.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "README.md",
+    "AGENTS.md",
+    "agent_reports/2026-06-16_ticket-240_readme-rank2-live-closure-checklist.md"
+  ],
+  "acceptance_criteria": [
+    "README section lists all four rank-2 live gates, shared env, and per-step pytest commands.",
+    "Documents rank-2 live surface closed at detect; reconcile/report remain deterministic.",
+    "AGENTS cross-reference added.",
+    "Golden pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Product code changes.",
+    "New fallthrough flags.",
+    "Orchestrator live LLM.",
+    "CI Ollama."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README/AGENTS doc edits.",
+  "status": "proposed",
+  "category": "Phase 3 / docs / operator"
+}
