@@ -1,0 +1,48 @@
+{
+  "id": "ticket-251",
+  "title": "Rank-2 staged candidate heuristic scan for catalog drift resilience",
+  "problem": "Live rank-2 operator proofs blind-select OFFSET 1 candidate by priority score. OpenAlex catalog drift yields rank-2 artifacts without the constraint management marker, causing unsuitable_live_rank2_artifact skips on all per-step live proofs. Ticket-233 hardened fetch; rank-2 selection still needs top-N heuristic scan.",
+  "evidence": [
+    "agent_reports/2026-06-16_operator-proof-rank2-live-ollama-checklist.md",
+    "agent_reports/2026-06-16_pre-ticket-251_rank-2-staged-candidate-heuristic-scan-audit.md",
+    "tests/unit/live_staged_candidates.py",
+    "rge/cli.py _staged_rank_candidate_ids"
+  ],
+  "affected_modules": [
+    "rge/modules/staged_spine_heuristics.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/staged_candidate_selection.py",
+    "tests/unit/test_staged_rank2_candidate_heuristic_scan.py",
+    "tests/unit/live_staged_candidates.py",
+    "agent_reports/2026-06-16_phase-3_ticket-251_rank-2-candidate-heuristic-scan.md"
+  ],
+  "acceptance_criteria": [
+    "select_rank2_staged_candidate_id scans top-N queued candidates (after rank-1) for rank-2 title heuristic before fetch.",
+    "Live rank-2 pytest spines use heuristic scan; skip only when no candidate in window matches.",
+    "Staged orchestrator rank-2 id selection uses same helper when live discover path is active.",
+    "Rank-1 selection unchanged (OFFSET 0). unsuitable_live_rank2_artifact semantics preserved when no match.",
+    "Unit tests cover scan success, fallback skip, and rank-1 isolation.",
+    "Golden pass; default pytest remains mock-only without live_network."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_staged_rank2_candidate_heuristic_scan.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Live Ollama gate or fallthrough changes.",
+    "Orchestrator live LLM.",
+    "Reconcile/report live LLM.",
+    "CI live_network in default pytest.",
+    "Default graph DB live proofs.",
+    "Broadening rank-2 heuristic markers beyond staged_spine_heuristics contract.",
+    "Detect-seed documentation.",
+    "Schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert staged_candidate_selection module; restore OFFSET 1 rank-2 selection.",
+  "status": "ready",
+  "category": "Phase 3 / staged spine product hardening"
+}
