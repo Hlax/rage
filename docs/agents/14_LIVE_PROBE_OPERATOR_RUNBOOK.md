@@ -242,6 +242,9 @@ Each step uses **existing CLIs only**; nothing in this chain runs automatically.
    exist and no higher-priority blocker applies, expect
    `next_recommended_action.action_id == run_scratch_evidence_review`.
 
+   Alternatively, run bounded autocycle plan (ticket-252) — see
+   **Operator autocycle scratch evidence gate** below.
+
 **Out of scope for this checklist:** accepted graph DB writes, public export,
 automatic ticket seeding, or execute-safe evidence review generation.
 
@@ -349,6 +352,36 @@ python -m rge.modules.operator_loop --mode plan
 Look for `next_recommended_action.action_id == run_scratch_evidence_review`.
 The plan also includes `scratch_evidence_status` (path, row count, readiness).
 Plan mode never auto-generates evidence reviews or mutates scratch/graph DBs.
+
+### Operator autocycle scratch evidence gate (ticket-252)
+
+Bounded autocycle planner mirrors operator_loop scratch readiness in machine-readable
+JSON. Use when coordinating audit + run-next-ticket loops:
+
+```powershell
+python -m rge.modules.operator_autocycle --mode plan --max-cycles 1
+```
+
+| Field | Meaning |
+| ----- | ------- |
+| `scratch_evidence_status` | Same read-only scratch DB snapshot as operator_loop plan |
+| `scratch_evidence_review_recommended` | `true` when evidence review is the recommended next human action |
+| `recommended_action.action_id` | Expect `run_scratch_evidence_review` when ready |
+| `stop_reason` | `operator_action_blocked_automation: run_scratch_evidence_review` |
+
+When `scratch_evidence_status.evidence_review_ready` is true and operator_loop agrees,
+autocycle stops with suggested `probe-scratch-evidence-review` commands (review_gated).
+Autocycle never auto-generates evidence reviews or mutates scratch/graph DBs.
+
+**Drift carve-out:** `drift_warning` from `principal_audit_gate` may still block product
+ticket implementation, but autocycle surfaces scratch evidence review **before** the
+`drift_warning_active` stop when the operator_loop plan already recommends
+`run_scratch_evidence_review`. Run evidence review even when drift warns about a
+docs-only ticket streak.
+
+**Priority (unchanged):** Dirty tree, documentation drift, improvement drafts, audit
+overdue, pre-ticket audit gaps, and open queue tickets (`proposed`/`ready`) still take
+precedence over scratch review in both operator_loop and autocycle.
 
 ### Who does what
 

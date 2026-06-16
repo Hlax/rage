@@ -26,6 +26,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert runbook note.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / scratch evidence workflow"
 }
