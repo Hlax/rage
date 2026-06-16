@@ -106,6 +106,7 @@ def test_cli_top_level_help() -> None:
         "promote-improvement-ticket",
         "export-public",
         "export-atlas-snapshot",
+        "atlas-coherence-report",
         "prove-arbitrary-source-bundle",
         "model-health",
         "discover-sources",

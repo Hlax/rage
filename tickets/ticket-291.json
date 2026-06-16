@@ -1,0 +1,38 @@
+{
+  "id": "ticket-291",
+  "title": "Live staged export + atlas coherence report CLI pipeline proof",
+  "problem": "Tickets 289–290 split coherence analysis across pytest module and standalone CLI. Operators need an opt-in live_network proof that chains staged orchestrator → export-atlas-snapshot → atlas-coherence-report on temp paths with stdout/json artifacts.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-290_atlas-coherence-report-cli.md",
+    "tests/unit/test_live_staged_atlas_coherence_report.py",
+    "rge/cli.py"
+  ],
+  "affected_modules": [
+    "tests/unit/test_live_staged_atlas_coherence_cli_pipeline.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_live_staged_atlas_coherence_cli_pipeline.py",
+    "agent_reports/2026-06-16_phase-3_ticket-291_live-atlas-coherence-cli-pipeline.md"
+  ],
+  "acceptance_criteria": [
+    "Opt-in live_network pytest runs orchestrator, export-atlas-snapshot CLI, atlas-coherence-report CLI on temp paths.",
+    "Asserts coherence CLI stdout overall_coherence_verdict and written report JSON paths.",
+    "Layer-3 unsuitable_live_artifact skip preserved; default pytest unchanged.",
+    "No public export, public-site, or schema changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_live_staged_atlas_coherence_cli_pipeline.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "CI live_network enforcement.",
+    "Public atlas route or site UI.",
+    "Schema migrations.",
+    "README/AGENTS cross-links."
+  ],
+  "risk_level": "high",
+  "rollback_plan": "Remove live_network pipeline test module only.",
+  "status": "proposed",
+  "category": "Phase 3 / live research proof / Research Atlas operator pipeline"
+}
