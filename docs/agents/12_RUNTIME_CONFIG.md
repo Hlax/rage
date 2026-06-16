@@ -48,6 +48,7 @@ Golden tests and the builder agent should set `RGE_LLM_MODE=mock` explicitly.
 | `RGE_ALLOW_LIVE_STAGED_RANK2_DETECT_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama detect on rank-2 staged ingest (ticket-238) |
 | `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama build on staged ingest |
 | `RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama detect on staged ingest |
+| `RGE_STAGED_RANK2_SCAN_MAX` | optional (default `10`) | no | yes | no | Rank-2 staged candidate title heuristic scan window (ticket-254); bounded 1–50 |
 | `RGE_ALLOW_LIVE_STAGED_RECONCILE` | optional (default `0`) | no | yes | no | Live OpenAlex network spine through deterministic reconcile (ticket-184); **no live LLM gate** |
 | `RGE_ALLOW_LIVE_STAGED_REPORT` | optional (default `0`) | no | yes | no | Live OpenAlex network spine through deterministic generate-run-report (ticket-187); **no live LLM gate** |
 | `RGE_ALLOW_LIVE_STAGED_*` (other mock spine) | optional (default `0`) | no | yes | no | Live OpenAlex + mock LLM staged proofs: FETCH, INGEST, EXTRACT, LINK, BUILD, DETECT, RANK2, ORCHESTRATOR (see README) |

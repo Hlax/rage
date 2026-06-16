@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from rge.config import ConfigError, load_config, parse_staged_rank2_scan_max
 from rge.db.connection import ensure_database
 from rge.modules.staged_candidate_selection import (
     Rank2StagedCandidateNotFoundError,
@@ -123,6 +124,34 @@ def test_select_rank2_requires_minimum_candidate_count(conn) -> None:
     conn.commit()
     with pytest.raises(ValueError, match="at least 2 candidates"):
         select_rank2_staged_candidate_id(conn, QUESTION_ID)
+
+
+def test_select_rank2_honors_env_scan_max_override(
+    conn, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("RGE_STAGED_RANK2_SCAN_MAX", "1")
+    with pytest.raises(Rank2StagedCandidateNotFoundError) as exc_info:
+        select_rank2_staged_candidate_id(conn, QUESTION_ID)
+    assert exc_info.value.max_scan == 1
+    assert exc_info.value.scanned_candidates == 1
+
+    monkeypatch.setenv("RGE_STAGED_RANK2_SCAN_MAX", "2")
+    assert select_rank2_staged_candidate_id(conn, QUESTION_ID) == "disc_rank3_hit"
+
+
+def test_parse_staged_rank2_scan_max_rejects_out_of_range() -> None:
+    with pytest.raises(ConfigError, match="out of range"):
+        parse_staged_rank2_scan_max("0")
+    with pytest.raises(ConfigError, match="out of range"):
+        parse_staged_rank2_scan_max("51")
+
+
+def test_load_config_includes_staged_rank2_scan_max(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("RGE_STAGED_RANK2_SCAN_MAX", "15")
+    config = load_config()
+    assert config.staged_rank2_scan_max == 15
 
 
 def test_live_staged_wrapper_skips_when_no_title_match(tmp_path: Path) -> None:
