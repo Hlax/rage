@@ -276,8 +276,8 @@ def collect_research_atlas_gaps() -> list[dict[str, str]]:
         },
         {
             "gap": "research_question_lineage_not_explicit",
-            "severity": "medium",
-            "notes": "Need parent_question_id, spawned_from_claim_ids, spawned_from_report_id, spawn_reason",
+            "severity": "low",
+            "notes": "runs[] projection adds optional lineage fields (ticket-281); dedicated research_questions table still deferred",
         },
         {
             "gap": "agent_lab_not_separated_from_research_graph",
