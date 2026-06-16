@@ -1,0 +1,35 @@
+{
+  "id": "ticket-257",
+  "title": "Operator autocycle plan surfaces staged rank-2 scan window config",
+  "problem": "Ticket-256 added staged_rank2_scan_max to operator_loop plan JSON; operator_autocycle plan output does not yet expose the same resolved scan window for autocycle operators.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-256_operator-loop-rank2-scan-config.md",
+    "rge/modules/operator_autocycle.py plan output"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_autocycle.py"
+  ],
+  "expected_files": [
+    "rge/modules/operator_autocycle.py",
+    "tests/unit/test_operator_autocycle_plan.py"
+  ],
+  "acceptance_criteria": [
+    "operator_autocycle --mode plan JSON includes staged_rank2_scan_max from load_config",
+    "Unit test asserts default and env override appear in autocycle plan output",
+    "Golden pass; no live LLM or public export changes"
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_autocycle_plan.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Runbook or README duplication",
+    "Live Ollama operator proofs",
+    "Changing rank-2 selection logic"
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert operator_autocycle plan field and unit test.",
+  "status": "proposed",
+  "category": "Phase 3 / operator autocycle product hardening"
+}
