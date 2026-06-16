@@ -74,4 +74,4 @@ Recommend `/rge-principal-audit` before broadening scope further.
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `a32ad94`
