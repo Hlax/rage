@@ -297,7 +297,8 @@ superseded
 | 268 | ticket-268 | done | Operator loop plan surfaces arbitrary-source proof bundle command | `phase-3/ticket-268-operator-loop-proof-bundle` | `agent_reports/2026-06-16_phase-3_ticket-268_operator-loop-proof-bundle.md` |
 | 269 | ticket-269 | done | Operator autocycle plan surfaces arbitrary-source proof bundle status | `phase-3/ticket-269-operator-autocycle-proof-bundle` | `agent_reports/2026-06-16_phase-3_ticket-269_operator-autocycle-proof-bundle.md` |
 | 270 | ticket-270 | done | Verify CLI lists prove-arbitrary-source-bundle in mock gate | `phase-3/ticket-270-verify-proof-bundle-checklist` | `agent_reports/2026-06-16_phase-3_ticket-270_verify-proof-bundle-checklist.md` |
-| 271 | ticket-271 | proposed | Principal audit post-ticket-270 proof bundle visibility checkpoint | | |
+| 271 | ticket-271 | done | Principal audit post-ticket-270 proof bundle visibility checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-270.md` |
+| 272 | ticket-272 | proposed | Operator proof bundle idempotency unit test | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1032,9 +1033,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-271 (proposed) — Principal audit post-ticket-270 proof bundle visibility checkpoint
+ticket-272 (proposed) — Operator proof bundle idempotency unit test
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, principal audit post-ticket-270)
+
+- Principal checkpoint report: `agent_reports/2026-06-16_principal-audit-post-ticket-270.md`
+- Cadence reset after tickets 268–270; mock golden gate green (142 golden, 705 pytest)
+- Arbitrary-source proof bundle visibility thread closed (267 product + 268–270 operators)
+- ticket-272 seeded: proof bundle idempotency unit test
 
 ## Queue Notes (2026-06-16, ticket-270 verify proof bundle checklist)
 

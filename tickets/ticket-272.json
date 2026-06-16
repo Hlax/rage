@@ -1,0 +1,39 @@
+{
+  "id": "ticket-272",
+  "title": "Operator proof bundle idempotency unit test",
+  "problem": "Ticket-267 added prove-arbitrary-source-bundle but does not prove that a second run on the same temp DB is idempotent or emits stable usable_output.",
+  "evidence": [
+    "agent_reports/2026-06-16_principal-audit-post-ticket-270.md",
+    "agent_reports/2026-06-16_phase-3_ticket-267_arbitrary-source-operator-proof-bundle.md",
+    "tests/unit/test_operator_proof_bundle.py"
+  ],
+  "affected_modules": [
+    "tests/unit/test_operator_proof_bundle.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_operator_proof_bundle.py",
+    "agent_reports/2026-06-16_phase-3_ticket-272_operator-proof-bundle-idempotency.md"
+  ],
+  "acceptance_criteria": [
+    "Unit test runs prove-arbitrary-source-bundle twice on same temp paths with patched network.",
+    "Second bundle JSON matches stable counts and usable_output from first run.",
+    "Mock LLM only; no live_network in default CI.",
+    "Golden pass.",
+    "Full pytest pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_proof_bundle.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "README or AGENTS.md docs.",
+    "Live LLM.",
+    "Public site changes.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove idempotency test only.",
+  "status": "proposed",
+  "category": "Phase 3 / arbitrary-source pipeline / product hardening"
+}
