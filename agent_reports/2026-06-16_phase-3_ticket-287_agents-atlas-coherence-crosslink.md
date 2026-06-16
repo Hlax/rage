@@ -72,4 +72,4 @@ hypothesis/report representation, missing-field refactor risk). Mock-only CI unc
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `c5a46f4`
