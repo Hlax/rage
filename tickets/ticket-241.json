@@ -1,0 +1,32 @@
+{
+  "id": "ticket-241",
+  "title": "Runtime config rank-2 live Ollama closure operator summary",
+  "problem": "Ticket-240 added README rank-2 live closure checklist. docs/agents/12_RUNTIME_CONFIG.md should cross-reference closure and link to README checklist for operator env tables.",
+  "evidence": [
+    "agent_reports/2026-06-16_ticket-240_readme-rank2-live-closure-checklist.md",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "README.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "agent_reports/2026-06-16_ticket-241_runtime-config-rank2-live-closure.md"
+  ],
+  "acceptance_criteria": [
+    "12_RUNTIME_CONFIG documents rank-2 live surface closed at detect with README cross-link.",
+    "Reconcile/report deterministic boundary unchanged.",
+    "Golden pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Product code changes.",
+    "New env gates.",
+    "README duplication beyond cross-link."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert runtime config doc edits.",
+  "status": "proposed",
+  "category": "Phase 3 / docs / operator"
+}

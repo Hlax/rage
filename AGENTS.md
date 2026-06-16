@@ -180,6 +180,11 @@ gates, temp `--db`, **domain opposing context seed** before live discover
 `live_smoke` markers). **Staged rank-2 per-step live Ollama surface is closed at detect**
 (230/236/237/238); no further rank-2 fallthrough flags are planned.
 
+**Rank-2 per-step live Ollama closure checklist (ticket-240):** consolidated operator
+checklist with shared env, per-step gate table, and pytest commands — see README
+Operator Quickstart **One-time rank-2 per-step live Ollama verification**. Reconcile/report
+remain deterministic on both ranks.
+
 **Live staged build (live Ollama; ticket-212):** separate per-step operator proof —
 not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM=1`,
 `RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama`, network gates above, temp `--db`, mock
