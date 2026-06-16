@@ -70,13 +70,33 @@ def _build_curated_cards(
     *,
     fixture_mode: bool,
     repo_root: Path,
+    topic: str = "",
+    domain_pack: str = "creativity",
 ) -> list[dict[str, Any]]:
-    ensure_golden_public_cards(conn)
+    if fixture_mode:
+        ensure_golden_public_cards(conn)
+    else:
+        from rge.modules.evidence_db_atlas import (
+            claim_backed_card_extras,
+            ensure_claim_backed_public_cards,
+            ensure_evidence_research_run_lineage,
+        )
+
+        if topic.strip():
+            ensure_evidence_research_run_lineage(
+                conn, topic=topic, domain_pack=domain_pack
+            )
+        ensure_claim_backed_public_cards(conn)
+        if PublicCardRepository(conn).count_public_safe() == 0:
+            ensure_golden_public_cards(conn)
+
     pack = load_domain_pack("creativity", root=repo_root)
     repo = PublicCardRepository(conn)
     cards: list[dict[str, Any]] = []
     for record in repo.list_public_safe(limit=100):
         extras = dict(GOLDEN_CARD_EXTRAS.get(record.id) or {})
+        if not fixture_mode:
+            extras.update(claim_backed_card_extras(conn, record))
         claim_ids = json.loads(record.claim_ids_json or "[]")
         if "evidence_type" not in extras:
             evidence_type = _dominant_evidence_type(conn, claim_ids)
@@ -436,7 +456,13 @@ def build_atlas_snapshot_from_db(
     """Project a validated atlas snapshot dict from the current DB state."""
     root = repo_root or _repo_root()
     resolved_question = primary_question or topic
-    cards = _build_curated_cards(conn, fixture_mode=fixture_mode, repo_root=root)
+    cards = _build_curated_cards(
+        conn,
+        fixture_mode=fixture_mode,
+        repo_root=root,
+        topic=topic,
+        domain_pack=domain_pack,
+    )
     nodes = _build_concept_nodes(conn, domain_pack)
     edges = _build_relationship_edges(conn, domain_pack)
 
