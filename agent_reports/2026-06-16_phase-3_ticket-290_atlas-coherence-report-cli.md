@@ -79,4 +79,4 @@ Next ticket should stay product/live centered (chained live pipeline), not docs 
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `042a07a`
