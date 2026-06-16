@@ -1,0 +1,38 @@
+{
+  "id": "ticket-296",
+  "title": "Evidence DB cluster summary projection for atlas overall GO",
+  "problem": "Ticket-295 achieved reports verdict pass but overall coherence remains partial due to empty clusters[] on evidence DB atlas export.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-295_evidence-db-run-report-projection.md",
+    "data/atlas/ticket293/atlas_coherence_report_v295.json"
+  ],
+  "affected_modules": [
+    "rge/modules/evidence_db_atlas.py",
+    "rge/modules/atlas_snapshot_builder.py"
+  ],
+  "expected_files": [
+    "rge/modules/evidence_db_atlas.py",
+    "tests/unit/test_evidence_db_cluster_projection.py",
+    "agent_reports/2026-06-16_phase-3_ticket-296_evidence-db-cluster-projection.md"
+  ],
+  "acceptance_criteria": [
+    "Evidence DB atlas export populates clusters[] from active relationships when non-fixture claims exist.",
+    "Mock evidence spine coherence overall_coherence_verdict reaches pass (or documents remaining blocker).",
+    "Network-free unit test; golden + full pytest green.",
+    "No public routes/site/schema/live default pytest."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_evidence_db_cluster_projection.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Public atlas UI.",
+    "Live Ollama default pytest.",
+    "Full cluster report LLM generation."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert cluster projection hook only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / live-derived population"
+}

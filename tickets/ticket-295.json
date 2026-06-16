@@ -35,6 +35,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert evidence DB run report hook only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / Research Atlas / live-derived population"
 }
