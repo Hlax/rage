@@ -11,10 +11,12 @@ import sqlite3
 from typing import Any
 
 from rge.db.repositories import (
+    ClusterReportRepository,
     PublicCardRepository,
     ResearchContractRepository,
     ResearchQueueRepository,
     ResearchRunRepository,
+    RelationshipRepository,
     RunReportRepository,
     sha256_hex,
 )
@@ -310,4 +312,151 @@ def ensure_evidence_run_report(
         "status": "created",
         "run_id": run_id,
         "report_id": record.id,
+    }
+
+
+def _evidence_claim_ids(conn: sqlite3.Connection) -> list[str]:
+    rows = conn.execute(
+        """
+        SELECT c.id, s.source_type, s.raw_text_checksum
+        FROM claims c
+        JOIN sources s ON s.id = c.source_id
+        WHERE c.status = 'accepted'
+        ORDER BY c.id
+        """
+    ).fetchall()
+    claim_ids: list[str] = []
+    for row in rows:
+        if row["source_type"] != "manual_text":
+            continue
+        source = type("Source", (), dict(row))()
+        if manual_text_lacks_extract_fixture(source):
+            claim_ids.append(str(row["id"]))
+    return claim_ids
+
+
+def _concepts_for_claims(conn: sqlite3.Connection, claim_ids: list[str]) -> list[str]:
+    if not claim_ids:
+        return []
+    placeholders = ",".join("?" for _ in claim_ids)
+    rows = conn.execute(
+        f"""
+        SELECT DISTINCT c.label
+        FROM claim_concepts cc
+        JOIN concepts c ON c.id = cc.concept_id
+        WHERE cc.claim_id IN ({placeholders})
+        ORDER BY c.label
+        """,
+        tuple(claim_ids),
+    ).fetchall()
+    return [str(row["label"]).strip() for row in rows if row["label"]]
+
+
+def _evidence_cluster_label(concepts: list[str]) -> str:
+    if len(concepts) >= 2:
+        return f"{concepts[0]} and {concepts[1]}"
+    if concepts:
+        return concepts[0]
+    return "Evidence cluster summary"
+
+
+def ensure_evidence_cluster_summary(
+    conn: sqlite3.Connection,
+    *,
+    topic: str,
+    domain_pack: str = "creativity",
+) -> dict[str, Any]:
+    """Persist a minimal cluster_reports row for evidence DB atlas clusters[] projection."""
+    if not db_has_non_fixture_manual_claims(conn):
+        return {"status": "skipped", "reason": "no_non_fixture_manual_claims"}
+
+    claim_ids = _evidence_claim_ids(conn)
+    if not claim_ids:
+        return {"status": "skipped", "reason": "no_evidence_claim_ids"}
+
+    _contract_id, _question_id, run_id = _evidence_lineage_ids(topic)
+    ensure_evidence_research_run_lineage(conn, topic=topic, domain_pack=domain_pack)
+
+    existing = conn.execute(
+        "SELECT id FROM cluster_reports WHERE run_id = ? ORDER BY created_at DESC LIMIT 1",
+        (run_id,),
+    ).fetchone()
+    if existing is not None:
+        return {
+            "status": "already_present",
+            "run_id": run_id,
+            "cluster_report_id": str(existing["id"]),
+        }
+
+    digest = sha256_hex(topic.strip().casefold())[:12]
+    cluster_id = f"cluster_evidence_{digest}"
+    included_concepts = _concepts_for_claims(conn, claim_ids)
+    if not included_concepts:
+        included_concepts = [domain_pack]
+    cluster_label = _evidence_cluster_label(included_concepts)
+
+    relationships = RelationshipRepository(conn).list_active()
+    strongest = sorted(
+        relationships,
+        key=lambda rel: float(rel.get("confidence") or 0.0),
+        reverse=True,
+    )[:3]
+
+    source_rows = conn.execute(
+        f"""
+        SELECT DISTINCT s.id, s.title
+        FROM sources s
+        JOIN claims c ON c.source_id = s.id
+        WHERE c.id IN ({",".join("?" for _ in claim_ids)})
+        ORDER BY s.id
+        """,
+        tuple(claim_ids),
+    ).fetchall()
+
+    evidence_packet = {
+        "cluster_id": cluster_id,
+        "top_supporting_claims": claim_ids[:5],
+        "top_contradicting_claims": [],
+        "top_qualifying_claims": [],
+        "highest_quality_sources": [
+            {"source_id": row["id"], "title": row["title"]} for row in source_rows[:3]
+        ],
+        "newest_claims": claim_ids[-3:],
+        "highest_score_change_events": [],
+        "bridge_concepts": included_concepts[:2],
+        "open_gaps": [],
+    }
+
+    report = {
+        "report_type": "cluster_report",
+        "cluster_id": cluster_id,
+        "cluster_label": cluster_label,
+        "included_concepts": included_concepts,
+        "supporting_claims": claim_ids,
+        "contradicting_claims": [],
+        "qualifying_claims": [],
+        "strongest_relationships": [rel["id"] for rel in strongest],
+        "linked_claim_ids": claim_ids,
+        "formula_version": "evidence_summary_v0.1.0",
+        "relationship_count": len(relationships),
+        "evidence_packet": evidence_packet,
+    }
+
+    record = ClusterReportRepository(conn).insert(
+        cluster_id=cluster_id,
+        cluster_label=cluster_label,
+        included_concepts=included_concepts,
+        evidence_packet=evidence_packet,
+        report=report,
+        prose_summary=(
+            f"Evidence cluster summary for {len(claim_ids)} claim(s) "
+            f"linked to {len(included_concepts)} concept(s)."
+        ),
+        run_id=run_id,
+    )
+    return {
+        "status": "created",
+        "run_id": run_id,
+        "cluster_report_id": record.id,
+        "cluster_label": cluster_label,
     }

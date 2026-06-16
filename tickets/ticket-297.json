@@ -1,0 +1,38 @@
+{
+  "id": "ticket-297",
+  "title": "Evidence DB relationship edge projection for atlas overall GO",
+  "problem": "Ticket-296 cleared clusters[] warn but overall coherence remains partial on extract+link-only evidence spine because edges[] is empty (no relationships rows).",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-296_evidence-db-cluster-projection.md",
+    "tests/unit/test_evidence_db_cluster_projection.py"
+  ],
+  "affected_modules": [
+    "rge/modules/evidence_db_atlas.py",
+    "rge/modules/atlas_snapshot_builder.py"
+  ],
+  "expected_files": [
+    "rge/modules/evidence_db_atlas.py",
+    "tests/unit/test_evidence_db_relationship_projection.py",
+    "agent_reports/2026-06-16_phase-3_ticket-297_evidence-db-relationship-projection.md"
+  ],
+  "acceptance_criteria": [
+    "Evidence DB atlas export populates edges[] from active relationships when non-fixture claims exist.",
+    "Mock evidence spine coherence overall_coherence_verdict reaches pass.",
+    "Network-free unit test; golden + full pytest green.",
+    "No public routes/site/schema/live default pytest."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_evidence_db_relationship_projection.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Public atlas UI.",
+    "Live Ollama default pytest.",
+    "Full build-relationships LLM spine in default pytest."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert relationship projection hook only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / live-derived population"
+}
