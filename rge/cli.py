@@ -555,6 +555,10 @@ def execute_staged_fixture_mode_run(
                     (STAGED_RANK1_CANDIDATE_ID, "rank1"),
                     (STAGED_RANK2_CANDIDATE_ID, "rank2"),
                 )
+            rank1_candidate_id, rank2_candidate_id = (
+                candidate_pairs[0][0],
+                candidate_pairs[1][0],
+            )
 
             for candidate_id, rank_label in candidate_pairs:
                 _run_cli_step(
@@ -856,6 +860,8 @@ def execute_staged_fixture_mode_run(
                 **actual,
                 "rank1_source_id": rank1_id,
                 "rank2_source_id": rank2_id,
+                "rank1_candidate_id": rank1_candidate_id,
+                "rank2_candidate_id": rank2_candidate_id,
                 "artifacts": {
                     "database": str(resolved_db),
                     "rank1_run_report": str(

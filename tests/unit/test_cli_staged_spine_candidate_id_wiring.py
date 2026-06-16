@@ -104,7 +104,7 @@ def _run_with_recorded_cli_steps(
         return original(argv)
 
     with patch.object(cli_module, "_run_cli_step", side_effect=_recording_run_cli_step):
-        execute_staged_fixture_mode_run(
+        result = execute_staged_fixture_mode_run(
             topic=STAGED_TOPIC,
             domain="creativity",
             db_path=temp_db,
@@ -113,7 +113,7 @@ def _run_with_recorded_cli_steps(
             staging_dir=staging_dir,
             question_id=STAGED_FIXTURE_QUESTION_ID,
         )
-    return recorded_steps
+    return recorded_steps, result
 
 
 def test_fixture_staged_run_wires_default_candidate_ids(
@@ -127,7 +127,7 @@ def test_fixture_staged_run_wires_default_candidate_ids(
     staging_dir.mkdir()
     report_dir.mkdir()
 
-    recorded_steps = _run_with_recorded_cli_steps(
+    recorded_steps, result = _run_with_recorded_cli_steps(
         temp_db=temp_db,
         staging_dir=staging_dir,
         report_dir=report_dir,
@@ -137,6 +137,8 @@ def test_fixture_staged_run_wires_default_candidate_ids(
         STAGED_RANK1_CANDIDATE_ID,
         STAGED_RANK2_CANDIDATE_ID,
     ]
+    assert result["rank1_candidate_id"] == STAGED_RANK1_CANDIDATE_ID
+    assert result["rank2_candidate_id"] == STAGED_RANK2_CANDIDATE_ID
 
 
 def test_fixture_staged_run_live_orchestrator_wires_heuristic_candidate_ids(
@@ -190,3 +192,5 @@ def test_fixture_staged_run_live_orchestrator_wires_heuristic_candidate_ids(
     ]
     assert result["status"] == "completed"
     assert result["mode"] == "fixture_staged"
+    assert result["rank1_candidate_id"] == STAGED_RANK1_CANDIDATE_ID
+    assert result["rank2_candidate_id"] == STAGED_RANK2_CANDIDATE_ID
