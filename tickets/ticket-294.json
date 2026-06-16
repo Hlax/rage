@@ -1,0 +1,41 @@
+{
+  "id": "ticket-294",
+  "title": "Evidence DB research_run lineage + live-derived atlas card projection v0",
+  "problem": "Ticket-293 PARTIAL: live NM-1/NM-4 spine produces useful claims/links/edges but atlas export shows runs[]=0 and golden fixture card placeholders instead of live-derived summaries.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-293_live-nm1-atlas-quality-proof-v0.md",
+    "data/atlas/ticket293/atlas_coherence_report.json (operator gitignored)"
+  ],
+  "affected_modules": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "rge/modules/card_exporter.py",
+    "evidence DB operator spine CLI wiring"
+  ],
+  "expected_files": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "tests/unit/test_evidence_db_atlas_projection.py",
+    "agent_reports/2026-06-16_phase-3_ticket-294_evidence-db-atlas-projection-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Evidence DB NM-1/NM-4 operator path can populate research_runs with question lineage on temp DB.",
+    "Atlas export from live-derived evidence DB uses claim-backed card projection (not golden seed placeholders when live claims exist).",
+    "Network-free unit test proves runs[] and live-derived card fields on mock evidence DB fixture.",
+    "Optional operator re-run of ticket-293 spine shows improved coherence verdict (runs>=1).",
+    "No public routes/site/schema migration/review_batch; default pytest mock-only."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_evidence_db_atlas_projection.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Public atlas UI or routes.",
+    "Default pytest live Ollama tests.",
+    "Staged OpenAlex network expansion.",
+    "Full research_queue follow-up generation (defer unless minimal)."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert atlas card projection changes; keep ticket-293 operator report as baseline.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / live-derived population"
+}
