@@ -51,7 +51,8 @@ Safety audit not required — live LLM opt-in only; no public export or schema c
 
 ## Merge to main
 
-Pending merge commit hash (recorded after step 12).
+Merge commit: `2ae81af` (`Merge branch 'phase-3/ticket-230-rank2-extract-live-llm-spine'`).
+Post-merge pytest: 648 passed, 27 deselected.
 
 ## Recommended next ticket
 
