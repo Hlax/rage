@@ -35,6 +35,25 @@ RANK2_HTML = (
 )
 PROOF_TOPIC = "Arbitrary-source operator proof bundle (mock)"
 
+_STABLE_BUNDLE_COUNT_KEYS = (
+    "status",
+    "usable_output",
+    "source_id",
+    "claim_count",
+    "concept_link_count",
+    "relationship_count",
+    "qualification_count",
+    "card_count",
+    "rank1_candidate_id",
+)
+
+
+def _stable_bundle_snapshot(bundle: dict) -> dict:
+    return {
+        "counts": {key: bundle[key] for key in _STABLE_BUNDLE_COUNT_KEYS},
+        "reconcile": dict(bundle["reconcile"]),
+    }
+
 
 @pytest.fixture(autouse=True)
 def mock_llm_mode(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -162,6 +181,41 @@ def test_proof_bundle_happy_path_fixture_staged(
     assert Path(bundle["export_path"]).is_file()
     assert bundle_out.is_file()
     assert json.loads(bundle_out.read_text(encoding="utf-8"))["status"] == "completed"
+
+
+def test_proof_bundle_second_run_is_idempotent_on_same_temp_paths(
+    mock_network_env: None,
+    patched_staged_network: None,
+    temp_db: Path,
+    staging_dir: Path,
+    report_dir: Path,
+    export_dir: Path,
+) -> None:
+    first_bundle_out = temp_db.parent / "operator_proof_bundle_first.json"
+    second_bundle_out = temp_db.parent / "operator_proof_bundle_second.json"
+
+    first = _run_proof_bundle(
+        temp_db,
+        staging_dir,
+        report_dir,
+        export_dir,
+        bundle_out=first_bundle_out,
+    )
+    second = _run_proof_bundle(
+        temp_db,
+        staging_dir,
+        report_dir,
+        export_dir,
+        bundle_out=second_bundle_out,
+    )
+
+    assert first["status"] == "completed"
+    assert second["status"] == "completed"
+    assert first["usable_output"] is True
+    assert second["usable_output"] is True
+    assert _stable_bundle_snapshot(second) == _stable_bundle_snapshot(first)
+    assert second_bundle_out.is_file()
+    assert json.loads(second_bundle_out.read_text(encoding="utf-8"))["usable_output"] is True
 
 
 def test_proof_bundle_schema_required_fields(
