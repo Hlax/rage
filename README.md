@@ -279,6 +279,8 @@ Example skip body (truncated):
 | Layer 1 **FAIL** (`forbidden`, `paywall_blocked`, `no_fetchable_url`) | No fetchable URL in top-N | Retry from unrestricted network; inspect `attempted_urls`; adjust query toward OA works |
 | Layer 3 **FAIL** (not skip) after layer 1 passed | Downstream spine regression | Investigate ingest/mock LLM/reconcile/report — not acquisition |
 | Combined **PASS** | Live catalog returned fixture-compatible text | Full operator mock-spine proof succeeded |
+| Atlas coherence **SKIPPED** (`unsuitable_live_artifact`) | Same layer-3 preflight as other combined proofs (ticket-285) | **Expected** — orchestrator/atlas export not attempted; not an atlas contract regression |
+| Atlas coherence **PASS** | Staged orchestrator + private `export-atlas-snapshot` met coherence thresholds | Research Atlas v0 populated from live staged run (temp DB only) |
 
 Helpers: `tests/unit/live_staged_proof_layers.py` (`require_mock_spine_compatible_fetch_or_skip`,
 `run_live_source_acquisition`).
@@ -293,6 +295,9 @@ ticket-190 adds rank-2 candidate discover through generate-run-report with
 second-candidate mock fixtures; ticket-193 adds single-command
 `research run --fixture-mode --staged-spine` on real OpenAlex via
 `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1` (orchestrator **always** forces mock LLM).
+ticket-285 adds orchestrator → private **`export-atlas-snapshot`** coherence proof
+(same orchestrator env gate; layer-3 `unsuitable_live_artifact` skip when live text
+lacks mock-spine markers — see table above).
 **Per-step live Ollama extract** on staged rank-1 ingest is a separate operator opt-in
 (ticket-204; not orchestrator-wide). **Per-step live Ollama link** after mock extract is
 a separate operator opt-in (ticket-208; not orchestrator-wide). These proofs write to temp DB and report paths
@@ -681,6 +686,30 @@ $env:OPENALEX_MAILTO = "operator@example.com"
 
 python -m pytest tests/unit/test_live_staged_orchestrator_mock_spine.py -m live_network -q
 ```
+
+*Live staged orchestrator → private atlas snapshot coherence* (ticket-285; same
+`RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1` gate as ticket-193; runs staged spine on temp
+`--db`, exports operator-private atlas JSON via `export-atlas-snapshot` **without**
+`--fixture-mode`, then audits `atlas_snapshot_v0.1.0` coherence — non-empty
+cards/nodes/edges/runs, `validate_atlas_snapshot`, private-field scan; mock LLM upstream
+only):
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+$env:RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR = "1"
+$env:RGE_ALLOW_SOURCE_NETWORK = "1"
+$env:OPENALEX_MAILTO = "operator@example.com"
+
+python -m pytest tests/unit/test_live_staged_atlas_snapshot_coherence.py -m live_network -q
+```
+
+**Skip semantics:** layer-3 preflight uses the same mock-spine marker phrases as other
+combined proofs (`human-ai co-creativity`, `songwriting`). When live discover + fetch
+succeed but no top-N artifact contains those phrases, pytest **skips** with
+`reason: unsuitable_live_artifact` (see **Interpreting `unsuitable_live_artifact`**
+above) — **not** an atlas export or contract regression. On **PASS**, inspect temp
+atlas JSON for coherence fields (`cards`, `nodes`, `edges`, `runs`); no
+`export-public` or public-site writes.
 
 **One-time live orchestrator verification (operator checklist; ticket-199; refreshed
 ticket-226):** after per-step **network** proofs or when validating a fresh operator

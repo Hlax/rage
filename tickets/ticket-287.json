@@ -1,0 +1,35 @@
+{
+  "id": "ticket-287",
+  "title": "AGENTS.md cross-link live staged atlas coherence operator proof",
+  "problem": "Ticket-286 documented the live staged atlas coherence proof in README Operator Quickstart. AGENTS.md should cross-link the same env gates and pytest command for agent/operator discoverability.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-286_readme-atlas-coherence-crosslink.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "AGENTS.md",
+    "agent_reports/2026-06-16_phase-3_ticket-287_agents-atlas-coherence-crosslink.md"
+  ],
+  "acceptance_criteria": [
+    "AGENTS.md cross-links README Operator Quickstart section for ticket-285 atlas coherence proof.",
+    "Documents RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR gate and live_network pytest path.",
+    "No code or public-site changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Runtime config or operating protocol cross-links.",
+    "Public atlas route or public-site UI.",
+    "CI enforcement of live_network proof."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert AGENTS.md section only.",
+  "status": "proposed",
+  "category": "Phase 3 / operator documentation / Research Atlas"
+}

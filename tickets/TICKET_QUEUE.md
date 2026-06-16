@@ -312,7 +312,8 @@ superseded
 | 283 | ticket-283 | done | Atlas contract inventory refresh for export-atlas-snapshot producer | `phase-3/ticket-283-atlas-inventory-export-producer` | `agent_reports/2026-06-16_phase-3_ticket-283_atlas-inventory-export-producer.md` |
 | 284 | ticket-284 | done | Atlas snapshot follow_up_questions projection from research_queue v0 | `phase-3/ticket-284-atlas-follow-up-questions-projection` | `agent_reports/2026-06-16_phase-3_ticket-284_atlas-follow-up-questions-projection.md` |
 | 285 | ticket-285 | done | Live staged atlas snapshot coherence proof (operator opt-in) | `phase-3/ticket-285-live-staged-atlas-coherence-proof` | `agent_reports/2026-06-16_phase-3_ticket-285_live-staged-atlas-coherence-proof.md` |
-| 286 | ticket-286 | proposed | README operator quickstart live staged atlas coherence proof cross-link | | |
+| 286 | ticket-286 | done | README operator quickstart live staged atlas coherence proof cross-link | `phase-3/ticket-286-readme-atlas-coherence-crosslink` | `agent_reports/2026-06-16_phase-3_ticket-286_readme-atlas-coherence-crosslink.md` |
+| 287 | ticket-287 | proposed | AGENTS.md cross-link live staged atlas coherence operator proof | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1047,9 +1048,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-286 (proposed) — README operator quickstart live staged atlas coherence proof cross-link
+ticket-287 (proposed) — AGENTS.md cross-link live staged atlas coherence operator proof
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-286 README atlas coherence cross-link)
+
+- README Operator Quickstart: orchestrator gate, pytest command, unsuitable_live_artifact table rows
+- ticket-287 seeded: AGENTS.md cross-link
 
 ## Queue Notes (2026-06-16, ticket-285 live staged atlas coherence proof)
 
