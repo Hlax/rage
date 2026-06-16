@@ -14,6 +14,8 @@ import pytest
 from rge.cli import (
     STAGED_FIXTURE_QUESTION_ID,
     STAGED_FIXTURE_RUN_ID,
+    STAGED_RANK1_CANDIDATE_ID,
+    STAGED_RANK2_CANDIDATE_ID,
     execute_staged_fixture_mode_run,
     main,
 )
@@ -159,6 +161,8 @@ def test_execute_staged_fixture_mode_run_matches_dual_spine_counts(
 
     assert result["status"] == "completed"
     assert result["mode"] == "fixture_staged"
+    assert result["rank1_candidate_id"] == STAGED_RANK1_CANDIDATE_ID
+    assert result["rank2_candidate_id"] == STAGED_RANK2_CANDIDATE_ID
     assert _orchestrator_counts(result) == _OrchestratorCounts(
         sources=3,
         candidate_sources=2,
@@ -182,13 +186,15 @@ def test_execute_staged_fixture_mode_run_twice_is_idempotent(
     staging_dir: Path,
     report_dir: Path,
 ) -> None:
-    first = _orchestrator_counts(
-        _run_staged_orchestrator(temp_db, staging_dir, report_dir)
-    )
-    second = _orchestrator_counts(
-        _run_staged_orchestrator(temp_db, staging_dir, report_dir)
-    )
+    first_result = _run_staged_orchestrator(temp_db, staging_dir, report_dir)
+    first = _orchestrator_counts(first_result)
+    second_result = _run_staged_orchestrator(temp_db, staging_dir, report_dir)
+    second = _orchestrator_counts(second_result)
     assert second == first
+    assert first_result["rank1_candidate_id"] == STAGED_RANK1_CANDIDATE_ID
+    assert first_result["rank2_candidate_id"] == STAGED_RANK2_CANDIDATE_ID
+    assert second_result["rank1_candidate_id"] == first_result["rank1_candidate_id"]
+    assert second_result["rank2_candidate_id"] == first_result["rank2_candidate_id"]
 
 
 def test_staged_fixture_mode_run_cli_entry(
