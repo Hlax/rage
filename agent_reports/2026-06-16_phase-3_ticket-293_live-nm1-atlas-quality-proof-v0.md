@@ -170,4 +170,4 @@ another operator-tooling-only ticket.
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `5f008d9`
