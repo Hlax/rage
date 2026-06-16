@@ -80,4 +80,4 @@ Wire `generate-run-report` on evidence DB spine so `reports[]` populate and cohe
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `0324d41`
