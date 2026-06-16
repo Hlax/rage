@@ -1,0 +1,41 @@
+{
+  "id": "ticket-281",
+  "title": "Atlas snapshot runs projection with research question lineage v0",
+  "problem": "ticket-278 inventory flagged missing parent_question_id and spawn metadata for frontend question lineage; atlas runs[] entries are summary-only today.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-280_review-batch-contract-v0.md",
+    "docs/contracts/research_atlas_export_contract_inventory_v0.md",
+    "rge/modules/atlas_snapshot_builder.py"
+  ],
+  "affected_modules": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "rge/contracts/atlas_snapshot_v0.py"
+  ],
+  "expected_files": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json",
+    "tests/unit/test_atlas_snapshot_builder.py",
+    "agent_reports/2026-06-16_phase-3_ticket-281_atlas-question-lineage-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Atlas runs[] projection includes optional lineage fields when contract data exists.",
+    "Creativity fixture snapshot updated deterministically.",
+    "validate_atlas_snapshot pass; no private field leak.",
+    "Golden pass and full pytest pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_atlas_snapshot_builder.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Schema migrations.",
+    "Public-site UI.",
+    "Live Ollama.",
+    "review_batch persistence."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert lineage fields on runs projection only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / product contract"
+}

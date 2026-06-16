@@ -1,0 +1,51 @@
+{
+  "schema_version": "review_batch_v0.1.0",
+  "batch_id": "rbatch_fixture_principal_review_001",
+  "generated_at": "2026-06-16T00:00:00Z",
+  "classification": "agent_lab_private",
+  "review_scope": {
+    "run_id": "run_golden_fixture_mvp",
+    "topic": "Does AI improve creative output while reducing diversity?",
+    "domain_pack": "creativity",
+    "review_kind": "principal_synthesis"
+  },
+  "model_runtime": {
+    "llm_mode": "mock",
+    "model_provider": "mock",
+    "model_name": "mock",
+    "task_name": "principal_review",
+    "schema_version": "0.1.0",
+    "prompt_template_version": "0.1.0",
+    "raw_response_stored": false
+  },
+  "inputs": {
+    "artifact_refs": [
+      "run_report:run_golden_fixture_mvp",
+      "atlas_snapshot:snap_creativity_fixture_v0_001"
+    ],
+    "improvement_ticket_ids": [],
+    "atlas_snapshot_id": "snap_creativity_fixture_v0_001"
+  },
+  "outputs": {
+    "review_status": "completed",
+    "candidate_findings": [
+      {
+        "finding_id": "finding_fixture_metric_scope_001",
+        "summary": "Contradiction may reflect metric scope difference rather than direct opposition.",
+        "severity": "info",
+        "related_concepts": ["semantic diversity", "diversity"]
+      }
+    ],
+    "recommended_tickets": [
+      {
+        "title": "Add divergent-prompting operator checklist",
+        "priority": "medium",
+        "evidence_refs": ["finding_fixture_metric_scope_001"]
+      }
+    ]
+  },
+  "safety": {
+    "public_safe": false,
+    "operator_only": true
+  }
+}
