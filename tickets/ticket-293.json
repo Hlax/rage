@@ -41,6 +41,6 @@
   ],
   "risk_level": "high",
   "rollback_plan": "Remove operator report only; no production code required unless minimal helpers.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / Research Atlas / live research quality proof"
 }
