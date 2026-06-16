@@ -1,0 +1,31 @@
+{
+  "id": "ticket-265",
+  "title": "README documents staged run rank candidate id output fields",
+  "problem": "Tickets 261–264 harden rank1/rank2 candidate id visibility in staged run result and CLI stdout tests, but README operator quickstart does not document the fields for operators inspecting run JSON.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-264_staged-spine-cli-stdout-candidate-ids.md",
+    "README.md Operator Quickstart staged spine section"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "README.md"
+  ],
+  "acceptance_criteria": [
+    "README staged spine operator section documents rank1_candidate_id and rank2_candidate_id in run stdout JSON",
+    "No code or export surface changes",
+    "Golden pass"
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Production logic changes",
+    "Public site changes",
+    "Live Ollama proofs"
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section only.",
+  "status": "proposed",
+  "category": "Phase 3 / staged spine operator docs"
+}

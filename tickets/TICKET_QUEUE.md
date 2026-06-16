@@ -290,7 +290,8 @@ superseded
 | 261 | ticket-261 | done | Staged fixture run JSON exposes rank candidate ids | `phase-3/ticket-261-staged-fixture-rank-candidate-ids-json` | `agent_reports/2026-06-16_phase-3_ticket-261_staged-fixture-rank-candidate-ids.md` |
 | 262 | ticket-262 | done | Staged fixture spine test asserts rank candidate ids | `phase-3/ticket-262-staged-spine-candidate-id-assertions` | `agent_reports/2026-06-16_phase-3_ticket-262_staged-spine-candidate-id-assertions.md` |
 | 263 | ticket-263 | done | Principal audit post-ticket-262 staged spine candidate-id checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-262.md` |
-| 264 | ticket-264 | proposed | Staged spine CLI stdout asserts rank candidate ids | | |
+| 264 | ticket-264 | done | Staged spine CLI stdout asserts rank candidate ids | `phase-3/ticket-264-staged-spine-cli-stdout-candidate-ids` | `agent_reports/2026-06-16_phase-3_ticket-264_staged-spine-cli-stdout-candidate-ids.md` |
+| 265 | ticket-265 | proposed | README documents staged run rank candidate id output fields | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1025,9 +1026,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-264 (proposed) — Staged spine CLI stdout asserts rank candidate ids
+ticket-265 (proposed) — README documents staged run rank candidate id output fields
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-264 staged spine CLI stdout candidate ids)
+
+- CLI entry tests parse multi-document stdout and assert rank candidate ids on both paths
+- ticket-265 seeded: README operator docs for rank candidate id fields
 
 ## Queue Notes (2026-06-16, principal audit post-ticket-262)
 

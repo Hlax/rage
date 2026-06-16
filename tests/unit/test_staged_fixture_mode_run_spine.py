@@ -150,6 +150,68 @@ def patched_staged_network():
         yield
 
 
+def _staged_spine_cli_argv(
+    *,
+    with_fixture_mode: bool,
+    temp_db: Path,
+    staging_dir: Path,
+    report_dir: Path,
+) -> list[str]:
+    argv = [
+        "run",
+        "--topic",
+        STAGED_TOPIC,
+        "--domain",
+        "creativity",
+        "--db",
+        str(temp_db),
+        "--staging-dir",
+        str(staging_dir),
+        "--output-dir",
+        str(report_dir),
+        "--run-id",
+        STAGED_FIXTURE_RUN_ID,
+        "--question-id",
+        STAGED_FIXTURE_QUESTION_ID,
+    ]
+    if with_fixture_mode:
+        return ["run", "--fixture-mode", "--staged-spine", *argv[1:]]
+    return ["run", "--staged-spine", *argv[1:]]
+
+
+def _parse_stdout_json_documents(stdout: str) -> list[dict]:
+    decoder = json.JSONDecoder()
+    documents: list[dict] = []
+    idx = 0
+    while idx < len(stdout):
+        while idx < len(stdout) and stdout[idx].isspace():
+            idx += 1
+        if idx >= len(stdout):
+            break
+        document, end = decoder.raw_decode(stdout, idx)
+        documents.append(document)
+        idx = end
+    return documents
+
+
+def _staged_spine_run_stdout_payload(stdout: str) -> dict:
+    documents = _parse_stdout_json_documents(stdout)
+    assert documents, "expected staged spine CLI stdout JSON"
+    for payload in reversed(documents):
+        if payload.get("mode") == "fixture_staged":
+            return payload
+    raise AssertionError("fixture_staged run payload not found in CLI stdout")
+
+
+def _assert_staged_spine_stdout_candidate_ids(stdout: str) -> dict:
+    payload = _staged_spine_run_stdout_payload(stdout)
+    assert payload["status"] == "completed"
+    assert payload["mode"] == "fixture_staged"
+    assert payload["rank1_candidate_id"] == STAGED_RANK1_CANDIDATE_ID
+    assert payload["rank2_candidate_id"] == STAGED_RANK2_CANDIDATE_ID
+    return payload
+
+
 def test_execute_staged_fixture_mode_run_matches_dual_spine_counts(
     mock_network_env: None,
     patched_staged_network: None,
@@ -203,29 +265,18 @@ def test_staged_fixture_mode_run_cli_entry(
     temp_db: Path,
     staging_dir: Path,
     report_dir: Path,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
-    exit_code = main(
-        [
-            "run",
-            "--fixture-mode",
-            "--staged-spine",
-            "--topic",
-            STAGED_TOPIC,
-            "--domain",
-            "creativity",
-            "--db",
-            str(temp_db),
-            "--staging-dir",
-            str(staging_dir),
-            "--output-dir",
-            str(report_dir),
-            "--run-id",
-            STAGED_FIXTURE_RUN_ID,
-            "--question-id",
-            STAGED_FIXTURE_QUESTION_ID,
-        ]
+    argv = _staged_spine_cli_argv(
+        with_fixture_mode=True,
+        temp_db=temp_db,
+        staging_dir=staging_dir,
+        report_dir=report_dir,
     )
+    exit_code = main(argv)
+    captured = capsys.readouterr()
     assert exit_code == 0
+    _assert_staged_spine_stdout_candidate_ids(captured.out)
 
 
 def test_staged_spine_run_cli_entry_without_fixture_mode(
@@ -234,25 +285,15 @@ def test_staged_spine_run_cli_entry_without_fixture_mode(
     temp_db: Path,
     staging_dir: Path,
     report_dir: Path,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
-    exit_code = main(
-        [
-            "run",
-            "--staged-spine",
-            "--topic",
-            STAGED_TOPIC,
-            "--domain",
-            "creativity",
-            "--db",
-            str(temp_db),
-            "--staging-dir",
-            str(staging_dir),
-            "--output-dir",
-            str(report_dir),
-            "--run-id",
-            STAGED_FIXTURE_RUN_ID,
-            "--question-id",
-            STAGED_FIXTURE_QUESTION_ID,
-        ]
+    argv = _staged_spine_cli_argv(
+        with_fixture_mode=False,
+        temp_db=temp_db,
+        staging_dir=staging_dir,
+        report_dir=report_dir,
     )
+    exit_code = main(argv)
+    captured = capsys.readouterr()
     assert exit_code == 0
+    _assert_staged_spine_stdout_candidate_ids(captured.out)
