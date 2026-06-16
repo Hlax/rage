@@ -2217,6 +2217,7 @@ def _cmd_detect_contradictions(args: argparse.Namespace) -> int:
         detect_contradictions_for_source,
         detect_contradictions_manual_live_fallthrough,
         detect_contradictions_staged_live_fallthrough,
+        detect_contradictions_staged_rank2_live_fallthrough,
     )
     from rge.modules.live_extraction_write import (
         LiveExtractionWriteError,
@@ -2242,6 +2243,61 @@ def _cmd_detect_contradictions(args: argparse.Namespace) -> int:
         conn = ensure_database(db_path)
         try:
             payload = detect_contradictions_manual_live_fallthrough(conn, args.source)
+            print(json.dumps(payload, indent=2))
+            return 0
+        except (LiveExtractionWriteError, LiveProbeGateError, ValueError) as exc:
+            payload = {
+                "status": "error",
+                "command": "detect-contradictions",
+                "detail": str(exc),
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+        finally:
+            conn.close()
+
+    if getattr(args, "live_staged_detect_fallthrough", False) and getattr(
+        args, "live_staged_rank2_detect_fallthrough", False
+    ):
+        payload = {
+            "status": "error",
+            "command": "detect-contradictions",
+            "detail": (
+                "--live-staged-detect-fallthrough and --live-staged-rank2-detect-fallthrough "
+                "are mutually exclusive."
+            ),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+    if getattr(args, "live_staged_rank2_detect_fallthrough", False):
+        if args.fixture:
+            payload = {
+                "status": "error",
+                "command": "detect-contradictions",
+                "detail": (
+                    "live_staged_rank2_detect_fallthrough cannot be combined with --fixture; "
+                    "live Ollama contradiction detection uses domain graph context."
+                ),
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+        db_path = resolve_live_evidence_db(Path(args.db) if args.db else None)
+        if is_default_graph_db(db_path):
+            payload = {
+                "status": "error",
+                "command": "detect-contradictions",
+                "detail": (
+                    "Refusing live staged rank-2 detect fall-through on the default graph DB. "
+                    "Pass --db data/db/live_research_evidence.sqlite or another "
+                    "explicit gitignored evidence path."
+                ),
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+        conn = ensure_database(db_path)
+        try:
+            payload = detect_contradictions_staged_rank2_live_fallthrough(conn, args.source)
             print(json.dumps(payload, indent=2))
             return 0
         except (LiveExtractionWriteError, LiveProbeGateError, ValueError) as exc:
@@ -2978,6 +3034,16 @@ def build_parser() -> argparse.ArgumentParser:
             "Live Ollama contradiction detection for staged OpenAlex ingest sources. "
             "Requires RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM=1, RGE_LLM_MODE=ollama, "
             "RGE_ALLOW_LIVE_LLM=1, and an explicit gitignored evidence --db."
+        ),
+    )
+    detect_parser.add_argument(
+        "--live-staged-rank2-detect-fallthrough",
+        action="store_true",
+        help=(
+            "Live Ollama contradiction detection for rank-2 staged OpenAlex ingest sources. "
+            "Requires RGE_ALLOW_LIVE_STAGED_RANK2_DETECT_LIVE_LLM=1, "
+            "RGE_ALLOW_LIVE_STAGED_RANK2=1, RGE_LLM_MODE=ollama, RGE_ALLOW_LIVE_LLM=1, "
+            "and a non-default --db."
         ),
     )
     detect_parser.set_defaults(func=_cmd_detect_contradictions)

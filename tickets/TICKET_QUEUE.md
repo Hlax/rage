@@ -264,7 +264,8 @@ superseded
 | 230 | ticket-230 | done | Live staged rank-2 extract live LLM opt-in proof (per-step) | `phase-3/ticket-230-rank2-extract-live-llm-spine` | `agent_reports/2026-06-15_ticket-230_live-staged-rank2-extract-live-llm-spine.md` |
 | 236 | ticket-236 | done | Live staged rank-2 link live LLM opt-in proof (per-step) | `phase-3/ticket-236-rank2-link-live-llm-spine` | `agent_reports/2026-06-15_ticket-236_live-staged-rank2-link-live-llm-spine.md` |
 | 237 | ticket-237 | done | Live staged rank-2 build live LLM opt-in proof (per-step) | `phase-3/ticket-237-rank2-build-live-llm-spine` | `agent_reports/2026-06-16_ticket-237_live-staged-rank2-build-live-llm-spine.md` |
-| 238 | ticket-238 | proposed | Live staged rank-2 detect live LLM opt-in proof (per-step) | | |
+| 238 | ticket-238 | done | Live staged rank-2 detect live LLM opt-in proof (per-step) | `phase-3/ticket-238-rank2-detect-live-llm-spine` | `agent_reports/2026-06-16_ticket-238_live-staged-rank2-detect-live-llm-spine.md` |
+| 239 | ticket-239 | proposed | Principal audit post-ticket-238 rank-2 live LLM closure checkpoint | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -999,9 +1000,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-238 (proposed) — Live staged rank-2 detect live LLM opt-in proof (per-step)
+ticket-239 (proposed) — Principal audit post-ticket-238 rank-2 live LLM closure checkpoint
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-238 rank-2 detect live LLM)
+
+- `RGE_ALLOW_LIVE_STAGED_RANK2_DETECT_LIVE_LLM=1` + `--live-staged-rank2-detect-fallthrough`
+- Requires `seed_domain_opposing_context` before live discover
+- Mock upstream through build: `staged_fetch_second_candidate_*` fixtures
+- **Rank-2 per-step live Ollama surface closed** (230/236/237/238)
+- ticket-239 seeded: principal audit checkpoint
 
 ## Queue Notes (2026-06-16, ticket-237 rank-2 build live LLM)
 
