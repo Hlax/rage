@@ -5,7 +5,7 @@
 **Ticket:** ticket-260  
 **Branch:** `phase-3/ticket-260-cli-staged-spine-candidate-id-wiring`  
 **Main tip before branch:** `1f389409c106117088660dfc62642a4bcd230d3b`  
-**Status:** implemented
+**Status:** done
 
 ## Summary
 
@@ -61,8 +61,8 @@ None.
 
 ## Merge to main
 
-- Merge commit: _(pending)_
-- Post-merge pytest: _(pending)_
+- Merge commit: `39b85deb9b4b8c82df5680d6be3b54635b125ffe`
+- Post-merge pytest: `689 passed, 30 deselected`
 
 ## Recommended next ticket
 
