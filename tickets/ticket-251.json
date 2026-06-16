@@ -43,6 +43,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert staged_candidate_selection module; restore OFFSET 1 rank-2 selection.",
-  "status": "ready",
+  "status": "done",
   "category": "Phase 3 / staged spine product hardening"
 }

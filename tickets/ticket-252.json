@@ -1,0 +1,35 @@
+{
+  "id": "ticket-252",
+  "title": "Scratch evidence review gate in operator autocycle plan",
+  "problem": "After ticket-251 product hardening, operator loop should surface scratch evidence review as a review_gated autocycle action when reviewed rows exist and no higher-priority blocker applies — without auto-generating tickets.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-251_rank-2-candidate-heuristic-scan.md",
+    "rge/modules/operator_loop.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_autocycle.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_operator_autocycle_scratch_evidence.py",
+    "agent_reports/2026-06-16_phase-3_ticket-252_operator-autocycle-scratch-evidence-gate.md"
+  ],
+  "acceptance_criteria": [
+    "Autocycle plan recommends run_scratch_evidence_review when scratch_evidence_status.evidence_review_ready.",
+    "No automated ticket generation or scratch DB mutation.",
+    "Golden pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_autocycle_scratch_evidence.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama proofs.",
+    "Improvement ticket auto-generation.",
+    "Public export/site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert autocycle scratch gate wiring.",
+  "status": "proposed",
+  "category": "Phase 3 / scratch evidence workflow"
+}

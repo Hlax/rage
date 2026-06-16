@@ -277,7 +277,8 @@ superseded
 | 248 | ticket-248 | done | README maturity tier detect seed doc triangle closure | `phase-3/ticket-248-readme-maturity-detect-seed-triangle` | `agent_reports/2026-06-16_phase-3_ticket-248_readme-maturity-detect-seed-triangle.md` |
 | 249 | ticket-249 | done | Operator proof report addendum post detect seed doc triangle | `phase-3/ticket-249-operator-proof-addendum` | `agent_reports/2026-06-16_phase-3_ticket-249_operator-proof-addendum.md` |
 | 250 | ticket-250 | done | Principal audit post-ticket-249 detect seed doc closure checkpoint | `main` @ `c964ef7` | `agent_reports/2026-06-16_principal-audit-post-ticket-249.md` |
-| 251 | ticket-251 | ready | Rank-2 staged candidate heuristic scan for catalog drift resilience | | `agent_reports/2026-06-16_pre-ticket-251_rank-2-staged-candidate-heuristic-scan-audit.md` |
+| 251 | ticket-251 | done | Rank-2 staged candidate heuristic scan for catalog drift resilience | `phase-3/ticket-251-rank-2-candidate-heuristic-scan` | `agent_reports/2026-06-16_phase-3_ticket-251_rank-2-candidate-heuristic-scan.md` |
+| 252 | ticket-252 | proposed | Scratch evidence review gate in operator autocycle plan | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1012,9 +1013,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-251 (ready) — Rank-2 staged candidate heuristic scan for catalog drift resilience
+ticket-252 (proposed) — Scratch evidence review gate in operator autocycle plan
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-251 rank-2 candidate heuristic scan)
+
+- `staged_candidate_selection.py`: top-N rank-2 title scan after rank-1; shared by live pytest + orchestrator
+- ticket-252 seeded: scratch evidence autocycle gate
 
 ## Queue Notes (2026-06-16, ticket-250 principal audit + ticket-251 selection)
 
