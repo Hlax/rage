@@ -269,7 +269,8 @@ superseded
 | 240 | ticket-240 | done | README operator rank-2 per-step live LLM closure checklist | `phase-3/ticket-240-readme-rank2-live-closure-checklist` | `agent_reports/2026-06-16_ticket-240_readme-rank2-live-closure-checklist.md` |
 | 241 | ticket-241 | done | Runtime config rank-2 live Ollama closure operator summary | `phase-3/ticket-241-runtime-config-rank2-live-closure` | `agent_reports/2026-06-16_ticket-241_runtime-config-rank2-live-closure.md` |
 | 242 | ticket-242 | done | AGENTS runtime config rank-2 live closure cross-reference | `phase-3/ticket-242-agents-runtime-config-rank2-closure` | `agent_reports/2026-06-16_ticket-242_agents-runtime-config-rank2-closure.md` |
-| 243 | ticket-243 | proposed | Detect seed mock isolation for live Ollama operator proofs | | |
+| 243 | ticket-243 | done | Detect seed mock isolation for live Ollama operator proofs | `phase-3/ticket-243-detect-seed-mock-isolation` | `agent_reports/2026-06-16_phase-3_ticket-243_detect-seed-mock-isolation.md` |
+| 244 | ticket-244 | proposed | Principal audit post-ticket-243 detect seed mock isolation | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1004,9 +1005,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-243 (proposed) — Detect seed mock isolation for live Ollama operator proofs
+ticket-244 (proposed) — Principal audit post-ticket-243 detect seed mock isolation
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-243 detect seed mock isolation)
+
+- `seed_domain_opposing_context` forces mock LLM for GT7 seed spine under live operator env
+- Regression tests in rank-1/rank-2 live detect spine modules
+- ticket-244 seeded: principal audit (cadence after 241/242/243)
 
 ## Queue Notes (2026-06-16, ticket-242 AGENTS runtime config cross-link)
 

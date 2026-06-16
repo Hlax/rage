@@ -1,0 +1,31 @@
+{
+  "id": "ticket-244",
+  "title": "Principal audit post-ticket-243 detect seed mock isolation",
+  "problem": "Three consecutive done tickets since principal audit post-ticket-240 (241 docs, 242 docs, 243 test hardening). Cadence checkpoint required before further implementation.",
+  "evidence": [
+    "agent_reports/2026-06-16_principal-audit-post-ticket-240.md",
+    "agent_reports/2026-06-16_phase-3_ticket-243_detect-seed-mock-isolation.md",
+    "agent_reports/2026-06-16_operator-proof-rank2-live-ollama-checklist.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-16_principal-audit-post-ticket-243.md"
+  ],
+  "acceptance_criteria": [
+    "Audit report documents mock gate status, rank-2 closure docs triangle, and ticket-243 seed fix.",
+    "Cadence reset with GO/NO-GO for next implementation ticket.",
+    "Golden pass if audit patches runner/docs."
+  ],
+  "test_plan": [
+    "python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Product code changes.",
+    "Implementing queued feature tickets.",
+    "CI live network enablement."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert audit report only.",
+  "status": "proposed",
+  "category": "Phase 3 / audit / operator"
+}

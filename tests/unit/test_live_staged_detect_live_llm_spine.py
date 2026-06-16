@@ -112,6 +112,27 @@ def test_require_live_staged_detect_live_llm_skips_without_opt_in(
         require_live_staged_detect_live_llm_env()
 
 
+def test_seed_domain_opposing_context_completes_under_global_live_ollama_env(
+    temp_db: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("RGE_LLM_MODE", "ollama")
+    monkeypatch.setenv("RGE_ALLOW_LIVE_LLM", "1")
+    seed_domain_opposing_context(temp_db)
+    conn = connect(temp_db)
+    try:
+        accepted = conn.execute(
+            "SELECT COUNT(*) FROM claims WHERE status = 'accepted'"
+        ).fetchone()[0]
+        assert accepted >= 1
+        relationships = conn.execute(
+            "SELECT COUNT(*) FROM relationships WHERE status = 'active'"
+        ).fetchone()[0]
+        assert relationships >= 1
+    finally:
+        conn.close()
+
+
 @pytest.fixture(autouse=True)
 def _ensure_provider_registry() -> None:
     import rge.modules.source_providers  # noqa: F401
