@@ -3960,7 +3960,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run deterministic mock-only verification checks.",
         description=(
             "Run mock-only golden tests, pytest, safety audit, and public-site "
-            "build. Does not require Ollama or a clean git tree."
+            "build. JSON output includes an operator_checklist with optional "
+            "prove-arbitrary-source-bundle (not run automatically). Does not "
+            "require Ollama or a clean git tree."
         ),
     )
     verify_parser.add_argument(

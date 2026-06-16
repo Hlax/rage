@@ -12,7 +12,10 @@ import sys
 from pathlib import Path
 from typing import Any, Callable
 
-from rge.modules.operator_loop import safe_verification_commands
+from rge.modules.operator_loop import (
+    inspect_arbitrary_source_proof_bundle_status,
+    safe_verification_commands,
+)
 from rge.subprocess_capture import run_captured
 
 _MOCK_ENV = {
@@ -20,6 +23,24 @@ _MOCK_ENV = {
     "RGE_ALLOW_LIVE_LLM": "0",
     "RGE_TEST_LLM_MODE": "mock",
 }
+
+
+def mock_gate_operator_checklist(root: Path) -> list[dict[str, Any]]:
+    """Optional operator commands surfaced by verify (not run automatically)."""
+    status = inspect_arbitrary_source_proof_bundle_status(root=root)
+    return [
+        {
+            "id": "prove_arbitrary_source_bundle",
+            "command": status["command"],
+            "pipeline_mode": status["pipeline_mode"],
+            "shell": status["operator_commands"]["proof_bundle"],
+            "automated_in_verify": False,
+            "notes": (
+                "Optional mock arbitrary-source maturity proof on a temp or scratch "
+                "database; inspect operator_proof_bundle.json after run."
+            ),
+        }
+    ]
 
 
 def run_verification(
@@ -78,4 +99,8 @@ def run_verification(
         "skip_site": skip_site,
         "python": sys.version.split()[0],
         "checks": results,
+        "operator_checklist": mock_gate_operator_checklist(project_root),
+        "arbitrary_source_proof_bundle_status": inspect_arbitrary_source_proof_bundle_status(
+            root=project_root
+        ),
     }
