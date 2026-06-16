@@ -1907,6 +1907,7 @@ def _cmd_link_concepts(args: argparse.Namespace) -> int:
         link_concepts_for_source,
         link_concepts_manual_live_fallthrough,
         link_concepts_staged_live_fallthrough,
+        link_concepts_staged_rank2_live_fallthrough,
     )
     from rge.modules.live_extraction_write import (
         LiveExtractionWriteError,
@@ -1932,6 +1933,50 @@ def _cmd_link_concepts(args: argparse.Namespace) -> int:
         conn = ensure_database(db_path)
         try:
             payload = link_concepts_manual_live_fallthrough(conn, args.source)
+            print(json.dumps(payload, indent=2))
+            return 0
+        except (LiveExtractionWriteError, LiveProbeGateError, ValueError) as exc:
+            payload = {
+                "status": "error",
+                "command": "link-concepts",
+                "detail": str(exc),
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+        finally:
+            conn.close()
+
+    if getattr(args, "live_staged_link_fallthrough", False) and getattr(
+        args, "live_staged_rank2_link_fallthrough", False
+    ):
+        payload = {
+            "status": "error",
+            "command": "link-concepts",
+            "detail": (
+                "--live-staged-link-fallthrough and --live-staged-rank2-link-fallthrough "
+                "are mutually exclusive."
+            ),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+    if getattr(args, "live_staged_rank2_link_fallthrough", False):
+        db_path = resolve_live_evidence_db(Path(args.db) if args.db else None)
+        if is_default_graph_db(db_path):
+            payload = {
+                "status": "error",
+                "command": "link-concepts",
+                "detail": (
+                    "Refusing live staged rank-2 link fall-through on the default graph DB. "
+                    "Pass --db data/db/live_research_evidence.sqlite or another "
+                    "explicit gitignored evidence path."
+                ),
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+        conn = ensure_database(db_path)
+        try:
+            payload = link_concepts_staged_rank2_live_fallthrough(conn, args.source)
             print(json.dumps(payload, indent=2))
             return 0
         except (LiveExtractionWriteError, LiveProbeGateError, ValueError) as exc:
@@ -2748,6 +2793,16 @@ def build_parser() -> argparse.ArgumentParser:
             "Live Ollama concept linking for manual_text sources absent from "
             "fixtures/manual_source_fixture_map.json. Requires RGE_LLM_MODE=ollama, "
             "RGE_ALLOW_LIVE_LLM=1, and an explicit gitignored evidence --db."
+        ),
+    )
+    link_parser.add_argument(
+        "--live-staged-rank2-link-fallthrough",
+        action="store_true",
+        help=(
+            "Live Ollama concept linking for rank-2 staged OpenAlex ingest sources "
+            "(bypasses staged-fetch auto-mock). Requires "
+            "RGE_ALLOW_LIVE_STAGED_RANK2_LINK_LIVE_LLM=1, RGE_LLM_MODE=ollama, "
+            "RGE_ALLOW_LIVE_LLM=1, and a non-default --db."
         ),
     )
     link_parser.add_argument(

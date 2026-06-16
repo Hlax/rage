@@ -279,6 +279,7 @@ def propose_concept_links(
     source: Any | None = None,
     live_manual_link_fallthrough: bool = False,
     live_staged_link_fallthrough: bool = False,
+    live_staged_rank2_link_fallthrough: bool = False,
 ) -> list[dict[str, Any]]:
     """Propose concept links via the model client without persistence."""
     config = load_config()
@@ -313,6 +314,7 @@ def link_claim_concepts(
     client: Any | None = None,
     live_manual_link_fallthrough: bool = False,
     live_staged_link_fallthrough: bool = False,
+    live_staged_rank2_link_fallthrough: bool = False,
 ) -> list[dict[str, Any]]:
     """Propose concept links for claims via the configured model client."""
     return propose_concept_links(
@@ -324,6 +326,7 @@ def link_claim_concepts(
         client=client,
         live_manual_link_fallthrough=live_manual_link_fallthrough,
         live_staged_link_fallthrough=live_staged_link_fallthrough,
+        live_staged_rank2_link_fallthrough=live_staged_rank2_link_fallthrough,
     )
 
 
@@ -334,6 +337,7 @@ def link_concepts_for_source(
     fixture_name: str | None = None,
     live_manual_link_fallthrough: bool = False,
     live_staged_link_fallthrough: bool = False,
+    live_staged_rank2_link_fallthrough: bool = False,
     client: Any | None = None,
     config: Any | None = None,
 ) -> dict[str, Any]:
@@ -366,11 +370,32 @@ def link_concepts_for_source(
         }
 
     cfg = config if config is not None else load_config()
-    if live_manual_link_fallthrough and live_staged_link_fallthrough:
+    if live_manual_link_fallthrough and (
+        live_staged_link_fallthrough or live_staged_rank2_link_fallthrough
+    ):
         raise ValueError(
-            "live_manual_link_fallthrough and live_staged_link_fallthrough are mutually exclusive."
+            "live_manual_link_fallthrough cannot be combined with staged live link fallthrough."
         )
-    if live_staged_link_fallthrough:
+    if live_staged_link_fallthrough and live_staged_rank2_link_fallthrough:
+        raise ValueError(
+            "live_staged_link_fallthrough and live_staged_rank2_link_fallthrough are "
+            "mutually exclusive."
+        )
+    if live_staged_rank2_link_fallthrough:
+        from rge.modules.staged_spine_heuristics import is_staged_rank2_fetch_spine_source
+
+        if fixture_name:
+            raise ValueError(
+                "live_staged_rank2_link_fallthrough cannot be combined with --fixture; "
+                "live Ollama linking uses accepted claims from the source."
+            )
+        if not is_staged_rank2_fetch_spine_source(source_record):
+            raise ValueError(
+                "live_staged_rank2_link_fallthrough requires staged OpenAlex rank-2 "
+                "ingest source title (constraint management marker)."
+            )
+        model_client = client or get_model_client(cfg, mode="ollama")
+    elif live_staged_link_fallthrough:
         if fixture_name:
             raise ValueError(
                 "live_staged_link_fallthrough cannot be combined with --fixture; "
@@ -410,6 +435,7 @@ def link_concepts_for_source(
         client=model_client,
         live_manual_link_fallthrough=live_manual_link_fallthrough,
         live_staged_link_fallthrough=live_staged_link_fallthrough,
+        live_staged_rank2_link_fallthrough=live_staged_rank2_link_fallthrough,
     )
     validated = validate_concept_links(proposed, domain_pack=domain_pack)
 
@@ -566,6 +592,85 @@ def link_concepts_staged_live_fallthrough(
         "command": "link-concepts",
         "live_manual_link_fallthrough": False,
         "live_staged_link_fallthrough": True,
+        "source_id": source_id,
+        "source_title": source.title,
+        "source_type": source.source_type,
+        "raw_text_checksum": getattr(source, "raw_text_checksum", None),
+        "fixture_map_match": not manual_text_lacks_link_fixture(source),
+        "db_writes": True,
+        "provider": model_client.provider,
+        "model": getattr(model_client, "model", "unknown"),
+        "llm_schema_version": cfg.llm_schema_version,
+        "effective_llm_mode": "ollama",
+        "health": health,
+        "link_count": result["link_count"],
+        "rejected_link_count": result.get("rejected_link_count", 0),
+        "links": links,
+        "rejected_links": result.get("rejected_links", []),
+    }
+
+
+def assert_live_staged_rank2_link_live_env(
+    config: Any | None = None,
+    *,
+    command: str = "link-concepts",
+) -> Any:
+    """Require rank-2 staged-family live LLM opt-in in addition to live probe gates."""
+    from rge.modules.live_extraction_write import LiveExtractionWriteError
+    from rge.modules.live_probe import assert_live_probe_env
+
+    allow = os.environ.get(
+        "RGE_ALLOW_LIVE_STAGED_RANK2_LINK_LIVE_LLM", "0"
+    ).strip().casefold()
+    if allow not in ("1", "true", "yes"):
+        raise LiveExtractionWriteError(
+            f"{command} live staged rank-2 link fallthrough requires "
+            "RGE_ALLOW_LIVE_STAGED_RANK2_LINK_LIVE_LLM=1."
+        )
+    return assert_live_probe_env(config, command=command)
+
+
+def link_concepts_staged_rank2_live_fallthrough(
+    conn: Any,
+    source_id: str,
+    *,
+    config: Any | None = None,
+    skip_health_check: bool = False,
+    client: Any | None = None,
+) -> dict[str, Any]:
+    """Live Ollama concept linking for rank-2 staged OpenAlex ingest sources."""
+    from rge.db.repositories import ClaimConceptRepository, SourceRepository
+    from rge.modules.live_extraction_write import LiveExtractionWriteError
+    from rge.modules.live_probe import assert_ollama_health
+    from rge.modules.staged_spine_heuristics import is_staged_rank2_fetch_spine_source
+
+    cfg = assert_live_staged_rank2_link_live_env(config, command="link-concepts")
+    health = assert_ollama_health(cfg) if not skip_health_check else {}
+
+    source = SourceRepository(conn).get_by_id(source_id)
+    if source is None:
+        raise LiveExtractionWriteError(f"Source not found: {source_id}")
+    if not is_staged_rank2_fetch_spine_source(source):
+        raise LiveExtractionWriteError(
+            "live_staged_rank2_link_fallthrough requires staged OpenAlex rank-2 "
+            "ingest source title (constraint management marker)."
+        )
+
+    model_client = client or get_model_client(cfg, mode="ollama")
+    result = link_concepts_for_source(
+        conn,
+        source_id,
+        live_staged_rank2_link_fallthrough=True,
+        client=model_client,
+        config=cfg,
+    )
+    links = ClaimConceptRepository(conn).list_for_source(source_id)
+    return {
+        "status": result["status"],
+        "command": "link-concepts",
+        "live_manual_link_fallthrough": False,
+        "live_staged_link_fallthrough": False,
+        "live_staged_rank2_link_fallthrough": True,
         "source_id": source_id,
         "source_title": source.title,
         "source_type": source.source_type,
