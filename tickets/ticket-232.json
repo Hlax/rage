@@ -28,6 +28,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert audit report only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / live LLM / staged spine audit"
 }
