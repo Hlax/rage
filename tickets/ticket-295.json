@@ -1,0 +1,40 @@
+{
+  "id": "ticket-295",
+  "title": "Evidence DB run report projection for atlas coherence GO",
+  "problem": "Ticket-294 improved runs and claim-backed cards but coherence remains partial: reports[] empty and follow-ups minimal on evidence DB atlas export.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-294_evidence-db-atlas-projection-v0.md",
+    "data/atlas/ticket293/atlas_coherence_report_v294b.json"
+  ],
+  "affected_modules": [
+    "rge/modules/run_evaluator.py",
+    "rge/modules/evidence_db_atlas.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/evidence_db_atlas.py",
+    "tests/unit/test_evidence_db_run_report_projection.py",
+    "agent_reports/2026-06-16_phase-3_ticket-295_evidence-db-run-report-projection.md"
+  ],
+  "acceptance_criteria": [
+    "Evidence DB atlas export path ensures run_reports row linked to evidence research_run.",
+    "Atlas snapshot reports[] populated with run_id on evidence DB mock spine.",
+    "Coherence meaningful + reports verdicts pass on mock evidence DB fixture.",
+    "Network-free unit test; golden + full pytest green.",
+    "No public routes/site/schema migration/live default pytest."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_evidence_db_run_report_projection.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Public atlas UI.",
+    "Live Ollama default pytest.",
+    "Full research_queue generation beyond minimal follow-up seed."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert evidence DB run report hook only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / live-derived population"
+}
