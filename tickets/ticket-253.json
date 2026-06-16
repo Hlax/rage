@@ -1,0 +1,31 @@
+{
+  "id": "ticket-253",
+  "title": "Runbook autocycle scratch evidence review operator note",
+  "problem": "Ticket-252 wired scratch evidence review into operator autocycle plan output. Operators need a short runbook cross-link describing when autocycle recommends run_scratch_evidence_review vs drift_warning carve-out.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-252_operator-autocycle-scratch-evidence-gate.md",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "rge/modules/operator_autocycle.py"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "agent_reports/2026-06-16_phase-3_ticket-253_runbook-autocycle-scratch-note.md"
+  ],
+  "acceptance_criteria": [
+    "Runbook documents autocycle scratch_evidence_review_recommended and drift carve-out.",
+    "Golden pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Product code changes.",
+    "Live Ollama proofs.",
+    "README/AGENTS duplication beyond one cross-link."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert runbook note.",
+  "status": "proposed",
+  "category": "Phase 3 / scratch evidence workflow"
+}

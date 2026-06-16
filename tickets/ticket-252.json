@@ -30,6 +30,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert autocycle scratch gate wiring.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / scratch evidence workflow"
 }
