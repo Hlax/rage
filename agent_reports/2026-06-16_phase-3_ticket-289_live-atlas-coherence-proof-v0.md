@@ -78,4 +78,4 @@ on operator coherence artifacts — not revert to atlas infrastructure streak.
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `cee0cb8`
