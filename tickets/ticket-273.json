@@ -1,0 +1,38 @@
+{
+  "id": "ticket-273",
+  "title": "CLI prove-arbitrary-source-bundle second-run idempotency test",
+  "problem": "Ticket-272 proved module-level idempotency; CLI entry path second-run stability on same temp paths is not explicitly tested.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-272_operator-proof-bundle-idempotency.md",
+    "tests/unit/test_operator_proof_bundle.py"
+  ],
+  "affected_modules": [
+    "tests/unit/test_operator_proof_bundle.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_operator_proof_bundle.py",
+    "agent_reports/2026-06-16_phase-3_ticket-273_cli-proof-bundle-idempotency.md"
+  ],
+  "acceptance_criteria": [
+    "Unit test invokes prove-arbitrary-source-bundle via main() twice on same temp paths.",
+    "Second stdout bundle payload matches stable counts and usable_output from first run.",
+    "Mock LLM only; no live_network.",
+    "Golden pass.",
+    "Full pytest pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_proof_bundle.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "README or AGENTS.md docs.",
+    "Production code changes.",
+    "Live LLM.",
+    "Public site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove CLI idempotency test only.",
+  "status": "proposed",
+  "category": "Phase 3 / arbitrary-source pipeline / product hardening"
+}
