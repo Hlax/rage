@@ -34,6 +34,7 @@
 - `rge/models/schemas.py` — core entity schema stub / data model mirror
 - `rge/llm/schemas.py` — versioned pydantic candidate model outputs
 - `rge/contracts/atlas_snapshot_v0.py` — Research Atlas snapshot v0 contract
+- `rge/contracts/review_batch_v0.py` — Agent Lab review_batch v0 private contract
 - `rge/safety/public_export_policy.py` — public card export allowlist policy
 
 ## Report JSON shapes
@@ -50,6 +51,7 @@
 - **build_info.json** (0.1.0) [public_safe] — rge/modules/card_exporter.py: `export_schema_version`, `generated_at`, `phase`, `card_count`, `memo_count`
 - **public_memos.json** (0.1.0) [public_safe_when_curated] — rge/modules/card_exporter.py: `id`, `title`, `summary`, `updated_at`
 - **snapshot_manifest.json** (implicit) [operator_private] — rge/modules/card_exporter.py: `generated_at`, `bundle_files`, `card_count`
+- **review_batch.json** (review_batch_v0.1.0) [agent_lab_private] — rge/contracts/review_batch_v0.py (contract only; persistence TBD): `schema_version`, `batch_id`, `classification`, `review_scope`, `model_runtime`, `inputs`, `outputs`, `safety`
 - **atlas_snapshot.json** (atlas_snapshot_v0.1.0) [public_safe_when_curated] — rge/contracts/atlas_snapshot_v0.py (contract only; export TBD): `schema_version`, `generated_at`, `snapshot_id`, `root`, `domains`, `runs`, `nodes`, `edges`, `clusters`, `reports`, `cards`, `safety`
 
 ## Public-site data readers
@@ -96,14 +98,15 @@
 - **public_cards.json / public_memos.json / build_info.json** — `public_safe_when_curated`: Fail-closed export policy in public_export_policy.py
 - **run_report / cluster_report / theory_candidate** — `operator_private`: Reporting spec envelopes; not on public site today
 - **improvement_tickets** — `agent_lab_private`: Structured builder queue; must not clutter public atlas
-- **model invocation metadata / live_probe scratch** — `operator_private`: No durable review_batch object yet
+- **model invocation metadata / live_probe scratch** — `operator_private`: Scattered invocation metadata; review_batch contract is separate durable envelope
+- **review_batch_v0.1.0** — `agent_lab_private`: Private principal review envelope; contract defined ticket-280
 - **atlas_snapshot_v0.1.0** — `public_safe_when_curated`: Contract defined ticket-278; population/export deferred
 - **media / images** — `deferred`: Text-first graph; optional media_assets table reserved for later
 
 ## Gaps vs Research Atlas + Agent Lab needs
 
 - **[high]** no_explicit_public_atlas_snapshot_export: Cards alone cannot power graph/atlas UI; atlas_snapshot_v0 contract is shape-only
-- **[high]** no_review_batch_or_synthesis_batch_object: Larger-model passes need durable review_batch, not scattered invocation metadata
+- **[medium]** no_review_batch_or_synthesis_batch_object: review_batch_v0.1.0 contract shape defined (ticket-280); persistence and stronger-model wiring deferred
 - **[medium]** domain_links_not_normalized_for_ui: Domain pack supports overlap/parent/child; atlas needs stable domain_links[]
 - **[medium]** research_question_lineage_not_explicit: Need parent_question_id, spawned_from_claim_ids, spawned_from_report_id, spawn_reason
 - **[medium]** agent_lab_not_separated_from_research_graph: Improvement tickets should export to private Agent Lab layer by default

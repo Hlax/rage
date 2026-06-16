@@ -51,6 +51,7 @@ def collect_schema_files(repo_root: Path) -> list[dict[str, str]]:
         ("rge/models/schemas.py", "core entity schema stub / data model mirror"),
         ("rge/llm/schemas.py", "versioned pydantic candidate model outputs"),
         ("rge/contracts/atlas_snapshot_v0.py", "Research Atlas snapshot v0 contract"),
+        ("rge/contracts/review_batch_v0.py", "Agent Lab review_batch v0 private contract"),
         ("rge/safety/public_export_policy.py", "public card export allowlist policy"),
     ]
     return [
@@ -146,6 +147,22 @@ def collect_export_json_shapes() -> list[dict[str, Any]]:
             "safety_class": "operator_private",
         },
         {
+            "artifact": "review_batch.json",
+            "schema_version": "review_batch_v0.1.0",
+            "producer": "rge/contracts/review_batch_v0.py (contract only; persistence TBD)",
+            "record_fields": [
+                "schema_version",
+                "batch_id",
+                "classification",
+                "review_scope",
+                "model_runtime",
+                "inputs",
+                "outputs",
+                "safety",
+            ],
+            "safety_class": "agent_lab_private",
+        },
+        {
             "artifact": "atlas_snapshot.json",
             "schema_version": ATLAS_SNAPSHOT_SCHEMA_VERSION,
             "producer": "rge/contracts/atlas_snapshot_v0.py (contract only; export TBD)",
@@ -220,7 +237,12 @@ def collect_safety_classifications() -> list[dict[str, str]]:
         {
             "surface": "model invocation metadata / live_probe scratch",
             "classification": "operator_private",
-            "notes": "No durable review_batch object yet",
+            "notes": "Scattered invocation metadata; review_batch contract is separate durable envelope",
+        },
+        {
+            "surface": "review_batch_v0.1.0",
+            "classification": "agent_lab_private",
+            "notes": "Private principal review envelope; contract defined ticket-280",
         },
         {
             "surface": "atlas_snapshot_v0.1.0",
@@ -244,8 +266,8 @@ def collect_research_atlas_gaps() -> list[dict[str, str]]:
         },
         {
             "gap": "no_review_batch_or_synthesis_batch_object",
-            "severity": "high",
-            "notes": "Larger-model passes need durable review_batch, not scattered invocation metadata",
+            "severity": "medium",
+            "notes": "review_batch_v0.1.0 contract shape defined (ticket-280); persistence and stronger-model wiring deferred",
         },
         {
             "gap": "domain_links_not_normalized_for_ui",

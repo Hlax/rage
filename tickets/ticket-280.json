@@ -35,6 +35,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove review_batch contract module and tests only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / Agent Lab / product contract"
 }
