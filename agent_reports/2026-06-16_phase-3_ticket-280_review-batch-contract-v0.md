@@ -61,7 +61,7 @@ None.
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `6848091798c2268a750564180e8c55be6161036d`
 
 ## Recommended next ticket
 
