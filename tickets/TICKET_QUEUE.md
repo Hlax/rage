@@ -293,7 +293,8 @@ superseded
 | 264 | ticket-264 | done | Staged spine CLI stdout asserts rank candidate ids | `phase-3/ticket-264-staged-spine-cli-stdout-candidate-ids` | `agent_reports/2026-06-16_phase-3_ticket-264_staged-spine-cli-stdout-candidate-ids.md` |
 | 265 | ticket-265 | done | README documents staged run rank candidate id output fields | `phase-3/ticket-265-readme-staged-run-candidate-ids` | `agent_reports/2026-06-16_phase-3_ticket-265_readme-staged-run-candidate-ids.md` |
 | 266 | ticket-266 | done | Principal audit post-ticket-265 staged spine docs checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-265.md` |
-| 267 | ticket-267 | ready | End-to-end arbitrary-source operator proof bundle | | `agent_reports/2026-06-16_pre-ticket-267_arbitrary-source-operator-proof-bundle-audit.md` |
+| 267 | ticket-267 | done | End-to-end arbitrary-source operator proof bundle | `phase-3/ticket-267-arbitrary-source-operator-proof-bundle` | `agent_reports/2026-06-16_phase-3_ticket-267_arbitrary-source-operator-proof-bundle.md` |
+| 268 | ticket-268 | proposed | Operator loop plan surfaces arbitrary-source proof bundle command | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1028,9 +1029,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-267 (ready) — End-to-end arbitrary-source operator proof bundle
+ticket-268 (proposed) — Operator loop plan surfaces arbitrary-source proof bundle command
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-267 arbitrary-source operator proof bundle)
+
+- `prove-arbitrary-source-bundle` CLI + `operator_proof_bundle.json` on temp DB (mock staged rank-1 lens)
+- Branch: `phase-3/ticket-267-arbitrary-source-operator-proof-bundle`
+- ticket-268 seeded: operator loop plan visibility for proof bundle command
 
 ## Queue Notes (2026-06-16, ticket-267 reprioritized — arbitrary-source proof bundle)
 

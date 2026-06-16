@@ -47,6 +47,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove operator_proof_bundle module, CLI entry, and unit tests; revert staged run hook if added.",
-  "status": "ready",
+  "status": "done",
   "category": "Phase 3 / arbitrary-source pipeline / product-risk reduction"
 }

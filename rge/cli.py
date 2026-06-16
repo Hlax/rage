@@ -1287,6 +1287,41 @@ def _cmd_promote_improvement_ticket(args: argparse.Namespace) -> int:
             conn.close()
 
 
+def _cmd_prove_arbitrary_source_bundle(args: argparse.Namespace) -> int:
+    from rge.modules.operator_proof_bundle import execute_arbitrary_source_proof_bundle
+
+    if not args.db:
+        payload = {
+            "status": "error",
+            "command": "prove-arbitrary-source-bundle",
+            "detail": "--db <path> is required (use a temp or scratch database).",
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+    db_path = Path(args.db)
+    report_dir = Path(args.output_dir) if args.output_dir else db_path.parent / "reports"
+    staging_dir = (
+        Path(args.staging_dir) if args.staging_dir else db_path.parent / "staged"
+    )
+    export_dir = Path(args.export_dir) if args.export_dir else db_path.parent / "export"
+    bundle_out = Path(args.bundle_out) if args.bundle_out else None
+
+    result = execute_arbitrary_source_proof_bundle(
+        topic=args.topic,
+        domain=args.domain,
+        db_path=db_path,
+        report_dir=report_dir,
+        staging_dir=staging_dir,
+        export_dir=export_dir,
+        bundle_out=bundle_out,
+        run_id=args.run_id or STAGED_FIXTURE_RUN_ID,
+        question_id=args.question_id or STAGED_FIXTURE_QUESTION_ID,
+    )
+    print(json.dumps(result, indent=2))
+    return 0 if result.get("status") == "completed" else 1
+
+
 def _cmd_export_public(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.modules.card_exporter import export_public_cards
@@ -3390,6 +3425,57 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     export_parser.set_defaults(func=_cmd_export_public)
+
+    proof_bundle_parser = subparsers.add_parser(
+        "prove-arbitrary-source-bundle",
+        help="Run mock staged spine and write operator proof bundle JSON.",
+        description=(
+            "Execute the deterministic mock arbitrary-source pipeline "
+            "(discover→ingest→extract→link→build→detect→reconcile→report→export) "
+            "on a temp database and emit operator_proof_bundle.json summarizing "
+            "whether the run produced usable research output."
+        ),
+    )
+    proof_bundle_parser.add_argument(
+        "--topic",
+        required=True,
+        help="Research topic string for run reports.",
+    )
+    proof_bundle_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack id (default: creativity).",
+    )
+    proof_bundle_parser.add_argument(
+        "--db",
+        required=True,
+        help="SQLite database path (required; use temp or scratch only).",
+    )
+    proof_bundle_parser.add_argument(
+        "--output-dir",
+        help="Directory for run_report_latest.json (default: sibling of --db).",
+    )
+    proof_bundle_parser.add_argument(
+        "--staging-dir",
+        help="Staging directory for fetch/ingest (default: sibling of --db).",
+    )
+    proof_bundle_parser.add_argument(
+        "--export-dir",
+        help="Directory for fixture-mode public_cards.json (default: sibling of --db).",
+    )
+    proof_bundle_parser.add_argument(
+        "--bundle-out",
+        help="Path to write operator_proof_bundle.json (optional).",
+    )
+    proof_bundle_parser.add_argument(
+        "--run-id",
+        help=f"Research run id (default: {STAGED_FIXTURE_RUN_ID}).",
+    )
+    proof_bundle_parser.add_argument(
+        "--question-id",
+        help=f"Research question id (default: {STAGED_FIXTURE_QUESTION_ID}).",
+    )
+    proof_bundle_parser.set_defaults(func=_cmd_prove_arbitrary_source_bundle)
 
     model_health_parser = subparsers.add_parser(
         "model-health",
