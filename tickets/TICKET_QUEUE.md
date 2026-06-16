@@ -313,7 +313,8 @@ superseded
 | 284 | ticket-284 | done | Atlas snapshot follow_up_questions projection from research_queue v0 | `phase-3/ticket-284-atlas-follow-up-questions-projection` | `agent_reports/2026-06-16_phase-3_ticket-284_atlas-follow-up-questions-projection.md` |
 | 285 | ticket-285 | done | Live staged atlas snapshot coherence proof (operator opt-in) | `phase-3/ticket-285-live-staged-atlas-coherence-proof` | `agent_reports/2026-06-16_phase-3_ticket-285_live-staged-atlas-coherence-proof.md` |
 | 286 | ticket-286 | done | README operator quickstart live staged atlas coherence proof cross-link | `phase-3/ticket-286-readme-atlas-coherence-crosslink` | `agent_reports/2026-06-16_phase-3_ticket-286_readme-atlas-coherence-crosslink.md` |
-| 287 | ticket-287 | proposed | AGENTS.md cross-link live staged atlas coherence operator proof | | |
+| 287 | ticket-287 | blocked | AGENTS.md cross-link live staged atlas coherence operator proof | | `agent_reports/2026-06-16_ticket-287_audit-gate-block-principal-audit-required.md` |
+| 288 | ticket-288 | proposed | Principal audit post-ticket-286 checkpoint | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1048,9 +1049,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-287 (proposed) — AGENTS.md cross-link live staged atlas coherence operator proof
-(ticket-059 OpenAI placeholder remains deferred)
+ticket-288 (proposed) — Principal audit post-ticket-286 checkpoint
+(ticket-287 blocked pending audit; ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-287 audit gate block)
+
+- Cadence gate: 3 done tickets since post-ticket-283 audit (284–286) — ticket-287 not implemented
+- ticket-288 seeded: principal audit post-ticket-286
+- Resume ticket-287 after audit GO
 
 ## Queue Notes (2026-06-16, ticket-286 README atlas coherence cross-link)
 

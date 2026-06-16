@@ -1,0 +1,34 @@
+{
+  "id": "ticket-288",
+  "title": "Principal audit post-ticket-286 checkpoint",
+  "problem": "Three consecutive done tickets (284–286) since principal audit post-ticket-283. Cadence gate blocks ticket-287 until a read-only principal audit checkpoint resets the counter and confirms release health.",
+  "evidence": [
+    "agent_reports/2026-06-16_principal-audit-post-ticket-283.md",
+    "agent_reports/2026-06-16_phase-3_ticket-284_atlas-follow-up-questions-projection.md",
+    "agent_reports/2026-06-16_phase-3_ticket-285_live-staged-atlas-coherence-proof.md",
+    "agent_reports/2026-06-16_phase-3_ticket-286_readme-atlas-coherence-crosslink.md",
+    "agent_reports/2026-06-16_ticket-287_audit-gate-block-principal-audit-required.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-16_principal-audit-post-ticket-286.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report written with cadence status, mock golden gate results, and GO/NO-GO for ticket-287.",
+    "Read-only checkpoint — no ticket-287 implementation in the same run.",
+    "Cadence counter reset documented for tickets 284–286 window."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Implementing ticket-287 AGENTS.md cross-link.",
+    "Code or schema changes.",
+    "Public export or public-site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove audit report only.",
+  "status": "proposed",
+  "category": "Phase 3 / principal audit / cadence checkpoint"
+}

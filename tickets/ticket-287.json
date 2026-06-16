@@ -30,6 +30,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert AGENTS.md section only.",
-  "status": "proposed",
+  "status": "blocked",
   "category": "Phase 3 / operator documentation / Research Atlas"
 }
