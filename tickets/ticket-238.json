@@ -1,0 +1,42 @@
+{
+  "id": "ticket-238",
+  "title": "Live staged rank-2 detect live LLM opt-in proof (per-step)",
+  "problem": "Ticket-237 proved rank-2 live Ollama build. Pre-ticket-228 hardened scope: per-step rank-2 detect after mock extract + mock link + mock build, mirroring ticket-217 with RGE_ALLOW_LIVE_STAGED_RANK2_DETECT_LIVE_LLM.",
+  "evidence": [
+    "agent_reports/2026-06-15_pre-ticket-228_rank-2-staged-live-llm-audit.md",
+    "agent_reports/2026-06-15_ticket-237_live-staged-rank2-build-live-llm-spine.md",
+    "tests/unit/test_live_staged_detect_live_llm_spine.py"
+  ],
+  "affected_modules": [
+    "rge/modules/contradiction_detector.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/cli.py",
+    "tests/unit/test_live_staged_rank2_detect_live_llm_spine.py",
+    "agent_reports/2026-06-15_ticket-238_live-staged-rank2-detect-live-llm-spine.md"
+  ],
+  "acceptance_criteria": [
+    "RGE_ALLOW_LIVE_STAGED_RANK2_DETECT_LIVE_LLM gate and CLI fallthrough flag for rank-2 staged detect.",
+    "Uses is_staged_rank2_fetch_spine_* heuristics; rank-1 detect fallthrough unchanged.",
+    "Requires seed_domain_opposing_context on temp DB before live discover.",
+    "Opt-in live_network pytest on temp --db; excluded from default pytest.",
+    "Golden pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_live_staged_rank2_detect_live_llm_spine.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Orchestrator live LLM.",
+    "CI Ollama.",
+    "Public export/site.",
+    "Schema migrations.",
+    "Live reconcile/report."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert rank-2 detect live fallthrough and tests.",
+  "status": "proposed",
+  "category": "Phase 3 / live LLM / staged spine"
+}

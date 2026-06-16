@@ -231,6 +231,7 @@ def propose_relationship_drafts(
     source: Any | None = None,
     live_manual_relationship_fallthrough: bool = False,
     live_staged_build_fallthrough: bool = False,
+    live_staged_rank2_build_fallthrough: bool = False,
 ) -> list[dict[str, Any]]:
     """Propose relationship drafts via the model client without persistence."""
     config = load_config()
@@ -273,6 +274,7 @@ def draft_relationships_for_source(
     client: Any | None = None,
     live_manual_relationship_fallthrough: bool = False,
     live_staged_build_fallthrough: bool = False,
+    live_staged_rank2_build_fallthrough: bool = False,
 ) -> list[dict[str, Any]]:
     """Propose relationship drafts via the configured model client."""
     return propose_relationship_drafts(
@@ -285,6 +287,7 @@ def draft_relationships_for_source(
         client=client,
         live_manual_relationship_fallthrough=live_manual_relationship_fallthrough,
         live_staged_build_fallthrough=live_staged_build_fallthrough,
+        live_staged_rank2_build_fallthrough=live_staged_rank2_build_fallthrough,
     )
 
 
@@ -295,6 +298,7 @@ def build_relationships_for_source(
     fixture_name: str | None = None,
     live_manual_relationship_fallthrough: bool = False,
     live_staged_build_fallthrough: bool = False,
+    live_staged_rank2_build_fallthrough: bool = False,
     client: Any | None = None,
     config: Any | None = None,
 ) -> dict[str, Any]:
@@ -346,12 +350,33 @@ def build_relationships_for_source(
     accepted_claim_ids = {claim["id"] for claim in claim_dicts}
 
     cfg = config if config is not None else load_config()
-    if live_manual_relationship_fallthrough and live_staged_build_fallthrough:
+    if live_manual_relationship_fallthrough and (
+        live_staged_build_fallthrough or live_staged_rank2_build_fallthrough
+    ):
         raise ValueError(
-            "live_manual_relationship_fallthrough and live_staged_build_fallthrough "
+            "live_manual_relationship_fallthrough and staged build fallthrough flags "
             "are mutually exclusive."
         )
-    if live_staged_build_fallthrough:
+    if live_staged_build_fallthrough and live_staged_rank2_build_fallthrough:
+        raise ValueError(
+            "live_staged_build_fallthrough and live_staged_rank2_build_fallthrough "
+            "are mutually exclusive."
+        )
+    if live_staged_rank2_build_fallthrough:
+        from rge.modules.staged_spine_heuristics import is_staged_rank2_fetch_spine_source
+
+        if fixture_name:
+            raise ValueError(
+                "live_staged_rank2_build_fallthrough cannot be combined with --fixture; "
+                "live Ollama relationship drafting uses accepted claims from the source."
+            )
+        if not is_staged_rank2_fetch_spine_source(source_record):
+            raise ValueError(
+                "live_staged_rank2_build_fallthrough requires staged OpenAlex rank-2 "
+                "ingest source title (constraint management marker)."
+            )
+        model_client = client or get_model_client(cfg, mode="ollama")
+    elif live_staged_build_fallthrough:
         if fixture_name:
             raise ValueError(
                 "live_staged_build_fallthrough cannot be combined with --fixture; "
@@ -383,6 +408,7 @@ def build_relationships_for_source(
         client=model_client,
         live_manual_relationship_fallthrough=live_manual_relationship_fallthrough,
         live_staged_build_fallthrough=live_staged_build_fallthrough,
+        live_staged_rank2_build_fallthrough=live_staged_rank2_build_fallthrough,
     )
     validated = validate_relationship_candidates(
         proposed,
@@ -568,6 +594,92 @@ def build_relationships_staged_live_fallthrough(
         "command": "build-relationships",
         "live_manual_relationship_fallthrough": False,
         "live_staged_build_fallthrough": True,
+        "source_id": source_id,
+        "source_title": source.title,
+        "source_type": source.source_type,
+        "raw_text_checksum": getattr(source, "raw_text_checksum", None),
+        "fixture_map_match": not manual_text_lacks_relationship_fixture(source),
+        "db_writes": True,
+        "provider": model_client.provider,
+        "model": getattr(model_client, "model", "unknown"),
+        "llm_schema_version": cfg.llm_schema_version,
+        "effective_llm_mode": "ollama",
+        "health": health,
+        "relationship_count": result["relationship_count"],
+        "rejected_relationship_count": result.get("rejected_relationship_count", 0),
+        "relationships": relationships,
+        "evidence_count": len(evidence),
+        "evidence": evidence,
+        "rejected_relationships": result.get("rejected_relationships", []),
+    }
+
+
+def assert_live_staged_rank2_build_live_env(
+    config: Any | None = None,
+    *,
+    command: str = "build-relationships",
+) -> Any:
+    """Require rank-2 staged-family live LLM opt-in in addition to live probe gates."""
+    from rge.modules.live_extraction_write import LiveExtractionWriteError
+    from rge.modules.live_probe import assert_live_probe_env
+
+    allow = os.environ.get(
+        "RGE_ALLOW_LIVE_STAGED_RANK2_BUILD_LIVE_LLM", "0"
+    ).strip().casefold()
+    if allow not in ("1", "true", "yes"):
+        raise LiveExtractionWriteError(
+            f"{command} live staged rank-2 build fallthrough requires "
+            "RGE_ALLOW_LIVE_STAGED_RANK2_BUILD_LIVE_LLM=1."
+        )
+    return assert_live_probe_env(config, command=command)
+
+
+def build_relationships_staged_rank2_live_fallthrough(
+    conn: Any,
+    source_id: str,
+    *,
+    config: Any | None = None,
+    skip_health_check: bool = False,
+    client: Any | None = None,
+) -> dict[str, Any]:
+    """Live Ollama relationship drafting for rank-2 staged OpenAlex ingest sources."""
+    from rge.db.repositories import (
+        RelationshipEvidenceRepository,
+        RelationshipRepository,
+        SourceRepository,
+    )
+    from rge.modules.live_extraction_write import LiveExtractionWriteError
+    from rge.modules.live_probe import assert_ollama_health
+    from rge.modules.staged_spine_heuristics import is_staged_rank2_fetch_spine_source
+
+    cfg = assert_live_staged_rank2_build_live_env(config, command="build-relationships")
+    health = assert_ollama_health(cfg) if not skip_health_check else {}
+
+    source = SourceRepository(conn).get_by_id(source_id)
+    if source is None:
+        raise LiveExtractionWriteError(f"Source not found: {source_id}")
+    if not is_staged_rank2_fetch_spine_source(source):
+        raise LiveExtractionWriteError(
+            "live_staged_rank2_build_fallthrough requires staged OpenAlex rank-2 "
+            "ingest source title (constraint management marker)."
+        )
+
+    model_client = client or get_model_client(cfg, mode="ollama")
+    result = build_relationships_for_source(
+        conn,
+        source_id,
+        live_staged_rank2_build_fallthrough=True,
+        client=model_client,
+        config=cfg,
+    )
+    relationships = RelationshipRepository(conn).list_for_source(source_id)
+    evidence = RelationshipEvidenceRepository(conn).list_for_source(source_id)
+    return {
+        "status": result["status"],
+        "command": "build-relationships",
+        "live_manual_relationship_fallthrough": False,
+        "live_staged_build_fallthrough": False,
+        "live_staged_rank2_build_fallthrough": True,
         "source_id": source_id,
         "source_title": source.title,
         "source_type": source.source_type,

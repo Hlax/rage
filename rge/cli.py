@@ -2063,6 +2063,7 @@ def _cmd_build_relationships(args: argparse.Namespace) -> int:
         build_relationships_for_source,
         build_relationships_manual_live_fallthrough,
         build_relationships_staged_live_fallthrough,
+        build_relationships_staged_rank2_live_fallthrough,
     )
 
     if getattr(args, "live_manual_relationship_fallthrough", False):
@@ -2082,6 +2083,50 @@ def _cmd_build_relationships(args: argparse.Namespace) -> int:
         conn = ensure_database(db_path)
         try:
             payload = build_relationships_manual_live_fallthrough(conn, args.source)
+            print(json.dumps(payload, indent=2))
+            return 0
+        except (LiveExtractionWriteError, LiveProbeGateError, ValueError) as exc:
+            payload = {
+                "status": "error",
+                "command": "build-relationships",
+                "detail": str(exc),
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+        finally:
+            conn.close()
+
+    if getattr(args, "live_staged_build_fallthrough", False) and getattr(
+        args, "live_staged_rank2_build_fallthrough", False
+    ):
+        payload = {
+            "status": "error",
+            "command": "build-relationships",
+            "detail": (
+                "--live-staged-build-fallthrough and --live-staged-rank2-build-fallthrough "
+                "are mutually exclusive."
+            ),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+    if getattr(args, "live_staged_rank2_build_fallthrough", False):
+        db_path = resolve_live_evidence_db(Path(args.db) if args.db else None)
+        if is_default_graph_db(db_path):
+            payload = {
+                "status": "error",
+                "command": "build-relationships",
+                "detail": (
+                    "Refusing live staged rank-2 build fall-through on the default graph DB. "
+                    "Pass --db data/db/live_research_evidence.sqlite or another "
+                    "explicit gitignored evidence path."
+                ),
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+        conn = ensure_database(db_path)
+        try:
+            payload = build_relationships_staged_rank2_live_fallthrough(conn, args.source)
             print(json.dumps(payload, indent=2))
             return 0
         except (LiveExtractionWriteError, LiveProbeGateError, ValueError) as exc:
@@ -2852,6 +2897,16 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "Live Ollama relationship drafting for staged OpenAlex ingest sources (bypasses "
             "staged-fetch auto-mock). Requires RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM=1, "
+            "RGE_LLM_MODE=ollama, RGE_ALLOW_LIVE_LLM=1, and a non-default --db."
+        ),
+    )
+    build_parser.add_argument(
+        "--live-staged-rank2-build-fallthrough",
+        action="store_true",
+        help=(
+            "Live Ollama relationship drafting for rank-2 staged OpenAlex ingest sources "
+            "(bypasses staged-fetch auto-mock). Requires "
+            "RGE_ALLOW_LIVE_STAGED_RANK2_BUILD_LIVE_LLM=1, RGE_ALLOW_LIVE_STAGED_RANK2=1, "
             "RGE_LLM_MODE=ollama, RGE_ALLOW_LIVE_LLM=1, and a non-default --db."
         ),
     )
