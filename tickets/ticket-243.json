@@ -35,6 +35,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert staged_domain_seed and detect test edits.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / operator / test hardening"
 }
