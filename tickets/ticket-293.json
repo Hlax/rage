@@ -1,0 +1,46 @@
+{
+  "id": "ticket-293",
+  "title": "Live NM-1 extraction expansion + Atlas coherence quality proof v0",
+  "problem": "Tickets 289–292 proved Atlas/coherence pipeline mechanics (fixture + live_network CLI chains). Default CI still does not prove that live research extraction produces meaningful graph data for a future Research Atlas UI.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-292_atlas-coherence-cli-pipeline-fixture.md",
+    "agent_reports/2026-06-16_principal-audit-post-ticket-291.md",
+    "README.md (Live validated extraction write / NM-1)"
+  ],
+  "affected_modules": [
+    "operator live NM-1 extraction path",
+    "export-atlas-snapshot CLI",
+    "atlas-coherence-report CLI",
+    "agent_reports/"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-16_phase-3_ticket-293_live-nm1-atlas-quality-proof-v0.md"
+  ],
+  "acceptance_criteria": [
+    "At least one opt-in live research run executed, or report documents exact gate blocker.",
+    "Private atlas_snapshot.json exported from live-derived DB on temp/operator path.",
+    "Coherence report generated from that snapshot via atlas-coherence-report CLI.",
+    "Human-readable quality verdict: GO, PARTIAL, or NO-GO with evidence for claims/sources/concepts/edges/follow-ups/lineage/frontend-readiness.",
+    "Report recommends next concrete improvement from observed live behavior (not abstract infra cleanup).",
+    "Default pytest/golden remain mock-only; no public routes/site UI/schema migration/review_batch persistence."
+  ],
+  "test_plan": [
+    "Operator opt-in live NM-1 run per README (RGE_ALLOW_LIVE_LLM=1, evidence DB) OR documented blocker",
+    "python -m rge.cli export-atlas-snapshot on live-derived temp DB",
+    "python -m rge.cli atlas-coherence-report on exported snapshot",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Adding live tests to default pytest collection.",
+    "Public atlas route or public-site UI.",
+    "Atlas public consumption changes.",
+    "Schema migrations.",
+    "review_batch persistence.",
+    "Another operator-tooling-only ticket without live research quality proof."
+  ],
+  "risk_level": "high",
+  "rollback_plan": "Remove operator report only; no production code required unless minimal helpers.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / live research quality proof"
+}
