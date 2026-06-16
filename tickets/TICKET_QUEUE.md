@@ -305,7 +305,8 @@ superseded
 | 276 | ticket-276 | done | Operator proof bundle export JSON stable on CLI second run | `phase-3/ticket-276-export-json-disk-idempotency` | `agent_reports/2026-06-16_phase-3_ticket-276_export-json-disk-idempotency.md` |
 | 277 | ticket-277 | superseded | Operator proof bundle module-level export JSON stable on second run | | superseded by ticket-278 |
 | 278 | ticket-278 | done | Research Atlas export contract inventory and snapshot schema v0 | `phase-3/ticket-278-research-atlas-export-contract` | `agent_reports/2026-06-16_phase-3_ticket-278_research-atlas-export-contract.md` |
-| 279 | ticket-279 | proposed | Atlas snapshot v0 population from fixture-mode DB (read-only projection) | | |
+| 279 | ticket-279 | done | Atlas snapshot v0 population from fixture-mode DB (read-only projection) | `phase-3/ticket-279-atlas-snapshot-population` | `agent_reports/2026-06-16_phase-3_ticket-279_atlas-snapshot-population.md` |
+| 280 | ticket-280 | proposed | Agent Lab review_batch contract v0 schema and fixture | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1040,9 +1041,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-279 (proposed) — Atlas snapshot v0 population from fixture-mode DB (read-only projection)
+ticket-280 (proposed) — Agent Lab review_batch contract v0 schema and fixture
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-279 atlas snapshot population)
+
+- `build_atlas_snapshot_from_db` projects cards/nodes/edges from fixture-mode MVP DB
+- Creativity golden snapshot: `fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json`
+- ticket-280 seeded: Agent Lab `review_batch` contract v0
 
 ## Queue Notes (2026-06-16, ticket-278 Research Atlas export contract)
 

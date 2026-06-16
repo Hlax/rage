@@ -35,6 +35,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove builder module and tests only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / Research Atlas / product contract"
 }
