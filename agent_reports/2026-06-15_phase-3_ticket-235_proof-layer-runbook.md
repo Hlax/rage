@@ -38,8 +38,8 @@ python -m rge.cli verify --skip-site
 
 ## Next ticket
 
-**ticket-232** — Pre-ticket audit echo for ticket-230 (rank-2 live extract). ticket-230 remains **NO-GO** until that report exists.
+**ticket-230** — rank-2 staged extract live LLM opt-in proof (pre-ticket-230 GO).
 
 ## Merge note
 
-Docs-only ticket; commit/merge to `main` pending operator request per repo git protocol.
+Merged to `main` @ `65e4efa` (fast-forward).
