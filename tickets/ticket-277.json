@@ -1,10 +1,9 @@
 {
-  "id": "ticket-276",
-  "title": "Operator proof bundle export JSON stable on CLI second run",
-  "problem": "Tickets 272–274 proved bundle stdout and bundle-out disk idempotency; export_path public card JSON stability across second CLI run is not explicitly asserted.",
+  "id": "ticket-277",
+  "title": "Operator proof bundle module-level export JSON stable on second run",
+  "problem": "Ticket-276 proved CLI export_path disk idempotency; module-level execute_arbitrary_source_proof_bundle second-run export JSON stability is not explicitly asserted.",
   "evidence": [
-    "agent_reports/2026-06-16_principal-audit-post-ticket-274.md",
-    "agent_reports/2026-06-16_phase-3_ticket-274_bundle-out-disk-idempotency.md",
+    "agent_reports/2026-06-16_phase-3_ticket-276_export-json-disk-idempotency.md",
     "tests/unit/test_operator_proof_bundle.py"
   ],
   "affected_modules": [
@@ -12,10 +11,10 @@
   ],
   "expected_files": [
     "tests/unit/test_operator_proof_bundle.py",
-    "agent_reports/2026-06-16_phase-3_ticket-276_export-json-disk-idempotency.md"
+    "agent_reports/2026-06-16_phase-3_ticket-277_module-export-json-idempotency.md"
   ],
   "acceptance_criteria": [
-    "Unit test runs prove-arbitrary-source-bundle via main() twice on same temp paths.",
+    "Unit test runs execute_arbitrary_source_proof_bundle twice on same temp paths.",
     "Second on-disk export_path JSON card count and stable card ids match first run.",
     "Mock LLM only; no live_network.",
     "Golden pass.",
@@ -33,7 +32,7 @@
     "Public site changes."
   ],
   "risk_level": "low",
-  "rollback_plan": "Remove export-path idempotency test only.",
-  "status": "done",
+  "rollback_plan": "Remove module export-path idempotency test only.",
+  "status": "proposed",
   "category": "Phase 3 / arbitrary-source pipeline / product hardening"
 }
