@@ -321,7 +321,8 @@ superseded
 | 293 | ticket-293 | done | Live NM-1 extraction expansion + Atlas coherence quality proof v0 | `phase-3/ticket-293-live-nm1-atlas-quality-proof-v0` | `agent_reports/2026-06-16_phase-3_ticket-293_live-nm1-atlas-quality-proof-v0.md` |
 | 294 | ticket-294 | done | Evidence DB research_run lineage + live-derived atlas card projection v0 | `phase-3/ticket-294-evidence-db-atlas-projection-v0` | `agent_reports/2026-06-16_phase-3_ticket-294_evidence-db-atlas-projection-v0.md` |
 | 295 | ticket-295 | done | Evidence DB run report projection for atlas coherence GO | `phase-3/ticket-295-evidence-db-run-report-projection` | `agent_reports/2026-06-16_phase-3_ticket-295_evidence-db-run-report-projection.md` |
-| 296 | ticket-296 | proposed | Evidence DB cluster summary projection for atlas overall GO | | |
+| 296 | ticket-296 | done | Evidence DB cluster summary projection for atlas overall GO | `phase-3/ticket-296-evidence-db-cluster-projection` | `agent_reports/2026-06-16_phase-3_ticket-296_evidence-db-cluster-projection.md` |
+| 297 | ticket-297 | proposed | Evidence DB relationship edge projection for atlas overall GO | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1057,9 +1058,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-296 (proposed) — Evidence DB cluster summary projection for atlas overall GO
+ticket-297 (proposed) — Evidence DB relationship edge projection for atlas overall GO
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-296 evidence DB cluster projection)
+
+- `ensure_evidence_cluster_summary`: DB-only cluster_reports for evidence atlas export
+- Coherence clusters warn cleared; overall partial remains (empty relationship edges on extract+link spine)
+- ticket-297 seeded: relationship edge projection for overall GO
 
 ## Queue Notes (2026-06-16, ticket-295 evidence DB run report projection)
 
