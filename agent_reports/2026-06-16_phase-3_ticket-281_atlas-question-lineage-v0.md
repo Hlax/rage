@@ -66,7 +66,7 @@ Root run in fixture includes `research_question_id` and `parent_question_id: nul
 
 ## Merge to main
 
-*(pending merge)*
+Merge commit: `03753ac42c6219fcf63dc814076d94a8b662cfe1`
 
 ## Recommended next ticket
 
