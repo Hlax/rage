@@ -72,7 +72,7 @@ None. Rank-2 spine still runs inside staged orchestrator for parity; proof bundl
 
 ## Merge to main
 
-_Pending merge — hash recorded after merge._
+Merge commit: `d1c819d5f8051f7858a220ba39354c4a7faf9f58`
 
 ## Recommended next ticket
 
