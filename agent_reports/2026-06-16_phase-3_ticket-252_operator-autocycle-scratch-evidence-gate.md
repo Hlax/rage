@@ -63,8 +63,8 @@ None.
 
 ## Merge to main
 
-- Merge commit: _(pending)_
-- Post-merge pytest: _(pending)_
+- Merge commit: `c3ceadd90a00ea663e42c63fce5b915ae5f98fe4`
+- Post-merge pytest: **678 passed**, 30 deselected
 
 ## Recommended next ticket
 
