@@ -174,7 +174,9 @@ gates, temp `--db`, mock extract + mock link upstream
 proof — not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_RANK2_DETECT_LIVE_LLM=1`,
 `RGE_ALLOW_LIVE_STAGED_RANK2=1`, `RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama`, network
 gates, temp `--db`, **domain opposing context seed** before live discover
-(`seed_domain_opposing_context()`), mock extract + mock link + mock build upstream, and
+(`seed_domain_opposing_context()` in `tests/unit/staged_domain_seed.py` — **forces mock LLM**
+for GT7 seed extract/link/build under global live operator env; ticket-243), mock extract +
+mock link + mock build upstream, and
 `detect-contradictions --live-staged-rank2-detect-fallthrough` (or chained pytest in
 `tests/unit/test_live_staged_rank2_detect_live_llm_spine.py` with `live_network` and
 `live_smoke` markers). **Staged rank-2 per-step live Ollama surface is closed at detect**
@@ -182,8 +184,9 @@ gates, temp `--db`, **domain opposing context seed** before live discover
 
 **Rank-2 per-step live Ollama closure checklist (ticket-240):** consolidated operator
 checklist with shared env, per-step gate table, and pytest commands — see README
-Operator Quickstart **One-time rank-2 per-step live Ollama verification**. Full staged
-operator env variable table and per-step gate matrix:
+Operator Quickstart **One-time rank-2 per-step live Ollama verification** (includes
+**Domain seed** mock-isolation note; ticket-245). Full staged operator env variable table
+and per-step gate matrix:
 `docs/agents/12_RUNTIME_CONFIG.md` (**Live staged operator env profile**). Reconcile/report
 remain deterministic on both ranks.
 
@@ -199,7 +202,8 @@ not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM=1` (separ
 mock `RGE_ALLOW_LIVE_STAGED_DETECT=1`), `RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama`,
 network gates above, temp `--db`, mock extract + mock link + mock build upstream in
 pytest, **domain opposing context seed** on the temp DB before live discover
-(`seed_domain_opposing_context()` in `tests/unit/staged_domain_seed.py`), and
+(`seed_domain_opposing_context()` in `tests/unit/staged_domain_seed.py` — **forces mock LLM**
+for GT7 seed extract/link/build under global live operator env; ticket-243), and
 `detect-contradictions --live-staged-detect-fallthrough` (or chained pytest in
 `tests/unit/test_live_staged_detect_live_llm_spine.py` with `live_network` and
 `live_smoke` markers). **Staged rank-1 per-step live Ollama surface is closed at detect**

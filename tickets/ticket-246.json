@@ -25,6 +25,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert AGENTS.md doc edits.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / docs / operator"
 }
