@@ -119,8 +119,9 @@ detect), `RGE_ALLOW_LIVE_STAGED_RECONCILE=1`
 (rank-2 discover→fetch→ingest→second-candidate mock extract→…→generate-run-report), or
 `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1`
 (single-command discover→dual-candidate report via `research run --staged-spine`).
-See README **Operator Quickstart** (**Live staged proof layers (tickets 233–234)** and
-**Live staged network proofs**) for per-step commands
+See README **Operator Quickstart** (**Live staged proof layers (tickets 233–234)**,
+**Live staged network proofs**, and **Live staged orchestrator → private atlas snapshot
+coherence (ticket-285)**) for per-step commands
 and **One-time live orchestrator verification (operator checklist)** for the recommended
 one-time orchestrator `pytest -m live_network` checklist (temp DB only; not CI-enforced).
 
@@ -129,6 +130,25 @@ fetch (pass independently of fixture phrases); layer 2 = network-free mock spine
 CI); layer 3 = combined live + mock spine — skips with `unsuitable_live_artifact` when
 fetchable but fixture-incompatible (not a fetch/reconcile/report regression). See README
 **Operator Quickstart** proof-layer table and skip JSON interpretation.
+
+**Live staged atlas snapshot coherence (ticket-285):** opt-in operator proof on the same
+`RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1` gate as ticket-193 — staged orchestrator on temp
+`--db`, private `export-atlas-snapshot` **without** `--fixture-mode`, then contract
+coherence audit (`validate_atlas_snapshot`, private-field scan, minimum graph thresholds).
+Mock LLM upstream only; layer-3 preflight skips with `unsuitable_live_artifact` when live
+fetch lacks mock-spine marker phrases (not an atlas export regression). Operator pytest:
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+$env:RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR = "1"
+$env:RGE_ALLOW_SOURCE_NETWORK = "1"
+$env:OPENALEX_MAILTO = "operator@example.com"
+python -m pytest tests/unit/test_live_staged_atlas_snapshot_coherence.py -m live_network -q
+```
+
+See README **Operator Quickstart** (*Live staged orchestrator → private atlas snapshot
+coherence*) for skip semantics and coherence table rows. Temp DB/atlas JSON only — no
+`export-public` or public-site writes.
 
 **Live staged extract (live Ollama; ticket-204):** separate per-step operator proof —
 not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_EXTRACT_LIVE_LLM=1`,
