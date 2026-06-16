@@ -1,0 +1,40 @@
+{
+  "id": "ticket-280",
+  "title": "Agent Lab review_batch contract v0 schema and fixture",
+  "problem": "ticket-278 inventory flagged missing review_batch/synthesis_batch object for principal larger-model review loops; Agent Lab layer needs a durable private contract separate from public atlas.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-279_atlas-snapshot-population.md",
+    "docs/contracts/research_atlas_export_contract_inventory_v0.md",
+    "docs/agents/08_REPORTING_SPEC.md"
+  ],
+  "affected_modules": [
+    "rge/contracts/review_batch_v0.py"
+  ],
+  "expected_files": [
+    "rge/contracts/review_batch_v0.py",
+    "fixtures/agent_lab/review_batch_v0_minimal.json",
+    "tests/unit/test_review_batch_contract.py",
+    "agent_reports/2026-06-16_phase-3_ticket-280_review-batch-contract-v0.md"
+  ],
+  "acceptance_criteria": [
+    "review_batch_v0.1.0 pydantic contract with model runtime metadata envelope.",
+    "Minimal fixture validates; classified agent_lab_private in inventory notes.",
+    "Unit tests for fail-closed validation.",
+    "Golden pass and full pytest pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_review_batch_contract.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Public atlas export.",
+    "Public-site UI.",
+    "Live Ollama wiring.",
+    "Schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove review_batch contract module and tests only.",
+  "status": "proposed",
+  "category": "Phase 3 / Agent Lab / product contract"
+}

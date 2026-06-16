@@ -1,0 +1,277 @@
+{
+  "schema_version": "atlas_snapshot_v0.1.0",
+  "generated_at": "2026-06-16T00:00:00Z",
+  "snapshot_id": "snap_creativity_fixture_v0_001",
+  "root": {
+    "topic": "Does AI improve creative output while reducing diversity?",
+    "primary_question": "Does AI improve creative output while reducing diversity?",
+    "domain_pack": "creativity"
+  },
+  "domains": [
+    {
+      "id": "creativity",
+      "label": "creativity",
+      "role": "primary"
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "run_golden_fixture_mvp",
+      "topic": "Does AI improve creative output while reducing diversity?",
+      "domain_pack": "creativity",
+      "mode": "fixture",
+      "status": "completed"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "cpt_agency",
+      "node_type": "concept",
+      "label": "agency",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_ai_assistance",
+      "node_type": "concept",
+      "label": "AI assistance",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_authorship",
+      "node_type": "concept",
+      "label": "authorship",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_brainstorming",
+      "node_type": "concept",
+      "label": "brainstorming",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_co_creation",
+      "node_type": "concept",
+      "label": "co-creation",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_constraint",
+      "node_type": "concept",
+      "label": "constraint",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_creative_phase",
+      "node_type": "concept",
+      "label": "creative phase",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_creativity_domain",
+      "node_type": "concept",
+      "label": "creativity",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_curation",
+      "node_type": "concept",
+      "label": "curation",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_diversity",
+      "node_type": "concept",
+      "label": "diversity",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_human_control",
+      "node_type": "concept",
+      "label": "human control",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_ideation",
+      "node_type": "concept",
+      "label": "ideation",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_intention",
+      "node_type": "concept",
+      "label": "intention",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_iteration",
+      "node_type": "concept",
+      "label": "iteration",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_meaning",
+      "node_type": "concept",
+      "label": "meaning",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_novelty",
+      "node_type": "concept",
+      "label": "novelty",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_originality",
+      "node_type": "concept",
+      "label": "originality",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_ownership",
+      "node_type": "concept",
+      "label": "ownership",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_prompt_engineering",
+      "node_type": "concept",
+      "label": "prompt engineering",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_selection_burden",
+      "node_type": "concept",
+      "label": "selection burden",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_semantic_diversity",
+      "node_type": "concept",
+      "label": "semantic diversity",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_style_collapse",
+      "node_type": "concept",
+      "label": "style collapse",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_taste",
+      "node_type": "concept",
+      "label": "taste",
+      "domain_pack": "creativity"
+    },
+    {
+      "id": "cpt_variation_volume",
+      "node_type": "concept",
+      "label": "variation volume",
+      "domain_pack": "creativity"
+    }
+  ],
+  "edges": [
+    {
+      "id": "rel_28254d9b65c568be",
+      "edge_type": "relationship",
+      "predicate": "may_increase",
+      "source_node_id": "cpt_ai_assistance",
+      "target_node_id": "cpt_diversity",
+      "source_label": "AI assistance",
+      "target_label": "diversity",
+      "scope": "under divergent prompting when participants generate multiple divergent directions",
+      "confidence": 0.5
+    },
+    {
+      "id": "rel_317b2f78489f21b8",
+      "edge_type": "relationship",
+      "predicate": "may_reduce",
+      "source_node_id": "cpt_ai_assistance",
+      "target_node_id": "cpt_semantic_diversity",
+      "source_label": "AI assistance",
+      "target_label": "semantic diversity",
+      "scope": "short-form writing tasks",
+      "confidence": 0.62
+    }
+  ],
+  "clusters": [
+    {
+      "cluster_id": "crpt_56a4b3c77556fd70",
+      "cluster_label": "AI assistance and semantic diversity",
+      "run_id": null
+    }
+  ],
+  "reports": [
+    {
+      "report_type": "run_report",
+      "schema_version": "0.1.0",
+      "run_id": "run_golden_fixture_mvp",
+      "status": "informational"
+    }
+  ],
+  "cards": [
+    {
+      "id": "card_golden_diversity_001",
+      "type": "cluster_card",
+      "title": "AI assistance and semantic diversity",
+      "summary": "Fixture evidence suggests AI-assisted brainstorming may improve average idea quality while reducing semantic diversity in some short-form writing tasks.",
+      "confidence": "medium",
+      "concepts": [
+        "AI assistance",
+        "semantic diversity",
+        "ideation"
+      ],
+      "source_count": 3,
+      "public_caveats": [
+        "Evidence is from short-form creative writing fixtures."
+      ],
+      "public_source_metadata": [
+        {
+          "title": "Creativity AI diversity (fixture)",
+          "year": 2026,
+          "source_type": "fixture"
+        }
+      ],
+      "related_cards": [
+        "card_golden_originality_002"
+      ],
+      "public_detail_level": "standard",
+      "evidence_type": "empirical",
+      "public_run_timestamp": "2026-06-12T00:00:00Z",
+      "updated_at": "2026-06-12T00:00:00Z"
+    },
+    {
+      "id": "card_golden_originality_002",
+      "type": "cluster_card",
+      "title": "AI assistance and creative originality",
+      "summary": "Accepted fixture claims indicate AI assistance can raise output volume while leaving open whether originality gains persist outside controlled ideation tasks.",
+      "confidence": "medium",
+      "concepts": [
+        "AI assistance",
+        "originality",
+        "human control"
+      ],
+      "source_count": 3,
+      "public_caveats": [
+        "Fixture-derived synthesis; not a live literature review."
+      ],
+      "public_source_metadata": [
+        {
+          "title": "Creativity AI diversity (fixture)",
+          "year": 2026,
+          "source_type": "fixture"
+        }
+      ],
+      "related_cards": [
+        "card_golden_diversity_001"
+      ],
+      "public_detail_level": "standard",
+      "evidence_type": "empirical",
+      "public_run_timestamp": "2026-06-12T00:00:00Z",
+      "updated_at": "2026-06-12T00:00:00Z"
+    }
+  ],
+  "safety": {
+    "public_safe": true,
+    "safety_audit_id": "audit_atlas_fixture_v0_001"
+  }
+}
