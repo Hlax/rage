@@ -15,6 +15,7 @@ from rge.db.repositories import (
     ResearchContractRepository,
     ResearchQueueRepository,
     ResearchRunRepository,
+    RunReportRepository,
     sha256_hex,
 )
 from rge.modules.domain_pack_loader import load_domain_pack, source_strategy_from_search_templates
@@ -266,3 +267,47 @@ def claim_backed_card_extras(conn: sqlite3.Connection, record: Any) -> dict[str,
         if row and row["created_at"]:
             extras["public_run_timestamp"] = row["created_at"]
     return extras
+
+
+def ensure_evidence_run_report(
+    conn: sqlite3.Connection,
+    *,
+    topic: str,
+    domain_pack: str = "creativity",
+) -> dict[str, Any]:
+    """Persist an evidence DB run report row for atlas reports[] projection."""
+    if not db_has_non_fixture_manual_claims(conn):
+        return {"status": "skipped", "reason": "no_non_fixture_manual_claims"}
+
+    contract_id, _question_id, run_id = _evidence_lineage_ids(topic)
+    ensure_evidence_research_run_lineage(conn, topic=topic, domain_pack=domain_pack)
+
+    report_repo = RunReportRepository(conn)
+    existing = report_repo.get_by_run_id(run_id)
+    if existing is not None:
+        return {
+            "status": "already_present",
+            "run_id": run_id,
+            "report_id": existing.id,
+        }
+
+    from rge.modules.run_evaluator import build_run_report
+
+    report = build_run_report(
+        conn,
+        run_id=run_id,
+        topic=topic,
+        domain_pack=domain_pack,
+        contract_id=contract_id,
+    )
+    record = report_repo.insert(
+        run_id=run_id,
+        topic=topic,
+        domain_pack=domain_pack,
+        report=report,
+    )
+    return {
+        "status": "created",
+        "run_id": run_id,
+        "report_id": record.id,
+    }
