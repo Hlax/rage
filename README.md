@@ -196,6 +196,77 @@ Rank #1 staged steps use auto mock routing; rank #2 uses explicit `--fixture` bi
 inside the orchestrator. Automated proof:
 `tests/unit/test_staged_fixture_mode_run_spine.py`.
 
+**Live staged proof layers (tickets 233–234)** — operator runbook for interpreting
+live OpenAlex proofs. Default CI runs **layer 2 only** (network-free). Layers 1 and 3
+require `-m live_network` and env gates below.
+
+| Layer | What it proves | Typical signal | CI? |
+|------:|----------------|----------------|-----|
+| **1 — Live acquisition** | Real OpenAlex discover + top-N fetch writes a staged artifact | pytest **PASS** | No (`live_network`) |
+| **2 — Mock spine** | Ingest → extract/link/build/detect → reconcile/report with checksum-pinned mock fixtures | default `pytest` **PASS** | Yes |
+| **3 — Combined live mock spine** | Layer 1 + live ingest + mock-fixture downstream steps | pytest **PASS** or **SKIPPED** | No (`live_network`) |
+
+**Layer 1 — run first to validate fetch resilience** (ticket-233: OA-first URL ordering,
+multi-URL retry on 403/401/406, top-N candidates — rank-1 publisher 403 alone must not
+fail acquisition):
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+$env:RGE_ALLOW_LIVE_STAGED_FETCH = "1"
+$env:RGE_ALLOW_SOURCE_NETWORK = "1"
+$env:OPENALEX_MAILTO = "operator@example.com"
+
+python -m pytest tests/unit/test_live_staged_fetch_validation.py -m live_network -q
+python -m pytest tests/unit/test_live_staged_reconcile_mock_spine.py::test_live_openalex_source_acquisition_for_reconcile_spine -m live_network -q
+```
+
+Inspect successful `fetch-candidate` JSON for `selected_url_kind` and `attempted_urls`
+when a publisher route was blocked but an OA route succeeded.
+
+**Layer 2 — deterministic mock spine (default CI):** patched OpenAlex + HTML fixtures;
+no live network. Examples: `tests/unit/test_staged_ingest_reconcile_spine.py`,
+`tests/unit/test_staged_ingest_run_report_spine.py`, `tests/unit/test_staged_fixture_mode_run_spine.py`.
+
+**Layer 3 — combined live mock spine:** full per-step proofs (extract through
+reconcile/report) when a fetched live artifact also satisfies mock-spine marker phrases
+(`human-ai co-creativity`, `songwriting` — checksum-pinned fixture text). Each spine
+module exposes `test_live_openalex_combined_*` alongside `test_live_openalex_source_acquisition_*`.
+
+Example (reconcile; requires `RGE_ALLOW_LIVE_STAGED_RECONCILE=1`):
+
+```powershell
+python -m pytest tests/unit/test_live_staged_reconcile_mock_spine.py::test_live_openalex_combined_reconcile_mock_spine -m live_network -q
+```
+
+**Interpreting `unsuitable_live_artifact` (layer 3 skip — not a regression):** when live
+discover + fetch succeed for one or more top-N candidates but **none** of the fetched
+artifacts contain the mock-spine marker phrases, combined tests **skip** with structured
+JSON (`reason: unsuitable_live_artifact`). This is **catalog/fixture coupling**, not a
+fetch, reconcile, or report engine failure.
+
+Example skip body (truncated):
+
+```json
+{
+  "proof_layer": "combined_live_mock_spine",
+  "reason": "unsuitable_live_artifact",
+  "detail": "Live source acquisition succeeded for one or more candidates, but none of the fetched top-N artifacts satisfy mock-spine marker preconditions.",
+  "required_markers": ["human-ai co-creativity", "songwriting"],
+  "unsuitable_candidates": [{ "candidate_id": "disc_openalex_...", "missing_markers": ["songwriting"] }],
+  "assessment": "Not a fetch/reconcile/report regression — live OpenAlex catalog text does not match checksum-pinned mock fixture phrases for this query."
+}
+```
+
+| Observation | Likely meaning | Action |
+|-------------|----------------|--------|
+| Layer 1 **PASS**, layer 3 **SKIPPED** (`unsuitable_live_artifact`) | Acquisition healthy; today's OpenAlex results ≠ fixture phrases | **Expected** — treat as NO-GO for combined proof only; rely on layer 2 for CI |
+| Layer 1 **FAIL** (`forbidden`, `paywall_blocked`, `no_fetchable_url`) | No fetchable URL in top-N | Retry from unrestricted network; inspect `attempted_urls`; adjust query toward OA works |
+| Layer 3 **FAIL** (not skip) after layer 1 passed | Downstream spine regression | Investigate ingest/mock LLM/reconcile/report — not acquisition |
+| Combined **PASS** | Live catalog returned fixture-compatible text | Full operator mock-spine proof succeeded |
+
+Helpers: `tests/unit/live_staged_proof_layers.py` (`require_mock_spine_compatible_fetch_or_skip`,
+`run_live_source_acquisition`).
+
 **Live staged network proofs** (operator opt-in; tickets 167–193): pytest proofs on
 real OpenAlex HTTP with temp DB paths. **Not** run in CI or default `pytest`
 (collection excludes `live_network`; see `pyproject.toml`). Default staged proofs use

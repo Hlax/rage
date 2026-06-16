@@ -27,6 +27,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert README/AGENTS doc edits.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / operator documentation"
 }

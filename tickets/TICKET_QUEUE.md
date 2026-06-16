@@ -266,7 +266,7 @@ superseded
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
 | 234 | ticket-234 | done | Decouple live staged mock-spine proofs from fixture phrases | `phase-3/ticket-234-live-staged-proof-layers` | `agent_reports/2026-06-15_phase-3_ticket-234_live-staged-proof-layers.md` |
-| 235 | ticket-235 | proposed | README operator proof-layer runbook (unsuitable_live_artifact) | | |
+| 235 | ticket-235 | done | README operator proof-layer runbook (unsuitable_live_artifact) | `phase-3/ticket-235-proof-layer-runbook` | `agent_reports/2026-06-15_phase-3_ticket-235_proof-layer-runbook.md` |
 
 ## Queue Notes (2026-06-14, corrective NM-1/NM-2/NM-3 integration)
 
@@ -996,10 +996,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-235 (proposed) — README operator proof-layer runbook (unsuitable_live_artifact)
 ticket-230 (proposed) — Live staged rank-2 extract live LLM opt-in proof (pre-ticket-230 GO)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-15, ticket-235 proof-layer runbook)
+
+- README **Live staged proof layers (tickets 233–234)** documents layers 1/2/3,
+  `unsuitable_live_artifact` skip JSON, and operator retry table.
+- AGENTS cross-reference added; no product code changes.
 
 ## Queue Notes (2026-06-15, ticket-232 pre-ticket-230 echo audit)
 
