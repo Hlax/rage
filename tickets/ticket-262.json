@@ -29,6 +29,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert unit test assertions only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / staged spine product hardening"
 }
