@@ -35,6 +35,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove CLI subcommand; builder unchanged.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / Research Atlas / operator CLI"
 }
