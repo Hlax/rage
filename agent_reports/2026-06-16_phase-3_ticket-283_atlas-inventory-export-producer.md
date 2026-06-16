@@ -58,7 +58,7 @@ Regenerated inventory via `python -m rge.modules.atlas_contract_inventory`; comm
 
 ## Merge to main
 
-*(pending merge)*
+Merge commit: `9ac7ff7`
 
 ## Recommended next ticket
 
