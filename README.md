@@ -27,7 +27,7 @@ third-party repo-direction audit):
 |------|--------|---------------|
 | **MVP-Engine** | **mock/fixture-proven** | Deterministic Python pipeline, validator gate, safety model, public export, golden tests (GT01–GT26), and fixture-mode orchestration are real and green. |
 | **MVP-Research** | **partial — NM-1 + NM-4 evidence DB** | NM-1: first live validated claim write via `extract-claims-live` on gitignored `data/db/live_research_evidence.sqlite`. NM-4: operator-proven live manual_text spine through reconcile on that same evidence DB (tickets 127–133). Default graph DB synthnote path remains checksum-mock — not arbitrary live inference. |
-| **Arbitrary-source pipeline** | **partial** | **Phase 3 staged spine (mock/fixture-proven):** discover → fetch → ingest-staged → extract → link → build → detect → reconcile → report for rank #1 and #2 OpenAlex candidates, dual-candidate idempotency, and `research run --fixture-mode --staged-spine` orchestration (tickets 144–164). Unit tests patch OpenAlex/fetcher I/O; operator runs require `RGE_ALLOW_SOURCE_NETWORK=1`. **Opt-in operator proofs (not CI):** per-step live OpenAlex proofs (tickets 167–190) and single-command orchestrator proof via `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1` (ticket-193) as `pytest -m live_network` — see Operator Quickstart. **Per-step live Ollama (rank-1 only; orchestrator still mock):** extract (204), link (208), build (212), detect (217) — each has a separate `RGE_ALLOW_LIVE_STAGED_*_LIVE_LLM=1` gate and CLI fallthrough flag. **Deterministic Python (no live LLM path):** `reconcile-scores` and `generate-run-report` on staged spine (tickets 184/187; pre-ticket audits 221/222). **`RGE_ALLOW_LIVE_STAGED_RECONCILE` / `_REPORT`** gate OpenAlex network spines only — not Ollama. **Not proven in CI/default pytest:** live OpenAlex (operator opt-in); live LLM on full staged orchestrator. **Evidence DB:** NM-4 live ingest → extract/link/relationship/contradiction fall-through + deterministic reconcile (`--evidence-db-reconcile`) on gitignored evidence DB. **Default graph DB:** committed synthnote files still use checksum-pinned mock fixtures. `research run` without `--fixture-mode` remains `not_implemented`. |
+| **Arbitrary-source pipeline** | **partial** | **Phase 3 staged spine (mock/fixture-proven):** discover → fetch → ingest-staged → extract → link → build → detect → reconcile → report for rank #1 and #2 OpenAlex candidates, dual-candidate idempotency, and `research run --fixture-mode --staged-spine` orchestration (tickets 144–164). Unit tests patch OpenAlex/fetcher I/O; operator runs require `RGE_ALLOW_SOURCE_NETWORK=1`. **Opt-in operator proofs (not CI):** per-step live OpenAlex proofs (tickets 167–190) and single-command orchestrator proof via `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1` (ticket-193) as `pytest -m live_network` — see Operator Quickstart. **Per-step live Ollama (rank-1 and rank-2; orchestrator still mock):** rank-1 extract/link/build/detect (204/208/212/217); rank-2 extract/link/build/detect (230/236/237/238) — each has a separate `RGE_ALLOW_LIVE_STAGED_*_LIVE_LLM` or `RGE_ALLOW_LIVE_STAGED_RANK2_*_LIVE_LLM` gate and CLI fallthrough flag; rank-2 surface **closed at detect** (ticket-240 checklist). **Deterministic Python (no live LLM path):** `reconcile-scores` and `generate-run-report` on staged spine (tickets 184/187; pre-ticket audits 221/222). **`RGE_ALLOW_LIVE_STAGED_RECONCILE` / `_REPORT`** gate OpenAlex network spines only — not Ollama. **Not proven in CI/default pytest:** live OpenAlex (operator opt-in); live LLM on full staged orchestrator. **Evidence DB:** NM-4 live ingest → extract/link/relationship/contradiction fall-through + deterministic reconcile (`--evidence-db-reconcile`) on gitignored evidence DB. **Default graph DB:** committed synthnote files still use checksum-pinned mock fixtures. `research run` without `--fixture-mode` remains `not_implemented`. |
 | **Cloud providers** | **deferred** | OpenAI/OpenRouter/etc. are not wired (ticket-059 placeholder). |
 
 **Phase 1 MVP is complete** for the engine tier. The public site still serves **fixture
@@ -60,7 +60,8 @@ What is **live report-only** (no graph writes unless operator explicitly opts in
 - **Per-step live staged link** (ticket-208): live Ollama `link-concepts --live-staged-link-fallthrough` after mock extract on rank-1 staged source (temp `--db` only; separate env gate from mock link) — see Operator Quickstart **Live staged link (live Ollama)**
 - **Per-step live staged build** (ticket-212): live Ollama `build-relationships --live-staged-build-fallthrough` after mock extract + mock link on rank-1 staged source (temp `--db` only; separate env gate from mock build) — see Operator Quickstart **Live staged build (live Ollama)**
 - **Per-step live staged detect** (ticket-217): live Ollama `detect-contradictions --live-staged-detect-fallthrough` after mock extract + mock link + mock build on rank-1 staged source (temp `--db` only; separate env gate from mock detect; domain opposing context seed required) — see Operator Quickstart **Live staged detect (live Ollama)**
-- **Staged reconcile and report** (tickets 184/187): `reconcile-scores` and `generate-run-report` are **deterministic Python** (`score_reconciler.py`, `run_evaluator.py`) — no live LLM fallthrough. `RGE_ALLOW_LIVE_STAGED_RECONCILE` / `RGE_ALLOW_LIVE_STAGED_REPORT` opt into **live OpenAlex network** pytest spines only (mock LLM upstream). Staged rank-1 model-assisted steps end at detect (204/208/212/217).
+- **Per-step live staged rank-2 extract/link/build/detect** (tickets 230/236/237/238): separate rank-2 `RGE_ALLOW_LIVE_STAGED_RANK2_*_LIVE_LLM` gates and CLI fallthrough flags; surface **closed at detect** — see Operator Quickstart **One-time rank-2 per-step live Ollama verification**
+- **Staged reconcile and report** (tickets 184/187): `reconcile-scores` and `generate-run-report` are **deterministic Python** (`score_reconciler.py`, `run_evaluator.py`) — no live LLM fallthrough. `RGE_ALLOW_LIVE_STAGED_RECONCILE` / `RGE_ALLOW_LIVE_STAGED_REPORT` opt into **live OpenAlex network** pytest spines only (mock LLM upstream). Staged rank-1 and rank-2 model-assisted live Ollama steps end at detect (204–217; 230/236–238).
 
 What requires **explicit live opt-in** (local Ollama only):
 
@@ -471,6 +472,70 @@ python -m rge.cli detect-contradictions --source <source_id> `
   --db <temp.sqlite> --live-staged-rank2-detect-fallthrough
 ```
 
+**One-time rank-2 per-step live Ollama verification (operator checklist; ticket-240):**
+after rank-2 live surface closure (tickets 230/236/237/238), use this checklist to
+validate a fresh operator environment with local Ollama. **Not CI-enforced:** default
+`pytest` and GitHub Golden Gate exclude `live_network` and `live_smoke`; operator opt-in only.
+
+**Closure (post ticket-238):** rank-2 per-step live Ollama is **complete** at detect
+(extract → link → build → detect). No further `RGE_ALLOW_LIVE_STAGED_RANK2_*_LIVE_LLM`
+fallthrough flags are planned. **`reconcile-scores`** and **`generate-run-report`** on
+both ranks remain **deterministic Python** — no live LLM path (pre-ticket audits 221/222).
+The staged orchestrator still **forces** `RGE_LLM_MODE=mock`.
+
+**Shared prerequisites (all rank-2 live steps):**
+
+| Prerequisite | Required value |
+| --- | --- |
+| `RGE_ALLOW_LIVE_STAGED_RANK2` | `1` |
+| `RGE_ALLOW_LIVE_LLM` | `1` |
+| `RGE_LLM_MODE` | `ollama` |
+| `RGE_ALLOW_SOURCE_NETWORK` | `1` |
+| `OPENALEX_MAILTO` | valid contact email (OpenAlex polite pool) |
+| `--db` | temp path only (pytest `tmp_path` or explicit gitignored evidence DB — never default graph DB) |
+| Ollama | `python -m rge.cli model-health` should pass before live steps |
+
+**Per-step rank-2 live gates and proofs:**
+
+| Step | Live Ollama gate | CLI fallthrough | Pytest module | Mock upstream |
+| --- | --- | --- | --- | --- |
+| extract | `RGE_ALLOW_LIVE_STAGED_RANK2_EXTRACT_LIVE_LLM=1` | `--live-staged-rank2-extract-fallthrough` | `test_live_staged_rank2_extract_live_llm_spine.py` | — (live ingest) |
+| link | `RGE_ALLOW_LIVE_STAGED_RANK2_LINK_LIVE_LLM=1` | `--live-staged-rank2-link-fallthrough` | `test_live_staged_rank2_link_live_llm_spine.py` | mock extract |
+| build | `RGE_ALLOW_LIVE_STAGED_RANK2_BUILD_LIVE_LLM=1` | `--live-staged-rank2-build-fallthrough` | `test_live_staged_rank2_build_live_llm_spine.py` | mock extract + link |
+| detect | `RGE_ALLOW_LIVE_STAGED_RANK2_DETECT_LIVE_LLM=1` | `--live-staged-rank2-detect-fallthrough` | `test_live_staged_rank2_detect_live_llm_spine.py` | `seed_domain_opposing_context` + mock through build |
+
+Run each pytest with `-m "live_network and live_smoke"`. Rank-2 live proofs require ≥2
+queued candidates (`select_rank2_candidate_id`) and rank-2 title heuristic
+(`constraint management` marker).
+
+**Not in scope for this checklist:**
+
+| Item | Why |
+| --- | --- |
+| Staged orchestrator live LLM | Orchestrator forces mock; see orchestrator checklist below |
+| Live LLM on reconcile/report | Deterministic only — no `*_LIVE_LLM` gate exists |
+| Rank-1 live fallthrough flags | Separate `RGE_ALLOW_LIVE_STAGED_*_LIVE_LLM` gates (204/208/212/217) |
+| Combined rank-1 + rank-2 all-live chain | Per-step proofs only — one step live at a time |
+| Default graph DB | Temp `--db` only |
+
+**Catalog drift:** rank-2 live network tests may skip with `unsuitable_live_rank2_artifact`
+when fetched rank-2 text lacks the `constraint management` marker — see proof-layer
+runbook above (`unsuitable_live_artifact` table). This is **not** a detect-engine regression.
+
+**Checklist:**
+
+1. Set shared prerequisites from the table above.
+2. Run extract proof: `python -m pytest tests/unit/test_live_staged_rank2_extract_live_llm_spine.py -m "live_network and live_smoke" -q`
+3. Run link proof (mock extract upstream in test): `python -m pytest tests/unit/test_live_staged_rank2_link_live_llm_spine.py -m "live_network and live_smoke" -q`
+4. Run build proof: `python -m pytest tests/unit/test_live_staged_rank2_build_live_llm_spine.py -m "live_network and live_smoke" -q`
+5. Run detect proof (domain seed inside test): `python -m pytest tests/unit/test_live_staged_rank2_detect_live_llm_spine.py -m "live_network and live_smoke" -q`
+6. Confirm each step reports **1 passed** (not skipped) when Ollama and network are healthy.
+7. Confirm live detect payload includes `"live_staged_rank2_detect_fallthrough": true` and `qualification_count >= 1`.
+
+For rank-1 per-step live Ollama proofs, see **Live staged extract/link/build/detect**
+sections above. For orchestrator mock-LLM network proof, see **One-time live orchestrator
+verification** below.
+
 *Discover + fetch + ingest-staged + mock extract + mock link + mock build* (ticket-178; writes `relationships` via fixture):
 
 ```powershell
@@ -621,7 +686,8 @@ per-step live Ollama proofs (pre-ticket audits 221/222).
 
 | Item | Why |
 | --- | --- |
-| Per-step live Ollama (204/208/212/217) | Separate `*_LIVE_LLM` gates and CLI fallthrough flags |
+| Per-step live Ollama (204/208/212/217; rank-1) | Separate `RGE_ALLOW_LIVE_STAGED_*_LIVE_LLM` gates and CLI fallthrough flags |
+| Per-step live Ollama (230/236/237/238; rank-2) | Separate `RGE_ALLOW_LIVE_STAGED_RANK2_*_LIVE_LLM` gates — see **One-time rank-2 per-step live Ollama verification** |
 | Live LLM on reconcile/report | Deterministic only — no `*_LIVE_LLM` gate exists |
 | Default graph DB | Temp `--db` only (pytest `tmp_path`) |
 
@@ -633,7 +699,7 @@ per-step live Ollama proofs (pre-ticket audits 221/222).
 4. Confirm stdout JSON includes `"status": "completed"`, `"mode": "fixture_staged"`, and stable dual-spine counts: `sources` 3, `candidate_sources` 2, `research_queue` 2, `score_events` 2, `run_reports` 2, `qualifies_evidence` 2. The `score_events` and `run_reports` rows come from deterministic reconcile/report — not Ollama.
 5. Confirm temp report artifact: `run_report_latest.json` under the test temp output dir (not committed).
 
-If the run times out, retry from a network-unrestricted machine; do **not** enable live network in CI. Patched-network regression remains `tests/unit/test_staged_fixture_mode_run_spine.py`. For per-step live Ollama proofs after mock ingest, see **Live staged extract/link/build/detect** sections above.
+If the run times out, retry from a network-unrestricted machine; do **not** enable live network in CI. Patched-network regression remains `tests/unit/test_staged_fixture_mode_run_spine.py`. For per-step live Ollama proofs after mock ingest, see **Live staged extract/link/build/detect** (rank-1) and **One-time rank-2 per-step live Ollama verification** (rank-2) above.
 
 **Manual source ingestion** (Level-1): place operator `.txt`/`.md` files under gitignored `data/sources/manual/<domain>/` (e.g. `data/sources/manual/creativity/`) and ingest with:
 
