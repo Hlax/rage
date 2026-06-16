@@ -1,0 +1,41 @@
+{
+  "id": "ticket-285",
+  "title": "Live staged atlas snapshot coherence proof (operator opt-in)",
+  "problem": "Tickets 278–284 built a coherent atlas_snapshot_v0.1.0 contract thread on fixture-mode DBs only. We need live-research/product proof that a real staged run populates the Research Atlas contract with meaningful graph data—not just well-shaped JSON.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-284_atlas-follow-up-questions-projection.md",
+    "agent_reports/2026-06-16_principal-audit-post-ticket-283.md",
+    "rge/modules/atlas_snapshot_builder.py",
+    "tests/unit/test_live_staged_orchestrator_spine.py"
+  ],
+  "affected_modules": [
+    "tests/unit/test_live_staged_atlas_snapshot_coherence.py",
+    "rge/modules/atlas_snapshot_builder.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_live_staged_atlas_snapshot_coherence.py",
+    "agent_reports/2026-06-16_phase-3_ticket-285_live-staged-atlas-coherence-proof.md"
+  ],
+  "acceptance_criteria": [
+    "Opt-in live_network pytest runs staged spine on temp DB, exports private atlas snapshot via export-atlas-snapshot, and asserts contract coherence (non-empty cards/nodes/edges, validate_atlas_snapshot, assert_no_private_fields).",
+    "Coherence audit documents minimum thresholds and skip reasons when live artifact unsuitable.",
+    "Default pytest and golden pass unchanged (live_network excluded).",
+    "No public export or public-site changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_live_staged_atlas_snapshot_coherence.py -m live_network -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "CI enforcement of live network proof.",
+    "Public atlas route or public-site UI.",
+    "Schema migrations.",
+    "Live Ollama per-step fallthrough (mock LLM upstream on staged spine).",
+    "review_batch persistence."
+  ],
+  "risk_level": "high",
+  "rollback_plan": "Remove live_network pytest module only.",
+  "status": "proposed",
+  "category": "Phase 3 / live research proof / Research Atlas validation"
+}

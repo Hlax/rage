@@ -36,6 +36,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert follow_up_questions projection only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / Research Atlas / product contract"
 }

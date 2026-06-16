@@ -22,6 +22,14 @@ ATLAS_RUN_LINEAGE_OPTIONAL_FIELDS = (
     "spawned_from_report_id",
     "spawn_reason",
 )
+ATLAS_FOLLOW_UP_QUESTION_FIELDS = (
+    "id",
+    "research_question_id",
+    "reason",
+    "status",
+    "question_text",
+    "priority_score",
+)
 
 
 class AtlasSnapshotValidationError(ValueError):
@@ -51,6 +59,7 @@ class AtlasSnapshot_v0_1(BaseModel):
     clusters: list[dict[str, Any]] = Field(default_factory=list)
     reports: list[dict[str, Any]] = Field(default_factory=list)
     cards: list[dict[str, Any]] = Field(default_factory=list)
+    follow_up_questions: list[dict[str, Any]] = Field(default_factory=list)
     safety: AtlasSnapshotSafety_v0_1
 
 

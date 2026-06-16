@@ -66,6 +66,39 @@ def _build_fixture_mvp_db(temp_db: Path, artifact_dirs: dict[str, Path]) -> None
     assert result["card_count"] >= 2
 
 
+def test_build_atlas_snapshot_follow_up_questions_from_research_queue(
+    temp_db: Path,
+    artifact_dirs: dict[str, Path],
+) -> None:
+    from rge.contracts.atlas_snapshot_v0 import ATLAS_FOLLOW_UP_QUESTION_FIELDS
+    from rge.db.connection import connect
+    from rge.modules.research_planner import DEFAULT_RESEARCH_QUESTION_ID
+
+    _build_fixture_mvp_db(temp_db, artifact_dirs)
+    conn = connect(temp_db)
+    try:
+        snapshot = build_atlas_snapshot_from_db(
+            conn,
+            topic=GOLDEN_MVP_TOPIC,
+            domain_pack="creativity",
+            fixture_mode=True,
+            repo_root=REPO_ROOT,
+        )
+    finally:
+        conn.close()
+
+    questions = snapshot["follow_up_questions"]
+    assert len(questions) >= 3
+    for item in questions:
+        assert set(item.keys()) == set(ATLAS_FOLLOW_UP_QUESTION_FIELDS)
+        assert item["research_question_id"] == DEFAULT_RESEARCH_QUESTION_ID
+        assert item["question_text"]
+        assert "last_error" not in item
+    statuses = {item["status"] for item in questions}
+    assert "queued" in statuses
+    assert assert_no_private_fields(snapshot) == []
+
+
 def test_build_atlas_snapshot_run_lineage_contract_fields(
     temp_db: Path,
     artifact_dirs: dict[str, Path],

@@ -272,6 +272,56 @@
       "updated_at": "2026-06-12T00:00:00Z"
     }
   ],
+  "follow_up_questions": [
+    {
+      "id": "que_71bb9ab6a8a7bc76",
+      "research_question_id": "rq_creativity_originality",
+      "reason": "On-scope follow-up aligned with contract concepts.",
+      "status": "queued",
+      "question_text": "Does divergent prompting reduce semantic convergence in AI-assisted ideation?",
+      "priority_score": 0.8
+    },
+    {
+      "id": "que_45f9a67bbcabfd78",
+      "research_question_id": "rq_creativity_originality",
+      "reason": "On-scope follow-up aligned with contract concepts.",
+      "status": "queued",
+      "question_text": "Does AI improve originality more when humans retain final selection control?",
+      "priority_score": 0.8
+    },
+    {
+      "id": "que_443d1b3ac15e8ade",
+      "research_question_id": "rq_creativity_originality",
+      "reason": "On-scope follow-up aligned with contract concepts.",
+      "status": "queued",
+      "question_text": "Do AI-assisted workflows affect originality differently in writing versus design?",
+      "priority_score": 0.58
+    },
+    {
+      "id": "que_70be4980085cb865",
+      "research_question_id": "rq_creativity_originality",
+      "reason": "out_of_scope_topic_drift",
+      "status": "parked",
+      "question_text": "Will AI replace all creative jobs?",
+      "priority_score": 0.0
+    },
+    {
+      "id": "que_8df80336d0c1a7bd",
+      "research_question_id": "rq_creativity_originality",
+      "reason": "out_of_scope_topic_drift",
+      "status": "parked",
+      "question_text": "Is AI conscious?",
+      "priority_score": 0.0
+    },
+    {
+      "id": "que_9f1cf2054432ff24",
+      "research_question_id": "rq_creativity_originality",
+      "reason": "adjacent_out_of_scope_topic",
+      "status": "parked",
+      "question_text": "Who owns copyright for AI-generated work?",
+      "priority_score": 0.0
+    }
+  ],
   "safety": {
     "public_safe": true,
     "safety_audit_id": "audit_atlas_fixture_v0_001"
