@@ -18,6 +18,16 @@
 
 **Overall checklist verdict:** **NOT FULLY GREEN** — catalog drift blocked extract/link/build; detect seed path incompatible with global live Ollama env in this session.
 
+> **Addendum (2026-06-16, tickets 243–249):** The detect seed failure root cause was fixed in
+> **ticket-243** (`_mock_llm_seed_env()` in `tests/unit/staged_domain_seed.py` forces mock LLM
+> for GT7 seed ingest/extract/link/build regardless of operator live env). Operator docs for
+> this behavior are closed in the **detect seed doc triangle (245–248)** across README Domain
+> seed, `AGENTS.md`, `docs/agents/12_RUNTIME_CONFIG.md`, and README maturity tier. **Catalog
+> drift skip interpretation below is unchanged** — `unsuitable_live_rank2_artifact` remains the
+> expected outcome when OpenAlex rank-2 text lacks the `constraint management` marker. No live
+> Ollama re-run was performed for this addendum; mock-gated CI remains the authoritative green
+> signal.
+
 ## Mock gate (step 2)
 
 ```powershell
@@ -95,14 +105,27 @@ python -m pytest tests/unit/test_live_staged_rank2_detect_live_llm_spine.py -m "
 
 **Note:** This is an operator-environment interaction between global live LLM env and `staged_domain_seed.py` — distinct from rank-2 catalog drift skips. Mock-gated CI and default pytest remain unaffected.
 
+**Post-session status (ticket-243):** `seed_domain_opposing_context` now wraps seed extract/link/build in `_mock_llm_seed_env()`, so a future live detect proof session should not hit this failure mode. The original session failure above predates that fix.
+
+## Post-fix documentation closure (tickets 245–248)
+
+| Doc surface | Ticket | Content |
+|-------------|--------|---------|
+| README **Domain seed** operator note | 245 | GT7 seed mock isolation for live detect |
+| `AGENTS.md` detect seed notes | 246 | Cross-reference to seed helper |
+| `docs/agents/12_RUNTIME_CONFIG.md` | 247 | Runtime config cross-link |
+| README **Arbitrary-source pipeline** maturity row | 248 | Detect seed doc triangle closure |
+
+No further doc duplication is planned for this operator proof path.
+
 ## Reconcile/report boundary
 
 Not exercised in this session. Remains **deterministic Python** on both ranks (pre-ticket audits 221/222). No live LLM path attempted.
 
 ## Recommendations
 
-1. **Catalog drift (extract/link/build):** Retry on a network day when OpenAlex rank-2 candidate includes `constraint management`, or run on a machine/query that yields a compatible rank-2 artifact; accept skip as expected when drift occurs.
-2. **Detect seed:** Consider a follow-on hardening ticket so `seed_domain_opposing_context` forces mock LLM for GT7 seed steps when only the detect step is live (mirrors mock-upstream pattern for link/build).
+1. **Catalog drift (extract/link/build):** Retry on a network day when OpenAlex rank-2 candidate includes `constraint management`, or run on a machine/query that yields a compatible rank-2 artifact; accept skip as expected when drift occurs. **Interpretation unchanged** — skip is not an engine regression.
+2. **Detect seed:** **Resolved in ticket-243** — `_mock_llm_seed_env()` isolates GT7 seed steps from global live Ollama env. Re-run live detect only when operator wants a fresh proof; not required for doc closure.
 3. **Mock gate:** No action required — remains green.
 
 ## Commands reference

@@ -275,7 +275,8 @@ superseded
 | 246 | ticket-246 | done | AGENTS detect seed mock isolation cross-reference | `phase-3/ticket-246-agents-detect-seed-note` | `agent_reports/2026-06-16_phase-3_ticket-246_agents-detect-seed-note.md` |
 | 247 | ticket-247 | done | Runtime config detect seed mock isolation cross-reference | `phase-3/ticket-247-runtime-config-detect-seed-note` | `agent_reports/2026-06-16_phase-3_ticket-247_runtime-config-detect-seed-note.md` |
 | 248 | ticket-248 | done | README maturity tier detect seed doc triangle closure | `phase-3/ticket-248-readme-maturity-detect-seed-triangle` | `agent_reports/2026-06-16_phase-3_ticket-248_readme-maturity-detect-seed-triangle.md` |
-| 249 | ticket-249 | proposed | Operator proof report addendum post detect seed doc triangle | | |
+| 249 | ticket-249 | done | Operator proof report addendum post detect seed doc triangle | `phase-3/ticket-249-operator-proof-addendum` | `agent_reports/2026-06-16_phase-3_ticket-249_operator-proof-addendum.md` |
+| 250 | ticket-250 | proposed | Principal audit post-ticket-249 detect seed doc closure checkpoint | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1010,9 +1011,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-249 (proposed) — Operator proof report addendum post detect seed doc triangle
+ticket-250 (proposed) — Principal audit post-ticket-249 detect seed doc closure checkpoint
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-249 operator proof addendum)
+
+- Operator proof report addendum: ticket-243 seed fix + doc triangle 245–248; catalog drift unchanged
+- ticket-250 seeded: principal audit (cadence threshold after 247–249)
 
 ## Queue Notes (2026-06-16, ticket-248 README maturity detect seed triangle)
 
