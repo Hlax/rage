@@ -309,6 +309,33 @@ def _parse_last_proof_bundle_stdout(stdout: str) -> dict:
     raise AssertionError(f"{COMMAND} payload not found in CLI stdout")
 
 
+def _proof_bundle_cli_argv(
+    *,
+    temp_db: Path,
+    staging_dir: Path,
+    report_dir: Path,
+    export_dir: Path,
+    bundle_out: Path,
+) -> list[str]:
+    return [
+        "prove-arbitrary-source-bundle",
+        "--topic",
+        PROOF_TOPIC,
+        "--domain",
+        "creativity",
+        "--db",
+        str(temp_db),
+        "--output-dir",
+        str(report_dir),
+        "--staging-dir",
+        str(staging_dir),
+        "--export-dir",
+        str(export_dir),
+        "--bundle-out",
+        str(bundle_out),
+    ]
+
+
 def test_proof_bundle_cli_entry_requires_db() -> None:
     with pytest.raises(SystemExit) as excinfo:
         main(
@@ -332,23 +359,13 @@ def test_proof_bundle_cli_entry_happy_path(
 ) -> None:
     bundle_out = temp_db.parent / "cli_proof_bundle.json"
     exit_code = main(
-        [
-            "prove-arbitrary-source-bundle",
-            "--topic",
-            PROOF_TOPIC,
-            "--domain",
-            "creativity",
-            "--db",
-            str(temp_db),
-            "--output-dir",
-            str(report_dir),
-            "--staging-dir",
-            str(staging_dir),
-            "--export-dir",
-            str(export_dir),
-            "--bundle-out",
-            str(bundle_out),
-        ]
+        _proof_bundle_cli_argv(
+            temp_db=temp_db,
+            staging_dir=staging_dir,
+            report_dir=report_dir,
+            export_dir=export_dir,
+            bundle_out=bundle_out,
+        )
     )
     captured = capsys.readouterr()
     assert exit_code == 0
@@ -356,6 +373,54 @@ def test_proof_bundle_cli_entry_happy_path(
     assert payload["status"] == "completed"
     assert payload["usable_output"] is True
     assert bundle_out.is_file()
+
+
+def test_proof_bundle_cli_second_run_is_idempotent_on_same_temp_paths(
+    mock_network_env: None,
+    patched_staged_network: None,
+    temp_db: Path,
+    staging_dir: Path,
+    report_dir: Path,
+    export_dir: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    first_bundle_out = temp_db.parent / "cli_proof_bundle_first.json"
+    second_bundle_out = temp_db.parent / "cli_proof_bundle_second.json"
+
+    first_exit = main(
+        _proof_bundle_cli_argv(
+            temp_db=temp_db,
+            staging_dir=staging_dir,
+            report_dir=report_dir,
+            export_dir=export_dir,
+            bundle_out=first_bundle_out,
+        )
+    )
+    first_captured = capsys.readouterr()
+    first_payload = _parse_last_proof_bundle_stdout(first_captured.out)
+
+    second_exit = main(
+        _proof_bundle_cli_argv(
+            temp_db=temp_db,
+            staging_dir=staging_dir,
+            report_dir=report_dir,
+            export_dir=export_dir,
+            bundle_out=second_bundle_out,
+        )
+    )
+    second_captured = capsys.readouterr()
+    second_payload = _parse_last_proof_bundle_stdout(second_captured.out)
+
+    assert first_exit == 0
+    assert second_exit == 0
+    assert first_payload["status"] == "completed"
+    assert second_payload["status"] == "completed"
+    assert first_payload["usable_output"] is True
+    assert second_payload["usable_output"] is True
+    assert _stable_bundle_snapshot(second_payload) == _stable_bundle_snapshot(
+        first_payload
+    )
+    assert second_bundle_out.is_file()
 
 
 def test_collect_source_metrics_matches_db(

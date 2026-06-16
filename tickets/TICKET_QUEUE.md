@@ -299,7 +299,8 @@ superseded
 | 270 | ticket-270 | done | Verify CLI lists prove-arbitrary-source-bundle in mock gate | `phase-3/ticket-270-verify-proof-bundle-checklist` | `agent_reports/2026-06-16_phase-3_ticket-270_verify-proof-bundle-checklist.md` |
 | 271 | ticket-271 | done | Principal audit post-ticket-270 proof bundle visibility checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-270.md` |
 | 272 | ticket-272 | done | Operator proof bundle idempotency unit test | `phase-3/ticket-272-operator-proof-bundle-idempotency` | `agent_reports/2026-06-16_phase-3_ticket-272_operator-proof-bundle-idempotency.md` |
-| 273 | ticket-273 | proposed | CLI prove-arbitrary-source-bundle second-run idempotency test | | |
+| 273 | ticket-273 | done | CLI prove-arbitrary-source-bundle second-run idempotency test | `phase-3/ticket-273-cli-proof-bundle-idempotency` | `agent_reports/2026-06-16_phase-3_ticket-273_cli-proof-bundle-idempotency.md` |
+| 274 | ticket-274 | proposed | Operator proof bundle on-disk bundle-out JSON stable on CLI second run | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1034,9 +1035,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-273 (proposed) — CLI prove-arbitrary-source-bundle second-run idempotency test
+ticket-274 (proposed) — Operator proof bundle on-disk bundle-out JSON stable on CLI second run
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-273 CLI proof bundle idempotency)
+
+- CLI `main()` twice on same temp paths yields stable stdout bundle snapshot
+- `_proof_bundle_cli_argv` shared by happy-path and idempotency tests
+- ticket-274 seeded: on-disk bundle-out JSON stability
 
 ## Queue Notes (2026-06-16, ticket-272 operator proof bundle idempotency)
 
