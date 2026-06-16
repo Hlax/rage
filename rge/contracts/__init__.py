@@ -1,6 +1,7 @@
 """Versioned export and frontend contract schemas (ticket-278)."""
 
 from rge.contracts.atlas_snapshot_v0 import (
+    ATLAS_FOLLOW_UP_QUESTION_FIELDS,
     ATLAS_RUN_LINEAGE_OPTIONAL_FIELDS,
     ATLAS_SNAPSHOT_SCHEMA_VERSION,
     AtlasSnapshot_v0_1,
@@ -18,6 +19,7 @@ from rge.contracts.review_batch_v0 import (
 
 __all__ = [
     "AGENT_LAB_CLASSIFICATION",
+    "ATLAS_FOLLOW_UP_QUESTION_FIELDS",
     "ATLAS_RUN_LINEAGE_OPTIONAL_FIELDS",
     "ATLAS_SNAPSHOT_SCHEMA_VERSION",
     "AtlasSnapshot_v0_1",

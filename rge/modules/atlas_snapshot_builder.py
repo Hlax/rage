@@ -20,6 +20,7 @@ from rge.contracts.atlas_snapshot_v0 import (
 from rge.db.repositories import (
     ConceptRepository,
     PublicCardRepository,
+    ResearchQueueRepository,
     public_card_record_to_export_dict,
     utc_now_iso,
 )
@@ -31,7 +32,7 @@ from rge.modules.card_exporter import (
     order_public_card_fields,
 )
 from rge.modules.domain_pack_loader import load_domain_pack
-from rge.modules.research_planner import DEFAULT_RESEARCH_QUESTION_ID
+from rge.modules.research_planner import DEFAULT_RESEARCH_QUESTION_ID, GOLDEN_CONTRACT_ID
 from rge.safety.public_export_policy import (
     FORBIDDEN_KEY_SUBSTRINGS,
     curated_public_card,
@@ -167,6 +168,41 @@ def _build_domains(domain_pack: str) -> list[dict[str, Any]]:
             "role": "primary",
         }
     ]
+
+
+def _primary_contract_id(conn: sqlite3.Connection) -> str | None:
+    row = conn.execute(
+        """
+        SELECT contract_id FROM research_runs
+        WHERE contract_id IS NOT NULL
+        ORDER BY started_at, id
+        LIMIT 1
+        """
+    ).fetchone()
+    if row is None or not row["contract_id"]:
+        return None
+    return str(row["contract_id"])
+
+
+def _build_follow_up_questions(conn: sqlite3.Connection) -> list[dict[str, Any]]:
+    contract_id = _primary_contract_id(conn) or GOLDEN_CONTRACT_ID
+    followups = ResearchQueueRepository(conn).list_followups_for_contract(contract_id)
+    questions: list[dict[str, Any]] = []
+    for item in followups:
+        question_text = str(item.get("question_text") or "").strip()
+        if not question_text:
+            continue
+        questions.append(
+            {
+                "id": str(item["id"]),
+                "research_question_id": str(item["research_question_id"]),
+                "reason": str(item["reason"]),
+                "status": str(item["status"]),
+                "question_text": question_text,
+                "priority_score": float(item["priority_score"]),
+            }
+        )
+    return questions
 
 
 _LINEAGE_KEY_ALLOWLIST = frozenset(ATLAS_RUN_LINEAGE_OPTIONAL_FIELDS)
@@ -429,6 +465,7 @@ def build_atlas_snapshot_from_db(
         "clusters": _build_cluster_summaries(conn),
         "reports": _build_report_summaries(conn),
         "cards": cards,
+        "follow_up_questions": _build_follow_up_questions(conn),
         "safety": {
             "public_safe": True,
             "safety_audit_id": resolved_audit_id,
