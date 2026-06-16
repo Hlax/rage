@@ -170,9 +170,17 @@ API keys, mailto values, or other secrets.
 (`score_reconciler.py`) and `generate-run-report` (`run_evaluator.py`) are deterministic
 Python — no model client, no CLI fallthrough flags. `RGE_ALLOW_LIVE_STAGED_RECONCILE` and
 `RGE_ALLOW_LIVE_STAGED_REPORT` opt into **live OpenAlex network** pytest spines only (mock
-LLM upstream through detect). Staged rank-1 per-step live Ollama surface is **closed at
-detect** (204/208/212/217); do not add `RGE_ALLOW_LIVE_STAGED_RECONCILE_LIVE_LLM` or
-`RGE_ALLOW_LIVE_STAGED_REPORT_LIVE_LLM` without a new pre-ticket audit.
+LLM upstream through detect). On **both ranks**, reconcile and report remain deterministic —
+no `RGE_ALLOW_LIVE_STAGED_RECONCILE_LIVE_LLM` or `RGE_ALLOW_LIVE_STAGED_REPORT_LIVE_LLM`
+without a new pre-ticket audit.
+
+**Staged per-step live Ollama closure:** rank-1 surface is **closed at detect**
+(204/208/212/217); rank-2 surface is **closed at detect** (230/236/237/238). No further
+`RGE_ALLOW_LIVE_STAGED_*_LIVE_LLM` or `RGE_ALLOW_LIVE_STAGED_RANK2_*_LIVE_LLM` fallthrough
+flags are planned. For rank-2 shared prerequisites, per-step gate table, pytest commands,
+and operator checklist, see README **Operator Quickstart** → **One-time rank-2 per-step live
+Ollama verification** (ticket-240). Rank-1 per-step proofs: README **Live staged
+extract/link/build/detect** sections.
 
 All staged proofs also require `RGE_ALLOW_SOURCE_NETWORK=1` and `OPENALEX_MAILTO`.
 Per-step live Ollama gates are **separate** from mock-spine gates. Live detect
@@ -180,8 +188,9 @@ requires domain opposing context seeded on the temp DB before live discover (see
 README **Live staged detect (live Ollama)**). The staged orchestrator
 orchestrator (`research run --staged-spine`) always forces `RGE_LLM_MODE=mock`.
 
-See README Operator Quickstart for pytest commands (`live_network` + `live_smoke`
-markers excluded from default pytest).
+See README **Operator Quickstart** for pytest commands (`live_network` + `live_smoke`
+markers excluded from default pytest), including **One-time rank-2 per-step live Ollama
+verification** for consolidated rank-2 closure env tables and checklist steps.
 
 ## Live structured probe (ticket-060)
 
