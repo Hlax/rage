@@ -59,7 +59,7 @@ None.
 
 ## Merge to main
 
-_Pending merge._
+Merge commit: `256330831cff374c86010818f982fb7a2a91b314`
 
 ## Recommended next ticket
 
