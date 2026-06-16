@@ -119,8 +119,8 @@ def test_build_atlas_snapshot_run_spawn_lineage_for_followup_run(
                 "creativity",
                 "fixture",
                 "completed",
-                "2026-06-16T18:00:00Z",
-                "2026-06-16T18:00:00Z",
+                "2099-01-01T00:00:00Z",
+                "2099-01-01T00:00:00Z",
                 '{"fixture_mode": true, "spawned": true}',
             ),
         )

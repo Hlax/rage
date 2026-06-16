@@ -51,6 +51,7 @@ def collect_schema_files(repo_root: Path) -> list[dict[str, str]]:
         ("rge/models/schemas.py", "core entity schema stub / data model mirror"),
         ("rge/llm/schemas.py", "versioned pydantic candidate model outputs"),
         ("rge/contracts/atlas_snapshot_v0.py", "Research Atlas snapshot v0 contract"),
+        ("rge/modules/atlas_snapshot_builder.py", "Research Atlas snapshot DB projection + export helper"),
         ("rge/contracts/review_batch_v0.py", "Agent Lab review_batch v0 private contract"),
         ("rge/safety/public_export_policy.py", "public card export allowlist policy"),
     ]
@@ -165,7 +166,7 @@ def collect_export_json_shapes() -> list[dict[str, Any]]:
         {
             "artifact": "atlas_snapshot.json",
             "schema_version": ATLAS_SNAPSHOT_SCHEMA_VERSION,
-            "producer": "rge/contracts/atlas_snapshot_v0.py (contract only; export TBD)",
+            "producer": "rge/cli.py export-atlas-snapshot (rge/modules/atlas_snapshot_builder.py)",
             "record_fields": [
                 "schema_version",
                 "generated_at",
@@ -180,7 +181,7 @@ def collect_export_json_shapes() -> list[dict[str, Any]]:
                 "cards",
                 "safety",
             ],
-            "safety_class": "public_safe_when_curated",
+            "safety_class": "operator_private",
         },
     ]
 
@@ -246,8 +247,8 @@ def collect_safety_classifications() -> list[dict[str, str]]:
         },
         {
             "surface": "atlas_snapshot_v0.1.0",
-            "classification": "public_safe_when_curated",
-            "notes": "Contract defined ticket-278; population/export deferred",
+            "classification": "operator_private",
+            "notes": "Validated snapshot content is curated public-safe; export-atlas-snapshot writes operator-private JSON (ticket-282)",
         },
         {
             "surface": "media / images",
@@ -261,8 +262,8 @@ def collect_research_atlas_gaps() -> list[dict[str, str]]:
     return [
         {
             "gap": "no_explicit_public_atlas_snapshot_export",
-            "severity": "high",
-            "notes": "Cards alone cannot power graph/atlas UI; atlas_snapshot_v0 contract is shape-only",
+            "severity": "medium",
+            "notes": "Operator-private export-atlas-snapshot CLI exists (ticket-282); public atlas route and public-site consumption still deferred",
         },
         {
             "gap": "no_review_batch_or_synthesis_batch_object",
@@ -287,7 +288,7 @@ def collect_research_atlas_gaps() -> list[dict[str, str]]:
         {
             "gap": "nodes_edges_clusters_empty_in_v0_contract",
             "severity": "expected",
-            "notes": "v0 reserves arrays; graph projection from DB not wired yet",
+            "notes": "v0 reserves arrays; fixture-mode DB population wired (ticket-279); full live graph projection deferred",
         },
         {
             "gap": "images_not_in_core_graph",

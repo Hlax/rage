@@ -309,7 +309,8 @@ superseded
 | 280 | ticket-280 | done | Agent Lab review_batch contract v0 schema and fixture | `phase-3/ticket-280-review-batch-contract-v0` | `agent_reports/2026-06-16_phase-3_ticket-280_review-batch-contract-v0.md` |
 | 281 | ticket-281 | done | Atlas snapshot runs projection with research question lineage v0 | `phase-3/ticket-281-atlas-question-lineage-v0` | `agent_reports/2026-06-16_phase-3_ticket-281_atlas-question-lineage-v0.md` |
 | 282 | ticket-282 | done | Private atlas snapshot export CLI v0 | `phase-3/ticket-282-atlas-snapshot-export-cli` | `agent_reports/2026-06-16_phase-3_ticket-282_atlas-snapshot-export-cli.md` |
-| 283 | ticket-283 | proposed | Atlas contract inventory refresh for export-atlas-snapshot producer | | |
+| 283 | ticket-283 | done | Atlas contract inventory refresh for export-atlas-snapshot producer | `phase-3/ticket-283-atlas-inventory-export-producer` | `agent_reports/2026-06-16_phase-3_ticket-283_atlas-inventory-export-producer.md` |
+| 284 | ticket-284 | proposed | Atlas snapshot follow_up_questions projection from research_queue v0 | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1044,9 +1045,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-283 (proposed) — Atlas contract inventory refresh for export-atlas-snapshot producer
+ticket-284 (proposed) — Atlas snapshot follow_up_questions projection from research_queue v0
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-283 atlas inventory export producer)
+
+- Inventory documents export-atlas-snapshot as operator-private atlas_snapshot producer
+- Public atlas gap downgraded to medium (private CLI exists; public route deferred)
+- ticket-284 seeded: follow_up_questions[] projection
 
 ## Queue Notes (2026-06-16, ticket-282 atlas snapshot export CLI)
 

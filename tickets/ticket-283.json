@@ -35,6 +35,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert inventory doc strings only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / Research Atlas / inventory"
 }

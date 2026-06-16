@@ -1,0 +1,41 @@
+{
+  "id": "ticket-284",
+  "title": "Atlas snapshot follow_up_questions projection from research_queue v0",
+  "problem": "ticket-281 added runs[] lineage; atlas snapshot has no follow_up_questions[] array for Agent Lab / Research Atlas question queue UI planning.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-283_atlas-inventory-export-producer.md",
+    "rge/modules/atlas_snapshot_builder.py",
+    "rge/db/repositories.py"
+  ],
+  "affected_modules": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "rge/contracts/atlas_snapshot_v0.py"
+  ],
+  "expected_files": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json",
+    "tests/unit/test_atlas_snapshot_builder.py",
+    "agent_reports/2026-06-16_phase-3_ticket-284_atlas-follow-up-questions-projection.md"
+  ],
+  "acceptance_criteria": [
+    "Atlas snapshot includes follow_up_questions[] from research_queue question items when present.",
+    "Creativity fixture updated deterministically.",
+    "validate_atlas_snapshot pass; no private field leak.",
+    "Golden pass and full pytest pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_atlas_snapshot_builder.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Schema migrations.",
+    "Public-site UI.",
+    "Live Ollama.",
+    "review_batch persistence."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert follow_up_questions projection only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / product contract"
+}

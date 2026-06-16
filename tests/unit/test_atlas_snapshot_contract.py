@@ -87,6 +87,29 @@ def test_contract_inventory_markdown_has_required_sections() -> None:
         assert heading in markdown
 
 
+def test_contract_inventory_documents_atlas_snapshot_private_export() -> None:
+    inventory = build_contract_inventory(REPO_ROOT)
+    shapes = {
+        entry["artifact"]: entry for entry in inventory["export_json_shapes"]
+    }
+    atlas_shape = shapes["atlas_snapshot.json"]
+    assert "export-atlas-snapshot" in atlas_shape["producer"]
+    assert atlas_shape["safety_class"] == "operator_private"
+
+    gaps = {entry["gap"]: entry for entry in collect_research_atlas_gaps()}
+    public_gap = gaps["no_explicit_public_atlas_snapshot_export"]
+    assert public_gap["severity"] == "medium"
+    assert "export-atlas-snapshot" in public_gap["notes"]
+    assert "public-site" in public_gap["notes"] or "public atlas" in public_gap["notes"]
+
+    classifications = {
+        entry["surface"]: entry for entry in inventory["safety_classifications"]
+    }
+    atlas_surface = classifications["atlas_snapshot_v0.1.0"]
+    assert atlas_surface["classification"] == "operator_private"
+    assert "export-atlas-snapshot" in atlas_surface["notes"]
+
+
 def test_write_inventory_report_writes_markdown_and_json(tmp_path: Path) -> None:
     output = tmp_path / "inventory.md"
     inventory = write_inventory_report(output, repo_root=REPO_ROOT)

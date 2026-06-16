@@ -43,6 +43,10 @@
       "role": "Research Atlas snapshot v0 contract"
     },
     {
+      "path": "rge/modules/atlas_snapshot_builder.py",
+      "role": "Research Atlas snapshot DB projection + export helper"
+    },
+    {
       "path": "rge/contracts/review_batch_v0.py",
       "role": "Agent Lab review_batch v0 private contract"
     },
@@ -194,7 +198,7 @@
     {
       "artifact": "atlas_snapshot.json",
       "schema_version": "atlas_snapshot_v0.1.0",
-      "producer": "rge/contracts/atlas_snapshot_v0.py (contract only; export TBD)",
+      "producer": "rge/cli.py export-atlas-snapshot (rge/modules/atlas_snapshot_builder.py)",
       "record_fields": [
         "schema_version",
         "generated_at",
@@ -209,7 +213,7 @@
         "cards",
         "safety"
       ],
-      "safety_class": "public_safe_when_curated"
+      "safety_class": "operator_private"
     }
   ],
   "public_site_data_readers": [
@@ -377,8 +381,8 @@
     },
     {
       "surface": "atlas_snapshot_v0.1.0",
-      "classification": "public_safe_when_curated",
-      "notes": "Contract defined ticket-278; population/export deferred"
+      "classification": "operator_private",
+      "notes": "Validated snapshot content is curated public-safe; export-atlas-snapshot writes operator-private JSON (ticket-282)"
     },
     {
       "surface": "media / images",
@@ -389,8 +393,8 @@
   "research_atlas_gaps": [
     {
       "gap": "no_explicit_public_atlas_snapshot_export",
-      "severity": "high",
-      "notes": "Cards alone cannot power graph/atlas UI; atlas_snapshot_v0 contract is shape-only"
+      "severity": "medium",
+      "notes": "Operator-private export-atlas-snapshot CLI exists (ticket-282); public atlas route and public-site consumption still deferred"
     },
     {
       "gap": "no_review_batch_or_synthesis_batch_object",
@@ -404,8 +408,8 @@
     },
     {
       "gap": "research_question_lineage_not_explicit",
-      "severity": "medium",
-      "notes": "Need parent_question_id, spawned_from_claim_ids, spawned_from_report_id, spawn_reason"
+      "severity": "low",
+      "notes": "runs[] projection adds optional lineage fields (ticket-281); dedicated research_questions table still deferred"
     },
     {
       "gap": "agent_lab_not_separated_from_research_graph",
@@ -415,7 +419,7 @@
     {
       "gap": "nodes_edges_clusters_empty_in_v0_contract",
       "severity": "expected",
-      "notes": "v0 reserves arrays; graph projection from DB not wired yet"
+      "notes": "v0 reserves arrays; fixture-mode DB population wired (ticket-279); full live graph projection deferred"
     },
     {
       "gap": "images_not_in_core_graph",
