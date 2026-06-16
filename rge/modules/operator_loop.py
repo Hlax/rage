@@ -483,6 +483,7 @@ def _action_from_state(
     improvement: dict[str, Any],
     drift_violations: list[dict[str, str]],
     scratch_evidence: dict[str, Any] | None = None,
+    proof_bundle_status: dict[str, Any] | None = None,
     root: Path | None = None,
 ) -> RecommendedAction:
     safe_commands = safe_verification_commands(root)
@@ -658,6 +659,35 @@ def _action_from_state(
             ],
         )
 
+    proof_bundle = proof_bundle_status or {}
+    if proof_bundle.get("proof_bundle_recommended"):
+        proof_command = proof_bundle.get("operator_commands", {}).get(
+            "proof_bundle",
+            "python -m rge.cli prove-arbitrary-source-bundle --help",
+        )
+        return RecommendedAction(
+            action_id="run_arbitrary_source_proof_bundle",
+            label="Run mock arbitrary-source operator proof bundle",
+            gate="review_gated",
+            reason=(
+                "Principal audit drift notes missing product-risk proof; run the "
+                "mock-only prove-arbitrary-source-bundle command on a temp or "
+                "scratch DB and inspect operator_proof_bundle.json."
+            ),
+            commands=[
+                {
+                    "shell": proof_command,
+                    "purpose": "end-to-end mock arbitrary-source maturity proof",
+                },
+                {
+                    "shell": (
+                        "python -m rge.modules.operator_loop --mode plan"
+                    ),
+                    "purpose": "re-check proof bundle status after run",
+                },
+            ],
+        )
+
     return RecommendedAction(
         action_id="run_deterministic_verification",
         label="Run deterministic mock-only verification checks",
@@ -732,6 +762,52 @@ def inspect_scratch_evidence_status(
     status["evidence_review_ready"] = total > 0
     status["status"] = "ok" if total > 0 else "empty"
     return status
+
+
+def _product_drift_warning_active(audit: dict[str, Any]) -> bool:
+    warnings = audit.get("drift_warning") or []
+    return any(
+        token in warning.lower()
+        for warning in warnings
+        for token in ("product", "live-research", "arbitrary-source")
+    )
+
+
+def inspect_arbitrary_source_proof_bundle_status(
+    *,
+    root: Path | None = None,
+    audit: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Read-only arbitrary-source proof bundle CLI readiness for operator plan mode."""
+    from rge.modules.operator_proof_bundle import COMMAND, PIPELINE_MODE
+
+    project_root = root or repo_root()
+    audit_payload = audit or {}
+    proof_bundle_command = (
+        "python -m rge.cli prove-arbitrary-source-bundle "
+        '--topic "Does AI improve creative output while reducing diversity?" '
+        "--domain creativity "
+        "--db data/db/operator_proof_bundle_scratch.sqlite "
+        "--output-dir data/reports/operator_proof_bundle "
+        "--staging-dir data/sources/staged/operator_proof_bundle "
+        "--export-dir data/exports/operator_proof_bundle "
+        "--bundle-out data/reports/operator_proof_bundle/operator_proof_bundle.json"
+    )
+    recommended = _product_drift_warning_active(audit_payload)
+    return {
+        "status": "available",
+        "command": COMMAND,
+        "pipeline_mode": PIPELINE_MODE,
+        "mock_llm_only": True,
+        "requires_temp_db": True,
+        "proof_bundle_recommended": recommended,
+        "operator_commands": {
+            "proof_bundle": proof_bundle_command,
+        },
+        "proof_artifact": "operator_proof_bundle.json",
+        "usable_output_field": "usable_output",
+        "repo_root": str(project_root.resolve()),
+    }
 
 
 def inspect_domain_pack_status(
@@ -920,6 +996,10 @@ def build_operator_plan(
         log_runner=log_runner,
     )
     scratch_evidence = inspect_scratch_evidence_status(root=project_root)
+    arbitrary_source_proof_bundle_status = inspect_arbitrary_source_proof_bundle_status(
+        root=project_root,
+        audit=audit,
+    )
     domain_pack_status = inspect_domain_pack_status(root=project_root)
     nm4_evidence_spine_status = inspect_nm4_evidence_spine_status(root=project_root)
     runtime_config = load_config()
@@ -931,6 +1011,7 @@ def build_operator_plan(
         improvement=improvement,
         drift_violations=drift_violations,
         scratch_evidence=scratch_evidence,
+        proof_bundle_status=arbitrary_source_proof_bundle_status,
         root=project_root,
     )
 
@@ -980,6 +1061,7 @@ def build_operator_plan(
         },
         "audit_cadence": audit,
         "scratch_evidence_status": scratch_evidence,
+        "arbitrary_source_proof_bundle_status": arbitrary_source_proof_bundle_status,
         "staged_rank2_scan_max": runtime_config.staged_rank2_scan_max,
         "domain_pack_status": domain_pack_status,
         "nm4_evidence_spine_status": nm4_evidence_spine_status,

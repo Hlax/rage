@@ -1,0 +1,38 @@
+{
+  "id": "ticket-269",
+  "title": "Operator autocycle plan surfaces arbitrary-source proof bundle status",
+  "problem": "Ticket-268 added arbitrary_source_proof_bundle_status to operator_loop plan mode, but operator_autocycle plan does not expose the same proof bundle readiness for bounded autocycle operators.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-268_operator-loop-proof-bundle.md",
+    "rge/modules/operator_autocycle.py",
+    "tickets/ticket-257.json"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_autocycle.py"
+  ],
+  "expected_files": [
+    "rge/modules/operator_autocycle.py",
+    "tests/unit/test_operator_autocycle_plan.py",
+    "agent_reports/2026-06-16_phase-3_ticket-269_operator-autocycle-proof-bundle.md"
+  ],
+  "acceptance_criteria": [
+    "operator_autocycle --mode plan includes arbitrary_source_proof_bundle_status mirroring operator_loop.",
+    "No live LLM or live_network changes.",
+    "Golden pass.",
+    "Full pytest pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_autocycle_plan.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "README or AGENTS.md docs.",
+    "Execute-safe autocycle changes.",
+    "Public site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert autocycle plan fields and tests.",
+  "status": "proposed",
+  "category": "Phase 3 / operator visibility"
+}
