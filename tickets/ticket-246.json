@@ -1,0 +1,30 @@
+{
+  "id": "ticket-246",
+  "title": "AGENTS detect seed mock isolation cross-reference",
+  "problem": "Ticket-245 documented GT7 domain seed mock isolation in README rank-2 checklist. AGENTS.md rank-2 closure section should cross-reference the seed note for operator discoverability.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-245_readme-detect-seed-note.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "AGENTS.md",
+    "agent_reports/2026-06-16_phase-3_ticket-246_agents-detect-seed-note.md"
+  ],
+  "acceptance_criteria": [
+    "AGENTS rank-2 live detect section notes seed mock isolation (ticket-243).",
+    "Golden pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Product code changes.",
+    "Live Ollama operator proofs."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert AGENTS.md doc edits.",
+  "status": "proposed",
+  "category": "Phase 3 / docs / operator"
+}
