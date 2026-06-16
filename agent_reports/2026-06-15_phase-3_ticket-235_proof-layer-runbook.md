@@ -3,7 +3,7 @@
 **Date:** 2026-06-15  
 **Phase:** 3  
 **Ticket:** ticket-235  
-**Branch:** `phase-3/ticket-235-proof-layer-runbook` (docs-only; not yet committed)  
+**Branch:** `phase-3/ticket-235-proof-layer-runbook`  
 **Status:** done (documentation only)
 
 ## Summary

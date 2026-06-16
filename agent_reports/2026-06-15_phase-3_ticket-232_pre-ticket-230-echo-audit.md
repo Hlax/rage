@@ -3,7 +3,7 @@
 **Date:** 2026-06-15  
 **Phase:** 3  
 **Ticket:** ticket-232  
-**Branch:** `phase-3/ticket-232-pre-ticket-230-echo-audit` (audit-only; not yet committed)  
+**Branch:** `phase-3/ticket-232-pre-ticket-230-echo-audit`  
 **Status:** done
 
 ## Summary
@@ -48,4 +48,4 @@ Overall status **overdue** (cadence — 4 done tickets since ticket-231 checkpoi
 
 ## Merge note
 
-Audit-only; commit/merge pending operator request.
+Merged to `main` @ `b4398be` (fast-forward).
