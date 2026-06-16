@@ -267,7 +267,8 @@ superseded
 | 238 | ticket-238 | done | Live staged rank-2 detect live LLM opt-in proof (per-step) | `phase-3/ticket-238-rank2-detect-live-llm-spine` | `agent_reports/2026-06-16_ticket-238_live-staged-rank2-detect-live-llm-spine.md` |
 | 239 | ticket-239 | done | Principal audit post-ticket-238 rank-2 live LLM closure checkpoint | `phase-3/ticket-239-principal-audit-post-ticket-238` | `agent_reports/2026-06-16_ticket-239_principal-audit-post-ticket-238.md` |
 | 240 | ticket-240 | done | README operator rank-2 per-step live LLM closure checklist | `phase-3/ticket-240-readme-rank2-live-closure-checklist` | `agent_reports/2026-06-16_ticket-240_readme-rank2-live-closure-checklist.md` |
-| 241 | ticket-241 | proposed | Runtime config rank-2 live Ollama closure operator summary | | |
+| 241 | ticket-241 | done | Runtime config rank-2 live Ollama closure operator summary | `phase-3/ticket-241-runtime-config-rank2-live-closure` | `agent_reports/2026-06-16_ticket-241_runtime-config-rank2-live-closure.md` |
+| 242 | ticket-242 | proposed | AGENTS runtime config rank-2 live closure cross-reference | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1002,11 +1003,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-241 (proposed) — Runtime config rank-2 live Ollama closure operator summary
+ticket-242 (proposed) — AGENTS runtime config rank-2 live closure cross-reference
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-16, ticket-240 rank-2 live closure checklist)
+## Queue Notes (2026-06-16, ticket-241 runtime config rank-2 closure)
+
+- `12_RUNTIME_CONFIG.md` rank-2 closure at detect + README checklist cross-link
+- Both-ranks reconcile/report deterministic boundary explicit
+- ticket-242 seeded: AGENTS runtime config cross-reference
 
 - README **One-time rank-2 per-step live Ollama verification** section (shared env, gate table, checklist)
 - Maturity tier + AGENTS cross-reference updated

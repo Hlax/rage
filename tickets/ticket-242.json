@@ -1,0 +1,32 @@
+{
+  "id": "ticket-242",
+  "title": "AGENTS runtime config rank-2 live closure cross-reference",
+  "problem": "Ticket-241 added rank-2 closure summary and README cross-link in docs/agents/12_RUNTIME_CONFIG.md. AGENTS.md rank-2 closure checklist (ticket-240) should cross-reference the runtime config env table for operator discoverability.",
+  "evidence": [
+    "agent_reports/2026-06-16_ticket-241_runtime-config-rank2-live-closure.md",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "AGENTS.md",
+    "agent_reports/2026-06-16_ticket-242_agents-runtime-config-rank2-closure.md"
+  ],
+  "acceptance_criteria": [
+    "AGENTS.md rank-2 closure section cross-links 12_RUNTIME_CONFIG staged operator env profile.",
+    "Reconcile/report deterministic boundary unchanged.",
+    "Golden pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Product code changes.",
+    "New env gates.",
+    "README or runtime config duplication beyond cross-link."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert AGENTS.md doc edits.",
+  "status": "proposed",
+  "category": "Phase 3 / docs / operator"
+}
