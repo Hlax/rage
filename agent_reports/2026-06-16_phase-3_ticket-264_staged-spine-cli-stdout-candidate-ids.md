@@ -61,8 +61,8 @@ None. CLI stdout includes intermediate step JSON; tests parse the final `fixture
 
 ## Merge to main
 
-- Merge commit: _(pending)_
-- Post-merge pytest: _(pending)_
+- Merge commit: `fa8632e92057a6c6c8560e4c84ee367b4d6ebdf5`
+- Post-merge pytest: `689 passed, 30 deselected`
 
 ## Recommended next ticket
 
