@@ -20,7 +20,9 @@
       "topic": "Does AI improve creative output while reducing diversity?",
       "domain_pack": "creativity",
       "mode": "fixture",
-      "status": "completed"
+      "status": "completed",
+      "research_question_id": "rq_creativity_originality",
+      "parent_question_id": null
     }
   ],
   "nodes": [

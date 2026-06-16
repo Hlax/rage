@@ -1,0 +1,40 @@
+{
+  "id": "ticket-282",
+  "title": "Private atlas snapshot export CLI v0",
+  "problem": "ticket-279/281 build validated atlas snapshots in memory; operators lack a CLI to write snapshot JSON to a private path from fixture-mode or research DB.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-281_atlas-question-lineage-v0.md",
+    "rge/modules/atlas_snapshot_builder.py",
+    "docs/contracts/research_atlas_export_contract_inventory_v0.md"
+  ],
+  "affected_modules": [
+    "rge/cli.py",
+    "rge/modules/atlas_snapshot_builder.py"
+  ],
+  "expected_files": [
+    "rge/cli.py",
+    "tests/unit/test_atlas_snapshot_export_cli.py",
+    "agent_reports/2026-06-16_phase-3_ticket-282_atlas-snapshot-export-cli.md"
+  ],
+  "acceptance_criteria": [
+    "CLI subcommand exports validated atlas snapshot JSON to --out path.",
+    "Re-run with same DB is byte-identical in fixture_mode.",
+    "Fail-closed on private-field leakage before write.",
+    "Golden pass and full pytest pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_atlas_snapshot_export_cli.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Public export route or public-site consumption.",
+    "Schema migrations.",
+    "Live Ollama.",
+    "Agent Lab review_batch persistence."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove CLI subcommand; builder unchanged.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / operator CLI"
+}

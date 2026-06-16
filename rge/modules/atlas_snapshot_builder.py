@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from rge.contracts.atlas_snapshot_v0 import (
+    ATLAS_RUN_LINEAGE_OPTIONAL_FIELDS,
     ATLAS_SNAPSHOT_SCHEMA_VERSION,
     AtlasSnapshot_v0_1,
     validate_atlas_snapshot,
@@ -30,6 +31,7 @@ from rge.modules.card_exporter import (
     order_public_card_fields,
 )
 from rge.modules.domain_pack_loader import load_domain_pack
+from rge.modules.research_planner import DEFAULT_RESEARCH_QUESTION_ID
 from rge.safety.public_export_policy import (
     FORBIDDEN_KEY_SUBSTRINGS,
     curated_public_card,
@@ -167,24 +169,153 @@ def _build_domains(domain_pack: str) -> list[dict[str, Any]]:
     ]
 
 
+_LINEAGE_KEY_ALLOWLIST = frozenset(ATLAS_RUN_LINEAGE_OPTIONAL_FIELDS)
+
+
+def _contract_question_lineage(
+    conn: sqlite3.Connection,
+    contract_id: str | None,
+) -> dict[str, Any]:
+    if not contract_id:
+        return {}
+    contract = conn.execute(
+        "SELECT id FROM research_contracts WHERE id = ?",
+        (contract_id,),
+    ).fetchone()
+    if contract is None:
+        return {}
+    queue_row = conn.execute(
+        """
+        SELECT research_question_id FROM research_queue
+        WHERE contract_id = ? AND item_type = 'question'
+        ORDER BY priority_score DESC, created_at
+        LIMIT 1
+        """,
+        (contract_id,),
+    ).fetchone()
+    question_id = (
+        str(queue_row["research_question_id"]).strip()
+        if queue_row and queue_row["research_question_id"]
+        else DEFAULT_RESEARCH_QUESTION_ID
+    )
+    return {"research_question_id": question_id}
+
+
+def _is_root_run_for_contract(
+    conn: sqlite3.Connection,
+    run_id: str,
+    contract_id: str,
+) -> bool:
+    first = conn.execute(
+        """
+        SELECT id FROM research_runs
+        WHERE contract_id = ?
+        ORDER BY started_at, id
+        LIMIT 1
+        """,
+        (contract_id,),
+    ).fetchone()
+    return first is not None and first["id"] == run_id
+
+
+def _cluster_report_row_for_prior_run(
+    conn: sqlite3.Connection,
+    prior_run_id: str,
+) -> sqlite3.Row | None:
+    row = conn.execute(
+        """
+        SELECT id, report_json FROM cluster_reports
+        WHERE run_id = ?
+        ORDER BY created_at DESC, id DESC
+        LIMIT 1
+        """,
+        (prior_run_id,),
+    ).fetchone()
+    if row is not None:
+        return row
+    return conn.execute(
+        """
+        SELECT id, report_json FROM cluster_reports
+        WHERE run_id IS NULL
+        ORDER BY created_at DESC, id DESC
+        LIMIT 1
+        """
+    ).fetchone()
+
+
+def _spawn_lineage_for_run(
+    conn: sqlite3.Connection,
+    *,
+    run_id: str,
+    contract_id: str,
+) -> dict[str, Any]:
+    if _is_root_run_for_contract(conn, run_id, contract_id):
+        return {"parent_question_id": None}
+
+    prior_run = conn.execute(
+        """
+        SELECT id FROM research_runs
+        WHERE contract_id = ? AND id != ?
+        ORDER BY started_at, id
+        LIMIT 1
+        """,
+        (contract_id, run_id),
+    ).fetchone()
+    if prior_run is None:
+        return {"parent_question_id": DEFAULT_RESEARCH_QUESTION_ID}
+
+    cluster_row = _cluster_report_row_for_prior_run(conn, str(prior_run["id"]))
+    if cluster_row is None:
+        return {"parent_question_id": DEFAULT_RESEARCH_QUESTION_ID}
+
+    report = json.loads(cluster_row["report_json"] or "{}")
+    claim_ids = sorted(str(claim_id) for claim_id in (report.get("linked_claim_ids") or []))
+    reason_row = conn.execute(
+        """
+        SELECT reason FROM research_queue
+        WHERE contract_id = ? AND item_type = 'question' AND status = 'queued'
+        ORDER BY priority_score DESC, created_at
+        LIMIT 1
+        """,
+        (contract_id,),
+    ).fetchone()
+    lineage: dict[str, Any] = {
+        "parent_question_id": DEFAULT_RESEARCH_QUESTION_ID,
+        "spawned_from_report_id": cluster_row["id"],
+    }
+    if claim_ids:
+        lineage["spawned_from_claim_ids"] = claim_ids
+    if reason_row and reason_row["reason"]:
+        lineage["spawn_reason"] = str(reason_row["reason"])
+    return lineage
+
+
 def _build_runs(conn: sqlite3.Connection) -> list[dict[str, Any]]:
     rows = conn.execute(
         """
-        SELECT id, topic, domain_pack, mode, status
+        SELECT id, topic, domain_pack, mode, status, contract_id
         FROM research_runs
         ORDER BY started_at, id
         """
     ).fetchall()
-    return [
-        {
+    runs: list[dict[str, Any]] = []
+    for row in rows:
+        entry: dict[str, Any] = {
             "run_id": row["id"],
             "topic": row["topic"],
             "domain_pack": row["domain_pack"],
             "mode": row["mode"],
             "status": row["status"],
         }
-        for row in rows
-    ]
+        contract_id = row["contract_id"]
+        lineage = _contract_question_lineage(conn, contract_id)
+        if lineage and contract_id:
+            lineage.update(
+                _spawn_lineage_for_run(conn, run_id=row["id"], contract_id=contract_id)
+            )
+            entry.update(lineage)
+        runs.append(entry)
+    return runs
 
 
 def _build_report_summaries(conn: sqlite3.Connection) -> list[dict[str, Any]]:
@@ -246,6 +377,8 @@ def assert_no_private_fields(snapshot: dict[str, Any]) -> list[str]:
     for key_path in _iter_keys(snapshot):
         leaf = key_path.rsplit(".", 1)[-1]
         leaf = leaf.split("[", 1)[0]
+        if leaf in _LINEAGE_KEY_ALLOWLIST:
+            continue
         lowered = leaf.casefold()
         if any(fragment in lowered for fragment in FORBIDDEN_KEY_SUBSTRINGS):
             violations.append(f"forbidden snapshot key: {key_path}")

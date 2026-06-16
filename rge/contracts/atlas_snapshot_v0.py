@@ -15,6 +15,13 @@ from pydantic import BaseModel, Field, ValidationError
 
 ATLAS_SNAPSHOT_SCHEMA_VERSION = "atlas_snapshot_v0.1.0"
 FIXTURE_RELATIVE_PATH = Path("fixtures/atlas/atlas_snapshot_v0_minimal.json")
+ATLAS_RUN_LINEAGE_OPTIONAL_FIELDS = (
+    "research_question_id",
+    "parent_question_id",
+    "spawned_from_claim_ids",
+    "spawned_from_report_id",
+    "spawn_reason",
+)
 
 
 class AtlasSnapshotValidationError(ValueError):
