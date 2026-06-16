@@ -229,6 +229,7 @@ def evaluate_autocycle_cycle(
         "pre_ticket_audit_required": pre_ticket_required,
         "drift_warning": drift_warning,
         "scratch_evidence_status": plan.get("scratch_evidence_status") or {},
+        "staged_rank2_scan_max": plan.get("staged_rank2_scan_max"),
         "scratch_evidence_review_recommended": False,
         "run_next_ticket_allowed": False,
         "next_command": None,
@@ -503,6 +504,7 @@ def run_autocycle(
         "pre_ticket_audit_required": last.get("pre_ticket_audit_required"),
         "drift_warning": last.get("drift_warning"),
         "scratch_evidence_status": last.get("scratch_evidence_status") or {},
+        "staged_rank2_scan_max": last.get("staged_rank2_scan_max"),
         "scratch_evidence_review_recommended": last.get(
             "scratch_evidence_review_recommended", False
         ),

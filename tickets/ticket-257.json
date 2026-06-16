@@ -30,6 +30,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert operator_autocycle plan field and unit test.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / operator autocycle product hardening"
 }
