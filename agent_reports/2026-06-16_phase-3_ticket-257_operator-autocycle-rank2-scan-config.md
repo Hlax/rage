@@ -5,7 +5,7 @@
 **Ticket:** ticket-257  
 **Branch:** `phase-3/ticket-257-operator-autocycle-rank2-scan-config`  
 **Main tip before branch:** `b5010df16b9d0cda379efa56ae0d5684b154d15e`  
-**Status:** implemented
+**Status:** done
 
 ## Summary
 
@@ -61,8 +61,9 @@ None.
 
 ## Merge to main
 
-- Merge commit: _(pending)_
-- Post-merge pytest: _(pending)_
+- Merge commit: `132ab1dbab04d96343bd16a9be363cca262c8d1c`
+- Post-merge pytest: `685 passed, 30 deselected`
+- Push: `origin/main` updated
 
 ## Recommended next ticket
 
