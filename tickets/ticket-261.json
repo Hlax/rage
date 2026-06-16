@@ -1,0 +1,35 @@
+{
+  "id": "ticket-261",
+  "title": "Staged fixture run JSON exposes rank candidate ids",
+  "problem": "Ticket-260 proved fetch-candidate wiring via step recording, but execute_staged_fixture_mode_run result JSON does not expose rank1/rank2 candidate ids for operator inspection.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-260_cli-staged-spine-candidate-id-wiring.md",
+    "rge/cli.py execute_staged_fixture_mode_run return payload"
+  ],
+  "affected_modules": [
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/cli.py",
+    "tests/unit/test_cli_staged_spine_candidate_id_wiring.py"
+  ],
+  "acceptance_criteria": [
+    "execute_staged_fixture_mode_run result includes rank1_candidate_id and rank2_candidate_id",
+    "Unit test asserts both default and live-orchestrator paths populate fields",
+    "Golden pass"
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_cli_staged_spine_candidate_id_wiring.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Live Ollama proofs",
+    "Public export/site changes",
+    "Changing selection heuristics"
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert result payload fields and unit assertions.",
+  "status": "proposed",
+  "category": "Phase 3 / staged spine product hardening"
+}
