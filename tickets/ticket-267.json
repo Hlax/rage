@@ -1,0 +1,32 @@
+{
+  "id": "ticket-267",
+  "title": "AGENTS.md staged spine candidate-id operator docs cross-link",
+  "problem": "Ticket-265 documented rank1/rank2 candidate ids in README staged spine section, but AGENTS.md operator quickstart does not cross-link operators to that section.",
+  "evidence": [
+    "agent_reports/2026-06-16_principal-audit-post-ticket-265.md",
+    "README.md staged spine candidate-id table",
+    "AGENTS.md operator quickstart cross-link pattern (tickets 077–082)"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "AGENTS.md"
+  ],
+  "acceptance_criteria": [
+    "AGENTS.md operator section cross-links README staged spine rank candidate id fields",
+    "No code or export surface changes",
+    "Golden pass"
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Production logic changes",
+    "Public site changes",
+    "Live Ollama proofs"
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert AGENTS.md cross-link only.",
+  "status": "proposed",
+  "category": "Phase 3 / staged spine operator docs"
+}
