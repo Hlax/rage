@@ -315,7 +315,8 @@ superseded
 | 286 | ticket-286 | done | README operator quickstart live staged atlas coherence proof cross-link | `phase-3/ticket-286-readme-atlas-coherence-crosslink` | `agent_reports/2026-06-16_phase-3_ticket-286_readme-atlas-coherence-crosslink.md` |
 | 287 | ticket-287 | done | AGENTS.md cross-link live staged atlas coherence operator proof | `phase-3/ticket-287-agents-atlas-coherence-crosslink` | `agent_reports/2026-06-16_phase-3_ticket-287_agents-atlas-coherence-crosslink.md` |
 | 289 | ticket-289 | done | Live Atlas coherence proof v0 (operator human-readable report) | `phase-3/ticket-289-live-atlas-coherence-proof-v0` | `agent_reports/2026-06-16_phase-3_ticket-289_live-atlas-coherence-proof-v0.md` |
-| 290 | ticket-290 | proposed | Atlas coherence report CLI (operator snapshot in → report out) | | |
+| 290 | ticket-290 | done | Atlas coherence report CLI (operator snapshot in → report out) | `phase-3/ticket-290-atlas-coherence-report-cli` | `agent_reports/2026-06-16_phase-3_ticket-290_atlas-coherence-report-cli.md` |
+| 291 | ticket-291 | proposed | Live staged export + atlas coherence report CLI pipeline proof | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1051,9 +1052,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-290 (proposed) — Atlas coherence report CLI (operator snapshot in → report out)
+ticket-291 (proposed) — Live staged export + atlas coherence report CLI pipeline proof
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-290 atlas coherence report CLI)
+
+- `atlas-coherence-report --snapshot --out-json [--out-md]` operator subcommand
+- ticket-291 seeded: live_network CLI pipeline proof (orchestrator → export → report)
 
 ## Queue Notes (2026-06-16, ticket-289 live atlas coherence proof v0)
 

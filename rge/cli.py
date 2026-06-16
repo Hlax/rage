@@ -1352,6 +1352,36 @@ def _cmd_export_atlas_snapshot(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_atlas_coherence_report(args: argparse.Namespace) -> int:
+    from rge.modules.atlas_coherence_report import write_atlas_coherence_report
+
+    snapshot_path = Path(args.snapshot)
+    json_path = Path(args.out_json)
+    markdown_path = Path(args.out_md) if args.out_md else None
+    try:
+        if not snapshot_path.is_file():
+            raise FileNotFoundError(f"Atlas snapshot not found: {snapshot_path}")
+        snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+        if not isinstance(snapshot, dict):
+            raise ValueError("Atlas snapshot JSON must be an object.")
+        result = write_atlas_coherence_report(
+            snapshot,
+            json_path=json_path,
+            markdown_path=markdown_path,
+        )
+        result["command"] = "atlas-coherence-report"
+        print(json.dumps(result, indent=2))
+        return 0 if result.get("status") == "completed" else 1
+    except (OSError, json.JSONDecodeError, ValueError, TypeError) as exc:
+        payload = {
+            "status": "error",
+            "command": "atlas-coherence-report",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+
 def _cmd_export_public(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.modules.card_exporter import export_public_cards
@@ -3494,6 +3524,31 @@ def build_parser() -> argparse.ArgumentParser:
         help="Use pinned snapshot metadata for deterministic byte-identical re-exports.",
     )
     atlas_export_parser.set_defaults(func=_cmd_export_atlas_snapshot)
+
+    atlas_coherence_parser = subparsers.add_parser(
+        "atlas-coherence-report",
+        help="Write Research Atlas coherence verdict report from private snapshot JSON.",
+        description=(
+            "Read an operator-private atlas_snapshot_v0.1.0 JSON file and emit a "
+            "structured coherence report (JSON plus optional markdown) with population, "
+            "lineage, linkage, and frontend-readiness verdict sections."
+        ),
+    )
+    atlas_coherence_parser.add_argument(
+        "--snapshot",
+        required=True,
+        help="Path to private atlas snapshot JSON input.",
+    )
+    atlas_coherence_parser.add_argument(
+        "--out-json",
+        required=True,
+        help="Path to write coherence report JSON (operator-private).",
+    )
+    atlas_coherence_parser.add_argument(
+        "--out-md",
+        help="Optional path to write human-readable markdown coherence report.",
+    )
+    atlas_coherence_parser.set_defaults(func=_cmd_atlas_coherence_report)
 
     proof_bundle_parser = subparsers.add_parser(
         "prove-arbitrary-source-bundle",
