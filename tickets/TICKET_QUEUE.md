@@ -300,7 +300,8 @@ superseded
 | 271 | ticket-271 | done | Principal audit post-ticket-270 proof bundle visibility checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-270.md` |
 | 272 | ticket-272 | done | Operator proof bundle idempotency unit test | `phase-3/ticket-272-operator-proof-bundle-idempotency` | `agent_reports/2026-06-16_phase-3_ticket-272_operator-proof-bundle-idempotency.md` |
 | 273 | ticket-273 | done | CLI prove-arbitrary-source-bundle second-run idempotency test | `phase-3/ticket-273-cli-proof-bundle-idempotency` | `agent_reports/2026-06-16_phase-3_ticket-273_cli-proof-bundle-idempotency.md` |
-| 274 | ticket-274 | proposed | Operator proof bundle on-disk bundle-out JSON stable on CLI second run | | |
+| 274 | ticket-274 | done | Operator proof bundle on-disk bundle-out JSON stable on CLI second run | `phase-3/ticket-274-bundle-out-disk-idempotency` | `agent_reports/2026-06-16_phase-3_ticket-274_bundle-out-disk-idempotency.md` |
+| 275 | ticket-275 | proposed | Principal audit post-ticket-274 proof bundle idempotency checkpoint | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1035,9 +1036,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-274 (proposed) — Operator proof bundle on-disk bundle-out JSON stable on CLI second run
+ticket-275 (proposed) — Principal audit post-ticket-274 proof bundle idempotency checkpoint
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-274 bundle-out disk idempotency)
+
+- CLI second run on same `--bundle-out` path yields stable on-disk JSON snapshot
+- `_load_bundle_out_snapshot` helper reads bundle-out file for stable comparison
+- ticket-275 seeded: principal audit cadence after tickets 272–274
 
 ## Queue Notes (2026-06-16, ticket-273 CLI proof bundle idempotency)
 
