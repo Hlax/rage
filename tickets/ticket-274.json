@@ -33,6 +33,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Remove on-disk bundle-out idempotency test only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / arbitrary-source pipeline / product hardening"
 }

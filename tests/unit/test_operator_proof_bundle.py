@@ -423,6 +423,54 @@ def test_proof_bundle_cli_second_run_is_idempotent_on_same_temp_paths(
     assert second_bundle_out.is_file()
 
 
+def _load_bundle_out_snapshot(bundle_out: Path) -> dict:
+    bundle = json.loads(bundle_out.read_text(encoding="utf-8"))
+    return _stable_bundle_snapshot(bundle)
+
+
+def test_proof_bundle_cli_second_run_bundle_out_on_disk_is_stable(
+    mock_network_env: None,
+    patched_staged_network: None,
+    temp_db: Path,
+    staging_dir: Path,
+    report_dir: Path,
+    export_dir: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    bundle_out = temp_db.parent / "cli_proof_bundle_disk.json"
+
+    first_exit = main(
+        _proof_bundle_cli_argv(
+            temp_db=temp_db,
+            staging_dir=staging_dir,
+            report_dir=report_dir,
+            export_dir=export_dir,
+            bundle_out=bundle_out,
+        )
+    )
+    capsys.readouterr()
+    assert first_exit == 0
+    assert bundle_out.is_file()
+    first_disk_snapshot = _load_bundle_out_snapshot(bundle_out)
+
+    second_exit = main(
+        _proof_bundle_cli_argv(
+            temp_db=temp_db,
+            staging_dir=staging_dir,
+            report_dir=report_dir,
+            export_dir=export_dir,
+            bundle_out=bundle_out,
+        )
+    )
+    capsys.readouterr()
+    assert second_exit == 0
+    second_disk_snapshot = _load_bundle_out_snapshot(bundle_out)
+
+    assert first_disk_snapshot["counts"]["usable_output"] is True
+    assert second_disk_snapshot["counts"]["usable_output"] is True
+    assert second_disk_snapshot == first_disk_snapshot
+
+
 def test_collect_source_metrics_matches_db(
     mock_network_env: None,
     patched_staged_network: None,

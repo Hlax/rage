@@ -1,0 +1,35 @@
+{
+  "id": "ticket-275",
+  "title": "Principal audit post-ticket-274 proof bundle idempotency checkpoint",
+  "problem": "Three consecutive done tickets (272–274) since principal audit post-ticket-270; cadence requires a read-only principal audit checkpoint before further implementation.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-274_bundle-out-disk-idempotency.md",
+    "agent_reports/2026-06-16_principal-audit-post-ticket-270.md",
+    "tickets/ticket-272.json",
+    "tickets/ticket-273.json",
+    "tickets/ticket-274.json"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-16_principal-audit-post-ticket-274.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report written with cadence reset.",
+    "Mock golden gate green at audit time.",
+    "No implementation code changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Ticket implementation.",
+    "Public export or site changes.",
+    "Live Ollama proofs."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove audit report only.",
+  "status": "proposed",
+  "category": "Phase 3 / principal audit checkpoint"
+}
