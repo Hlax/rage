@@ -1,0 +1,32 @@
+{
+  "id": "ticket-245",
+  "title": "README rank-2 checklist detect seed isolation note",
+  "problem": "Ticket-243 fixed detect seed under global live Ollama env. README One-time rank-2 checklist should document that domain seed (GT7 spine) forces mock LLM so operators do not misread detect failures as seed regressions.",
+  "evidence": [
+    "agent_reports/2026-06-16_principal-audit-post-ticket-243.md",
+    "agent_reports/2026-06-16_phase-3_ticket-243_detect-seed-mock-isolation.md",
+    "README.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-16_phase-3_ticket-245_readme-detect-seed-note.md"
+  ],
+  "acceptance_criteria": [
+    "README rank-2 checklist notes GT7 domain seed uses mock LLM for extract/link/build under live operator env.",
+    "Cross-reference to tests/unit/staged_domain_seed.py or ticket-243 report.",
+    "Golden pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Product code changes.",
+    "Live Ollama operator proof session.",
+    "Fixing catalog drift skips."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README doc edits.",
+  "status": "proposed",
+  "category": "Phase 3 / docs / operator"
+}

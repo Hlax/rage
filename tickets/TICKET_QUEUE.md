@@ -270,7 +270,8 @@ superseded
 | 241 | ticket-241 | done | Runtime config rank-2 live Ollama closure operator summary | `phase-3/ticket-241-runtime-config-rank2-live-closure` | `agent_reports/2026-06-16_ticket-241_runtime-config-rank2-live-closure.md` |
 | 242 | ticket-242 | done | AGENTS runtime config rank-2 live closure cross-reference | `phase-3/ticket-242-agents-runtime-config-rank2-closure` | `agent_reports/2026-06-16_ticket-242_agents-runtime-config-rank2-closure.md` |
 | 243 | ticket-243 | done | Detect seed mock isolation for live Ollama operator proofs | `phase-3/ticket-243-detect-seed-mock-isolation` | `agent_reports/2026-06-16_phase-3_ticket-243_detect-seed-mock-isolation.md` |
-| 244 | ticket-244 | proposed | Principal audit post-ticket-243 detect seed mock isolation | | |
+| 244 | ticket-244 | done | Principal audit post-ticket-243 detect seed mock isolation | `main` | `agent_reports/2026-06-16_principal-audit-post-ticket-243.md` |
+| 245 | ticket-245 | proposed | README rank-2 checklist detect seed isolation note | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1005,9 +1006,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-244 (proposed) — Principal audit post-ticket-243 detect seed mock isolation
+ticket-245 (proposed) — README rank-2 checklist detect seed isolation note
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-244 principal audit post-ticket-243)
+
+- Cadence reset; mock gate green (142 golden, 668 pytest)
+- Rank-2 docs triangle + ticket-243 seed fix verified
+- ticket-245 seeded: README detect seed isolation operator note
 
 ## Queue Notes (2026-06-16, ticket-243 detect seed mock isolation)
 
