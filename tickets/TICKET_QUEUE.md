@@ -303,7 +303,9 @@ superseded
 | 274 | ticket-274 | done | Operator proof bundle on-disk bundle-out JSON stable on CLI second run | `phase-3/ticket-274-bundle-out-disk-idempotency` | `agent_reports/2026-06-16_phase-3_ticket-274_bundle-out-disk-idempotency.md` |
 | 275 | ticket-275 | done | Principal audit post-ticket-274 proof bundle idempotency checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-274.md` |
 | 276 | ticket-276 | done | Operator proof bundle export JSON stable on CLI second run | `phase-3/ticket-276-export-json-disk-idempotency` | `agent_reports/2026-06-16_phase-3_ticket-276_export-json-disk-idempotency.md` |
-| 277 | ticket-277 | proposed | Operator proof bundle module-level export JSON stable on second run | | |
+| 277 | ticket-277 | superseded | Operator proof bundle module-level export JSON stable on second run | | superseded by ticket-278 |
+| 278 | ticket-278 | done | Research Atlas export contract inventory and snapshot schema v0 | `phase-3/ticket-278-research-atlas-export-contract` | `agent_reports/2026-06-16_phase-3_ticket-278_research-atlas-export-contract.md` |
+| 279 | ticket-279 | proposed | Atlas snapshot v0 population from fixture-mode DB (read-only projection) | | |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
 | 233 | ticket-233 | done | Live OpenAlex source acquisition resilience | `phase-3/ticket-233-openalex-fetch-resilience` | `agent_reports/2026-06-15_phase-3_ticket-233_openalex-fetch-resilience.md` |
@@ -1038,9 +1040,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-277 (proposed) — Operator proof bundle module-level export JSON stable on second run
+ticket-279 (proposed) — Atlas snapshot v0 population from fixture-mode DB (read-only projection)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-16, ticket-278 Research Atlas export contract)
+
+- `atlas_snapshot_v0.1.0` contract + validator; minimal fixture; inventory in `docs/contracts/`
+- ticket-277 superseded (operator pivot away from narrow idempotency)
+- ticket-279 seeded: fixture-mode DB → atlas snapshot population
+- Pre-ticket audit: `agent_reports/2026-06-16_pre-ticket-278_research-atlas-export-contract-audit.md`
 
 ## Queue Notes (2026-06-16, ticket-276 export JSON disk idempotency)
 
