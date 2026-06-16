@@ -65,4 +65,4 @@ Write pre-ticket-297, then /rge-run-next-ticket
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `4c7f8b9`
