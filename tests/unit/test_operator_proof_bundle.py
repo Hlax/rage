@@ -428,6 +428,15 @@ def _load_bundle_out_snapshot(bundle_out: Path) -> dict:
     return _stable_bundle_snapshot(bundle)
 
 
+def _stable_export_snapshot(export_path: Path) -> dict:
+    cards = json.loads(export_path.read_text(encoding="utf-8"))
+    assert isinstance(cards, list)
+    return {
+        "card_count": len(cards),
+        "card_ids": sorted(card["id"] for card in cards),
+    }
+
+
 def test_proof_bundle_cli_second_run_bundle_out_on_disk_is_stable(
     mock_network_env: None,
     patched_staged_network: None,
@@ -469,6 +478,52 @@ def test_proof_bundle_cli_second_run_bundle_out_on_disk_is_stable(
     assert first_disk_snapshot["counts"]["usable_output"] is True
     assert second_disk_snapshot["counts"]["usable_output"] is True
     assert second_disk_snapshot == first_disk_snapshot
+
+
+def test_proof_bundle_cli_second_run_export_json_on_disk_is_stable(
+    mock_network_env: None,
+    patched_staged_network: None,
+    temp_db: Path,
+    staging_dir: Path,
+    report_dir: Path,
+    export_dir: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    bundle_out = temp_db.parent / "cli_proof_bundle_export.json"
+
+    first_exit = main(
+        _proof_bundle_cli_argv(
+            temp_db=temp_db,
+            staging_dir=staging_dir,
+            report_dir=report_dir,
+            export_dir=export_dir,
+            bundle_out=bundle_out,
+        )
+    )
+    capsys.readouterr()
+    assert first_exit == 0
+    first_bundle = json.loads(bundle_out.read_text(encoding="utf-8"))
+    export_path = Path(first_bundle["export_path"])
+    assert export_path.is_file()
+    first_export_snapshot = _stable_export_snapshot(export_path)
+
+    second_exit = main(
+        _proof_bundle_cli_argv(
+            temp_db=temp_db,
+            staging_dir=staging_dir,
+            report_dir=report_dir,
+            export_dir=export_dir,
+            bundle_out=bundle_out,
+        )
+    )
+    capsys.readouterr()
+    assert second_exit == 0
+    second_bundle = json.loads(bundle_out.read_text(encoding="utf-8"))
+    assert Path(second_bundle["export_path"]) == export_path
+    second_export_snapshot = _stable_export_snapshot(export_path)
+
+    assert first_export_snapshot["card_count"] >= 2
+    assert second_export_snapshot == first_export_snapshot
 
 
 def test_collect_source_metrics_matches_db(
