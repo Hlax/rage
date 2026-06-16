@@ -228,6 +228,8 @@ def evaluate_autocycle_cycle(
         "audit_required": audit_required,
         "pre_ticket_audit_required": pre_ticket_required,
         "drift_warning": drift_warning,
+        "scratch_evidence_status": plan.get("scratch_evidence_status") or {},
+        "scratch_evidence_review_recommended": False,
         "run_next_ticket_allowed": False,
         "next_command": None,
         "next_commands": [],
@@ -291,6 +293,22 @@ def evaluate_autocycle_cycle(
         return stop(
             f"pre_ticket_audit_missing for {ticket_id}",
             next_cmd=f"/rge-principal-audit (pre-ticket audit for {ticket_id})",
+        )
+
+    scratch_evidence = plan.get("scratch_evidence_status") or {}
+    action = plan.get("next_recommended_action") or {}
+    action_id = action.get("action_id")
+    if (
+        scratch_evidence.get("evidence_review_ready")
+        and action_id == "run_scratch_evidence_review"
+    ):
+        commands = [_shell_command(cmd) for cmd in action.get("commands", [])]
+        result["scratch_evidence_review_recommended"] = True
+        result["recommended_action"] = action
+        return stop(
+            "operator_action_blocked_automation: run_scratch_evidence_review",
+            next_cmd=commands[0] if commands else None,
+            commands=commands,
         )
 
     if drift_warning:
@@ -484,6 +502,10 @@ def run_autocycle(
         "audit_required": last.get("audit_required"),
         "pre_ticket_audit_required": last.get("pre_ticket_audit_required"),
         "drift_warning": last.get("drift_warning"),
+        "scratch_evidence_status": last.get("scratch_evidence_status") or {},
+        "scratch_evidence_review_recommended": last.get(
+            "scratch_evidence_review_recommended", False
+        ),
         "run_next_ticket_allowed": last.get("run_next_ticket_allowed"),
         "stop_reason": final_stop_reason or last.get("stop_reason"),
         "next_command": last.get("next_command"),
