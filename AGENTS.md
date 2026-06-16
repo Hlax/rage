@@ -152,6 +152,14 @@ extract upstream in pytest, and `link-concepts --live-staged-link-fallthrough` (
 chained pytest in `tests/unit/test_live_staged_link_live_llm_spine.py` with
 `live_network` and `live_smoke` markers).
 
+**Live staged rank-2 link (live Ollama; ticket-236):** separate per-step rank-2 operator
+proof — not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_RANK2_LINK_LIVE_LLM=1`,
+`RGE_ALLOW_LIVE_STAGED_RANK2=1`, `RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama`, network
+gates, temp `--db`, mock extract upstream (`staged_fetch_second_candidate_extract_claims.json`),
+and `link-concepts --live-staged-rank2-link-fallthrough` (or chained pytest in
+`tests/unit/test_live_staged_rank2_link_live_llm_spine.py` with `live_network` and
+`live_smoke` markers). Rank-1 `--live-staged-link-fallthrough` unchanged.
+
 **Live staged build (live Ollama; ticket-212):** separate per-step operator proof —
 not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM=1`,
 `RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama`, network gates above, temp `--db`, mock
