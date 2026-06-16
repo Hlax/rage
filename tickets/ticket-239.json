@@ -1,0 +1,32 @@
+{
+  "id": "ticket-239",
+  "title": "Principal audit post-ticket-238 rank-2 per-step live LLM closure checkpoint",
+  "problem": "Tickets 230/236/237/238 completed rank-2 per-step live Ollama (extract/link/build/detect). Principal audit cadence should reset after rank-2 live surface closure before further implementation.",
+  "evidence": [
+    "agent_reports/2026-06-16_ticket-238_live-staged-rank2-detect-live-llm-spine.md",
+    "agent_reports/2026-06-15_pre-ticket-228_rank-2-staged-live-llm-audit.md",
+    "agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-16_ticket-239_principal-audit-post-ticket-238.md"
+  ],
+  "acceptance_criteria": [
+    "Audit report confirms rank-2 per-step live Ollama surface closed at detect.",
+    "Cadence reset documented; reconcile/report remain deterministic NO-GO for LLM.",
+    "Recommended next smallest ticket identified."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-239"
+  ],
+  "non_goals": [
+    "Product code changes.",
+    "Orchestrator live LLM.",
+    "New live fallthrough flags."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Delete audit report only.",
+  "status": "proposed",
+  "category": "Phase 3 / audit / checkpoint"
+}

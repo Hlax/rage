@@ -37,6 +37,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert rank-2 detect live fallthrough and tests.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / live LLM / staged spine"
 }

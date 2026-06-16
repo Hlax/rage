@@ -170,6 +170,16 @@ gates, temp `--db`, mock extract + mock link upstream
 `tests/unit/test_live_staged_rank2_build_live_llm_spine.py` with `live_network` and
 `live_smoke` markers). Rank-1 `--live-staged-build-fallthrough` unchanged.
 
+**Live staged rank-2 detect (live Ollama; ticket-238):** separate per-step rank-2 operator
+proof — not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_RANK2_DETECT_LIVE_LLM=1`,
+`RGE_ALLOW_LIVE_STAGED_RANK2=1`, `RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama`, network
+gates, temp `--db`, **domain opposing context seed** before live discover
+(`seed_domain_opposing_context()`), mock extract + mock link + mock build upstream, and
+`detect-contradictions --live-staged-rank2-detect-fallthrough` (or chained pytest in
+`tests/unit/test_live_staged_rank2_detect_live_llm_spine.py` with `live_network` and
+`live_smoke` markers). **Staged rank-2 per-step live Ollama surface is closed at detect**
+(230/236/237/238); no further rank-2 fallthrough flags are planned.
+
 **Live staged build (live Ollama; ticket-212):** separate per-step operator proof —
 not orchestrator-wide. Requires `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM=1`,
 `RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama`, network gates above, temp `--db`, mock

@@ -45,6 +45,7 @@ Golden tests and the builder agent should set `RGE_LLM_MODE=mock` explicitly.
 | `RGE_ALLOW_LIVE_STAGED_LINK_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama link on rank-1 staged ingest |
 | `RGE_ALLOW_LIVE_STAGED_RANK2_LINK_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama link on rank-2 staged ingest (ticket-236) |
 | `RGE_ALLOW_LIVE_STAGED_RANK2_BUILD_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama build on rank-2 staged ingest (ticket-237) |
+| `RGE_ALLOW_LIVE_STAGED_RANK2_DETECT_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama detect on rank-2 staged ingest (ticket-238) |
 | `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama build on staged ingest |
 | `RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM` | optional (default `0`) | no | yes | no | Per-step live Ollama detect on staged ingest |
 | `RGE_ALLOW_LIVE_STAGED_RECONCILE` | optional (default `0`) | no | yes | no | Live OpenAlex network spine through deterministic reconcile (ticket-184); **no live LLM gate** |
@@ -160,7 +161,8 @@ API keys, mailto values, or other secrets.
 | link (rank-2) | `RGE_ALLOW_LIVE_STAGED_RANK2_LINK_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_RANK2=1` |
 | build (rank-1) | `RGE_ALLOW_LIVE_STAGED_BUILD_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_BUILD=1` |
 | build (rank-2) | `RGE_ALLOW_LIVE_STAGED_RANK2_BUILD_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_RANK2=1` |
-| detect | `RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_DETECT=1` |
+| detect (rank-1) | `RGE_ALLOW_LIVE_STAGED_DETECT_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_DETECT=1` |
+| detect (rank-2) | `RGE_ALLOW_LIVE_STAGED_RANK2_DETECT_LIVE_LLM=1` | `RGE_ALLOW_LIVE_STAGED_RANK2=1` |
 | reconcile-scores | — (deterministic Python; **no** `*_LIVE_LLM` gate) | `RGE_ALLOW_LIVE_STAGED_RECONCILE=1` |
 | generate-run-report | — (deterministic Python; **no** `*_LIVE_LLM` gate) | `RGE_ALLOW_LIVE_STAGED_REPORT=1` |
 

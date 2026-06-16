@@ -446,6 +446,31 @@ python -m rge.cli build-relationships --source <source_id> `
   --db <temp.sqlite> --live-staged-rank2-build-fallthrough
 ```
 
+**Live staged rank-2 detect (live Ollama; ticket-238):** per-step rank-2 proof after
+`seed_domain_opposing_context` on temp DB, then live discover (≥2 candidates) → fetch rank-2
+→ ingest → **mock extract** + **mock link** + **mock build** — uses
+`detect-contradictions --live-staged-rank2-detect-fallthrough`. Requires
+`RGE_ALLOW_LIVE_STAGED_RANK2=1`. Temp `--db` only. Markers: `live_network` **and** `live_smoke`.
+Completes rank-2 per-step live Ollama surface (extract/link/build/detect).
+
+```powershell
+$env:RGE_ALLOW_LIVE_STAGED_RANK2_DETECT_LIVE_LLM = "1"
+$env:RGE_ALLOW_LIVE_STAGED_RANK2 = "1"
+$env:RGE_ALLOW_LIVE_LLM = "1"
+$env:RGE_LLM_MODE = "ollama"
+$env:RGE_ALLOW_SOURCE_NETWORK = "1"
+$env:OPENALEX_MAILTO = "operator@example.com"
+
+python -m pytest tests/unit/test_live_staged_rank2_detect_live_llm_spine.py -m "live_network and live_smoke" -q
+```
+
+CLI equivalent after domain seed → discover → fetch rank-2 → ingest → mock upstream on temp DB:
+
+```powershell
+python -m rge.cli detect-contradictions --source <source_id> `
+  --db <temp.sqlite> --live-staged-rank2-detect-fallthrough
+```
+
 *Discover + fetch + ingest-staged + mock extract + mock link + mock build* (ticket-178; writes `relationships` via fixture):
 
 ```powershell
