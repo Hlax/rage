@@ -115,4 +115,4 @@ None.
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `7504406`
