@@ -90,6 +90,8 @@ def test_atlas_preview_page_is_static_fixture_only() -> None:
     assert "Research Atlas" in text
     assert "atlasSnapshot" in text
     assert "resolveAtlasCoherencePreview" in text
+    assert "conceptToSlug" in text
+    assert "findConceptBySlug" in text
     assert "fetch(" not in text, "atlas preview must not fetch data"
 
     preview_lib = (SITE_DIR / "lib" / "atlasPreview.ts").read_text(encoding="utf-8")
@@ -190,3 +192,4 @@ def test_static_export_atlas_preview_page_exists() -> None:
             assert concept in atlas_html
     if atlas.get("coherence_summary"):
         assert atlas["coherence_summary"]["preview_label"] in atlas_html
+    assert "/concepts/ai-assistance" in atlas_html

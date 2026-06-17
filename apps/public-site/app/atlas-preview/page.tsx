@@ -10,7 +10,7 @@ import {
   humanizeLabel,
   resolveAtlasCoherencePreview,
 } from '../../lib/atlasPreview';
-import { findCardById } from '../../lib/publicCards';
+import { conceptToSlug, findCardById, findConceptBySlug } from '../../lib/publicCards';
 
 export const metadata = {
   title: 'Research Atlas Preview — Research Graph Engine',
@@ -210,7 +210,22 @@ export default function AtlasPreviewPage() {
         <div style={panelStyle}>
           <p style={{ margin: 0, fontSize: '0.85rem', color: '#8b93a3' }}>Concept nodes</p>
           <p style={{ margin: '0.5rem 0 0', color: '#aeb4c0', lineHeight: 1.6 }}>
-            {atlasSnapshot.nodes.map((node) => node.label).join(' · ')}
+            {atlasSnapshot.nodes.map((node, index) => {
+              const slug = conceptToSlug(node.label);
+              const hasConceptPage = findConceptBySlug(slug) != null;
+              return (
+                <span key={node.id}>
+                  {index > 0 ? ' · ' : null}
+                  {hasConceptPage ? (
+                    <Link href={`/concepts/${slug}`} style={{ color: '#9eb4ff' }}>
+                      {node.label}
+                    </Link>
+                  ) : (
+                    node.label
+                  )}
+                </span>
+              );
+            })}
           </p>
         </div>
         <ul style={{ listStyle: 'none', padding: 0, margin: '0.75rem 0 0' }}>
