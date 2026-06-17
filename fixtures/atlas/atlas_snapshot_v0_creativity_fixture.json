@@ -199,7 +199,13 @@
     {
       "cluster_id": "crpt_56a4b3c77556fd70",
       "cluster_label": "AI assistance and semantic diversity",
-      "run_id": null
+      "run_id": null,
+      "member_concepts": [
+        "AI assistance",
+        "semantic diversity",
+        "originality",
+        "ideation"
+      ]
     }
   ],
   "reports": [

@@ -180,3 +180,7 @@ def test_static_export_atlas_preview_page_exists() -> None:
     atlas = _atlas_snapshot_preview()
     if atlas["reports"] and atlas["reports"][0].get("public_summary"):
         assert atlas["reports"][0]["public_summary"] in atlas_html
+    if atlas["clusters"] and atlas["clusters"][0].get("member_concepts"):
+        assert "Concepts:" in atlas_html
+        for concept in atlas["clusters"][0]["member_concepts"]:
+            assert concept in atlas_html

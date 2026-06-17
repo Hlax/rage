@@ -1,0 +1,47 @@
+{
+  "id": "ticket-306",
+  "title": "Atlas snapshot inline coherence summary v0",
+  "problem": "Ticket-300 product verdict: coherence verdict lives in a separate JSON file; /atlas-preview imports two files. Optional coherence_summary on snapshot enables single-import pages.",
+  "evidence": [
+    "agent_reports/2026-06-17_phase-3_ticket-300_atlas-readonly-public-preview-v0.md",
+    "agent_reports/2026-06-17_phase-3_ticket-305_atlas-cluster-member-projection-v0.md",
+    "rge/modules/atlas_coherence_report.py"
+  ],
+  "affected_modules": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "apps/public-site"
+  ],
+  "expected_files": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json",
+    "apps/public-site/public/data/atlas_snapshot_preview.json",
+    "apps/public-site/lib/atlasPreview.ts",
+    "tests/unit/test_atlas_snapshot_coherence_summary.py",
+    "agent_reports/2026-06-17_phase-3_ticket-306_atlas-coherence-summary-inline-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit written before implementation (medium risk: public preview JSON).",
+    "Fixture-mode atlas snapshot includes coherence_summary block (verdict + preview_label only).",
+    "Committed creativity fixture + atlas_snapshot_preview.json updated.",
+    "/atlas-preview can read coherence from snapshot when present (keep separate file fallback).",
+    "No export-public semantic changes.",
+    "Golden + full pytest + safety audit + public-site build pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_atlas_snapshot_coherence_summary.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "export-public changes.",
+    "Schema migrations.",
+    "Full coherence report body in snapshot.",
+    "Removing atlas_coherence_preview.json import."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert coherence_summary projection and preview JSON only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / product-facing"
+}

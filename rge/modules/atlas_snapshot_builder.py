@@ -436,22 +436,52 @@ def _build_report_summaries(conn: sqlite3.Connection) -> list[dict[str, Any]]:
     return summaries
 
 
+def _project_cluster_member_concepts(included_concepts_json: str | None) -> list[str]:
+    """Build public-safe concept labels from cluster_reports.included_concepts_json."""
+    if not included_concepts_json:
+        return []
+    try:
+        raw = json.loads(included_concepts_json)
+    except json.JSONDecodeError:
+        return []
+    if not isinstance(raw, list):
+        return []
+    labels: list[str] = []
+    seen: set[str] = set()
+    for item in raw:
+        if not isinstance(item, str):
+            continue
+        label = item.strip()
+        if not label:
+            continue
+        key = label.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        labels.append(label)
+    return labels
+
+
 def _build_cluster_summaries(conn: sqlite3.Connection) -> list[dict[str, Any]]:
     rows = conn.execute(
         """
-        SELECT id, run_id, cluster_label
+        SELECT id, run_id, cluster_label, included_concepts_json
         FROM cluster_reports
         ORDER BY created_at, id
         """
     ).fetchall()
-    return [
-        {
+    summaries: list[dict[str, Any]] = []
+    for row in rows:
+        summary: dict[str, Any] = {
             "cluster_id": row["id"],
             "cluster_label": row["cluster_label"],
             "run_id": row["run_id"],
         }
-        for row in rows
-    ]
+        member_concepts = _project_cluster_member_concepts(row["included_concepts_json"])
+        if member_concepts:
+            summary["member_concepts"] = member_concepts
+        summaries.append(summary)
+    return summaries
 
 
 def _iter_keys(value: object, prefix: str = "") -> list[str]:
