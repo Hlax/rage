@@ -92,6 +92,7 @@ def test_atlas_preview_page_is_static_fixture_only() -> None:
     assert "resolveAtlasCoherencePreview" in text
     assert "conceptToSlug" in text
     assert "findConceptBySlug" in text
+    assert "renderConceptLabelList" in text
     assert "fetch(" not in text, "atlas preview must not fetch data"
 
     preview_lib = (SITE_DIR / "lib" / "atlasPreview.ts").read_text(encoding="utf-8")
@@ -193,3 +194,5 @@ def test_static_export_atlas_preview_page_exists() -> None:
     if atlas.get("coherence_summary"):
         assert atlas["coherence_summary"]["preview_label"] in atlas_html
     assert "/concepts/ai-assistance" in atlas_html
+    # ticket-310: card + cluster concept lines add links beyond nodes-only (ticket-309)
+    assert atlas_html.count("/concepts/") >= 12

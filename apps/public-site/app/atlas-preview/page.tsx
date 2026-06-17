@@ -29,6 +29,25 @@ const panelStyle = {
   background: '#161922',
 } as const;
 
+function renderConceptLabelList(labels: string[], separator: string) {
+  return labels.map((label, index) => {
+    const slug = conceptToSlug(label);
+    const hasConceptPage = findConceptBySlug(slug) != null;
+    return (
+      <span key={`${label}-${index}`}>
+        {index > 0 ? separator : null}
+        {hasConceptPage ? (
+          <Link href={`/concepts/${slug}`} style={{ color: '#9eb4ff' }}>
+            {label}
+          </Link>
+        ) : (
+          label
+        )}
+      </span>
+    );
+  });
+}
+
 function QueuedFollowUps() {
   const queued = atlasSnapshot.follow_up_questions.filter(
     (item) => item.status === 'queued',
@@ -191,7 +210,7 @@ export default function AtlasPreviewPage() {
                 </p>
                 {card.concepts.length > 0 ? (
                   <p style={{ margin: '0.75rem 0 0', fontSize: '0.8rem', color: '#8b93a3' }}>
-                    Concepts: {card.concepts.join(', ')}
+                    Concepts: {renderConceptLabelList(card.concepts, ', ')}
                   </p>
                 ) : null}
               </li>
@@ -294,7 +313,8 @@ export default function AtlasPreviewPage() {
                   <span>{cluster.cluster_label}</span>
                   {cluster.member_concepts && cluster.member_concepts.length > 0 ? (
                     <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#8b93a3' }}>
-                      Concepts: {cluster.member_concepts.join(', ')}
+                      Concepts:{' '}
+                      {renderConceptLabelList(cluster.member_concepts, ', ')}
                     </p>
                   ) : null}
                 </li>
