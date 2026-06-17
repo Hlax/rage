@@ -93,4 +93,4 @@ labels in snapshot + `/atlas-preview` clusters section; per ticket-300 product v
 
 ## Merge to main
 
-_(pending)_
+Merge commit: `22f4ae0`
