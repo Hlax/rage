@@ -237,6 +237,11 @@ export default function AtlasPreviewPage() {
               <p style={{ margin: '0.35rem 0 0', fontSize: '0.85rem', color: '#8b93a3' }}>
                 Run: {report.run_id ?? '—'} · status {humanizeLabel(report.status ?? 'unknown')}
               </p>
+              {report.public_summary ? (
+                <p style={{ margin: '0.75rem 0 0', color: '#aeb4c0', lineHeight: 1.55 }}>
+                  {report.public_summary}
+                </p>
+              ) : null}
             </li>
           ))}
         </ul>

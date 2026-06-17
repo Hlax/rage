@@ -69,6 +69,7 @@ export type AtlasPreviewSnapshot = {
     schema_version?: string;
     run_id?: string;
     status?: string;
+    public_summary?: string;
   }>;
   cards: AtlasPreviewCard[];
   follow_up_questions: AtlasPreviewFollowUp[];

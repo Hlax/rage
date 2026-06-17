@@ -207,7 +207,8 @@
       "report_type": "run_report",
       "schema_version": "0.1.0",
       "run_id": "run_golden_fixture_mvp",
-      "status": "informational"
+      "status": "informational",
+      "public_summary": "15 claims accepted from 3 ingested sources; 1 rejected; 2 relationships; 1 score event; 2 public cards; 1 cluster report."
     }
   ],
   "cards": [
