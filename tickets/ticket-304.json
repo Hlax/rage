@@ -1,0 +1,48 @@
+{
+  "id": "ticket-304",
+  "title": "Atlas snapshot public report summary projection v0",
+  "problem": "Ticket-300 product verdict: atlas reports[] are too thin for /atlas-preview UI (type/run_id/status only). Fixture-mode export should project a public-safe summary body without changing export-public.",
+  "evidence": [
+    "agent_reports/2026-06-17_principal-audit-post-ticket-302.md",
+    "agent_reports/2026-06-17_phase-3_ticket-300_atlas-readonly-public-preview-v0.md",
+    "rge/modules/atlas_snapshot_builder.py"
+  ],
+  "affected_modules": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "apps/public-site"
+  ],
+  "expected_files": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json",
+    "apps/public-site/public/data/atlas_snapshot_preview.json",
+    "apps/public-site/app/atlas-preview/page.tsx",
+    "tests/unit/test_atlas_snapshot_report_summary.py",
+    "agent_reports/*pre-ticket-304*",
+    "agent_reports/2026-06-17_phase-3_ticket-304_atlas-report-summary-projection-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit written before implementation.",
+    "Fixture-mode atlas reports[] include public_summary (or equivalent) derived from run_report JSON without private fields.",
+    "Committed creativity fixture + public atlas_snapshot_preview.json updated.",
+    "/atlas-preview reports section shows summary text.",
+    "No export-public semantic changes.",
+    "Golden + full pytest + safety audit + public-site build pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_atlas_snapshot_report_summary.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "export-public changes.",
+    "Schema migrations.",
+    "Live operator DB wiring.",
+    "Full run report body export."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert atlas builder report projection and preview JSON only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / product-facing"
+}

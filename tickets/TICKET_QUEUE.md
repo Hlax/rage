@@ -328,7 +328,8 @@ superseded
 | 300 | ticket-300 | done | Research Atlas read-only public preview v0 | `phase-3/ticket-300-atlas-readonly-public-preview-v0` | `agent_reports/2026-06-17_phase-3_ticket-300_atlas-readonly-public-preview-v0.md` |
 | 301 | ticket-301 | done | GT12 atlas-preview static export assertion | `phase-3/ticket-301-gt12-atlas-preview-assertion` | `agent_reports/2026-06-17_phase-3_ticket-301_gt12-atlas-preview-assertion.md` |
 | 302 | ticket-302 | done | Safety auditor atlas preview public data scan | `phase-3/ticket-302-safety-auditor-atlas-preview-scan` | `agent_reports/2026-06-17_phase-3_ticket-302_safety-auditor-atlas-preview-scan.md` |
-| 303 | ticket-303 | proposed | Principal audit post-ticket-302 checkpoint | | |
+| 303 | ticket-303 | done | Principal audit post-ticket-302 checkpoint | `phase-3/ticket-303-principal-audit-post-ticket-302` | `agent_reports/2026-06-17_principal-audit-post-ticket-302.md` |
+| 304 | ticket-304 | proposed | Atlas snapshot public report summary projection v0 | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1064,9 +1065,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-303 (proposed) — Principal audit post-ticket-302 checkpoint
+ticket-304 (proposed) — Atlas snapshot public report summary projection v0
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-17, ticket-303 principal audit post-ticket-302)
+
+- Principal audit committed @ c9d844b; cadence GO for tickets 299–302 batch
+- Drift advisory: favor product-facing ticket-304; no docs-only streak
+- ticket-304 seeded: atlas report public_summary projection (pre-ticket audit required)
 
 ## Queue Notes (2026-06-17, ticket-302 safety auditor atlas preview scan)
 
