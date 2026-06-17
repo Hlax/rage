@@ -88,4 +88,4 @@ or
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `ffe5991`
