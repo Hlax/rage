@@ -16,6 +16,7 @@ from rge.db.repositories import (
     ResearchContractRepository,
     ResearchQueueRepository,
     ResearchRunRepository,
+    RelationshipEvidenceRepository,
     RelationshipRepository,
     RunReportRepository,
     sha256_hex,
@@ -459,4 +460,147 @@ def ensure_evidence_cluster_summary(
         "run_id": run_id,
         "cluster_report_id": record.id,
         "cluster_label": cluster_label,
+    }
+
+
+_ROLE_PRIORITY: dict[str, int] = {
+    "method": 0,
+    "subject": 1,
+    "object": 2,
+    "context": 3,
+}
+
+
+def _claim_concept_links(
+    conn: sqlite3.Connection, claim_id: str
+) -> list[dict[str, Any]]:
+    rows = conn.execute(
+        """
+        SELECT cc.concept_id, cc.role, cc.confidence, c.label
+        FROM claim_concepts cc
+        JOIN concepts c ON c.id = cc.concept_id
+        WHERE cc.claim_id = ?
+        ORDER BY cc.concept_id
+        """,
+        (claim_id,),
+    ).fetchall()
+    return [
+        {
+            "concept_id": str(row["concept_id"]),
+            "role": str(row["role"] or "context"),
+            "confidence": float(row["confidence"] or 0.5),
+            "label": str(row["label"] or ""),
+        }
+        for row in rows
+    ]
+
+
+def _ordered_concept_pair(
+    links: list[dict[str, Any]],
+) -> tuple[dict[str, Any], dict[str, Any]] | None:
+    if len(links) < 2:
+        return None
+    ordered = sorted(
+        links,
+        key=lambda item: (
+            _ROLE_PRIORITY.get(str(item["role"]), 99),
+            -float(item["confidence"]),
+            str(item["concept_id"]),
+        ),
+    )
+    return ordered[0], ordered[1]
+
+
+def _predicate_for_link_pair(subject_role: str, object_role: str) -> str:
+    if subject_role == "method":
+        return "may_influence"
+    if object_role == "object":
+        return "relates_to"
+    return "relates_to"
+
+
+def _evidence_relationships_exist(
+    conn: sqlite3.Connection, claim_ids: list[str]
+) -> bool:
+    if not claim_ids:
+        return False
+    placeholders = ",".join("?" for _ in claim_ids)
+    row = conn.execute(
+        f"""
+        SELECT COUNT(DISTINCT r.id)
+        FROM relationships r
+        JOIN relationship_evidence re ON re.relationship_id = r.id
+        WHERE r.status = 'active' AND re.claim_id IN ({placeholders})
+        """,
+        tuple(claim_ids),
+    ).fetchone()
+    return int(row[0]) > 0 if row else False
+
+
+def ensure_evidence_relationship_edges(
+    conn: sqlite3.Connection,
+    *,
+    topic: str,
+    domain_pack: str = "creativity",
+) -> dict[str, Any]:
+    """Seed active relationships from claim-concept links for evidence DB atlas edges[]."""
+    if not db_has_non_fixture_manual_claims(conn):
+        return {"status": "skipped", "reason": "no_non_fixture_manual_claims"}
+
+    claim_ids = _evidence_claim_ids(conn)
+    if not claim_ids:
+        return {"status": "skipped", "reason": "no_evidence_claim_ids"}
+
+    if _evidence_relationships_exist(conn, claim_ids):
+        return {
+            "status": "already_present",
+            "relationship_ids": [],
+        }
+
+    rel_repo = RelationshipRepository(conn)
+    evidence_repo = RelationshipEvidenceRepository(conn)
+    created_ids: list[str] = []
+
+    for claim_id in claim_ids:
+        links = _claim_concept_links(conn, claim_id)
+        pair = _ordered_concept_pair(links)
+        if pair is None:
+            continue
+        subject, obj = pair
+        if subject["concept_id"] == obj["concept_id"]:
+            continue
+
+        scope_row = conn.execute(
+            "SELECT scope FROM claims WHERE id = ?",
+            (claim_id,),
+        ).fetchone()
+        scope = str(scope_row["scope"]).strip() if scope_row and scope_row["scope"] else "evidence summary"
+        predicate = _predicate_for_link_pair(str(subject["role"]), str(obj["role"]))
+        confidence = min(float(subject["confidence"]), float(obj["confidence"]))
+
+        relationship = rel_repo.insert(
+            subject_concept_id=subject["concept_id"],
+            predicate=predicate,
+            object_concept_id=obj["concept_id"],
+            scope=scope,
+            confidence=confidence,
+            domain=domain_pack,
+            status="active",
+            evidence_strength=confidence,
+            domain_metadata={"evidence_db_atlas": True, "claim_id": claim_id},
+        )
+        evidence_repo.insert(
+            relationship_id=relationship["id"],
+            claim_id=claim_id,
+            stance="supports",
+            relevance_score=confidence,
+        )
+        created_ids.append(relationship["id"])
+
+    if not created_ids:
+        return {"status": "skipped", "reason": "no_concept_pairs_for_edges"}
+
+    return {
+        "status": "created",
+        "relationship_ids": created_ids,
     }
