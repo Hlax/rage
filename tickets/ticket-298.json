@@ -1,0 +1,34 @@
+{
+  "id": "ticket-298",
+  "title": "Operator evidence DB atlas coherence re-export proof",
+  "problem": "Tickets 294–297 close evidence DB atlas population on mock spine with overall coherence pass; ticket-293 live NM-1 DB has not been re-exported to verify end-to-end operator coherence after population hooks.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-297_evidence-db-relationship-projection.md",
+    "agent_reports/2026-06-16_phase-3_ticket-293_live-nm1-atlas-quality-proof-v0.md"
+  ],
+  "affected_modules": [
+    "rge/modules/evidence_db_atlas.py"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-16_phase-3_ticket-298_operator-evidence-db-coherence-reexport.md"
+  ],
+  "acceptance_criteria": [
+    "Re-export atlas snapshot + coherence report on ticket-293 evidence DB path (operator-only).",
+    "Document before/after population counts and overall_coherence_verdict.",
+    "No pytest or public surface changes required unless regression found.",
+    "Honest verdict if live DB lacks concept pairs for relationship edges."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_evidence_db_relationship_projection.py -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Public atlas UI.",
+    "CI live Ollama.",
+    "Schema migration."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "N/A — operator report only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / operator proof"
+}
