@@ -63,7 +63,12 @@ export type AtlasPreviewSnapshot = {
   runs: AtlasPreviewRun[];
   nodes: AtlasPreviewNode[];
   edges: AtlasPreviewEdge[];
-  clusters: Array<{ cluster_id: string; cluster_label: string; run_id?: string | null }>;
+  clusters: Array<{
+    cluster_id: string;
+    cluster_label: string;
+    run_id?: string | null;
+    member_concepts?: string[];
+  }>;
   reports: Array<{
     report_type: string;
     schema_version?: string;

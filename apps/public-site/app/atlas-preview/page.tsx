@@ -274,7 +274,14 @@ export default function AtlasPreviewPage() {
             <p style={{ margin: 0, fontSize: '0.85rem', color: '#8b93a3' }}>Clusters</p>
             <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#aeb4c0' }}>
               {atlasSnapshot.clusters.map((cluster) => (
-                <li key={cluster.cluster_id}>{cluster.cluster_label}</li>
+                <li key={cluster.cluster_id} style={{ marginBottom: '0.5rem' }}>
+                  <span>{cluster.cluster_label}</span>
+                  {cluster.member_concepts && cluster.member_concepts.length > 0 ? (
+                    <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#8b93a3' }}>
+                      Concepts: {cluster.member_concepts.join(', ')}
+                    </p>
+                  ) : null}
+                </li>
               ))}
             </ul>
           </div>

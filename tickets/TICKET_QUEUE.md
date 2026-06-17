@@ -330,7 +330,8 @@ superseded
 | 302 | ticket-302 | done | Safety auditor atlas preview public data scan | `phase-3/ticket-302-safety-auditor-atlas-preview-scan` | `agent_reports/2026-06-17_phase-3_ticket-302_safety-auditor-atlas-preview-scan.md` |
 | 303 | ticket-303 | done | Principal audit post-ticket-302 checkpoint | `phase-3/ticket-303-principal-audit-post-ticket-302` | `agent_reports/2026-06-17_principal-audit-post-ticket-302.md` |
 | 304 | ticket-304 | done | Atlas snapshot public report summary projection v0 | `phase-3/ticket-304-atlas-report-summary-projection-v0` | `agent_reports/2026-06-17_phase-3_ticket-304_atlas-report-summary-projection-v0.md` |
-| 305 | ticket-305 | proposed | Atlas cluster member projection v0 | | |
+| 305 | ticket-305 | done | Atlas cluster member projection v0 | `phase-3/ticket-305-atlas-cluster-member-projection-v0` | `agent_reports/2026-06-17_phase-3_ticket-305_atlas-cluster-member-projection-v0.md` |
+| 306 | ticket-306 | proposed | Atlas snapshot inline coherence summary v0 | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1066,9 +1067,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-305 (proposed) — Atlas cluster member projection v0
+ticket-306 (proposed) — Atlas snapshot inline coherence summary v0
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-17, ticket-305 atlas cluster member projection)
+
+- `member_concepts` on atlas `clusters[]` from `included_concepts_json` (labels only)
+- Regenerated creativity fixture + atlas_snapshot_preview.json; /atlas-preview lists concepts
+- 7 unit tests; GT12 asserts member labels in static HTML; 776 pytest pass
+- Pre-ticket audit: `agent_reports/2026-06-17_pre-ticket-305_atlas-cluster-member-projection-audit.md`
+- Cadence: 2 done since ticket-303 principal (304–305) — principal audit advisory before ticket-306
+- ticket-306 seeded: optional coherence_summary inline on atlas snapshot
 
 ## Queue Notes (2026-06-17, ticket-304 atlas report summary projection)
 
