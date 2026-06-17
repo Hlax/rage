@@ -42,6 +42,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert public-site page and fixture wiring; remove route only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / Research Atlas / product-facing"
 }

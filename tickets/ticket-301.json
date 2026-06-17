@@ -1,0 +1,36 @@
+{
+  "id": "ticket-301",
+  "title": "GT12 atlas-preview static export assertion",
+  "problem": "Ticket-300 added /atlas-preview but Golden Test 12 does not yet assert the static HTML export or key section markers, so route regression could slip past CI.",
+  "evidence": [
+    "agent_reports/2026-06-17_phase-3_ticket-300_atlas-readonly-public-preview-v0.md",
+    "tests/golden/test_12_public_site_static_render.py"
+  ],
+  "affected_modules": [
+    "tests/golden"
+  ],
+  "expected_files": [
+    "tests/golden/test_12_public_site_static_render.py",
+    "agent_reports/2026-06-17_phase-3_ticket-301_gt12-atlas-preview-assertion.md"
+  ],
+  "acceptance_criteria": [
+    "GT12 asserts atlas-preview.html exists after npm build.",
+    "GT12 asserts primary question and coherence badge text in exported HTML.",
+    "No production code or public export semantic changes.",
+    "Golden + full pytest green."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden/test_12_public_site_static_render.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Atlas UI changes.",
+    "export-public changes.",
+    "New public routes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert GT12 assertions only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / golden gate"
+}

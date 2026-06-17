@@ -133,6 +133,10 @@ export default function HomePage() {
         </p>
         <p style={{ margin: '0.25rem 0 0' }}>
           Last updated: {formatPublicTimestamp(String(buildInfo.generated_at))}
+          {' · '}
+          <Link href="/atlas-preview" style={{ color: '#9eb4ff' }}>
+            Research Atlas preview
+          </Link>
         </p>
       </footer>
     </main>
