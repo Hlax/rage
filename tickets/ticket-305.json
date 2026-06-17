@@ -1,0 +1,47 @@
+{
+  "id": "ticket-305",
+  "title": "Atlas cluster member projection v0",
+  "problem": "Ticket-300 product verdict: atlas clusters[] are label-only; /atlas-preview cannot show which concepts belong to each cluster.",
+  "evidence": [
+    "agent_reports/2026-06-17_phase-3_ticket-300_atlas-readonly-public-preview-v0.md",
+    "agent_reports/2026-06-17_phase-3_ticket-304_atlas-report-summary-projection-v0.md",
+    "rge/modules/atlas_snapshot_builder.py"
+  ],
+  "affected_modules": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "apps/public-site"
+  ],
+  "expected_files": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json",
+    "apps/public-site/public/data/atlas_snapshot_preview.json",
+    "apps/public-site/app/atlas-preview/page.tsx",
+    "tests/unit/test_atlas_snapshot_cluster_members.py",
+    "agent_reports/2026-06-17_phase-3_ticket-305_atlas-cluster-member-projection-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit written before implementation (medium risk: public preview JSON).",
+    "Fixture-mode atlas clusters[] include public-safe member concept labels (no raw claim text).",
+    "Committed creativity fixture + atlas_snapshot_preview.json updated.",
+    "/atlas-preview clusters section lists member labels.",
+    "No export-public semantic changes.",
+    "Golden + full pytest + safety audit + public-site build pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_atlas_snapshot_cluster_members.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "export-public changes.",
+    "Schema migrations.",
+    "Full cluster report body export.",
+    "Live operator DB-only paths without run_reports/cluster_reports projection."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert cluster member projection and preview JSON only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / product-facing"
+}

@@ -177,3 +177,6 @@ def test_static_export_atlas_preview_page_exists() -> None:
     assert "Coherence:" in atlas_html
     assert "Pass" in atlas_html
     assert "Research Atlas" in atlas_html
+    atlas = _atlas_snapshot_preview()
+    if atlas["reports"] and atlas["reports"][0].get("public_summary"):
+        assert atlas["reports"][0]["public_summary"] in atlas_html

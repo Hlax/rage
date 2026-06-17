@@ -374,6 +374,44 @@ def _build_runs(conn: sqlite3.Connection) -> list[dict[str, Any]]:
     return runs
 
 
+def _project_public_report_summary(report: dict[str, Any]) -> str:
+    """Build a public-safe one-line summary from whitelisted run_report metrics."""
+    parts: list[str] = []
+    ingested = report.get("sources_ingested")
+    accepted = report.get("claims_accepted")
+    rejected = report.get("claims_rejected")
+    if ingested is not None and accepted is not None:
+        segment = (
+            f"{accepted} claims accepted from {ingested} ingested source"
+            f"{'' if ingested == 1 else 's'}"
+        )
+        if rejected:
+            segment += f"; {rejected} rejected"
+        parts.append(segment)
+    relationships = report.get("relationships_updated")
+    if relationships:
+        label = "relationship" if relationships == 1 else "relationships"
+        parts.append(f"{relationships} {label}")
+    score_events = report.get("score_events_created")
+    if score_events:
+        label = "score event" if score_events == 1 else "score events"
+        parts.append(f"{score_events} {label}")
+    cards_exported = report.get("cards_exported")
+    if cards_exported is not None:
+        label = "public card" if cards_exported == 1 else "public cards"
+        parts.append(f"{cards_exported} {label}")
+    cluster_reports = report.get("cluster_reports_created")
+    if cluster_reports:
+        label = "cluster report" if cluster_reports == 1 else "cluster reports"
+        parts.append(f"{cluster_reports} {label}")
+    if parts:
+        return "; ".join(parts) + "."
+    topic = str(report.get("topic", "")).strip()
+    if topic:
+        return f"Research run summary for topic: {topic[:120]}."
+    return "Research run completed (informational summary)."
+
+
 def _build_report_summaries(conn: sqlite3.Connection) -> list[dict[str, Any]]:
     rows = conn.execute(
         """
@@ -385,14 +423,16 @@ def _build_report_summaries(conn: sqlite3.Connection) -> list[dict[str, Any]]:
     summaries: list[dict[str, Any]] = []
     for row in rows:
         report = json.loads(row["report_json"])
-        summaries.append(
-            {
+        summary = {
                 "report_type": report.get("report_type", "run_report"),
                 "schema_version": report.get("schema_version", "0.1.0"),
                 "run_id": report.get("run_id", row["run_id"]),
                 "status": report.get("status", "informational"),
             }
-        )
+        public_summary = _project_public_report_summary(report)
+        if public_summary:
+            summary["public_summary"] = public_summary
+        summaries.append(summary)
     return summaries
 
 
