@@ -107,4 +107,4 @@ Run **principal audit** checkpoint (296–298 since post-ticket-295), then docs 
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `a19d03a`
