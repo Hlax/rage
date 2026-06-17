@@ -31,6 +31,11 @@ AUDIT_TYPES = (
     "full",
 )
 
+ATLAS_PREVIEW_PUBLIC_DATA_FILES = (
+    "atlas_snapshot_preview.json",
+    "atlas_coherence_preview.json",
+)
+
 _PASS_EXIT_CODE = 0
 _FAIL_EXIT_CODE = 1
 
@@ -261,6 +266,24 @@ def _audit_data_exports(root: Path) -> tuple[list[str], list[str]]:
     return checked, blocked
 
 
+def _audit_atlas_preview_public_data(root: Path) -> tuple[list[str], list[str]]:
+    """Scan committed atlas preview JSON for secret-like and path leakage patterns."""
+    data_dir = root / "apps" / "public-site" / "public" / "data"
+    checked: list[str] = []
+    blocked: list[str] = []
+    for name in ATLAS_PREVIEW_PUBLIC_DATA_FILES:
+        path = data_dir / name
+        if not path.is_file():
+            blocked.append(f"missing atlas preview public data file: {name}")
+            continue
+        file_checked, file_blocked = _audit_export_json_file(
+            path, root, label=str(path.relative_to(root))
+        )
+        checked.extend(file_checked)
+        blocked.extend(file_blocked)
+    return checked, blocked
+
+
 def _audit_secrets(root: Path) -> tuple[list[str], list[str]]:
     data_dir = root / "apps" / "public-site" / "public" / "data"
     checked: list[str] = []
@@ -278,6 +301,9 @@ def _audit_secrets(root: Path) -> tuple[list[str], list[str]]:
                 blocked.append(
                     f"secret-like content in {relative} matching {pattern.pattern!r}"
                 )
+    atlas_checked, atlas_blocked = _audit_atlas_preview_public_data(root)
+    checked.extend(atlas_checked)
+    blocked.extend(atlas_blocked)
     return checked, blocked
 
 
