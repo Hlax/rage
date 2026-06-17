@@ -1,0 +1,40 @@
+{
+  "id": "ticket-309",
+  "title": "Atlas preview nodes concept slug links",
+  "problem": "Ticket-300 product verdict: atlas preview nodes are plain text; readers cannot navigate to existing /concepts/[slug] detail pages.",
+  "evidence": [
+    "agent_reports/2026-06-17_phase-3_ticket-300_atlas-readonly-public-preview-v0.md",
+    "agent_reports/2026-06-17_phase-3_ticket-308_export-coherence-preview-cli.md",
+    "apps/public-site/app/atlas-preview/page.tsx"
+  ],
+  "affected_modules": [
+    "apps/public-site"
+  ],
+  "expected_files": [
+    "apps/public-site/app/atlas-preview/page.tsx",
+    "tests/golden/test_12_public_site_static_render.py",
+    "agent_reports/2026-06-17_phase-3_ticket-309_atlas-preview-node-concept-links.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit written before implementation (medium risk: public site).",
+    "/atlas-preview nodes section links labels to /concepts/[slug] when slug exists in public export.",
+    "Unknown labels remain plain text.",
+    "Golden + full pytest + public-site build pass.",
+    "No export-public semantic changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden/test_12_public_site_static_render.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "export-public changes.",
+    "New routes.",
+    "Graph visualization."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert atlas-preview nodes link UI only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / product-facing"
+}

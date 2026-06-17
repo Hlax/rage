@@ -1329,6 +1329,9 @@ def _cmd_export_atlas_snapshot(args: argparse.Namespace) -> int:
     db_path = Path(args.db) if args.db else None
     output_path = Path(args.out)
     conn = ensure_database(db_path)
+    coherence_preview_path = (
+        Path(args.coherence_preview_out) if args.coherence_preview_out else None
+    )
     try:
         result = export_atlas_snapshot_to_path(
             conn,
@@ -1337,6 +1340,7 @@ def _cmd_export_atlas_snapshot(args: argparse.Namespace) -> int:
             primary_question=args.primary_question,
             domain_pack=args.domain,
             fixture_mode=bool(args.fixture_mode),
+            coherence_preview_path=coherence_preview_path,
         )
         print(json.dumps(result, indent=2))
         return 0
@@ -3522,6 +3526,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--fixture-mode",
         action="store_true",
         help="Use pinned snapshot metadata for deterministic byte-identical re-exports.",
+    )
+    atlas_export_parser.add_argument(
+        "--coherence-preview-out",
+        help="Optional path to write public-site atlas_coherence_preview.json sidecar.",
     )
     atlas_export_parser.set_defaults(func=_cmd_export_atlas_snapshot)
 
