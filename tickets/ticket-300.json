@@ -1,0 +1,47 @@
+{
+  "id": "ticket-300",
+  "title": "Research Atlas read-only public preview v0",
+  "problem": "Evidence DB atlas population and coherence are closed on operator paths (294-298) but no product-facing surface lets a human evaluate whether the Atlas contract feels usable before deeper backend dependencies harden.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-298_operator-evidence-db-coherence-reexport.md",
+    "agent_reports/2026-06-17_principal-audit-post-ticket-298.md",
+    "fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json"
+  ],
+  "affected_modules": [
+    "apps/public-site"
+  ],
+  "expected_files": [
+    "apps/public-site/**",
+    "fixtures/atlas/**",
+    "agent_reports/*pre-ticket-300*",
+    "agent_reports/2026-06-17_phase-3_ticket-300_atlas-readonly-public-preview-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit written before implementation (public-site + public-facing data presentation).",
+    "Read-only public-site preview page (e.g. /atlas-preview) using committed fixture or mock-safe Atlas snapshot data only.",
+    "Text-first sections: research run summary, domain/candidate domain, claims/cards, nodes/edges summary, reports, follow-up questions, lineage/research trail, coherence status badge or summary when available.",
+    "No operator-private live Atlas exports, public write routes, ingestion routes, or live LLM calls.",
+    "No export-public semantic changes unless pre-ticket audit explicitly approves.",
+    "No complex graph visualization or image/media assets.",
+    "Public site builds successfully; safety audit passes; golden + full pytest pass.",
+    "Final report includes screenshots or clear text description of page sections and honest product verdict."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "Live/public Atlas consumption from operator DB.",
+    "Auth or dynamic DB reads.",
+    "3D graph visualization.",
+    "review_batch persistence.",
+    "Schema migrations.",
+    "export-public semantic changes without audit approval."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert public-site page and fixture wiring; remove route only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / product-facing"
+}
