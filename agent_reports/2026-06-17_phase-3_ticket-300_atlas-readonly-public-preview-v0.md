@@ -25,8 +25,8 @@ copied from `fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json` plus deri
 |------|--------|
 | `apps/public-site/app/atlas-preview/page.tsx` | Text-first Atlas preview page |
 | `apps/public-site/lib/atlasPreview.ts` | Types + static import helpers |
-| `apps/public-site/public/data/atlas_snapshot_preview.json` | Fixture snapshot copy |
-| `apps/public-site/public/data/atlas_coherence_preview.json` | Coherence summary (verdict + population) |
+| `apps/public-site/public/data/atlas_snapshot_preview.json` | Fixture snapshot copy (force-added; `data/` gitignore) |
+| `apps/public-site/public/data/atlas_coherence_preview.json` | Coherence summary (force-added) |
 | `apps/public-site/app/page.tsx` | Footer link to atlas preview |
 | `agent_reports/2026-06-17_pre-ticket-300_atlas-readonly-public-preview-audit.md` | Pre-ticket GO audit |
 | `tickets/ticket-300.json` | Status `done` |
