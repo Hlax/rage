@@ -17,6 +17,7 @@ CARD_DETAIL_PAGE = SITE_DIR / "app" / "cards" / "[id]" / "page.tsx"
 CONCEPT_DETAIL_PAGE = SITE_DIR / "app" / "concepts" / "[id]" / "page.tsx"
 LIST_PAGE = SITE_DIR / "app" / "page.tsx"
 ABOUT_PAGE = SITE_DIR / "app" / "about" / "page.tsx"
+ATLAS_PREVIEW_PAGE = SITE_DIR / "app" / "atlas-preview" / "page.tsx"
 NOT_FOUND_PAGE = SITE_DIR / "app" / "not-found.tsx"
 
 FORBIDDEN_SOURCE_PATTERNS = (
@@ -44,6 +45,12 @@ def _cards() -> list[dict]:
     return json.loads((DATA_DIR / "public_cards.json").read_text(encoding="utf-8"))
 
 
+def _atlas_snapshot_preview() -> dict:
+    return json.loads(
+        (DATA_DIR / "atlas_snapshot_preview.json").read_text(encoding="utf-8")
+    )
+
+
 def test_static_detail_route_files_exist() -> None:
     assert CARD_DETAIL_PAGE.is_file(), "missing card detail route"
     assert CONCEPT_DETAIL_PAGE.is_file(), "missing concept detail route"
@@ -61,6 +68,7 @@ def test_list_page_links_to_card_and_concept_routes() -> None:
     assert "/cards/" in text
     assert "/concepts/" in text
     assert "/about" in text
+    assert "/atlas-preview" in text
     assert "Last updated:" in text
     assert "buildInfo.generated_at" in text
 
@@ -73,6 +81,16 @@ def test_about_page_is_static_presentation_only() -> None:
     assert "confidence" in text.casefold()
     assert "read-only" in text.casefold()
     assert "fetch(" not in text, "about page must not fetch data"
+
+
+def test_atlas_preview_page_is_static_fixture_only() -> None:
+    """ticket-301: /atlas-preview must stay static JSON imports only."""
+    assert ATLAS_PREVIEW_PAGE.is_file(), "missing atlas preview page route"
+    text = ATLAS_PREVIEW_PAGE.read_text(encoding="utf-8")
+    assert "Research Atlas" in text
+    assert "atlasSnapshot" in text
+    assert "atlasCoherence" in text
+    assert "fetch(" not in text, "atlas preview must not fetch data"
 
 
 def test_not_found_page_uses_site_visual_language() -> None:
@@ -142,3 +160,20 @@ def test_static_export_html_pages_exist() -> None:
     for slug in concept_slugs:
         concept_page = _static_html_path(OUT_DIR, "concepts", slug)
         assert concept_page.is_file(), f"missing static export for concept {slug}"
+
+
+def test_static_export_atlas_preview_page_exists() -> None:
+    """ticket-301: atlas-preview static export must include question + coherence badge."""
+    if not (OUT_DIR / "index.html").is_file():
+        pytest.skip("Run `cd apps/public-site && npm run build` before this test")
+
+    atlas = _atlas_snapshot_preview()
+    primary_question = atlas["root"]["primary_question"]
+
+    atlas_html_path = OUT_DIR / "atlas-preview.html"
+    assert atlas_html_path.is_file(), "missing static export for /atlas-preview"
+    atlas_html = atlas_html_path.read_text(encoding="utf-8")
+    assert primary_question in atlas_html
+    assert "Coherence:" in atlas_html
+    assert "Pass" in atlas_html
+    assert "Research Atlas" in atlas_html

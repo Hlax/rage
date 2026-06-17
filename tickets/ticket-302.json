@@ -1,0 +1,37 @@
+{
+  "id": "ticket-302",
+  "title": "Safety auditor atlas preview public data scan",
+  "problem": "Ticket-300 added atlas_snapshot_preview.json and atlas_coherence_preview.json to public-site data but safety auditor full audit does not yet scan those files for forbidden paths or secrets.",
+  "evidence": [
+    "agent_reports/2026-06-17_phase-3_ticket-300_atlas-readonly-public-preview-v0.md",
+    "agent_reports/2026-06-17_phase-3_ticket-301_gt12-atlas-preview-assertion.md"
+  ],
+  "affected_modules": [
+    "rge/modules/safety_auditor.py"
+  ],
+  "expected_files": [
+    "rge/modules/safety_auditor.py",
+    "tests/unit/test_safety_auditor_atlas_preview.py",
+    "agent_reports/2026-06-17_phase-3_ticket-302_safety-auditor-atlas-preview-scan.md"
+  ],
+  "acceptance_criteria": [
+    "Full safety audit scans atlas preview JSON under apps/public-site/public/data/.",
+    "Forbidden path/secret patterns fail closed on atlas preview fixtures.",
+    "No export-public semantic changes.",
+    "Golden + full pytest + safety audit pass."
+  ],
+  "test_plan": [
+    "python -m rge.modules.safety_auditor --audit full",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Atlas UI changes.",
+    "export-public changes.",
+    "New public routes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert safety auditor scan list only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / safety"
+}
