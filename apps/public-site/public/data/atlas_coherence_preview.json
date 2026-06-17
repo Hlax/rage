@@ -1,0 +1,15 @@
+{
+  "overall_coherence_verdict": "pass",
+  "population": {
+    "runs": 1,
+    "nodes": 24,
+    "edges": 2,
+    "cards": 2,
+    "reports": 1,
+    "follow_up_questions": 6,
+    "domains": 1,
+    "clusters": 1
+  },
+  "preview_label": "Fixture-mode creativity atlas (mock-safe)",
+  "schema_version": "atlas_coherence_preview_v0"
+}
