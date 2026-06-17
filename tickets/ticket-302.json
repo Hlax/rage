@@ -32,6 +32,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert safety auditor scan list only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / Research Atlas / safety"
 }

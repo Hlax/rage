@@ -327,7 +327,8 @@ superseded
 | 299 | ticket-299 | done | README evidence DB atlas population closure cross-link (294-298) | `phase-3/ticket-299-readme-evidence-db-atlas-closure` | `agent_reports/2026-06-16_phase-3_ticket-299_readme-evidence-db-atlas-closure.md` |
 | 300 | ticket-300 | done | Research Atlas read-only public preview v0 | `phase-3/ticket-300-atlas-readonly-public-preview-v0` | `agent_reports/2026-06-17_phase-3_ticket-300_atlas-readonly-public-preview-v0.md` |
 | 301 | ticket-301 | done | GT12 atlas-preview static export assertion | `phase-3/ticket-301-gt12-atlas-preview-assertion` | `agent_reports/2026-06-17_phase-3_ticket-301_gt12-atlas-preview-assertion.md` |
-| 302 | ticket-302 | proposed | Safety auditor atlas preview public data scan | | |
+| 302 | ticket-302 | done | Safety auditor atlas preview public data scan | `phase-3/ticket-302-safety-auditor-atlas-preview-scan` | `agent_reports/2026-06-17_phase-3_ticket-302_safety-auditor-atlas-preview-scan.md` |
+| 303 | ticket-303 | proposed | Principal audit post-ticket-302 checkpoint | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1063,9 +1064,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-302 (proposed) — Safety auditor atlas preview public data scan
+ticket-303 (proposed) — Principal audit post-ticket-302 checkpoint
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-17, ticket-302 safety auditor atlas preview scan)
+
+- Secrets audit scans atlas_snapshot_preview.json + atlas_coherence_preview.json
+- Fail-closed on forbidden path/secret patterns; 4 unit tests
+- Cadence: 4 done since post-ticket-298 principal — recommend ticket-303 audit
+- ticket-303 seeded: principal audit post-ticket-302
 
 ## Queue Notes (2026-06-17, ticket-301 GT12 atlas-preview assertion)
 

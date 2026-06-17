@@ -1,0 +1,33 @@
+{
+  "id": "ticket-303",
+  "title": "Principal audit post-ticket-302 checkpoint",
+  "problem": "Four done tickets since post-ticket-298 principal audit (299-302) including public-site atlas preview and safety hardening; cadence checkpoint recommended before next medium-risk work.",
+  "evidence": [
+    "agent_reports/2026-06-17_phase-3_ticket-302_safety-auditor-atlas-preview-scan.md",
+    "agent_reports/2026-06-17_principal-audit-post-ticket-298.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-17_principal-audit-post-ticket-302.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report written with GO/NO-GO for next implementation.",
+    "Mock golden gate verification recorded.",
+    "Cadence status and drift advisory documented.",
+    "No production code changes unless runner/docs patch required by audit findings."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "Feature implementation.",
+    "Queue ticket execution."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "N/A — audit-only checkpoint.",
+  "status": "proposed",
+  "category": "Phase 3 / principal audit"
+}
