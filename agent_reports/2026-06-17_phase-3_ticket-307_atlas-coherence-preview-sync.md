@@ -81,4 +81,4 @@ None.
 
 ## Merge to main
 
-_(pending)_
+Merge commit: `e4e50a9`
