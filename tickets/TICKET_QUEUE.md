@@ -333,7 +333,8 @@ superseded
 | 305 | ticket-305 | done | Atlas cluster member projection v0 | `phase-3/ticket-305-atlas-cluster-member-projection-v0` | `agent_reports/2026-06-17_phase-3_ticket-305_atlas-cluster-member-projection-v0.md` |
 | 306 | ticket-306 | done | Atlas snapshot inline coherence summary v0 | `phase-3/ticket-306-atlas-coherence-summary-inline-v0` | `agent_reports/2026-06-17_phase-3_ticket-306_atlas-coherence-summary-inline-v0.md` |
 | 307 | ticket-307 | done | Atlas coherence preview JSON sync from snapshot export | `phase-3/ticket-307-atlas-coherence-preview-sync` | `agent_reports/2026-06-17_phase-3_ticket-307_atlas-coherence-preview-sync.md` |
-| 308 | ticket-308 | proposed | export-atlas-snapshot coherence preview sidecar CLI flag | | |
+| 308 | ticket-308 | done | export-atlas-snapshot coherence preview sidecar CLI flag | `phase-3/ticket-308-export-coherence-preview-cli` | `agent_reports/2026-06-17_phase-3_ticket-308_export-coherence-preview-cli.md` |
+| 309 | ticket-309 | proposed | Atlas preview nodes concept slug links | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1069,9 +1070,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-308 (proposed) — export-atlas-snapshot coherence preview sidecar CLI flag
+ticket-309 (proposed) — Atlas preview nodes concept slug links
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-17, ticket-308 export coherence preview CLI)
+
+- `export-atlas-snapshot --coherence-preview-out PATH` writes public coherence sidecar
+- 7 unit tests in coherence preview sync module (+1 CLI test); 789 pytest pass
+- Cadence: 2 done since pre-ticket-307 (307–308) — principal audit advisory before ticket-309
+- ticket-309 seeded: atlas preview node links to /concepts/[slug]
 
 ## Queue Notes (2026-06-17, ticket-307 atlas coherence preview sync)
 

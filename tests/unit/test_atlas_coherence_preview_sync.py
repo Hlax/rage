@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from rge.cli import FIXTURE_RUN_ID, GOLDEN_MVP_TOPIC, execute_fixture_mode_run
+from rge.cli import FIXTURE_RUN_ID, GOLDEN_MVP_TOPIC, execute_fixture_mode_run, main
 from rge.modules.atlas_snapshot_builder import (
     ATLAS_COHERENCE_PREVIEW_SCHEMA_VERSION,
     build_atlas_coherence_preview,
@@ -141,3 +141,44 @@ def test_fixture_mode_snapshot_export_population_matches_preview(
     preview = build_atlas_coherence_preview(snapshot)
     assert preview["population"]["cards"] == len(snapshot["cards"])
     assert preview["population"]["clusters"] == len(snapshot["clusters"])
+
+
+def test_export_atlas_snapshot_cli_writes_coherence_preview_sidecar(
+    tmp_path: Path,
+    artifact_dirs: dict[str, Path],
+) -> None:
+    temp_db = tmp_path / "atlas_cli_coherence.sqlite"
+    execute_fixture_mode_run(
+        topic=GOLDEN_MVP_TOPIC,
+        domain="creativity",
+        db_path=temp_db,
+        run_id=FIXTURE_RUN_ID,
+        report_dir=artifact_dirs["reports"],
+        ticket_dir=artifact_dirs["tickets"],
+        export_dirs=[artifact_dirs["export"]],
+    )
+    snapshot_path = tmp_path / "atlas_snapshot.json"
+    coherence_path = tmp_path / "atlas_coherence_preview.json"
+    exit_code = main(
+        [
+            "export-atlas-snapshot",
+            "--db",
+            str(temp_db),
+            "--out",
+            str(snapshot_path),
+            "--coherence-preview-out",
+            str(coherence_path),
+            "--topic",
+            GOLDEN_MVP_TOPIC,
+            "--domain",
+            "creativity",
+            "--fixture-mode",
+        ]
+    )
+    assert exit_code == 0
+    assert snapshot_path.is_file()
+    assert coherence_path.is_file()
+    snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    preview = json.loads(coherence_path.read_text(encoding="utf-8"))
+    assert preview == build_atlas_coherence_preview(snapshot)
+    assert preview == json.loads(COMMITTED_COHERENCE_PREVIEW.read_text(encoding="utf-8"))
