@@ -1,0 +1,31 @@
+{
+  "id": "ticket-299",
+  "title": "README evidence DB atlas population closure cross-link (294-298)",
+  "problem": "Tickets 294-298 close evidence DB atlas population on mock and ticket-293 operator paths but README Operator Quickstart lacks a consolidated cross-link for the closure thread.",
+  "evidence": [
+    "agent_reports/2026-06-16_phase-3_ticket-298_operator-evidence-db-coherence-reexport.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-16_phase-3_ticket-299_readme-evidence-db-atlas-closure.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart documents evidence DB atlas population hooks (runs, cards, reports, clusters, edges) and ticket-298 operator re-export proof pointer.",
+    "No code or public surface changes.",
+    "Mock golden + full pytest green."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Public atlas UI.",
+    "Live Ollama CI.",
+    "Schema migration."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / documentation"
+}
