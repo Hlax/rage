@@ -511,6 +511,24 @@ def assert_no_private_fields(snapshot: dict[str, Any]) -> list[str]:
     return violations
 
 
+def _project_coherence_summary(
+    snapshot: dict[str, Any], *, fixture_mode: bool
+) -> dict[str, str]:
+    """Build public-safe coherence summary from atlas snapshot (verdict + label only)."""
+    from rge.modules.atlas_coherence_report import build_atlas_coherence_report
+
+    report = build_atlas_coherence_report(snapshot)
+    domain_pack = (snapshot.get("root") or {}).get("domain_pack", "unknown")
+    if fixture_mode:
+        preview_label = f"Fixture-mode {domain_pack} atlas (mock-safe)"
+    else:
+        preview_label = f"{domain_pack} atlas coherence projection"
+    return {
+        "overall_coherence_verdict": str(report["overall_coherence_verdict"]),
+        "preview_label": preview_label,
+    }
+
+
 def build_atlas_snapshot_from_db(
     conn: sqlite3.Connection,
     *,
@@ -586,6 +604,19 @@ def build_atlas_snapshot_from_db(
         },
     }
 
+    leak_violations = assert_no_private_fields(snapshot_dict)
+    if leak_violations:
+        raise ValueError(
+            "Atlas snapshot projection blocked by private-field policy: "
+            + "; ".join(leak_violations[:5])
+        )
+
+    validate_atlas_snapshot(snapshot_dict)
+
+    coherence_summary = _project_coherence_summary(
+        snapshot_dict, fixture_mode=fixture_mode
+    )
+    snapshot_dict["coherence_summary"] = coherence_summary
     leak_violations = assert_no_private_fields(snapshot_dict)
     if leak_violations:
         raise ValueError(

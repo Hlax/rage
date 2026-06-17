@@ -3,12 +3,12 @@
 import Link from 'next/link';
 
 import {
-  atlasCoherence,
   atlasSnapshot,
   coherenceBadgeColor,
   formatEdgeSummary,
   formatPublicTimestamp,
   humanizeLabel,
+  resolveAtlasCoherencePreview,
 } from '../../lib/atlasPreview';
 import { findCardById } from '../../lib/publicCards';
 
@@ -78,7 +78,8 @@ function QueuedFollowUps() {
 }
 
 export default function AtlasPreviewPage() {
-  const { population, overall_coherence_verdict } = atlasCoherence;
+  const { population, overall_coherence_verdict, preview_label } =
+    resolveAtlasCoherencePreview();
   const primaryRun = atlasSnapshot.runs[0];
 
   return (
@@ -125,7 +126,7 @@ export default function AtlasPreviewPage() {
           Coherence: {humanizeLabel(overall_coherence_verdict)}
         </span>
         <p style={{ ...bodyStyle, marginTop: '0.75rem', fontSize: '0.9rem' }}>
-          {atlasCoherence.preview_label} · snapshot{' '}
+          {preview_label} · snapshot{' '}
           {atlasSnapshot.snapshot_id} · generated{' '}
           {formatPublicTimestamp(atlasSnapshot.generated_at)}
         </p>

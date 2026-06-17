@@ -89,8 +89,12 @@ def test_atlas_preview_page_is_static_fixture_only() -> None:
     text = ATLAS_PREVIEW_PAGE.read_text(encoding="utf-8")
     assert "Research Atlas" in text
     assert "atlasSnapshot" in text
-    assert "atlasCoherence" in text
+    assert "resolveAtlasCoherencePreview" in text
     assert "fetch(" not in text, "atlas preview must not fetch data"
+
+    preview_lib = (SITE_DIR / "lib" / "atlasPreview.ts").read_text(encoding="utf-8")
+    assert "atlas_coherence_preview.json" in preview_lib
+    assert "coherence_summary" in preview_lib
 
 
 def test_not_found_page_uses_site_visual_language() -> None:
@@ -184,3 +188,5 @@ def test_static_export_atlas_preview_page_exists() -> None:
         assert "Concepts:" in atlas_html
         for concept in atlas["clusters"][0]["member_concepts"]:
             assert concept in atlas_html
+    if atlas.get("coherence_summary"):
+        assert atlas["coherence_summary"]["preview_label"] in atlas_html
