@@ -91,4 +91,4 @@ export pipeline (reduces dual-file drift; keeps separate file for safety auditor
 
 ## Merge to main
 
-_(pending)_
+Merge commit: `26f7939`
