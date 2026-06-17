@@ -934,6 +934,60 @@ Inspect `nm4_evidence_spine_status` in the JSON output: `evidence_db_path`,
 `spine_milestones`. When the local evidence DB has completed steps 1–8,
 expect `spine_stage: reconciled` and `score_event_count: 1`.
 
+**Evidence DB atlas population closure** (tickets 294–298; operator-private; no public
+atlas route/UI): when `export-atlas-snapshot` runs on a **non-fixture** evidence DB
+with accepted claims from `manual_text` sources outside the checksum fixture map,
+`rge/modules/evidence_db_atlas.py` hooks populate atlas sections before snapshot write:
+
+| Atlas section | Hook (ticket) | Trigger |
+| --- | --- | --- |
+| `runs[]` + question lineage | `ensure_evidence_research_run_lineage` (294) | `--topic` on non-fixture export |
+| `cards[]` (claim-backed) | `ensure_claim_backed_public_cards` (294) | non-fixture export; replaces golden placeholders when live claims exist |
+| `reports[]` | `ensure_evidence_run_report` (295) | non-fixture export + non-fixture manual claims |
+| `clusters[]` | `ensure_evidence_cluster_summary` (296) | same gate as reports |
+| `edges[]` | `ensure_evidence_relationship_edges` (297) | same gate; seeds from claim–concept links |
+| `follow_up_questions[]` | research_queue projection (284; lineage from 294) | populated when contract/queue rows exist |
+
+Fixture-mode golden MVP paths (`export-atlas-snapshot --fixture-mode`) are unchanged.
+Default graph DB synthnote export remains checksum-mock — not arbitrary live inference.
+
+**Mock spine proof** (network-free; default `pytest`):
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+python -m pytest tests/unit/test_evidence_db_atlas_projection.py -q
+python -m pytest tests/unit/test_evidence_db_run_report_projection.py -q
+python -m pytest tests/unit/test_evidence_db_cluster_projection.py -q
+python -m pytest tests/unit/test_evidence_db_relationship_projection.py -q
+```
+
+Expect `overall_coherence_verdict: pass` on the mock evidence spine after ticket-297
+hooks. Regression layer remains `tests/unit/test_atlas_coherence_cli_pipeline_fixture.py`
+(ticket-292 fixture-mode CLI chain).
+
+**Operator re-export proof** (ticket-298; gitignored DB only; not CI): after live NM-1 +
+NM-4 link/build on `data/db/ticket293_live_nm1_quality_proof.sqlite`, re-export upgraded
+overall coherence **fail → pass** once 294–297 hooks ran. Full before/after table:
+`agent_reports/2026-06-16_phase-3_ticket-298_operator-evidence-db-coherence-reexport.md`.
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+$DB = "data/db/ticket293_live_nm1_quality_proof.sqlite"
+$TOPIC = "Does AI-assisted songwriting reduce creative diversity in workshop drafts?"
+
+python -m rge.cli export-atlas-snapshot --db $DB `
+  --out data/atlas/ticket293/atlas_snapshot_v298.json `
+  --topic $TOPIC --domain creativity
+
+python -m rge.cli atlas-coherence-report `
+  --snapshot data/atlas/ticket293/atlas_snapshot_v298.json `
+  --out-json data/atlas/ticket293/atlas_coherence_report_v298.json `
+  --out-md data/atlas/ticket293/atlas_coherence_report_v298.md
+```
+
+Public atlas UI/routes remain deferred — see **ticket-300** (Research Atlas read-only
+public preview v0) in the queue.
+
 **Live probe scratch evidence workflow** (local Ollama opt-in; report-only until
 operator persist): use the numbered checklist in
 [`docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md`](docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md)

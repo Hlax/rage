@@ -324,7 +324,8 @@ superseded
 | 296 | ticket-296 | done | Evidence DB cluster summary projection for atlas overall GO | `phase-3/ticket-296-evidence-db-cluster-projection` | `agent_reports/2026-06-16_phase-3_ticket-296_evidence-db-cluster-projection.md` |
 | 297 | ticket-297 | done | Evidence DB relationship edge projection for atlas overall GO | `phase-3/ticket-297-evidence-db-relationship-projection` | `agent_reports/2026-06-16_phase-3_ticket-297_evidence-db-relationship-projection.md` |
 | 298 | ticket-298 | done | Operator evidence DB atlas coherence re-export proof | `phase-3/ticket-298-operator-evidence-db-coherence-reexport` | `agent_reports/2026-06-16_phase-3_ticket-298_operator-evidence-db-coherence-reexport.md` |
-| 299 | ticket-299 | proposed | README evidence DB atlas population closure cross-link (294-298) | | |
+| 299 | ticket-299 | done | README evidence DB atlas population closure cross-link (294-298) | `phase-3/ticket-299-readme-evidence-db-atlas-closure` | `agent_reports/2026-06-16_phase-3_ticket-299_readme-evidence-db-atlas-closure.md` |
+| 300 | ticket-300 | proposed | Research Atlas read-only public preview v0 | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1060,9 +1061,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-299 (proposed) — README evidence DB atlas population closure cross-link (294-298)
+ticket-300 (proposed) — Research Atlas read-only public preview v0
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-17, ticket-299 README evidence DB atlas closure cross-link)
+
+- Operator Quickstart documents evidence DB atlas population hooks (294–298) and ticket-298 re-export pointer
+- Evidence DB atlas population thread closed on mock spine + operator path; public atlas UI deferred
+- ticket-300 seeded: Research Atlas read-only public preview v0 (product-facing; pre-ticket audit required)
+- **Hygiene closure:** do not follow ticket-299 with another docs-only or operator-proof ticket
 
 ## Queue Notes (2026-06-17, ticket-298 operator evidence DB coherence re-export)
 
