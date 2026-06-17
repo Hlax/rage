@@ -37,6 +37,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert coherence preview sync helper and JSON only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / Research Atlas / product-facing"
 }

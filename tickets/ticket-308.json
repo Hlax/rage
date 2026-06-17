@@ -1,0 +1,39 @@
+{
+  "id": "ticket-308",
+  "title": "export-atlas-snapshot coherence preview sidecar CLI flag",
+  "problem": "Ticket-307 added export_atlas_coherence_preview_to_path and coherence_preview_path on export_atlas_snapshot_to_path but operators must use Python API; CLI should expose --coherence-preview-out.",
+  "evidence": [
+    "agent_reports/2026-06-17_phase-3_ticket-307_atlas-coherence-preview-sync.md",
+    "rge/cli.py",
+    "rge/modules/atlas_snapshot_builder.py"
+  ],
+  "affected_modules": [
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/cli.py",
+    "tests/unit/test_atlas_coherence_preview_sync.py",
+    "agent_reports/2026-06-17_phase-3_ticket-308_export-coherence-preview-cli.md"
+  ],
+  "acceptance_criteria": [
+    "export-atlas-snapshot accepts optional --coherence-preview-out PATH.",
+    "CLI writes coherence preview JSON when flag is set.",
+    "Unit test covers CLI happy path on temp paths.",
+    "Golden + full pytest pass.",
+    "No export-public semantic changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_atlas_coherence_preview_sync.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "export-public changes.",
+    "Public site changes.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert CLI flag and test only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / operator CLI"
+}

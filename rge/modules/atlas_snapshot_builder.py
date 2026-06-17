@@ -511,6 +511,46 @@ def assert_no_private_fields(snapshot: dict[str, Any]) -> list[str]:
     return violations
 
 
+ATLAS_COHERENCE_PREVIEW_SCHEMA_VERSION = "atlas_coherence_preview_v0"
+
+
+def build_atlas_coherence_preview(snapshot: dict[str, Any]) -> dict[str, Any]:
+    """Build public-site atlas_coherence_preview.json from a validated atlas snapshot."""
+    from rge.modules.atlas_coherence_report import build_atlas_coherence_report
+
+    summary = snapshot.get("coherence_summary")
+    if not summary:
+        raise ValueError(
+            "Atlas snapshot missing coherence_summary required for coherence preview export"
+        )
+    report = build_atlas_coherence_report(snapshot)
+    return {
+        "overall_coherence_verdict": str(summary["overall_coherence_verdict"]),
+        "population": dict(report["population"]),
+        "preview_label": str(summary["preview_label"]),
+        "schema_version": ATLAS_COHERENCE_PREVIEW_SCHEMA_VERSION,
+    }
+
+
+def export_atlas_coherence_preview_to_path(
+    snapshot: dict[str, Any],
+    output_path: Path,
+) -> dict[str, Any]:
+    """Write public-site atlas_coherence_preview.json derived from snapshot export."""
+    preview = build_atlas_coherence_preview(snapshot)
+    payload = json.dumps(preview, indent=2, ensure_ascii=False) + "\n"
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(payload, encoding="utf-8")
+    return {
+        "status": "completed",
+        "command": "export-atlas-coherence-preview",
+        "output_path": str(output_path),
+        "schema_version": preview["schema_version"],
+        "byte_length": len(payload.encode("utf-8")),
+    }
+
+
 def _project_coherence_summary(
     snapshot: dict[str, Any], *, fixture_mode: bool
 ) -> dict[str, str]:
@@ -640,6 +680,7 @@ def export_atlas_snapshot_to_path(
     safety_audit_id: str | None = None,
     fixture_mode: bool = False,
     repo_root: Path | None = None,
+    coherence_preview_path: Path | None = None,
 ) -> dict[str, Any]:
     """Build, validate, and write an atlas snapshot JSON file (operator-private)."""
     snapshot = build_atlas_snapshot_from_db(
@@ -664,7 +705,12 @@ def export_atlas_snapshot_to_path(
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(payload, encoding="utf-8")
-    return {
+    coherence_preview_result: dict[str, Any] | None = None
+    if coherence_preview_path is not None:
+        coherence_preview_result = export_atlas_coherence_preview_to_path(
+            snapshot, coherence_preview_path
+        )
+    result = {
         "status": "completed",
         "command": "export-atlas-snapshot",
         "output_path": str(output_path),
@@ -672,6 +718,9 @@ def export_atlas_snapshot_to_path(
         "schema_version": snapshot["schema_version"],
         "byte_length": len(payload.encode("utf-8")),
     }
+    if coherence_preview_result is not None:
+        result["coherence_preview_path"] = coherence_preview_result["output_path"]
+    return result
 
 
 def build_atlas_snapshot_model(
