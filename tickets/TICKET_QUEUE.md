@@ -332,7 +332,8 @@ superseded
 | 304 | ticket-304 | done | Atlas snapshot public report summary projection v0 | `phase-3/ticket-304-atlas-report-summary-projection-v0` | `agent_reports/2026-06-17_phase-3_ticket-304_atlas-report-summary-projection-v0.md` |
 | 305 | ticket-305 | done | Atlas cluster member projection v0 | `phase-3/ticket-305-atlas-cluster-member-projection-v0` | `agent_reports/2026-06-17_phase-3_ticket-305_atlas-cluster-member-projection-v0.md` |
 | 306 | ticket-306 | done | Atlas snapshot inline coherence summary v0 | `phase-3/ticket-306-atlas-coherence-summary-inline-v0` | `agent_reports/2026-06-17_phase-3_ticket-306_atlas-coherence-summary-inline-v0.md` |
-| 307 | ticket-307 | proposed | Atlas coherence preview JSON sync from snapshot export | | |
+| 307 | ticket-307 | done | Atlas coherence preview JSON sync from snapshot export | `phase-3/ticket-307-atlas-coherence-preview-sync` | `agent_reports/2026-06-17_phase-3_ticket-307_atlas-coherence-preview-sync.md` |
+| 308 | ticket-308 | proposed | export-atlas-snapshot coherence preview sidecar CLI flag | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1068,9 +1069,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-307 (proposed) — Atlas coherence preview JSON sync from snapshot export
+ticket-308 (proposed) — export-atlas-snapshot coherence preview sidecar CLI flag
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-17, ticket-307 atlas coherence preview sync)
+
+- `build_atlas_coherence_preview()` derives public preview JSON from snapshot export
+- `export_atlas_snapshot_to_path(..., coherence_preview_path=...)` writes sidecar
+- 6 unit tests; committed atlas_coherence_preview.json export-derived; 788 pytest pass
+- Pre-ticket audit: `agent_reports/2026-06-17_pre-ticket-307_atlas-coherence-preview-sync-audit.md`
+- ticket-308 seeded: CLI --coherence-preview-out flag
 
 ## Queue Notes (2026-06-17, ticket-306 atlas inline coherence summary)
 
