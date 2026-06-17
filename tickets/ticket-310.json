@@ -1,0 +1,42 @@
+{
+  "id": "ticket-310",
+  "title": "Atlas preview card and cluster concept slug links",
+  "problem": "Ticket-309 linked concept nodes only; card Concepts lines and cluster member_concepts remain plain text while public concept detail pages exist.",
+  "evidence": [
+    "agent_reports/2026-06-17_phase-3_ticket-309_atlas-preview-node-concept-links.md",
+    "agent_reports/2026-06-17_pre-ticket-309_atlas-preview-node-concept-links-audit.md",
+    "apps/public-site/app/atlas-preview/page.tsx"
+  ],
+  "affected_modules": [
+    "apps/public-site"
+  ],
+  "expected_files": [
+    "apps/public-site/app/atlas-preview/page.tsx",
+    "tests/golden/test_12_public_site_static_render.py",
+    "agent_reports/2026-06-17_phase-3_ticket-310_atlas-preview-card-cluster-concept-links.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit written before implementation (medium risk: public site).",
+    "/atlas-preview card Concepts lines link labels to /concepts/[slug] when slug exists.",
+    "/atlas-preview cluster member_concepts lines link labels to /concepts/[slug] when slug exists.",
+    "Unknown labels remain plain text; separator punctuation preserved.",
+    "Golden + full pytest + public-site build pass.",
+    "No export-public semantic changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden/test_12_public_site_static_render.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "export-public changes.",
+    "New routes.",
+    "Nodes section changes (ticket-309).",
+    "Graph visualization."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert atlas-preview card/cluster concept link UI only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / product-facing"
+}

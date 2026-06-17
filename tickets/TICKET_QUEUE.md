@@ -334,7 +334,8 @@ superseded
 | 306 | ticket-306 | done | Atlas snapshot inline coherence summary v0 | `phase-3/ticket-306-atlas-coherence-summary-inline-v0` | `agent_reports/2026-06-17_phase-3_ticket-306_atlas-coherence-summary-inline-v0.md` |
 | 307 | ticket-307 | done | Atlas coherence preview JSON sync from snapshot export | `phase-3/ticket-307-atlas-coherence-preview-sync` | `agent_reports/2026-06-17_phase-3_ticket-307_atlas-coherence-preview-sync.md` |
 | 308 | ticket-308 | done | export-atlas-snapshot coherence preview sidecar CLI flag | `phase-3/ticket-308-export-coherence-preview-cli` | `agent_reports/2026-06-17_phase-3_ticket-308_export-coherence-preview-cli.md` |
-| 309 | ticket-309 | proposed | Atlas preview nodes concept slug links | | |
+| 309 | ticket-309 | done | Atlas preview nodes concept slug links | `phase-3/ticket-309-atlas-preview-node-concept-links` | `agent_reports/2026-06-17_phase-3_ticket-309_atlas-preview-node-concept-links.md` |
+| 310 | ticket-310 | proposed | Atlas preview card and cluster concept slug links | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1070,9 +1071,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-309 (proposed) — Atlas preview nodes concept slug links
+ticket-310 (proposed) — Atlas preview card and cluster concept slug links
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-17, ticket-309 atlas preview node concept links)
+
+- `/atlas-preview` nodes section links labels to `/concepts/[slug]` when slug resolves
+- Fail-closed via `conceptToSlug` + `findConceptBySlug`; unknown labels stay plain text
+- GT12 asserts `/concepts/ai-assistance` in static export; 789 pytest pass
+- Pre-ticket audit: `agent_reports/2026-06-17_pre-ticket-309_atlas-preview-node-concept-links-audit.md`
+- ticket-310 seeded: card + cluster concept slug links
 
 ## Queue Notes (2026-06-17, ticket-308 export coherence preview CLI)
 

@@ -35,6 +35,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert atlas-preview nodes link UI only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / Research Atlas / product-facing"
 }
