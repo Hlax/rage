@@ -80,4 +80,4 @@ None.
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `cc666fd`
