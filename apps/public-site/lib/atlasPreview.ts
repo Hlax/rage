@@ -50,6 +50,11 @@ export type AtlasPreviewFollowUp = {
   priority_score?: number;
 };
 
+export type AtlasCoherenceSummary = {
+  overall_coherence_verdict: string;
+  preview_label: string;
+};
+
 export type AtlasPreviewSnapshot = {
   schema_version: string;
   generated_at: string;
@@ -79,6 +84,7 @@ export type AtlasPreviewSnapshot = {
   cards: AtlasPreviewCard[];
   follow_up_questions: AtlasPreviewFollowUp[];
   safety: { public_safe: boolean; safety_audit_id: string };
+  coherence_summary?: AtlasCoherenceSummary;
 };
 
 export type AtlasCoherencePreview = {
@@ -90,6 +96,23 @@ export type AtlasCoherencePreview = {
 
 export const atlasSnapshot = snapshot as AtlasPreviewSnapshot;
 export const atlasCoherence = coherence as AtlasCoherencePreview;
+
+/** Prefer inline snapshot coherence_summary; fall back to separate preview JSON. */
+export function resolveAtlasCoherencePreview(): AtlasCoherenceSummary & {
+  population: Record<string, number>;
+} {
+  if (atlasSnapshot.coherence_summary) {
+    return {
+      ...atlasSnapshot.coherence_summary,
+      population: atlasCoherence.population,
+    };
+  }
+  return {
+    overall_coherence_verdict: atlasCoherence.overall_coherence_verdict,
+    preview_label: atlasCoherence.preview_label,
+    population: atlasCoherence.population,
+  };
+}
 
 export function coherenceBadgeColor(verdict: string): string {
   if (verdict === 'pass') {

@@ -1,0 +1,42 @@
+{
+  "id": "ticket-307",
+  "title": "Atlas coherence preview JSON sync from snapshot export",
+  "problem": "Ticket-306 added inline coherence_summary on atlas snapshots but atlas_coherence_preview.json is still hand-maintained; population counts can drift from snapshot export.",
+  "evidence": [
+    "agent_reports/2026-06-17_phase-3_ticket-306_atlas-coherence-summary-inline-v0.md",
+    "apps/public-site/public/data/atlas_coherence_preview.json",
+    "rge/modules/atlas_coherence_report.py"
+  ],
+  "affected_modules": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "apps/public-site"
+  ],
+  "expected_files": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "apps/public-site/public/data/atlas_coherence_preview.json",
+    "tests/unit/test_atlas_coherence_preview_sync.py",
+    "agent_reports/2026-06-17_phase-3_ticket-307_atlas-coherence-preview-sync.md"
+  ],
+  "acceptance_criteria": [
+    "Pre-ticket audit written before implementation (medium risk: public preview JSON).",
+    "Fixture-mode export derives atlas_coherence_preview.json fields from snapshot + coherence report population counts.",
+    "Committed atlas_coherence_preview.json updated to match creativity fixture export.",
+    "No export-public semantic changes.",
+    "Golden + full pytest + safety audit pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_atlas_coherence_preview_sync.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "export-public changes.",
+    "Removing atlas_coherence_preview.json.",
+    "Schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert coherence preview sync helper and JSON only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / product-facing"
+}

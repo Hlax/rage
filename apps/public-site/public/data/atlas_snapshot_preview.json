@@ -332,5 +332,9 @@
   "safety": {
     "public_safe": true,
     "safety_audit_id": "audit_atlas_fixture_v0_001"
+  },
+  "coherence_summary": {
+    "overall_coherence_verdict": "pass",
+    "preview_label": "Fixture-mode creativity atlas (mock-safe)"
   }
 }

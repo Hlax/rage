@@ -331,7 +331,8 @@ superseded
 | 303 | ticket-303 | done | Principal audit post-ticket-302 checkpoint | `phase-3/ticket-303-principal-audit-post-ticket-302` | `agent_reports/2026-06-17_principal-audit-post-ticket-302.md` |
 | 304 | ticket-304 | done | Atlas snapshot public report summary projection v0 | `phase-3/ticket-304-atlas-report-summary-projection-v0` | `agent_reports/2026-06-17_phase-3_ticket-304_atlas-report-summary-projection-v0.md` |
 | 305 | ticket-305 | done | Atlas cluster member projection v0 | `phase-3/ticket-305-atlas-cluster-member-projection-v0` | `agent_reports/2026-06-17_phase-3_ticket-305_atlas-cluster-member-projection-v0.md` |
-| 306 | ticket-306 | proposed | Atlas snapshot inline coherence summary v0 | | |
+| 306 | ticket-306 | done | Atlas snapshot inline coherence summary v0 | `phase-3/ticket-306-atlas-coherence-summary-inline-v0` | `agent_reports/2026-06-17_phase-3_ticket-306_atlas-coherence-summary-inline-v0.md` |
+| 307 | ticket-307 | proposed | Atlas coherence preview JSON sync from snapshot export | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1067,9 +1068,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-306 (proposed) — Atlas snapshot inline coherence summary v0
+ticket-307 (proposed) — Atlas coherence preview JSON sync from snapshot export
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-17, ticket-306 atlas inline coherence summary)
+
+- `coherence_summary` on atlas snapshot (verdict + preview_label only)
+- `resolveAtlasCoherencePreview()` prefers inline; separate JSON fallback for population
+- 6 unit tests; GT12 updated; 782 pytest pass
+- Pre-ticket audit: `agent_reports/2026-06-17_pre-ticket-306_atlas-coherence-summary-inline-audit.md`
+- ticket-307 seeded: sync atlas_coherence_preview.json from export pipeline
 
 ## Queue Notes (2026-06-17, ticket-305 atlas cluster member projection)
 
