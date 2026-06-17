@@ -73,4 +73,4 @@ Four done tickets since post-ticket-298 principal audit (299–302). Run
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `4dfa883`
