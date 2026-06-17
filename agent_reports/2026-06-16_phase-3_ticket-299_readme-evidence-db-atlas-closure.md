@@ -77,4 +77,4 @@ Write pre-ticket-300 audit, then /rge-run-next-ticket for ticket-300
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `891c8cc`
