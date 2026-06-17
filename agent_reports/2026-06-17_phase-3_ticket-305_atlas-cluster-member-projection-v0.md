@@ -91,4 +91,4 @@ atlas snapshot `coherence_summary` inline block (ticket-300 product follow-on; p
 
 ## Merge to main
 
-_(pending)_
+Merge commit: `9b4b694`
