@@ -343,7 +343,8 @@ superseded
 | 315 | ticket-315 | done | Evidence DB Atlas re-export proof refresh v0 | `phase-3/ticket-315-evidence-db-atlas-reexport-proof-refresh-v0` | `agent_reports/2026-06-18_phase-3_ticket-315_evidence-db-atlas-reexport-proof-refresh-v0.md` |
 | 316 | ticket-316 | done | Live staged-spine operator proof refresh v0 | `phase-3/ticket-316-live-staged-spine-operator-proof-refresh-v0` | `agent_reports/2026-06-18_phase-3_ticket-316_live-staged-spine-operator-proof-refresh-v0.md` |
 | 317 | ticket-317 | done | Staged spine atlas cluster projection hook | `phase-3/ticket-317-staged-spine-atlas-cluster-projection` | `agent_reports/2026-06-18_phase-3_ticket-317_staged-spine-atlas-cluster-projection.md` |
-| 318 | ticket-318 | proposed | Principal audit post-ticket-317 checkpoint | | |
+| 318 | ticket-318 | done | Principal audit post-ticket-317 checkpoint | `phase-3/ticket-318-principal-audit-post-ticket-317` | `agent_reports/2026-06-18_phase-3_ticket-318_principal-audit-post-ticket-317.md` |
+| 319 | ticket-319 | proposed | Staged spine cluster projection test isolation hardening | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1079,9 +1080,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-318 (proposed) — Principal audit post-ticket-317 checkpoint
+ticket-319 (proposed) — Staged spine cluster projection test isolation hardening
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-318 principal audit post-ticket-317)
+
+- Principal audit closes batch 315–317; cadence reset (was due pre-audit)
+- Verdict GO; 144 golden, 792 pytest, safety audit pass, public-site build pass
+- Atlas operator proof thread: evidence DB PARTIAL + staged spine pass after ticket-317
+- Drift advisory improved; live layer-3 still skips unsuitable_live_artifact
+- Report: `agent_reports/2026-06-18_principal-audit-post-ticket-317.md`
+- ticket-319 seeded: staged cluster test isolation hardening (flake advisory)
 
 ## Queue Notes (2026-06-18, ticket-317 staged spine atlas cluster projection hook)
 

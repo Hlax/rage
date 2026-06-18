@@ -1,0 +1,34 @@
+{
+  "id": "ticket-319",
+  "title": "Staged spine cluster projection test isolation hardening",
+  "problem": "Principal audit post-ticket-317 observed intermittent full-suite ordering failure in test_staged_spine_cluster_projection (overall_coherence_verdict partial when evidence cluster tests run first). Reproducibility is flaky but risks golden gate noise.",
+  "evidence": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-317.md",
+    "tests/unit/test_staged_spine_cluster_projection.py"
+  ],
+  "affected_modules": [
+    "tests/unit/test_staged_spine_cluster_projection.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_staged_spine_cluster_projection.py",
+    "agent_reports/2026-06-18_phase-3_ticket-319_staged-spine-cluster-test-isolation.md"
+  ],
+  "acceptance_criteria": [
+    "test_staged_spine_cluster_projection passes reliably after test_evidence_db_cluster_projection in same pytest session.",
+    "No production code changes unless root cause requires minimal hook fix.",
+    "Golden + full pytest pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_evidence_db_cluster_projection.py tests/unit/test_staged_spine_cluster_projection.py -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Public site changes.",
+    "README-only documentation.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert test fixture isolation changes only.",
+  "status": "proposed",
+  "category": "Phase 3 / test hygiene"
+}
