@@ -1,0 +1,35 @@
+{
+  "id": "ticket-345",
+  "title": "README operator quickstart autonomous loop scratch status fields v0",
+  "problem": "Tickets 339 and 341–343 shipped autonomous loop scratch inspection, plan reason enrichment, autocycle passthrough, and execute-safe refresh, but README Operator Quickstart does not yet document these operator-visible fields or scratch paths.",
+  "evidence": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-343.md",
+    "agent_reports/2026-06-18_phase-3_ticket-344_principal-audit-post-ticket-343.md",
+    "README.md"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-18_phase-3_ticket-345_readme-autonomous-loop-operator-fields-v0.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart documents gitignored scratch paths for autonomous loop proofs.",
+    "README describes autonomous_loop_scratch_status in operator plan and autocycle JSON.",
+    "README notes execute-safe post-run scratch refresh behavior (ticket-343).",
+    "No CLI or export code changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama runs.",
+    "Public site changes.",
+    "Operator loop code changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}
