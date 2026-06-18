@@ -62,4 +62,4 @@ cd apps/public-site && npm run build      # success
 
 ## Merge to main
 
-(Pending branch merge — document hash after merge.)
+Merge commit: `e3502a1a1261bf2f5889d0b30423814cb0b3bfbc`
