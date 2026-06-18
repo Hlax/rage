@@ -56,7 +56,7 @@ Safety audit not required — operator-private loop artifacts only; no public su
 
 ## Merge to main
 
-(Pending branch merge — document hash after merge.)
+Merge commit: `5675d99c8949972612fb0f86ab0aeaff3fce688c`
 
 ## Recommended next ticket
 
