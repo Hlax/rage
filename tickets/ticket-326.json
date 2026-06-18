@@ -1,0 +1,35 @@
+{
+  "id": "ticket-326",
+  "title": "README refresh script auto-sync fixtures/atlas note",
+  "problem": "Ticket-325 auto-syncs fixtures/atlas from the refresh script, but README Operator Quickstart still says operators must copy or verify parity manually (ticket-324 wording).",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-325_refresh-script-sync-fixtures-atlas.md",
+    "README.md",
+    "scripts/refresh_atlas_preview_from_staged_spine.py"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-18_phase-3_ticket-326_readme-refresh-script-fixtures-sync-note.md"
+  ],
+  "acceptance_criteria": [
+    "README staged-spine refresh section states script writes fixtures/atlas/atlas_snapshot_staged_spine_preview.json automatically.",
+    "Removes or updates manual copy instructions from ticket-324 text.",
+    "Golden + full pytest pass (docs-only)."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Script behavior changes.",
+    "Public site changes.",
+    "Live OpenAlex proofs."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / operator docs"
+}

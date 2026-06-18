@@ -27,6 +27,10 @@ STAGED_PREVIEW_TOPIC = (
     "Does staged fixture-mode discovery improve atlas preview coherence?"
 )
 
+FIXTURES_ATLAS_STAGED_SPINE_PREVIEW = (
+    "fixtures/atlas/atlas_snapshot_staged_spine_preview.json"
+)
+
 
 def curate_snapshot_for_public_preview(snapshot: dict[str, Any]) -> dict[str, Any]:
     """Apply public-preview curation on a validated atlas snapshot dict."""
@@ -71,6 +75,7 @@ def write_public_preview_fixtures(
     *,
     snapshot_path: Path,
     coherence_path: Path,
+    fixtures_reference_path: Path | None = None,
 ) -> dict[str, Any]:
     """Validate, curate, and write public-site atlas preview JSON files."""
     curated = curate_snapshot_for_public_preview(snapshot)
@@ -84,7 +89,10 @@ def write_public_preview_fixtures(
     coherence_path.parent.mkdir(parents=True, exist_ok=True)
     snapshot_path.write_text(snapshot_payload, encoding="utf-8")
     coherence_path.write_text(coherence_payload, encoding="utf-8")
-    return {
+    if fixtures_reference_path is not None:
+        fixtures_reference_path.parent.mkdir(parents=True, exist_ok=True)
+        fixtures_reference_path.write_text(snapshot_payload, encoding="utf-8")
+    result = {
         "status": "completed",
         "snapshot_path": str(snapshot_path),
         "coherence_path": str(coherence_path),
@@ -92,6 +100,9 @@ def write_public_preview_fixtures(
         "overall_coherence_verdict": coherence["overall_coherence_verdict"],
         "population": coherence["population"],
     }
+    if fixtures_reference_path is not None:
+        result["fixtures_reference_path"] = str(fixtures_reference_path)
+    return result
 
 
 def export_staged_spine_preview_from_db(
@@ -126,6 +137,7 @@ def export_staged_spine_preview_to_paths(
     topic: str = STAGED_PREVIEW_TOPIC,
     domain_pack: str = "creativity",
     repo_root: Path | None = None,
+    fixtures_reference_path: Path | None = None,
 ) -> dict[str, Any]:
     """Export staged-spine atlas from DB, curate, and write public preview fixture paths."""
     scratch = snapshot_path.parent / "_scratch_atlas_snapshot.json"
@@ -148,4 +160,5 @@ def export_staged_spine_preview_to_paths(
         snapshot,
         snapshot_path=snapshot_path,
         coherence_path=coherence_path,
+        fixtures_reference_path=fixtures_reference_path,
     )

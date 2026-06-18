@@ -350,7 +350,8 @@ superseded
 | 322 | ticket-322 | done | fixtures/atlas staged-spine preview reference copy | `phase-3/ticket-322-fixtures-atlas-staged-preview-reference` | `agent_reports/2026-06-18_phase-3_ticket-322_fixtures-atlas-staged-preview-reference.md` |
 | 323 | ticket-323 | done | Principal audit post-ticket-322 checkpoint | `phase-3/ticket-323-principal-audit-post-ticket-322` | `agent_reports/2026-06-18_phase-3_ticket-323_principal-audit-post-ticket-322.md` |
 | 324 | ticket-324 | done | README staged-spine atlas preview refresh runbook | `phase-3/ticket-324-readme-staged-spine-atlas-preview-runbook` | `agent_reports/2026-06-18_phase-3_ticket-324_readme-staged-spine-atlas-preview-runbook.md` |
-| 325 | ticket-325 | proposed | Refresh script sync fixtures/atlas staged-spine reference | | |
+| 325 | ticket-325 | done | Refresh script sync fixtures/atlas staged-spine reference | `phase-3/ticket-325-refresh-script-sync-fixtures-atlas` | `agent_reports/2026-06-18_phase-3_ticket-325_refresh-script-sync-fixtures-atlas.md` |
+| 326 | ticket-326 | proposed | README refresh script auto-sync fixtures/atlas note | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1086,9 +1087,21 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-325 (proposed) — Refresh script sync fixtures/atlas staged-spine reference
+ticket-326 (proposed) — README refresh script auto-sync fixtures/atlas note
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-325 refresh script fixtures/atlas sync)
+
+- `export_staged_spine_preview_to_paths` accepts optional `fixtures_reference_path`
+- Refresh script writes `fixtures/atlas/atlas_snapshot_staged_spine_preview.json` automatically
+- Unit test `test_write_public_preview_fixtures_syncs_fixtures_reference`; 800 pytest pass
+- ticket-326 seeded: README auto-sync note
+
+## Queue Notes (2026-06-18, principal audit post-ticket-324)
+
+- Audit committed: `agent_reports/2026-06-18_principal-audit-post-ticket-324.md`
+- GO for ticket-325; cadence satisfied
 
 ## Queue Notes (2026-06-18, ticket-324 README staged-spine atlas preview runbook)
 

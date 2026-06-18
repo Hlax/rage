@@ -32,6 +32,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert script sync line only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / Research Atlas / operator tooling"
 }
