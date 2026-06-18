@@ -1,39 +1,44 @@
 {
   "id": "ticket-315",
-  "title": "README operator evidence DB atlas re-export verification runbook",
-  "problem": "Principal audit post-ticket-313 recommends advancing live-research operator proof; ticket-298 evidence DB re-export proof exists but README lacks a consolidated re-verification checklist for operators.",
+  "title": "Evidence DB Atlas re-export proof refresh v0",
+  "problem": "Six consecutive infra/docs tickets since ticket-309 with no live-research proof. ticket-298 evidence DB re-export is stale; operators need a fresh product-usefulness verdict on the evidence DB atlas export path, not another README-only runbook.",
   "evidence": [
-    "agent_reports/2026-06-17_principal-audit-post-ticket-313.md",
+    "agent_reports/2026-06-17_phase-3_ticket-314_principal-audit-post-ticket-313.md",
     "agent_reports/2026-06-16_phase-3_ticket-298_operator-evidence-db-coherence-reexport.md",
-    "README.md"
+    "tickets/ticket-315.json (superseded README runbook scope)"
   ],
   "affected_modules": [
-    "README.md"
+    "rge/modules/evidence_db_atlas.py"
   ],
   "expected_files": [
-    "README.md",
-    "agent_reports/2026-06-17_phase-3_ticket-315_readme-evidence-db-atlas-reexport-runbook.md"
+    "agent_reports/2026-06-18_phase-3_ticket-315_evidence-db-atlas-reexport-proof-refresh-v0.md",
+    "tickets/ticket-315.json",
+    "tickets/TICKET_QUEUE.md"
   ],
   "acceptance_criteria": [
-    "README Operator Quickstart adds evidence DB atlas re-export verification subsection.",
-    "Documents mock unit-test regression commands (test_evidence_db_atlas_projection family).",
-    "Documents operator re-export commands from ticket-298 on gitignored evidence DB.",
-    "Cross-links Public boundary (ticket-313); no public site or export-public changes.",
-    "Golden + full pytest pass."
+    "Private atlas_snapshot.json exported from evidence DB path, or report documents exact blocker.",
+    "atlas-coherence-report runs against exported snapshot, or report documents exact blocker.",
+    "Human-readable agent report with GO/PARTIAL/NO-GO product verdict and nine-question assessment.",
+    "Supersedes proposed README-only ticket-315 runbook scope.",
+    "Golden + full pytest + safety audit + public-site build pass.",
+    "Report recommends next product move (staged-spine, extraction quality, projection repair, or UI)."
   ],
   "test_plan": [
-    "python -m pytest tests/unit/test_evidence_db_atlas_projection.py -q",
-    "python -m pytest tests/golden -q",
-    "python -m pytest -q"
+    "python -m pytest tests/unit/test_evidence_db_atlas_projection.py tests/unit/test_evidence_db_run_report_projection.py tests/unit/test_evidence_db_cluster_projection.py tests/unit/test_evidence_db_relationship_projection.py -q",
+    "python -m rge.cli verify",
+    "cd apps/public-site && npm run build"
   ],
   "non_goals": [
+    "README-only runbook (superseded).",
     "export-public changes.",
-    "Public site changes.",
+    "Public site UI changes.",
     "New evidence DB hooks or schema migrations.",
-    "CI live-network tests."
+    "CI live-network tests.",
+    "review_batch persistence."
   ],
   "risk_level": "low",
-  "rollback_plan": "Revert README subsection only.",
-  "status": "proposed",
-  "category": "Phase 3 / Research Atlas / operator docs"
+  "rollback_plan": "Revert agent report and ticket queue updates only.",
+  "status": "done",
+  "category": "Phase 3 / Research Atlas / operator proof",
+  "supersedes_note": "Original ticket-315 README operator evidence DB atlas re-export verification runbook scope deferred/superseded by this product proof ticket."
 }
