@@ -53,7 +53,7 @@ Safety audit not required — operator plan read-only reason string; no public s
 
 ## Merge to main
 
-Merge commit: *(pending merge)*
+Merge commit: `3a5627bdefa874e70489ce9a47cae25b4230fbf3`
 
 ## Recommended next ticket
 
