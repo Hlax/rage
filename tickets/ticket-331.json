@@ -1,0 +1,35 @@
+{
+  "id": "ticket-331",
+  "title": "Principal audit post-ticket-330 checkpoint",
+  "problem": "Tickets 329–330 completed docs cross-link and hygiene closure. Cadence approaches threshold (2 done since pre-ticket-328); principal audit due before more implementation.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-330_orphan-agent-reports-hygiene.md",
+    "agent_reports/2026-06-18_pre-ticket-328_live-layer-3-staged-atlas-coherence-audit.md",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [
+    "agent_reports"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-330.md",
+    "agent_reports/2026-06-18_phase-3_ticket-331_principal-audit-post-ticket-330.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report documents tickets 329–330 outcomes and mock golden gate health.",
+    "Cadence reset recorded; next product ticket recommended.",
+    "No implementation code changes beyond audit runner/docs if needed."
+  ],
+  "test_plan": [
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-332",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "New feature implementation.",
+    "Public site changes.",
+    "Live OpenAlex proofs in CI."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert audit reports only.",
+  "status": "proposed",
+  "category": "Phase 3 / principal audit"
+}
