@@ -59,4 +59,4 @@ Safety audit not required — fixtures-only; no new public surface.
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merge commit: `9491117`

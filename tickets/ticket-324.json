@@ -1,0 +1,38 @@
+{
+  "id": "ticket-324",
+  "title": "README staged-spine atlas preview refresh runbook",
+  "problem": "Ticket-320 added scripts/refresh_atlas_preview_from_staged_spine.py and ticket-322 added fixtures/atlas/atlas_snapshot_staged_spine_preview.json, but README Operator Quickstart still documents only fixture-mode MVP refresh (ticket-312). Operators need the staged-spine primary path documented.",
+  "evidence": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-322.md",
+    "agent_reports/2026-06-18_phase-3_ticket-320_public-atlas-preview-fixture-refresh.md",
+    "scripts/refresh_atlas_preview_from_staged_spine.py",
+    "README.md"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-18_phase-3_ticket-324_readme-staged-spine-atlas-preview-runbook.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart documents scripts/refresh_atlas_preview_from_staged_spine.py as primary staged-spine preview refresh path.",
+    "Documents fixtures/atlas/atlas_snapshot_staged_spine_preview.json offline reference and parity test.",
+    "Retains fixture-mode MVP path as legacy/alternate; cross-links tickets 320/321/322.",
+    "Golden + full pytest pass (docs-only)."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Public site code changes.",
+    "export-public changes.",
+    "Live OpenAlex proofs.",
+    "Script behavior changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / operator docs"
+}
