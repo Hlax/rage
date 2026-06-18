@@ -1,0 +1,36 @@
+{
+  "id": "ticket-313",
+  "title": "README evidence DB atlas vs public preview boundary",
+  "problem": "Ticket-312 documents fixture-mode public preview refresh; README Evidence DB atlas section (294-298) does not state that non-fixture exports remain operator-private and do not publish to /atlas-preview.",
+  "evidence": [
+    "agent_reports/2026-06-17_phase-3_ticket-312_readme-atlas-preview-fixture-refresh-runbook.md",
+    "agent_reports/2026-06-17_principal-audit-post-ticket-310.md",
+    "README.md"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-17_phase-3_ticket-313_readme-evidence-db-atlas-public-boundary.md"
+  ],
+  "acceptance_criteria": [
+    "Evidence DB atlas section cross-links Research Atlas public preview fixture refresh runbook.",
+    "Explicit boundary: non-fixture evidence DB atlas exports are operator-private; public /atlas-preview uses committed fixture-mode refresh only.",
+    "No CLI or export semantic changes.",
+    "Golden + full pytest pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "export-public changes.",
+    "Public site code changes.",
+    "Live evidence DB to public site pipeline."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README paragraph only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / operator docs"
+}

@@ -337,7 +337,8 @@ superseded
 | 309 | ticket-309 | done | Atlas preview nodes concept slug links | `phase-3/ticket-309-atlas-preview-node-concept-links` | `agent_reports/2026-06-17_phase-3_ticket-309_atlas-preview-node-concept-links.md` |
 | 310 | ticket-310 | done | Atlas preview card and cluster concept slug links | `phase-3/ticket-310-atlas-preview-card-cluster-concept-links` | `agent_reports/2026-06-17_phase-3_ticket-310_atlas-preview-card-cluster-concept-links.md` |
 | 311 | ticket-311 | done | Principal audit post-ticket-310 checkpoint | `phase-3/ticket-311-principal-audit-post-ticket-310` | `agent_reports/2026-06-17_phase-3_ticket-311_principal-audit-post-ticket-310.md` |
-| 312 | ticket-312 | proposed | README operator atlas preview fixture refresh runbook | | |
+| 312 | ticket-312 | done | README operator atlas preview fixture refresh runbook | `phase-3/ticket-312-readme-atlas-preview-fixture-refresh-runbook` | `agent_reports/2026-06-17_phase-3_ticket-312_readme-atlas-preview-fixture-refresh-runbook.md` |
+| 313 | ticket-313 | proposed | README evidence DB atlas vs public preview boundary | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1073,9 +1074,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-312 (proposed) — README operator atlas preview fixture refresh runbook
+ticket-313 (proposed) — README evidence DB atlas vs public preview boundary
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-17, ticket-312 README atlas preview fixture refresh runbook)
+
+- Operator Quickstart: fixture-mode export-atlas-snapshot + --coherence-preview-out → public/data
+- Replaced stale "public atlas deferred" text; Public Site section cross-link
+- 789 pytest pass; docs-only
+- ticket-313 seeded: evidence DB atlas vs public preview boundary
 
 ## Queue Notes (2026-06-17, ticket-311 principal audit post-ticket-310)
 
