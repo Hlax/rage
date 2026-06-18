@@ -60,4 +60,4 @@ Safety audit not required — script/curator path only; no committed public JSON
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merge commit: `c5d8db1`
