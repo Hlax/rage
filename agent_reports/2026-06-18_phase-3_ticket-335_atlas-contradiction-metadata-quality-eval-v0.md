@@ -58,7 +58,7 @@ Safety audit not required — operator-private atlas projection only; no public 
 
 ## Merge to main
 
-(Pending merge commit hash.)
+Merge commit: `f88b4b2a2e72182e17c6e48b5c407929b2536990`
 
 ## Recommended next ticket
 
