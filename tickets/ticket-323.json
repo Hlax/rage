@@ -1,0 +1,34 @@
+{
+  "id": "ticket-323",
+  "title": "Principal audit post-ticket-322 checkpoint",
+  "problem": "Tickets 320–322 completed the public atlas preview thread (JSON refresh, page copy, fixtures reference). Cadence rule requires a principal audit after ≥3 consecutive done tickets since the last checkpoint (pre-ticket-320).",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-322_fixtures-atlas-staged-preview-reference.md",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [
+    "agent_reports"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-322.md",
+    "agent_reports/2026-06-18_phase-3_ticket-323_principal-audit-post-ticket-322.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report documents tickets 320–322 outcomes and mock golden gate health.",
+    "Cadence reset recorded; next product ticket recommended.",
+    "No implementation code changes beyond audit runner/docs if needed."
+  ],
+  "test_plan": [
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-324",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "New feature implementation.",
+    "Public site changes.",
+    "Live OpenAlex proofs."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert audit reports only.",
+  "status": "proposed",
+  "category": "Phase 3 / principal audit"
+}

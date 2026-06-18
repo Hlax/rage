@@ -31,6 +31,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Remove fixtures/atlas reference file only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / fixtures"
 }
