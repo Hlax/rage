@@ -59,4 +59,4 @@ Safety audit not required — hygiene only; no tracked file deletion.
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merge commit: `bb0da47`
