@@ -32,6 +32,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Operator report only; no production code expected unless regression found.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / live staged spine / operator proof"
 }

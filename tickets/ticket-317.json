@@ -1,0 +1,39 @@
+{
+  "id": "ticket-317",
+  "title": "Staged spine atlas cluster projection hook",
+  "problem": "ticket-316 staged-spine atlas export is materially richer than evidence DB baseline but overall_coherence_verdict is partial because clusters[] is empty — evidence DB hooks (ticket-296) populate clusters but staged orchestrator export does not.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-316_live-staged-spine-operator-proof-refresh-v0.md",
+    "agent_reports/2026-06-16_phase-3_ticket-296_evidence-db-cluster-projection.md"
+  ],
+  "affected_modules": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "rge/modules/evidence_db_atlas.py"
+  ],
+  "expected_files": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "tests/unit/test_staged_spine_cluster_projection.py",
+    "agent_reports/2026-06-18_phase-3_ticket-317_staged-spine-atlas-cluster-projection.md"
+  ],
+  "acceptance_criteria": [
+    "export-atlas-snapshot on staged orchestrator DB populates clusters[] from active relationships.",
+    "Staged spine operator re-export from ticket-316 DB path upgrades overall_coherence_verdict to pass.",
+    "Mock unit test on temp DB; no live_network CI enforcement.",
+    "Golden + full pytest pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_staged_spine_cluster_projection.py -q",
+    "python -m pytest tests/unit/test_evidence_db_cluster_projection.py -q",
+    "python -m rge.cli verify"
+  ],
+  "non_goals": [
+    "Public export or public-site changes.",
+    "Schema migrations.",
+    "README-only documentation.",
+    "Live Ollama."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert atlas_snapshot_builder hook and test module.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / projection"
+}
