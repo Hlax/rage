@@ -75,4 +75,4 @@ non-fixture exports stay operator-private; public preview refresh is fixture-mod
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `0f8ac38`
