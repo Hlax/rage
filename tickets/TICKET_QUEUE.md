@@ -365,7 +365,8 @@ superseded
 | 337 | ticket-337 | done | Autonomous researcher loop staged-spine mock orchestrator v0 | `phase-3/ticket-337-autonomous-loop-staged-spine-mock-v0` | `agent_reports/2026-06-18_phase-3_ticket-337_autonomous-loop-staged-spine-mock-v0.md` |
 | 338 | ticket-338 | done | Autonomous loop operator autocycle hook v0 | `phase-3/ticket-338-autonomous-loop-operator-autocycle-hook-v0` | `agent_reports/2026-06-18_phase-3_ticket-338_autonomous-loop-operator-autocycle-hook-v0.md` |
 | 339 | ticket-339 | done | Autonomous loop scratch artifact inspection in operator plan v0 | `phase-3/ticket-339-autonomous-loop-scratch-inspection-v0` | `agent_reports/2026-06-18_phase-3_ticket-339_autonomous-loop-scratch-inspection-v0.md` |
-| 345 | ticket-345 | proposed | README operator quickstart autonomous loop scratch status fields v0 | | |
+| 346 | ticket-346 | proposed | Operator autocycle execute-safe scratch status sync from execution v0 | | |
+| 345 | ticket-345 | done | README operator quickstart autonomous loop scratch status fields v0 | `phase-3/ticket-345-readme-autonomous-loop-operator-fields-v0` | `agent_reports/2026-06-18_phase-3_ticket-345_readme-autonomous-loop-operator-fields-v0.md` |
 | 344 | ticket-344 | done | Principal audit post-ticket-343 autonomous loop checkpoint | | `agent_reports/2026-06-18_phase-3_ticket-344_principal-audit-post-ticket-343.md` |
 | 343 | ticket-343 | done | Autonomous loop execute-safe refresh scratch status after proof v0 | `phase-3/ticket-343-autonomous-loop-execute-safe-refresh-v0` | `agent_reports/2026-06-18_phase-3_ticket-343_autonomous-loop-execute-safe-refresh-v0.md` |
 | 342 | ticket-342 | done | Autonomous loop scratch status in operator autocycle plan summary v0 | `phase-3/ticket-342-autonomous-loop-autocycle-scratch-status-v0` | `agent_reports/2026-06-18_phase-3_ticket-342_autonomous-loop-autocycle-scratch-status-v0.md` |
@@ -1106,9 +1107,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-345 (proposed) — README operator quickstart autonomous loop scratch status fields v0
+ticket-346 (proposed) — Operator autocycle execute-safe scratch status sync from execution v0
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-345 README autonomous loop operator fields v0)
+
+- Operator Quickstart: scratch paths, plan/autocycle `autonomous_loop_scratch_status`, execute-safe refresh
+- Artifact Paths table extended for operator autonomous loop scratch locations
+- ticket-346 seeded: autocycle execute-safe scratch sync from execution payload
+- Report: `agent_reports/2026-06-18_phase-3_ticket-345_readme-autonomous-loop-operator-fields-v0.md`
 
 ## Queue Notes (2026-06-18, ticket-344 principal audit post-ticket-343)
 

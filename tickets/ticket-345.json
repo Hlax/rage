@@ -30,6 +30,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert README section only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / documentation"
 }
