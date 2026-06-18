@@ -1,0 +1,38 @@
+{
+  "id": "ticket-312",
+  "title": "README operator atlas preview fixture refresh runbook",
+  "problem": "Principal audit post-ticket-310 identified a gap: export-atlas-snapshot --coherence-preview-out exists (ticket-308) but README does not document how operators refresh committed apps/public-site/public/data/ atlas preview JSON.",
+  "evidence": [
+    "agent_reports/2026-06-17_principal-audit-post-ticket-310.md",
+    "agent_reports/2026-06-17_phase-3_ticket-308_export-coherence-preview-cli.md",
+    "README.md"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-17_phase-3_ticket-312_readme-atlas-preview-fixture-refresh-runbook.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart section documents fixture-mode atlas snapshot export to public-site preview paths.",
+    "Documents --coherence-preview-out sidecar copy to atlas_coherence_preview.json.",
+    "Notes git add -f for gitignored public/data paths when refreshing committed snapshots.",
+    "Cross-links ticket-300/308 and /atlas-preview route; no CLI semantic changes.",
+    "Golden + full pytest pass (docs-only; no site rebuild required unless README references change test expectations)."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "export-public changes.",
+    "Public site code changes.",
+    "Automated refresh script.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / operator docs"
+}
