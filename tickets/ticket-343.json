@@ -31,6 +31,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert post-run scratch re-inspection in execute_safe_checks only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / autonomous researcher"
 }
