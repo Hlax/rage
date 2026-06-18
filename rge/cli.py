@@ -1322,6 +1322,35 @@ def _cmd_prove_arbitrary_source_bundle(args: argparse.Namespace) -> int:
     return 0 if result.get("status") == "completed" else 1
 
 
+def _cmd_autonomous_researcher_loop(args: argparse.Namespace) -> int:
+    from rge.modules.autonomous_researcher_loop import execute_autonomous_researcher_loop
+
+    if not args.db:
+        payload = {
+            "status": "error",
+            "command": "autonomous-researcher-loop",
+            "detail": "--db <path> is required (use a temp or scratch database).",
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+    db_path = Path(args.db)
+    artifact_dir = (
+        Path(args.artifact_dir) if args.artifact_dir else db_path.parent / "autonomous_loop"
+    )
+
+    result = execute_autonomous_researcher_loop(
+        topic=args.topic,
+        domain=args.domain,
+        db_path=db_path,
+        artifact_dir=artifact_dir,
+        run_id=args.run_id or FIXTURE_RUN_ID,
+        recommended_ticket_id=args.recommended_ticket_id or "ticket-333",
+    )
+    print(json.dumps(result, indent=2))
+    return 0 if result.get("status") == "completed" else 1
+
+
 def _cmd_export_atlas_snapshot(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.modules.atlas_snapshot_builder import export_atlas_snapshot_to_path
@@ -3608,6 +3637,44 @@ def build_parser() -> argparse.ArgumentParser:
         help=f"Research question id (default: {STAGED_FIXTURE_QUESTION_ID}).",
     )
     proof_bundle_parser.set_defaults(func=_cmd_prove_arbitrary_source_bundle)
+
+    autonomous_loop_parser = subparsers.add_parser(
+        "autonomous-researcher-loop",
+        help="Run mock autonomous researcher loop proof (fixture-mode).",
+        description=(
+            "Execute one closed autonomous researcher loop: fixture-mode research "
+            "pipeline → private atlas snapshot → coherence report → research quality "
+            "evaluation → recommended improvement ticket JSON. Mock-only; use temp "
+            "database paths."
+        ),
+    )
+    autonomous_loop_parser.add_argument(
+        "--topic",
+        help=f"Research question (default: golden MVP topic).",
+    )
+    autonomous_loop_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack id (default: creativity).",
+    )
+    autonomous_loop_parser.add_argument(
+        "--db",
+        required=True,
+        help="SQLite database path (required; use temp or scratch only).",
+    )
+    autonomous_loop_parser.add_argument(
+        "--artifact-dir",
+        help="Directory for atlas/coherence/loop artifacts (default: sibling of --db).",
+    )
+    autonomous_loop_parser.add_argument(
+        "--run-id",
+        help=f"Research run id (default: {FIXTURE_RUN_ID}).",
+    )
+    autonomous_loop_parser.add_argument(
+        "--recommended-ticket-id",
+        help="Queue ticket id for recommended improvement ticket JSON (default: ticket-333).",
+    )
+    autonomous_loop_parser.set_defaults(func=_cmd_autonomous_researcher_loop)
 
     model_health_parser = subparsers.add_parser(
         "model-health",

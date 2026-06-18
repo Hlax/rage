@@ -356,7 +356,9 @@ superseded
 | 328 | ticket-328 | done | Pre-ticket audit: live layer-3 staged atlas snapshot coherence | `phase-3/ticket-328-pre-ticket-live-layer-3-staged-atlas-audit` | `agent_reports/2026-06-18_phase-3_ticket-328_pre-ticket-live-layer-3-staged-atlas-audit.md` |
 | 329 | ticket-329 | done | README live layer-3 vs public atlas preview boundary cross-link | `phase-3/ticket-329-readme-live-layer3-public-preview-boundary` | `agent_reports/2026-06-18_phase-3_ticket-329_readme-live-layer3-public-preview-boundary.md` |
 | 330 | ticket-330 | done | Orphan agent_reports hygiene (superseded ticket-308 audit) | `phase-3/ticket-330-orphan-agent-reports-hygiene` | `agent_reports/2026-06-18_phase-3_ticket-330_orphan-agent-reports-hygiene.md` |
-| 331 | ticket-331 | proposed | Principal audit post-ticket-330 checkpoint | | |
+| 331 | ticket-331 | cancelled | Principal audit post-ticket-330 checkpoint (skipped — strategic pivot to ticket-332) | | |
+| 332 | ticket-332 | done | Autonomous Researcher MVP loop proof v0 | `phase-3/ticket-332-autonomous-researcher-loop-proof-v0` | `agent_reports/2026-06-18_phase-3_ticket-332_autonomous-researcher-loop-proof-v0.md` |
+| 333 | ticket-333 | proposed | Autonomous loop quality-driven improvement ticket seeding v0 | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1092,15 +1094,28 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-331 (proposed) — Principal audit post-ticket-330 checkpoint
-(ticket-059 OpenAI placeholder remains deferred)
+ticket-333 (proposed) — Autonomous loop quality-driven improvement ticket seeding v0
+(ticket-059 OpenAI placeholder remains deferred; ticket-331 cancelled per pivot)
 ```
+
+## Queue Notes (2026-06-18, ticket-332 autonomous researcher MVP loop proof v0)
+
+- Strategic pivot from Atlas/docs streak; skipped docs-only ticket-331 per operator directive
+- Mock fixture loop: research → atlas → coherence → quality PARTIAL (weak_ticket_generation)
+- Seeded ticket-333 from observed golden-covered ticket suppression gap
+- Report: `agent_reports/2026-06-18_phase-3_ticket-332_autonomous-researcher-loop-proof-v0.md`
+- Drift note: frontend contract parked; next work improves autonomous research behavior
+
+## Queue Notes (2026-06-18, ticket-331 principal audit — cancelled)
+
+- Untracked principal audit exists: `agent_reports/2026-06-18_principal-audit-post-ticket-330.md`
+- Cancelled per strategic pivot to autonomous researcher loop (ticket-332); gate did not block product work
 
 ## Queue Notes (2026-06-18, ticket-330 orphan agent_reports hygiene)
 
 - Deleted untracked duplicate `2026-06-17_principal-audit-post-ticket-308.md`
 - Canonical audits: post-ticket-310, ticket-311 closure report
-- ticket-331 seeded: principal audit post-ticket-330
+- ticket-331 seeded: principal audit post-ticket-330 (later cancelled)
 
 ## Queue Notes (2026-06-18, ticket-329 README live layer-3 public preview boundary)
 
