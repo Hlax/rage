@@ -594,9 +594,11 @@ def build_atlas_snapshot_from_db(
     if not fixture_mode and topic.strip():
         from rge.modules.evidence_db_atlas import (
             db_has_non_fixture_manual_claims,
+            db_has_staged_spine_runs,
             ensure_evidence_cluster_summary,
             ensure_evidence_relationship_edges,
             ensure_evidence_run_report,
+            ensure_staged_cluster_summaries,
         )
 
         if db_has_non_fixture_manual_claims(conn):
@@ -607,6 +609,10 @@ def build_atlas_snapshot_from_db(
                 conn, topic=topic, domain_pack=domain_pack
             )
             ensure_evidence_cluster_summary(
+                conn, topic=topic, domain_pack=domain_pack
+            )
+        if db_has_staged_spine_runs(conn):
+            ensure_staged_cluster_summaries(
                 conn, topic=topic, domain_pack=domain_pack
             )
     nodes = _build_concept_nodes(conn, domain_pack)
