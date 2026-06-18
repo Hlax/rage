@@ -173,7 +173,7 @@ def test_clean_safe_check_pass_when_no_open_ticket(tmp_path: Path) -> None:
     plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
     action = plan["next_recommended_action"]
 
-    assert action["action_id"] == "run_deterministic_verification"
+    assert action["action_id"] == "run_autonomous_researcher_loop"
     assert action["gate"] == "safe_autonomous"
     assert plan["execute_safe_eligible"] is True
     assert len(plan["safe_verification_commands"]) >= 3
@@ -227,7 +227,7 @@ def test_execute_safe_runs_allowlisted_commands(tmp_path: Path) -> None:
     )
 
     assert result["execution_status"] == "pass"
-    assert len(result["execution_results"]) == 3
+    assert len(result["execution_results"]) == 4
     assert all(item["passed"] for item in result["execution_results"])
 
 
@@ -740,7 +740,7 @@ def test_evidence_review_action_not_when_scratch_empty(tmp_path: Path) -> None:
 
     plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
 
-    assert plan["next_recommended_action"]["action_id"] == "run_deterministic_verification"
+    assert plan["next_recommended_action"]["action_id"] == "run_autonomous_researcher_loop"
 
 
 def test_evidence_review_deferred_for_improvement_draft(tmp_path: Path) -> None:

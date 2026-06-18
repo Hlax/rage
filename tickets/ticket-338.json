@@ -32,6 +32,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert operator_loop hook; CLI loop paths unchanged.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / autonomous researcher"
 }

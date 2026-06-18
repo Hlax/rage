@@ -18,6 +18,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
+from rge.cli import GOLDEN_MVP_TOPIC
 from rge.config import load_config
 from rge.modules.domain_pack_loader import inspect_domain_pack_load_health
 from rge.modules.live_probe_scratch import get_scratch_db_path
@@ -60,6 +61,10 @@ _PATH_TICKET_HINTS: dict[str, str] = {
 }
 
 _MOCK_ENV = {"RGE_LLM_MODE": "mock", "RGE_ALLOW_LIVE_LLM": "0"}
+
+_OPERATOR_AUTONOMOUS_DB_REL = "data/db/operator_autonomous_loop_scratch.sqlite"
+_OPERATOR_AUTONOMOUS_ARTIFACT_REL = "data/reports/operator_autonomous_loop"
+_OPERATOR_AUTONOMOUS_STAGING_REL = "data/sources/staged/operator_autonomous_loop"
 
 _FORBIDDEN_EXECUTE_PATTERNS = (
     "git push",
@@ -146,6 +151,89 @@ def safe_verification_commands(root: Path | None = None) -> list[dict[str, Any]]
             }
         )
     return commands
+
+
+def autonomous_loop_scratch_paths(root: Path | None = None) -> dict[str, Path]:
+    """Resolve gitignored scratch paths for operator autonomous loop proofs."""
+    project_root = root or repo_root()
+    return {
+        "db": project_root / _OPERATOR_AUTONOMOUS_DB_REL,
+        "artifact_dir": project_root / _OPERATOR_AUTONOMOUS_ARTIFACT_REL,
+        "staging_dir": project_root / _OPERATOR_AUTONOMOUS_STAGING_REL,
+    }
+
+
+def autonomous_loop_safe_commands(root: Path | None = None) -> list[dict[str, Any]]:
+    """Deterministic fixture-mode autonomous loop proof for execute-safe."""
+    project_root = root or repo_root()
+    paths = autonomous_loop_scratch_paths(project_root)
+    paths["db"].parent.mkdir(parents=True, exist_ok=True)
+    paths["artifact_dir"].mkdir(parents=True, exist_ok=True)
+    db_arg = _OPERATOR_AUTONOMOUS_DB_REL
+    artifact_arg = _OPERATOR_AUTONOMOUS_ARTIFACT_REL
+    return [
+        {
+            "name": "autonomous_loop_fixture_proof",
+            "shell": (
+                "RGE_LLM_MODE=mock python -m rge.cli autonomous-researcher-loop "
+                f'--db {db_arg} --artifact-dir {artifact_arg} '
+                f'--topic "{GOLDEN_MVP_TOPIC}" --domain creativity'
+            ),
+            "argv": [
+                sys.executable,
+                "-m",
+                "rge.cli",
+                "autonomous-researcher-loop",
+                "--db",
+                db_arg,
+                "--artifact-dir",
+                artifact_arg,
+                "--topic",
+                GOLDEN_MVP_TOPIC,
+                "--domain",
+                "creativity",
+            ],
+            "cwd": str(project_root),
+            "env": dict(_MOCK_ENV),
+        }
+    ]
+
+
+def inspect_autonomous_researcher_loop_status(
+    *,
+    root: Path | None = None,
+) -> dict[str, Any]:
+    """Read-only autonomous researcher loop CLI readiness for operator plan mode."""
+    project_root = root or repo_root()
+    fixture_command = (
+        "python -m rge.cli autonomous-researcher-loop "
+        f'--db {_OPERATOR_AUTONOMOUS_DB_REL} '
+        f"--artifact-dir {_OPERATOR_AUTONOMOUS_ARTIFACT_REL} "
+        f'--topic "{GOLDEN_MVP_TOPIC}" --domain creativity'
+    )
+    staged_command = (
+        "python -m rge.cli autonomous-researcher-loop --staged-spine "
+        f'--db {_OPERATOR_AUTONOMOUS_DB_REL} '
+        f"--artifact-dir {_OPERATOR_AUTONOMOUS_ARTIFACT_REL} "
+        f"--staging-dir {_OPERATOR_AUTONOMOUS_STAGING_REL} "
+        f'--topic "{GOLDEN_MVP_TOPIC}" --domain creativity'
+    )
+    return {
+        "status": "available",
+        "command": "autonomous-researcher-loop",
+        "mock_llm_only": True,
+        "requires_temp_db": True,
+        "scratch_db_path": _OPERATOR_AUTONOMOUS_DB_REL,
+        "artifact_dir": _OPERATOR_AUTONOMOUS_ARTIFACT_REL,
+        "staging_dir": _OPERATOR_AUTONOMOUS_STAGING_REL,
+        "operator_commands": {
+            "fixture_loop": fixture_command,
+            "staged_spine_loop": staged_command,
+        },
+        "loop_artifact": "autonomous_loop_report.json",
+        "quality_verdict_field": "research_quality.research_quality_verdict",
+        "no_auto_promotion": True,
+    }
 
 
 def inspect_working_tree(
@@ -484,10 +572,9 @@ def _action_from_state(
     drift_violations: list[dict[str, str]],
     scratch_evidence: dict[str, Any] | None = None,
     proof_bundle_status: dict[str, Any] | None = None,
+    autonomous_loop_status: dict[str, Any] | None = None,
     root: Path | None = None,
 ) -> RecommendedAction:
-    safe_commands = safe_verification_commands(root)
-
     if drift_violations:
         return RecommendedAction(
             action_id="resolve_documentation_git_drift",
@@ -689,14 +776,34 @@ def _action_from_state(
         )
 
     return RecommendedAction(
-        action_id="run_deterministic_verification",
-        label="Run deterministic mock-only verification checks",
+        action_id="run_autonomous_researcher_loop",
+        label="Run mock autonomous researcher loop proof on scratch DB",
         gate="safe_autonomous",
         reason=(
             "No open queue ticket requires immediate human action; safe to run "
-            "mock-only golden tests, pytest, safety audit, and public-site build."
+            "fixture-mode autonomous researcher loop proof on temp DB paths "
+            "(no queue writes or ticket promotion)."
         ),
-        commands=safe_commands,
+        commands=[
+            {
+                "shell": (
+                    (autonomous_loop_status or {}).get("operator_commands", {}).get(
+                        "fixture_loop",
+                        "python -m rge.cli autonomous-researcher-loop --help",
+                    )
+                ),
+                "purpose": "fixture-mode autonomous loop proof",
+            },
+            {
+                "shell": (
+                    (autonomous_loop_status or {}).get("operator_commands", {}).get(
+                        "staged_spine_loop",
+                        "python -m rge.cli autonomous-researcher-loop --staged-spine --help",
+                    )
+                ),
+                "purpose": "optional staged-spine mock loop (operator manual; network env)",
+            },
+        ],
     )
 
 
@@ -1000,6 +1107,9 @@ def build_operator_plan(
         root=project_root,
         audit=audit,
     )
+    autonomous_researcher_loop_status = inspect_autonomous_researcher_loop_status(
+        root=project_root,
+    )
     domain_pack_status = inspect_domain_pack_status(root=project_root)
     nm4_evidence_spine_status = inspect_nm4_evidence_spine_status(root=project_root)
     runtime_config = load_config()
@@ -1012,6 +1122,7 @@ def build_operator_plan(
         drift_violations=drift_violations,
         scratch_evidence=scratch_evidence,
         proof_bundle_status=arbitrary_source_proof_bundle_status,
+        autonomous_loop_status=autonomous_researcher_loop_status,
         root=project_root,
     )
 
@@ -1062,6 +1173,7 @@ def build_operator_plan(
         "audit_cadence": audit,
         "scratch_evidence_status": scratch_evidence,
         "arbitrary_source_proof_bundle_status": arbitrary_source_proof_bundle_status,
+        "autonomous_researcher_loop_status": autonomous_researcher_loop_status,
         "staged_rank2_scan_max": runtime_config.staged_rank2_scan_max,
         "domain_pack_status": domain_pack_status,
         "nm4_evidence_spine_status": nm4_evidence_spine_status,
@@ -1091,6 +1203,7 @@ def _assert_safe_command(command: dict[str, Any]) -> None:
     shell_repr = command.get("shell", "")
     name = command.get("name", "")
     allowed_names = {item["name"] for item in safe_verification_commands()}
+    allowed_names.update(item["name"] for item in autonomous_loop_safe_commands())
     if name and name not in allowed_names:
         raise ValueError(f"command {name!r} is not in the safe verification allowlist")
     combined = shell_repr.lower()
@@ -1118,7 +1231,11 @@ def execute_safe_checks(
     runner = command_runner or run_captured
     results: list[dict[str, Any]] = []
     all_passed = True
-    for command in plan["safe_verification_commands"]:
+    commands_to_run = list(plan["safe_verification_commands"])
+    action_id = (plan.get("next_recommended_action") or {}).get("action_id")
+    if action_id == "run_autonomous_researcher_loop":
+        commands_to_run.extend(autonomous_loop_safe_commands(project_root))
+    for command in commands_to_run:
         _assert_safe_command(command)
         env = os.environ.copy()
         env.update(command.get("env", {}))
