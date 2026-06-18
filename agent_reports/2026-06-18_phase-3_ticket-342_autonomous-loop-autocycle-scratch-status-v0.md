@@ -51,7 +51,7 @@ Safety audit not required — read-only JSON field passthrough; no public surfac
 
 ## Merge to main
 
-Merge commit: *(pending merge)*
+Merge commit: `063769e8c8ac8a0f8fd620a9854a031f7fa95f47`
 
 ## Recommended next ticket
 
