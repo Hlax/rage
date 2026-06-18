@@ -16,13 +16,18 @@ from rge.modules.atlas_snapshot_builder import (
     export_atlas_snapshot_to_path,
 )
 
+from rge.modules.atlas_preview_curator import STAGED_PREVIEW_LABEL
+
 from tests.unit.test_evidence_db_atlas_projection import REPO_ROOT
 
 CREATIVITY_FIXTURE = REPO_ROOT / "fixtures" / "atlas" / "atlas_snapshot_v0_creativity_fixture.json"
+COMMITTED_SNAPSHOT_PREVIEW = (
+    REPO_ROOT / "apps" / "public-site" / "public" / "data" / "atlas_snapshot_preview.json"
+)
 COMMITTED_COHERENCE_PREVIEW = (
     REPO_ROOT / "apps" / "public-site" / "public" / "data" / "atlas_coherence_preview.json"
 )
-EXPECTED_PREVIEW_LABEL = "Fixture-mode creativity atlas (mock-safe)"
+EXPECTED_FIXTURE_PREVIEW_LABEL = "Fixture-mode creativity atlas (mock-safe)"
 
 
 @pytest.fixture()
@@ -50,16 +55,17 @@ def test_build_atlas_coherence_preview_whitelists_public_fields() -> None:
     }
     assert preview["schema_version"] == ATLAS_COHERENCE_PREVIEW_SCHEMA_VERSION
     assert preview["overall_coherence_verdict"] == "pass"
-    assert preview["preview_label"] == EXPECTED_PREVIEW_LABEL
+    assert preview["preview_label"] == EXPECTED_FIXTURE_PREVIEW_LABEL
     assert preview["population"]["runs"] == 1
     assert preview["population"]["nodes"] == 24
 
 
-def test_committed_coherence_preview_matches_fixture_export() -> None:
-    snapshot = json.loads(CREATIVITY_FIXTURE.read_text(encoding="utf-8"))
+def test_committed_coherence_preview_matches_staged_snapshot_preview() -> None:
+    snapshot = json.loads(COMMITTED_SNAPSHOT_PREVIEW.read_text(encoding="utf-8"))
     expected = build_atlas_coherence_preview(snapshot)
     committed = json.loads(COMMITTED_COHERENCE_PREVIEW.read_text(encoding="utf-8"))
     assert committed == expected
+    assert committed["preview_label"] == STAGED_PREVIEW_LABEL
 
 
 def test_fixture_mode_export_writes_matching_coherence_preview(
@@ -94,13 +100,12 @@ def test_fixture_mode_export_writes_matching_coherence_preview(
     snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
     preview = json.loads(coherence_path.read_text(encoding="utf-8"))
     assert preview == build_atlas_coherence_preview(snapshot)
-    assert preview == json.loads(COMMITTED_COHERENCE_PREVIEW.read_text(encoding="utf-8"))
 
 
 def test_export_coherence_preview_bytes_stable(
     tmp_path: Path,
 ) -> None:
-    snapshot = json.loads(CREATIVITY_FIXTURE.read_text(encoding="utf-8"))
+    snapshot = json.loads(COMMITTED_SNAPSHOT_PREVIEW.read_text(encoding="utf-8"))
     out_path = tmp_path / "atlas_coherence_preview.json"
     export_atlas_coherence_preview_to_path(snapshot, out_path)
     assert out_path.read_bytes() == COMMITTED_COHERENCE_PREVIEW.read_bytes()
@@ -181,4 +186,3 @@ def test_export_atlas_snapshot_cli_writes_coherence_preview_sidecar(
     snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
     preview = json.loads(coherence_path.read_text(encoding="utf-8"))
     assert preview == build_atlas_coherence_preview(snapshot)
-    assert preview == json.loads(COMMITTED_COHERENCE_PREVIEW.read_text(encoding="utf-8"))

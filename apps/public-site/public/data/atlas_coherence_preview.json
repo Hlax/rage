@@ -1,15 +1,15 @@
 {
   "overall_coherence_verdict": "pass",
   "population": {
-    "runs": 1,
+    "runs": 2,
     "nodes": 24,
-    "edges": 2,
+    "edges": 3,
     "cards": 2,
-    "reports": 1,
-    "follow_up_questions": 6,
+    "reports": 2,
+    "follow_up_questions": 1,
     "domains": 1,
-    "clusters": 1
+    "clusters": 2
   },
-  "preview_label": "Fixture-mode creativity atlas (mock-safe)",
+  "preview_label": "Mock staged-spine atlas preview (fixture-safe)",
   "schema_version": "atlas_coherence_preview_v0"
 }

@@ -1,0 +1,35 @@
+{
+  "id": "ticket-321",
+  "title": "Atlas preview page copy refresh for staged-spine labeling",
+  "problem": "Ticket-320 refreshed preview JSON to staged-spine shape, but /atlas-preview page header still says 'fixture preview v0' and copy references golden MVP fixture semantics. UI copy should honestly label the staged-spine mock preview without implying live literature review.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-320_public-atlas-preview-fixture-refresh.md",
+    "apps/public-site/app/atlas-preview/page.tsx"
+  ],
+  "affected_modules": [
+    "apps/public-site/app/atlas-preview/page.tsx"
+  ],
+  "expected_files": [
+    "apps/public-site/app/atlas-preview/page.tsx",
+    "tests/golden/test_12_public_site_static_render.py",
+    "agent_reports/2026-06-18_phase-3_ticket-321_atlas-preview-page-copy-refresh.md"
+  ],
+  "acceptance_criteria": [
+    "Atlas preview page header/copy references staged-spine mock preview provenance.",
+    "No data surface or routing changes; static JSON imports only.",
+    "GT12 atlas-preview static export test passes after npm run build."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden/test_12_public_site_static_render.py -q",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "JSON fixture regeneration.",
+    "export-public.",
+    "Graph visualization."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert page copy changes only.",
+  "status": "proposed",
+  "category": "Phase 3 / public atlas preview"
+}
