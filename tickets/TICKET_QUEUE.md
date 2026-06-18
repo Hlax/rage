@@ -338,7 +338,8 @@ superseded
 | 310 | ticket-310 | done | Atlas preview card and cluster concept slug links | `phase-3/ticket-310-atlas-preview-card-cluster-concept-links` | `agent_reports/2026-06-17_phase-3_ticket-310_atlas-preview-card-cluster-concept-links.md` |
 | 311 | ticket-311 | done | Principal audit post-ticket-310 checkpoint | `phase-3/ticket-311-principal-audit-post-ticket-310` | `agent_reports/2026-06-17_phase-3_ticket-311_principal-audit-post-ticket-310.md` |
 | 312 | ticket-312 | done | README operator atlas preview fixture refresh runbook | `phase-3/ticket-312-readme-atlas-preview-fixture-refresh-runbook` | `agent_reports/2026-06-17_phase-3_ticket-312_readme-atlas-preview-fixture-refresh-runbook.md` |
-| 313 | ticket-313 | proposed | README evidence DB atlas vs public preview boundary | | |
+| 313 | ticket-313 | done | README evidence DB atlas vs public preview boundary | `phase-3/ticket-313-readme-evidence-db-atlas-public-boundary` | `agent_reports/2026-06-17_phase-3_ticket-313_readme-evidence-db-atlas-public-boundary.md` |
+| 314 | ticket-314 | proposed | Principal audit post-ticket-313 checkpoint | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1074,9 +1075,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-313 (proposed) — README evidence DB atlas vs public preview boundary
+ticket-314 (proposed) — Principal audit post-ticket-313 checkpoint
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-17, ticket-313 README evidence DB atlas public boundary)
+
+- Evidence DB atlas section: operator-private vs public /atlas-preview boundary
+- Cross-link to fixture refresh runbook (ticket-312); 789 pytest pass; docs-only
+- ticket-314 seeded: principal audit post-ticket-313 (cadence advisory)
 
 ## Queue Notes (2026-06-17, ticket-312 README atlas preview fixture refresh runbook)
 
