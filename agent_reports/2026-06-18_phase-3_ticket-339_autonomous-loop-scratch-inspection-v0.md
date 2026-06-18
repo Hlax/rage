@@ -52,7 +52,7 @@ Safety audit not required — operator plan read-only; no public surface.
 
 ## Merge to main
 
-(Pending branch merge — document hash after merge.)
+Merge commit: `5c77c67cf060e774c38571917ae3823f2e02c3d0`
 
 ## Recommended next ticket
 
