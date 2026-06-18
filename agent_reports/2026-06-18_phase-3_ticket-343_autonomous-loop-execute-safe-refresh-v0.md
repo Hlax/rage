@@ -52,7 +52,7 @@ Safety audit not required — operator execute-safe JSON refresh only; no public
 
 ## Merge to main
 
-Merge commit: *(pending merge)*
+Merge commit: `b488b4451d1511006ae16c1c0927863f6db74e8f`
 
 ## Recommended next ticket
 
