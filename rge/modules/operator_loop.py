@@ -300,6 +300,32 @@ def inspect_autonomous_loop_scratch_artifact(
     return status
 
 
+_AUTONOMOUS_LOOP_BASE_REASON = (
+    "No open queue ticket requires immediate human action; safe to run "
+    "fixture-mode autonomous researcher loop proof on temp DB paths "
+    "(no queue writes or ticket promotion)."
+)
+
+
+def _autonomous_loop_recommended_reason(
+    scratch_status: dict[str, Any] | None,
+) -> str:
+    """Build recommended-action reason, appending scratch quality when available."""
+    scratch = scratch_status or {}
+    if scratch.get("status") != "ok":
+        return _AUTONOMOUS_LOOP_BASE_REASON
+    verdict = scratch.get("research_quality_verdict")
+    weakest = scratch.get("weakest_dimension")
+    if not verdict or not weakest:
+        return _AUTONOMOUS_LOOP_BASE_REASON
+    score = scratch.get("weakest_dimension_score")
+    score_suffix = f" ({score}/100)" if score is not None else ""
+    return (
+        f"{_AUTONOMOUS_LOOP_BASE_REASON} Last scratch loop quality: {verdict}; "
+        f"weakest dimension {weakest}{score_suffix}."
+    )
+
+
 def inspect_working_tree(
     root: Path | None = None,
     *,
@@ -637,6 +663,7 @@ def _action_from_state(
     scratch_evidence: dict[str, Any] | None = None,
     proof_bundle_status: dict[str, Any] | None = None,
     autonomous_loop_status: dict[str, Any] | None = None,
+    autonomous_loop_scratch_status: dict[str, Any] | None = None,
     root: Path | None = None,
 ) -> RecommendedAction:
     if drift_violations:
@@ -843,11 +870,7 @@ def _action_from_state(
         action_id="run_autonomous_researcher_loop",
         label="Run mock autonomous researcher loop proof on scratch DB",
         gate="safe_autonomous",
-        reason=(
-            "No open queue ticket requires immediate human action; safe to run "
-            "fixture-mode autonomous researcher loop proof on temp DB paths "
-            "(no queue writes or ticket promotion)."
-        ),
+        reason=_autonomous_loop_recommended_reason(autonomous_loop_scratch_status),
         commands=[
             {
                 "shell": (
@@ -1190,6 +1213,7 @@ def build_operator_plan(
         scratch_evidence=scratch_evidence,
         proof_bundle_status=arbitrary_source_proof_bundle_status,
         autonomous_loop_status=autonomous_researcher_loop_status,
+        autonomous_loop_scratch_status=autonomous_loop_scratch_status,
         root=project_root,
     )
 

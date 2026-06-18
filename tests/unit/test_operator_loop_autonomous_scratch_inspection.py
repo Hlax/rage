@@ -7,6 +7,7 @@ from pathlib import Path
 
 from rge.modules.operator_loop import (
     WorkingTreeStatus,
+    _AUTONOMOUS_LOOP_BASE_REASON,
     build_operator_plan,
     inspect_autonomous_loop_scratch_artifact,
 )
@@ -109,6 +110,20 @@ def test_plan_includes_scratch_status_when_report_exists(tmp_path: Path) -> None
     assert scratch["research_quality_verdict"] == "PARTIAL"
     assert scratch["weakest_dimension"] == "weak_ticket_generation"
     assert plan["next_recommended_action"]["action_id"] == "run_autonomous_researcher_loop"
+    reason = plan["next_recommended_action"]["reason"]
+    assert "PARTIAL" in reason
+    assert "weak_ticket_generation" in reason
+    assert "Last scratch loop quality" in reason
+
+
+def test_recommended_action_reason_unchanged_when_scratch_not_run(tmp_path: Path) -> None:
+    _seed_done_only_queue(tmp_path)
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+
+    assert plan["next_recommended_action"]["reason"] == _AUTONOMOUS_LOOP_BASE_REASON
+    assert "Last scratch loop quality" not in plan["next_recommended_action"]["reason"]
 
 
 def test_plan_includes_not_run_scratch_status_without_failing(tmp_path: Path) -> None:

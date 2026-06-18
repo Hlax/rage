@@ -1,0 +1,37 @@
+{
+  "id": "ticket-342",
+  "title": "Autonomous loop scratch status in operator autocycle plan summary v0",
+  "problem": "Ticket-339 surfaces autonomous_loop_scratch_status in operator plan mode and ticket-341 enriches the recommended-action reason, but operator autocycle plan/execute JSON does not yet pass through autonomous_loop_scratch_status for cycle visibility.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-341_autonomous-loop-quality-summary-v0.md",
+    "rge/modules/operator_autocycle.py",
+    "rge/modules/operator_loop.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_autocycle.py",
+    "tests/unit"
+  ],
+  "expected_files": [
+    "rge/modules/operator_autocycle.py",
+    "tests/unit/test_operator_autocycle_autonomous_scratch.py",
+    "agent_reports/2026-06-18_phase-3_ticket-342_autonomous-loop-autocycle-scratch-status-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Operator autocycle plan JSON includes autonomous_loop_scratch_status from build_operator_plan.",
+    "When scratch report exists, autocycle summary exposes research_quality_verdict and weakest_dimension.",
+    "No execute-safe command allowlist changes or queue writes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_autocycle_autonomous_scratch.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama runs.",
+    "Changing autonomous loop skip logic.",
+    "Public export or site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert autocycle plan field passthrough only.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher"
+}
