@@ -358,7 +358,8 @@ superseded
 | 330 | ticket-330 | done | Orphan agent_reports hygiene (superseded ticket-308 audit) | `phase-3/ticket-330-orphan-agent-reports-hygiene` | `agent_reports/2026-06-18_phase-3_ticket-330_orphan-agent-reports-hygiene.md` |
 | 331 | ticket-331 | cancelled | Principal audit post-ticket-330 checkpoint (skipped — strategic pivot to ticket-332) | | |
 | 332 | ticket-332 | done | Autonomous Researcher MVP loop proof v0 | `phase-3/ticket-332-autonomous-researcher-loop-proof-v0` | `agent_reports/2026-06-18_phase-3_ticket-332_autonomous-researcher-loop-proof-v0.md` |
-| 333 | ticket-333 | proposed | Autonomous loop quality-driven improvement ticket seeding v0 | | |
+| 333 | ticket-333 | done | Autonomous loop quality-driven improvement ticket seeding v0 | `phase-3/ticket-333-autonomous-loop-quality-ticket-seeding-v0` | `agent_reports/2026-06-18_phase-3_ticket-333_autonomous-loop-quality-ticket-seeding-v0.md` |
+| 334 | ticket-334 | proposed | Autonomous loop quality verdict refresh after ticket seeding | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1094,9 +1095,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-333 (proposed) — Autonomous loop quality-driven improvement ticket seeding v0
-(ticket-059 OpenAI placeholder remains deferred; ticket-331 cancelled per pivot)
+ticket-334 (proposed) — Autonomous loop quality verdict refresh after ticket seeding
+(ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-333 autonomous loop quality-driven ticket seeding v0)
+
+- Pre-ticket audit GO: `agent_reports/2026-06-18_pre-ticket-333_autonomous-loop-quality-ticket-seeding-audit.md`
+- `generate_quality_driven_improvement_tickets` persists draft when standard path empty
+- Fixture loop emits draft with failure_reason=weak_ticket_generation matching weakest dimension
+- Golden test 20 unchanged; 802 pytest pass
+- ticket-334 seeded: quality verdict refresh after seeding
 
 ## Queue Notes (2026-06-18, ticket-332 autonomous researcher MVP loop proof v0)
 

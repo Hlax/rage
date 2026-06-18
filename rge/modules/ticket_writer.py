@@ -131,6 +131,213 @@ GOLDEN_FAILURE_TEMPLATES: dict[str, dict[str, Any]] = {
     },
 }
 
+QUALITY_WEAKNESS_SCORE_THRESHOLD = 50
+
+AUTONOMOUS_QUALITY_TEMPLATES: dict[str, dict[str, Any]] = {
+    "weak_ticket_generation": {
+        "priority": "high",
+        "title": "Improve autonomous loop improvement ticket emission",
+        "problem": (
+            "The autonomous researcher loop completes with observable failure modes "
+            "but standard ticket generation suppresses golden-covered modes, leaving "
+            "no draft improvement tickets for builder agents."
+        ),
+        "affected_modules": [
+            "rge/modules/ticket_writer.py",
+            "rge/modules/autonomous_researcher_loop.py",
+        ],
+        "expected_files": [
+            "rge/modules/ticket_writer.py",
+            "tests/unit/test_autonomous_researcher_loop_proof.py",
+        ],
+        "acceptance_criteria": [
+            "Autonomous loop persists at least one draft improvement ticket when "
+            "quality evaluator flags weak_ticket_generation.",
+            "Draft failure_reason matches quality weakest_dimension.",
+        ],
+        "test_plan": [
+            "pytest tests/unit/test_autonomous_researcher_loop_proof.py",
+            "pytest tests/golden/test_20_improvement_tickets.py",
+        ],
+        "non_goals": [
+            "Auto-promote improvement tickets without human --confirm.",
+            "Remove golden-covered suppression from default pipeline runs.",
+        ],
+        "risk_level": "medium",
+        "rollback_plan": "Remove quality-driven seeding hook from autonomous loop only.",
+    },
+    "weak_claim_extraction": {
+        "priority": "high",
+        "title": "Improve claim extraction quality on autonomous loop runs",
+        "problem": (
+            "Autonomous loop quality evaluation flags weak claim extraction — "
+            "high rejection ratio or insufficient accepted claims."
+        ),
+        "affected_modules": ["claim_extractor", "claim_validator"],
+        "expected_files": [
+            "rge/modules/claim_extractor.py",
+            "tests/golden/test_02_claim_extraction.py",
+        ],
+        "acceptance_criteria": [
+            "Accepted claim count meets autonomous loop minimum thresholds.",
+        ],
+        "test_plan": ["pytest tests/golden/test_02_claim_extraction.py"],
+        "non_goals": ["Live web source extraction."],
+        "risk_level": "medium",
+        "rollback_plan": "Revert extractor prompt or validator changes.",
+    },
+    "missing_hypotheses": {
+        "priority": "medium",
+        "title": "Surface theory candidates in autonomous loop output",
+        "problem": (
+            "Autonomous loop runs without theory candidates — hypotheses missing "
+            "from research output."
+        ),
+        "affected_modules": ["theory_generator", "rge/modules/autonomous_researcher_loop.py"],
+        "expected_files": [
+            "rge/modules/theory_generator.py",
+            "tests/unit/test_autonomous_researcher_loop_proof.py",
+        ],
+        "acceptance_criteria": [
+            "At least one theory candidate created on fixture autonomous loop runs.",
+        ],
+        "test_plan": ["pytest tests/unit/test_autonomous_researcher_loop_proof.py"],
+        "non_goals": ["Public theory UI."],
+        "risk_level": "low",
+        "rollback_plan": "Revert theory generation hook.",
+    },
+}
+
+
+def quality_weakest_dimension_to_failure_reason(weakest_dimension: str) -> str:
+    """Map research quality evaluator dimension id to improvement ticket failure_reason."""
+    if weakest_dimension not in AUTONOMOUS_QUALITY_TEMPLATES:
+        raise ValueError(f"unsupported quality weakness dimension: {weakest_dimension}")
+    return weakest_dimension
+
+
+def write_quality_driven_improvement_tickets(
+    quality: dict[str, Any],
+    *,
+    run_id: str,
+    supplemental_evidence: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Build draft improvement tickets from autonomous loop quality evaluation."""
+    weakest = quality.get("weakest_dimension")
+    weakest_score = int(quality.get("weakest_dimension_score") or 0)
+    if not isinstance(weakest, str) or weakest_score > QUALITY_WEAKNESS_SCORE_THRESHOLD:
+        return []
+
+    template = AUTONOMOUS_QUALITY_TEMPLATES.get(weakest)
+    if template is None:
+        return []
+
+    failure_reason = quality_weakest_dimension_to_failure_reason(weakest)
+    evidence = [
+        f"quality_eval:{run_id}:weakest={weakest}",
+        f"quality_eval:{run_id}:weakest_score={weakest_score}",
+        f"quality_eval:{run_id}:verdict={quality.get('research_quality_verdict')}",
+    ]
+    if supplemental_evidence:
+        evidence.extend(supplemental_evidence)
+
+    return [
+        _build_ticket_report(
+            run_id=run_id,
+            failure_reason=failure_reason,
+            failure_count=1,
+            template=template,
+        )
+    ]
+
+
+def generate_quality_driven_improvement_tickets(
+    conn: sqlite3.Connection,
+    *,
+    run_id: str,
+    quality: dict[str, Any],
+    output_dir: Path | None = None,
+    supplemental_evidence: list[str] | None = None,
+) -> dict[str, Any]:
+    """Persist quality-driven draft improvement tickets when standard path is empty."""
+    proposed = write_quality_driven_improvement_tickets(
+        quality,
+        run_id=run_id,
+        supplemental_evidence=supplemental_evidence,
+    )
+    target_dir = output_dir or default_report_dir()
+    target_dir.mkdir(parents=True, exist_ok=True)
+    output_path = target_dir / "improvement_ticket_latest.json"
+
+    if not proposed:
+        return {
+            "status": "skipped_no_actionable_weakness",
+            "run_id": run_id,
+            "ticket_ids": [],
+            "tickets": [],
+            "output_path": str(output_path),
+            "operator_seed_path": (
+                "When all failure modes are golden-covered and quality score is above "
+                f"{QUALITY_WEAKNESS_SCORE_THRESHOLD}, seed tickets manually from "
+                "recommended_improvement_ticket.json — no auto draft emitted."
+            ),
+        }
+
+    ticket_repo = ImprovementTicketRepository(conn)
+    existing_count = ticket_repo.count_for_run(run_id)
+    created_ids: list[str] = []
+    ticket_reports: list[dict[str, Any]] = []
+
+    for ticket in proposed:
+        reason = ticket["failure_reason"]
+        violations = validate_builder_ticket(ticket)
+        if violations:
+            raise ValueError(
+                f"Quality-driven ticket for {reason} is not builder-consumable: "
+                + "; ".join(violations)
+            )
+        existing = ticket_repo.get_for_run_and_reason(run_id=run_id, failure_reason=reason)
+        if existing is not None:
+            ticket_reports.append(json.loads(existing.ticket_json))
+            created_ids.append(existing.id)
+            continue
+        record = ticket_repo.insert(
+            run_id=run_id,
+            failure_reason=reason,
+            priority=ticket["priority"],
+            title=ticket["title"],
+            problem=ticket["problem"],
+            evidence=ticket["evidence"],
+            affected_modules=ticket["affected_modules"],
+            expected_files=ticket["expected_files"],
+            acceptance_criteria=ticket["acceptance_criteria"],
+            test_plan=ticket["test_plan"],
+            non_goals=ticket["non_goals"],
+            risk_level=ticket["risk_level"],
+            rollback_plan=ticket["rollback_plan"],
+            ticket=ticket,
+        )
+        ticket["id"] = record.id
+        created_ids.append(record.id)
+        ticket_reports.append(ticket)
+
+    status = (
+        "quality_driven_generated"
+        if ticket_repo.count_for_run(run_id) > existing_count
+        else "quality_driven_already_generated"
+    )
+    output_path.write_text(json.dumps(ticket_reports, indent=2) + "\n", encoding="utf-8")
+
+    return {
+        "status": status,
+        "run_id": run_id,
+        "ticket_ids": created_ids,
+        "tickets": ticket_reports,
+        "output_path": str(output_path),
+        "failure_reason": proposed[0]["failure_reason"],
+        "weakest_dimension": quality.get("weakest_dimension"),
+    }
+
 
 def failure_mode_covered_by_golden_tests(failure_reason: str) -> bool:
     """Return True when golden tests already cover intentional fixture rejection."""

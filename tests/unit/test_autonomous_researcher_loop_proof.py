@@ -18,6 +18,7 @@ from rge.modules.autonomous_researcher_loop import (
     LOOP_SCHEMA_VERSION,
     execute_autonomous_researcher_loop,
 )
+from rge.modules.ticket_writer import improvement_draft_is_actionable
 
 
 @pytest.fixture()
@@ -93,6 +94,18 @@ def test_autonomous_researcher_loop_proof_fixture_mode(
     assert ticket["problem"]
     assert ticket["acceptance_criteria"]
     assert ticket["source_weakness"] == quality["weakest_dimension"]
+
+    assert result["run_summary"]["quality_driven_ticket_ids"]
+    assert result["quality_driven_improvement"]["failure_reason"] == quality[
+        "weakest_dimension"
+    ]
+    draft_tickets = json.loads(
+        Path(result["artifacts"]["improvement_tickets"]).read_text(encoding="utf-8")
+    )
+    assert len(draft_tickets) >= 1
+    assert draft_tickets[0]["failure_reason"] == quality["weakest_dimension"]
+    assert draft_tickets[0]["status"] == "draft"
+    assert improvement_draft_is_actionable(draft_tickets[0])
 
     assert "frontend contract is parked" in result["drift_note"]
 
