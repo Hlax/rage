@@ -1,0 +1,36 @@
+{
+  "id": "ticket-322",
+  "title": "fixtures/atlas staged-spine preview reference copy",
+  "problem": "Ticket-320 refreshed public-site preview JSON from staged spine, but fixtures/atlas still only holds golden MVP creativity fixture. Offline contract tests and operators lack a committed reference for the staged-spine preview shape under fixtures/atlas/.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-321_atlas-preview-page-copy-refresh.md",
+    "apps/public-site/public/data/atlas_snapshot_preview.json",
+    "fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json"
+  ],
+  "affected_modules": [
+    "fixtures/atlas"
+  ],
+  "expected_files": [
+    "fixtures/atlas/atlas_snapshot_staged_spine_preview.json",
+    "tests/unit/test_public_atlas_preview_fixture.py",
+    "agent_reports/2026-06-18_phase-3_ticket-322_fixtures-atlas-staged-preview-reference.md"
+  ],
+  "acceptance_criteria": [
+    "fixtures/atlas contains staged-spine preview reference JSON matching public-site preview snapshot contract fields.",
+    "Reference passes validate_atlas_snapshot and private-field scan.",
+    "No public-site or export-public changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_public_atlas_preview_fixture.py -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Public site copy changes.",
+    "Live OpenAlex proofs.",
+    "README-only documentation."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove fixtures/atlas reference file only.",
+  "status": "proposed",
+  "category": "Phase 3 / fixtures"
+}

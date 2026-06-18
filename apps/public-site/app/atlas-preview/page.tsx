@@ -15,7 +15,7 @@ import { conceptToSlug, findCardById, findConceptBySlug } from '../../lib/public
 export const metadata = {
   title: 'Research Atlas Preview — Research Graph Engine',
   description:
-    'Text-first read-only preview of the Research Atlas contract using committed fixture data.',
+    'Text-first read-only preview of the Research Atlas contract using a committed mock staged-spine snapshot.',
 };
 
 const sectionStyle = { marginTop: '2.25rem' } as const;
@@ -119,15 +119,16 @@ export default function AtlasPreviewPage() {
           color: '#8b93a3',
         }}
       >
-        Research Atlas · fixture preview v0
+        Research Atlas · staged-spine mock preview
       </p>
       <h1 style={{ fontSize: '1.7rem', lineHeight: 1.25, marginTop: '0.35rem' }}>
         {atlasSnapshot.root.primary_question}
       </h1>
       <p style={bodyStyle}>
-        This page renders a committed mock-safe Atlas snapshot to evaluate whether the
-        contract feels usable before live operator exports or graph visualization.
-        It is read-only, static, and disconnected from the private research engine.
+        This page renders a committed mock-safe staged-spine Atlas snapshot (fixture-mode
+        discover→report pipeline) to evaluate whether the contract feels usable before live
+        operator exports or graph visualization. It is read-only, static, and disconnected
+        from the private research engine — not a live literature review.
       </p>
 
       <section style={{ marginTop: '1.5rem' }}>

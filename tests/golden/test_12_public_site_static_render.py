@@ -88,6 +88,9 @@ def test_atlas_preview_page_is_static_fixture_only() -> None:
     assert ATLAS_PREVIEW_PAGE.is_file(), "missing atlas preview page route"
     text = ATLAS_PREVIEW_PAGE.read_text(encoding="utf-8")
     assert "Research Atlas" in text
+    assert "staged-spine mock preview" in text
+    assert "staged-spine Atlas snapshot" in text
+    assert "fixture-mode" in text
     assert "atlasSnapshot" in text
     assert "resolveAtlasCoherencePreview" in text
     assert "conceptToSlug" in text

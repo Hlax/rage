@@ -346,7 +346,8 @@ superseded
 | 318 | ticket-318 | done | Principal audit post-ticket-317 checkpoint | `phase-3/ticket-318-principal-audit-post-ticket-317` | `agent_reports/2026-06-18_phase-3_ticket-318_principal-audit-post-ticket-317.md` |
 | 319 | ticket-319 | done | Staged spine cluster projection test isolation hardening | `phase-3/ticket-319-staged-spine-cluster-test-isolation` | `agent_reports/2026-06-18_phase-3_ticket-319_staged-spine-cluster-test-isolation.md` |
 | 320 | ticket-320 | done | Public atlas preview fixture refresh from staged spine export | `phase-3/ticket-320-public-atlas-preview-fixture-refresh` | `agent_reports/2026-06-18_phase-3_ticket-320_public-atlas-preview-fixture-refresh.md` |
-| 321 | ticket-321 | proposed | Atlas preview page copy refresh for staged-spine labeling | | |
+| 321 | ticket-321 | done | Atlas preview page copy refresh for staged-spine labeling | `phase-3/ticket-321-atlas-preview-page-copy-refresh` | `agent_reports/2026-06-18_phase-3_ticket-321_atlas-preview-page-copy-refresh.md` |
+| 322 | ticket-322 | proposed | fixtures/atlas staged-spine preview reference copy | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1082,7 +1083,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-321 (proposed) — Atlas preview page copy refresh for staged-spine labeling
+ticket-322 (proposed) — fixtures/atlas staged-spine preview reference copy
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
@@ -1093,7 +1094,12 @@ ticket-321 (proposed) — Atlas preview page copy refresh for staged-spine label
 - Atlas operator proof thread: evidence DB PARTIAL + staged spine pass after ticket-317
 - Drift advisory improved; live layer-3 still skips unsuitable_live_artifact
 - Report: `agent_reports/2026-06-18_principal-audit-post-ticket-317.md`
-- ticket-321 seeded: atlas preview page copy refresh (staged-spine labeling)
+- ticket-322 seeded: fixtures/atlas staged-spine preview reference copy
+
+## Queue Notes (2026-06-18, ticket-321 atlas preview page copy refresh)
+
+- `/atlas-preview` header + intro copy now label mock staged-spine snapshot (ticket-320 JSON).
+- GT12 asserts staged-spine copy strings; 798 pytest pass.
 
 ## Queue Notes (2026-06-18, ticket-320 public atlas preview fixture refresh)
 
