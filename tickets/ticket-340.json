@@ -1,0 +1,33 @@
+{
+  "id": "ticket-340",
+  "title": "Principal audit post-ticket-338 operator integration checkpoint",
+  "problem": "Tickets 336–338 completed operator integration (cadence audit, staged-spine loop, operator autocycle hook). Cadence threshold reached (3 done since post-ticket-335); principal audit due before ticket-339 implementation.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-338_autonomous-loop-operator-autocycle-hook-v0.md",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [
+    "agent_reports"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-338.md",
+    "agent_reports/2026-06-18_phase-3_ticket-340_principal-audit-post-ticket-338.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit documents tickets 336–338 outcomes and mock golden gate health.",
+    "Cadence reset recorded; ticket-339 cleared for implementation.",
+    "Operator integration batch summarized honestly."
+  ],
+  "test_plan": [
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-340",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "New feature implementation.",
+    "Public site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert audit reports only.",
+  "status": "done",
+  "category": "Phase 3 / principal audit"
+}
