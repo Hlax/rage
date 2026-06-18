@@ -61,4 +61,4 @@ opt-in live layer-3 staged atlas proof (medium risk; pre-ticket audit if public 
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merge commit: `aeed375`
