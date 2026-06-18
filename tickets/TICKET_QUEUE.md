@@ -339,7 +339,8 @@ superseded
 | 311 | ticket-311 | done | Principal audit post-ticket-310 checkpoint | `phase-3/ticket-311-principal-audit-post-ticket-310` | `agent_reports/2026-06-17_phase-3_ticket-311_principal-audit-post-ticket-310.md` |
 | 312 | ticket-312 | done | README operator atlas preview fixture refresh runbook | `phase-3/ticket-312-readme-atlas-preview-fixture-refresh-runbook` | `agent_reports/2026-06-17_phase-3_ticket-312_readme-atlas-preview-fixture-refresh-runbook.md` |
 | 313 | ticket-313 | done | README evidence DB atlas vs public preview boundary | `phase-3/ticket-313-readme-evidence-db-atlas-public-boundary` | `agent_reports/2026-06-17_phase-3_ticket-313_readme-evidence-db-atlas-public-boundary.md` |
-| 314 | ticket-314 | proposed | Principal audit post-ticket-313 checkpoint | | |
+| 314 | ticket-314 | done | Principal audit post-ticket-313 checkpoint | `phase-3/ticket-314-principal-audit-post-ticket-313` | `agent_reports/2026-06-17_phase-3_ticket-314_principal-audit-post-ticket-313.md` |
+| 315 | ticket-315 | proposed | README operator evidence DB atlas re-export verification runbook | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1075,9 +1076,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-314 (proposed) — Principal audit post-ticket-313 checkpoint
+ticket-315 (proposed) — README operator evidence DB atlas re-export verification runbook
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-17, ticket-314 principal audit post-ticket-313)
+
+- Principal audit closes batch 312–313; cadence reset (was overdue pre-audit)
+- Verdict GO; 144 golden, 789 pytest, safety audit pass, public-site build pass
+- Report: `agent_reports/2026-06-17_principal-audit-post-ticket-313.md`
+- ticket-315 seeded: evidence DB atlas re-export verification runbook
 
 ## Queue Notes (2026-06-17, ticket-313 README evidence DB atlas public boundary)
 

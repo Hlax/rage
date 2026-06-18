@@ -1,0 +1,39 @@
+{
+  "id": "ticket-315",
+  "title": "README operator evidence DB atlas re-export verification runbook",
+  "problem": "Principal audit post-ticket-313 recommends advancing live-research operator proof; ticket-298 evidence DB re-export proof exists but README lacks a consolidated re-verification checklist for operators.",
+  "evidence": [
+    "agent_reports/2026-06-17_principal-audit-post-ticket-313.md",
+    "agent_reports/2026-06-16_phase-3_ticket-298_operator-evidence-db-coherence-reexport.md",
+    "README.md"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-17_phase-3_ticket-315_readme-evidence-db-atlas-reexport-runbook.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart adds evidence DB atlas re-export verification subsection.",
+    "Documents mock unit-test regression commands (test_evidence_db_atlas_projection family).",
+    "Documents operator re-export commands from ticket-298 on gitignored evidence DB.",
+    "Cross-links Public boundary (ticket-313); no public site or export-public changes.",
+    "Golden + full pytest pass."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_evidence_db_atlas_projection.py -q",
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "export-public changes.",
+    "Public site changes.",
+    "New evidence DB hooks or schema migrations.",
+    "CI live-network tests."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README subsection only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / operator docs"
+}
