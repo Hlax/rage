@@ -123,6 +123,22 @@ def execute_autonomous_researcher_loop(
             f"run_report:{run_id}:{mode.get('reason')}_count={mode.get('count')}"
         )
 
+    quality_driven_result: dict[str, Any] | None = None
+    if not run_result.get("ticket_ids"):
+        from rge.modules.ticket_writer import generate_quality_driven_improvement_tickets
+
+        conn = connect(db_path)
+        try:
+            quality_driven_result = generate_quality_driven_improvement_tickets(
+                conn,
+                run_id=run_id,
+                quality=quality,
+                output_dir=ticket_dir,
+                supplemental_evidence=evidence,
+            )
+        finally:
+            conn.close()
+
     recommended_ticket = recommend_improvement_ticket(
         quality,
         queue_ticket_id=recommended_ticket_id,
@@ -147,6 +163,7 @@ def execute_autonomous_researcher_loop(
             "export_atlas_snapshot",
             "atlas_coherence_report",
             "evaluate_research_quality",
+            "generate_quality_driven_improvement_tickets",
             "recommend_improvement_ticket",
         ],
         "artifacts": {
@@ -164,7 +181,14 @@ def execute_autonomous_researcher_loop(
             "relationships_active": run_result.get("relationships_active"),
             "card_count": run_result.get("card_count"),
             "ticket_ids": run_result.get("ticket_ids") or [],
+            "quality_driven_ticket_ids": (
+                (quality_driven_result or {}).get("ticket_ids") or []
+            ),
+            "quality_driven_status": (
+                (quality_driven_result or {}).get("status")
+            ),
         },
+        "quality_driven_improvement": quality_driven_result,
         "atlas_export": atlas_export,
         "coherence": {
             "overall_coherence_verdict": coherence_report.get("overall_coherence_verdict"),

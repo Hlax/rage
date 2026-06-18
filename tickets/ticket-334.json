@@ -1,0 +1,34 @@
+{
+  "id": "ticket-334",
+  "title": "Autonomous loop quality verdict refresh after ticket seeding",
+  "problem": "Ticket-333 emits quality-driven draft improvement tickets but research_quality_verdict is computed before seeding, so weak_ticket_generation remains PARTIAL even after drafts are persisted.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-333_autonomous-loop-quality-ticket-seeding-v0.md",
+    "rge/modules/autonomous_researcher_loop.py",
+    "rge/modules/research_quality_evaluator.py"
+  ],
+  "affected_modules": [
+    "rge/modules/autonomous_researcher_loop.py",
+    "rge/modules/research_quality_evaluator.py"
+  ],
+  "expected_files": [
+    "rge/modules/autonomous_researcher_loop.py",
+    "rge/modules/research_quality_evaluator.py",
+    "tests/unit/test_autonomous_researcher_loop_proof.py"
+  ],
+  "acceptance_criteria": [
+    "After quality-driven ticket seeding, loop report research_quality_verdict reflects emitted drafts (weak_ticket_generation score improves when ticket_ids non-empty).",
+    "Fixture autonomous loop can reach GO or documented PARTIAL with honest rationale."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_autonomous_researcher_loop_proof.py"
+  ],
+  "non_goals": [
+    "Auto-promote improvement tickets.",
+    "Public routes or schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert post-seeding quality re-evaluation only.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher loop"
+}
