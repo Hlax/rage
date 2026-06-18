@@ -59,4 +59,4 @@ opt-in live layer-3 pytest on a machine with suitable OpenAlex catalog.
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merge commit: `e37c684`
