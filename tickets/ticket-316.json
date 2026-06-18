@@ -1,0 +1,37 @@
+{
+  "id": "ticket-316",
+  "title": "Live staged-spine operator proof refresh v0",
+  "problem": "ticket-315 refreshed evidence DB atlas export mechanics (PARTIAL product verdict) but did not advance live-research proof. Drift advisory: six infra/docs tickets since 309; next move must be staged-spine operator proof on temp DB with richer multi-source graph.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-315_evidence-db-atlas-reexport-proof-refresh-v0.md",
+    "agent_reports/2026-06-17_phase-3_ticket-314_principal-audit-post-ticket-313.md"
+  ],
+  "affected_modules": [
+    "rge/cli.py",
+    "tests/unit/test_live_staged_atlas_snapshot_coherence.py"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-18_phase-3_ticket-316_live-staged-spine-operator-proof-refresh-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Operator proof on temp --db via RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1 gate (or layer-2 mock spine fallback with honest blocker note).",
+    "Private atlas snapshot + coherence report with product-usefulness verdict.",
+    "Compare graph richness vs ticket-315 evidence DB refresh baseline.",
+    "No public export or public-site changes.",
+    "Golden + full pytest pass; live_network tests remain opt-in only."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_live_staged_atlas_snapshot_coherence.py -q",
+    "python -m rge.cli verify"
+  ],
+  "non_goals": [
+    "README-only documentation.",
+    "Public atlas UI.",
+    "Schema migrations.",
+    "CI live-network enforcement."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Operator report only; no production code expected unless regression found.",
+  "status": "proposed",
+  "category": "Phase 3 / live staged spine / operator proof"
+}
