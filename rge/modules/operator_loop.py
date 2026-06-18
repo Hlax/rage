@@ -236,6 +236,70 @@ def inspect_autonomous_researcher_loop_status(
     }
 
 
+def inspect_autonomous_loop_scratch_artifact(
+    *,
+    root: Path | None = None,
+    artifact_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Read-only inspection of the last operator scratch autonomous loop report."""
+    project_root = root or repo_root()
+    paths = autonomous_loop_scratch_paths(project_root)
+    report_path = (artifact_dir or paths["artifact_dir"]) / "autonomous_loop_report.json"
+    try:
+        rel_path = report_path.relative_to(project_root.resolve()).as_posix()
+    except ValueError:
+        rel_path = report_path.as_posix()
+
+    status: dict[str, Any] = {
+        "loop_report_path": rel_path,
+        "loop_report_exists": report_path.is_file(),
+        "status": "not_run",
+        "run_status": None,
+        "research_path": None,
+        "research_quality_verdict": None,
+        "weakest_dimension": None,
+        "weakest_dimension_label": None,
+        "weakest_dimension_score": None,
+        "evaluated_after_ticket_seeding": None,
+        "error": None,
+    }
+
+    if not report_path.is_file():
+        status["error"] = f"autonomous loop report not found: {rel_path}"
+        return status
+
+    try:
+        payload = json.loads(report_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        status["status"] = "invalid"
+        status["error"] = str(exc)
+        return status
+
+    if not isinstance(payload, dict):
+        status["status"] = "invalid"
+        status["error"] = "autonomous loop report must be a JSON object"
+        return status
+
+    quality = payload.get("research_quality") or {}
+    run_status = payload.get("status")
+    status.update(
+        {
+            "status": "ok" if run_status == "completed" else "incomplete",
+            "run_status": run_status,
+            "research_path": payload.get("research_path"),
+            "research_quality_verdict": quality.get("research_quality_verdict"),
+            "weakest_dimension": quality.get("weakest_dimension"),
+            "weakest_dimension_label": quality.get("weakest_dimension_label"),
+            "weakest_dimension_score": quality.get("weakest_dimension_score"),
+            "evaluated_after_ticket_seeding": quality.get(
+                "evaluated_after_ticket_seeding"
+            ),
+            "error": None,
+        }
+    )
+    return status
+
+
 def inspect_working_tree(
     root: Path | None = None,
     *,
@@ -1110,6 +1174,9 @@ def build_operator_plan(
     autonomous_researcher_loop_status = inspect_autonomous_researcher_loop_status(
         root=project_root,
     )
+    autonomous_loop_scratch_status = inspect_autonomous_loop_scratch_artifact(
+        root=project_root,
+    )
     domain_pack_status = inspect_domain_pack_status(root=project_root)
     nm4_evidence_spine_status = inspect_nm4_evidence_spine_status(root=project_root)
     runtime_config = load_config()
@@ -1174,6 +1241,7 @@ def build_operator_plan(
         "scratch_evidence_status": scratch_evidence,
         "arbitrary_source_proof_bundle_status": arbitrary_source_proof_bundle_status,
         "autonomous_researcher_loop_status": autonomous_researcher_loop_status,
+        "autonomous_loop_scratch_status": autonomous_loop_scratch_status,
         "staged_rank2_scan_max": runtime_config.staged_rank2_scan_max,
         "domain_pack_status": domain_pack_status,
         "nm4_evidence_spine_status": nm4_evidence_spine_status,

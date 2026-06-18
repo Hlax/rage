@@ -364,7 +364,8 @@ superseded
 | 336 | ticket-336 | done | Principal audit post-ticket-335 autonomous loop checkpoint | `phase-3/ticket-336-principal-audit-post-ticket-335` | `agent_reports/2026-06-18_phase-3_ticket-336_principal-audit-post-ticket-335.md` |
 | 337 | ticket-337 | done | Autonomous researcher loop staged-spine mock orchestrator v0 | `phase-3/ticket-337-autonomous-loop-staged-spine-mock-v0` | `agent_reports/2026-06-18_phase-3_ticket-337_autonomous-loop-staged-spine-mock-v0.md` |
 | 338 | ticket-338 | done | Autonomous loop operator autocycle hook v0 | `phase-3/ticket-338-autonomous-loop-operator-autocycle-hook-v0` | `agent_reports/2026-06-18_phase-3_ticket-338_autonomous-loop-operator-autocycle-hook-v0.md` |
-| 339 | ticket-339 | proposed | Autonomous loop scratch artifact inspection in operator plan v0 | | |
+| 339 | ticket-339 | done | Autonomous loop scratch artifact inspection in operator plan v0 | `phase-3/ticket-339-autonomous-loop-scratch-inspection-v0` | `agent_reports/2026-06-18_phase-3_ticket-339_autonomous-loop-scratch-inspection-v0.md` |
+| 341 | ticket-341 | proposed | Autonomous loop operator plan quality summary in recommended action v0 | | |
 | 340 | ticket-340 | done | Principal audit post-ticket-338 operator integration checkpoint | `phase-3/ticket-340-principal-audit-post-ticket-338` | `agent_reports/2026-06-18_phase-3_ticket-340_principal-audit-post-ticket-338.md` |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
@@ -1101,9 +1102,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-339 (proposed) — Autonomous loop scratch artifact inspection in operator plan v0
-(ticket-059 OpenAI placeholder remains deferred; cadence reset by ticket-340)
+ticket-341 (proposed) — Autonomous loop operator plan quality summary in recommended action v0
+(ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-339 autonomous loop scratch artifact inspection v0)
+
+- `inspect_autonomous_loop_scratch_artifact` reads `autonomous_loop_report.json` on scratch path
+- Plan field `autonomous_loop_scratch_status`: ok / not_run / invalid / incomplete
+- Surfaces research_quality_verdict + weakest_dimension when report exists
+- Audit gate satisfied: post-ticket-340 principal audit (2026-06-18)
+- ticket-341 seeded: quality summary in recommended action reason
+- Report: `agent_reports/2026-06-18_phase-3_ticket-339_autonomous-loop-scratch-inspection-v0.md`
 
 ## Queue Notes (2026-06-18, ticket-340 principal audit post-ticket-338)
 

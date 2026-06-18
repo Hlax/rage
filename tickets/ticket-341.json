@@ -1,0 +1,36 @@
+{
+  "id": "ticket-341",
+  "title": "Autonomous loop operator plan quality summary in recommended action v0",
+  "problem": "Ticket-339 surfaces scratch autonomous loop quality in autonomous_loop_scratch_status, but next_recommended_action.reason does not yet mention the last research_quality_verdict or weakest_dimension when a scratch report exists.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-339_autonomous-loop-scratch-inspection-v0.md",
+    "rge/modules/operator_loop.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "tests/unit"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop_autonomous_scratch_inspection.py",
+    "agent_reports/2026-06-18_phase-3_ticket-341_autonomous-loop-quality-summary-v0.md"
+  ],
+  "acceptance_criteria": [
+    "When scratch report status is ok, next_recommended_action.reason includes research_quality_verdict and weakest_dimension.",
+    "When status is not_run, reason unchanged from ticket-338 baseline.",
+    "No queue writes or ticket promotion."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_loop_autonomous_scratch_inspection.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama runs.",
+    "Changing execute-safe command allowlist.",
+    "Public export or site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert reason-string hook only.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher"
+}
