@@ -60,4 +60,4 @@ Gate after audit: implementation gate should clear for low-risk ticket-329.
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merge commit: `955b556`
