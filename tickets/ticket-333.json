@@ -1,0 +1,39 @@
+{
+  "id": "ticket-333",
+  "title": "Autonomous loop quality-driven improvement ticket seeding v0",
+  "problem": "The autonomous researcher loop (ticket-332) completes with observable failure modes in run reports but suppresses golden-covered modes when generating improvement tickets, leaving ticket_ids empty and blocking self-upgrade closure.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-332_autonomous-researcher-loop-proof-v0.md",
+    "rge/modules/research_quality_evaluator.py",
+    "tests/unit/test_autonomous_researcher_loop_proof.py"
+  ],
+  "affected_modules": [
+    "rge/modules/ticket_writer.py",
+    "rge/modules/research_quality_evaluator.py",
+    "rge/modules/autonomous_researcher_loop.py"
+  ],
+  "expected_files": [
+    "rge/modules/ticket_writer.py",
+    "tests/unit/test_autonomous_researcher_loop_proof.py"
+  ],
+  "acceptance_criteria": [
+    "Autonomous loop emits at least one actionable draft improvement ticket from observed non-golden failure modes OR documents explicit operator seed path when all modes are golden-covered.",
+    "Quality evaluator weakest dimension maps to seeded ticket failure_reason.",
+    "Golden tests remain mock-only; no auto-promotion to queue."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_autonomous_researcher_loop_proof.py",
+    "pytest tests/golden/test_20_improvement_tickets.py"
+  ],
+  "non_goals": [
+    "Auto-promote improvement tickets without human --confirm.",
+    "Live Ollama ticket drafting.",
+    "Public routes or schema migrations."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert ticket seeding hook; restore golden-covered suppression only.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher loop",
+  "source_weakness": "weak_ticket_generation",
+  "source_quality_verdict": "PARTIAL"
+}

@@ -1,0 +1,45 @@
+{
+  "id": "ticket-332",
+  "title": "Autonomous Researcher MVP loop proof v0",
+  "problem": "Strategic pivot from Atlas/frontend/docs work to autonomous researcher with self-upgrading ticket loop. Need one closed mock-safe proof: seed question → research → private atlas → coherence → quality verdict → improvement ticket recommendation.",
+  "evidence": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-330.md",
+    "tickets/TICKET_QUEUE.md",
+    "tests/unit/test_atlas_coherence_cli_pipeline_fixture.py"
+  ],
+  "affected_modules": [
+    "rge/modules/autonomous_researcher_loop.py",
+    "rge/modules/research_quality_evaluator.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/autonomous_researcher_loop.py",
+    "rge/modules/research_quality_evaluator.py",
+    "tests/unit/test_autonomous_researcher_loop_proof.py",
+    "tickets/ticket-333.json",
+    "agent_reports/2026-06-18_phase-3_ticket-332_autonomous-researcher-loop-proof-v0.md"
+  ],
+  "acceptance_criteria": [
+    "One complete mock fixture-mode researcher loop demonstrated via module + CLI.",
+    "Private atlas snapshot and coherence report artifacts produced.",
+    "Research quality verdict GO/PARTIAL/NO-GO with weakest dimension identified.",
+    "At least one concrete improvement ticket recommended from observed evidence.",
+    "Golden tests, full pytest, safety audit, and public-site build pass.",
+    "No public routes, schema migrations, or frontend UI changes."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_autonomous_researcher_loop_proof.py",
+    "pytest tests/golden -q",
+    "python -m rge.cli verify"
+  ],
+  "non_goals": [
+    "Principal audit ticket-331 (docs-only; skipped per pivot).",
+    "Public Atlas UI or routes.",
+    "Live OpenAlex or live Ollama in CI.",
+    "Auto-promote improvement tickets without human review."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert autonomous loop modules, CLI command, and tests; remove ticket-333 seed.",
+  "status": "done",
+  "category": "Phase 3 / autonomous researcher loop"
+}
