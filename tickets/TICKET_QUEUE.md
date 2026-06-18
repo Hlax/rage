@@ -361,7 +361,8 @@ superseded
 | 333 | ticket-333 | done | Autonomous loop quality-driven improvement ticket seeding v0 | `phase-3/ticket-333-autonomous-loop-quality-ticket-seeding-v0` | `agent_reports/2026-06-18_phase-3_ticket-333_autonomous-loop-quality-ticket-seeding-v0.md` |
 | 334 | ticket-334 | done | Autonomous loop quality verdict refresh after ticket seeding | `phase-3/ticket-334-autonomous-loop-quality-verdict-refresh-v0` | `agent_reports/2026-06-18_phase-3_ticket-334_autonomous-loop-quality-verdict-refresh-v0.md` |
 | 335 | ticket-335 | done | Atlas snapshot contradiction metadata for autonomous quality eval | `phase-3/ticket-335-atlas-contradiction-metadata-quality-eval` | `agent_reports/2026-06-18_phase-3_ticket-335_atlas-contradiction-metadata-quality-eval-v0.md` |
-| 336 | ticket-336 | proposed | Principal audit post-ticket-335 autonomous loop checkpoint | | |
+| 336 | ticket-336 | done | Principal audit post-ticket-335 autonomous loop checkpoint | `phase-3/ticket-336-principal-audit-post-ticket-335` | `agent_reports/2026-06-18_phase-3_ticket-336_principal-audit-post-ticket-335.md` |
+| 337 | ticket-337 | proposed | Autonomous researcher loop staged-spine mock orchestrator v0 | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1097,9 +1098,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-336 (proposed) — Principal audit post-ticket-335 autonomous loop checkpoint
+ticket-337 (proposed) — Autonomous researcher loop staged-spine mock orchestrator v0
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-336 principal audit post-ticket-335)
+
+- Principal audit: `agent_reports/2026-06-18_principal-audit-post-ticket-335.md`
+- Cadence reset after autonomous loop batch 332–335; fixture loop **GO** recorded
+- Mock golden gate: 144 golden, 802 pytest, safety pass, public-site build
+- Drift advisory: next work should extend loop beyond fixture path → ticket-337 seeded
+- Orphan hygiene: untracked `agent_reports/2026-06-18_principal-audit-post-ticket-330.md` superseded (ticket-331 cancelled)
+- Report: `agent_reports/2026-06-18_phase-3_ticket-336_principal-audit-post-ticket-335.md`
 
 ## Queue Notes (2026-06-18, ticket-335 atlas contradiction metadata quality eval)
 

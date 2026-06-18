@@ -1,0 +1,39 @@
+{
+  "id": "ticket-337",
+  "title": "Autonomous researcher loop staged-spine mock orchestrator v0",
+  "problem": "Ticket-332–335 closed the autonomous researcher loop on the checksum-pinned fixture-mode golden MVP path (research_quality GO). The loop still does not run against the staged-spine mock orchestrator (`research run --staged-spine`), which is the next network-free product path toward arbitrary-source research without live Ollama.",
+  "evidence": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-335.md",
+    "rge/modules/autonomous_researcher_loop.py",
+    "tests/unit/test_autonomous_researcher_loop_proof.py"
+  ],
+  "affected_modules": [
+    "rge/modules/autonomous_researcher_loop.py",
+    "rge/cli.py",
+    "tests/unit"
+  ],
+  "expected_files": [
+    "rge/modules/autonomous_researcher_loop.py",
+    "tests/unit/test_autonomous_researcher_loop_staged_spine_proof.py",
+    "agent_reports/2026-06-18_phase-3_ticket-337_autonomous-loop-staged-spine-mock-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Autonomous loop accepts a staged-spine mock orchestrator research path (no live network gates).",
+    "Loop writes atlas snapshot, coherence report, quality eval, and improvement ticket artifacts on temp DB.",
+    "Unit test proves end-to-end loop completion with mock LLM only.",
+    "No public export, public site, or schema migration changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_autonomous_researcher_loop_staged_spine_proof.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live OpenAlex network gates or live Ollama.",
+    "Public atlas UI or export-public changes.",
+    "Operator autocycle wiring (defer to follow-on)."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert autonomous loop staged-spine branch; fixture-mode path unchanged.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher"
+}
