@@ -1338,14 +1338,20 @@ def _cmd_autonomous_researcher_loop(args: argparse.Namespace) -> int:
     artifact_dir = (
         Path(args.artifact_dir) if args.artifact_dir else db_path.parent / "autonomous_loop"
     )
+    staged_spine = bool(getattr(args, "staged_spine", False))
+    research_path = "staged_spine" if staged_spine else "fixture_mode"
+    default_run_id = STAGED_FIXTURE_RUN_ID if staged_spine else FIXTURE_RUN_ID
 
     result = execute_autonomous_researcher_loop(
         topic=args.topic,
         domain=args.domain,
         db_path=db_path,
         artifact_dir=artifact_dir,
-        run_id=args.run_id or FIXTURE_RUN_ID,
+        run_id=args.run_id or default_run_id,
         recommended_ticket_id=args.recommended_ticket_id or "ticket-333",
+        research_path=research_path,
+        staging_dir=Path(args.staging_dir) if getattr(args, "staging_dir", None) else None,
+        question_id=getattr(args, "question_id", None) or None,
     )
     print(json.dumps(result, indent=2))
     return 0 if result.get("status") == "completed" else 1
@@ -3640,12 +3646,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     autonomous_loop_parser = subparsers.add_parser(
         "autonomous-researcher-loop",
-        help="Run mock autonomous researcher loop proof (fixture-mode).",
+        help="Run mock autonomous researcher loop proof (fixture or staged-spine).",
         description=(
-            "Execute one closed autonomous researcher loop: fixture-mode research "
-            "pipeline → private atlas snapshot → coherence report → research quality "
-            "evaluation → recommended improvement ticket JSON. Mock-only; use temp "
-            "database paths."
+            "Execute one closed autonomous researcher loop: research pipeline "
+            "(fixture-mode default or --staged-spine mock orchestrator) → private "
+            "atlas snapshot → coherence report → research quality evaluation → "
+            "recommended improvement ticket JSON. Mock-only; use temp database paths."
         ),
     )
     autonomous_loop_parser.add_argument(
@@ -3673,6 +3679,22 @@ def build_parser() -> argparse.ArgumentParser:
     autonomous_loop_parser.add_argument(
         "--recommended-ticket-id",
         help="Queue ticket id for recommended improvement ticket JSON (default: ticket-333).",
+    )
+    autonomous_loop_parser.add_argument(
+        "--staged-spine",
+        action="store_true",
+        help=(
+            "Use mock staged discover→report orchestrator instead of fixture-mode MVP "
+            "pipeline (network env required for discover/fetch; mock LLM only)."
+        ),
+    )
+    autonomous_loop_parser.add_argument(
+        "--staging-dir",
+        help="Staging directory for staged-spine fetch/ingest (default: artifact-dir/staging).",
+    )
+    autonomous_loop_parser.add_argument(
+        "--question-id",
+        help=f"Research question id for staged discover enqueue (default: {STAGED_FIXTURE_QUESTION_ID}).",
     )
     autonomous_loop_parser.set_defaults(func=_cmd_autonomous_researcher_loop)
 

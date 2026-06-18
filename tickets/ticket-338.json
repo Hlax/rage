@@ -1,0 +1,37 @@
+{
+  "id": "ticket-338",
+  "title": "Autonomous loop operator autocycle hook v0",
+  "problem": "Ticket-337 closed the autonomous researcher loop on staged-spine mock orchestrator, but the loop is still invoked only via direct CLI/tests. The bounded operator runner (operator_loop / operator_autocycle) does not yet recommend or execute autonomous loop proofs as a safe_autonomous action.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-337_autonomous-loop-staged-spine-mock-v0.md",
+    "rge/modules/operator_loop.py",
+    "rge/modules/autonomous_researcher_loop.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "tests/unit"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop_autonomous_hook.py",
+    "agent_reports/2026-06-18_phase-3_ticket-338_autonomous-loop-operator-autocycle-hook-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Operator loop plan mode surfaces autonomous loop as safe_autonomous recommendation when queue is clear.",
+    "Execute-safe path can run fixture or staged-spine autonomous loop proof on temp DB without merging or queue writes.",
+    "No auto-promotion of improvement tickets; mock LLM only."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_loop_autonomous_hook.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama autonomous runs.",
+    "Public export or site changes.",
+    "Auto-merge or auto-promote improvement drafts."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert operator_loop hook; CLI loop paths unchanged.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher"
+}
