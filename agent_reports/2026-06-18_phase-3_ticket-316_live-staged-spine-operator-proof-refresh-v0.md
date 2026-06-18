@@ -137,4 +137,4 @@ pattern for `export-atlas-snapshot` on staged orchestrator DBs).
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `1239403`
