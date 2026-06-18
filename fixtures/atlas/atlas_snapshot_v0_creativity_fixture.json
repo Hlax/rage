@@ -181,7 +181,11 @@
       "source_label": "AI assistance",
       "target_label": "diversity",
       "scope": "under divergent prompting when participants generate multiple divergent directions",
-      "confidence": 0.5
+      "confidence": 0.5,
+      "domain_metadata": {
+        "contradiction_classification": "apparent_contradiction_metric_or_condition_difference",
+        "qualifies_relationship_id": "rel_317b2f78489f21b8"
+      }
     },
     {
       "id": "rel_317b2f78489f21b8",
@@ -192,7 +196,11 @@
       "source_label": "AI assistance",
       "target_label": "semantic diversity",
       "scope": "short-form writing tasks",
-      "confidence": 0.62
+      "confidence": 0.62,
+      "domain_metadata": {
+        "contradiction_classification": "apparent_contradiction_metric_or_condition_difference",
+        "qualifies_relationship_id": "rel_28254d9b65c568be"
+      }
     }
   ],
   "clusters": [

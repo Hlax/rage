@@ -43,6 +43,29 @@ ATLAS_FIXTURE_SNAPSHOT_ID = "snap_creativity_fixture_v0_001"
 ATLAS_FIXTURE_GENERATED_AT = "2026-06-16T00:00:00Z"
 ATLAS_FIXTURE_SAFETY_AUDIT_ID = "audit_atlas_fixture_v0_001"
 
+ATLAS_EDGE_DOMAIN_METADATA_FIELDS = (
+    "contradiction_classification",
+    "qualifies_relationship_id",
+)
+
+
+def _project_edge_domain_metadata(raw: str | None) -> dict[str, Any]:
+    """Whitelist contradiction linkage metadata for atlas relationship edges."""
+    if not raw:
+        return {}
+    try:
+        metadata = json.loads(raw)
+    except json.JSONDecodeError:
+        return {}
+    if not isinstance(metadata, dict):
+        return {}
+    projected: dict[str, Any] = {}
+    for field in ATLAS_EDGE_DOMAIN_METADATA_FIELDS:
+        value = metadata.get(field)
+        if value is not None and value != "":
+            projected[field] = value
+    return projected
+
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -153,6 +176,7 @@ def _build_relationship_edges(conn: sqlite3.Connection, domain_pack: str) -> lis
     rows = conn.execute(
         """
         SELECT r.id, r.predicate, r.scope, r.confidence, r.status,
+               r.domain_metadata_json,
                sub.id AS subject_id, sub.label AS subject_label,
                obj.id AS object_id, obj.label AS object_label
         FROM relationships r
@@ -165,19 +189,21 @@ def _build_relationship_edges(conn: sqlite3.Connection, domain_pack: str) -> lis
     ).fetchall()
     edges: list[dict[str, Any]] = []
     for row in rows:
-        edges.append(
-            {
-                "id": row["id"],
-                "edge_type": "relationship",
-                "predicate": row["predicate"],
-                "source_node_id": row["subject_id"],
-                "target_node_id": row["object_id"],
-                "source_label": row["subject_label"],
-                "target_label": row["object_label"],
-                "scope": row["scope"],
-                "confidence": row["confidence"],
-            }
-        )
+        edge: dict[str, Any] = {
+            "id": row["id"],
+            "edge_type": "relationship",
+            "predicate": row["predicate"],
+            "source_node_id": row["subject_id"],
+            "target_node_id": row["object_id"],
+            "source_label": row["subject_label"],
+            "target_label": row["object_label"],
+            "scope": row["scope"],
+            "confidence": row["confidence"],
+        }
+        domain_metadata = _project_edge_domain_metadata(row["domain_metadata_json"])
+        if domain_metadata:
+            edge["domain_metadata"] = domain_metadata
+        edges.append(edge)
     return edges
 
 

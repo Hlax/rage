@@ -76,11 +76,12 @@ def test_autonomous_researcher_loop_proof_fixture_mode(
 
     quality = result["research_quality"]
     quality_initial = result["research_quality_initial"]
-    assert quality["research_quality_verdict"] in {"GO", "PARTIAL", "NO-GO"}
+    assert quality["research_quality_verdict"] == "GO"
     assert quality_initial["research_quality_verdict"] == "PARTIAL"
     assert quality_initial["weakest_dimension"] == "weak_ticket_generation"
     assert quality["evaluated_after_ticket_seeding"] is True
     assert quality["dimension_scores"]["weak_ticket_generation"]["score"] >= 80
+    assert quality["dimension_scores"]["poor_contradiction_handling"]["score"] >= 80
     assert quality.get("weak_ticket_generation_score_delta", 0) > 0
     assert quality["weakest_dimension"] in {
         "weak_claim_extraction",
@@ -147,8 +148,4 @@ def test_autonomous_researcher_loop_cli(
     assert loop_report["research_quality"]["dimension_scores"]["weak_ticket_generation"][
         "score"
     ] >= 80
-    assert loop_report["research_quality"]["research_quality_verdict"] in {
-        "GO",
-        "PARTIAL",
-        "NO-GO",
-    }
+    assert loop_report["research_quality"]["research_quality_verdict"] == "GO"

@@ -1,0 +1,33 @@
+{
+  "id": "ticket-336",
+  "title": "Principal audit post-ticket-335 autonomous loop checkpoint",
+  "problem": "Tickets 332–335 completed autonomous researcher loop closure (loop proof, ticket seeding, quality refresh, contradiction metadata). Cadence threshold reached (4 done since post-ticket-330); principal audit due before next implementation batch.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-335_atlas-contradiction-metadata-quality-eval-v0.md",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [
+    "agent_reports"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-335.md",
+    "agent_reports/2026-06-18_phase-3_ticket-336_principal-audit-post-ticket-335.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit documents tickets 332–335 outcomes and mock golden gate health.",
+    "Autonomous loop GO verdict on fixture path recorded.",
+    "Cadence reset recorded; next product ticket recommended."
+  ],
+  "test_plan": [
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-336",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "New feature implementation.",
+    "Public site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert audit reports only.",
+  "status": "proposed",
+  "category": "Phase 3 / principal audit"
+}

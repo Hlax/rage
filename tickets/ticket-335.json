@@ -28,6 +28,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert edge metadata projection only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / autonomous researcher loop"
 }
