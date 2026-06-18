@@ -985,8 +985,57 @@ python -m rge.cli atlas-coherence-report `
   --out-md data/atlas/ticket293/atlas_coherence_report_v298.md
 ```
 
-Public atlas UI/routes remain deferred — see **ticket-300** (Research Atlas read-only
-public preview v0) in the queue.
+Public atlas preview is **shipped** at `/atlas-preview` (ticket-300) — see **Research Atlas
+public preview fixture refresh** below. Evidence DB exports below remain operator-private;
+they do not auto-publish to the public site.
+
+**Research Atlas public preview fixture refresh** (tickets 300, 308, 312): the static
+`/atlas-preview` page reads committed JSON only — `atlas_snapshot_preview.json` and
+`atlas_coherence_preview.json` under `apps/public-site/public/data/`. Refresh those files
+from a **fixture-mode** MVP DB (mock LLM; no `export-public` changes):
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+$TOPIC = "Does AI improve creative output while reducing diversity?"
+$DB = "data/db/atlas_preview_refresh.sqlite"
+$STAGING = "data/atlas/preview_refresh"
+
+# 1) Build fixture-mode MVP DB (gitignored under data/)
+python -m rge.cli run --topic $TOPIC --domain creativity --fixture-mode --db $DB
+
+# 2) Export snapshot + coherence preview sidecar (ticket-308 --coherence-preview-out)
+New-Item -ItemType Directory -Force -Path $STAGING | Out-Null
+python -m rge.cli export-atlas-snapshot `
+  --db $DB `
+  --out "$STAGING/atlas_snapshot.json" `
+  --coherence-preview-out "$STAGING/atlas_coherence_preview.json" `
+  --topic $TOPIC `
+  --domain creativity `
+  --fixture-mode
+
+# 3) Copy into committed public-site preview paths
+Copy-Item "$STAGING/atlas_snapshot.json" `
+  "apps/public-site/public/data/atlas_snapshot_preview.json" -Force
+Copy-Item "$STAGING/atlas_coherence_preview.json" `
+  "apps/public-site/public/data/atlas_coherence_preview.json" -Force
+
+# 4) Verify before commit
+python -m rge.modules.safety_auditor --audit full
+cd apps/public-site; npm run build; cd ../..
+python -m pytest tests/golden/test_12_public_site_static_render.py -q
+```
+
+Stage the refreshed snapshots for commit:
+
+```powershell
+git add apps/public-site/public/data/atlas_snapshot_preview.json `
+  apps/public-site/public/data/atlas_coherence_preview.json
+```
+
+If `git status` does not list those paths (local ignore rules), use `git add -f` on the
+same files — ticket-300 used force-add when bootstrapping preview JSON. Regression layer:
+`tests/unit/test_atlas_coherence_cli_pipeline_fixture.py` (fixture export chain) and
+`tests/unit/test_atlas_coherence_preview_sync.py` (coherence preview sidecar).
 
 **Live probe scratch evidence workflow** (local Ollama opt-in; report-only until
 operator persist): use the numbered checklist in
@@ -1072,7 +1121,7 @@ The public site (`apps/public-site/`) is a read-only static export:
 - Never connects to the private local engine or SQLite
 - Does not read `NEXT_PUBLIC_*` or other build-time secrets
 
-After changing accepted claims or export policy, run `export-public`, pass the safety audit, review the snapshot diff, then rebuild the site.
+After changing accepted claims or export policy, run `export-public`, pass the safety audit, review the snapshot diff, then rebuild the site. After changing atlas preview contract fields, follow **Research Atlas public preview fixture refresh** in Operator Quickstart (fixture-mode `export-atlas-snapshot` + `--coherence-preview-out`; tickets 300/308/312). Browse `/atlas-preview` after `npm run build`.
 
 Deployment guide (build, pre-deploy checklist, static hosting): `docs/deployment/public-site-static-hosting.md`
 
