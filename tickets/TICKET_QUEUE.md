@@ -352,7 +352,8 @@ superseded
 | 324 | ticket-324 | done | README staged-spine atlas preview refresh runbook | `phase-3/ticket-324-readme-staged-spine-atlas-preview-runbook` | `agent_reports/2026-06-18_phase-3_ticket-324_readme-staged-spine-atlas-preview-runbook.md` |
 | 325 | ticket-325 | done | Refresh script sync fixtures/atlas staged-spine reference | `phase-3/ticket-325-refresh-script-sync-fixtures-atlas` | `agent_reports/2026-06-18_phase-3_ticket-325_refresh-script-sync-fixtures-atlas.md` |
 | 326 | ticket-326 | done | README refresh script auto-sync fixtures/atlas note | `phase-3/ticket-326-readme-refresh-script-fixtures-sync-note` | `agent_reports/2026-06-18_phase-3_ticket-326_readme-refresh-script-fixtures-sync-note.md` |
-| 327 | ticket-327 | proposed | Principal audit post-ticket-326 checkpoint | | |
+| 327 | ticket-327 | done | Principal audit post-ticket-326 checkpoint | `phase-3/ticket-327-principal-audit-post-ticket-326` | `agent_reports/2026-06-18_phase-3_ticket-327_principal-audit-post-ticket-326.md` |
+| 328 | ticket-328 | proposed | Pre-ticket audit: live layer-3 staged atlas snapshot coherence | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1088,9 +1089,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-327 (proposed) — Principal audit post-ticket-326 checkpoint
+ticket-328 (proposed) — Pre-ticket audit: live layer-3 staged atlas snapshot coherence
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-327 principal audit post-ticket-326)
+
+- Principal audit closes batch 325–326; cadence reset
+- Verdict GO; staged-spine operator refresh thread complete (320–326)
+- Drift advisory: favor live layer-3 product proof over more docs
+- Report: `agent_reports/2026-06-18_principal-audit-post-ticket-326.md`
+- ticket-328 seeded: pre-ticket audit live layer-3 staged atlas coherence
 
 ## Queue Notes (2026-06-18, ticket-326 README refresh script fixtures sync note)
 
