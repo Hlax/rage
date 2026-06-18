@@ -464,6 +464,7 @@ def ensure_evidence_cluster_summary(
 
 
 STAGED_SPINE_RUN_PREFIX = "run_staged_fixture_mode_spine"
+STAGED_SPINE_RESEARCH_QUESTION_ID = "rq_staged_fixture_mode_run"
 _STAGED_RANK1_TITLE_FRAGMENT = "songwriting"
 _STAGED_RANK2_TITLE_FRAGMENT = "Constraint management"
 
@@ -479,6 +480,47 @@ def db_has_staged_spine_runs(conn: sqlite3.Connection) -> bool:
         (f"{STAGED_SPINE_RUN_PREFIX}%",),
     ).fetchone()
     return row is not None
+
+
+def ensure_staged_atlas_follow_up_question(
+    conn: sqlite3.Connection,
+    *,
+    topic: str,
+    domain_pack: str = "creativity",
+) -> dict[str, Any]:
+    """Seed a question follow-up on the golden contract for staged atlas coherence."""
+    from rge.modules.research_planner import GOLDEN_CONTRACT_ID, ensure_golden_contract
+
+    _ = domain_pack
+    if not db_has_staged_spine_runs(conn):
+        return {"status": "skipped", "reason": "no_staged_runs"}
+    question_text = topic.strip()
+    if not question_text:
+        return {"status": "skipped", "reason": "empty_topic"}
+
+    ensure_golden_contract(conn)
+    queue_repo = ResearchQueueRepository(conn)
+    existing = queue_repo.get_followup(GOLDEN_CONTRACT_ID, question_text)
+    if existing is not None:
+        return {
+            "status": "already_present",
+            "contract_id": GOLDEN_CONTRACT_ID,
+            "queue_item_id": existing["id"],
+        }
+
+    item = queue_repo.insert_followup(
+        contract_id=GOLDEN_CONTRACT_ID,
+        question_text=question_text,
+        priority_score=1.0,
+        reason="staged_spine_atlas_follow_up",
+        status="active",
+        research_question_id=STAGED_SPINE_RESEARCH_QUESTION_ID,
+    )
+    return {
+        "status": "created",
+        "contract_id": GOLDEN_CONTRACT_ID,
+        "queue_item_id": item["id"],
+    }
 
 
 def _claim_ids_for_staged_run(conn: sqlite3.Connection, run_id: str) -> list[str]:

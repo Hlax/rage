@@ -7,10 +7,15 @@
     "tests/unit/test_staged_spine_cluster_projection.py"
   ],
   "affected_modules": [
-    "tests/unit/test_staged_spine_cluster_projection.py"
+    "tests/unit/test_staged_spine_cluster_projection.py",
+    "rge/modules/evidence_db_atlas.py",
+    "rge/modules/atlas_snapshot_builder.py"
   ],
   "expected_files": [
     "tests/unit/test_staged_spine_cluster_projection.py",
+    "tests/unit/test_evidence_db_atlas_projection.py",
+    "rge/modules/evidence_db_atlas.py",
+    "rge/modules/atlas_snapshot_builder.py",
     "agent_reports/2026-06-18_phase-3_ticket-319_staged-spine-cluster-test-isolation.md"
   ],
   "acceptance_criteria": [
@@ -29,6 +34,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert test fixture isolation changes only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / test hygiene"
 }

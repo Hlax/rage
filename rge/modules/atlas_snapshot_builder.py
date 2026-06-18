@@ -78,11 +78,12 @@ def _build_curated_cards(
     else:
         from rge.modules.evidence_db_atlas import (
             claim_backed_card_extras,
+            db_has_non_fixture_manual_claims,
             ensure_claim_backed_public_cards,
             ensure_evidence_research_run_lineage,
         )
 
-        if topic.strip():
+        if topic.strip() and db_has_non_fixture_manual_claims(conn):
             ensure_evidence_research_run_lineage(
                 conn, topic=topic, domain_pack=domain_pack
             )
@@ -598,6 +599,7 @@ def build_atlas_snapshot_from_db(
             ensure_evidence_cluster_summary,
             ensure_evidence_relationship_edges,
             ensure_evidence_run_report,
+            ensure_staged_atlas_follow_up_question,
             ensure_staged_cluster_summaries,
         )
 
@@ -612,6 +614,9 @@ def build_atlas_snapshot_from_db(
                 conn, topic=topic, domain_pack=domain_pack
             )
         if db_has_staged_spine_runs(conn):
+            ensure_staged_atlas_follow_up_question(
+                conn, topic=topic, domain_pack=domain_pack
+            )
             ensure_staged_cluster_summaries(
                 conn, topic=topic, domain_pack=domain_pack
             )

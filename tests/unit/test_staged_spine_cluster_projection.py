@@ -13,6 +13,7 @@ from rge.modules.atlas_coherence_report import build_atlas_coherence_report
 from rge.modules.atlas_snapshot_builder import build_atlas_snapshot_from_db
 from rge.modules.evidence_db_atlas import (
     STAGED_SPINE_RUN_PREFIX,
+    ensure_staged_atlas_follow_up_question,
     ensure_staged_cluster_summaries,
 )
 
@@ -116,6 +117,35 @@ def test_ensure_staged_cluster_summaries_creates_rank_rows(
             (f"{STAGED_SPINE_RUN_PREFIX}%",),
         ).fetchone()
         assert row is not None and int(row["n"]) >= 2
+    finally:
+        conn.close()
+
+
+def test_ensure_staged_atlas_follow_up_question_seeds_golden_contract_row(
+    temp_db: Path,
+    staging_dir: Path,
+    report_dir: Path,
+    mock_network_env: None,
+    patched_staged_network: None,
+) -> None:
+    _run_staged_orchestrator_cli(temp_db, staging_dir, report_dir, patched_staged_network)
+
+    conn = connect(temp_db)
+    try:
+        result = ensure_staged_atlas_follow_up_question(
+            conn, topic=EXPORT_TOPIC, domain_pack="creativity"
+        )
+        assert result["status"] in {"created", "already_present"}
+        row = conn.execute(
+            """
+            SELECT contract_id, item_type, last_error
+            FROM research_queue
+            WHERE item_type = 'question' AND last_error = ?
+            """,
+            (EXPORT_TOPIC,),
+        ).fetchone()
+        assert row is not None
+        assert row["contract_id"] == "contract_golden_test_10"
     finally:
         conn.close()
 

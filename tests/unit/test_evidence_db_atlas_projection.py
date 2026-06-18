@@ -160,32 +160,35 @@ def _run_mock_live_spine(temp_db: Path, source_id: str) -> None:
                 "rge.modules.concept_linker.get_model_client",
                 return_value=stub,
             ):
-                assert (
-                    main(
-                        [
-                            "extract-claims",
-                            "--source",
-                            source_id,
-                            "--db",
-                            str(temp_db),
-                            "--live-manual-fallthrough",
-                        ]
+                try:
+                    assert (
+                        main(
+                            [
+                                "extract-claims",
+                                "--source",
+                                source_id,
+                                "--db",
+                                str(temp_db),
+                                "--live-manual-fallthrough",
+                            ]
+                        )
+                        == 0
                     )
-                    == 0
-                )
-                assert (
-                    main(
-                        [
-                            "link-concepts",
-                            "--source",
-                            source_id,
-                            "--db",
-                            str(temp_db),
-                            "--live-manual-link-fallthrough",
-                        ]
+                    assert (
+                        main(
+                            [
+                                "link-concepts",
+                                "--source",
+                                source_id,
+                                "--db",
+                                str(temp_db),
+                                "--live-manual-link-fallthrough",
+                            ]
+                        )
+                        == 0
                     )
-                    == 0
-                )
+                finally:
+                    patch.stopall()
 
 
 def test_db_has_non_fixture_manual_claims_after_ticket127_spine(temp_db: Path) -> None:
