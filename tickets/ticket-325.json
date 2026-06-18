@@ -1,0 +1,37 @@
+{
+  "id": "ticket-325",
+  "title": "Refresh script sync fixtures/atlas staged-spine reference",
+  "problem": "Ticket-324 README documents offline parity against fixtures/atlas/atlas_snapshot_staged_spine_preview.json, but scripts/refresh_atlas_preview_from_staged_spine.py only writes public-site paths. Operators must manually copy; automate sync to keep reference current.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-324_readme-staged-spine-atlas-preview-runbook.md",
+    "scripts/refresh_atlas_preview_from_staged_spine.py",
+    "tests/unit/test_public_atlas_preview_fixture.py"
+  ],
+  "affected_modules": [
+    "scripts/refresh_atlas_preview_from_staged_spine.py",
+    "rge/modules/atlas_preview_curator.py"
+  ],
+  "expected_files": [
+    "scripts/refresh_atlas_preview_from_staged_spine.py",
+    "tests/unit/test_public_atlas_preview_fixture.py",
+    "agent_reports/2026-06-18_phase-3_ticket-325_refresh-script-sync-fixtures-atlas.md"
+  ],
+  "acceptance_criteria": [
+    "refresh_atlas_preview_from_staged_spine.py writes fixtures/atlas/atlas_snapshot_staged_spine_preview.json after public preview write.",
+    "Existing parity test remains green without manual copy step.",
+    "No export-public or public-site routing changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_public_atlas_preview_fixture.py -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "README changes.",
+    "Live OpenAlex proofs.",
+    "Coherence sidecar in fixtures/atlas."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert script sync line only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / operator tooling"
+}
