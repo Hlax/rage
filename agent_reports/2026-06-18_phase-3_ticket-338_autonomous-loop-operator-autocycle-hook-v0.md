@@ -58,7 +58,7 @@ Safety audit not required — operator runner only; scratch paths under `data/`.
 
 ## Merge to main
 
-(Pending branch merge — document hash after merge.)
+Merge commit: `50e9246672bd736dc15b19ec5b15138965d556a1`
 
 ## Recommended next ticket
 
