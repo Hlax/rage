@@ -1,0 +1,36 @@
+{
+  "id": "ticket-343",
+  "title": "Autonomous loop execute-safe refresh scratch status after proof v0",
+  "problem": "Ticket-342 surfaces autonomous_loop_scratch_status in operator autocycle JSON, but execute-safe mode returns pre-run scratch inspection only; after a successful autonomous loop proof the payload should re-read autonomous_loop_report.json.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-342_autonomous-loop-autocycle-scratch-status-v0.md",
+    "rge/modules/operator_loop.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "tests/unit"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop_autonomous_execute_safe_refresh.py",
+    "agent_reports/2026-06-18_phase-3_ticket-343_autonomous-loop-execute-safe-refresh-v0.md"
+  ],
+  "acceptance_criteria": [
+    "After successful execute-safe autonomous loop proof, payload autonomous_loop_scratch_status reflects the written report.",
+    "Failed or blocked execute-safe runs leave pre-run scratch status unchanged.",
+    "No execute-safe command allowlist changes or queue writes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_loop_autonomous_execute_safe_refresh.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama runs.",
+    "Operator autocycle behavior changes.",
+    "Public export or site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert post-run scratch re-inspection in execute_safe_checks only.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher"
+}
