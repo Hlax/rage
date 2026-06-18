@@ -79,4 +79,4 @@ Safety audit not required — DB-only operator projection; no public surface cha
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `a362da7`
