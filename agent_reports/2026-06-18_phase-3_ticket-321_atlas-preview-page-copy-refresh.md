@@ -61,4 +61,4 @@ Safety audit not required — presentation copy only; no new public data files.
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merge commit: `a965cf4`. Pushed `origin/main`.
