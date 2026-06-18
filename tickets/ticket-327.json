@@ -1,0 +1,35 @@
+{
+  "id": "ticket-327",
+  "title": "Principal audit post-ticket-326 checkpoint",
+  "problem": "Tickets 325–326 completed operator tooling + README closure for staged-spine atlas preview refresh. Cadence rule requires a principal audit after ≥3 consecutive done tickets since post-ticket-324 checkpoint (325–327).",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-326_readme-refresh-script-fixtures-sync-note.md",
+    "agent_reports/2026-06-18_principal-audit-post-ticket-325.md",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [
+    "agent_reports"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-326.md",
+    "agent_reports/2026-06-18_phase-3_ticket-327_principal-audit-post-ticket-326.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report documents tickets 325–326 outcomes and mock golden gate health.",
+    "Cadence reset recorded; next product ticket recommended.",
+    "No implementation code changes beyond audit runner/docs if needed."
+  ],
+  "test_plan": [
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-328",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "New feature implementation.",
+    "Public site changes.",
+    "Live OpenAlex proofs."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert audit reports only.",
+  "status": "proposed",
+  "category": "Phase 3 / principal audit"
+}

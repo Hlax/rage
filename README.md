@@ -993,7 +993,7 @@ python -m rge.cli atlas-coherence-report `
   --out-md data/atlas/ticket293/atlas_coherence_report_v298.md
 ```
 
-**Research Atlas public preview fixture refresh** (tickets 300, 308, 312, 320–322; see
+**Research Atlas public preview fixture refresh** (tickets 300, 308, 312, 320–325; see
 **Public boundary** under Evidence DB atlas above): the static `/atlas-preview` page reads
 committed JSON only — `atlas_snapshot_preview.json` and `atlas_coherence_preview.json`
 under `apps/public-site/public/data/`. The **primary** refresh path is the mock
@@ -1006,11 +1006,10 @@ python scripts/refresh_atlas_preview_from_staged_spine.py
 
 The script runs `research run --fixture-mode --staged-spine` on a temp SQLite DB (patched
 OpenAlex fixtures), exports via `atlas_preview_curator` (maps `active` follow-ups to
-`queued` for UI), and writes both preview JSON files under `apps/public-site/public/data/`.
-Page copy labels the result as a mock staged-spine preview (ticket-321).
-
-**Offline reference:** after refresh, copy or verify parity against
-`fixtures/atlas/atlas_snapshot_staged_spine_preview.json` (ticket-322). Regression:
+`queued` for UI), writes both preview JSON files under `apps/public-site/public/data/`,
+and **auto-syncs** the offline reference
+`fixtures/atlas/atlas_snapshot_staged_spine_preview.json` (tickets 322, 325). Page copy
+labels the result as a mock staged-spine preview (ticket-321). Regression:
 `tests/unit/test_public_atlas_preview_fixture.py` (committed preview + fixture parity).
 
 Verify before commit:
@@ -1026,7 +1025,8 @@ Stage the refreshed snapshots for commit:
 
 ```powershell
 git add apps/public-site/public/data/atlas_snapshot_preview.json `
-  apps/public-site/public/data/atlas_coherence_preview.json
+  apps/public-site/public/data/atlas_coherence_preview.json `
+  fixtures/atlas/atlas_snapshot_staged_spine_preview.json
 ```
 
 If `git status` does not list those paths (local ignore rules), use `git add -f` on the
@@ -1151,7 +1151,7 @@ The public site (`apps/public-site/`) is a read-only static export:
 - Never connects to the private local engine or SQLite
 - Does not read `NEXT_PUBLIC_*` or other build-time secrets
 
-After changing accepted claims or export policy, run `export-public`, pass the safety audit, review the snapshot diff, then rebuild the site. After changing atlas preview contract fields, follow **Research Atlas public preview fixture refresh** in Operator Quickstart (primary: `scripts/refresh_atlas_preview_from_staged_spine.py`; tickets 320–322; legacy fixture-mode path tickets 300/308/312). Browse `/atlas-preview` after `npm run build`.
+After changing accepted claims or export policy, run `export-public`, pass the safety audit, review the snapshot diff, then rebuild the site. After changing atlas preview contract fields, follow **Research Atlas public preview fixture refresh** in Operator Quickstart (primary: `scripts/refresh_atlas_preview_from_staged_spine.py` auto-syncs public preview + `fixtures/atlas/`; tickets 320–325; legacy fixture-mode path tickets 300/308/312). Browse `/atlas-preview` after `npm run build`.
 
 Deployment guide (build, pre-deploy checklist, static hosting): `docs/deployment/public-site-static-hosting.md`
 
