@@ -1,0 +1,36 @@
+{
+  "id": "ticket-314",
+  "title": "Principal audit post-ticket-313 checkpoint",
+  "problem": "Three consecutive done tickets since principal audit 311 (312–313 docs batch plus closure cadence); operator loop recommends a read-only principal audit before further implementation.",
+  "evidence": [
+    "agent_reports/2026-06-17_phase-3_ticket-313_readme-evidence-db-atlas-public-boundary.md",
+    "agent_reports/2026-06-17_principal-audit-post-ticket-310.md",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-17_principal-audit-post-ticket-313.md"
+  ],
+  "acceptance_criteria": [
+    "Read-only principal audit report written for tickets 312–313 batch.",
+    "Verification commands run and results documented.",
+    "Safety boundary checklist for atlas operator docs vs public preview.",
+    "GO/STOP recommendation for next implementation ticket.",
+    "No implementation changes in this ticket."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q",
+    "python -m rge.modules.safety_auditor --audit full",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "Implementation of queued feature tickets.",
+    "export-public changes.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Delete audit report only.",
+  "status": "proposed",
+  "category": "Phase 3 / governance / principal audit"
+}

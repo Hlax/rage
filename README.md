@@ -934,9 +934,9 @@ Inspect `nm4_evidence_spine_status` in the JSON output: `evidence_db_path`,
 `spine_milestones`. When the local evidence DB has completed steps 1–8,
 expect `spine_stage: reconciled` and `score_event_count: 1`.
 
-**Evidence DB atlas population closure** (tickets 294–298; operator-private; no public
-atlas route/UI): when `export-atlas-snapshot` runs on a **non-fixture** evidence DB
-with accepted claims from `manual_text` sources outside the checksum fixture map,
+**Evidence DB atlas population closure** (tickets 294–298; **operator-private only**): when
+`export-atlas-snapshot` runs on a **non-fixture** evidence DB with accepted claims from
+`manual_text` sources outside the checksum fixture map,
 `rge/modules/evidence_db_atlas.py` hooks populate atlas sections before snapshot write:
 
 | Atlas section | Hook (ticket) | Trigger |
@@ -947,6 +947,14 @@ with accepted claims from `manual_text` sources outside the checksum fixture map
 | `clusters[]` | `ensure_evidence_cluster_summary` (296) | same gate as reports |
 | `edges[]` | `ensure_evidence_relationship_edges` (297) | same gate; seeds from claim–concept links |
 | `follow_up_questions[]` | research_queue projection (284; lineage from 294) | populated when contract/queue rows exist |
+
+**Public boundary (ticket-313):** non-fixture evidence DB atlas exports write to
+operator-private paths under gitignored `data/` (for example `data/atlas/ticket293/…`).
+They **do not** publish to the public site, `export-public`, or `/atlas-preview`. The
+static public preview at `/atlas-preview` (ticket-300) reads committed fixture JSON only;
+refresh via **Research Atlas public preview fixture refresh** below (fixture-mode
+`export-atlas-snapshot` + `--coherence-preview-out`; tickets 300/308/312). There is no
+live evidence-DB → public-site atlas pipeline in this phase.
 
 Fixture-mode golden MVP paths (`export-atlas-snapshot --fixture-mode`) are unchanged.
 Default graph DB synthnote export remains checksum-mock — not arbitrary live inference.
@@ -985,14 +993,11 @@ python -m rge.cli atlas-coherence-report `
   --out-md data/atlas/ticket293/atlas_coherence_report_v298.md
 ```
 
-Public atlas preview is **shipped** at `/atlas-preview` (ticket-300) — see **Research Atlas
-public preview fixture refresh** below. Evidence DB exports below remain operator-private;
-they do not auto-publish to the public site.
-
-**Research Atlas public preview fixture refresh** (tickets 300, 308, 312): the static
-`/atlas-preview` page reads committed JSON only — `atlas_snapshot_preview.json` and
-`atlas_coherence_preview.json` under `apps/public-site/public/data/`. Refresh those files
-from a **fixture-mode** MVP DB (mock LLM; no `export-public` changes):
+**Research Atlas public preview fixture refresh** (tickets 300, 308, 312; see **Public
+boundary** under Evidence DB atlas above): the static `/atlas-preview` page reads
+committed JSON only — `atlas_snapshot_preview.json` and `atlas_coherence_preview.json`
+under `apps/public-site/public/data/`. Refresh those files from a **fixture-mode** MVP DB
+(mock LLM; no `export-public` changes):
 
 ```powershell
 $env:RGE_LLM_MODE = "mock"

@@ -31,6 +31,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert README paragraph only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / Research Atlas / operator docs"
 }
