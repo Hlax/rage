@@ -711,6 +711,14 @@ above) — **not** an atlas export or contract regression. On **PASS**, inspect 
 atlas JSON for coherence fields (`cards`, `nodes`, `edges`, `runs`); no
 `export-public` or public-site writes.
 
+**Public preview boundary (tickets 285, 320–326, 328–329):** this live layer-3 proof
+writes **operator-private temp atlas JSON only** (`export-atlas-snapshot` on pytest
+`tmp_path`). It does **not** refresh committed `/atlas-preview` JSON,
+`fixtures/atlas/atlas_snapshot_staged_spine_preview.json`, or `export-public`. For the
+static **mock** staged-spine public preview, use **Research Atlas public preview fixture
+refresh** below (`scripts/refresh_atlas_preview_from_staged_spine.py`; patched OpenAlex
+fixtures on a temp DB — not live catalog).
+
 **One-time live orchestrator verification (operator checklist; ticket-199; refreshed
 ticket-226):** after per-step **network** proofs or when validating a fresh operator
 environment, run the orchestrator proof once on a **temp `--db` path** (pytest `tmp_path`
@@ -1011,6 +1019,14 @@ and **auto-syncs** the offline reference
 `fixtures/atlas/atlas_snapshot_staged_spine_preview.json` (tickets 322, 325). Page copy
 labels the result as a mock staged-spine preview (ticket-321). Regression:
 `tests/unit/test_public_atlas_preview_fixture.py` (committed preview + fixture parity).
+
+**Live layer-3 boundary (tickets 285, 328–329):** the opt-in live OpenAlex +
+`live_network` atlas coherence pytest
+(`tests/unit/test_live_staged_atlas_snapshot_coherence.py`; see *Live staged orchestrator
+→ private atlas snapshot coherence* in Operator Quickstart above) validates **private**
+temp exports only — it **never** writes the committed public preview or `fixtures/atlas/`
+paths listed here. Live catalog skips (`unsuitable_live_artifact`) are **not** public
+preview regressions.
 
 Verify before commit:
 

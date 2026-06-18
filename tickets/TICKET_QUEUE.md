@@ -354,7 +354,8 @@ superseded
 | 326 | ticket-326 | done | README refresh script auto-sync fixtures/atlas note | `phase-3/ticket-326-readme-refresh-script-fixtures-sync-note` | `agent_reports/2026-06-18_phase-3_ticket-326_readme-refresh-script-fixtures-sync-note.md` |
 | 327 | ticket-327 | done | Principal audit post-ticket-326 checkpoint | `phase-3/ticket-327-principal-audit-post-ticket-326` | `agent_reports/2026-06-18_phase-3_ticket-327_principal-audit-post-ticket-326.md` |
 | 328 | ticket-328 | done | Pre-ticket audit: live layer-3 staged atlas snapshot coherence | `phase-3/ticket-328-pre-ticket-live-layer-3-staged-atlas-audit` | `agent_reports/2026-06-18_phase-3_ticket-328_pre-ticket-live-layer-3-staged-atlas-audit.md` |
-| 329 | ticket-329 | proposed | README live layer-3 vs public atlas preview boundary cross-link | | |
+| 329 | ticket-329 | done | README live layer-3 vs public atlas preview boundary cross-link | `phase-3/ticket-329-readme-live-layer3-public-preview-boundary` | `agent_reports/2026-06-18_phase-3_ticket-329_readme-live-layer3-public-preview-boundary.md` |
+| 330 | ticket-330 | proposed | Orphan agent_reports hygiene (superseded ticket-308 audit) | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1090,9 +1091,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-329 (proposed) — README live layer-3 vs public atlas preview boundary cross-link
+ticket-330 (proposed) — Orphan agent_reports hygiene (superseded ticket-308 audit)
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-329 README live layer-3 public preview boundary)
+
+- Bidirectional README boundary: live layer-3 temp export vs mock public preview (320–326)
+- Cross-links ticket-285 live_network pytest and refresh script path
+- ticket-330 seeded: orphan agent_reports hygiene (ticket-308)
 
 ## Queue Notes (2026-06-18, ticket-328 pre-ticket live layer-3 staged atlas audit)
 
