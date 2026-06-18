@@ -63,7 +63,7 @@ Safety audit not required — no public surface changes.
 
 ## Merge to main
 
-(Pending merge commit hash.)
+Merge commit: `f2f0de7fa85e8187342464f32ceca3ac43700701`
 
 ## Recommended next ticket
 
