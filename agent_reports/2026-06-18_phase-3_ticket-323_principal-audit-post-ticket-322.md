@@ -63,4 +63,4 @@ operator doc gap after ticket-320 script).
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merge commit: `f7aa16b`
