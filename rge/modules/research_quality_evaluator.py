@@ -203,8 +203,22 @@ def _score_ticket_generation(
     run_result: dict[str, Any],
     run_report: dict[str, Any],
     improvement_result: dict[str, Any] | None,
+    quality_driven_result: dict[str, Any] | None = None,
 ) -> tuple[int, str]:
-    ticket_ids = run_result.get("ticket_ids") or []
+    ticket_ids = list(run_result.get("ticket_ids") or [])
+    quality_driven_ids = list((quality_driven_result or {}).get("ticket_ids") or [])
+    if quality_driven_ids:
+        if ticket_ids:
+            return (
+                95,
+                f"{len(ticket_ids)} standard and {len(quality_driven_ids)} "
+                "quality-driven improvement ticket(s) generated.",
+            )
+        return (
+            90,
+            f"{len(quality_driven_ids)} quality-driven improvement ticket(s) seeded "
+            "after golden-covered suppression.",
+        )
     if ticket_ids:
         return 95, f"{len(ticket_ids)} improvement ticket(s) generated."
     status = (improvement_result or {}).get("status", "")
@@ -239,6 +253,49 @@ def _score_run_lineage(coherence_report: dict[str, Any]) -> tuple[int, str]:
     return 25, f"Run lineage weak — {with_question}/{run_count} runs have question ids."
 
 
+def _quality_driven_ticket_ids(quality_driven_result: dict[str, Any] | None) -> list[str]:
+    return list((quality_driven_result or {}).get("ticket_ids") or [])
+
+
+def refresh_research_quality_after_ticket_seeding(
+    *,
+    run_result: dict[str, Any],
+    run_report: dict[str, Any],
+    atlas_snapshot: dict[str, Any],
+    coherence_report: dict[str, Any],
+    improvement_result: dict[str, Any] | None,
+    quality_driven_result: dict[str, Any] | None,
+    initial_quality: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Re-evaluate research quality after quality-driven ticket seeding."""
+    refreshed = evaluate_research_quality(
+        run_result=run_result,
+        run_report=run_report,
+        atlas_snapshot=atlas_snapshot,
+        coherence_report=coherence_report,
+        improvement_result=improvement_result,
+        quality_driven_result=quality_driven_result,
+    )
+    refreshed["evaluated_after_ticket_seeding"] = True
+    if initial_quality is not None:
+        refreshed["initial_research_quality_verdict"] = initial_quality.get(
+            "research_quality_verdict"
+        )
+        refreshed["initial_weakest_dimension"] = initial_quality.get("weakest_dimension")
+        refreshed["initial_weakest_dimension_score"] = initial_quality.get(
+            "weakest_dimension_score"
+        )
+        ticket_before = initial_quality.get("dimension_scores", {}).get(
+            "weak_ticket_generation", {}
+        ).get("score")
+        ticket_after = refreshed.get("dimension_scores", {}).get(
+            "weak_ticket_generation", {}
+        ).get("score")
+        if ticket_before is not None and ticket_after is not None:
+            refreshed["weak_ticket_generation_score_delta"] = ticket_after - ticket_before
+    return refreshed
+
+
 def evaluate_research_quality(
     *,
     run_result: dict[str, Any],
@@ -246,6 +303,7 @@ def evaluate_research_quality(
     atlas_snapshot: dict[str, Any],
     coherence_report: dict[str, Any],
     improvement_result: dict[str, Any] | None = None,
+    quality_driven_result: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Score research dimensions and return GO/PARTIAL/NO-GO quality verdict."""
     dimension_scores: dict[str, dict[str, Any]] = {}
@@ -262,7 +320,12 @@ def evaluate_research_quality(
         ),
         (
             "weak_ticket_generation",
-            _score_ticket_generation(run_result, run_report, improvement_result),
+            _score_ticket_generation(
+                run_result,
+                run_report,
+                improvement_result,
+                quality_driven_result,
+            ),
         ),
         ("weak_run_lineage", _score_run_lineage(coherence_report)),
     ]
@@ -286,7 +349,11 @@ def evaluate_research_quality(
         quality_detail = (
             "Loop did not produce usable research output or atlas coherence failed."
         )
-    elif weakest == "weak_ticket_generation" and weakest_score <= 15:
+    elif (
+        weakest == "weak_ticket_generation"
+        and weakest_score <= 15
+        and not _quality_driven_ticket_ids(quality_driven_result)
+    ):
         quality_verdict = "PARTIAL"
         quality_detail = (
             "Research and atlas inspection are useful, but the loop cannot seed a "

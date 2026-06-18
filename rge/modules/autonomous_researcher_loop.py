@@ -17,6 +17,7 @@ from rge.modules.atlas_snapshot_builder import export_atlas_snapshot_to_path
 from rge.modules.research_quality_evaluator import (
     evaluate_research_quality,
     recommend_improvement_ticket,
+    refresh_research_quality_after_ticket_seeding,
 )
 
 LOOP_SCHEMA_VERSION = "autonomous_researcher_loop_v0"
@@ -104,7 +105,7 @@ def execute_autonomous_researcher_loop(
         "output_path": str(improvement_path),
     }
 
-    quality = evaluate_research_quality(
+    quality_initial = evaluate_research_quality(
         run_result=run_result,
         run_report=run_report,
         atlas_snapshot=snapshot,
@@ -113,8 +114,8 @@ def execute_autonomous_researcher_loop(
     )
 
     evidence = [
-        f"autonomous_loop:{run_id}:quality_verdict={quality['research_quality_verdict']}",
-        f"autonomous_loop:{run_id}:weakest={quality['weakest_dimension']}",
+        f"autonomous_loop:{run_id}:quality_verdict={quality_initial['research_quality_verdict']}",
+        f"autonomous_loop:{run_id}:weakest={quality_initial['weakest_dimension']}",
         f"coherence:{coherence_report.get('overall_coherence_verdict')}",
         f"run_report:{run_id}:tickets_generated={run_report.get('tickets_generated', 0)}",
     ]
@@ -132,12 +133,22 @@ def execute_autonomous_researcher_loop(
             quality_driven_result = generate_quality_driven_improvement_tickets(
                 conn,
                 run_id=run_id,
-                quality=quality,
+                quality=quality_initial,
                 output_dir=ticket_dir,
                 supplemental_evidence=evidence,
             )
         finally:
             conn.close()
+
+    quality = refresh_research_quality_after_ticket_seeding(
+        run_result=run_result,
+        run_report=run_report,
+        atlas_snapshot=snapshot,
+        coherence_report=coherence_report,
+        improvement_result=improvement_result,
+        quality_driven_result=quality_driven_result,
+        initial_quality=quality_initial,
+    )
 
     recommended_ticket = recommend_improvement_ticket(
         quality,
@@ -164,6 +175,7 @@ def execute_autonomous_researcher_loop(
             "atlas_coherence_report",
             "evaluate_research_quality",
             "generate_quality_driven_improvement_tickets",
+            "refresh_research_quality_after_ticket_seeding",
             "recommend_improvement_ticket",
         ],
         "artifacts": {
@@ -195,6 +207,7 @@ def execute_autonomous_researcher_loop(
             "population": coherence_report.get("population"),
         },
         "research_quality": quality,
+        "research_quality_initial": quality_initial,
         "recommended_improvement_ticket_id": recommended_ticket_id,
         "drift_note": (
             "Research Atlas / frontend contract is parked; next work should improve "
