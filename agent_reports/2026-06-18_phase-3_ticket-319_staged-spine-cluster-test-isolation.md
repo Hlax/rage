@@ -75,4 +75,4 @@ Safety audit not required — test hygiene and private atlas projection hooks on
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merge commit: `ab85b7b`. Pushed `origin/main`.
