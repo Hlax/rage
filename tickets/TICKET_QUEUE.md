@@ -345,7 +345,8 @@ superseded
 | 317 | ticket-317 | done | Staged spine atlas cluster projection hook | `phase-3/ticket-317-staged-spine-atlas-cluster-projection` | `agent_reports/2026-06-18_phase-3_ticket-317_staged-spine-atlas-cluster-projection.md` |
 | 318 | ticket-318 | done | Principal audit post-ticket-317 checkpoint | `phase-3/ticket-318-principal-audit-post-ticket-317` | `agent_reports/2026-06-18_phase-3_ticket-318_principal-audit-post-ticket-317.md` |
 | 319 | ticket-319 | done | Staged spine cluster projection test isolation hardening | `phase-3/ticket-319-staged-spine-cluster-test-isolation` | `agent_reports/2026-06-18_phase-3_ticket-319_staged-spine-cluster-test-isolation.md` |
-| 320 | ticket-320 | proposed | Public atlas preview fixture refresh from staged spine export | | |
+| 320 | ticket-320 | done | Public atlas preview fixture refresh from staged spine export | `phase-3/ticket-320-public-atlas-preview-fixture-refresh` | `agent_reports/2026-06-18_phase-3_ticket-320_public-atlas-preview-fixture-refresh.md` |
+| 321 | ticket-321 | proposed | Atlas preview page copy refresh for staged-spine labeling | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1081,7 +1082,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-320 (proposed) — Public atlas preview fixture refresh from staged spine export
+ticket-321 (proposed) — Atlas preview page copy refresh for staged-spine labeling
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
@@ -1092,7 +1093,14 @@ ticket-320 (proposed) — Public atlas preview fixture refresh from staged spine
 - Atlas operator proof thread: evidence DB PARTIAL + staged spine pass after ticket-317
 - Drift advisory improved; live layer-3 still skips unsuitable_live_artifact
 - Report: `agent_reports/2026-06-18_principal-audit-post-ticket-317.md`
-- ticket-320 seeded: public atlas preview fixture refresh from staged spine export (requires pre-ticket audit)
+- ticket-321 seeded: atlas preview page copy refresh (staged-spine labeling)
+
+## Queue Notes (2026-06-18, ticket-320 public atlas preview fixture refresh)
+
+- Refreshed `atlas_snapshot_preview.json` + `atlas_coherence_preview.json` from mock staged-spine export.
+- `atlas_preview_curator.py` maps `active`→`queued` follow-ups; deterministic preview ids.
+- Operator: `python scripts/refresh_atlas_preview_from_staged_spine.py`
+- Coherence: pass; population clusters=2, follow-ups=1, runs=2 (rank1/rank2).
 
 ## Queue Notes (2026-06-18, ticket-319 staged spine cluster test isolation)
 

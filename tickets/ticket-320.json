@@ -13,8 +13,12 @@
     "rge/modules/atlas_snapshot_builder.py"
   ],
   "expected_files": [
-    "apps/public-site/public/data/atlas_snapshot.json",
+    "apps/public-site/public/data/atlas_snapshot_preview.json",
+    "apps/public-site/public/data/atlas_coherence_preview.json",
+    "rge/modules/atlas_preview_curator.py",
+    "scripts/refresh_atlas_preview_from_staged_spine.py",
     "tests/unit/test_public_atlas_preview_fixture.py",
+    "tests/unit/test_atlas_coherence_preview_sync.py",
     "agent_reports/2026-06-18_phase-3_ticket-320_public-atlas-preview-fixture-refresh.md"
   ],
   "acceptance_criteria": [
@@ -34,6 +38,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert fixture JSON and site data copy only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / public atlas preview"
 }

@@ -1,10 +1,10 @@
 {
   "schema_version": "atlas_snapshot_v0.1.0",
-  "generated_at": "2026-06-16T00:00:00Z",
-  "snapshot_id": "snap_creativity_fixture_v0_001",
+  "generated_at": "2026-06-18T00:00:00Z",
+  "snapshot_id": "snap_staged_fixture_preview_v0_001",
   "root": {
-    "topic": "Does AI improve creative output while reducing diversity?",
-    "primary_question": "Does AI improve creative output while reducing diversity?",
+    "topic": "Does staged fixture-mode discovery improve atlas preview coherence?",
+    "primary_question": "Does staged fixture-mode discovery improve atlas preview coherence?",
     "domain_pack": "creativity"
   },
   "domains": [
@@ -16,13 +16,26 @@
   ],
   "runs": [
     {
-      "run_id": "run_golden_fixture_mvp",
-      "topic": "Does AI improve creative output while reducing diversity?",
+      "run_id": "run_staged_fixture_mode_spine_rank1",
+      "topic": "Staged fixture-mode run orchestration spine (mock) (rank #1 staged candidate)",
       "domain_pack": "creativity",
       "mode": "fixture",
       "status": "completed",
-      "research_question_id": "rq_creativity_originality",
+      "research_question_id": "rq_staged_fixture_mode_run",
       "parent_question_id": null
+    },
+    {
+      "run_id": "run_staged_fixture_mode_spine_rank2",
+      "topic": "Staged fixture-mode run orchestration spine (mock) (rank #2 staged candidate)",
+      "domain_pack": "creativity",
+      "mode": "fixture",
+      "status": "completed",
+      "research_question_id": "rq_staged_fixture_mode_run",
+      "parent_question_id": "rq_creativity_originality",
+      "spawned_from_report_id": "crpt_e5a41c01d3eee1c8",
+      "spawned_from_claim_ids": [
+        "clm_7eec734d0c770072"
+      ]
     }
   ],
   "nodes": [
@@ -173,15 +186,15 @@
   ],
   "edges": [
     {
-      "id": "rel_28254d9b65c568be",
+      "id": "rel_19ab6ba7fd51a9ea",
       "edge_type": "relationship",
       "predicate": "may_increase",
-      "source_node_id": "cpt_ai_assistance",
-      "target_node_id": "cpt_diversity",
-      "source_label": "AI assistance",
-      "target_label": "diversity",
-      "scope": "under divergent prompting when participants generate multiple divergent directions",
-      "confidence": 0.5
+      "source_node_id": "cpt_co_creation",
+      "target_node_id": "cpt_semantic_diversity",
+      "source_label": "co-creation",
+      "target_label": "semantic diversity",
+      "scope": "songwriting workshops",
+      "confidence": 0.62
     },
     {
       "id": "rel_317b2f78489f21b8",
@@ -192,19 +205,39 @@
       "source_label": "AI assistance",
       "target_label": "semantic diversity",
       "scope": "short-form writing tasks",
+      "confidence": 0.5
+    },
+    {
+      "id": "rel_5b45d376f8c1ef5c",
+      "edge_type": "relationship",
+      "predicate": "may_increase",
+      "source_node_id": "cpt_constraint",
+      "target_node_id": "cpt_human_control",
+      "source_label": "constraint",
+      "target_label": "human control",
+      "scope": "AI-assisted creative team workflows",
       "confidence": 0.62
     }
   ],
   "clusters": [
     {
-      "cluster_id": "crpt_56a4b3c77556fd70",
-      "cluster_label": "AI assistance and semantic diversity",
-      "run_id": null,
+      "cluster_id": "crpt_954afc55a3e0c35d",
+      "cluster_label": "AI assistance and constraint",
+      "run_id": "run_staged_fixture_mode_spine_rank2",
       "member_concepts": [
         "AI assistance",
-        "semantic diversity",
-        "originality",
-        "ideation"
+        "constraint",
+        "human control"
+      ]
+    },
+    {
+      "cluster_id": "crpt_e5a41c01d3eee1c8",
+      "cluster_label": "co-creation and diversity",
+      "run_id": "run_staged_fixture_mode_spine_rank1",
+      "member_concepts": [
+        "co-creation",
+        "diversity",
+        "semantic diversity"
       ]
     }
   ],
@@ -212,9 +245,16 @@
     {
       "report_type": "run_report",
       "schema_version": "0.1.0",
-      "run_id": "run_golden_fixture_mvp",
+      "run_id": "run_staged_fixture_mode_spine_rank2",
       "status": "informational",
-      "public_summary": "15 claims accepted from 3 ingested sources; 1 rejected; 2 relationships; 1 score event; 2 public cards; 1 cluster report."
+      "public_summary": "4 claims accepted from 3 ingested sources; 2 rejected; 3 relationships; 2 score events; 0 public cards."
+    },
+    {
+      "report_type": "run_report",
+      "schema_version": "0.1.0",
+      "run_id": "run_staged_fixture_mode_spine_rank1",
+      "status": "informational",
+      "public_summary": "3 claims accepted from 3 ingested sources; 1 rejected; 2 relationships; 1 score event; 0 public cards."
     }
   ],
   "cards": [
@@ -246,7 +286,7 @@
       "public_detail_level": "standard",
       "evidence_type": "empirical",
       "public_run_timestamp": "2026-06-12T00:00:00Z",
-      "updated_at": "2026-06-12T00:00:00Z"
+      "updated_at": "2026-06-18T06:04:31Z"
     },
     {
       "id": "card_golden_originality_002",
@@ -276,65 +316,25 @@
       "public_detail_level": "standard",
       "evidence_type": "empirical",
       "public_run_timestamp": "2026-06-12T00:00:00Z",
-      "updated_at": "2026-06-12T00:00:00Z"
+      "updated_at": "2026-06-18T06:04:31Z"
     }
   ],
   "follow_up_questions": [
     {
-      "id": "que_71bb9ab6a8a7bc76",
-      "research_question_id": "rq_creativity_originality",
-      "reason": "On-scope follow-up aligned with contract concepts.",
+      "id": "que_21d03ee425262d8c",
+      "research_question_id": "rq_staged_fixture_mode_run",
+      "reason": "staged_spine_atlas_follow_up",
       "status": "queued",
-      "question_text": "Does divergent prompting reduce semantic convergence in AI-assisted ideation?",
-      "priority_score": 0.8
-    },
-    {
-      "id": "que_45f9a67bbcabfd78",
-      "research_question_id": "rq_creativity_originality",
-      "reason": "On-scope follow-up aligned with contract concepts.",
-      "status": "queued",
-      "question_text": "Does AI improve originality more when humans retain final selection control?",
-      "priority_score": 0.8
-    },
-    {
-      "id": "que_443d1b3ac15e8ade",
-      "research_question_id": "rq_creativity_originality",
-      "reason": "On-scope follow-up aligned with contract concepts.",
-      "status": "queued",
-      "question_text": "Do AI-assisted workflows affect originality differently in writing versus design?",
-      "priority_score": 0.58
-    },
-    {
-      "id": "que_70be4980085cb865",
-      "research_question_id": "rq_creativity_originality",
-      "reason": "out_of_scope_topic_drift",
-      "status": "parked",
-      "question_text": "Will AI replace all creative jobs?",
-      "priority_score": 0.0
-    },
-    {
-      "id": "que_8df80336d0c1a7bd",
-      "research_question_id": "rq_creativity_originality",
-      "reason": "out_of_scope_topic_drift",
-      "status": "parked",
-      "question_text": "Is AI conscious?",
-      "priority_score": 0.0
-    },
-    {
-      "id": "que_9f1cf2054432ff24",
-      "research_question_id": "rq_creativity_originality",
-      "reason": "adjacent_out_of_scope_topic",
-      "status": "parked",
-      "question_text": "Who owns copyright for AI-generated work?",
-      "priority_score": 0.0
+      "question_text": "Does staged fixture-mode discovery improve atlas preview coherence?",
+      "priority_score": 1.0
     }
   ],
   "safety": {
     "public_safe": true,
-    "safety_audit_id": "audit_atlas_fixture_v0_001"
+    "safety_audit_id": "audit_atlas_staged_preview_v0_001"
   },
   "coherence_summary": {
     "overall_coherence_verdict": "pass",
-    "preview_label": "Fixture-mode creativity atlas (mock-safe)"
+    "preview_label": "Mock staged-spine atlas preview (fixture-safe)"
   }
 }
