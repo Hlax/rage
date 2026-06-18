@@ -165,8 +165,12 @@ compare live vs stub-live card/edge quality.
 **ticket-316** — Live staged-spine operator proof refresh v0 (`pytest -m live_network`
 opt-in when network gates set; mock layer-2 fallback with honest blocker if gates absent).
 
+## Merge to main
+
+Merge commit: `303082c`
+
 ## Suggested next prompt
 
 ```txt
-Implement ticket-316 live staged-spine operator proof refresh v0 on temp --db.
+/rge-run-next-ticket
 ```
