@@ -363,7 +363,8 @@ superseded
 | 335 | ticket-335 | done | Atlas snapshot contradiction metadata for autonomous quality eval | `phase-3/ticket-335-atlas-contradiction-metadata-quality-eval` | `agent_reports/2026-06-18_phase-3_ticket-335_atlas-contradiction-metadata-quality-eval-v0.md` |
 | 336 | ticket-336 | done | Principal audit post-ticket-335 autonomous loop checkpoint | `phase-3/ticket-336-principal-audit-post-ticket-335` | `agent_reports/2026-06-18_phase-3_ticket-336_principal-audit-post-ticket-335.md` |
 | 337 | ticket-337 | done | Autonomous researcher loop staged-spine mock orchestrator v0 | `phase-3/ticket-337-autonomous-loop-staged-spine-mock-v0` | `agent_reports/2026-06-18_phase-3_ticket-337_autonomous-loop-staged-spine-mock-v0.md` |
-| 338 | ticket-338 | proposed | Autonomous loop operator autocycle hook v0 | | |
+| 338 | ticket-338 | done | Autonomous loop operator autocycle hook v0 | `phase-3/ticket-338-autonomous-loop-operator-autocycle-hook-v0` | `agent_reports/2026-06-18_phase-3_ticket-338_autonomous-loop-operator-autocycle-hook-v0.md` |
+| 339 | ticket-339 | proposed | Autonomous loop scratch artifact inspection in operator plan v0 | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1099,9 +1100,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-338 (proposed) — Autonomous loop operator autocycle hook v0
+ticket-339 (proposed) — Autonomous loop scratch artifact inspection in operator plan v0
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-338 autonomous loop operator autocycle hook v0)
+
+- Plan mode: `run_autonomous_researcher_loop` when queue clear (`safe_autonomous`)
+- Execute-safe: fixture autonomous loop on `data/db/operator_autonomous_loop_scratch.sqlite`
+- Staged-spine CLI documented in plan; operator manual (network env)
+- Operator autocycle recognizes new safe action
+- ticket-339 seeded: scratch loop report inspection in plan
+- Report: `agent_reports/2026-06-18_phase-3_ticket-338_autonomous-loop-operator-autocycle-hook-v0.md`
 
 ## Queue Notes (2026-06-18, ticket-337 autonomous loop staged-spine mock orchestrator v0)
 

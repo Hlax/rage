@@ -436,7 +436,10 @@ def evaluate_autocycle_cycle(
             next_cmd="python -m rge.modules.operator_loop --mode plan",
         )
 
-    if action_id == "run_deterministic_verification" and gate == "safe_autonomous":
+    if action_id in {
+        "run_deterministic_verification",
+        "run_autonomous_researcher_loop",
+    } and gate == "safe_autonomous":
         result["execute_safe_eligible"] = True
         result["next_command"] = (
             "python -m rge.modules.operator_autocycle --mode execute-safe"
@@ -444,6 +447,13 @@ def evaluate_autocycle_cycle(
         result["next_commands"] = [
             _shell_command(cmd) for cmd in plan.get("safe_verification_commands", [])
         ]
+        if action_id == "run_autonomous_researcher_loop":
+            from rge.modules.operator_loop import autonomous_loop_safe_commands
+
+            result["next_commands"].extend(
+                _shell_command(cmd)
+                for cmd in autonomous_loop_safe_commands(project_root)
+            )
         return result
 
     return stop(

@@ -1,0 +1,37 @@
+{
+  "id": "ticket-339",
+  "title": "Autonomous loop scratch artifact inspection in operator plan v0",
+  "problem": "Ticket-338 runs fixture-mode autonomous loop proofs to scratch paths under data/reports/operator_autonomous_loop/, but operator plan mode does not yet read autonomous_loop_report.json to surface research_quality_verdict or weakest_dimension for operator visibility.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-338_autonomous-loop-operator-autocycle-hook-v0.md",
+    "rge/modules/operator_loop.py",
+    "data/reports/operator_autonomous_loop/autonomous_loop_report.json"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "tests/unit"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop_autonomous_scratch_inspection.py",
+    "agent_reports/2026-06-18_phase-3_ticket-339_autonomous-loop-scratch-inspection-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Operator plan includes last scratch autonomous loop quality verdict when report artifact exists.",
+    "Missing artifact reports honest not_run status without failing plan mode.",
+    "No queue writes or ticket promotion."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_loop_autonomous_scratch_inspection.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama runs.",
+    "Auto-promote improvement drafts.",
+    "Public export or site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert scratch inspection helper; execute-safe hook unchanged.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher"
+}
