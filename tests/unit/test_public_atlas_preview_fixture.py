@@ -11,6 +11,7 @@ from rge.modules.atlas_preview_curator import (
     STAGED_PREVIEW_SNAPSHOT_ID,
     curate_snapshot_for_public_preview,
     validate_public_preview_snapshot,
+    write_public_preview_fixtures,
 )
 from rge.modules.atlas_snapshot_builder import assert_no_private_fields
 from rge.modules.evidence_db_atlas import STAGED_SPINE_RUN_PREFIX
@@ -90,3 +91,20 @@ def test_fixtures_atlas_staged_spine_reference_matches_public_preview() -> None:
     validate_atlas_snapshot(fixture_snapshot)
     validate_public_preview_snapshot(fixture_snapshot)
     assert fixture_snapshot == public_snapshot
+
+
+def test_write_public_preview_fixtures_syncs_fixtures_reference(tmp_path: Path) -> None:
+    snapshot = _load_snapshot()
+    snapshot_path = tmp_path / "atlas_snapshot_preview.json"
+    coherence_path = tmp_path / "atlas_coherence_preview.json"
+    fixtures_path = tmp_path / "fixtures" / "atlas_snapshot_staged_spine_preview.json"
+    result = write_public_preview_fixtures(
+        snapshot,
+        snapshot_path=snapshot_path,
+        coherence_path=coherence_path,
+        fixtures_reference_path=fixtures_path,
+    )
+    assert result["fixtures_reference_path"] == str(fixtures_path)
+    public_written = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    fixture_written = json.loads(fixtures_path.read_text(encoding="utf-8"))
+    assert fixture_written == public_written

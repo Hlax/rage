@@ -21,6 +21,7 @@ from rge.db.connection import connect
 from rge.modules.atlas_preview_curator import (
     STAGED_PREVIEW_TOPIC,
     export_staged_spine_preview_to_paths,
+    FIXTURES_ATLAS_STAGED_SPINE_PREVIEW,
 )
 from tests.unit.test_staged_fixture_mode_run_spine import (
     OPENALEX_FIXTURE,
@@ -85,6 +86,7 @@ def main() -> None:
                 coherence_path=PUBLIC_DATA / "atlas_coherence_preview.json",
                 topic=STAGED_PREVIEW_TOPIC,
                 repo_root=REPO_ROOT,
+                fixtures_reference_path=REPO_ROOT / FIXTURES_ATLAS_STAGED_SPINE_PREVIEW,
             )
         finally:
             conn.close()
