@@ -359,7 +359,8 @@ superseded
 | 331 | ticket-331 | cancelled | Principal audit post-ticket-330 checkpoint (skipped — strategic pivot to ticket-332) | | |
 | 332 | ticket-332 | done | Autonomous Researcher MVP loop proof v0 | `phase-3/ticket-332-autonomous-researcher-loop-proof-v0` | `agent_reports/2026-06-18_phase-3_ticket-332_autonomous-researcher-loop-proof-v0.md` |
 | 333 | ticket-333 | done | Autonomous loop quality-driven improvement ticket seeding v0 | `phase-3/ticket-333-autonomous-loop-quality-ticket-seeding-v0` | `agent_reports/2026-06-18_phase-3_ticket-333_autonomous-loop-quality-ticket-seeding-v0.md` |
-| 334 | ticket-334 | proposed | Autonomous loop quality verdict refresh after ticket seeding | | |
+| 334 | ticket-334 | done | Autonomous loop quality verdict refresh after ticket seeding | `phase-3/ticket-334-autonomous-loop-quality-verdict-refresh-v0` | `agent_reports/2026-06-18_phase-3_ticket-334_autonomous-loop-quality-verdict-refresh-v0.md` |
+| 335 | ticket-335 | proposed | Atlas snapshot contradiction metadata for autonomous quality eval | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1095,9 +1096,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-334 (proposed) — Autonomous loop quality verdict refresh after ticket seeding
+ticket-335 (proposed) — Atlas snapshot contradiction metadata for autonomous quality eval
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-334 autonomous loop quality verdict refresh v0)
+
+- Post-seeding `refresh_research_quality_after_ticket_seeding` updates final verdict
+- weak_ticket_generation score 10→90 after quality-driven draft persisted
+- Final fixture verdict PARTIAL (weakest: poor_contradiction_handling 55) — honest rationale
+- 802 pytest pass (verify --skip-site)
+- ticket-335 seeded: atlas edge contradiction metadata for quality eval
+- Cadence: 3 done since principal audit (332–334) — principal audit advisory before next batch
 
 ## Queue Notes (2026-06-18, ticket-333 autonomous loop quality-driven ticket seeding v0)
 

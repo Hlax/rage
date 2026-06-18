@@ -1,0 +1,33 @@
+{
+  "id": "ticket-335",
+  "title": "Atlas snapshot contradiction metadata for autonomous quality eval",
+  "problem": "After ticket-334 refresh, fixture autonomous loop reaches PARTIAL with weakest dimension poor_contradiction_handling (55) because atlas snapshot edges lack contradiction_classification metadata even when detect-contradictions ran.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-334_autonomous-loop-quality-verdict-refresh-v0.md",
+    "rge/modules/research_quality_evaluator.py",
+    "rge/modules/atlas_snapshot_builder.py"
+  ],
+  "affected_modules": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "rge/modules/research_quality_evaluator.py"
+  ],
+  "expected_files": [
+    "rge/modules/atlas_snapshot_builder.py",
+    "tests/unit/test_autonomous_researcher_loop_proof.py"
+  ],
+  "acceptance_criteria": [
+    "Fixture autonomous loop quality eval detects contradiction qualification from atlas snapshot edges.",
+    "poor_contradiction_handling score >= 80 on fixture loop or documented honest PARTIAL rationale remains."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_autonomous_researcher_loop_proof.py"
+  ],
+  "non_goals": [
+    "Public atlas UI changes.",
+    "Schema migrations."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert edge metadata projection only.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher loop"
+}

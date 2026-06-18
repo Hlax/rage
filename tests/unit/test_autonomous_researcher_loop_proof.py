@@ -75,7 +75,13 @@ def test_autonomous_researcher_loop_proof_fixture_mode(
     assert coherence["population"]["runs"] >= 1
 
     quality = result["research_quality"]
+    quality_initial = result["research_quality_initial"]
     assert quality["research_quality_verdict"] in {"GO", "PARTIAL", "NO-GO"}
+    assert quality_initial["research_quality_verdict"] == "PARTIAL"
+    assert quality_initial["weakest_dimension"] == "weak_ticket_generation"
+    assert quality["evaluated_after_ticket_seeding"] is True
+    assert quality["dimension_scores"]["weak_ticket_generation"]["score"] >= 80
+    assert quality.get("weak_ticket_generation_score_delta", 0) > 0
     assert quality["weakest_dimension"] in {
         "weak_claim_extraction",
         "weak_source_linkage",
@@ -96,14 +102,12 @@ def test_autonomous_researcher_loop_proof_fixture_mode(
     assert ticket["source_weakness"] == quality["weakest_dimension"]
 
     assert result["run_summary"]["quality_driven_ticket_ids"]
-    assert result["quality_driven_improvement"]["failure_reason"] == quality[
-        "weakest_dimension"
-    ]
+    assert result["quality_driven_improvement"]["failure_reason"] == "weak_ticket_generation"
     draft_tickets = json.loads(
         Path(result["artifacts"]["improvement_tickets"]).read_text(encoding="utf-8")
     )
     assert len(draft_tickets) >= 1
-    assert draft_tickets[0]["failure_reason"] == quality["weakest_dimension"]
+    assert draft_tickets[0]["failure_reason"] == "weak_ticket_generation"
     assert draft_tickets[0]["status"] == "draft"
     assert improvement_draft_is_actionable(draft_tickets[0])
 
@@ -139,6 +143,10 @@ def test_autonomous_researcher_loop_cli(
         (artifact_dir / "autonomous_loop_report.json").read_text(encoding="utf-8")
     )
     assert loop_report["status"] == "completed"
+    assert loop_report["research_quality"]["evaluated_after_ticket_seeding"] is True
+    assert loop_report["research_quality"]["dimension_scores"]["weak_ticket_generation"][
+        "score"
+    ] >= 80
     assert loop_report["research_quality"]["research_quality_verdict"] in {
         "GO",
         "PARTIAL",
