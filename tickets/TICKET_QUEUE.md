@@ -341,7 +341,8 @@ superseded
 | 313 | ticket-313 | done | README evidence DB atlas vs public preview boundary | `phase-3/ticket-313-readme-evidence-db-atlas-public-boundary` | `agent_reports/2026-06-17_phase-3_ticket-313_readme-evidence-db-atlas-public-boundary.md` |
 | 314 | ticket-314 | done | Principal audit post-ticket-313 checkpoint | `phase-3/ticket-314-principal-audit-post-ticket-313` | `agent_reports/2026-06-17_phase-3_ticket-314_principal-audit-post-ticket-313.md` |
 | 315 | ticket-315 | done | Evidence DB Atlas re-export proof refresh v0 | `phase-3/ticket-315-evidence-db-atlas-reexport-proof-refresh-v0` | `agent_reports/2026-06-18_phase-3_ticket-315_evidence-db-atlas-reexport-proof-refresh-v0.md` |
-| 316 | ticket-316 | proposed | Live staged-spine operator proof refresh v0 | | |
+| 316 | ticket-316 | done | Live staged-spine operator proof refresh v0 | `phase-3/ticket-316-live-staged-spine-operator-proof-refresh-v0` | `agent_reports/2026-06-18_phase-3_ticket-316_live-staged-spine-operator-proof-refresh-v0.md` |
+| 317 | ticket-317 | proposed | Staged spine atlas cluster projection hook | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1077,9 +1078,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-316 (proposed) — Live staged-spine operator proof refresh v0
+ticket-317 (proposed) — Staged spine atlas cluster projection hook
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-316 live staged-spine operator proof refresh v0)
+
+- Pre-ticket audit GO; layer-2 mock staged orchestrator proof on gitignored DB
+- Atlas richer than ticket-315: 3 runs, 2 cards, 3 edges, 2 reports; coherence **partial** (clusters[] empty)
+- Layer-3 live_network skipped `unsuitable_live_artifact` (not regression)
+- Product verdict **PARTIAL**; 144 golden, 789 pytest pass
+- ticket-317 seeded: staged spine atlas cluster projection hook
 
 ## Queue Notes (2026-06-18, ticket-315 evidence DB atlas re-export proof refresh v0)
 
