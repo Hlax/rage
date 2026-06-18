@@ -344,7 +344,8 @@ superseded
 | 316 | ticket-316 | done | Live staged-spine operator proof refresh v0 | `phase-3/ticket-316-live-staged-spine-operator-proof-refresh-v0` | `agent_reports/2026-06-18_phase-3_ticket-316_live-staged-spine-operator-proof-refresh-v0.md` |
 | 317 | ticket-317 | done | Staged spine atlas cluster projection hook | `phase-3/ticket-317-staged-spine-atlas-cluster-projection` | `agent_reports/2026-06-18_phase-3_ticket-317_staged-spine-atlas-cluster-projection.md` |
 | 318 | ticket-318 | done | Principal audit post-ticket-317 checkpoint | `phase-3/ticket-318-principal-audit-post-ticket-317` | `agent_reports/2026-06-18_phase-3_ticket-318_principal-audit-post-ticket-317.md` |
-| 319 | ticket-319 | proposed | Staged spine cluster projection test isolation hardening | | |
+| 319 | ticket-319 | done | Staged spine cluster projection test isolation hardening | `phase-3/ticket-319-staged-spine-cluster-test-isolation` | `agent_reports/2026-06-18_phase-3_ticket-319_staged-spine-cluster-test-isolation.md` |
+| 320 | ticket-320 | proposed | Public atlas preview fixture refresh from staged spine export | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1080,7 +1081,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-319 (proposed) — Staged spine cluster projection test isolation hardening
+ticket-320 (proposed) — Public atlas preview fixture refresh from staged spine export
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
@@ -1091,7 +1092,13 @@ ticket-319 (proposed) — Staged spine cluster projection test isolation hardeni
 - Atlas operator proof thread: evidence DB PARTIAL + staged spine pass after ticket-317
 - Drift advisory improved; live layer-3 still skips unsuitable_live_artifact
 - Report: `agent_reports/2026-06-18_principal-audit-post-ticket-317.md`
-- ticket-319 seeded: staged cluster test isolation hardening (flake advisory)
+- ticket-320 seeded: public atlas preview fixture refresh from staged spine export (requires pre-ticket audit)
+
+## Queue Notes (2026-06-18, ticket-319 staged spine cluster test isolation)
+
+- Root cause: evidence lineage hook on staged-only DBs + `started_at`/id tie-break on `_primary_contract_id` emptied follow-ups intermittently.
+- Fix: guard evidence lineage to manual-evidence DBs; `ensure_staged_atlas_follow_up_question`; evidence test `patch.stopall()`.
+- 10/10 combo runs green; full pytest 793 passed.
 
 ## Queue Notes (2026-06-18, ticket-317 staged spine atlas cluster projection hook)
 

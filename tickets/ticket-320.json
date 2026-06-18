@@ -1,0 +1,39 @@
+{
+  "id": "ticket-320",
+  "title": "Public atlas preview fixture refresh from staged spine export",
+  "problem": "Staged spine atlas coherence now passes with clusters and follow-ups (ticket-317/319), but apps/public-site atlas-preview still consumes older golden fixture JSON. Operator product proof should refresh the static preview from a staged orchestrator export without widening public export policy.",
+  "evidence": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-317.md",
+    "agent_reports/2026-06-18_phase-3_ticket-319_staged-spine-cluster-test-isolation.md",
+    "apps/public-site/"
+  ],
+  "affected_modules": [
+    "apps/public-site",
+    "fixtures/atlas",
+    "rge/modules/atlas_snapshot_builder.py"
+  ],
+  "expected_files": [
+    "apps/public-site/public/data/atlas_snapshot.json",
+    "tests/unit/test_public_atlas_preview_fixture.py",
+    "agent_reports/2026-06-18_phase-3_ticket-320_public-atlas-preview-fixture-refresh.md"
+  ],
+  "acceptance_criteria": [
+    "Atlas preview page renders refreshed staged-spine snapshot fixture with clusters[] and follow_up_questions[] populated.",
+    "Snapshot passes validate_atlas_snapshot and private-field scan before commit.",
+    "Public-site build passes; no public write routes added.",
+    "Pre-ticket audit required (public site + export boundary)."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_public_atlas_preview_fixture.py -q",
+    "cd apps/public-site && npm run build"
+  ],
+  "non_goals": [
+    "Live OpenAlex layer-3 proof.",
+    "Schema migrations.",
+    "README-only documentation."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert fixture JSON and site data copy only.",
+  "status": "proposed",
+  "category": "Phase 3 / public atlas preview"
+}
