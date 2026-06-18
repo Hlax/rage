@@ -19,6 +19,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 PUBLIC_DATA = REPO_ROOT / "apps" / "public-site" / "public" / "data"
 SNAPSHOT_PATH = PUBLIC_DATA / "atlas_snapshot_preview.json"
 COHERENCE_PATH = PUBLIC_DATA / "atlas_coherence_preview.json"
+STAGED_FIXTURE_PATH = (
+    REPO_ROOT / "fixtures" / "atlas" / "atlas_snapshot_staged_spine_preview.json"
+)
 
 
 def _load_snapshot() -> dict:
@@ -79,3 +82,11 @@ def test_curate_snapshot_maps_active_followups_to_queued() -> None:
     ]
     curated = curate_snapshot_for_public_preview(mutated)
     assert curated["follow_up_questions"][0]["status"] == "queued"
+
+
+def test_fixtures_atlas_staged_spine_reference_matches_public_preview() -> None:
+    public_snapshot = _load_snapshot()
+    fixture_snapshot = json.loads(STAGED_FIXTURE_PATH.read_text(encoding="utf-8"))
+    validate_atlas_snapshot(fixture_snapshot)
+    validate_public_preview_snapshot(fixture_snapshot)
+    assert fixture_snapshot == public_snapshot
