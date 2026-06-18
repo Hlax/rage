@@ -64,4 +64,4 @@ cd apps/public-site && npm run build      # success
 
 ## Merge to main
 
-(Pending branch merge — document hash after merge.)
+Merge commit: `85deb4c`
