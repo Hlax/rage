@@ -1,0 +1,35 @@
+{
+  "id": "ticket-329",
+  "title": "README live layer-3 vs public atlas preview boundary cross-link",
+  "problem": "Pre-ticket audit 328 clarifies live layer-3 private atlas proof does not write /atlas-preview or fixtures/atlas. README documents both paths separately but lacks an explicit boundary callout after public preview thread (320–326).",
+  "evidence": [
+    "agent_reports/2026-06-18_pre-ticket-328_live-layer-3-staged-atlas-coherence-audit.md",
+    "README.md",
+    "agent_reports/2026-06-18_phase-3_ticket-326_readme-refresh-script-fixtures-sync-note.md"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-18_phase-3_ticket-329_readme-live-layer3-public-preview-boundary.md"
+  ],
+  "acceptance_criteria": [
+    "README states live layer-3 atlas coherence proof does not refresh committed public preview or fixtures/atlas paths.",
+    "Cross-links mock staged-spine refresh (320–326) vs ticket-285 live_network pytest.",
+    "Golden + full pytest pass (docs-only)."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Live network pytest execution.",
+    "Public site or export-public changes.",
+    "Marker relaxation."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section only.",
+  "status": "proposed",
+  "category": "Phase 3 / Research Atlas / operator docs"
+}
