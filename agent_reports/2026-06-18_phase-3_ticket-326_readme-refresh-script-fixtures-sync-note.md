@@ -58,4 +58,4 @@ Safety audit not required — docs-only.
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merge commit: `b8df560`
