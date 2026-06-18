@@ -64,4 +64,4 @@ cd apps/public-site && npm run build      # success
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `9ff6348`
