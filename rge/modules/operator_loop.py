@@ -1351,6 +1351,10 @@ def execute_safe_checks(
 
     plan["execution_results"] = results
     plan["execution_status"] = "pass" if all_passed else "fail"
+    if all_passed and action_id == "run_autonomous_researcher_loop":
+        plan["autonomous_loop_scratch_status"] = inspect_autonomous_loop_scratch_artifact(
+            root=project_root
+        )
     return plan
 
 

@@ -1,0 +1,36 @@
+{
+  "id": "ticket-344",
+  "title": "Principal audit post-ticket-343 autonomous loop checkpoint",
+  "problem": "Tickets 341–343 completed three consecutive autonomous-loop operator integrations (plan reason, autocycle passthrough, execute-safe refresh) since post-ticket-340 principal audit; cadence requires a read-only checkpoint before the next implementation batch.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-343_autonomous-loop-execute-safe-refresh-v0.md",
+    "agent_reports/2026-06-18_phase-3_ticket-340_principal-audit-post-ticket-338.md",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [
+    "agent_reports",
+    "docs/agents"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-343.md",
+    "agent_reports/2026-06-18_phase-3_ticket-344_principal-audit-post-ticket-343.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report documents mock golden gate, safety audit, and cadence reset after tickets 341–343.",
+    "Audit confirms no public export or live Ollama regressions in autonomous loop operator path.",
+    "Clears queue for next /rge-run-next-ticket without implementation in the audit run."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Implementing queued feature tickets.",
+    "Live Ollama or public site changes.",
+    "Queue promotion or merges beyond audit documentation."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Audit is read-only; delete audit report if superseded.",
+  "status": "proposed",
+  "category": "Phase 3 / principal audit"
+}

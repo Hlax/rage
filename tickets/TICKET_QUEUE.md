@@ -365,7 +365,8 @@ superseded
 | 337 | ticket-337 | done | Autonomous researcher loop staged-spine mock orchestrator v0 | `phase-3/ticket-337-autonomous-loop-staged-spine-mock-v0` | `agent_reports/2026-06-18_phase-3_ticket-337_autonomous-loop-staged-spine-mock-v0.md` |
 | 338 | ticket-338 | done | Autonomous loop operator autocycle hook v0 | `phase-3/ticket-338-autonomous-loop-operator-autocycle-hook-v0` | `agent_reports/2026-06-18_phase-3_ticket-338_autonomous-loop-operator-autocycle-hook-v0.md` |
 | 339 | ticket-339 | done | Autonomous loop scratch artifact inspection in operator plan v0 | `phase-3/ticket-339-autonomous-loop-scratch-inspection-v0` | `agent_reports/2026-06-18_phase-3_ticket-339_autonomous-loop-scratch-inspection-v0.md` |
-| 343 | ticket-343 | proposed | Autonomous loop execute-safe refresh scratch status after proof v0 | | |
+| 344 | ticket-344 | proposed | Principal audit post-ticket-343 autonomous loop checkpoint | | |
+| 343 | ticket-343 | done | Autonomous loop execute-safe refresh scratch status after proof v0 | `phase-3/ticket-343-autonomous-loop-execute-safe-refresh-v0` | `agent_reports/2026-06-18_phase-3_ticket-343_autonomous-loop-execute-safe-refresh-v0.md` |
 | 342 | ticket-342 | done | Autonomous loop scratch status in operator autocycle plan summary v0 | `phase-3/ticket-342-autonomous-loop-autocycle-scratch-status-v0` | `agent_reports/2026-06-18_phase-3_ticket-342_autonomous-loop-autocycle-scratch-status-v0.md` |
 | 341 | ticket-341 | done | Autonomous loop operator plan quality summary in recommended action v0 | `phase-3/ticket-341-autonomous-loop-quality-summary-v0` | `agent_reports/2026-06-18_phase-3_ticket-341_autonomous-loop-quality-summary-v0.md` |
 | 340 | ticket-340 | done | Principal audit post-ticket-338 operator integration checkpoint | `phase-3/ticket-340-principal-audit-post-ticket-338` | `agent_reports/2026-06-18_phase-3_ticket-340_principal-audit-post-ticket-338.md` |
@@ -1104,9 +1105,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-343 (proposed) — Autonomous loop execute-safe refresh scratch status after proof v0
+ticket-344 (proposed) — Principal audit post-ticket-343 autonomous loop checkpoint
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-343 autonomous loop execute-safe refresh scratch status after proof v0)
+
+- `execute_safe_checks` re-inspects scratch report after successful autonomous loop proof
+- Failed/blocked execute-safe leaves pre-run `autonomous_loop_scratch_status` unchanged
+- Cadence: 3 done since post-ticket-340 audit (341–343) — ticket-344 principal audit seeded
+- Report: `agent_reports/2026-06-18_phase-3_ticket-343_autonomous-loop-execute-safe-refresh-v0.md`
 
 ## Queue Notes (2026-06-18, ticket-342 autonomous loop scratch status in operator autocycle plan summary v0)
 
