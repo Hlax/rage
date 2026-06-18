@@ -348,7 +348,8 @@ superseded
 | 320 | ticket-320 | done | Public atlas preview fixture refresh from staged spine export | `phase-3/ticket-320-public-atlas-preview-fixture-refresh` | `agent_reports/2026-06-18_phase-3_ticket-320_public-atlas-preview-fixture-refresh.md` |
 | 321 | ticket-321 | done | Atlas preview page copy refresh for staged-spine labeling | `phase-3/ticket-321-atlas-preview-page-copy-refresh` | `agent_reports/2026-06-18_phase-3_ticket-321_atlas-preview-page-copy-refresh.md` |
 | 322 | ticket-322 | done | fixtures/atlas staged-spine preview reference copy | `phase-3/ticket-322-fixtures-atlas-staged-preview-reference` | `agent_reports/2026-06-18_phase-3_ticket-322_fixtures-atlas-staged-preview-reference.md` |
-| 323 | ticket-323 | proposed | Principal audit post-ticket-322 checkpoint | | |
+| 323 | ticket-323 | done | Principal audit post-ticket-322 checkpoint | `phase-3/ticket-323-principal-audit-post-ticket-322` | `agent_reports/2026-06-18_phase-3_ticket-323_principal-audit-post-ticket-322.md` |
+| 324 | ticket-324 | proposed | README staged-spine atlas preview refresh runbook | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1084,11 +1085,19 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-323 (proposed) — Principal audit post-ticket-322 checkpoint
+ticket-324 (proposed) — README staged-spine atlas preview refresh runbook
 (ticket-059 OpenAI placeholder remains deferred)
 ```
 
-## Queue Notes (2026-06-18, ticket-318 principal audit post-ticket-317)
+## Queue Notes (2026-06-18, ticket-323 principal audit post-ticket-322)
+
+- Principal audit closes batch 320–322; cadence reset (was due pre-audit for public preview thread)
+- Verdict GO; 144 golden, 799 pytest, safety audit pass, public-site build pass
+- Public atlas preview thread closed: staged JSON (320) + UI copy (321) + fixtures reference (322)
+- Drift advisory: README still documents fixture-mode MVP path; ticket-324 seeded for staged-spine runbook
+- Report: `agent_reports/2026-06-18_principal-audit-post-ticket-322.md`
+
+## Queue Notes (2026-06-18, ticket-322 fixtures/atlas staged preview reference)
 
 - Principal audit closes batch 315–317; cadence reset (was due pre-audit)
 - Verdict GO; 144 golden, 792 pytest, safety audit pass, public-site build pass
