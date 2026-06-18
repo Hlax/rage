@@ -1083,6 +1083,76 @@ Regression layer for fixture-mode chain:
 Golden MVP contract fixture remains at
 `fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json`.
 
+**Autonomous researcher loop operator visibility** (tickets 332–343; mock LLM only):
+fixture-mode `autonomous-researcher-loop` proofs write to gitignored scratch paths only —
+no queue writes, no `export-public`, no ticket promotion.
+
+| Path | Git | Role |
+| --- | --- | --- |
+| `data/db/operator_autonomous_loop_scratch.sqlite` | gitignored | Scratch DB for operator loop proofs |
+| `data/reports/operator_autonomous_loop/` | gitignored | Loop artifacts; inspect `autonomous_loop_report.json` |
+| `data/sources/staged/operator_autonomous_loop/` | gitignored | Staged sources for operator loop proofs |
+
+When the implementation queue has no open tickets, operator plan mode recommends
+`run_autonomous_researcher_loop` (`safe_autonomous`). Execute-safe runs the fixture
+proof on the scratch DB when the working tree is clean.
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+
+# Plan — read-only JSON (includes scratch status + recommended action)
+python -m rge.modules.operator_loop --mode plan
+
+# Execute-safe — mock verification + fixture autonomous loop proof when eligible
+python -m rge.modules.operator_loop --mode execute-safe
+
+# Autocycle plan — bounded audit + run-next-ticket safety (never merges or implements)
+python -m rge.modules.operator_autocycle --mode plan --max-cycles 1
+```
+
+**`autonomous_loop_scratch_status`** (operator plan and autocycle JSON): read-only
+inspection of the last `autonomous_loop_report.json` on the scratch path.
+
+| Field | When present |
+| --- | --- |
+| `status` | `ok` when report exists and run completed; `not_run` when missing; `invalid` / `incomplete` otherwise |
+| `research_quality_verdict` | From `research_quality.research_quality_verdict` (e.g. `GO`, `PARTIAL`) |
+| `weakest_dimension` | Weakest quality dimension id from the loop eval |
+| `weakest_dimension_score` | Score for weakest dimension (0–100) when present |
+| `loop_report_path` | Relative path to the inspected report |
+
+When `status` is `ok`, `next_recommended_action.reason` also appends the last scratch
+quality verdict and weakest dimension (ticket-341). Operator autocycle plan/summary
+JSON passes through the same `autonomous_loop_scratch_status` object (ticket-342).
+
+**Execute-safe post-run refresh** (ticket-343): after a **successful** execute-safe run
+when the recommended action is `run_autonomous_researcher_loop`, the execute-safe payload
+re-reads `autonomous_loop_report.json` so `autonomous_loop_scratch_status` reflects the
+proof just written. Failed or blocked execute-safe runs leave the pre-run inspection
+unchanged.
+
+Manual operator commands (not run by execute-safe allowlist):
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+python -m rge.cli autonomous-researcher-loop `
+  --topic "Does AI improve creative output while reducing diversity?" `
+  --domain creativity `
+  --db data/db/operator_autonomous_loop_scratch.sqlite `
+  --artifact-dir data/reports/operator_autonomous_loop `
+  --staging-dir data/sources/staged/operator_autonomous_loop
+
+# Staged-spine mock loop (network env required; operator manual)
+$env:RGE_ALLOW_SOURCE_NETWORK = "1"
+$env:OPENALEX_MAILTO = "operator@example.com"
+python -m rge.cli autonomous-researcher-loop --staged-spine `
+  --topic "Does AI improve creative output while reducing diversity?" `
+  --domain creativity `
+  --db data/db/operator_autonomous_loop_scratch.sqlite `
+  --artifact-dir data/reports/operator_autonomous_loop `
+  --staging-dir data/sources/staged/operator_autonomous_loop
+```
+
 **Live probe scratch evidence workflow** (local Ollama opt-in; report-only until
 operator persist): use the numbered checklist in
 [`docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md`](docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md)
@@ -1117,6 +1187,9 @@ Golden tests always run in mock LLM mode and do not require Ollama.
 |---|---|---|
 | `data/db/` | gitignored | Private SQLite database (default: `creative_research.sqlite`) |
 | `data/reports/` | gitignored | Run, cluster, theory, and other private reports |
+| `data/reports/operator_autonomous_loop/` | gitignored | Operator autonomous loop scratch report (`autonomous_loop_report.json`) |
+| `data/db/operator_autonomous_loop_scratch.sqlite` | gitignored | Scratch DB for operator autonomous loop proofs |
+| `data/sources/staged/operator_autonomous_loop/` | gitignored | Staged sources for operator autonomous loop proofs |
 | `data/exports/` | gitignored | Generated export JSON copies |
 | `data/tickets/` | gitignored | Generated improvement-ticket artifacts (not the queue) |
 | `apps/public-site/public/data/` | committed | Reviewed public-safe JSON snapshots |

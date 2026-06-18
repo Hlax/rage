@@ -31,6 +31,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Audit is read-only; delete audit report if superseded.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / principal audit"
 }
