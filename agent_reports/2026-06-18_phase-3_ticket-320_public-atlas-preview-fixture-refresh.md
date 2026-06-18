@@ -86,4 +86,4 @@ cd apps/public-site && npm run build
 
 ## Merge to main
 
-_Placeholder — updated after merge._
+Merge commit: `648e3a5`. Pushed `origin/main`.
