@@ -62,4 +62,4 @@ family; mock unit-test regression + operator re-export checklist; low risk).
 
 ## Merge to main
 
-Merge commit: _(pending)_
+Merge commit: `76f13d1`
