@@ -342,7 +342,8 @@ superseded
 | 314 | ticket-314 | done | Principal audit post-ticket-313 checkpoint | `phase-3/ticket-314-principal-audit-post-ticket-313` | `agent_reports/2026-06-17_phase-3_ticket-314_principal-audit-post-ticket-313.md` |
 | 315 | ticket-315 | done | Evidence DB Atlas re-export proof refresh v0 | `phase-3/ticket-315-evidence-db-atlas-reexport-proof-refresh-v0` | `agent_reports/2026-06-18_phase-3_ticket-315_evidence-db-atlas-reexport-proof-refresh-v0.md` |
 | 316 | ticket-316 | done | Live staged-spine operator proof refresh v0 | `phase-3/ticket-316-live-staged-spine-operator-proof-refresh-v0` | `agent_reports/2026-06-18_phase-3_ticket-316_live-staged-spine-operator-proof-refresh-v0.md` |
-| 317 | ticket-317 | proposed | Staged spine atlas cluster projection hook | | |
+| 317 | ticket-317 | done | Staged spine atlas cluster projection hook | `phase-3/ticket-317-staged-spine-atlas-cluster-projection` | `agent_reports/2026-06-18_phase-3_ticket-317_staged-spine-atlas-cluster-projection.md` |
+| 318 | ticket-318 | proposed | Principal audit post-ticket-317 checkpoint | | |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
 | 232 | ticket-232 | done | Pre-ticket audit: rank-2 staged extract live LLM (ticket-230 scope echo) | `phase-3/ticket-232-pre-ticket-230-echo-audit` | `agent_reports/2026-06-15_pre-ticket-230_rank-2-staged-extract-live-llm-audit.md` |
@@ -1078,9 +1079,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-317 (proposed) — Staged spine atlas cluster projection hook
+ticket-318 (proposed) — Principal audit post-ticket-317 checkpoint
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-317 staged spine atlas cluster projection hook)
+
+- Pre-ticket audit GO; `ensure_staged_cluster_summaries` for rank1/rank2 staged runs
+- Ticket-316 operator DB re-export: coherence partial → **pass**; clusters 0 → 2
+- 6 cluster projection tests pass; 792 full pytest; verify pass
+- ticket-318 seeded: principal audit post-ticket-317
 
 ## Queue Notes (2026-06-18, ticket-316 live staged-spine operator proof refresh v0)
 

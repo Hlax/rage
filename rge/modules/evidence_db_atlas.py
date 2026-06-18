@@ -463,6 +463,206 @@ def ensure_evidence_cluster_summary(
     }
 
 
+STAGED_SPINE_RUN_PREFIX = "run_staged_fixture_mode_spine"
+_STAGED_RANK1_TITLE_FRAGMENT = "songwriting"
+_STAGED_RANK2_TITLE_FRAGMENT = "Constraint management"
+
+
+def db_has_staged_spine_runs(conn: sqlite3.Connection) -> bool:
+    """True when staged orchestrator research runs exist on the DB."""
+    row = conn.execute(
+        """
+        SELECT 1 FROM research_runs
+        WHERE id LIKE ?
+        LIMIT 1
+        """,
+        (f"{STAGED_SPINE_RUN_PREFIX}%",),
+    ).fetchone()
+    return row is not None
+
+
+def _claim_ids_for_staged_run(conn: sqlite3.Connection, run_id: str) -> list[str]:
+    """Map staged rank run ids to accepted claims on the rank-scoped staged source."""
+    if run_id.endswith("_rank1"):
+        title_fragment = _STAGED_RANK1_TITLE_FRAGMENT
+    elif run_id.endswith("_rank2"):
+        title_fragment = _STAGED_RANK2_TITLE_FRAGMENT
+    else:
+        return []
+    source = conn.execute(
+        """
+        SELECT id FROM sources
+        WHERE title LIKE ?
+        ORDER BY created_at DESC
+        LIMIT 1
+        """,
+        (f"%{title_fragment}%",),
+    ).fetchone()
+    if source is None:
+        return []
+    rows = conn.execute(
+        """
+        SELECT id FROM claims
+        WHERE source_id = ? AND status = 'accepted'
+        ORDER BY id
+        """,
+        (source["id"],),
+    ).fetchall()
+    return [str(row["id"]) for row in rows]
+
+
+def _relationships_for_claims(
+    conn: sqlite3.Connection, claim_ids: list[str]
+) -> list[dict[str, Any]]:
+    if not claim_ids:
+        return []
+    placeholders = ",".join("?" for _ in claim_ids)
+    rel_ids = conn.execute(
+        f"""
+        SELECT DISTINCT relationship_id
+        FROM relationship_evidence
+        WHERE claim_id IN ({placeholders})
+        """,
+        tuple(claim_ids),
+    ).fetchall()
+    if not rel_ids:
+        return []
+    rel_id_set = {str(row["relationship_id"]) for row in rel_ids}
+    relationships = RelationshipRepository(conn).list_active()
+    matched = [rel for rel in relationships if rel["id"] in rel_id_set]
+    return sorted(
+        matched,
+        key=lambda rel: float(rel.get("confidence") or 0.0),
+        reverse=True,
+    )
+
+
+def ensure_staged_cluster_summary_for_run(
+    conn: sqlite3.Connection,
+    *,
+    run_id: str,
+    domain_pack: str = "creativity",
+) -> dict[str, Any]:
+    """Persist a minimal cluster_reports row for a staged rank run."""
+    existing = conn.execute(
+        "SELECT id FROM cluster_reports WHERE run_id = ? ORDER BY created_at DESC LIMIT 1",
+        (run_id,),
+    ).fetchone()
+    if existing is not None:
+        return {
+            "status": "already_present",
+            "run_id": run_id,
+            "cluster_report_id": str(existing["id"]),
+        }
+
+    claim_ids = _claim_ids_for_staged_run(conn, run_id)
+    if not claim_ids:
+        return {"status": "skipped", "reason": "no_claims_for_run", "run_id": run_id}
+
+    relationships = _relationships_for_claims(conn, claim_ids)
+    if not relationships:
+        return {
+            "status": "skipped",
+            "reason": "no_active_relationships_for_run",
+            "run_id": run_id,
+        }
+
+    included_concepts = _concepts_for_claims(conn, claim_ids)
+    if not included_concepts:
+        included_concepts = [domain_pack]
+    cluster_label = _evidence_cluster_label(included_concepts)
+    digest = sha256_hex(run_id.strip().casefold())[:12]
+    cluster_id = f"cluster_staged_{digest}"
+
+    source_rows = conn.execute(
+        f"""
+        SELECT DISTINCT s.id, s.title
+        FROM sources s
+        JOIN claims c ON c.source_id = s.id
+        WHERE c.id IN ({",".join("?" for _ in claim_ids)})
+        ORDER BY s.id
+        """,
+        tuple(claim_ids),
+    ).fetchall()
+    strongest = relationships[:3]
+    evidence_packet = {
+        "cluster_id": cluster_id,
+        "top_supporting_claims": claim_ids[:5],
+        "top_contradicting_claims": [],
+        "top_qualifying_claims": [],
+        "highest_quality_sources": [
+            {"source_id": row["id"], "title": row["title"]} for row in source_rows[:3]
+        ],
+        "newest_claims": claim_ids[-3:],
+        "highest_score_change_events": [],
+        "bridge_concepts": included_concepts[:2],
+        "open_gaps": [],
+    }
+    report = {
+        "report_type": "cluster_report",
+        "cluster_id": cluster_id,
+        "cluster_label": cluster_label,
+        "included_concepts": included_concepts,
+        "supporting_claims": claim_ids,
+        "contradicting_claims": [],
+        "qualifying_claims": [],
+        "strongest_relationships": [rel["id"] for rel in strongest],
+        "linked_claim_ids": claim_ids,
+        "formula_version": "staged_summary_v0.1.0",
+        "relationship_count": len(relationships),
+        "evidence_packet": evidence_packet,
+    }
+    record = ClusterReportRepository(conn).insert(
+        cluster_id=cluster_id,
+        cluster_label=cluster_label,
+        included_concepts=included_concepts,
+        evidence_packet=evidence_packet,
+        report=report,
+        prose_summary=(
+            f"Staged cluster summary for {len(claim_ids)} claim(s) "
+            f"linked to {len(included_concepts)} concept(s)."
+        ),
+        run_id=run_id,
+    )
+    return {
+        "status": "created",
+        "run_id": run_id,
+        "cluster_report_id": record.id,
+        "cluster_label": cluster_label,
+    }
+
+
+def ensure_staged_cluster_summaries(
+    conn: sqlite3.Connection,
+    *,
+    topic: str,
+    domain_pack: str = "creativity",
+) -> list[dict[str, Any]]:
+    """Ensure cluster_reports rows exist for staged orchestrator rank runs."""
+    _ = topic
+    if not db_has_staged_spine_runs(conn):
+        return []
+    rows = conn.execute(
+        """
+        SELECT id FROM research_runs
+        WHERE id LIKE ?
+        ORDER BY id
+        """,
+        (f"{STAGED_SPINE_RUN_PREFIX}%",),
+    ).fetchall()
+    results: list[dict[str, Any]] = []
+    for row in rows:
+        run_id = str(row["id"])
+        if not run_id.endswith(("_rank1", "_rank2")):
+            continue
+        results.append(
+            ensure_staged_cluster_summary_for_run(
+                conn, run_id=run_id, domain_pack=domain_pack
+            )
+        )
+    return results
+
+
 _ROLE_PRIORITY: dict[str, int] = {
     "method": 0,
     "subject": 1,

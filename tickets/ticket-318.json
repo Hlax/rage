@@ -1,0 +1,30 @@
+{
+  "id": "ticket-318",
+  "title": "Principal audit post-ticket-317 checkpoint",
+  "problem": "Three done tickets since ticket-314 principal audit (315–317); cadence checkpoint due after staged cluster projection closes ticket-316 coherence gap.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-317_staged-spine-atlas-cluster-projection.md",
+    "agent_reports/2026-06-17_phase-3_ticket-314_principal-audit-post-ticket-313.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-18_phase-3_ticket-318_principal-audit-post-ticket-317.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report for batch 315–317 with mock golden gate verification.",
+    "Cadence reset and drift advisory on live-research vs projection work.",
+    "Queue marks ticket-318 done."
+  ],
+  "test_plan": [
+    "python -m rge.cli verify --skip-site",
+    "python -m rge.modules.principal_audit_gate --next-ticket ticket-318"
+  ],
+  "non_goals": [
+    "Production code changes.",
+    "Public site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert audit report only.",
+  "status": "proposed",
+  "category": "Phase 3 / governance / principal audit"
+}
