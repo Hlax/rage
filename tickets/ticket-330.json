@@ -27,6 +27,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Restore deleted orphan file from git if needed.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / hygiene"
 }
