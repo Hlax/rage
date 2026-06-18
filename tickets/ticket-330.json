@@ -1,0 +1,32 @@
+{
+  "id": "ticket-330",
+  "title": "Orphan agent_reports hygiene (superseded ticket-308 audit)",
+  "problem": "Untracked orphan agent_reports/2026-06-17_principal-audit-post-ticket-308.md persists on main; superseded by post-ticket-310/311. Principal audits note hygiene but no ticket closes it.",
+  "evidence": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-327.md",
+    "git status"
+  ],
+  "affected_modules": [
+    "agent_reports"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-18_phase-3_ticket-330_orphan-agent-reports-hygiene.md"
+  ],
+  "acceptance_criteria": [
+    "Orphan ticket-308 audit file deleted or committed with superseded header; working tree clean of duplicate audit artifacts.",
+    "Queue documents hygiene closure.",
+    "Golden + full pytest pass (no code changes expected)."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m pytest -q"
+  ],
+  "non_goals": [
+    "Rewriting historical audit content.",
+    "Queue reordering beyond hygiene note."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Restore deleted orphan file from git if needed.",
+  "status": "proposed",
+  "category": "Phase 3 / hygiene"
+}
