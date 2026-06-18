@@ -365,7 +365,8 @@ superseded
 | 337 | ticket-337 | done | Autonomous researcher loop staged-spine mock orchestrator v0 | `phase-3/ticket-337-autonomous-loop-staged-spine-mock-v0` | `agent_reports/2026-06-18_phase-3_ticket-337_autonomous-loop-staged-spine-mock-v0.md` |
 | 338 | ticket-338 | done | Autonomous loop operator autocycle hook v0 | `phase-3/ticket-338-autonomous-loop-operator-autocycle-hook-v0` | `agent_reports/2026-06-18_phase-3_ticket-338_autonomous-loop-operator-autocycle-hook-v0.md` |
 | 339 | ticket-339 | done | Autonomous loop scratch artifact inspection in operator plan v0 | `phase-3/ticket-339-autonomous-loop-scratch-inspection-v0` | `agent_reports/2026-06-18_phase-3_ticket-339_autonomous-loop-scratch-inspection-v0.md` |
-| 341 | ticket-341 | proposed | Autonomous loop operator plan quality summary in recommended action v0 | | |
+| 342 | ticket-342 | proposed | Autonomous loop scratch status in operator autocycle plan summary v0 | | |
+| 341 | ticket-341 | done | Autonomous loop operator plan quality summary in recommended action v0 | `phase-3/ticket-341-autonomous-loop-quality-summary-v0` | `agent_reports/2026-06-18_phase-3_ticket-341_autonomous-loop-quality-summary-v0.md` |
 | 340 | ticket-340 | done | Principal audit post-ticket-338 operator integration checkpoint | `phase-3/ticket-340-principal-audit-post-ticket-338` | `agent_reports/2026-06-18_phase-3_ticket-340_principal-audit-post-ticket-338.md` |
 | 288 | ticket-288 | done | Principal audit post-ticket-286 checkpoint | | `agent_reports/2026-06-16_principal-audit-post-ticket-286.md` |
 | 231 | ticket-231 | done | Principal audit post-ticket-229 rank-2 live LLM prerequisite checkpoint | | `agent_reports/2026-06-15_ticket-231_principal-audit-post-ticket-229.md` |
@@ -1102,9 +1103,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-341 (proposed) — Autonomous loop operator plan quality summary in recommended action v0
+ticket-342 (proposed) — Autonomous loop scratch status in operator autocycle plan summary v0
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-341 autonomous loop quality summary in recommended action v0)
+
+- `_autonomous_loop_recommended_reason()` appends verdict + weakest dimension when scratch ok
+- `not_run` keeps ticket-338 baseline reason unchanged
+- ticket-342 seeded: autocycle plan summary passthrough for scratch status
+- Report: `agent_reports/2026-06-18_phase-3_ticket-341_autonomous-loop-quality-summary-v0.md`
 
 ## Queue Notes (2026-06-18, ticket-339 autonomous loop scratch artifact inspection v0)
 
