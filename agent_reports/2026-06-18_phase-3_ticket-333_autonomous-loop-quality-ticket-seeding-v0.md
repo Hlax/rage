@@ -61,7 +61,7 @@ python -m rge.cli verify
 
 ## Merge to main
 
-(Pending merge commit hash below.)
+Merge commit: `9e2ba4c934001c409942ed4c163484a5201f9e43`
 
 ## Recommended next ticket
 

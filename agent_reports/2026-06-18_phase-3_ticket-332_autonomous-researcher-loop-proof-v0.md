@@ -156,7 +156,7 @@ python -m rge.cli verify
 
 ## Merge checkpoint
 
-Not merged in this run (awaiting operator commit/merge per workflow).
+Merge commit: `182c714` (merged in follow-on run-next-ticket session).
 
 ## Recommended next ticket
 
