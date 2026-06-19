@@ -31,6 +31,7 @@ _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 _WHITESPACE_PATTERN = re.compile(r"\s+")
 _RETRYABLE_HTTP_STATUSES = frozenset({401, 403, 406})
 _RETRYABLE_ERROR_MARKERS = frozenset({"timed out", "timeout"})
+FETCH_ACCESS_BLOCKED_REASONS = frozenset({"forbidden", "paywall_blocked"})
 
 
 class FetchError(Exception):
@@ -142,6 +143,11 @@ def _attempt_detail(url: str, kind: str, exc: Exception) -> dict[str, Any]:
     if status is not None:
         detail["http_status"] = status
     return detail
+
+
+def is_fetch_access_blocked(reason: str | None) -> bool:
+    """Return True when all URL routes failed with publisher access blocks."""
+    return str(reason or "").strip() in FETCH_ACCESS_BLOCKED_REASONS
 
 
 def classify_fetch_failure(

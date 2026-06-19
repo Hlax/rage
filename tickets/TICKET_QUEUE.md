@@ -367,7 +367,7 @@ superseded
 | 339 | ticket-339 | done | Autonomous loop scratch artifact inspection in operator plan v0 | `phase-3/ticket-339-autonomous-loop-scratch-inspection-v0` | `agent_reports/2026-06-18_phase-3_ticket-339_autonomous-loop-scratch-inspection-v0.md` |
 | 358 | ticket-358 | done | Principal audit post-ticket-356 autonomous loop checkpoint | `phase-3/ticket-358-principal-audit-post-ticket-356` | `agent_reports/2026-06-18_phase-3_ticket-358_principal-audit-post-ticket-356.md` |
 | 361 | ticket-361 | proposed | README operator quickstart arbitrary source proof bundle recommendation v0 | | |
-| 366 | ticket-366 | proposed | Live staged orchestrator fetch fallback on candidate 403 | | |
+| 366 | ticket-366 | done | Live staged orchestrator fetch fallback on candidate 403 | `phase-3/ticket-366-live-staged-orchestrator-fetch-fallback` | `agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md` |
 | 363 | ticket-363 | done | Autonomous loop improvement promotion golden proof | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md` |
 | 362 | ticket-362 | done | Default research run mock staged-spine path | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-362_default-research-run-staged-spine.md` |
 | 360 | ticket-360 | done | Principal audit post-ticket-359 autonomous loop reason stack checkpoint | `phase-3/ticket-360-principal-audit-post-ticket-359` | `agent_reports/2026-06-18_phase-3_ticket-360_principal-audit-post-ticket-359.md` |
@@ -1125,7 +1125,6 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-366 (proposed) — live staged orchestrator fetch fallback on candidate 403
 ticket-364 (proposed) — CI weekly live_network staged ingest smoke
 (ticket-361 README proof bundle deferred; ticket-059 OpenAI placeholder remains deferred)
 ```
@@ -1133,7 +1132,9 @@ ticket-364 (proposed) — CI weekly live_network staged ingest smoke
 ## Queue Notes (2026-06-19, ticket-366 live staged orchestrator fetch fallback)
 
 - Seeded after Option B operator run: live discover succeeds but rank-1 publisher fetch returns forbidden (403 on all URL routes).
-- Scope: advance to next queued candidate when per-candidate URL retry is exhausted (ticket-233); mock pytest only.
+- Live orchestrator skips rank-1 candidates when fetch returns forbidden/paywall_blocked; rank-2 excludes blocked/used ids.
+- Mock pytest: `tests/unit/test_live_staged_orchestrator_fetch_fallback.py`
+- Report: `agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md`
 
 ## Queue Notes (2026-06-19, ticket-363 autonomous loop improvement promotion proof)
 

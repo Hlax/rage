@@ -116,7 +116,7 @@ def test_fetch_staged_candidate_blocked_without_network(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    monkeypatch.delenv("RGE_ALLOW_SOURCE_NETWORK", raising=False)
+    monkeypatch.setenv("RGE_ALLOW_SOURCE_NETWORK", "0")
     candidate = {
         "id": CANDIDATE_ID,
         "url": "https://example.org/landing/page",

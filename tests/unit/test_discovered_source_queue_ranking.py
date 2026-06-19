@@ -229,7 +229,7 @@ def test_discover_sources_stub_unchanged(capsys: pytest.CaptureFixture[str]) -> 
 def test_discover_sources_blocked_without_network_opt_in(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.delenv("RGE_ALLOW_SOURCE_NETWORK", raising=False)
+    monkeypatch.setenv("RGE_ALLOW_SOURCE_NETWORK", "0")
     payload, exit_code = run_discover_sources_command(
         provider_id="openalex",
         query="human AI creativity",

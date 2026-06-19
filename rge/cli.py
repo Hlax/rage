@@ -131,9 +131,41 @@ def _live_staged_orchestrator_enabled() -> bool:
 
 
 from rge.modules.staged_candidate_selection import (
+    resolve_live_staged_spine_fetch_pair,
     select_rank1_staged_candidate_id,
     select_rank2_staged_candidate_id,
 )
+
+
+def _staged_fetch_and_ingest_candidate(
+    *,
+    candidate_id: str,
+    domain: str,
+    staging_dir: Path,
+    db_args: list[str],
+) -> None:
+    _run_cli_step(
+        [
+            "fetch-candidate",
+            "--candidate",
+            candidate_id,
+            "--out",
+            str(staging_dir),
+            *db_args,
+        ]
+    )
+    _run_cli_step(
+        [
+            "ingest-staged",
+            "--domain",
+            domain,
+            "--candidate",
+            candidate_id,
+            "--staging-dir",
+            str(staging_dir),
+            *db_args,
+        ]
+    )
 
 
 def _staged_rank_candidate_ids(conn: Any, question_id: str) -> tuple[str, str]:
@@ -556,34 +588,17 @@ def execute_staged_fixture_mode_run(
             steps_completed.append("discover_openalex_candidates")
 
             live_orchestrator = _live_staged_orchestrator_enabled()
+            rank1_blocked_ids: list[str] = []
             if live_orchestrator:
-                rank1_candidate_id, rank2_candidate_id = _staged_rank_candidate_ids(
-                    conn, question_id
-                )
-                candidate_pairs = (
-                    (rank1_candidate_id, "rank1"),
-                    (rank2_candidate_id, "rank2"),
-                )
-            else:
-                candidate_pairs = (
-                    (STAGED_RANK1_CANDIDATE_ID, "rank1"),
-                    (STAGED_RANK2_CANDIDATE_ID, "rank2"),
-                )
-            rank1_candidate_id, rank2_candidate_id = (
-                candidate_pairs[0][0],
-                candidate_pairs[1][0],
-            )
+                from rge.modules.fetcher import run_fetch_candidate_command
 
-            for candidate_id, rank_label in candidate_pairs:
-                _run_cli_step(
-                    [
-                        "fetch-candidate",
-                        "--candidate",
-                        candidate_id,
-                        "--out",
-                        str(resolved_staging),
-                        *db_args,
-                    ]
+                rank1_candidate_id, rank2_candidate_id, rank1_blocked_ids = (
+                    resolve_live_staged_spine_fetch_pair(
+                        conn,
+                        research_question_id=question_id,
+                        output_dir=resolved_staging,
+                        fetch_command=run_fetch_candidate_command,
+                    )
                 )
                 _run_cli_step(
                     [
@@ -591,13 +606,38 @@ def execute_staged_fixture_mode_run(
                         "--domain",
                         domain,
                         "--candidate",
-                        candidate_id,
+                        rank1_candidate_id,
                         "--staging-dir",
                         str(resolved_staging),
                         *db_args,
                     ]
                 )
-                steps_completed.append(f"{rank_label}_fetch_ingest")
+                steps_completed.append("rank1_fetch_ingest")
+                _staged_fetch_and_ingest_candidate(
+                    candidate_id=rank2_candidate_id,
+                    domain=domain,
+                    staging_dir=resolved_staging,
+                    db_args=db_args,
+                )
+                steps_completed.append("rank2_fetch_ingest")
+            else:
+                candidate_pairs = (
+                    (STAGED_RANK1_CANDIDATE_ID, "rank1"),
+                    (STAGED_RANK2_CANDIDATE_ID, "rank2"),
+                )
+                rank1_candidate_id, rank2_candidate_id = (
+                    candidate_pairs[0][0],
+                    candidate_pairs[1][0],
+                )
+
+                for candidate_id, rank_label in candidate_pairs:
+                    _staged_fetch_and_ingest_candidate(
+                        candidate_id=candidate_id,
+                        domain=domain,
+                        staging_dir=resolved_staging,
+                        db_args=db_args,
+                    )
+                    steps_completed.append(f"{rank_label}_fetch_ingest")
 
             if live_orchestrator:
                 rank1_id = _source_id_for_candidate(conn, rank1_candidate_id)

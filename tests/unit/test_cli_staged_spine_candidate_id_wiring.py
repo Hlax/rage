@@ -71,7 +71,7 @@ def mock_network_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("RGE_ALLOW_SOURCE_NETWORK", "1")
     monkeypatch.setenv("OPENALEX_MAILTO", "operator@example.com")
     monkeypatch.delenv("OPENALEX_API_KEY", raising=False)
-    monkeypatch.delenv("RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR", raising=False)
+    monkeypatch.setenv("RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR", "0")
 
 
 @pytest.fixture()
@@ -154,40 +154,13 @@ def test_fixture_staged_run_live_orchestrator_wires_heuristic_candidate_ids(
     staging_dir.mkdir()
     report_dir.mkdir()
 
-    selection_calls: list[str] = []
-    import rge.cli as cli_module
+    recorded_steps, result = _run_with_recorded_cli_steps(
+        temp_db=temp_db,
+        staging_dir=staging_dir,
+        report_dir=report_dir,
+    )
 
-    original_select = cli_module._staged_rank_candidate_ids
-
-    def _recording_select(conn, question_id: str):
-        selection_calls.append(question_id)
-        return original_select(conn, question_id)
-
-    recorded_steps: list[list[str]] = []
-    original_step = cli_module._run_cli_step
-
-    def _recording_run_cli_step(argv: list[str]) -> None:
-        recorded_steps.append(list(argv))
-        return original_step(argv)
-
-    with patch.object(
-        cli_module,
-        "_staged_rank_candidate_ids",
-        side_effect=_recording_select,
-    ), patch.object(cli_module, "_run_cli_step", side_effect=_recording_run_cli_step):
-        result = execute_staged_fixture_mode_run(
-            topic=STAGED_TOPIC,
-            domain="creativity",
-            db_path=temp_db,
-            run_id=STAGED_FIXTURE_RUN_ID,
-            report_dir=report_dir,
-            staging_dir=staging_dir,
-            question_id=STAGED_FIXTURE_QUESTION_ID,
-        )
-
-    assert selection_calls == [STAGED_FIXTURE_QUESTION_ID]
     assert _fetch_candidate_ids_from_steps(recorded_steps) == [
-        STAGED_RANK1_CANDIDATE_ID,
         STAGED_RANK2_CANDIDATE_ID,
     ]
     assert result["status"] == "completed"

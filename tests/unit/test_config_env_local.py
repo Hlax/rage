@@ -11,6 +11,12 @@ from rge.config import load_config
 
 def test_load_config_reads_env_local_overlay(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
+    for key in (
+        "RGE_ALLOW_SOURCE_NETWORK",
+        "OPENALEX_MAILTO",
+        "OPENALEX_API_KEY",
+    ):
+        monkeypatch.delenv(key, raising=False)
     (tmp_path / ".env").write_text(
         "RGE_ALLOW_SOURCE_NETWORK=0\nOPENALEX_MAILTO=\n",
         encoding="utf-8",

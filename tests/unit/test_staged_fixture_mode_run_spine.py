@@ -96,7 +96,7 @@ def mock_network_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("RGE_ALLOW_SOURCE_NETWORK", "1")
     monkeypatch.setenv("OPENALEX_MAILTO", "operator@example.com")
     monkeypatch.delenv("OPENALEX_API_KEY", raising=False)
-    monkeypatch.delenv("RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR", raising=False)
+    monkeypatch.setenv("RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR", "0")
 
 
 @pytest.fixture()
