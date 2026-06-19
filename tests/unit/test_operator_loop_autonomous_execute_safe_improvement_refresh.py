@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 from rge.modules.operator_loop import (
     WorkingTreeStatus,
+    _AUTONOMOUS_LOOP_BASE_REASON,
     execute_safe_checks,
 )
 
@@ -29,7 +30,7 @@ def _seed_done_only_queue(tmp_path: Path) -> None:
     (
         tmp_path
         / "agent_reports"
-        / "2026-06-18_principal-audit-post-ticket-346.md"
+        / "2026-06-18_principal-audit-post-ticket-352.md"
     ).write_text("# audit", encoding="utf-8")
 
 
@@ -148,3 +149,74 @@ def test_execute_safe_blocked_keeps_pre_run_improvement_status(tmp_path: Path) -
     assert result["execution_status"] == "blocked"
     assert improvement["status"] == "not_run"
     assert improvement["recommended_ticket_id"] is None
+
+
+def test_execute_safe_refresh_reason_after_real_loop_proof(tmp_path: Path) -> None:
+    _seed_done_only_queue(tmp_path)
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    with patch(
+        "rge.modules.operator_loop.safe_verification_commands",
+        return_value=[],
+    ):
+        result = execute_safe_checks(root=tmp_path, working_tree=clean_tree)
+
+    reason = result["next_recommended_action"]["reason"]
+
+    assert result["execution_status"] == "pass"
+    assert "Last scratch loop quality" in reason
+    assert "Last loop improvement" in reason
+    assert reason != _AUTONOMOUS_LOOP_BASE_REASON
+
+
+def test_execute_safe_failed_loop_keeps_pre_run_reason(tmp_path: Path) -> None:
+    _seed_done_only_queue(tmp_path)
+    artifact_dir = tmp_path / "data" / "reports" / "operator_autonomous_loop"
+    _write_pre_run_improvement_report(artifact_dir, recommended_id="ticket-old")
+    (artifact_dir / "autonomous_loop_report.json").write_text(
+        json.dumps(
+            {
+                "status": "completed",
+                "research_path": "fixture_mode",
+                "research_quality": {
+                    "research_quality_verdict": "PARTIAL",
+                    "weakest_dimension": "weak_claim_extraction",
+                    "weakest_dimension_score": 55,
+                },
+                "artifacts": {
+                    "improvement_tickets": str(
+                        artifact_dir / "tickets" / "improvement_ticket_latest.json"
+                    ),
+                    "recommended_improvement_ticket": str(
+                        artifact_dir / "recommended_improvement_ticket.json"
+                    ),
+                },
+                "run_summary": {"quality_driven_ticket_ids": ["old_id"]},
+            }
+        ),
+        encoding="utf-8",
+    )
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    def failing_runner(argv: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+        if "autonomous-researcher-loop" in " ".join(argv):
+            return subprocess.CompletedProcess(argv, 1, stdout="", stderr="loop failed")
+        return subprocess.CompletedProcess(argv, 0, stdout="ok", stderr="")
+
+    with patch(
+        "rge.modules.operator_loop.safe_verification_commands",
+        return_value=[],
+    ):
+        result = execute_safe_checks(
+            root=tmp_path,
+            working_tree=clean_tree,
+            command_runner=failing_runner,
+        )
+
+    reason = result["next_recommended_action"]["reason"]
+
+    assert result["execution_status"] == "fail"
+    assert "ticket-old" in reason
+    assert "weak_concept_mapping" in reason
+    assert "PARTIAL" in reason
+    assert "weak_claim_extraction" in reason

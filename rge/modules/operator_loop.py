@@ -1516,12 +1516,18 @@ def execute_safe_checks(
     plan["execution_results"] = results
     plan["execution_status"] = "pass" if all_passed else "fail"
     if all_passed and action_id == "run_autonomous_researcher_loop":
-        plan["autonomous_loop_scratch_status"] = inspect_autonomous_loop_scratch_artifact(
+        scratch_status = inspect_autonomous_loop_scratch_artifact(root=project_root)
+        improvement_status = inspect_autonomous_loop_improvement_artifact(
             root=project_root
         )
-        plan["autonomous_loop_improvement_status"] = (
-            inspect_autonomous_loop_improvement_artifact(root=project_root)
+        plan["autonomous_loop_scratch_status"] = scratch_status
+        plan["autonomous_loop_improvement_status"] = improvement_status
+        next_action = plan.get("next_recommended_action") or {}
+        next_action["reason"] = _autonomous_loop_recommended_reason(
+            scratch_status,
+            improvement_status,
         )
+        plan["next_recommended_action"] = next_action
     return plan
 
 
