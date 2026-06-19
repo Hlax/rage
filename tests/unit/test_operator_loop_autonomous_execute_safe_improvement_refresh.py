@@ -1,0 +1,150 @@
+"""Execute-safe autonomous loop improvement status refresh (ticket-350)."""
+
+from __future__ import annotations
+
+import json
+import subprocess
+from pathlib import Path
+from unittest.mock import patch
+
+from rge.modules.operator_loop import (
+    WorkingTreeStatus,
+    execute_safe_checks,
+)
+
+
+def _seed_done_only_queue(tmp_path: Path) -> None:
+    (tmp_path / "tickets").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "agent_reports").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tickets" / "TICKET_QUEUE.md").write_text(
+        """
+| 349 | ticket-349 | done | prev | | |
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "tickets" / "ticket-349.json").write_text(
+        json.dumps({"id": "ticket-349", "status": "done", "risk_level": "low"}),
+        encoding="utf-8",
+    )
+    (
+        tmp_path
+        / "agent_reports"
+        / "2026-06-18_principal-audit-post-ticket-346.md"
+    ).write_text("# audit", encoding="utf-8")
+
+
+def _write_pre_run_improvement_report(
+    artifact_dir: Path,
+    *,
+    recommended_id: str = "ticket-old",
+) -> None:
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    ticket_dir = artifact_dir / "tickets"
+    ticket_dir.mkdir(parents=True, exist_ok=True)
+    improvement_path = ticket_dir / "improvement_ticket_latest.json"
+    recommended_path = artifact_dir / "recommended_improvement_ticket.json"
+    improvement_path.write_text(
+        json.dumps(
+            [
+                {
+                    "title": "Old draft",
+                    "status": "draft",
+                    "failure_reason": "weak_concept_mapping",
+                    "risk_level": "low",
+                    "problem": "Old problem.",
+                    "acceptance_criteria": ["Old criterion."],
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    recommended_path.write_text(
+        json.dumps(
+            {
+                "id": recommended_id,
+                "title": "Old recommendation",
+                "status": "proposed",
+                "source_weakness": "weak_concept_mapping",
+            }
+        ),
+        encoding="utf-8",
+    )
+    (artifact_dir / "autonomous_loop_report.json").write_text(
+        json.dumps(
+            {
+                "status": "completed",
+                "artifacts": {
+                    "improvement_tickets": str(improvement_path),
+                    "recommended_improvement_ticket": str(recommended_path),
+                },
+                "run_summary": {"quality_driven_ticket_ids": ["old_id"]},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def test_execute_safe_refresh_improvement_status_after_real_loop_proof(
+    tmp_path: Path,
+) -> None:
+    _seed_done_only_queue(tmp_path)
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    with patch(
+        "rge.modules.operator_loop.safe_verification_commands",
+        return_value=[],
+    ):
+        result = execute_safe_checks(root=tmp_path, working_tree=clean_tree)
+
+    improvement = result["autonomous_loop_improvement_status"]
+
+    assert result["execution_status"] == "pass"
+    assert improvement["status"] == "ok"
+    assert improvement["recommended_ticket_id"] is not None
+    assert improvement["draft_count"] >= 1
+    assert improvement["pending"] is True
+    assert improvement["source_weakness"] is not None
+
+
+def test_execute_safe_failed_loop_keeps_pre_run_improvement_status(
+    tmp_path: Path,
+) -> None:
+    _seed_done_only_queue(tmp_path)
+    artifact_dir = tmp_path / "data" / "reports" / "operator_autonomous_loop"
+    _write_pre_run_improvement_report(artifact_dir, recommended_id="ticket-old")
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    def failing_runner(argv: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+        if "autonomous-researcher-loop" in " ".join(argv):
+            return subprocess.CompletedProcess(argv, 1, stdout="", stderr="loop failed")
+        return subprocess.CompletedProcess(argv, 0, stdout="ok", stderr="")
+
+    with patch(
+        "rge.modules.operator_loop.safe_verification_commands",
+        return_value=[],
+    ):
+        result = execute_safe_checks(
+            root=tmp_path,
+            working_tree=clean_tree,
+            command_runner=failing_runner,
+        )
+
+    improvement = result["autonomous_loop_improvement_status"]
+
+    assert result["execution_status"] == "fail"
+    assert improvement["status"] == "ok"
+    assert improvement["recommended_ticket_id"] == "ticket-old"
+    assert improvement["source_weakness"] == "weak_concept_mapping"
+    assert improvement["draft_tickets"][0]["failure_reason"] == "weak_concept_mapping"
+
+
+def test_execute_safe_blocked_keeps_pre_run_improvement_status(tmp_path: Path) -> None:
+    _seed_done_only_queue(tmp_path)
+    dirty_tree = WorkingTreeStatus(clean=False, branch="main", dirty_paths=[" M x"])
+
+    result = execute_safe_checks(root=tmp_path, working_tree=dirty_tree)
+    improvement = result["autonomous_loop_improvement_status"]
+
+    assert result["execution_status"] == "blocked"
+    assert improvement["status"] == "not_run"
+    assert improvement["recommended_ticket_id"] is None

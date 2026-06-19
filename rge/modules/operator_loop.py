@@ -1498,6 +1498,9 @@ def execute_safe_checks(
         plan["autonomous_loop_scratch_status"] = inspect_autonomous_loop_scratch_artifact(
             root=project_root
         )
+        plan["autonomous_loop_improvement_status"] = (
+            inspect_autonomous_loop_improvement_artifact(root=project_root)
+        )
     return plan
 
 
