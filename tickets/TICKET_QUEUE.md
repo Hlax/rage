@@ -366,7 +366,8 @@ superseded
 | 338 | ticket-338 | done | Autonomous loop operator autocycle hook v0 | `phase-3/ticket-338-autonomous-loop-operator-autocycle-hook-v0` | `agent_reports/2026-06-18_phase-3_ticket-338_autonomous-loop-operator-autocycle-hook-v0.md` |
 | 339 | ticket-339 | done | Autonomous loop scratch artifact inspection in operator plan v0 | `phase-3/ticket-339-autonomous-loop-scratch-inspection-v0` | `agent_reports/2026-06-18_phase-3_ticket-339_autonomous-loop-scratch-inspection-v0.md` |
 | 358 | ticket-358 | done | Principal audit post-ticket-356 autonomous loop checkpoint | `phase-3/ticket-358-principal-audit-post-ticket-356` | `agent_reports/2026-06-18_phase-3_ticket-358_principal-audit-post-ticket-356.md` |
-| 357 | ticket-357 | proposed | Operator autocycle execute-safe recommended action reason sync from execution v0 | | |
+| 359 | ticket-359 | proposed | README operator quickstart execute-safe and autocycle reason sync v0 | | |
+| 357 | ticket-357 | done | Operator autocycle execute-safe recommended action reason sync from execution v0 | `phase-3/ticket-357-autocycle-execute-safe-reason-sync-v0` | `agent_reports/2026-06-18_phase-3_ticket-357_autocycle-execute-safe-reason-sync-v0.md` |
 | 356 | ticket-356 | done | Execute-safe post-run recommended action reason refresh after autonomous loop proof v0 | `phase-3/ticket-356-execute-safe-reason-refresh-v0` | `agent_reports/2026-06-18_phase-3_ticket-356_execute-safe-reason-refresh-v0.md` |
 | 355 | ticket-355 | done | README operator quickstart autonomous loop improvement reason enrichment v0 | `phase-3/ticket-355-readme-autonomous-loop-improvement-reason-v0` | `agent_reports/2026-06-18_phase-3_ticket-355_readme-autonomous-loop-improvement-reason-v0.md` |
 | 354 | ticket-354 | done | Autonomous loop operator plan improvement summary in recommended action v0 | `phase-3/ticket-354-autonomous-loop-improvement-summary-v0` | `agent_reports/2026-06-18_phase-3_ticket-354_autonomous-loop-improvement-summary-v0.md` |
@@ -1119,9 +1120,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-357 (proposed) — Operator autocycle execute-safe recommended action reason sync from execution v0
+ticket-359 (proposed) — README operator quickstart execute-safe and autocycle reason sync v0
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-357 autocycle execute-safe reason sync v0)
+
+- `run_autocycle` execute-safe syncs `recommended_action.reason` from execution on pass
+- Top-level summary exposes `recommended_action` from last cycle
+- Failed execute-safe leaves pre-run reason unchanged
+- ticket-359 seeded: README execute-safe and autocycle reason sync docs
+- Report: `agent_reports/2026-06-18_phase-3_ticket-357_autocycle-execute-safe-reason-sync-v0.md`
 
 ## Queue Notes (2026-06-18, ticket-358 principal audit post-ticket-356)
 

@@ -528,6 +528,9 @@ def run_autocycle(
                 refreshed_improvement = executed.get("autonomous_loop_improvement_status")
                 if refreshed_improvement:
                     evaluation["autonomous_loop_improvement_status"] = refreshed_improvement
+                refreshed_action = executed.get("next_recommended_action")
+                if refreshed_action:
+                    evaluation["recommended_action"] = refreshed_action
             if executed.get("execution_status") != "pass":
                 overall_status = "stopped"
                 final_stop_reason = "verification_failed"
@@ -553,6 +556,7 @@ def run_autocycle(
             "autonomous_loop_improvement_status"
         )
         or {},
+        "recommended_action": last.get("recommended_action") or {},
         "arbitrary_source_proof_bundle_status": last.get(
             "arbitrary_source_proof_bundle_status"
         )
