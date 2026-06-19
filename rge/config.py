@@ -100,15 +100,28 @@ def parse_staged_rank2_scan_max(raw: str | int | None = None) -> int:
     return value
 
 
+def _merge_env_files(env_file: Path | None = None) -> dict[str, str]:
+    """Load defaults plus optional ``.env`` / ``.env.local`` overlays."""
+    merged = dict(_DEFAULTS)
+    if env_file is not None:
+        merged.update(_read_env_file(env_file))
+        return merged
+    merged.update(_read_env_file(Path(".env")))
+    merged.update(_read_env_file(Path(".env.local")))
+    return merged
+
+
 def load_config(env_file: Path | None = None) -> RgeConfig:
-    """Load configuration from defaults, optional .env file, then os.environ.
+    """Load configuration from defaults, optional env files, then os.environ.
+
+    When ``env_file`` is omitted, reads ``.env`` then ``.env.local`` (gitignored
+    operator profile). Process environment variables always override file values.
 
     Raises ConfigError on values that cannot be parsed. Does not validate
     llm_mode here; the LLM registry fails closed on unknown modes so that the
     error surfaces at client-selection time with a clear message.
     """
-    merged = dict(_DEFAULTS)
-    merged.update(_read_env_file(env_file if env_file is not None else Path(".env")))
+    merged = _merge_env_files(env_file)
     for key in _DEFAULTS:
         if key in os.environ:
             merged[key] = os.environ[key]

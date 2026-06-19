@@ -117,7 +117,12 @@ def _source_id_by_title_fragment(conn: Any, fragment: str) -> str:
 
 
 def _env_flag_enabled(name: str) -> bool:
-    value = os.environ.get(name, "0").strip().casefold()
+    value = os.environ.get(name)
+    if value is None:
+        from rge.config import _merge_env_files
+
+        value = _merge_env_files().get(name, "0")
+    value = str(value).strip().casefold()
     return value in ("1", "true", "yes")
 
 
@@ -132,8 +137,17 @@ from rge.modules.staged_candidate_selection import (
 
 
 def _staged_rank_candidate_ids(conn: Any, question_id: str) -> tuple[str, str]:
-    rank1_candidate_id = select_rank1_staged_candidate_id(conn, question_id)
-    rank2_candidate_id = select_rank2_staged_candidate_id(conn, question_id)
+    live_orchestrator = _live_staged_orchestrator_enabled()
+    rank1_candidate_id = select_rank1_staged_candidate_id(
+        conn,
+        question_id,
+        live_orchestrator_fallback=live_orchestrator,
+    )
+    rank2_candidate_id = select_rank2_staged_candidate_id(
+        conn,
+        question_id,
+        live_orchestrator_fallback=live_orchestrator,
+    )
     return rank1_candidate_id, rank2_candidate_id
 
 

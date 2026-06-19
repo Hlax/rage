@@ -57,23 +57,37 @@ def count_staged_candidates(conn: Any, research_question_id: str) -> int:
     )
 
 
-def select_rank1_staged_candidate_id(conn: Any, research_question_id: str) -> str:
+def _candidate_has_pdf_route(url_candidates_json: str | None) -> bool:
+    if not url_candidates_json:
+        return False
+    return "pdf" in url_candidates_json.casefold()
+
+
+def select_rank1_staged_candidate_id(
+    conn: Any,
+    research_question_id: str,
+    *,
+    live_orchestrator_fallback: bool = False,
+) -> str:
     """Return the top-ranked discovered candidate id (rank index 0)."""
-    row = conn.execute(
+    rows = conn.execute(
         """
-        SELECT id FROM candidate_sources
+        SELECT id, url_candidates_json FROM candidate_sources
         WHERE research_question_id = ?
         ORDER BY priority_score DESC
-        LIMIT 1 OFFSET 0
         """,
         (research_question_id,),
-    ).fetchone()
-    if row is None:
+    ).fetchall()
+    if not rows:
         raise ValueError(
             "staged spine requires at least one candidate for "
             f"{research_question_id}"
         )
-    return str(row["id"])
+    if live_orchestrator_fallback:
+        for row in rows:
+            if _candidate_has_pdf_route(row["url_candidates_json"]):
+                return str(row["id"])
+    return str(rows[0]["id"])
 
 
 def select_rank2_staged_candidate_id(
@@ -82,6 +96,7 @@ def select_rank2_staged_candidate_id(
     *,
     min_candidates: int = 2,
     max_scan: int | None = None,
+    live_orchestrator_fallback: bool = False,
 ) -> str:
     """Return the first rank-2+ candidate whose title matches rank-2 spine heuristic."""
     effective_max_scan = (
@@ -113,6 +128,9 @@ def select_rank2_staged_candidate_id(
         title = str(row["title"] or "")
         if is_staged_rank2_fetch_spine_source(SimpleNamespace(title=title)):
             return candidate_id
+
+    if live_orchestrator_fallback and scanned_ids:
+        return scanned_ids[0]
 
     raise Rank2StagedCandidateNotFoundError(
         research_question_id=research_question_id,
