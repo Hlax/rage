@@ -1,0 +1,37 @@
+{
+  "id": "ticket-357",
+  "title": "Operator autocycle execute-safe recommended action reason sync from execution v0",
+  "problem": "Ticket-356 refreshes next_recommended_action.reason in operator loop execute-safe output after successful autonomous loop proof, but operator autocycle execute-safe stores execution without updating evaluation/summary reason from the refreshed payload.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-356_execute-safe-reason-refresh-v0.md",
+    "agent_reports/2026-06-18_phase-3_ticket-351_autocycle-execute-safe-improvement-sync-v0.md",
+    "rge/modules/operator_autocycle.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_autocycle.py",
+    "tests/unit"
+  ],
+  "expected_files": [
+    "rge/modules/operator_autocycle.py",
+    "tests/unit/test_operator_autocycle_autonomous_execute_safe_reason_sync.py",
+    "agent_reports/2026-06-18_phase-3_ticket-357_autocycle-execute-safe-reason-sync-v0.md"
+  ],
+  "acceptance_criteria": [
+    "After autocycle execute-safe pass, evaluation and summary next_recommended_action.reason match execution payload when present.",
+    "Failed autocycle execute-safe leaves pre-run reason unchanged.",
+    "No execute-safe command allowlist changes or queue writes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_autocycle_autonomous_execute_safe_reason_sync.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama runs.",
+    "README changes.",
+    "Public export or site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert autocycle reason execution sync only.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher"
+}
