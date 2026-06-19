@@ -1083,7 +1083,7 @@ Regression layer for fixture-mode chain:
 Golden MVP contract fixture remains at
 `fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json`.
 
-**Autonomous researcher loop operator visibility** (tickets 332–354; mock LLM only):
+**Autonomous researcher loop operator visibility** (tickets 332–357; mock LLM only):
 fixture-mode `autonomous-researcher-loop` proofs write to gitignored scratch paths only —
 no queue writes, no `export-public`, no ticket promotion.
 
@@ -1133,8 +1133,14 @@ re-reads `autonomous_loop_report.json` so `autonomous_loop_scratch_status` refle
 proof just written. Failed or blocked execute-safe runs leave the pre-run inspection
 unchanged.
 
+**Execute-safe post-run reason refresh** (ticket-356): after a **successful** execute-safe
+run when the recommended action is `run_autonomous_researcher_loop`, the execute-safe
+payload also rebuilds `next_recommended_action.reason` from the post-proof scratch and
+improvement summaries (tickets 341/354). Failed or blocked execute-safe runs leave the
+pre-run reason unchanged.
+
 **`autonomous_loop_improvement_status`** (operator plan and autocycle JSON; tickets
-348–354): read-only inspection of improvement artifacts referenced from the scratch
+348–357): read-only inspection of improvement artifacts referenced from the scratch
 `autonomous_loop_report.json` (`artifacts.improvement_tickets` and
 `artifacts.recommended_improvement_ticket`). Paths resolve under the scratch artifact dir
 — typically `data/reports/operator_autonomous_loop/tickets/` and
@@ -1173,6 +1179,12 @@ operator autocycle execute-safe run, `evaluation.autonomous_loop_improvement_sta
 and the autocycle summary sync from the refreshed `execution` payload (same pattern as
 scratch sync in ticket-346). Failed autocycle execute-safe leaves pre-run improvement
 status unchanged.
+
+**Autocycle execute-safe reason sync** (ticket-357): after a **successful** operator
+autocycle execute-safe run, `evaluation.recommended_action.reason` and the top-level
+summary `recommended_action` sync from the refreshed `execution.next_recommended_action`
+payload (same pattern as improvement sync in ticket-351). Failed autocycle execute-safe
+leaves the pre-run reason unchanged.
 
 Manual operator commands (not run by execute-safe allowlist):
 
