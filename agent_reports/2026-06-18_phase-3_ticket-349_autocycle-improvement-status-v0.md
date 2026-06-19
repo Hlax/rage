@@ -51,7 +51,7 @@ Safety audit not required — read-only JSON field passthrough.
 
 ## Merge to main
 
-Merge commit: *(pending merge)*
+Merge commit: `aeb3e185900e39e29de4a7c8491b086d9c2467ef`
 
 ## Recommended next ticket
 
