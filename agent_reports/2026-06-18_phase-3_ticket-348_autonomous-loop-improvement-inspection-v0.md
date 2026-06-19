@@ -51,7 +51,7 @@ Safety audit not required — read-only operator plan inspection.
 
 ## Merge to main
 
-Merge commit: *(pending merge)*
+Merge commit: `7d6fd044d415d4c8e35a80fa783f63de044f69e8`
 
 ## Recommended next ticket
 
