@@ -1,0 +1,38 @@
+{
+  "id": "ticket-363",
+  "title": "Autonomous loop improvement promotion golden proof",
+  "problem": "Autonomous researcher loop emits quality-driven improvement drafts but lacks a pytest proof that those drafts promote to builder-consumable queue ticket JSON through the existing review gate.",
+  "evidence": [
+    "agent_reports/2026-06-19_principal-audit-independent-repo-audit.md",
+    "tests/unit/test_autonomous_researcher_loop_proof.py",
+    "tests/golden/test_21_builder_ticket_consumption.py"
+  ],
+  "affected_modules": [
+    "tests/unit/test_autonomous_loop_improvement_promotion_proof.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_autonomous_loop_improvement_promotion_proof.py",
+    "tickets/ticket-363.json",
+    "agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md"
+  ],
+  "acceptance_criteria": [
+    "Autonomous loop quality-driven draft is actionable and persisted to improvement_tickets DB.",
+    "promote-improvement-ticket --confirm from DB produces valid tickets/<id>.json.",
+    "promote-improvement-ticket --confirm --from-json path works for loop artifact drafts.",
+    "Golden tests and full pytest pass in mock mode."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_autonomous_loop_improvement_promotion_proof.py",
+    "pytest tests/golden/test_21_builder_ticket_consumption.py",
+    "python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Auto-edit TICKET_QUEUE.md.",
+    "Auto-promote without --confirm.",
+    "Live Ollama or public export changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove promotion proof test module only.",
+  "status": "done",
+  "category": "Phase 3 / autonomous researcher loop"
+}
