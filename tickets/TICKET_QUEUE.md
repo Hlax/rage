@@ -365,7 +365,8 @@ superseded
 | 337 | ticket-337 | done | Autonomous researcher loop staged-spine mock orchestrator v0 | `phase-3/ticket-337-autonomous-loop-staged-spine-mock-v0` | `agent_reports/2026-06-18_phase-3_ticket-337_autonomous-loop-staged-spine-mock-v0.md` |
 | 338 | ticket-338 | done | Autonomous loop operator autocycle hook v0 | `phase-3/ticket-338-autonomous-loop-operator-autocycle-hook-v0` | `agent_reports/2026-06-18_phase-3_ticket-338_autonomous-loop-operator-autocycle-hook-v0.md` |
 | 339 | ticket-339 | done | Autonomous loop scratch artifact inspection in operator plan v0 | `phase-3/ticket-339-autonomous-loop-scratch-inspection-v0` | `agent_reports/2026-06-18_phase-3_ticket-339_autonomous-loop-scratch-inspection-v0.md` |
-| 351 | ticket-351 | proposed | Operator autocycle execute-safe improvement status sync from execution v0 | | |
+| 352 | ticket-352 | proposed | README operator quickstart autonomous loop improvement status fields v0 | | |
+| 351 | ticket-351 | done | Operator autocycle execute-safe improvement status sync from execution v0 | `phase-3/ticket-351-autocycle-execute-safe-improvement-sync-v0` | `agent_reports/2026-06-18_phase-3_ticket-351_autocycle-execute-safe-improvement-sync-v0.md` |
 | 350 | ticket-350 | done | Autonomous loop execute-safe improvement status refresh after proof v0 | `phase-3/ticket-350-autonomous-loop-execute-safe-improvement-refresh-v0` | `agent_reports/2026-06-18_phase-3_ticket-350_autonomous-loop-execute-safe-improvement-refresh-v0.md` |
 | 349 | ticket-349 | done | Autonomous loop improvement status in operator autocycle plan summary v0 | `phase-3/ticket-349-autocycle-improvement-status-v0` | `agent_reports/2026-06-18_phase-3_ticket-349_autocycle-improvement-status-v0.md` |
 | 348 | ticket-348 | done | Autonomous loop improvement ticket artifact inspection in operator plan v0 | `phase-3/ticket-348-autonomous-loop-improvement-inspection-v0` | `agent_reports/2026-06-18_phase-3_ticket-348_autonomous-loop-improvement-inspection-v0.md` |
@@ -1112,9 +1113,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-351 (proposed) — Operator autocycle execute-safe improvement status sync from execution v0
+ticket-352 (proposed) — README operator quickstart autonomous loop improvement status fields v0
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-351 operator autocycle execute-safe improvement status sync v0)
+
+- `run_autocycle` execute-safe syncs `autonomous_loop_improvement_status` from execution on pass
+- Failed execute-safe leaves pre-run improvement status unchanged
+- ticket-352 seeded: README Operator Quickstart improvement status fields
+- Report: `agent_reports/2026-06-18_phase-3_ticket-351_autocycle-execute-safe-improvement-sync-v0.md`
 
 ## Queue Notes (2026-06-18, ticket-350 autonomous loop execute-safe improvement status refresh v0)
 

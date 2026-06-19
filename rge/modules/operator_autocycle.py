@@ -525,6 +525,9 @@ def run_autocycle(
                 refreshed_scratch = executed.get("autonomous_loop_scratch_status")
                 if refreshed_scratch:
                     evaluation["autonomous_loop_scratch_status"] = refreshed_scratch
+                refreshed_improvement = executed.get("autonomous_loop_improvement_status")
+                if refreshed_improvement:
+                    evaluation["autonomous_loop_improvement_status"] = refreshed_improvement
             if executed.get("execution_status") != "pass":
                 overall_status = "stopped"
                 final_stop_reason = "verification_failed"
