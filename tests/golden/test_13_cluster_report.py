@@ -257,6 +257,11 @@ def test_cluster_report_triggers_when_threshold_met(
 
         assert report["report_type"] == "cluster_report"
         assert report["cluster_label"]
+        assert report["purpose"]["schema_version"] == "purpose_metadata_v0.1.0"
+        assert "evidence_review" in report["research_intent"]
+        assert "reasoning_training_candidate" in report["asset_affordance"]
+        assert report["evidence_maturity"] == "clustered"
+        assert report["training_suitability"] in {"candidate", "needs_human_review"}
         assert report["included_concepts"] == list(REQUIRED_CONCEPTS)
         assert report["supporting_claims"]
         assert report["qualifying_claims"] or report["contradicting_claims"]
@@ -269,7 +274,18 @@ def test_cluster_report_triggers_when_threshold_met(
         )
         assert packet["top_supporting_claims"]
         assert packet["top_qualifying_claims"] or packet["top_contradicting_claims"]
+        assert isinstance(packet["top_evidence_atoms"], list)
+        assert len(packet["top_evidence_atoms"]) >= 1
+        assert packet["top_evidence_atoms"][0]["atom_id"].startswith("atom_")
+        assert isinstance(packet["top_evidence_cards"], list)
+        assert len(packet["top_evidence_cards"]) >= 1
+        assert packet["top_evidence_cards"][0]["schema_version"] == "evidence_card_v0.1.0"
+        assert packet["top_evidence_cards"][0]["card_type"] == "evidence_claim"
+        assert packet["top_evidence_cards"][0]["quote"]
         assert packet["open_gaps"]
+        assert isinstance(report["acquisition_quality_summary"], dict)
+        assert report["acquisition_quality_summary"]["cluster_domain"] == "creativity"
+        assert len(report["acquisition_quality_summary"]["cluster_source_ids"]) >= 3
 
         claim_count = conn.execute(
             "SELECT COUNT(*) FROM claims WHERE status = 'accepted'"

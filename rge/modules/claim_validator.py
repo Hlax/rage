@@ -20,6 +20,7 @@ REJECTION_MISSING_QUOTE = "missing_quote_span"
 REJECTION_OVERGENERALIZED = "overgeneralized_scope"
 REJECTION_MISSING_SOURCE = "missing_source_id"
 REJECTION_UNSUPPORTED = "unsupported_claim"
+REJECTION_ZERO_QUOTEABLE = "zero_quoteable_spans"
 REJECTION_INJECTED_CONTENT = REJECTION_REASON_INJECTED_CONTENT
 
 _OVERGENERALIZED_CLAIM_PATTERNS = (
@@ -120,6 +121,70 @@ def locate_quote_offsets(
     return index_map[start_c], index_map[end_c] + 1
 
 
+def _sentence_context_for_quote(chunk_text: str, quote_span: str) -> str:
+    """Return the sentence-level source context that anchors a validated quote."""
+    quote = str(quote_span).strip()
+    if not quote:
+        return ""
+    start, end = locate_quote_offsets(quote, chunk_text)
+    if start is None or end is None:
+        return quote
+
+    sentence_start = start
+    while sentence_start > 0 and chunk_text[sentence_start - 1] not in ".!?\n":
+        sentence_start -= 1
+    sentence_end = end
+    while sentence_end < len(chunk_text) and chunk_text[sentence_end] not in ".!?\n":
+        sentence_end += 1
+    return chunk_text[sentence_start:sentence_end].strip()
+
+
+def _scope_entailed_by_source(
+    scope: str,
+    *,
+    quote_span: str,
+    chunk_text: str,
+    claim_text: str,
+) -> bool:
+    """Return True when scope is supported by quote context or grounded claim text."""
+    if _scope_supported_by_quote(
+        scope,
+        quote_span=quote_span,
+        chunk_text=chunk_text,
+    ):
+        return True
+    scope_norm = _normalize(scope)
+    if not scope_norm:
+        return True
+    if scope_norm not in _normalize(claim_text):
+        return False
+    return scope_norm in _normalize(chunk_text)
+
+
+def _scope_supported_by_quote(
+    scope: str,
+    *,
+    quote_span: str,
+    chunk_text: str,
+) -> bool:
+    """Return True when claim scope is entailed by quote or nearby source context."""
+    scope_norm = _normalize(scope)
+    if not scope_norm:
+        return True
+    quote_norm = _normalize(quote_span)
+    if scope_norm in quote_norm:
+        return True
+    context_norm = _normalize(_sentence_context_for_quote(chunk_text, quote_span))
+    if scope_norm in context_norm:
+        return True
+    start, _ = locate_quote_offsets(str(quote_span), chunk_text)
+    if start is not None and start > 0:
+        preamble_norm = _normalize(chunk_text[:start])
+        if scope_norm in preamble_norm:
+            return True
+    return False
+
+
 def validate_candidate_claim(
     candidate: dict[str, Any],
     *,
@@ -142,6 +207,17 @@ def validate_candidate_claim(
 
     if not _quote_in_chunk(str(quote_span), chunk_text):
         return "rejected", None, REJECTION_UNSUPPORTED
+
+    scope = candidate.get("scope")
+    if scope and str(scope).strip():
+        claim_text = str(candidate.get("claim_text") or "")
+        if not _scope_entailed_by_source(
+            str(scope),
+            quote_span=str(quote_span),
+            chunk_text=chunk_text,
+            claim_text=claim_text,
+        ):
+            return "rejected", None, REJECTION_OVERGENERALIZED
 
     if candidate_has_prompt_injection(candidate):
         return "rejected", None, REJECTION_INJECTED_CONTENT
@@ -235,6 +311,8 @@ def rejection_diagnostic(
 
     if reason == REJECTION_MISSING_QUOTE:
         return "quote_span is missing or empty"
+    if reason == REJECTION_ZERO_QUOTEABLE:
+        return "chunk has no quoteable spans for quote-first extraction"
     if reason == REJECTION_UNSUPPORTED:
         if not _quote_in_chunk(str(candidate.get("quote_span") or ""), chunk_text):
             return "quote_span is not an exact substring of the source chunk"

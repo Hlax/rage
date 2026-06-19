@@ -13,11 +13,13 @@ from pathlib import Path
 from typing import Any
 
 from rge.db.repositories import (
+    ResearchContractRepository,
     ResearchRunRepository,
     RunReportRepository,
     utc_now_iso,
 )
 from rge.modules.research_planner import GOLDEN_CONTRACT_ID, ensure_golden_contract
+from rge.modules.research_purpose import classify_research_purpose
 
 GOLDEN_RUN_ID = "run_golden_test_19"
 GOLDEN_TOPIC = "Does AI improve creative output while reducing diversity?"
@@ -88,7 +90,28 @@ def aggregate_run_metrics(conn: sqlite3.Connection) -> dict[str, int]:
         "tickets_generated": _scalar_count(
             conn, "SELECT COUNT(*) FROM improvement_tickets"
         ),
+        "evidence_atoms_created": _scalar_count(conn, "SELECT COUNT(*) FROM evidence_atoms"),
     }
+
+
+def _purpose_for_report(
+    conn: sqlite3.Connection,
+    *,
+    contract_id: str,
+    topic: str,
+    domain_pack: str,
+) -> dict[str, Any]:
+    contract = ResearchContractRepository(conn).get_by_id(contract_id)
+    if contract and contract.get("purpose_metadata"):
+        return dict(contract["purpose_metadata"])
+    return classify_research_purpose(topic, domain=domain_pack, question_id=contract_id)
+
+
+def _acquisition_quality_summary(conn: sqlite3.Connection) -> dict[str, Any]:
+    """Summarize acquisition and parser outcomes stored on source metadata."""
+    from rge.modules.acquisition_quality import acquisition_quality_summary
+
+    return acquisition_quality_summary(conn)
 
 
 def build_run_report(
@@ -103,6 +126,12 @@ def build_run_report(
     metrics = aggregate_run_metrics(conn)
     failure_modes = aggregate_top_failure_modes(conn)
     resolved_contract = contract_id or GOLDEN_CONTRACT_ID
+    purpose = _purpose_for_report(
+        conn,
+        contract_id=resolved_contract,
+        topic=topic,
+        domain_pack=domain_pack,
+    )
     return {
         "report_type": "run_report",
         "schema_version": REPORT_SCHEMA_VERSION,
@@ -110,6 +139,11 @@ def build_run_report(
         "topic": topic,
         "domain_pack": domain_pack,
         "contract_id": resolved_contract,
+        "purpose": purpose,
+        "research_intent": purpose["research_intent"],
+        "asset_affordance": purpose["asset_affordance"],
+        "evidence_maturity": purpose["evidence_maturity"],
+        "training_suitability": purpose["training_suitability"],
         "status": "informational",
         "created_at": utc_now_iso(),
         "sources_discovered": metrics["sources_discovered"],
@@ -122,6 +156,8 @@ def build_run_report(
         "cards_exported": metrics["cards_exported"],
         "cluster_reports_created": metrics["cluster_reports_created"],
         "theory_candidates_created": metrics["theory_candidates_created"],
+        "evidence_atoms_created": metrics["evidence_atoms_created"],
+        "acquisition_quality_summary": _acquisition_quality_summary(conn),
         "top_failure_modes": failure_modes,
         "tickets_generated": metrics["tickets_generated"],
         "safety_audit_status": "not_run",

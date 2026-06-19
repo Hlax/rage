@@ -24,6 +24,16 @@ from rge.db.repositories import (
     make_cluster_report_id,
     utc_now_iso,
 )
+from rge.modules.evidence_atoms import (
+    list_top_evidence_atoms,
+    promote_cluster_evidence_atoms,
+)
+from rge.modules.evidence_card_exporter import list_top_evidence_cards
+from rge.modules.acquisition_quality import cluster_acquisition_quality_summary
+from rge.modules.research_purpose import (
+    classify_research_purpose,
+    conservative_maturity_profile,
+)
 
 GOLDEN_CLAIM_THRESHOLD = 15
 GOLDEN_SOURCE_THRESHOLD = 3
@@ -254,6 +264,7 @@ def build_evidence_packet(
 ) -> dict[str, Any]:
     """Build a balanced evidence packet from cluster-linked claims."""
     claim_ids = _cluster_claim_ids(conn, domain=domain)
+    promote_cluster_evidence_atoms(conn, domain=domain, claim_ids=claim_ids)
     claim_id_set = set(claim_ids)
     by_stance = _claims_by_stance(conn, claim_id_set)
 
@@ -320,6 +331,12 @@ def build_evidence_packet(
             }
             for event in score_events
         ],
+        "top_evidence_atoms": list_top_evidence_atoms(conn, limit=5),
+        "top_evidence_cards": list_top_evidence_cards(
+            conn,
+            claim_ids=claim_ids,
+            limit=5,
+        ),
         "bridge_concepts": bridge_concepts,
         "open_gaps": list(GOLDEN_EVIDENCE_GAPS),
     }
@@ -354,6 +371,16 @@ def build_cluster_report(
     supporting = evidence_packet["top_supporting_claims"]
     contradicting = evidence_packet["top_contradicting_claims"]
     qualifying = evidence_packet["top_qualifying_claims"]
+    purpose = classify_research_purpose(
+        cluster_label,
+        domain=domain,
+        question_id=cluster_id,
+    )
+    maturity = conservative_maturity_profile(
+        accepted_claim_count=int(readiness["accepted_claims"]),
+        source_count=int(readiness["independent_sources"]),
+        has_disagreement=bool(contradicting or qualifying),
+    )
     linked_claim_ids = sorted(
         set(supporting) | set(contradicting) | set(qualifying) | set(_cluster_claim_ids(conn, domain=domain))
     )
@@ -362,6 +389,11 @@ def build_cluster_report(
         "report_type": "cluster_report",
         "cluster_id": cluster_id,
         "cluster_label": cluster_label,
+        "purpose": purpose,
+        "research_intent": purpose["research_intent"],
+        "asset_affordance": purpose["asset_affordance"],
+        "evidence_maturity": maturity["evidence_maturity"],
+        "training_suitability": maturity["training_suitability"],
         "included_concepts": list(GOLDEN_CLUSTER_CONCEPTS),
         "supporting_claims": supporting,
         "contradicting_claims": contradicting,
@@ -377,6 +409,10 @@ def build_cluster_report(
             "required_sources": GOLDEN_SOURCE_THRESHOLD,
             "formula_version": GOLDEN_FORMULA_VERSION,
         },
+        "acquisition_quality_summary": cluster_acquisition_quality_summary(
+            conn,
+            domain=domain,
+        ),
         "evidence_packet": evidence_packet,
     }
 

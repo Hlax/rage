@@ -19,11 +19,16 @@ from rge.llm.mock_client import MockModelClient
 from rge.llm.mode import effective_llm_mode
 from rge.llm.registry import get_model_client
 from rge.llm.schemas import CandidateClaimBatch_v0_1
-from rge.modules.claim_validator import locate_quote_offsets, validate_candidate_claims
+from rge.modules.claim_validator import (
+    REJECTION_ZERO_QUOTEABLE,
+    locate_quote_offsets,
+    validate_candidate_claims,
+)
 from rge.modules.manual_source_fixtures import (
     extract_fixture_for_manual_source,
     manual_text_lacks_extract_fixture,
 )
+from rge.modules.text_quality_gate import assess_chunk_extractability, gate_source_for_extraction
 from rge.safety.prompt_injection import source_text_has_prompt_injection_fixture
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -52,6 +57,10 @@ def _is_creativity_diversity_chunk(chunk_text: str) -> bool:
 def _is_staged_fetch_spine_chunk(chunk_text: str) -> bool:
     lowered = chunk_text.casefold()
     return "human-ai co-creativity" in lowered and "songwriting" in lowered
+
+
+def _is_staged_rank2_fetch_spine_chunk(chunk_text: str) -> bool:
+    return "constraint management" in chunk_text.casefold()
 
 
 def _pipeline_model_client(config=None):
@@ -104,15 +113,32 @@ def _default_fixture_for_source_chunk(
     return _default_fixture_for_chunk(chunk)
 
 
-def _default_fixture_for_chunk(chunk: dict[str, Any]) -> str:
-    chunk_text = chunk.get("chunk_text", "")
+def _mock_fixture_profile_for_chunk(
+    source: Any | None,
+    chunk: dict[str, Any],
+) -> str | None:
+    """Return a checksum-pinned mock fixture when the chunk matches a known profile."""
+    mapped = extract_fixture_for_manual_source(source)
+    if mapped:
+        return mapped
+    if source is not None and manual_text_lacks_extract_fixture(source):
+        return None
+    chunk_text = str(chunk.get("chunk_text") or "")
     if source_text_has_prompt_injection_fixture(chunk_text):
         return "claim_extraction_prompt_injection.json"
     if _is_staged_fetch_spine_chunk(chunk_text):
         return "staged_fetch_extract_claims.json"
+    if _is_staged_rank2_fetch_spine_chunk(chunk_text):
+        return "staged_fetch_second_candidate_extract_claims.json"
     if _is_creativity_diversity_chunk(chunk_text):
         return "claim_extraction_creativity_scoped.json"
-    return "claim_extraction_valid_and_missing_quote.json"
+    return None
+
+
+def _default_fixture_for_chunk(chunk: dict[str, Any]) -> str:
+    return _mock_fixture_profile_for_chunk(None, chunk) or (
+        "claim_extraction_valid_and_missing_quote.json"
+    )
 
 
 def source_has_staged_fetch_spine(chunks: list[Any]) -> bool:
@@ -129,10 +155,46 @@ def extract_and_validate_for_chunk(
     source: Any | None = None,
     live_manual_fallthrough: bool = False,
     live_staged_fallthrough: bool = False,
+    live_staged_rank2_fallthrough: bool = False,
     live_staged_ingest_fallthrough: bool = False,
+    skip_quoteability_gate: bool = False,
 ) -> dict[str, list[dict[str, Any]]]:
     """Extract candidates for one chunk and validate them deterministically."""
+    chunk_text = str(chunk.get("chunk_text") or "")
+    pinned_fixture = fixture_name or _mock_fixture_profile_for_chunk(source, chunk)
+    using_live_fallthrough = (
+        live_manual_fallthrough
+        or live_staged_fallthrough
+        or live_staged_rank2_fallthrough
+        or live_staged_ingest_fallthrough
+    )
+    if (
+        not skip_quoteability_gate
+        and pinned_fixture is None
+        and not using_live_fallthrough
+    ):
+        assessment = assess_chunk_extractability(chunk_text)
+        if not assessment["extractable"]:
+            return {
+                "accepted": [],
+                "rejected": [
+                    {
+                        "source_id": chunk.get("source_id"),
+                        "chunk_id": chunk.get("id"),
+                        "claim_text": "",
+                        "quote_span": "",
+                        "rejection_reason": REJECTION_ZERO_QUOTEABLE,
+                        "quality_gate": assessment,
+                    }
+                ],
+            }
+        contract_quote_hints = assessment.get("quoteable_spans") or []
+    else:
+        contract_quote_hints = []
+
     contract: dict[str, Any] = {"domain_pack": domain_pack}
+    if contract_quote_hints:
+        contract["quoteable_span_hints"] = contract_quote_hints[:3]
     if live_manual_fallthrough:
         contract["manual_text_arbitrary_live"] = True
     if live_staged_ingest_fallthrough:
@@ -176,6 +238,59 @@ def extract_claims_for_source(
         raise ValueError(f"Source has no chunks: {source_id}")
 
     claim_repo = ClaimRepository(conn)
+    cfg = config if config is not None else load_config()
+    using_mock_fixture = (
+        fixture_name is not None
+        or (
+            not live_manual_fallthrough
+            and not live_staged_fallthrough
+            and not live_staged_rank2_fallthrough
+            and not live_staged_ingest_fallthrough
+            and effective_llm_mode(cfg) == "mock"
+        )
+    )
+    using_live_fallthrough = (
+        live_manual_fallthrough
+        or live_staged_fallthrough
+        or live_staged_rank2_fallthrough
+        or live_staged_ingest_fallthrough
+    )
+    quality_gate = gate_source_for_extraction(source, chunks)
+    if (
+        not using_mock_fixture
+        and not using_live_fallthrough
+        and not quality_gate["allowed"]
+    ):
+        rejected = claim_repo.insert_rejected(
+            {
+                "source_id": source_id,
+                "chunk_id": chunks[0].id,
+                "claim_text": "",
+                "quote_span": "",
+                "subject": "",
+                "predicate": "",
+                "object": "",
+                "scope": "",
+                "evidence_type": "blocked",
+                "confidence": 0.0,
+                "limitations": [],
+                "domain": source.domain,
+            },
+            rejection_reason=str(quality_gate["reason"]),
+            extractor_provider="quality_gate",
+            extractor_model="text_quality_gate",
+            llm_schema_version=cfg.llm_schema_version,
+        )
+        return {
+            "status": "blocked_by_quality_gate",
+            "source_id": source_id,
+            "quality_gate": quality_gate,
+            "accepted_count": 0,
+            "rejected_count": 1,
+            "accepted_claim_ids": [],
+            "rejected_claim_ids": [rejected.id],
+        }
+
     if claim_repo.count_for_source(source_id) > 0:
         accepted = claim_repo.list_for_source(source_id, status="accepted")
         rejected = claim_repo.list_for_source(source_id, status="rejected")
@@ -207,7 +322,6 @@ def extract_claims_for_source(
             "Only one staged live fallthrough flag may be set per extraction run."
         )
 
-    cfg = config if config is not None else load_config()
     if live_staged_rank2_fallthrough:
         from rge.modules.staged_spine_heuristics import source_has_staged_rank2_fetch_spine
 
@@ -286,6 +400,7 @@ def extract_claims_for_source(
             source=source,
             live_manual_fallthrough=live_manual_fallthrough,
             live_staged_fallthrough=live_staged_fallthrough,
+            live_staged_rank2_fallthrough=live_staged_rank2_fallthrough,
             live_staged_ingest_fallthrough=live_staged_ingest_fallthrough,
         )
         for claim in result["accepted"]:

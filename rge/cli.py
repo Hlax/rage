@@ -1112,6 +1112,97 @@ def _cmd_generate_cluster_report(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_promote_evidence_atoms(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.modules.evidence_atoms import promote_accepted_claims_for_domain
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        result = promote_accepted_claims_for_domain(conn, domain=args.domain)
+        payload = {
+            "command": "promote-evidence-atoms",
+            **result,
+        }
+        print(json.dumps(payload, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "promote-evidence-atoms",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
+def _cmd_export_evidence_cards(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.modules.evidence_card_exporter import export_evidence_cards
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        output_dir = (
+            Path(args.output_dir)
+            if args.output_dir
+            else Path("data/exports/evidence_cards")
+        )
+        result = export_evidence_cards(
+            conn,
+            domain=args.domain,
+            output_dir=output_dir,
+            limit=args.limit,
+            include_atlas_preview=not args.no_atlas_preview,
+        )
+        print(json.dumps(result, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "export-evidence-cards",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
+def _cmd_export_asset_candidates(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.modules.asset_export_candidates import write_asset_candidates_bundle
+
+    db_path = Path(args.db) if args.db else None
+    conn = ensure_database(db_path)
+    try:
+        output_path = (
+            Path(args.output)
+            if args.output
+            else Path("data/exports/asset_candidates") / f"{args.domain}_asset_candidates.json"
+        )
+        result = write_asset_candidates_bundle(
+            conn,
+            domain=args.domain,
+            output_path=output_path,
+            limit=args.limit,
+        )
+        print(json.dumps(result, indent=2))
+        return 0
+    except ValueError as exc:
+        payload = {
+            "status": "error",
+            "command": "export-asset-candidates",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+    finally:
+        conn.close()
+
+
 def _cmd_generate_theory_candidates(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.db.repositories import TheoryCandidateRepository
@@ -2986,6 +3077,86 @@ def _cmd_ingest_staged(args: argparse.Namespace) -> int:
         conn.close()
 
 
+def _cmd_ingest_webpage(args: argparse.Namespace) -> int:
+    from rge.db.connection import ensure_database
+    from rge.db.repositories import SourceRepository, source_record_to_public_dict
+    from rge.modules.web_source_adapter import (
+        acquire_webpage_from_path,
+        load_webpage_artifact_from_path,
+        persist_webpage_artifact_staging,
+        run_ingest_webpage_pipeline,
+    )
+
+    if not args.html and not args.artifact:
+        payload = {
+            "status": "error",
+            "command": "ingest-webpage",
+            "reason": "missing_target",
+            "detail": "Either --html or --artifact is required.",
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+    db_path = Path(args.db) if args.db else None
+    staging_dir = Path(args.staging_dir) if getattr(args, "staging_dir", None) else None
+    if staging_dir is not None and not staging_dir.is_absolute():
+        staging_dir = _REPO_ROOT / staging_dir
+
+    try:
+        if args.artifact:
+            artifact_path = Path(args.artifact)
+            if not artifact_path.is_absolute():
+                artifact_path = _REPO_ROOT / artifact_path
+            artifact = load_webpage_artifact_from_path(artifact_path)
+        else:
+            html_path = Path(args.html)
+            if not html_path.is_absolute():
+                html_path = _REPO_ROOT / html_path
+            artifact = acquire_webpage_from_path(
+                html_path,
+                url=args.url,
+                title=args.source_title,
+            )
+            if staging_dir is not None:
+                persist_webpage_artifact_staging(artifact, staging_dir=staging_dir)
+    except (OSError, json.JSONDecodeError, ValueError) as exc:
+        payload = {
+            "status": "error",
+            "command": "ingest-webpage",
+            "detail": str(exc),
+        }
+        print(json.dumps(payload, indent=2))
+        return 1
+
+    conn = ensure_database(db_path)
+    try:
+        result = run_ingest_webpage_pipeline(
+            conn,
+            artifact,
+            domain=args.domain,
+            staging_dir=staging_dir,
+            persist_claims=not bool(args.no_extract),
+            fixture_name=args.fixture,
+        )
+        source = SourceRepository(conn).get_by_id(result.get("source_id") or "")
+        payload = {
+            **result,
+            "source": source_record_to_public_dict(source) if source else None,
+        }
+        print(json.dumps(payload, indent=2))
+        ingest_status = (result.get("ingest") or {}).get("status")
+        if ingest_status in {"blocked_dirty_text", "skipped"}:
+            return 1
+        if result.get("status") != "completed":
+            return 1
+        extract_status = (result.get("extract") or {}).get("status")
+        if extract_status == "blocked_by_quality_gate":
+            return 1
+        return 0
+    finally:
+        conn.close()
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="research",
@@ -3133,6 +3304,57 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
     )
     ingest_staged_parser.set_defaults(func=_cmd_ingest_staged)
+
+    ingest_webpage_parser = subparsers.add_parser(
+        "ingest-webpage",
+        help="Ingest a local HTML webpage fixture and optionally extract claims.",
+        description=(
+            "Normalize local HTML via web_source_adapter, persist clean text as "
+            "sources/chunks, and optionally run quote-first extract-claims. "
+            "No live network calls; use --html for fixture HTML or --artifact "
+            "for a staged webpage JSON."
+        ),
+    )
+    ingest_webpage_parser.add_argument(
+        "--html",
+        help="Path to local HTML file (fixture mode; no network).",
+    )
+    ingest_webpage_parser.add_argument(
+        "--artifact",
+        help="Path to staged webpage artifact JSON (alternative to --html).",
+    )
+    ingest_webpage_parser.add_argument(
+        "--url",
+        help="Override canonical URL stored in webpage metadata.",
+    )
+    ingest_webpage_parser.add_argument(
+        "--domain",
+        required=True,
+        help="Primary domain pack ID (e.g. creativity).",
+    )
+    ingest_webpage_parser.add_argument(
+        "--staging-dir",
+        help="Directory for staged .txt and optional .webpage.json artifacts "
+        "(default: data/sources/web).",
+    )
+    ingest_webpage_parser.add_argument(
+        "--source-title",
+        help="Override webpage title (default: HTML <title> or filename).",
+    )
+    ingest_webpage_parser.add_argument(
+        "--fixture",
+        help="Optional mock extract-claims fixture override.",
+    )
+    ingest_webpage_parser.add_argument(
+        "--no-extract",
+        action="store_true",
+        help="Skip quote-first extract-claims after ingest.",
+    )
+    ingest_webpage_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    ingest_webpage_parser.set_defaults(func=_cmd_ingest_webpage)
 
     extract_parser = subparsers.add_parser(
         "extract-claims",
@@ -3477,6 +3699,88 @@ def build_parser() -> argparse.ArgumentParser:
         help="Skip deterministic golden threshold padding (for negative tests).",
     )
     cluster_report_parser.set_defaults(func=_cmd_generate_cluster_report)
+
+    promote_atoms_parser = subparsers.add_parser(
+        "promote-evidence-atoms",
+        help="Promote accepted quote-backed claims into evidence atoms.",
+        description=(
+            "Deterministically promote accepted claims in a domain into "
+            "operator-private evidence_atoms rows."
+        ),
+    )
+    promote_atoms_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack ID for accepted claim promotion (default: creativity).",
+    )
+    promote_atoms_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    promote_atoms_parser.set_defaults(func=_cmd_promote_evidence_atoms)
+
+    export_evidence_cards_parser = subparsers.add_parser(
+        "export-evidence-cards",
+        help="Export operator-private canonical evidence cards for a domain.",
+        description=(
+            "Build evidence_card_v0.1.0 JSON from accepted quote-backed claims. "
+            "Writes operator-private exports only; does not widen export-public."
+        ),
+    )
+    export_evidence_cards_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack ID for accepted claim export (default: creativity).",
+    )
+    export_evidence_cards_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    export_evidence_cards_parser.add_argument(
+        "--output-dir",
+        help="Output directory for evidence_cards.json (default: data/exports/evidence_cards).",
+    )
+    export_evidence_cards_parser.add_argument(
+        "--limit",
+        type=int,
+        default=100,
+        help="Maximum accepted claims to export (default: 100).",
+    )
+    export_evidence_cards_parser.add_argument(
+        "--no-atlas-preview",
+        action="store_true",
+        help="Skip atlas-safe preview derivation and private-field scan.",
+    )
+    export_evidence_cards_parser.set_defaults(func=_cmd_export_evidence_cards)
+
+    export_asset_candidates_parser = subparsers.add_parser(
+        "export-asset-candidates",
+        help="Derive conservative eval/style export candidates from evidence atoms.",
+        description=(
+            "Build operator-private asset_export_candidates_v0.1.0 JSON from "
+            "persisted evidence atoms without exporting raw quotes."
+        ),
+    )
+    export_asset_candidates_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain for atom selection (default: creativity).",
+    )
+    export_asset_candidates_parser.add_argument(
+        "--db",
+        help="Optional SQLite database path (defaults to data/db/creative_research.sqlite).",
+    )
+    export_asset_candidates_parser.add_argument(
+        "--output",
+        help="Output JSON path (default: data/exports/asset_candidates/<domain>_asset_candidates.json).",
+    )
+    export_asset_candidates_parser.add_argument(
+        "--limit",
+        type=int,
+        default=50,
+        help="Maximum evidence atoms to scan (default: 50).",
+    )
+    export_asset_candidates_parser.set_defaults(func=_cmd_export_asset_candidates)
 
     theory_parser = subparsers.add_parser(
         "generate-theory-candidates",

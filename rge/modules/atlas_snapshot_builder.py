@@ -649,6 +649,14 @@ def build_atlas_snapshot_from_db(
     nodes = _build_concept_nodes(conn, domain_pack)
     edges = _build_relationship_edges(conn, domain_pack)
 
+    from rge.modules.evidence_card_exporter import build_atlas_evidence_cards_preview
+
+    evidence_cards_preview = build_atlas_evidence_cards_preview(
+        conn,
+        domain_pack=domain_pack,
+        limit=8,
+    )
+
     if fixture_mode:
         resolved_generated_at = generated_at or ATLAS_FIXTURE_GENERATED_AT
         resolved_snapshot_id = snapshot_id or ATLAS_FIXTURE_SNAPSHOT_ID
@@ -674,6 +682,7 @@ def build_atlas_snapshot_from_db(
         "clusters": _build_cluster_summaries(conn),
         "reports": _build_report_summaries(conn),
         "cards": cards,
+        "evidence_cards_preview": evidence_cards_preview,
         "follow_up_questions": _build_follow_up_questions(conn),
         "safety": {
             "public_safe": True,

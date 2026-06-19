@@ -1,0 +1,7 @@
+{
+  "id": "ticket-377",
+  "title": "Atlas snapshot evidence card preview projection with safety audit",
+  "problem": "Operator-private evidence cards exist but atlas snapshots and public preview JSON lacked a public-safe derived projection with audited boundary checks.",
+  "status": "done",
+  "category": "Phase 4 / evidence quality Packet 5 follow-on"
+}

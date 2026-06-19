@@ -59,6 +59,7 @@ class AtlasSnapshot_v0_1(BaseModel):
     clusters: list[dict[str, Any]] = Field(default_factory=list)
     reports: list[dict[str, Any]] = Field(default_factory=list)
     cards: list[dict[str, Any]] = Field(default_factory=list)
+    evidence_cards_preview: list[dict[str, Any]] = Field(default_factory=list)
     follow_up_questions: list[dict[str, Any]] = Field(default_factory=list)
     safety: AtlasSnapshotSafety_v0_1
 

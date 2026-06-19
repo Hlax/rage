@@ -282,6 +282,11 @@ def test_run_report_includes_required_counters_and_failure_modes(
         assert report["topic"] == GOLDEN_TOPIC
         assert report["domain_pack"] == "creativity"
         assert report["contract_id"] == GOLDEN_CONTRACT_ID
+        assert report["purpose"]["schema_version"] == "purpose_metadata_v0.1.0"
+        assert "evidence_review" in report["research_intent"]
+        assert "reasoning_training_candidate" in report["asset_affordance"]
+        assert report["evidence_maturity"] == "seed"
+        assert report["training_suitability"] == "not_ready"
         assert report["sources_discovered"] >= 1
         assert report["sources_ingested"] >= 2
         assert report["claims_extracted"] >= 2
@@ -289,6 +294,7 @@ def test_run_report_includes_required_counters_and_failure_modes(
         assert report["claims_rejected"] >= 1
         assert report["relationships_updated"] >= 1
         assert report["score_events_created"] >= 1
+        assert report["evidence_atoms_created"] == 0
         assert isinstance(report["top_failure_modes"], list)
         assert report["top_failure_modes"]
         reasons = {item["reason"] for item in report["top_failure_modes"]}

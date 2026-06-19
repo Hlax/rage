@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS research_contracts (
     success_criteria_json TEXT,
     source_strategy_json TEXT,
     evidence_requirements_json TEXT,
+    purpose_metadata_json TEXT,
     queue_priority_formula TEXT,
     topic_drift_formula TEXT,
     status TEXT,
@@ -173,6 +174,26 @@ CREATE TABLE IF NOT EXISTS score_events (
     reason TEXT,
     formula_version TEXT,
     created_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS evidence_atoms (
+    id TEXT PRIMARY KEY,                 -- atom_...
+    atom_type TEXT,
+    canonical_text TEXT,
+    source_claim_ids_json TEXT,
+    source_quote_ids_json TEXT,
+    concepts_json TEXT,
+    stance_profile_json TEXT,
+    support_count INTEGER,
+    contradiction_count INTEGER,
+    scope TEXT,
+    evidence_type TEXT,
+    asset_tags_json TEXT,
+    evidence_maturity TEXT,
+    training_suitability TEXT,
+    confidence TEXT,
+    created_at TEXT,
+    updated_at TEXT
 );
 
 -- Candidate discovery and queue ----------------------------------------------

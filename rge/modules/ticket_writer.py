@@ -131,6 +131,101 @@ GOLDEN_FAILURE_TEMPLATES: dict[str, dict[str, Any]] = {
     },
 }
 
+ACQUISITION_FAILURE_TEMPLATES: dict[str, dict[str, Any]] = {
+    "blocked_by_quality_gate": {
+        "priority": "high",
+        "title": "Remediate acquisition quality gate blocks",
+        "problem": (
+            "Sources failed text quality or quoteability gates before claim extraction."
+        ),
+        "affected_modules": [
+            "text_quality_gate",
+            "document_parser",
+            "selective_fulltext",
+        ],
+        "expected_files": [
+            "rge/modules/text_quality_gate.py",
+            "rge/modules/document_parser.py",
+            "tests/unit/test_text_quality_gate.py",
+        ],
+        "acceptance_criteria": [
+            "Dirty or unextractable sources are blocked with machine-readable reasons.",
+            "Run reports surface acquisition_quality_summary counts.",
+        ],
+        "test_plan": [
+            "pytest tests/unit/test_text_quality_gate.py",
+            "pytest tests/unit/test_acquisition_quality.py",
+        ],
+        "non_goals": ["Bypass quoteability gates for live sources."],
+        "risk_level": "medium",
+        "rollback_plan": "Revert quality gate threshold changes.",
+    },
+    "parse_failed": {
+        "priority": "high",
+        "title": "Improve PDF/TEI parse failure handling",
+        "problem": "Document parse failures block quote-grounded extraction.",
+        "affected_modules": ["document_parser", "selective_fulltext"],
+        "expected_files": [
+            "rge/modules/document_parser.py",
+            "tests/unit/test_document_parser.py",
+            "tests/golden/test_33_grobid_fixture_parse.py",
+        ],
+        "acceptance_criteria": [
+            "Parse failures emit parse_failed acquisition status in source metadata.",
+            "GROBID fixture proof passes without live network.",
+        ],
+        "test_plan": ["pytest tests/unit/test_document_parser.py"],
+        "non_goals": ["Live GROBID operator proof in CI."],
+        "risk_level": "medium",
+        "rollback_plan": "Revert parser backend selection changes.",
+    },
+    "webpage_dirty_text": {
+        "priority": "medium",
+        "title": "Improve webpage clean-text normalization",
+        "problem": (
+            "Webpage sources normalized to dirty_text and failed extraction readiness."
+        ),
+        "affected_modules": ["web_source_adapter", "text_quality_gate"],
+        "expected_files": [
+            "rge/modules/web_source_adapter.py",
+            "tests/unit/test_web_source_adapter.py",
+            "tests/unit/test_ingest_webpage_cli.py",
+        ],
+        "acceptance_criteria": [
+            "Fixture HTML ingests as clean_text_ready when quoteable spans exist.",
+            "Dirty webpage HTML is blocked before DB ingest.",
+        ],
+        "test_plan": ["pytest tests/unit/test_ingest_webpage_cli.py"],
+        "non_goals": ["Scrapling live network integration."],
+        "risk_level": "low",
+        "rollback_plan": "Revert web adapter normalization changes.",
+    },
+    "pdf_parser_unavailable": {
+        "priority": "medium",
+        "title": "Install or enable PDF parser backends",
+        "problem": (
+            "PDF sources report pdf_unavailable parser backend — no PyMuPDF/pypdf/GROBID path succeeded."
+        ),
+        "affected_modules": ["document_parser"],
+        "expected_files": [
+            "rge/modules/document_parser.py",
+            "tests/unit/test_document_parser.py",
+        ],
+        "acceptance_criteria": [
+            "Minimal PDF fixture parses to clean_text_ready or dirty_text, not pdf_unavailable.",
+        ],
+        "test_plan": ["pytest tests/unit/test_document_parser.py"],
+        "non_goals": ["Mandatory live GROBID in default CI."],
+        "risk_level": "low",
+        "rollback_plan": "Revert PDF backend dependency changes.",
+    },
+}
+
+IMPROVEMENT_FAILURE_TEMPLATES: dict[str, dict[str, Any]] = {
+    **GOLDEN_FAILURE_TEMPLATES,
+    **ACQUISITION_FAILURE_TEMPLATES,
+}
+
 QUALITY_WEAKNESS_SCORE_THRESHOLD = 50
 
 AUTONOMOUS_QUALITY_TEMPLATES: dict[str, dict[str, Any]] = {
@@ -596,10 +691,13 @@ def _build_ticket_report(
     failure_reason: str,
     failure_count: int,
     template: dict[str, Any],
+    supplemental_evidence: list[str] | None = None,
 ) -> dict[str, Any]:
     evidence = [
         f"run_report:{run_id}:{failure_reason}_count={failure_count}",
     ]
+    if supplemental_evidence:
+        evidence.extend(supplemental_evidence)
     return {
         "report_type": "improvement_ticket_report",
         "type": "improvement_ticket",
@@ -620,17 +718,58 @@ def _build_ticket_report(
     }
 
 
+def _collect_failure_mode_counts(run_report: dict[str, Any]) -> dict[str, int]:
+    """Merge top_failure_modes with acquisition_quality_summary signals."""
+    from rge.modules.acquisition_quality import failure_modes_from_acquisition_summary
+
+    mode_counts: dict[str, int] = {}
+    for mode in run_report.get("top_failure_modes", []):
+        reason = mode.get("reason")
+        if not reason:
+            continue
+        key = str(reason)
+        mode_counts[key] = mode_counts.get(key, 0) + int(mode.get("count", 0))
+
+    for mode in failure_modes_from_acquisition_summary(
+        run_report.get("acquisition_quality_summary")
+    ):
+        key = str(mode["reason"])
+        mode_counts[key] = max(mode_counts.get(key, 0), int(mode["count"]))
+
+    return mode_counts
+
+
+def _acquisition_evidence_lines(
+    run_id: str,
+    summary: dict[str, Any] | None,
+) -> list[str]:
+    if not summary:
+        return []
+    lines = [
+        f"acquisition_quality:{run_id}:sources_with_metadata="
+        f"{summary.get('sources_with_metadata', 0)}"
+    ]
+    for status, count in (summary.get("acquisition_status_counts") or {}).items():
+        lines.append(f"acquisition_quality:{run_id}:{status}_count={count}")
+    for backend, count in (summary.get("parser_backend_counts") or {}).items():
+        lines.append(f"acquisition_quality:{run_id}:parser_{backend}_count={count}")
+    return lines
+
+
 def write_improvement_tickets(run_report: dict[str, Any]) -> list[dict[str, Any]]:
     """Build improvement ticket reports from a run report failure-mode summary."""
     run_id = run_report.get("run_id", GOLDEN_RUN_ID)
+    mode_counts = _collect_failure_mode_counts(run_report)
+    acquisition_evidence = _acquisition_evidence_lines(
+        run_id,
+        run_report.get("acquisition_quality_summary"),
+    )
     tickets: list[dict[str, Any]] = []
-    for mode in run_report.get("top_failure_modes", []):
-        reason = mode.get("reason")
-        count = int(mode.get("count", 0))
-        template = GOLDEN_FAILURE_TEMPLATES.get(reason or "")
+    for reason, count in sorted(mode_counts.items()):
+        template = IMPROVEMENT_FAILURE_TEMPLATES.get(reason)
         if template is None or count < GOLDEN_MIN_FAILURE_COUNT:
             continue
-        if failure_mode_covered_by_golden_tests(reason or ""):
+        if failure_mode_covered_by_golden_tests(reason):
             continue
         tickets.append(
             _build_ticket_report(
@@ -638,6 +777,7 @@ def write_improvement_tickets(run_report: dict[str, Any]) -> list[dict[str, Any]
                 failure_reason=reason,
                 failure_count=count,
                 template=template,
+                supplemental_evidence=acquisition_evidence or None,
             )
         )
     return tickets

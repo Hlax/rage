@@ -82,6 +82,21 @@ INTENTIONALLY_OPTIONAL_GOLDEN_TESTS: dict[str, str] = {
     "tests/golden/test_30_research_spine_db.py": (
         "Research-run DB ingest and full-text claim persistence (fixture mode)."
     ),
+    "tests/golden/test_31_evidence_card_export.py": (
+        "Phase 4 operator-private evidence card export; does not widen public export."
+    ),
+    "tests/golden/test_32_ingest_webpage.py": (
+        "Phase 4 webpage adapter ingest pipeline; fixture HTML only, no network."
+    ),
+    "tests/golden/test_33_grobid_fixture_parse.py": (
+        "Phase 4 GROBID TEI fixture parse proof; mocked HTTP, no live GROBID."
+    ),
+    "tests/golden/test_34_asset_export_candidates.py": (
+        "Phase 4 conservative asset export candidates; qa_eval gated on clustered maturity."
+    ),
+    "tests/golden/test_35_acquisition_quality_tickets.py": (
+        "Phase 4 acquisition_quality_summary seeds improvement tickets and packet recommendations."
+    ),
 }
 
 META_GOLDEN_TEST_FILES = frozenset({"tests/golden/test_22_builder_golden_gate.py"})

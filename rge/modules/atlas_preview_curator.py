@@ -62,11 +62,19 @@ def curate_snapshot_for_public_preview(snapshot: dict[str, Any]) -> dict[str, An
 
 def validate_public_preview_snapshot(snapshot: dict[str, Any]) -> None:
     """Fail closed when preview snapshot violates contract or private-field policy."""
+    from rge.modules.evidence_card_exporter import audit_snapshot_evidence_cards_preview
+
     validate_atlas_snapshot(snapshot)
     violations = assert_no_private_fields(snapshot)
     if violations:
         raise ValueError(
             "Public atlas preview snapshot blocked: " + "; ".join(violations[:5])
+        )
+    preview_violations = audit_snapshot_evidence_cards_preview(snapshot)
+    if preview_violations:
+        raise ValueError(
+            "Public atlas evidence card preview blocked: "
+            + "; ".join(preview_violations[:5])
         )
 
 

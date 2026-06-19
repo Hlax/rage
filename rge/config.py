@@ -27,7 +27,7 @@ DEFAULT_STAGED_RANK2_SCAN_MAX = 10
 
 _DEFAULTS = {
     "OLLAMA_BASE_URL": "http://127.0.0.1:11434",
-    "RGE_LOCAL_LLM": "qwen2.5:7b",
+    "RGE_LOCAL_LLM": "qwen3.5:9b-q4_K_M",
     "RGE_LLM_MODE": "ollama",
     "RGE_TEST_LLM_MODE": "mock",
     "RGE_ALLOW_LIVE_LLM": "0",
@@ -38,7 +38,7 @@ _DEFAULTS = {
     "OPENALEX_MAILTO": "",
     "OPENALEX_API_KEY": "",
     "UNPAYWALL_EMAIL": "",
-    "RGE_LLM_TIMEOUT_SECONDS": "60",
+    "RGE_LLM_TIMEOUT_SECONDS": "180",
     "RGE_LLM_TEMPERATURE": "0",
     "RGE_LLM_SCHEMA_VERSION": "0.1.0",
     "RGE_EMBEDDING_MODE": "local_sentence_transformer",

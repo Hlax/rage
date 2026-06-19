@@ -24,6 +24,10 @@ PACKET_SELF_IMPROVEMENT = "MVP-P4-self-improvement"
 PACKET_SELECTIVE_FULLTEXT = "MVP-P5-selective-fulltext"
 PACKET_PDF_PARSER = "MVP-P6-pdf-parser-milestone"
 PACKET_DEMO_LOOP = "MVP-P7-demo-loop"
+PACKET_EVIDENCE_CARDS = "Phase4-P5-evidence-card-export"
+PACKET_WEB_ADAPTER = "Phase4-P6-web-adapter"
+PACKET_ASSET_EXPORT = "Phase4-P8-asset-export-candidates"
+PACKET_QUALITY_GATES = "Phase4-P3-quality-gates"
 
 REJECTION_UNSUPPORTED = "unsupported_claim"
 REJECTION_UNSUPPORTED_WALL = "unsupported_claim_wall"
@@ -75,10 +79,28 @@ PACKET_RECOMMENDATIONS: dict[str, dict[str, Any]] = {
         "priority": "medium",
     },
     REJECTION_ZERO_QUOTES: {
-        "recommended_packet": PACKET_ABSTRACT_EVIDENCE,
-        "title": "Quote-first extraction prompt tuning",
+        "recommended_packet": PACKET_QUALITY_GATES,
+        "title": "Text quality / quoteability gates",
         "rationale": "Text exists but yielded zero quoteable spans for grounding.",
         "priority": "high",
+    },
+    "blocked_by_quality_gate": {
+        "recommended_packet": PACKET_QUALITY_GATES,
+        "title": "Acquisition quality gate remediation",
+        "rationale": "Extraction blocked before LLM due to dirty or unextractable source text.",
+        "priority": "high",
+    },
+    "webpage_dirty_text": {
+        "recommended_packet": PACKET_WEB_ADAPTER,
+        "title": "Web adapter clean-text normalization",
+        "rationale": "Webpage HTML normalized to dirty_text; improve extraction adapter or source selection.",
+        "priority": "medium",
+    },
+    "asset_export_backlog": {
+        "recommended_packet": PACKET_ASSET_EXPORT,
+        "title": "Derived asset export candidates",
+        "rationale": "Evidence atoms exist but no conservative eval/style export candidates were derived.",
+        "priority": "low",
     },
     REJECTION_UNSUPPORTED: {
         "recommended_packet": PACKET_ABSTRACT_EVIDENCE,
@@ -108,6 +130,15 @@ PACKET_RECOMMENDATIONS: dict[str, dict[str, Any]] = {
         "recommended_packet": PACKET_FIELD_MAP,
         "title": "Field-map synthesis / concept linking",
         "rationale": "Accepted claims exist but synthesis/report quality is weak.",
+        "priority": "medium",
+    },
+    "pdf_parser_unavailable": {
+        "recommended_packet": PACKET_PDF_PARSER,
+        "title": "PDF parser backend availability",
+        "rationale": (
+            "PDF sources report pdf_unavailable parser backend — install or enable "
+            "PyMuPDF/pypdf/GROBID path."
+        ),
         "priority": "medium",
     },
 }
@@ -247,6 +278,39 @@ def recommend_from_abstract_evidence_run(
     return recommendation
 
 
+def recommend_from_run_report(run_report: dict[str, Any]) -> dict[str, Any]:
+    """Build packet recommendation from a persisted run report JSON."""
+    from rge.modules.acquisition_quality import failure_modes_from_acquisition_summary
+
+    rejection_reasons: list[str] = []
+    for item in run_report.get("top_failure_modes") or []:
+        reason = item.get("reason")
+        count = int(item.get("count") or 0)
+        if reason:
+            rejection_reasons.extend([str(reason)] * count)
+
+    summary = run_report.get("acquisition_quality_summary") or {}
+    for mode in failure_modes_from_acquisition_summary(summary):
+        rejection_reasons.extend([str(mode["reason"])] * int(mode["count"]))
+
+    source_statuses: list[str] = []
+    for status, count in summary.get("acquisition_status_counts", {}).items():
+        source_statuses.extend([str(status)] * int(count))
+
+    metrics: dict[str, Any] = {
+        "claims_accepted": run_report.get("claims_accepted", 0),
+        "claims_rejected": run_report.get("claims_rejected", 0),
+        "source_status_counts": summary.get("acquisition_status_counts") or {},
+    }
+    recommendation = recommend_improvement_packet(
+        rejection_reasons=rejection_reasons,
+        source_statuses=source_statuses,
+        run_metrics=metrics,
+    )
+    recommendation["source_run"] = "run_report"
+    return recommendation
+
+
 def run_recommend_improvement_packet_command(
     *,
     run_report_path: str | None = None,
@@ -266,19 +330,7 @@ def run_recommend_improvement_packet_command(
 
     if run_report_path:
         report = json.loads(Path(run_report_path).read_text(encoding="utf-8"))
-        rejection_reasons = [
-            str(item.get("reason"))
-            for item in report.get("top_failure_modes") or []
-            for _ in range(int(item.get("count") or 0))
-        ]
-        metrics = {
-            "claims_accepted": report.get("claims_accepted", 0),
-            "claims_rejected": report.get("claims_rejected", 0),
-        }
-        result = recommend_improvement_packet(
-            rejection_reasons=rejection_reasons,
-            run_metrics=metrics,
-        )
+        result = recommend_from_run_report(report)
         return {**payload_base, **result, "input": "run_report"}, 0
 
     if abstract_evidence_path:

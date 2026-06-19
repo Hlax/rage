@@ -287,6 +287,160 @@
       "updated_at": "2026-06-12T00:00:00Z"
     }
   ],
+  "evidence_cards_preview": [
+    {
+      "card_type": "evidence_claim",
+      "summary": "AI-assisted brainstorming can increase rated idea diversity under explicit divergent-generation instructions.",
+      "source_type": "fixture",
+      "source_title": "creativity_ai_diversity_followup_short.txt",
+      "evidence_type": "synthetic_fixture",
+      "stance": "supports",
+      "evidence_maturity": "seed",
+      "asset_tags": [
+        "reasoning_training_candidate",
+        "argument_map_candidate"
+      ],
+      "confidence": "medium",
+      "concepts": [
+        "ideation"
+      ],
+      "scope": "fixture-derived cluster padding",
+      "limitations_count": 1
+    },
+    {
+      "card_type": "evidence_claim",
+      "summary": "AI assistance may raise ideation throughput without guaranteeing originality gains in professional creative work.",
+      "source_type": "fixture",
+      "source_title": "creativity_ai_diversity_contradiction.txt",
+      "evidence_type": "synthetic_fixture",
+      "stance": "supports",
+      "evidence_maturity": "seed",
+      "asset_tags": [
+        "reasoning_training_candidate",
+        "argument_map_candidate"
+      ],
+      "confidence": "medium",
+      "concepts": [
+        "ideation"
+      ],
+      "scope": "fixture-derived cluster padding",
+      "limitations_count": 1
+    },
+    {
+      "card_type": "evidence_claim",
+      "summary": "Originality claims require stronger cross-source replication before cluster-level synthesis.",
+      "source_type": "fixture",
+      "source_title": "creativity_ai_diversity_short.txt",
+      "evidence_type": "synthetic_fixture",
+      "stance": "supports",
+      "evidence_maturity": "seed",
+      "asset_tags": [
+        "reasoning_training_candidate",
+        "argument_map_candidate"
+      ],
+      "confidence": "medium",
+      "concepts": [
+        "ideation"
+      ],
+      "scope": "fixture-derived cluster padding",
+      "limitations_count": 1
+    },
+    {
+      "card_type": "evidence_claim",
+      "summary": "Semantic diversity trade-offs may be task-specific rather than universal across creative domains.",
+      "source_type": "fixture",
+      "source_title": "creativity_ai_diversity_followup_short.txt",
+      "evidence_type": "synthetic_fixture",
+      "stance": "supports",
+      "evidence_maturity": "seed",
+      "asset_tags": [
+        "reasoning_training_candidate",
+        "argument_map_candidate"
+      ],
+      "confidence": "medium",
+      "concepts": [
+        "semantic diversity"
+      ],
+      "scope": "fixture-derived cluster padding",
+      "limitations_count": 1
+    },
+    {
+      "card_type": "evidence_claim",
+      "summary": "AI assistance may raise ideation throughput without guaranteeing originality gains in professional creative work.",
+      "source_type": "fixture",
+      "source_title": "creativity_ai_diversity_short.txt",
+      "evidence_type": "synthetic_fixture",
+      "stance": "supports",
+      "evidence_maturity": "seed",
+      "asset_tags": [
+        "reasoning_training_candidate",
+        "argument_map_candidate"
+      ],
+      "confidence": "medium",
+      "concepts": [
+        "originality"
+      ],
+      "scope": "fixture-derived cluster padding",
+      "limitations_count": 1
+    },
+    {
+      "card_type": "evidence_claim",
+      "summary": "Ideation-phase AI assistance may shift selection burden rather than eliminate creative judgment.",
+      "source_type": "fixture",
+      "source_title": "creativity_ai_diversity_contradiction.txt",
+      "evidence_type": "synthetic_fixture",
+      "stance": "supports",
+      "evidence_maturity": "seed",
+      "asset_tags": [
+        "reasoning_training_candidate",
+        "argument_map_candidate"
+      ],
+      "confidence": "medium",
+      "concepts": [
+        "AI assistance"
+      ],
+      "scope": "fixture-derived cluster padding",
+      "limitations_count": 1
+    },
+    {
+      "card_type": "evidence_claim",
+      "summary": "Originality ratings for AI-assisted outputs vary by task framing and participant instructions.",
+      "source_type": "fixture",
+      "source_title": "creativity_ai_diversity_short.txt",
+      "evidence_type": "synthetic_fixture",
+      "stance": "supports",
+      "evidence_maturity": "seed",
+      "asset_tags": [
+        "reasoning_training_candidate",
+        "argument_map_candidate"
+      ],
+      "confidence": "medium",
+      "concepts": [
+        "semantic diversity"
+      ],
+      "scope": "fixture-derived cluster padding",
+      "limitations_count": 1
+    },
+    {
+      "card_type": "evidence_claim",
+      "summary": "Originality evidence remains sparse relative to diversity metrics in current fixture sources.",
+      "source_type": "fixture",
+      "source_title": "creativity_ai_diversity_short.txt",
+      "evidence_type": "synthetic_fixture",
+      "stance": "supports",
+      "evidence_maturity": "seed",
+      "asset_tags": [
+        "reasoning_training_candidate",
+        "argument_map_candidate"
+      ],
+      "confidence": "medium",
+      "concepts": [
+        "AI assistance"
+      ],
+      "scope": "fixture-derived cluster padding",
+      "limitations_count": 1
+    }
+  ],
   "follow_up_questions": [
     {
       "id": "que_71bb9ab6a8a7bc76",

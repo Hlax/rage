@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>GROBID fixture: Human-AI co-creativity and semantic diversity</title>
+      </titleStmt>
+    </fileDesc>
+  </teiHeader>
+  <text>
+    <body>
+      <p>Human-AI co-creativity supports diverse songwriting outputs when teams iterate on lyrical drafts together.</p>
+      <p>Participants reported broader semantic diversity when AI suggestions were treated as optional prompts rather than final lyrics.</p>
+    </body>
+  </text>
+</TEI>

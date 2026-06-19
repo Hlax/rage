@@ -1,0 +1,49 @@
+{
+  "id": "ticket-372",
+  "title": "Operator-private evidence card export and atlas-safe previews",
+  "problem": "Canonical evidence_card_v0.1.0 exists but has no export path, cluster reports lack top_evidence_cards, and atlas/frontend cannot consume a safe derived preview without widening export-public.",
+  "evidence": [
+    "agent_reports/rge_next_features_data_quality_evidence_atoms.md Packet 5",
+    "agent_reports/2026-06-19_phase-4_packets-002-004_evidence-quality-extraction-closeout.md",
+    "build_evidence_card_for_claim() exists but is operator-only"
+  ],
+  "affected_modules": [
+    "rge/modules/evidence_card_exporter.py",
+    "rge/modules/cluster_reporter.py",
+    "rge/cli.py",
+    "tests/unit/test_evidence_card_exporter.py",
+    "tests/golden/test_31_evidence_card_export.py"
+  ],
+  "expected_files": [
+    "rge/modules/evidence_card_exporter.py",
+    "rge/modules/cluster_reporter.py",
+    "rge/cli.py",
+    "tests/unit/test_evidence_card_exporter.py",
+    "tests/golden/test_31_evidence_card_export.py",
+    "tests/golden/test_00_scaffold.py",
+    "tests/golden/test_13_cluster_report.py",
+    "tickets/ticket-372.json",
+    "agent_reports/2026-06-19_phase-4_ticket-372_evidence-card-export.md"
+  ],
+  "acceptance_criteria": [
+    "export-evidence-cards CLI writes deterministic evidence_card_export_v0.1.0 JSON under data/exports/evidence_cards or --output-dir.",
+    "Cluster evidence packets include top_evidence_cards with evidence_card_v0.1.0 shape.",
+    "Atlas-safe previews omit quote/IDs and pass private-field key scan.",
+    "export-public allowlist unchanged; golden test 11 unaffected."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_evidence_card_exporter.py",
+    "pytest tests/golden/test_31_evidence_card_export.py",
+    "pytest tests/golden/test_13_cluster_report.py",
+    "python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Public export allowlist changes",
+    "apps/public-site evidence card UI",
+    "Live Ollama proof"
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove export-evidence-cards CLI and cluster top_evidence_cards field.",
+  "status": "done",
+  "category": "Phase 4 / evidence quality Packet 5"
+}

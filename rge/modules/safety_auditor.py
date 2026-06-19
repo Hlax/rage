@@ -281,6 +281,19 @@ def _audit_atlas_preview_public_data(root: Path) -> tuple[list[str], list[str]]:
         )
         checked.extend(file_checked)
         blocked.extend(file_blocked)
+        if name == "atlas_snapshot_preview.json":
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                blocked.append(f"invalid JSON in atlas preview file: {name}")
+            else:
+                from rge.modules.evidence_card_exporter import (
+                    audit_snapshot_evidence_cards_preview,
+                )
+
+                preview_violations = audit_snapshot_evidence_cards_preview(payload)
+                for violation in preview_violations:
+                    blocked.append(f"{name}: {violation}")
     return checked, blocked
 
 

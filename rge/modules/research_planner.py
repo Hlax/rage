@@ -17,6 +17,7 @@ from rge.modules.domain_pack_loader import (
     search_template_topic_signals,
     source_strategy_from_search_templates,
 )
+from rge.modules.research_purpose import classify_research_purpose
 
 REASON_OUT_OF_SCOPE = "out_of_scope_topic_drift"
 REASON_ON_SCOPE = "On-scope follow-up aligned with contract concepts."
@@ -61,6 +62,31 @@ GOLDEN_CONTRACT: dict[str, Any] = {
     "success_criteria": [],
     "source_strategy": {},
     "evidence_requirements": {},
+    "purpose_metadata": {
+        "schema_version": "purpose_metadata_v0.1.0",
+        "question_id": DEFAULT_RESEARCH_QUESTION_ID,
+        "question": "How does AI assistance affect originality in creative work?",
+        "domain": "creativity",
+        "research_intent": ["theory_building", "evidence_review"],
+        "asset_affordance": [
+            "reasoning_training_candidate",
+            "argument_map_candidate",
+            "concept_ontology_candidate",
+        ],
+        "evidence_need": "mixed_empirical_theory",
+        "acceptable_source_types": [
+            "paper",
+            "abstract",
+            "essay",
+            "book",
+            "interview",
+            "webpage",
+        ],
+        "output_targets": ["cluster_report", "evidence_cards", "atlas_map"],
+        "evidence_maturity": "seed",
+        "training_suitability": "not_ready",
+        "classifier_version": "purpose_classifier_v0.1.0",
+    },
     "queue_priority_formula": "golden_v0.1.0",
     "topic_drift_formula": "golden_v0.1.0",
     "status": "active",
@@ -106,6 +132,21 @@ def _matches_out_of_scope(question_text: str, out_of_scope_concepts: list[str]) 
 def _pack_for_contract(contract: dict[str, Any]) -> DomainPack:
     pack_id = str(contract.get("domain_pack", "creativity")).strip() or "creativity"
     return load_domain_pack(pack_id)
+
+
+def _attach_purpose_metadata(
+    contract: dict[str, Any],
+    *,
+    question_id: str = DEFAULT_RESEARCH_QUESTION_ID,
+) -> dict[str, Any]:
+    if contract.get("purpose_metadata"):
+        return contract
+    contract["purpose_metadata"] = classify_research_purpose(
+        str(contract.get("primary_question") or contract.get("root_topic") or ""),
+        domain=str(contract.get("domain_pack") or "general"),
+        question_id=question_id,
+    )
+    return contract
 
 
 def _score_followup(
@@ -257,6 +298,7 @@ def ensure_golden_contract(conn: Any) -> dict[str, Any]:
     if existing is not None:
         return existing
     contract = dict(GOLDEN_CONTRACT)
+    _attach_purpose_metadata(contract)
     pack = load_domain_pack(str(contract["domain_pack"]))
     contract["source_strategy"] = source_strategy_from_search_templates(pack)
     return repo.insert(contract)
@@ -268,7 +310,8 @@ def create_research_contract(topic: str, domain_pack: str) -> dict[str, Any]:
     contract["root_topic"] = topic
     contract["primary_question"] = topic
     contract["domain_pack"] = domain_pack
-    return contract
+    contract.pop("purpose_metadata", None)
+    return _attach_purpose_metadata(contract)
 
 
 def _repo_root() -> Path:

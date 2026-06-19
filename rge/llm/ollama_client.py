@@ -138,6 +138,7 @@ class OllamaModelClient(ModelClient):
             "prompt": prompt,
             "stream": False,
             "format": "json",
+            "think": False,
             "options": {"temperature": self.temperature},
         }
         request = urllib.request.Request(
@@ -238,6 +239,14 @@ class OllamaModelClient(ModelClient):
         manual_calibration = (
             self._manual_text_arbitrary_live_calibration() if manual_text_mode else ""
         )
+        quote_hints = contract.get("quoteable_span_hints") or []
+        quote_hint_block = ""
+        if quote_hints:
+            quoted = "\n".join(f'- "{span}"' for span in quote_hints)
+            quote_hint_block = (
+                "Deterministic quoteable span hints from Python (copy exactly):\n"
+                f"{quoted}\n\n"
+            )
         return (
             f"You are a research extraction assistant for domain pack {domain_pack!r}.\n"
             f"{UNTRUSTED_SOURCE_PREAMBLE}\n\n"
@@ -246,8 +255,10 @@ class OllamaModelClient(ModelClient):
             f"--- UNTRUSTED SOURCE TEXT END ---\n\n"
             f"Research contract context (JSON): {json.dumps(contract, ensure_ascii=False)}\n\n"
             f"{manual_calibration}"
-            "Rules for each claim:\n"
-            "- quote_span MUST be an exact contiguous substring from the source text.\n"
+            f"{quote_hint_block}"
+            "Quote-first extraction rules:\n"
+            "- Select an exact quote_span from the source text FIRST.\n"
+            "- Derive claim_text only from that quote_span; do not invent topic-shaped claims.\n"
             "- scope MUST be a short, specific boundary phrase (population, task, or setting).\n"
             "- scope SHOULD be concise (about 3-7 words); avoid long multi-clause scope strings.\n"
             "- claim_text MUST include the scope phrase verbatim (same wording as scope).\n"

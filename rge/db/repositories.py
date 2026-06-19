@@ -2090,7 +2090,8 @@ class ResearchContractRepository:
                    out_of_scope_concepts_json, source_budget, search_budget,
                    follow_up_depth, drift_threshold, success_criteria_json,
                    source_strategy_json, evidence_requirements_json,
-                   queue_priority_formula, topic_drift_formula, status,
+                   purpose_metadata_json, queue_priority_formula,
+                   topic_drift_formula, status,
                    created_at, updated_at
             FROM research_contracts
             WHERE id = ?
@@ -2118,6 +2119,7 @@ class ResearchContractRepository:
             "evidence_requirements": json.loads(
                 row["evidence_requirements_json"] or "{}"
             ),
+            "purpose_metadata": json.loads(row["purpose_metadata_json"] or "{}"),
             "queue_priority_formula": row["queue_priority_formula"],
             "topic_drift_formula": row["topic_drift_formula"],
             "status": row["status"],
@@ -2136,9 +2138,9 @@ class ResearchContractRepository:
                 out_of_scope_concepts_json, source_budget, search_budget,
                 follow_up_depth, drift_threshold, success_criteria_json,
                 source_strategy_json, evidence_requirements_json,
-                queue_priority_formula, topic_drift_formula, status,
+                purpose_metadata_json, queue_priority_formula, topic_drift_formula, status,
                 created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO NOTHING
             """,
             (
@@ -2156,6 +2158,7 @@ class ResearchContractRepository:
                 json.dumps(contract.get("success_criteria", [])),
                 json.dumps(contract.get("source_strategy", {})),
                 json.dumps(contract.get("evidence_requirements", {})),
+                json.dumps(contract.get("purpose_metadata", {})),
                 contract.get("queue_priority_formula", "golden_v0.1.0"),
                 contract.get("topic_drift_formula", "golden_v0.1.0"),
                 contract.get("status", "active"),
