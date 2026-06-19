@@ -80,6 +80,8 @@ $env:RGE_GROBID_URL = "http://127.0.0.1:8070"
 
 **GO** — mock verification green; DB persist path proven; live selective fetch gated and test-covered (`live_network` marker).
 
-## Recommended next ticket
+## Staged orchestrator wiring (follow-up)
 
-Wire selective full-text acquisition into staged orchestrator post-ingest (or document as operator-only parallel path) and run one-time live selective fetch operator proof on temp DB.
+When `RGE_ALLOW_STAGED_SELECTIVE_FULLTEXT=1`, `execute_staged_fixture_mode_run` runs supplemental selective full-text acquisition for rank-1/rank-2 staged candidates after the dual-spine report, persisting clean full-text sources and mock claims via `wire_staged_orchestrator_selective_fulltext`. Default off — golden staged counts unchanged.
+
+Fixture-mode staged runs map `disc_openalex_W2741809807` / `disc_openalex_W1234567890` to manual resolver fixtures for mock full-text acquisition.

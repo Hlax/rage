@@ -33,6 +33,7 @@ _DEFAULTS = {
     "RGE_ALLOW_LIVE_LLM": "0",
     "RGE_ALLOW_SOURCE_NETWORK": "0",
     "RGE_ALLOW_LIVE_SELECTIVE_FETCH": "0",
+    "RGE_ALLOW_STAGED_SELECTIVE_FULLTEXT": "0",
     "RGE_GROBID_URL": "",
     "OPENALEX_MAILTO": "",
     "OPENALEX_API_KEY": "",
@@ -71,6 +72,7 @@ class RgeConfig:
     allow_live_llm: bool
     allow_source_network: bool
     allow_live_selective_fetch: bool
+    allow_staged_selective_fulltext: bool
     grobid_url: str
     openalex_mailto: str
     openalex_api_key: str
@@ -173,6 +175,21 @@ def load_config(env_file: Path | None = None) -> RgeConfig:
             "Use 1/true/yes to enable live selective full-text fetch or 0/false/no."
         )
 
+    staged_selective_raw = merged.get(
+        "RGE_ALLOW_STAGED_SELECTIVE_FULLTEXT", "0"
+    ).strip().casefold()
+    if staged_selective_raw in ("1", "true", "yes"):
+        allow_staged_selective_fulltext = True
+    elif staged_selective_raw in ("0", "false", "no", ""):
+        allow_staged_selective_fulltext = False
+    else:
+        raise ConfigError(
+            "Invalid RGE_ALLOW_STAGED_SELECTIVE_FULLTEXT="
+            f"{merged.get('RGE_ALLOW_STAGED_SELECTIVE_FULLTEXT')!r}. "
+            "Use 1/true/yes to enable staged orchestrator selective full-text wiring "
+            "or 0/false/no."
+        )
+
     return RgeConfig(
         ollama_base_url=merged["OLLAMA_BASE_URL"],
         local_llm=merged["RGE_LOCAL_LLM"],
@@ -181,6 +198,7 @@ def load_config(env_file: Path | None = None) -> RgeConfig:
         allow_live_llm=allow_live_llm,
         allow_source_network=allow_source_network,
         allow_live_selective_fetch=allow_live_selective_fetch,
+        allow_staged_selective_fulltext=allow_staged_selective_fulltext,
         grobid_url=merged.get("RGE_GROBID_URL", "").strip(),
         openalex_mailto=merged.get("OPENALEX_MAILTO", "").strip(),
         openalex_api_key=merged.get("OPENALEX_API_KEY", "").strip(),

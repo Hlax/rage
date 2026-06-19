@@ -139,6 +139,12 @@ def _live_staged_orchestrator_live_llm_enabled() -> bool:
     return live_staged_orchestrator_live_llm_enabled()
 
 
+def _staged_selective_fulltext_enabled() -> bool:
+    from rge.modules.research_network import staged_selective_fulltext_enabled
+
+    return staged_selective_fulltext_enabled()
+
+
 @contextmanager
 def _mock_llm_seed_env() -> Iterator[None]:
     """Force mock LLM for GT7 seed spine steps regardless of operator live env."""
@@ -935,6 +941,22 @@ def execute_staged_fixture_mode_run(
                     )
                 )
 
+            selective_fulltext_wiring = None
+            if _staged_selective_fulltext_enabled():
+                from rge.modules.research_spine import (
+                    wire_staged_orchestrator_selective_fulltext,
+                )
+
+                selective_fulltext_wiring = wire_staged_orchestrator_selective_fulltext(
+                    conn,
+                    candidate_ids=[rank1_candidate_id, rank2_candidate_id],
+                    domain=domain,
+                    staging_dir=resolved_staging / "selective_fulltext",
+                    fixture_mode=not live_orchestrator,
+                    persist_claims=True,
+                )
+                steps_completed.append("selective_fulltext_wiring")
+
             return {
                 "status": "completed",
                 "command": "run",
@@ -953,6 +975,7 @@ def execute_staged_fixture_mode_run(
                 "rank2_source_id": rank2_id,
                 "rank1_candidate_id": rank1_candidate_id,
                 "rank2_candidate_id": rank2_candidate_id,
+                "selective_fulltext_wiring": selective_fulltext_wiring,
                 "artifacts": {
                     "database": str(resolved_db),
                     "rank1_run_report": str(
