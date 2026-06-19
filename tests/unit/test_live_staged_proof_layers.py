@@ -80,7 +80,12 @@ def test_require_mock_spine_compatible_fetch_or_skip_skips_when_unsuitable(
     question_id = "rq_proof_layers_skip"
     candidate_id = "disc_openalex_W999"
     artifact = staging_dir / f"{candidate_id}.html"
-    artifact.write_text("<html><body>Live paper without fixture phrases.</body></html>")
+    artifact.write_text(
+        "<html><body><p>Live paper without fixture phrases but with enough extractable "
+        "plain text for staged ingest quality validation and operator live fetch proofs "
+        "on gitignored evidence databases without publisher landing stubs.</p></body></html>",
+        encoding="utf-8",
+    )
 
     conn.execute(
         """

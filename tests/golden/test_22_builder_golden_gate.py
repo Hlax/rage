@@ -70,6 +70,18 @@ INTENTIONALLY_OPTIONAL_GOLDEN_TESTS: dict[str, str] = {
     "tests/golden/test_19_run_report.py": (
         "Run report aggregation; orchestrated by GT26 and improvement ticket spine."
     ),
+    "tests/golden/test_27_source_resolver.py": (
+        "MVP source resolver foundation; mock fixture-mode resolver proofs."
+    ),
+    "tests/golden/test_28_mvp_research_loop.py": (
+        "MVP abstract evidence, field map, and failure recommender fixture chain."
+    ),
+    "tests/golden/test_29_mvp_research_demo.py": (
+        "MVP selective full-text, document parser, and research-run demo loop."
+    ),
+    "tests/golden/test_30_research_spine_db.py": (
+        "Research-run DB ingest and full-text claim persistence (fixture mode)."
+    ),
 }
 
 META_GOLDEN_TEST_FILES = frozenset({"tests/golden/test_22_builder_golden_gate.py"})

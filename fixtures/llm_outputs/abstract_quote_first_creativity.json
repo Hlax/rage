@@ -1,0 +1,25 @@
+{
+  "task_name": "claim_extraction",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "claim_text": "AI-assisted brainstorming increased idea diversity when participants were instructed to generate multiple divergent directions.",
+      "source_id": "src_placeholder",
+      "chunk_id": "chk_placeholder",
+      "quote_span": "AI-assisted brainstorming increased idea diversity when participants were instructed to generate multiple divergent directions",
+      "subject": "AI-assisted brainstorming",
+      "predicate": "increased",
+      "object": "idea diversity",
+      "scope": "when participants were instructed to generate multiple divergent directions",
+      "evidence_type": "empirical",
+      "confidence": 0.72,
+      "limitations": [
+        "Abstract-only evidence; full-text verification not performed."
+      ],
+      "domain": "creativity",
+      "domain_metadata": {
+        "measured_dimension": "semantic diversity"
+      }
+    }
+  ]
+}

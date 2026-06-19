@@ -13,7 +13,10 @@ import urllib.error
 from rge.modules.fetcher import (
     ERROR_EXIT_CODE,
     OK_EXIT_CODE,
+    ARTIFACT_UNUSABLE_REASON,
     classify_fetch_failure,
+    clear_unusable_cached_staged_artifacts,
+    evaluate_fetch_artifact_quality,
     fetch_staged_candidate_artifact,
     fetch_url_bytes_with_retry,
     parse_url_candidates,
@@ -25,6 +28,11 @@ from rge.modules.source_providers.openalex_urls import build_openalex_fetch_url_
 from rge.db.connection import ensure_database
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+_STAGED_FETCH_HTML_PAD = (
+    b" Extended operator test padding to meet the two-hundred-character "
+    b"minimum extractable plain text threshold for staged fetch quality gates."
+)
 OPENALEX_FIXTURE = REPO_ROOT / "fixtures" / "source_providers" / "openalex_works_sample.json"
 TEST_QUESTION_ID = "rq_openalex_url_candidates_test"
 
@@ -84,6 +92,75 @@ def test_publisher_landing_page_used_only_as_fallback() -> None:
     assert candidates[0]["kind"] == "primary_location.landing_page_url_non_oa"
 
 
+def test_pmc_mirror_preferred_over_publisher_pdf() -> None:
+    work = _work(
+        best_oa_location={
+            "pdf_url": "https://www.science.org/doi/pdf/10.1126/example.pdf",
+            "landing_page_url": "https://doi.org/10.1126/example",
+        },
+        locations=[
+            {
+                "id": "loc:pmc",
+                "is_oa": True,
+                "pdf_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC123/pdf/example.pdf",
+                "landing_page_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC123/",
+            }
+        ],
+    )
+    candidates = build_openalex_fetch_url_candidates(work)
+    assert candidates[0]["url"].startswith("https://pmc.ncbi.nlm.nih.gov/")
+
+
+def test_bot_challenge_html_retries_next_url(tmp_path: Path) -> None:
+    routes = [
+        {
+            "url": "https://publisher.example/challenge",
+            "kind": "best_oa_location.landing_page_url",
+        },
+        {
+            "url": "https://example.org/open/paper.html",
+            "kind": "open_access.oa_url",
+        },
+    ]
+    challenge_html = (
+        b"<!DOCTYPE html><html><head><title>Client Challenge</title></head>"
+        b"<body><div class='noscript-container'>Enable JavaScript</div></body></html>"
+    )
+    good_html = (
+        b"<html><body><p>Generative AI tools accelerate creative ideation in "
+        b"exploratory studies with enough extractable plain text for ingest-ready "
+        b"quality validation on gitignored operator evidence databases."
+        + _STAGED_FETCH_HTML_PAD
+        + b"</p></body></html>"
+    )
+    urlopen = _mock_urlopen_sequence([(None, challenge_html), (None, good_html)])
+
+    body, content_type, selected, attempted = fetch_url_bytes_with_retry(
+        routes,
+        urlopen=urlopen,
+    )
+    assert b"Generative AI tools" in body
+    assert selected["kind"] == "open_access.oa_url"
+    assert attempted[0]["reason"] == "artifact_unusable"
+
+
+def test_all_unusable_artifacts_produce_clear_failure_reason() -> None:
+    routes = [
+        {"url": "https://publisher.example/challenge", "kind": "best_oa_location.pdf_url"},
+    ]
+    challenge_html = (
+        b"<!DOCTYPE html><html><head><title>Client Challenge</title></head>"
+        b"<body><div class='noscript-container'>Enable JavaScript</div></body></html>"
+    )
+    urlopen = _mock_urlopen_sequence([(None, challenge_html)])
+
+    with pytest.raises(FetchError) as exc_info:
+        fetch_url_bytes_with_retry(routes, urlopen=urlopen)
+
+    error = exc_info.value
+    assert getattr(error, "reason", "") == "artifact_unusable"
+
+
 def _mock_urlopen_sequence(responses: list[tuple[int | None, bytes | Exception]]):
     call_index = {"value": 0}
 
@@ -121,12 +198,31 @@ def _mock_urlopen_sequence(responses: list[tuple[int | None, bytes | Exception]]
     return _urlopen
 
 
+def test_clear_unusable_cached_staged_artifacts_deletes_stub(tmp_path: Path) -> None:
+    candidate_id = "disc_openalex_W999"
+    stub_path = tmp_path / f"{candidate_id}.html"
+    stub_path.write_text(
+        "<html><head><title>Client Challenge</title></head>"
+        "<body><div class='noscript-container'>Enable JavaScript</div></body></html>",
+        encoding="utf-8",
+    )
+    removed = clear_unusable_cached_staged_artifacts(candidate_id, tmp_path)
+    assert removed == [str(stub_path)]
+    assert not stub_path.is_file()
+
+
 def test_403_on_first_url_attempts_next_url(tmp_path: Path) -> None:
     routes = [
         {"url": "https://example.org/blocked", "kind": "primary_location.landing_page_url"},
         {"url": "https://example.org/open.pdf", "kind": "open_access.oa_url"},
     ]
-    html = b"<html><body>open access</body></html>"
+    html = (
+        b"<html><body>open access content with enough extractable plain text for "
+        b"staged fetch validation on gitignored operator evidence databases without "
+        b"publisher landing stubs or cached redirect pages."
+        + _STAGED_FETCH_HTML_PAD
+        + b"</body></html>"
+    )
     urlopen = _mock_urlopen_sequence(
         [
             (403, b""),
@@ -215,7 +311,12 @@ def test_fetch_staged_candidate_reports_selected_url_kind(
             ]
         ),
     }
-    html = b"<html><body>fallback success</body></html>"
+    html = (
+        b"<html><body>fallback success with enough extractable research text for "
+        b"staged fetch validation."
+        + _STAGED_FETCH_HTML_PAD
+        + b"</body></html>"
+    )
     urlopen = _mock_urlopen_sequence([(403, b""), (None, html)])
     result = fetch_staged_candidate_artifact(
         candidate,

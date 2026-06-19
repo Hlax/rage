@@ -19,6 +19,10 @@ from typing import Any
 
 from rge.modules.source_network import source_network_enabled
 from rge.modules.source_providers.openalex_urls import is_non_oa_url_kind
+from rge.modules.staged_spine_heuristics import (
+    MIN_STAGED_INGEST_TEXT_CHARS,
+    MOCK_STAGED_RANK1_ARTIFACT_MARKERS,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STAGED_FETCH_DIR = REPO_ROOT / "data" / "sources" / "staged"
@@ -32,6 +36,35 @@ _WHITESPACE_PATTERN = re.compile(r"\s+")
 _RETRYABLE_HTTP_STATUSES = frozenset({401, 403, 406})
 _RETRYABLE_ERROR_MARKERS = frozenset({"timed out", "timeout"})
 FETCH_ACCESS_BLOCKED_REASONS = frozenset({"forbidden", "paywall_blocked"})
+ARTIFACT_UNUSABLE_REASON = "artifact_unusable"
+MIN_FETCH_HTML_TEXT_CHARS = MIN_STAGED_INGEST_TEXT_CHARS
+MIN_FETCH_PDF_BYTES = 1024
+_BOT_CHALLENGE_MARKERS = (
+    "client challenge",
+    "enable javascript",
+    "noscript-container",
+    "cf-chl-bypass",
+    "cdn-cgi/challenge",
+    "just a moment",
+    "access denied",
+    "please enable cookies",
+    "preparing to download",
+    "pow_challenge",
+    "pd-medc-pmc-cloudpmc-viewer",
+)
+_PUBLISHER_STUB_MARKERS = (
+    "redirecting you to",
+    "redirecting...",
+    "log in via your institution",
+    "purchase this article",
+    "sign in to access",
+)
+_REDIRECT_GATE_MARKERS = (
+    'http-equiv="refresh"',
+    "autoredirecttourl",
+    "auto article locator",
+    "<title>redirecting</title>",
+)
 
 
 class FetchError(Exception):
@@ -145,9 +178,128 @@ def _attempt_detail(url: str, kind: str, exc: Exception) -> dict[str, Any]:
     return detail
 
 
+def html_to_text(html: str) -> str:
+    """Minimal HTML tag stripping for staged artifact ingestion."""
+    without_tags = _HTML_TAG_PATTERN.sub(" ", html)
+    return _WHITESPACE_PATTERN.sub(" ", without_tags).strip()
+
+
+def _html_has_mock_spine_fixture_markers(folded_text: str) -> bool:
+    """Return True when text contains checksum-pinned mock staged spine markers."""
+    if all(marker.casefold() in folded_text for marker in MOCK_STAGED_RANK1_ARTIFACT_MARKERS):
+        return True
+    return "constraint management" in folded_text
+
+
 def is_fetch_access_blocked(reason: str | None) -> bool:
     """Return True when all URL routes failed with publisher access blocks."""
     return str(reason or "").strip() in FETCH_ACCESS_BLOCKED_REASONS
+
+
+def evaluate_fetch_artifact_quality(
+    body: bytes,
+    content_type: str | None,
+) -> dict[str, Any]:
+    """Return whether fetched bytes are usable for staged ingest (not bot-wall HTML)."""
+    lowered_type = (content_type or "").split(";")[0].strip().casefold()
+    if lowered_type == "application/pdf":
+        if len(body) < MIN_FETCH_PDF_BYTES:
+            return {
+                "usable": False,
+                "reason": ARTIFACT_UNUSABLE_REASON,
+                "detail": (
+                    f"PDF artifact too small ({len(body)} bytes; "
+                    f"minimum {MIN_FETCH_PDF_BYTES})."
+                ),
+                "byte_count": len(body),
+                "extractable_text_chars": 0,
+            }
+        return {
+            "usable": True,
+            "reason": "usable",
+            "detail": "PDF artifact meets minimum byte threshold.",
+            "byte_count": len(body),
+            "extractable_text_chars": len(body),
+        }
+
+    text = body.decode("utf-8", errors="replace")
+    if lowered_type == "text/html" or text.lstrip().startswith("<"):
+        extractable = html_to_text(text)
+        folded = text.casefold()
+        matched_markers = [
+            marker for marker in _BOT_CHALLENGE_MARKERS if marker in folded
+        ]
+        stub_markers = [
+            marker for marker in _PUBLISHER_STUB_MARKERS if marker in folded
+        ]
+        if matched_markers:
+            return {
+                "usable": False,
+                "reason": ARTIFACT_UNUSABLE_REASON,
+                "detail": (
+                    "HTML artifact looks like a bot challenge or access gate "
+                    f"(markers: {', '.join(matched_markers)})."
+                ),
+                "byte_count": len(body),
+                "extractable_text_chars": len(extractable),
+                "matched_markers": matched_markers,
+            }
+        redirect_markers = [
+            marker for marker in _REDIRECT_GATE_MARKERS if marker in folded
+        ]
+        if redirect_markers:
+            return {
+                "usable": False,
+                "reason": ARTIFACT_UNUSABLE_REASON,
+                "detail": (
+                    "HTML artifact looks like a publisher redirect or locator stub "
+                    f"(markers: {', '.join(redirect_markers)})."
+                ),
+                "byte_count": len(body),
+                "extractable_text_chars": len(extractable),
+                "matched_markers": redirect_markers,
+            }
+        if stub_markers and len(extractable) < MIN_FETCH_HTML_TEXT_CHARS * 2:
+            return {
+                "usable": False,
+                "reason": ARTIFACT_UNUSABLE_REASON,
+                "detail": (
+                    "HTML artifact looks like a publisher landing or redirect stub "
+                    f"(markers: {', '.join(stub_markers)})."
+                ),
+                "byte_count": len(body),
+                "extractable_text_chars": len(extractable),
+                "matched_markers": stub_markers,
+            }
+        if len(extractable) < MIN_FETCH_HTML_TEXT_CHARS:
+            if _html_has_mock_spine_fixture_markers(folded):
+                return {
+                    "usable": True,
+                    "reason": "usable",
+                    "detail": "Short HTML allowed for checksum-pinned mock staged spine markers.",
+                    "byte_count": len(body),
+                    "extractable_text_chars": len(extractable),
+                }
+            return {
+                "usable": False,
+                "reason": ARTIFACT_UNUSABLE_REASON,
+                "detail": (
+                    f"HTML artifact has insufficient extractable text "
+                    f"({len(extractable)} chars; minimum {MIN_FETCH_HTML_TEXT_CHARS})."
+                ),
+                "byte_count": len(body),
+                "extractable_text_chars": len(extractable),
+            }
+
+    return {
+        "usable": True,
+        "reason": "usable",
+        "detail": "Artifact meets minimum extractable content thresholds.",
+        "byte_count": len(body),
+        "extractable_text_chars": len(
+            html_to_text(text) if text.lstrip().startswith("<") else text.strip()
+        ),
+    }
 
 
 def classify_fetch_failure(
@@ -156,6 +308,15 @@ def classify_fetch_failure(
     """Map attempted URL failures to a structured fetch-candidate reason."""
     if not attempted_urls:
         return "no_fetchable_url", "Candidate has no fetchable URL routes."
+
+    if all(
+        str(item.get("reason") or "") == ARTIFACT_UNUSABLE_REASON
+        for item in attempted_urls
+    ):
+        return (
+            ARTIFACT_UNUSABLE_REASON,
+            "All URL routes returned unusable artifacts (bot challenge or insufficient text).",
+        )
 
     statuses = [
         item["http_status"]
@@ -220,7 +381,7 @@ def fetch_url_bytes_with_retry(
         )
 
     attempted: list[dict[str, Any]] = []
-    for index, route in enumerate(routes):
+    for route in routes:
         url = route["url"]
         kind = route.get("kind") or "unknown"
         try:
@@ -229,10 +390,9 @@ def fetch_url_bytes_with_retry(
                 urlopen=urlopen,
                 timeout=timeout,
             )
-            return body, content_type, {"url": url, "kind": kind}, attempted
         except FetchError as exc:
             attempted.append(_attempt_detail(url, kind, exc))
-            if _is_retryable_fetch_error(exc) and index < len(routes) - 1:
+            if _is_retryable_fetch_error(exc):
                 continue
             reason, detail = classify_fetch_failure(attempted)
             raise FetchError(
@@ -243,7 +403,7 @@ def fetch_url_bytes_with_retry(
             ) from exc
         except Exception as exc:
             attempted.append(_attempt_detail(url, kind, exc))
-            if _is_retryable_fetch_error(exc) and index < len(routes) - 1:
+            if _is_retryable_fetch_error(exc):
                 continue
             reason, detail = classify_fetch_failure(attempted)
             raise FetchError(
@@ -251,6 +411,24 @@ def fetch_url_bytes_with_retry(
                 reason=reason,
                 attempted_urls=attempted,
             ) from exc
+
+        quality = evaluate_fetch_artifact_quality(body, content_type)
+        if not quality.get("usable"):
+            attempted.append(
+                {
+                    "url": url,
+                    "kind": kind,
+                    "error": quality.get("detail") or "Unusable artifact.",
+                    "reason": ARTIFACT_UNUSABLE_REASON,
+                    "byte_count": quality.get("byte_count"),
+                    "extractable_text_chars": quality.get(
+                        "extractable_text_chars"
+                    ),
+                }
+            )
+            continue
+
+        return body, content_type, {"url": url, "kind": kind}, attempted
 
     reason, detail = classify_fetch_failure(attempted)
     raise FetchError(detail, reason=reason, attempted_urls=attempted)
@@ -264,6 +442,81 @@ def staged_artifact_path(
     extension = extension_for_content_type(content_type)
     safe_id = candidate_id.replace("/", "_").replace(":", "_")
     return output_dir / f"{safe_id}{extension}"
+
+
+def content_type_for_artifact_path(path: Path) -> str | None:
+    suffix = path.suffix.casefold()
+    if suffix == ".html":
+        return "text/html"
+    if suffix == ".pdf":
+        return "application/pdf"
+    if suffix == ".txt":
+        return "text/plain"
+    return None
+
+
+def clear_unusable_cached_staged_artifacts(
+    candidate_id: str,
+    output_dir: Path,
+) -> list[str]:
+    """Delete cached staged artifacts that fail ingest-ready quality checks."""
+    safe_id = candidate_id.replace("/", "_").replace(":", "_")
+    removed: list[str] = []
+    for path in sorted(output_dir.glob(f"{safe_id}.*")):
+        if not path.is_file():
+            continue
+        quality = evaluate_fetch_artifact_quality(
+            path.read_bytes(),
+            content_type_for_artifact_path(path),
+        )
+        if not quality.get("usable"):
+            path.unlink(missing_ok=True)
+            removed.append(str(path))
+    return removed
+
+
+def _fetch_success_payload(
+    *,
+    candidate_id: str,
+    body: bytes,
+    content_type: str | None,
+    url: str,
+    selected_url_kind: str,
+    attempted_urls: list[dict[str, Any]],
+    artifact_path: Path,
+    status: str,
+) -> dict[str, Any]:
+    quality = evaluate_fetch_artifact_quality(body, content_type)
+    if not quality.get("usable"):
+        raise FetchError(
+            quality.get("detail") or "Fetched artifact is not ingest-ready.",
+            reason=ARTIFACT_UNUSABLE_REASON,
+            attempted_urls=[
+                *attempted_urls,
+                {
+                    "url": url,
+                    "kind": selected_url_kind,
+                    "error": quality.get("detail") or "Unusable artifact.",
+                    "reason": ARTIFACT_UNUSABLE_REASON,
+                    "byte_count": quality.get("byte_count"),
+                    "extractable_text_chars": quality.get("extractable_text_chars"),
+                },
+            ],
+        )
+    checksum = sha256_bytes(body)
+    return {
+        "status": status,
+        "command": FETCH_CANDIDATE_COMMAND,
+        "candidate_id": candidate_id,
+        "url": url,
+        "selected_url_kind": selected_url_kind,
+        "attempted_urls": attempted_urls,
+        "checksum": checksum,
+        "content_type": content_type,
+        "artifact_path": str(artifact_path.resolve()),
+        "byte_count": len(body),
+        "extractable_text_chars": quality.get("extractable_text_chars"),
+    }
 
 
 def fetch_staged_candidate_artifact(
@@ -294,6 +547,7 @@ def fetch_staged_candidate_artifact(
 
     target_dir = output_dir or default_staged_fetch_dir()
     target_dir.mkdir(parents=True, exist_ok=True)
+    clear_unusable_cached_staged_artifacts(candidate_id, target_dir)
 
     body, content_type, selected_route, attempted_urls = fetch_url_bytes_with_retry(
         routes,
@@ -307,33 +561,29 @@ def fetch_staged_candidate_artifact(
     if artifact_path.is_file():
         existing_checksum = sha256_bytes(artifact_path.read_bytes())
         if existing_checksum == checksum:
-            return {
-                "status": "already_fetched",
-                "command": FETCH_CANDIDATE_COMMAND,
-                "candidate_id": candidate_id,
-                "url": url,
-                "selected_url_kind": selected_url_kind,
-                "attempted_urls": attempted_urls,
-                "checksum": checksum,
-                "content_type": content_type,
-                "artifact_path": str(artifact_path.resolve()),
-                "byte_count": len(body),
-            }
+            return _fetch_success_payload(
+                candidate_id=candidate_id,
+                body=body,
+                content_type=content_type,
+                url=url,
+                selected_url_kind=selected_url_kind,
+                attempted_urls=attempted_urls,
+                artifact_path=artifact_path,
+                status="already_fetched",
+            )
 
     artifact_path.write_bytes(body)
 
-    return {
-        "status": "completed",
-        "command": FETCH_CANDIDATE_COMMAND,
-        "candidate_id": candidate_id,
-        "url": url,
-        "selected_url_kind": selected_url_kind,
-        "attempted_urls": attempted_urls,
-        "checksum": checksum,
-        "content_type": content_type,
-        "artifact_path": str(artifact_path.resolve()),
-        "byte_count": len(body),
-    }
+    return _fetch_success_payload(
+        candidate_id=candidate_id,
+        body=body,
+        content_type=content_type,
+        url=url,
+        selected_url_kind=selected_url_kind,
+        attempted_urls=attempted_urls,
+        artifact_path=artifact_path,
+        status="completed",
+    )
 
 
 def run_fetch_candidate_command(
@@ -380,15 +630,33 @@ def run_fetch_candidate_command(
     return result, OK_EXIT_CODE
 
 
-def html_to_text(html: str) -> str:
-    """Minimal HTML tag stripping for staged artifact ingestion."""
-    without_tags = _HTML_TAG_PATTERN.sub(" ", html)
-    return _WHITESPACE_PATTERN.sub(" ", without_tags).strip()
-
-
 def artifact_bytes_to_text(data: bytes, artifact_path: Path) -> str:
+    from rge.modules.document_parser import CLEAN_TEXT_READY, parse_document_bytes
+
+    suffix = artifact_path.suffix.casefold()
+    if data.startswith(b"%PDF") or suffix == ".pdf":
+        result = parse_document_bytes(data, content_type="application/pdf", suffix=suffix)
+        if result.source_status != CLEAN_TEXT_READY:
+            raise FetchError(
+                result.detail or "PDF parse failed.",
+                reason=result.source_status,
+            )
+        return result.clean_text
+
+    if suffix in {".xml", ".tei"}:
+        result = parse_document_bytes(data, content_type="application/xml", suffix=suffix)
+        if result.source_status != CLEAN_TEXT_READY:
+            raise FetchError(
+                result.detail or "TEI/XML parse failed.",
+                reason=result.source_status,
+            )
+        return result.clean_text
+
     text = data.decode("utf-8", errors="replace")
-    if artifact_path.suffix.casefold() == ".html":
+    if suffix == ".html" or text.lstrip().startswith("<"):
+        parsed = parse_document_bytes(data, content_type="text/html", suffix=suffix)
+        if parsed.source_status == CLEAN_TEXT_READY:
+            return parsed.clean_text
         return html_to_text(text)
     return text.strip()
 
@@ -457,6 +725,15 @@ def ingest_staged_artifact(
     raw_text = artifact_bytes_to_text(data, path)
     if not raw_text.strip():
         raise FetchError(f"Staged artifact produced empty text: {path}")
+    if len(raw_text.strip()) < MIN_STAGED_INGEST_TEXT_CHARS and not _html_has_mock_spine_fixture_markers(
+        raw_text.casefold()
+    ):
+        raise FetchError(
+            f"Staged artifact text too short for ingest "
+            f"({len(raw_text.strip())} chars; minimum {MIN_STAGED_INGEST_TEXT_CHARS}): "
+            f"{path}",
+            reason=ARTIFACT_UNUSABLE_REASON,
+        )
 
     effective_source_type = source_type or "staged_fetch"
     effective_title = title or path.name

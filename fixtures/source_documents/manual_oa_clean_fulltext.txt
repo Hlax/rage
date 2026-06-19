@@ -1,0 +1,1 @@
+Human-AI co-creativity supports diverse songwriting outputs when teams iterate on lyrical drafts together. Participants reported broader semantic diversity when AI suggestions were treated as optional prompts rather than final lyrics. This open-access fixture simulates clean full-text prose suitable for quote-first extraction.

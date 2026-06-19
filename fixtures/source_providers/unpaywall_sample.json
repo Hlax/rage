@@ -1,0 +1,13 @@
+{
+  "doi": "10.1234/rge-openalex-fixture",
+  "is_oa": true,
+  "oa_status": "gold",
+  "title": "Human-AI co-creativity and semantic diversity in songwriting workshops",
+  "best_oa_location": {
+    "url": "https://example.org/unpaywall/landing",
+    "url_for_pdf": "https://example.org/unpaywall/paper.pdf",
+    "host_type": "repository",
+    "license": "cc-by",
+    "version": "publishedVersion"
+  }
+}

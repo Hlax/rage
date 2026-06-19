@@ -28,6 +28,11 @@ TEST_QUESTION_ID = "rq_fetch_candidate_test"
 CANDIDATE_ID = "disc_openalex_W2741809807"
 REFERENCE_YEAR = 2026
 
+_STAGED_FETCH_HTML_PAD = (
+    b" Extended operator test padding to meet the two-hundred-character "
+    b"minimum extractable plain text threshold for staged fetch quality gates."
+)
+
 
 @pytest.fixture(autouse=True)
 def _ensure_provider_registry() -> None:
@@ -98,7 +103,12 @@ def test_fetch_staged_candidate_artifact_writes_file(
         "id": CANDIDATE_ID,
         "url": "https://example.org/landing/human-ai-cocreativity",
     }
-    html = b"<html><body>Human-AI co-creativity evidence.</body></html>"
+    html = (
+        b"<html><body>Human-AI co-creativity evidence for staged fetch validation "
+        b"with enough extractable plain text for ingest-ready quality gates on "
+        b"gitignored operator evidence databases without publisher landing stubs."
+        b"</body></html>"
+    )
     result = fetch_staged_candidate_artifact(
         candidate,
         output_dir=tmp_path,
@@ -131,7 +141,13 @@ def test_run_fetch_candidate_command_completed(
     mock_network_env: None,
     tmp_path: Path,
 ) -> None:
-    html = b"<html><body>Staged candidate fetch test.</body></html>"
+    html = (
+        b"<html><body>Staged candidate fetch test with enough extractable plain "
+        b"text for ingest-ready quality validation on gitignored operator evidence "
+        b"databases without publisher landing stubs or cached redirect pages."
+        + _STAGED_FETCH_HTML_PAD
+        + b"</body></html>"
+    )
     conn = ensure_database(staged_db_with_candidate)
     try:
         payload, exit_code = run_fetch_candidate_command(
@@ -189,7 +205,13 @@ def test_fetch_staged_candidate_artifact_idempotent(
         "id": CANDIDATE_ID,
         "url": "https://example.org/landing/page",
     }
-    html = b"<html><body>Idempotent fetch.</body></html>"
+    html = (
+        b"<html><body>Idempotent fetch with enough extractable plain text for "
+        b"ingest-ready quality validation on gitignored operator evidence databases "
+        b"without publisher landing stubs or cached redirect pages."
+        + _STAGED_FETCH_HTML_PAD
+        + b"</body></html>"
+    )
     urlopen = _mock_html_urlopen(html)
     first = fetch_staged_candidate_artifact(
         candidate,
@@ -212,7 +234,13 @@ def test_fetch_candidate_cli(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    html = b"<html><body>CLI fetch candidate.</body></html>"
+    html = (
+        b"<html><body>CLI fetch candidate with enough extractable plain text for "
+        b"ingest-ready quality validation on gitignored operator evidence databases "
+        b"without publisher landing stubs or cached redirect pages."
+        + _STAGED_FETCH_HTML_PAD
+        + b"</body></html>"
+    )
     with patch("rge.modules.fetcher.urllib.request.urlopen", _mock_html_urlopen(html)):
         exit_code = main(
             [

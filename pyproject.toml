@@ -11,11 +11,16 @@ requires-python = ">=3.11"
 license = { text = "Proprietary" }
 dependencies = [
     "pydantic>=2",
+    "pypdf>=4",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=8",
+]
+parser = [
+    "pypdf>=4",
+    "pymupdf>=1.24",
 ]
 
 [project.scripts]

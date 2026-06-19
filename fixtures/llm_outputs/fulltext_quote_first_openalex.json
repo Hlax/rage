@@ -1,0 +1,25 @@
+{
+  "task_name": "claim_extraction",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "claim_text": "Human-AI co-creativity supports diverse songwriting outputs when teams iterate on lyrical drafts together.",
+      "source_id": "src_placeholder",
+      "chunk_id": "chk_placeholder",
+      "quote_span": "Human-AI co-creativity supports diverse songwriting outputs when teams iterate on lyrical drafts together.",
+      "subject": "Human-AI co-creativity",
+      "predicate": "supports",
+      "object": "diverse songwriting outputs",
+      "scope": "when teams iterate on lyrical drafts together",
+      "evidence_type": "empirical",
+      "confidence": 0.74,
+      "limitations": [
+        "Full-text evidence; abstract cross-check recommended."
+      ],
+      "domain": "creativity",
+      "domain_metadata": {
+        "measured_dimension": "semantic diversity"
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom">
+  <entry>
+    <id>http://arxiv.org/abs/2401.01234v1</id>
+    <title>Generative AI and Creative Diversity in Collaborative Workflows</title>
+    <summary>We study how generative AI tools affect semantic diversity in collaborative creative workflows across writing and design tasks.</summary>
+    <published>2024-01-15T00:00:00Z</published>
+    <author><name>Jordan Lee</name></author>
+    <author><name>Casey Researcher</name></author>
+    <link title="doi" href="https://doi.org/10.1234/rge-arxiv-fixture" rel="related"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2309.98765v2</id>
+    <title>Constraint Management in AI-Assisted Creative Teams</title>
+    <summary>Teams using AI assistants maintained output quality while exploring broader idea neighborhoods when constraints were explicit.</summary>
+    <published>2023-09-20T00:00:00Z</published>
+    <author><name>Ada Example</name></author>
+  </entry>
+</feed>

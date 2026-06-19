@@ -11,11 +11,12 @@ import pytest
 
 from rge.cli import STAGED_FIXTURE_QUESTION_ID
 from rge.db.connection import ensure_database
-from rge.modules.fetcher import ERROR_EXIT_CODE, OK_EXIT_CODE
+from rge.modules.fetcher import ERROR_EXIT_CODE, OK_EXIT_CODE, ARTIFACT_UNUSABLE_REASON
 from rge.modules.staged_candidate_selection import (
     Rank1StagedFetchAccessBlockedError,
     UnsuitableLiveArtifactError,
     fetch_rank1_with_access_fallback,
+    fetch_rank2_with_access_fallback,
     list_rank1_fetch_candidate_ids,
     resolve_live_staged_spine_fetch_pair,
     select_rank2_staged_candidate_id,
@@ -124,6 +125,117 @@ def test_list_rank1_fetch_candidate_ids_prefers_pdf_routes_when_live(conn) -> No
     )
     assert ordered[0] == RANK1_BLOCKED
     assert ordered[1:] == [RANK1_FALLBACK, RANK2_MATCH]
+
+
+def test_fetch_rank2_with_access_fallback_skips_unusable_artifact(
+    tmp_path: Path,
+    conn,
+) -> None:
+    bot_artifact = tmp_path / f"{RANK1_FALLBACK}.html"
+    bot_artifact.write_text(
+        "<html><head><title>Client Challenge</title></head>"
+        "<body><div class='noscript-container'>Enable JavaScript</div></body></html>",
+        encoding="utf-8",
+    )
+    good_artifact = tmp_path / f"{RANK2_MATCH}.html"
+    good_artifact.write_text(
+        "<html><body>Generative creativity research with enough extractable plain "
+        "text for ingest-ready quality validation on gitignored operator evidence "
+        "databases without publisher landing stubs or cached redirect pages."
+        "</body></html>",
+        encoding="utf-8",
+    )
+    fetch_command = _mock_fetch_responses(
+        {
+            RANK1_FALLBACK: (
+                {
+                    "status": "completed",
+                    "candidate_id": RANK1_FALLBACK,
+                    "artifact_path": str(bot_artifact),
+                    "content_type": "text/html; charset=utf-8",
+                },
+                OK_EXIT_CODE,
+            ),
+            RANK2_MATCH: (
+                {
+                    "status": "completed",
+                    "candidate_id": RANK2_MATCH,
+                    "artifact_path": str(good_artifact),
+                    "content_type": "text/html; charset=utf-8",
+                },
+                OK_EXIT_CODE,
+            ),
+        }
+    )
+
+    candidate_id, blocked_ids, incompatible = fetch_rank2_with_access_fallback(
+        conn,
+        research_question_id=QUESTION_ID,
+        output_dir=tmp_path,
+        fetch_command=fetch_command,
+        exclude_ids=frozenset({RANK1_BLOCKED}),
+        live_orchestrator_fallback=True,
+        require_mock_spine_markers=False,
+        max_scan=10,
+    )
+
+    assert candidate_id == RANK2_MATCH
+    assert blocked_ids == []
+    assert incompatible[0]["candidate_id"] == RANK1_FALLBACK
+
+
+def test_fetch_rank1_with_access_fallback_skips_unusable_artifact(
+    tmp_path: Path,
+    conn,
+) -> None:
+    bot_artifact = tmp_path / f"{RANK1_BLOCKED}.html"
+    bot_artifact.write_text(
+        "<html><head><title>Client Challenge</title></head>"
+        "<body><div class='noscript-container'>Enable JavaScript</div></body></html>",
+        encoding="utf-8",
+    )
+    good_artifact = tmp_path / f"{RANK1_FALLBACK}.html"
+    good_artifact.write_text(
+        "Human-AI co-creativity supports diverse songwriting workshops.",
+        encoding="utf-8",
+    )
+    fetch_command = _mock_fetch_responses(
+        {
+            RANK1_BLOCKED: (
+                {
+                    "status": "completed",
+                    "candidate_id": RANK1_BLOCKED,
+                    "artifact_path": str(bot_artifact),
+                    "content_type": "text/html; charset=utf-8",
+                },
+                OK_EXIT_CODE,
+            ),
+            RANK1_FALLBACK: (
+                {
+                    "status": "completed",
+                    "candidate_id": RANK1_FALLBACK,
+                    "artifact_path": str(good_artifact),
+                    "content_type": "text/html; charset=utf-8",
+                },
+                OK_EXIT_CODE,
+            ),
+        }
+    )
+
+    candidate_id, blocked_ids, incompatible = fetch_rank1_with_access_fallback(
+        conn,
+        research_question_id=QUESTION_ID,
+        output_dir=tmp_path,
+        fetch_command=fetch_command,
+        live_orchestrator_fallback=True,
+        max_scan=10,
+    )
+
+    assert candidate_id == RANK1_FALLBACK
+    assert blocked_ids == []
+    assert len(incompatible) == 1
+    assert incompatible[0]["candidate_id"] == RANK1_BLOCKED
+    assert incompatible[0]["reason"] == ARTIFACT_UNUSABLE_REASON
 
 
 def test_fetch_rank1_with_access_fallback_skips_forbidden(tmp_path: Path, conn) -> None:

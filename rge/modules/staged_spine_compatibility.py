@@ -7,10 +7,7 @@ from typing import Any
 
 from rge.modules.fetcher import html_to_text
 
-MOCK_STAGED_RANK1_ARTIFACT_MARKERS = (
-    "human-ai co-creativity",
-    "songwriting",
-)
+from rge.modules.staged_spine_heuristics import MOCK_STAGED_RANK1_ARTIFACT_MARKERS
 UNSUITABLE_LIVE_ARTIFACT = "unsuitable_live_artifact"
 
 

@@ -1,0 +1,25 @@
+{
+  "task_name": "claim_extraction",
+  "schema_version": "0.1.0",
+  "items": [
+    {
+      "claim_text": "Human-AI co-creativity supports diverse songwriting outputs.",
+      "source_id": "src_placeholder",
+      "chunk_id": "chk_placeholder",
+      "quote_span": "Human-AI co-creativity supports diverse songwriting outputs.",
+      "subject": "Human-AI co-creativity",
+      "predicate": "supports",
+      "object": "diverse songwriting outputs",
+      "scope": "songwriting workshops",
+      "evidence_type": "empirical",
+      "confidence": 0.7,
+      "limitations": [
+        "Abstract-only evidence; full-text verification not performed."
+      ],
+      "domain": "creativity",
+      "domain_metadata": {
+        "measured_dimension": "semantic diversity"
+      }
+    }
+  ]
+}

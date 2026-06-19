@@ -1,0 +1,53 @@
+{
+  "records": [
+    {
+      "fixture_id": "manual_creativity_ai_diversity",
+      "title": "AI-assisted brainstorming and semantic diversity in creative writing",
+      "authors": ["Fixture Author"],
+      "year": 2024,
+      "doi": "10.1234/rge-manual-fixture",
+      "abstract_text": "AI-assisted brainstorming increased idea diversity when participants were instructed to generate multiple divergent directions.",
+      "abstract_source": "manual_fixture",
+      "is_oa": false,
+      "oa_status": "closed",
+      "source_status": "abstract_available"
+    },
+    {
+      "fixture_id": "manual_metadata_only",
+      "title": "Untitled paywalled working paper with no abstract",
+      "authors": ["Anonymous Researcher"],
+      "year": 2021,
+      "doi": null,
+      "abstract_text": "",
+      "is_oa": false,
+      "oa_status": "closed",
+      "source_status": "metadata_only"
+    },
+    {
+      "fixture_id": "manual_oa_tei",
+      "title": "Human-AI co-creativity TEI fixture for selective full-text",
+      "authors": ["Open Access Lab"],
+      "year": 2022,
+      "doi": "10.1234/rge-manual-oa-tei",
+      "abstract_text": "Human-AI co-creativity supports diverse songwriting outputs.",
+      "abstract_source": "manual_fixture",
+      "tei_url": "https://example.org/fixtures/manual_oa.tei.xml",
+      "is_oa": true,
+      "oa_status": "gold",
+      "source_status": "oa_tei_available"
+    },
+    {
+      "fixture_id": "manual_oa_pdf",
+      "title": "Open PDF fixture for selective full-text milestone",
+      "authors": ["Open Access Lab"],
+      "year": 2022,
+      "doi": "10.1234/rge-manual-oa-pdf",
+      "abstract_text": "This fixture includes an OA PDF URL for downstream fetch tests.",
+      "abstract_source": "manual_fixture",
+      "pdf_url": "https://example.org/fixtures/manual_oa.pdf",
+      "is_oa": true,
+      "oa_status": "gold",
+      "source_status": "oa_pdf_available"
+    }
+  ]
+}

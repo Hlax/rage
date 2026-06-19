@@ -6,8 +6,9 @@ import argparse
 import json
 import os
 import sys
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 from rge import __version__
 
@@ -136,6 +137,26 @@ def _live_staged_orchestrator_live_llm_enabled() -> bool:
     )
 
     return live_staged_orchestrator_live_llm_enabled()
+
+
+@contextmanager
+def _mock_llm_seed_env() -> Iterator[None]:
+    """Force mock LLM for GT7 seed spine steps regardless of operator live env."""
+    prior_mode = os.environ.get("RGE_LLM_MODE")
+    prior_allow = os.environ.get("RGE_ALLOW_LIVE_LLM")
+    os.environ["RGE_LLM_MODE"] = "mock"
+    os.environ["RGE_ALLOW_LIVE_LLM"] = "0"
+    try:
+        yield
+    finally:
+        if prior_mode is None:
+            os.environ.pop("RGE_LLM_MODE", None)
+        else:
+            os.environ["RGE_LLM_MODE"] = prior_mode
+        if prior_allow is None:
+            os.environ.pop("RGE_ALLOW_LIVE_LLM", None)
+        else:
+            os.environ["RGE_ALLOW_LIVE_LLM"] = prior_allow
 
 
 from rge.modules.staged_candidate_selection import (
@@ -546,6 +567,8 @@ def execute_staged_fixture_mode_run(
     resolved_db = get_db_path(db_path)
     resolved_reports = report_dir or (root / "data" / "reports")
     resolved_staging = staging_dir or (root / "data" / "sources" / "staged")
+    if not resolved_staging.is_absolute():
+        resolved_staging = root / resolved_staging
     resolved_staging.mkdir(parents=True, exist_ok=True)
     resolved_reports.mkdir(parents=True, exist_ok=True)
     db_args = ["--db", str(resolved_db)]
@@ -574,30 +597,32 @@ def execute_staged_fixture_mode_run(
             base_id = _source_id_by_title(
                 conn, _SOURCE_TITLE_BY_KEY["base"]
             )
-            _run_cli_step(["extract-claims", "--source", base_id, *db_args])
-            _run_cli_step(["link-concepts", "--source", base_id, *db_args])
-            _run_cli_step(
-                ["build-relationships", "--source", base_id, *db_args]
-            )
+            with _mock_llm_seed_env():
+                _run_cli_step(["extract-claims", "--source", base_id, *db_args])
+                _run_cli_step(["link-concepts", "--source", base_id, *db_args])
+                _run_cli_step(
+                    ["build-relationships", "--source", base_id, *db_args]
+                )
             steps_completed.append("seed_domain_opposing_context")
 
-            _run_cli_step(
-                [
-                    "discover-sources",
-                    "--provider",
-                    "openalex",
-                    "--query",
-                    "human AI creativity",
-                    "--rank-only",
-                    "--enqueue",
-                    "--question",
-                    question_id,
-                    *db_args,
-                ]
-            )
+            live_orchestrator = _live_staged_orchestrator_enabled()
+            discover_args = [
+                "discover-sources",
+                "--provider",
+                "openalex",
+                "--query",
+                "human AI creativity",
+                "--rank-only",
+                "--enqueue",
+                "--question",
+                question_id,
+                *db_args,
+            ]
+            if live_orchestrator:
+                discover_args.extend(["--limit", "25"])
+            _run_cli_step(discover_args)
             steps_completed.append("discover_openalex_candidates")
 
-            live_orchestrator = _live_staged_orchestrator_enabled()
             rank1_blocked_ids: list[str] = []
             if live_orchestrator:
                 from rge.modules.fetcher import run_fetch_candidate_command
@@ -627,12 +652,26 @@ def execute_staged_fixture_mode_run(
                     ]
                 )
                 steps_completed.append("rank1_fetch_ingest")
-                _staged_fetch_and_ingest_candidate(
-                    candidate_id=rank2_candidate_id,
-                    domain=domain,
-                    staging_dir=resolved_staging,
-                    db_args=db_args,
-                )
+                if live_orchestrator_llm:
+                    _run_cli_step(
+                        [
+                            "ingest-staged",
+                            "--domain",
+                            domain,
+                            "--candidate",
+                            rank2_candidate_id,
+                            "--staging-dir",
+                            str(resolved_staging),
+                            *db_args,
+                        ]
+                    )
+                else:
+                    _staged_fetch_and_ingest_candidate(
+                        candidate_id=rank2_candidate_id,
+                        domain=domain,
+                        staging_dir=resolved_staging,
+                        db_args=db_args,
+                    )
                 steps_completed.append("rank2_fetch_ingest")
             else:
                 candidate_pairs = (
@@ -1578,6 +1617,107 @@ def _cmd_discover_sources(args: argparse.Namespace) -> int:
         finally:
             conn.close()
 
+    print(json.dumps(payload, indent=2))
+    return exit_code
+
+
+def _cmd_resolve_sources(args: argparse.Namespace) -> int:
+    from rge.modules.source_resolver import run_resolve_sources_command
+
+    backends = None
+    if args.sources:
+        backends = [
+            item.strip().lower()
+            for item in str(args.sources).split(",")
+            if item.strip()
+        ]
+    payload, exit_code = run_resolve_sources_command(
+        query=args.query,
+        domain_pack=args.domain,
+        limit=args.limit,
+        backends=backends,
+        enrich_unpaywall=args.enrich_unpaywall,
+        fixture_mode=args.fixture_mode,
+        explain_only=args.explain_only,
+        health=args.health,
+    )
+    print(json.dumps(payload, indent=2))
+    return exit_code
+
+
+def _cmd_generate_abstract_evidence(args: argparse.Namespace) -> int:
+    from rge.modules.abstract_evidence import run_generate_abstract_evidence_command
+
+    output_dir = Path(args.out) if getattr(args, "out", None) else None
+    if output_dir is not None and not output_dir.is_absolute():
+        output_dir = Path(__file__).resolve().parents[2] / output_dir
+    payload, exit_code = run_generate_abstract_evidence_command(
+        query=args.query,
+        domain_pack=args.domain,
+        limit=args.limit,
+        fixture_mode=args.fixture_mode,
+        output_dir=output_dir,
+    )
+    print(json.dumps(payload, indent=2))
+    return exit_code
+
+
+def _cmd_recommend_improvement_packet(args: argparse.Namespace) -> int:
+    from rge.modules.failure_recommender import run_recommend_improvement_packet_command
+
+    payload, exit_code = run_recommend_improvement_packet_command(
+        run_report_path=args.run_report,
+        abstract_evidence_path=args.abstract_evidence,
+        fixture_mode=args.fixture_mode,
+        domain_pack=args.domain,
+    )
+    print(json.dumps(payload, indent=2))
+    return exit_code
+
+
+def _cmd_generate_field_map(args: argparse.Namespace) -> int:
+    from rge.modules.field_map import run_generate_field_map_command
+
+    output_dir = Path(args.out) if getattr(args, "out", None) else None
+    if output_dir is not None and not output_dir.is_absolute():
+        output_dir = Path(__file__).resolve().parents[2] / output_dir
+    payload, exit_code = run_generate_field_map_command(
+        query=args.query,
+        domain_pack=args.domain,
+        max_candidates=args.max_candidates,
+        top_sources=args.top_sources,
+        fixture_mode=args.fixture_mode,
+        output_dir=output_dir,
+    )
+    print(json.dumps(payload, indent=2))
+    return exit_code
+
+
+def _cmd_research_run(args: argparse.Namespace) -> int:
+    from rge.modules.research_run import run_research_run_command
+
+    output_dir = Path(args.out) if getattr(args, "out", None) else None
+    if output_dir is not None and not output_dir.is_absolute():
+        output_dir = Path(__file__).resolve().parents[2] / output_dir
+    staging_dir = Path(args.staging_dir) if getattr(args, "staging_dir", None) else None
+    if staging_dir is not None and not staging_dir.is_absolute():
+        staging_dir = Path(__file__).resolve().parents[2] / staging_dir
+    db_path = Path(args.db) if getattr(args, "db", None) else None
+    if db_path is not None and not db_path.is_absolute():
+        db_path = Path(__file__).resolve().parents[2] / db_path
+    payload, exit_code = run_research_run_command(
+        topic=args.topic,
+        domain_pack=args.domain,
+        max_candidates=args.max_candidates,
+        top_sources=args.top_sources,
+        full_text_top_n=args.full_text_top_n,
+        fixture_mode=args.fixture_mode,
+        mode=args.mode,
+        output_dir=output_dir,
+        db_path=db_path,
+        persist_claims=getattr(args, "persist_claims", False),
+        staging_dir=staging_dir,
+    )
     print(json.dumps(payload, indent=2))
     return exit_code
 
@@ -2790,10 +2930,10 @@ def _cmd_ingest_staged(args: argparse.Namespace) -> int:
 
     artifact_path = Path(args.artifact) if args.artifact else None
     if artifact_path is not None and not artifact_path.is_absolute():
-        artifact_path = Path(__file__).resolve().parents[2] / artifact_path
+        artifact_path = _REPO_ROOT / artifact_path
     staging_dir = Path(args.staging_dir) if getattr(args, "staging_dir", None) else None
     if staging_dir is not None and not staging_dir.is_absolute():
-        staging_dir = Path(__file__).resolve().parents[2] / staging_dir
+        staging_dir = _REPO_ROOT / staging_dir
 
     db_path = Path(args.db) if args.db else None
     conn = ensure_database(db_path)
@@ -3820,6 +3960,219 @@ def build_parser() -> argparse.ArgumentParser:
         help="SQLite database path for --enqueue staging writes.",
     )
     discover_sources_parser.set_defaults(func=_cmd_discover_sources)
+
+    resolve_sources_parser = subparsers.add_parser(
+        "resolve-sources",
+        help="Resolve unified source records with explicit acquisition status.",
+        description=(
+            "MVP source resolver entry point. Returns unified records from "
+            "OpenAlex, arXiv, and manual fixtures with explicit source_status "
+            "and pre-extraction evidence summaries. Unpaywall enrichment is "
+            "optional via --enrich-unpaywall when RGE_ALLOW_SOURCE_NETWORK=1."
+        ),
+    )
+    resolve_sources_parser.add_argument(
+        "--query",
+        help="Search query passed to discovery backends.",
+    )
+    resolve_sources_parser.add_argument(
+        "--sources",
+        help="Comma-separated backends: openalex,arxiv,manual_fixture (default: openalex).",
+    )
+    resolve_sources_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack id for candidate metadata (default: creativity).",
+    )
+    resolve_sources_parser.add_argument(
+        "--limit",
+        type=int,
+        default=10,
+        help="Maximum records per backend (default: 10).",
+    )
+    resolve_sources_parser.add_argument(
+        "--enrich-unpaywall",
+        action="store_true",
+        help="Enrich DOI-backed records with Unpaywall OA metadata.",
+    )
+    resolve_sources_parser.add_argument(
+        "--fixture-mode",
+        action="store_true",
+        help="Use manual resolver fixtures only (no network).",
+    )
+    resolve_sources_parser.add_argument(
+        "--explain-only",
+        action="store_true",
+        help="Return evidence summaries without full resolved records.",
+    )
+    resolve_sources_parser.add_argument(
+        "--health",
+        action="store_true",
+        help="Report backend readiness without resolving sources.",
+    )
+    resolve_sources_parser.set_defaults(func=_cmd_resolve_sources)
+
+    abstract_evidence_parser = subparsers.add_parser(
+        "generate-abstract-evidence",
+        help="Generate quote-grounded abstract evidence cards (MVP-P2).",
+        description=(
+            "Resolve sources (or use --fixture-mode) and extract quote-first "
+            "claims from abstract text only. Evidence cards are labeled "
+            "abstract_only; no full-text fetch required."
+        ),
+    )
+    abstract_evidence_parser.add_argument("--query", help="Search query for resolver.")
+    abstract_evidence_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack id (default: creativity).",
+    )
+    abstract_evidence_parser.add_argument(
+        "--limit",
+        type=int,
+        default=10,
+        help="Maximum resolver records (default: 10).",
+    )
+    abstract_evidence_parser.add_argument(
+        "--fixture-mode",
+        action="store_true",
+        help="Use manual resolver fixtures only (no network).",
+    )
+    abstract_evidence_parser.add_argument(
+        "--out",
+        help="Output directory for abstract_evidence_latest.json.",
+    )
+    abstract_evidence_parser.set_defaults(func=_cmd_generate_abstract_evidence)
+
+    recommend_packet_parser = subparsers.add_parser(
+        "recommend-improvement-packet",
+        help="Recommend next MVP improvement packet from run evidence (MVP-P4).",
+        description=(
+            "Classify dominant bottlenecks from run reports or abstract evidence "
+            "runs and recommend the next MVP packet (parser vs resolver vs ranker)."
+        ),
+    )
+    recommend_packet_parser.add_argument(
+        "--run-report",
+        help="Path to run report JSON (e.g. data/reports/run_report_latest.json).",
+    )
+    recommend_packet_parser.add_argument(
+        "--abstract-evidence",
+        help="Path to abstract evidence JSON output.",
+    )
+    recommend_packet_parser.add_argument(
+        "--fixture-mode",
+        action="store_true",
+        help="Run fixture resolver + abstract evidence and recommend from that.",
+    )
+    recommend_packet_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack for --fixture-mode (default: creativity).",
+    )
+    recommend_packet_parser.set_defaults(func=_cmd_recommend_improvement_packet)
+
+    field_map_parser = subparsers.add_parser(
+        "generate-field-map",
+        help="Generate metadata field-map report with abstract evidence (MVP-P3).",
+        description=(
+            "Resolve metadata records, cluster heuristically, rank top sources, "
+            "extract abstract-grounded claims, and synthesize a field report with "
+            "improvement packet recommendation."
+        ),
+    )
+    field_map_parser.add_argument("--query", help="Topic query for field-map run.")
+    field_map_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack id (default: creativity).",
+    )
+    field_map_parser.add_argument(
+        "--max-candidates",
+        type=int,
+        default=20,
+        help="Maximum metadata records to pull (default: 20).",
+    )
+    field_map_parser.add_argument(
+        "--top-sources",
+        type=int,
+        default=5,
+        help="Top sources for abstract evidence extraction (default: 5).",
+    )
+    field_map_parser.add_argument(
+        "--fixture-mode",
+        action="store_true",
+        help="Use manual resolver fixtures only (no network).",
+    )
+    field_map_parser.add_argument(
+        "--out",
+        help="Output directory for field_map_latest.json.",
+    )
+    field_map_parser.set_defaults(func=_cmd_generate_field_map)
+
+    research_run_parser = subparsers.add_parser(
+        "research-run",
+        help="Run MVP research demo loop (resolve → evidence → field map).",
+        description=(
+            "Single-command MVP research loop: source resolver, abstract evidence "
+            "cards, selective full-text acquisition, field-map synthesis, and "
+            "improvement packet recommendation. Use --fixture-mode for mock proofs."
+        ),
+    )
+    research_run_parser.add_argument("--topic", help="Research topic query.")
+    research_run_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack id (default: creativity).",
+    )
+    research_run_parser.add_argument(
+        "--mode",
+        default="abstract-first",
+        choices=["abstract-first", "full-text-augmented"],
+        help="Research mode (default: abstract-first).",
+    )
+    research_run_parser.add_argument(
+        "--max-candidates",
+        type=int,
+        default=20,
+        help="Maximum resolver records (default: 20).",
+    )
+    research_run_parser.add_argument(
+        "--top-sources",
+        type=int,
+        default=5,
+        help="Top ranked sources for abstract evidence (default: 5).",
+    )
+    research_run_parser.add_argument(
+        "--full-text-top-n",
+        type=int,
+        default=3,
+        help="Top-N sources considered for selective full-text (default: 3).",
+    )
+    research_run_parser.add_argument(
+        "--fixture-mode",
+        action="store_true",
+        help="Use fixture resolver/documents only (no network).",
+    )
+    research_run_parser.add_argument(
+        "--out",
+        default="data/reports/research_runs",
+        help="Output directory for latest.json (default: data/reports/research_runs).",
+    )
+    research_run_parser.add_argument(
+        "--db",
+        help="SQLite database path for selective full-text ingest and claim extraction.",
+    )
+    research_run_parser.add_argument(
+        "--persist-claims",
+        action="store_true",
+        help="With --db, extract quote-grounded full-text claims into the database.",
+    )
+    research_run_parser.add_argument(
+        "--staging-dir",
+        help="Staging directory for selective full-text artifacts ingested to DB.",
+    )
+    research_run_parser.set_defaults(func=_cmd_research_run)
 
     fetch_candidate_parser = subparsers.add_parser(
         "fetch-candidate",

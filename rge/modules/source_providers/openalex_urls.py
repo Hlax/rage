@@ -12,6 +12,24 @@ _NON_OA_URL_KINDS = frozenset(
 )
 
 
+def _host_priority_bonus(url: str) -> int:
+    """Lower effective priority for trusted open mirrors; raise for brittle hosts."""
+    lowered = url.casefold()
+    if "pmc.ncbi.nlm.nih.gov" in lowered or "ncbi.nlm.nih.gov/pmc" in lowered:
+        return -200
+    if "arxiv.org" in lowered:
+        return -150
+    if "springeropen.com" in lowered:
+        return -100
+    if "europepmc.org" in lowered:
+        return -90
+    if "science.org" in lowered or "sciencedirect.com" in lowered:
+        return 100
+    if "link.springer.com" in lowered:
+        return 80
+    return 0
+
+
 def _location_sort_key(location: dict[str, Any]) -> str:
     source = location.get("source") or {}
     return str(location.get("id") or source.get("id") or "")
@@ -71,7 +89,9 @@ def build_openalex_fetch_url_candidates(work: dict[str, Any]) -> list[dict[str, 
         900,
     )
 
-    ordered.sort(key=lambda item: (item[0], item[1], item[2]))
+    ordered.sort(
+        key=lambda item: (item[0] + _host_priority_bonus(item[2]), item[1], item[2])
+    )
     return [{"url": url, "kind": kind} for _, kind, url in ordered]
 
 

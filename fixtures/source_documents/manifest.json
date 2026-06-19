@@ -1,0 +1,18 @@
+{
+  "manual_fixture:manual_oa_pdf": {
+    "path": "manual_oa_clean_fulltext.txt",
+    "location_kind": "oa_pdf",
+    "content_type": "text/plain",
+    "simulated_pdf_parse": true
+  },
+  "manual_fixture:manual_oa_tei": {
+    "path": "manual_oa_tei.xml",
+    "location_kind": "tei",
+    "content_type": "application/xml"
+  },
+  "manual_fixture:manual_creativity_ai_diversity": {
+    "path": null,
+    "location_kind": "abstract_only",
+    "skip_full_text": true
+  }
+}

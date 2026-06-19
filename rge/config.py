@@ -32,8 +32,11 @@ _DEFAULTS = {
     "RGE_TEST_LLM_MODE": "mock",
     "RGE_ALLOW_LIVE_LLM": "0",
     "RGE_ALLOW_SOURCE_NETWORK": "0",
+    "RGE_ALLOW_LIVE_SELECTIVE_FETCH": "0",
+    "RGE_GROBID_URL": "",
     "OPENALEX_MAILTO": "",
     "OPENALEX_API_KEY": "",
+    "UNPAYWALL_EMAIL": "",
     "RGE_LLM_TIMEOUT_SECONDS": "60",
     "RGE_LLM_TEMPERATURE": "0",
     "RGE_LLM_SCHEMA_VERSION": "0.1.0",
@@ -67,8 +70,11 @@ class RgeConfig:
     test_llm_mode: str
     allow_live_llm: bool
     allow_source_network: bool
+    allow_live_selective_fetch: bool
+    grobid_url: str
     openalex_mailto: str
     openalex_api_key: str
+    unpaywall_email: str
     llm_timeout_seconds: int
     llm_temperature: float
     llm_schema_version: str
@@ -155,6 +161,18 @@ def load_config(env_file: Path | None = None) -> RgeConfig:
             "Use 1/true/yes to enable source discovery network calls or 0/false/no."
         )
 
+    selective_raw = merged.get("RGE_ALLOW_LIVE_SELECTIVE_FETCH", "0").strip().casefold()
+    if selective_raw in ("1", "true", "yes"):
+        allow_live_selective_fetch = True
+    elif selective_raw in ("0", "false", "no", ""):
+        allow_live_selective_fetch = False
+    else:
+        raise ConfigError(
+            "Invalid RGE_ALLOW_LIVE_SELECTIVE_FETCH="
+            f"{merged.get('RGE_ALLOW_LIVE_SELECTIVE_FETCH')!r}. "
+            "Use 1/true/yes to enable live selective full-text fetch or 0/false/no."
+        )
+
     return RgeConfig(
         ollama_base_url=merged["OLLAMA_BASE_URL"],
         local_llm=merged["RGE_LOCAL_LLM"],
@@ -162,8 +180,14 @@ def load_config(env_file: Path | None = None) -> RgeConfig:
         test_llm_mode=merged["RGE_TEST_LLM_MODE"],
         allow_live_llm=allow_live_llm,
         allow_source_network=allow_source_network,
+        allow_live_selective_fetch=allow_live_selective_fetch,
+        grobid_url=merged.get("RGE_GROBID_URL", "").strip(),
         openalex_mailto=merged.get("OPENALEX_MAILTO", "").strip(),
         openalex_api_key=merged.get("OPENALEX_API_KEY", "").strip(),
+        unpaywall_email=(
+            merged.get("UNPAYWALL_EMAIL", "").strip()
+            or merged.get("OPENALEX_MAILTO", "").strip()
+        ),
         llm_timeout_seconds=timeout,
         llm_temperature=temperature,
         llm_schema_version=merged["RGE_LLM_SCHEMA_VERSION"],

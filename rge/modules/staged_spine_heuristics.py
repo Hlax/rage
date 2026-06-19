@@ -50,6 +50,11 @@ def source_has_staged_rank2_fetch_spine(chunks: list[Any]) -> bool:
 
 MIN_STAGED_INGEST_TEXT_CHARS = 200
 
+MOCK_STAGED_RANK1_ARTIFACT_MARKERS = (
+    "human-ai co-creativity",
+    "songwriting",
+)
+
 
 def staged_ingest_chunk_text(chunks: list[Any]) -> str:
     """Concatenate chunk text for staged ingest validation."""
