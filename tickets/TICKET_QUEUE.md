@@ -365,7 +365,8 @@ superseded
 | 337 | ticket-337 | done | Autonomous researcher loop staged-spine mock orchestrator v0 | `phase-3/ticket-337-autonomous-loop-staged-spine-mock-v0` | `agent_reports/2026-06-18_phase-3_ticket-337_autonomous-loop-staged-spine-mock-v0.md` |
 | 338 | ticket-338 | done | Autonomous loop operator autocycle hook v0 | `phase-3/ticket-338-autonomous-loop-operator-autocycle-hook-v0` | `agent_reports/2026-06-18_phase-3_ticket-338_autonomous-loop-operator-autocycle-hook-v0.md` |
 | 339 | ticket-339 | done | Autonomous loop scratch artifact inspection in operator plan v0 | `phase-3/ticket-339-autonomous-loop-scratch-inspection-v0` | `agent_reports/2026-06-18_phase-3_ticket-339_autonomous-loop-scratch-inspection-v0.md` |
-| 353 | ticket-353 | proposed | Principal audit post-ticket-352 autonomous loop checkpoint | | |
+| 354 | ticket-354 | proposed | Autonomous loop operator plan improvement summary in recommended action v0 | | |
+| 353 | ticket-353 | done | Principal audit post-ticket-352 autonomous loop checkpoint | `phase-3/ticket-353-principal-audit-post-ticket-352` | `agent_reports/2026-06-18_phase-3_ticket-353_principal-audit-post-ticket-352.md` |
 | 352 | ticket-352 | done | README operator quickstart autonomous loop improvement status fields v0 | `phase-3/ticket-352-readme-autonomous-loop-improvement-fields-v0` | `agent_reports/2026-06-18_phase-3_ticket-352_readme-autonomous-loop-improvement-fields-v0.md` |
 | 351 | ticket-351 | done | Operator autocycle execute-safe improvement status sync from execution v0 | `phase-3/ticket-351-autocycle-execute-safe-improvement-sync-v0` | `agent_reports/2026-06-18_phase-3_ticket-351_autocycle-execute-safe-improvement-sync-v0.md` |
 | 350 | ticket-350 | done | Autonomous loop execute-safe improvement status refresh after proof v0 | `phase-3/ticket-350-autonomous-loop-execute-safe-improvement-refresh-v0` | `agent_reports/2026-06-18_phase-3_ticket-350_autonomous-loop-execute-safe-improvement-refresh-v0.md` |
@@ -1114,9 +1115,17 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-353 (proposed) — Principal audit post-ticket-352 autonomous loop checkpoint
+ticket-354 (proposed) — Autonomous loop operator plan improvement summary in recommended action v0
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-353 principal audit post-ticket-352)
+
+- Cadence reset after tickets 350–352 (improvement execute-safe refresh, autocycle sync, README)
+- Principal audit: `agent_reports/2026-06-18_principal-audit-post-ticket-352.md`
+- Verdict GO; no public export, site, schema, or live-Ollama regressions in batch
+- ticket-354 seeded: recommended-action improvement summary (ticket-341 parity)
+- Report: `agent_reports/2026-06-18_phase-3_ticket-353_principal-audit-post-ticket-352.md`
 
 ## Queue Notes (2026-06-18, ticket-352 README autonomous loop improvement status fields v0)
 
