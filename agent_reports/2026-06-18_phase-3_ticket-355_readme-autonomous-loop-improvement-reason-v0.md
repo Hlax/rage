@@ -50,7 +50,7 @@ Safety audit not required — README documentation only.
 
 ## Merge to main
 
-Merge commit: *(pending merge)*
+Merge commit: `6b0c76f2e8ef4e172c1ee22fc6dfcfe10f371684`
 
 ## Recommended next ticket
 
