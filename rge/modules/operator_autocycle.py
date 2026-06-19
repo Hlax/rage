@@ -231,6 +231,10 @@ def evaluate_autocycle_cycle(
         "scratch_evidence_status": plan.get("scratch_evidence_status") or {},
         "autonomous_loop_scratch_status": plan.get("autonomous_loop_scratch_status")
         or {},
+        "autonomous_loop_improvement_status": plan.get(
+            "autonomous_loop_improvement_status"
+        )
+        or {},
         "arbitrary_source_proof_bundle_status": plan.get(
             "arbitrary_source_proof_bundle_status"
         )
@@ -541,6 +545,10 @@ def run_autocycle(
         "drift_warning": last.get("drift_warning"),
         "scratch_evidence_status": last.get("scratch_evidence_status") or {},
         "autonomous_loop_scratch_status": last.get("autonomous_loop_scratch_status")
+        or {},
+        "autonomous_loop_improvement_status": last.get(
+            "autonomous_loop_improvement_status"
+        )
         or {},
         "arbitrary_source_proof_bundle_status": last.get(
             "arbitrary_source_proof_bundle_status"
