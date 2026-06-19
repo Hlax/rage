@@ -23,4 +23,6 @@
 
 ## Merge
 
-Not performed in this session (user did not request commit/merge).
+Merged to `main` at **`09b6b44`** (includes integration commits `cf98966`, `e3f6bb8`).
+
+Operator proof: `agent_reports/2026-06-19_mvp-research-spine-integration-operator-proof.md`
