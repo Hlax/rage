@@ -300,6 +300,145 @@ def inspect_autonomous_loop_scratch_artifact(
     return status
 
 
+def _resolve_loop_artifact_path(project_root: Path, raw: str | None) -> Path | None:
+    """Resolve an autonomous loop artifact path from loop report metadata."""
+    if not raw:
+        return None
+    path = Path(raw)
+    if path.is_file():
+        return path
+    relative = project_root / raw
+    if relative.is_file():
+        return relative
+    return path
+
+
+def inspect_autonomous_loop_improvement_artifact(
+    *,
+    root: Path | None = None,
+    artifact_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Read-only inspection of improvement ticket artifacts from scratch loop report."""
+    project_root = root or repo_root()
+    paths = autonomous_loop_scratch_paths(project_root)
+    report_path = (artifact_dir or paths["artifact_dir"]) / "autonomous_loop_report.json"
+    try:
+        rel_report_path = report_path.relative_to(project_root.resolve()).as_posix()
+    except ValueError:
+        rel_report_path = report_path.as_posix()
+
+    status: dict[str, Any] = {
+        "loop_report_path": rel_report_path,
+        "loop_report_exists": report_path.is_file(),
+        "status": "not_run",
+        "improvement_tickets_path": None,
+        "improvement_tickets_exists": False,
+        "recommended_improvement_ticket_path": None,
+        "recommended_improvement_ticket_exists": False,
+        "recommended_ticket_id": None,
+        "recommended_ticket_title": None,
+        "recommended_ticket_status": None,
+        "source_weakness": None,
+        "quality_driven_ticket_ids": [],
+        "pending": False,
+        "draft_count": 0,
+        "draft_tickets": [],
+        "error": None,
+    }
+
+    if not report_path.is_file():
+        status["error"] = f"autonomous loop report not found: {rel_report_path}"
+        return status
+
+    try:
+        loop_report = json.loads(report_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        status["status"] = "invalid"
+        status["error"] = str(exc)
+        return status
+
+    if not isinstance(loop_report, dict):
+        status["status"] = "invalid"
+        status["error"] = "autonomous loop report must be a JSON object"
+        return status
+
+    artifacts = loop_report.get("artifacts") or {}
+    improvement_raw = artifacts.get("improvement_tickets")
+    recommended_raw = artifacts.get("recommended_improvement_ticket")
+    if not improvement_raw and not recommended_raw:
+        status["status"] = "incomplete"
+        status["error"] = "autonomous loop report has no improvement artifact references"
+        return status
+
+    improvement_path = _resolve_loop_artifact_path(project_root, improvement_raw)
+    recommended_path = _resolve_loop_artifact_path(project_root, recommended_raw)
+
+    if improvement_path is not None:
+        try:
+            status["improvement_tickets_path"] = improvement_path.relative_to(
+                project_root.resolve()
+            ).as_posix()
+        except ValueError:
+            status["improvement_tickets_path"] = improvement_path.as_posix()
+        status["improvement_tickets_exists"] = improvement_path.is_file()
+
+    if recommended_path is not None:
+        try:
+            status["recommended_improvement_ticket_path"] = recommended_path.relative_to(
+                project_root.resolve()
+            ).as_posix()
+        except ValueError:
+            status["recommended_improvement_ticket_path"] = recommended_path.as_posix()
+        status["recommended_improvement_ticket_exists"] = recommended_path.is_file()
+
+    run_summary = loop_report.get("run_summary") or {}
+    quality_driven_ids = run_summary.get("quality_driven_ticket_ids")
+    if isinstance(quality_driven_ids, list):
+        status["quality_driven_ticket_ids"] = quality_driven_ids
+
+    if recommended_path is not None and recommended_path.is_file():
+        try:
+            recommended = json.loads(recommended_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            status["status"] = "invalid"
+            status["error"] = f"recommended improvement ticket invalid: {exc}"
+            return status
+        if isinstance(recommended, dict):
+            status["recommended_ticket_id"] = recommended.get("id") or loop_report.get(
+                "recommended_improvement_ticket_id"
+            )
+            status["recommended_ticket_title"] = recommended.get("title")
+            status["recommended_ticket_status"] = recommended.get("status")
+            status["source_weakness"] = recommended.get("source_weakness")
+    else:
+        status["recommended_ticket_id"] = loop_report.get(
+            "recommended_improvement_ticket_id"
+        )
+
+    if improvement_path is not None and improvement_path.is_file():
+        pending = pending_improvement_tickets(
+            root=project_root,
+            artifact_path=improvement_path,
+        )
+        status["pending"] = pending.get("pending", False)
+        status["draft_count"] = pending.get("draft_count", 0)
+        status["draft_tickets"] = pending.get("draft_tickets", [])
+
+    has_improvement_signal = (
+        status["improvement_tickets_exists"]
+        or status["recommended_improvement_ticket_exists"]
+        or bool(status["quality_driven_ticket_ids"])
+    )
+    if has_improvement_signal:
+        status["status"] = "ok"
+        status["error"] = None
+    else:
+        status["status"] = "incomplete"
+        status["error"] = "autonomous loop report references improvement artifacts that are missing"
+
+    return status
+
+
 _AUTONOMOUS_LOOP_BASE_REASON = (
     "No open queue ticket requires immediate human action; safe to run "
     "fixture-mode autonomous researcher loop proof on temp DB paths "
@@ -1200,6 +1339,9 @@ def build_operator_plan(
     autonomous_loop_scratch_status = inspect_autonomous_loop_scratch_artifact(
         root=project_root,
     )
+    autonomous_loop_improvement_status = inspect_autonomous_loop_improvement_artifact(
+        root=project_root,
+    )
     domain_pack_status = inspect_domain_pack_status(root=project_root)
     nm4_evidence_spine_status = inspect_nm4_evidence_spine_status(root=project_root)
     runtime_config = load_config()
@@ -1266,6 +1408,7 @@ def build_operator_plan(
         "arbitrary_source_proof_bundle_status": arbitrary_source_proof_bundle_status,
         "autonomous_researcher_loop_status": autonomous_researcher_loop_status,
         "autonomous_loop_scratch_status": autonomous_loop_scratch_status,
+        "autonomous_loop_improvement_status": autonomous_loop_improvement_status,
         "staged_rank2_scan_max": runtime_config.staged_rank2_scan_max,
         "domain_pack_status": domain_pack_status,
         "nm4_evidence_spine_status": nm4_evidence_spine_status,
