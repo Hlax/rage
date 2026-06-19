@@ -37,7 +37,7 @@ python -m rge.cli verify --skip-site
 
 ## Merge
 
-*(filled after merge to main)*
+Fast-forward merge to `main` @ `15f425a` (includes tickets 362–363 from same branch lineage).
 
 ## Next ticket
 
