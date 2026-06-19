@@ -334,6 +334,7 @@ def propose_contradictions(
     live_manual_contradiction_fallthrough: bool = False,
     live_staged_detect_fallthrough: bool = False,
     live_staged_rank2_detect_fallthrough: bool = False,
+    live_staged_ingest_detect_fallthrough: bool = False,
 ) -> list[dict[str, Any]]:
     """Propose contradiction/qualification links via the configured model client."""
     config = load_config()
@@ -344,7 +345,7 @@ def propose_contradictions(
         "domain_pack": domain_pack,
         "schema_version": config.llm_schema_version,
     }
-    if live_manual_contradiction_fallthrough:
+    if live_manual_contradiction_fallthrough or live_staged_ingest_detect_fallthrough:
         detect_kwargs["manual_text_arbitrary_live"] = True
     if isinstance(model_client, MockModelClient):
         detect_kwargs["fixture_name"] = fixture_name or _default_contradiction_fixture_for_source(
@@ -363,6 +364,7 @@ def detect_contradictions_for_source(
     live_manual_contradiction_fallthrough: bool = False,
     live_staged_detect_fallthrough: bool = False,
     live_staged_rank2_detect_fallthrough: bool = False,
+    live_staged_ingest_detect_fallthrough: bool = False,
     client: Any | None = None,
     config: Any | None = None,
 ) -> dict[str, Any]:
@@ -405,16 +407,23 @@ def detect_contradictions_for_source(
     ]
     cfg = config if config is not None else load_config()
     if live_manual_contradiction_fallthrough and (
-        live_staged_detect_fallthrough or live_staged_rank2_detect_fallthrough
+        live_staged_detect_fallthrough
+        or live_staged_rank2_detect_fallthrough
+        or live_staged_ingest_detect_fallthrough
     ):
         raise ValueError(
             "live_manual_contradiction_fallthrough and staged detect fallthrough flags "
             "are mutually exclusive."
         )
-    if live_staged_detect_fallthrough and live_staged_rank2_detect_fallthrough:
+    if sum(
+        (
+            live_staged_detect_fallthrough,
+            live_staged_rank2_detect_fallthrough,
+            live_staged_ingest_detect_fallthrough,
+        )
+    ) > 1:
         raise ValueError(
-            "live_staged_detect_fallthrough and live_staged_rank2_detect_fallthrough "
-            "are mutually exclusive."
+            "Only one staged live detect fallthrough flag may be set per detect run."
         )
     if live_staged_rank2_detect_fallthrough:
         from rge.modules.staged_spine_heuristics import is_staged_rank2_fetch_spine_source
@@ -428,6 +437,19 @@ def detect_contradictions_for_source(
             raise ValueError(
                 "live_staged_rank2_detect_fallthrough requires staged OpenAlex rank-2 "
                 "ingest source title (constraint management marker)."
+            )
+        model_client = client or get_model_client(cfg, mode="ollama")
+    elif live_staged_ingest_detect_fallthrough:
+        from rge.modules.staged_spine_heuristics import is_staged_ingest_source
+
+        if fixture_name:
+            raise ValueError(
+                "live_staged_ingest_detect_fallthrough cannot be combined with --fixture; "
+                "live Ollama contradiction detection uses domain graph context."
+            )
+        if not is_staged_ingest_source(source_record, conn=conn):
+            raise ValueError(
+                "live_staged_ingest_detect_fallthrough requires an ingest-staged OpenAlex source."
             )
         model_client = client or get_model_client(cfg, mode="ollama")
     elif live_staged_detect_fallthrough:
@@ -461,6 +483,9 @@ def detect_contradictions_for_source(
         source=source_record,
         client=model_client,
         live_manual_contradiction_fallthrough=live_manual_contradiction_fallthrough,
+        live_staged_detect_fallthrough=live_staged_detect_fallthrough,
+        live_staged_rank2_detect_fallthrough=live_staged_rank2_detect_fallthrough,
+        live_staged_ingest_detect_fallthrough=live_staged_ingest_detect_fallthrough,
     )
     hints = contradiction_claim_hints_for_manual_source(source_record)
     if hints:

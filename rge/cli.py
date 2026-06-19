@@ -130,6 +130,14 @@ def _live_staged_orchestrator_enabled() -> bool:
     return _env_flag_enabled("RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR")
 
 
+def _live_staged_orchestrator_live_llm_enabled() -> bool:
+    from rge.modules.live_staged_orchestrator_spine import (
+        live_staged_orchestrator_live_llm_enabled,
+    )
+
+    return live_staged_orchestrator_live_llm_enabled()
+
+
 from rge.modules.staged_candidate_selection import (
     resolve_live_staged_spine_fetch_pair,
     select_rank1_staged_candidate_id,
@@ -545,7 +553,8 @@ def execute_staged_fixture_mode_run(
     rank2_run_id = f"{run_id}_rank2"
     steps_completed: list[str] = []
 
-    os.environ["RGE_LLM_MODE"] = "mock"
+    live_orchestrator_llm = _live_staged_orchestrator_live_llm_enabled()
+    os.environ["RGE_LLM_MODE"] = "ollama" if live_orchestrator_llm else "mock"
     os.environ["RGE_ALLOW_SOURCE_NETWORK"] = "1"
     if not prior_mailto:
         os.environ["OPENALEX_MAILTO"] = "operator@example.com"
@@ -600,6 +609,7 @@ def execute_staged_fixture_mode_run(
                             research_question_id=question_id,
                             output_dir=resolved_staging,
                             fetch_command=run_fetch_candidate_command,
+                            require_mock_spine_markers=not live_orchestrator_llm,
                         )
                     )
                 except UnsuitableLiveArtifactError as exc:
@@ -650,14 +660,27 @@ def execute_staged_fixture_mode_run(
                 rank1_id = _source_id_by_title_fragment(conn, "songwriting")
                 rank2_id = _source_id_by_title_fragment(conn, "Constraint management")
 
-            _run_cli_step(["extract-claims", "--source", rank1_id, *db_args])
-            _run_cli_step(["link-concepts", "--source", rank1_id, *db_args])
-            _run_cli_step(
-                ["build-relationships", "--source", rank1_id, *db_args]
-            )
-            _run_cli_step(
-                ["detect-contradictions", "--source", rank1_id, *db_args]
-            )
+            if live_orchestrator_llm:
+                from rge.modules.live_staged_orchestrator_spine import (
+                    run_staged_ingest_live_spine_for_source,
+                )
+
+                run_staged_ingest_live_spine_for_source(
+                    conn,
+                    rank1_id,
+                    domain=domain,
+                    skip_health_check=True,
+                )
+                steps_completed.append("rank1_live_ingest_spine")
+            else:
+                _run_cli_step(["extract-claims", "--source", rank1_id, *db_args])
+                _run_cli_step(["link-concepts", "--source", rank1_id, *db_args])
+                _run_cli_step(
+                    ["build-relationships", "--source", rank1_id, *db_args]
+                )
+                _run_cli_step(
+                    ["detect-contradictions", "--source", rank1_id, *db_args]
+                )
             _run_cli_step(["reconcile-scores", "--source", rank1_id, *db_args])
             _run_cli_step(
                 [
@@ -675,46 +698,59 @@ def execute_staged_fixture_mode_run(
             )
             steps_completed.append("rank1_spine_and_report")
 
-            _run_cli_step(
-                [
-                    "extract-claims",
-                    "--source",
+            if live_orchestrator_llm:
+                from rge.modules.live_staged_orchestrator_spine import (
+                    run_staged_ingest_live_spine_for_source,
+                )
+
+                run_staged_ingest_live_spine_for_source(
+                    conn,
                     rank2_id,
-                    "--fixture",
-                    _STAGED_RANK2_LLM["extract"],
-                    *db_args,
-                ]
-            )
-            _run_cli_step(
-                [
-                    "link-concepts",
-                    "--source",
-                    rank2_id,
-                    "--fixture",
-                    _STAGED_RANK2_LLM["link"],
-                    *db_args,
-                ]
-            )
-            _run_cli_step(
-                [
-                    "build-relationships",
-                    "--source",
-                    rank2_id,
-                    "--fixture",
-                    _STAGED_RANK2_LLM["relationship"],
-                    *db_args,
-                ]
-            )
-            _run_cli_step(
-                [
-                    "detect-contradictions",
-                    "--source",
-                    rank2_id,
-                    "--fixture",
-                    _STAGED_RANK2_LLM["detect"],
-                    *db_args,
-                ]
-            )
+                    domain=domain,
+                    skip_health_check=True,
+                )
+                steps_completed.append("rank2_live_ingest_spine")
+            else:
+                _run_cli_step(
+                    [
+                        "extract-claims",
+                        "--source",
+                        rank2_id,
+                        "--fixture",
+                        _STAGED_RANK2_LLM["extract"],
+                        *db_args,
+                    ]
+                )
+                _run_cli_step(
+                    [
+                        "link-concepts",
+                        "--source",
+                        rank2_id,
+                        "--fixture",
+                        _STAGED_RANK2_LLM["link"],
+                        *db_args,
+                    ]
+                )
+                _run_cli_step(
+                    [
+                        "build-relationships",
+                        "--source",
+                        rank2_id,
+                        "--fixture",
+                        _STAGED_RANK2_LLM["relationship"],
+                        *db_args,
+                    ]
+                )
+                _run_cli_step(
+                    [
+                        "detect-contradictions",
+                        "--source",
+                        rank2_id,
+                        "--fixture",
+                        _STAGED_RANK2_LLM["detect"],
+                        *db_args,
+                    ]
+                )
             _run_cli_step(["reconcile-scores", "--source", rank2_id, *db_args])
             _run_cli_step(
                 [

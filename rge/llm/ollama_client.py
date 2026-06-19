@@ -231,7 +231,10 @@ class OllamaModelClient(ModelClient):
         schema_version: str,
     ) -> str:
         chunk_text = chunk.get("chunk_text", "")
-        manual_text_mode = bool(contract.get("manual_text_arbitrary_live"))
+        manual_text_mode = bool(
+            contract.get("manual_text_arbitrary_live")
+            or contract.get("staged_ingest_arbitrary_live")
+        )
         manual_calibration = (
             self._manual_text_arbitrary_live_calibration() if manual_text_mode else ""
         )

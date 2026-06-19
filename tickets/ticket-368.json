@@ -1,0 +1,57 @@
+{
+  "id": "ticket-368",
+  "title": "Live staged orchestrator real-data spine v0",
+  "problem": "Live staged orchestrator skips with unsuitable_live_artifact when fetched OpenAlex HTML lacks mock-spine markers. Operators who opt into live Ollama need extract→detect on actual ingested staged text instead of checksum-pinned fixtures.",
+  "evidence": [
+    "ticket-367 unsuitable_live_artifact skip on real publisher HTML",
+    "per-step live staged fallthrough tickets 204/208/212/217 require mock marker phrases",
+    "operator request: start creating the real spine from live data"
+  ],
+  "affected_modules": [
+    "rge/cli.py",
+    "rge/llm/ollama_client.py",
+    "rge/modules/claim_extractor.py",
+    "rge/modules/concept_linker.py",
+    "rge/modules/relationship_builder.py",
+    "rge/modules/contradiction_detector.py",
+    "rge/modules/live_staged_orchestrator_spine.py",
+    "rge/modules/staged_candidate_selection.py",
+    "rge/modules/staged_spine_heuristics.py",
+    "tests/unit/test_live_staged_orchestrator_real_spine.py"
+  ],
+  "expected_files": [
+    "rge/cli.py",
+    "rge/llm/ollama_client.py",
+    "rge/modules/claim_extractor.py",
+    "rge/modules/concept_linker.py",
+    "rge/modules/relationship_builder.py",
+    "rge/modules/contradiction_detector.py",
+    "rge/modules/live_staged_orchestrator_spine.py",
+    "rge/modules/staged_candidate_selection.py",
+    "rge/modules/staged_spine_heuristics.py",
+    "tests/unit/test_live_staged_orchestrator_real_spine.py",
+    "tests/conftest.py",
+    "tickets/ticket-368.json",
+    "agent_reports/2026-06-19_phase-3_ticket-368_live-staged-orchestrator-real-spine.md"
+  ],
+  "acceptance_criteria": [
+    "RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR_LIVE_LLM=1 with RGE_ALLOW_LIVE_LLM=1 and RGE_LLM_MODE=ollama accepts first fetchable rank-1 artifact without mock-spine markers.",
+    "Orchestrator runs live Ollama extract→link→build→detect on ingest-staged sources via live_staged_ingest fallthrough flags.",
+    "Mock-only pytest proves fetch acceptance and stub-Ollama spine without network.",
+    "Default CI pytest remains network-free; reconcile/report stay deterministic."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_live_staged_orchestrator_real_spine.py",
+    "pytest tests/unit/test_live_staged_orchestrator_fetch_fallback.py",
+    "python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "live_network CI enforcement",
+    "Changing per-step marker-gated fallthrough flags (204/208/212/217)",
+    "Public export or default graph DB writes"
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert orchestrator live LLM branch; restore mock-spine-only live orchestrator path.",
+  "status": "done",
+  "category": "Phase 3 / staged spine live LLM"
+}

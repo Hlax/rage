@@ -253,6 +253,7 @@ def fetch_rank1_with_access_fallback(
     output_dir: Path,
     fetch_command: Callable[..., tuple[dict[str, Any], int]],
     live_orchestrator_fallback: bool = False,
+    require_mock_spine_markers: bool = True,
     max_scan: int | None = None,
 ) -> tuple[str, list[str], list[dict[str, Any]]]:
     """Fetch rank-1 candidate bytes, skipping publisher access blocks."""
@@ -276,7 +277,7 @@ def fetch_rank1_with_access_fallback(
             output_dir=output_dir,
         )
         if exit_code == OK_EXIT_CODE and payload.get("status") == "completed":
-            if live_orchestrator_fallback:
+            if live_orchestrator_fallback and require_mock_spine_markers:
                 compatibility = evaluate_mock_spine_compatibility(payload)
                 if not compatibility.get("compatible"):
                     incompatible_candidates.append(
@@ -330,6 +331,7 @@ def resolve_live_staged_spine_fetch_pair(
     research_question_id: str,
     output_dir: Path,
     fetch_command: Callable[..., tuple[dict[str, Any], int]],
+    require_mock_spine_markers: bool = True,
     max_scan: int | None = None,
 ) -> tuple[str, str, list[str]]:
     """Resolve rank-1/rank-2 candidate ids with rank-1 fetch access fallback."""
@@ -340,6 +342,7 @@ def resolve_live_staged_spine_fetch_pair(
             output_dir=output_dir,
             fetch_command=fetch_command,
             live_orchestrator_fallback=True,
+            require_mock_spine_markers=require_mock_spine_markers,
             max_scan=max_scan,
         )
     )

@@ -46,3 +46,38 @@ def source_has_staged_rank2_fetch_spine(chunks: list[Any]) -> bool:
         is_staged_rank2_fetch_spine_chunk(str(getattr(c, "chunk_text", "") or ""))
         for c in chunks
     )
+
+
+MIN_STAGED_INGEST_TEXT_CHARS = 200
+
+
+def staged_ingest_chunk_text(chunks: list[Any]) -> str:
+    """Concatenate chunk text for staged ingest validation."""
+    return "".join(str(getattr(chunk, "chunk_text", "") or "") for chunk in chunks)
+
+
+def staged_ingest_has_sufficient_text(chunks: list[Any]) -> bool:
+    """Return True when staged ingest chunks contain enough text for live extraction."""
+    return len(staged_ingest_chunk_text(chunks).strip()) >= MIN_STAGED_INGEST_TEXT_CHARS
+
+
+def is_staged_ingest_source(source: Any | None, *, conn: Any | None = None) -> bool:
+    """Return True when a source row came from ingest-staged (not checksum-pinned mock)."""
+    if source is None:
+        return False
+    source_type = str(getattr(source, "source_type", "") or "").strip().casefold()
+    if source_type == "staged_fetch":
+        return True
+    local_path = str(getattr(source, "local_path", "") or "").casefold()
+    if "staged" in local_path:
+        return True
+    if conn is not None:
+        title = str(getattr(source, "title", "") or "").strip()
+        if title:
+            row = conn.execute(
+                "SELECT 1 FROM candidate_sources WHERE title = ? LIMIT 1",
+                (title,),
+            ).fetchone()
+            if row is not None:
+                return True
+    return False

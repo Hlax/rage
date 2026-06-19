@@ -280,6 +280,7 @@ def propose_concept_links(
     live_manual_link_fallthrough: bool = False,
     live_staged_link_fallthrough: bool = False,
     live_staged_rank2_link_fallthrough: bool = False,
+    live_staged_ingest_link_fallthrough: bool = False,
 ) -> list[dict[str, Any]]:
     """Propose concept links via the model client without persistence."""
     config = load_config()
@@ -289,7 +290,7 @@ def propose_concept_links(
         "domain_pack": domain_pack,
         "schema_version": config.llm_schema_version,
     }
-    if live_manual_link_fallthrough:
+    if live_manual_link_fallthrough or live_staged_ingest_link_fallthrough:
         link_kwargs["manual_text_arbitrary_live"] = True
     if isinstance(model_client, MockModelClient):
         link_kwargs["fixture_name"] = fixture_name or _default_link_fixture_for_source(
@@ -315,6 +316,7 @@ def link_claim_concepts(
     live_manual_link_fallthrough: bool = False,
     live_staged_link_fallthrough: bool = False,
     live_staged_rank2_link_fallthrough: bool = False,
+    live_staged_ingest_link_fallthrough: bool = False,
 ) -> list[dict[str, Any]]:
     """Propose concept links for claims via the configured model client."""
     return propose_concept_links(
@@ -327,6 +329,7 @@ def link_claim_concepts(
         live_manual_link_fallthrough=live_manual_link_fallthrough,
         live_staged_link_fallthrough=live_staged_link_fallthrough,
         live_staged_rank2_link_fallthrough=live_staged_rank2_link_fallthrough,
+        live_staged_ingest_link_fallthrough=live_staged_ingest_link_fallthrough,
     )
 
 
@@ -338,6 +341,7 @@ def link_concepts_for_source(
     live_manual_link_fallthrough: bool = False,
     live_staged_link_fallthrough: bool = False,
     live_staged_rank2_link_fallthrough: bool = False,
+    live_staged_ingest_link_fallthrough: bool = False,
     client: Any | None = None,
     config: Any | None = None,
 ) -> dict[str, Any]:
@@ -371,15 +375,22 @@ def link_concepts_for_source(
 
     cfg = config if config is not None else load_config()
     if live_manual_link_fallthrough and (
-        live_staged_link_fallthrough or live_staged_rank2_link_fallthrough
+        live_staged_link_fallthrough
+        or live_staged_rank2_link_fallthrough
+        or live_staged_ingest_link_fallthrough
     ):
         raise ValueError(
             "live_manual_link_fallthrough cannot be combined with staged live link fallthrough."
         )
-    if live_staged_link_fallthrough and live_staged_rank2_link_fallthrough:
+    if sum(
+        (
+            live_staged_link_fallthrough,
+            live_staged_rank2_link_fallthrough,
+            live_staged_ingest_link_fallthrough,
+        )
+    ) > 1:
         raise ValueError(
-            "live_staged_link_fallthrough and live_staged_rank2_link_fallthrough are "
-            "mutually exclusive."
+            "Only one staged live link fallthrough flag may be set per linking run."
         )
     if live_staged_rank2_link_fallthrough:
         from rge.modules.staged_spine_heuristics import is_staged_rank2_fetch_spine_source
@@ -393,6 +404,19 @@ def link_concepts_for_source(
             raise ValueError(
                 "live_staged_rank2_link_fallthrough requires staged OpenAlex rank-2 "
                 "ingest source title (constraint management marker)."
+            )
+        model_client = client or get_model_client(cfg, mode="ollama")
+    elif live_staged_ingest_link_fallthrough:
+        from rge.modules.staged_spine_heuristics import is_staged_ingest_source
+
+        if fixture_name:
+            raise ValueError(
+                "live_staged_ingest_link_fallthrough cannot be combined with --fixture; "
+                "live Ollama linking uses accepted claims from the source."
+            )
+        if not is_staged_ingest_source(source_record, conn=conn):
+            raise ValueError(
+                "live_staged_ingest_link_fallthrough requires an ingest-staged OpenAlex source."
             )
         model_client = client or get_model_client(cfg, mode="ollama")
     elif live_staged_link_fallthrough:
@@ -436,6 +460,7 @@ def link_concepts_for_source(
         live_manual_link_fallthrough=live_manual_link_fallthrough,
         live_staged_link_fallthrough=live_staged_link_fallthrough,
         live_staged_rank2_link_fallthrough=live_staged_rank2_link_fallthrough,
+        live_staged_ingest_link_fallthrough=live_staged_ingest_link_fallthrough,
     )
     validated = validate_concept_links(proposed, domain_pack=domain_pack)
 

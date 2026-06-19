@@ -232,6 +232,7 @@ def propose_relationship_drafts(
     live_manual_relationship_fallthrough: bool = False,
     live_staged_build_fallthrough: bool = False,
     live_staged_rank2_build_fallthrough: bool = False,
+    live_staged_ingest_build_fallthrough: bool = False,
 ) -> list[dict[str, Any]]:
     """Propose relationship drafts via the model client without persistence."""
     config = load_config()
@@ -242,7 +243,7 @@ def propose_relationship_drafts(
         "domain_pack": domain_pack,
         "schema_version": config.llm_schema_version,
     }
-    if live_manual_relationship_fallthrough:
+    if live_manual_relationship_fallthrough or live_staged_ingest_build_fallthrough:
         draft_kwargs["manual_text_arbitrary_live"] = True
     if isinstance(model_client, MockModelClient):
         draft_kwargs["fixture_name"] = fixture_name or _default_relationship_fixture_for_source(
@@ -275,6 +276,7 @@ def draft_relationships_for_source(
     live_manual_relationship_fallthrough: bool = False,
     live_staged_build_fallthrough: bool = False,
     live_staged_rank2_build_fallthrough: bool = False,
+    live_staged_ingest_build_fallthrough: bool = False,
 ) -> list[dict[str, Any]]:
     """Propose relationship drafts via the configured model client."""
     return propose_relationship_drafts(
@@ -288,6 +290,7 @@ def draft_relationships_for_source(
         live_manual_relationship_fallthrough=live_manual_relationship_fallthrough,
         live_staged_build_fallthrough=live_staged_build_fallthrough,
         live_staged_rank2_build_fallthrough=live_staged_rank2_build_fallthrough,
+        live_staged_ingest_build_fallthrough=live_staged_ingest_build_fallthrough,
     )
 
 
@@ -299,6 +302,7 @@ def build_relationships_for_source(
     live_manual_relationship_fallthrough: bool = False,
     live_staged_build_fallthrough: bool = False,
     live_staged_rank2_build_fallthrough: bool = False,
+    live_staged_ingest_build_fallthrough: bool = False,
     client: Any | None = None,
     config: Any | None = None,
 ) -> dict[str, Any]:
@@ -351,16 +355,23 @@ def build_relationships_for_source(
 
     cfg = config if config is not None else load_config()
     if live_manual_relationship_fallthrough and (
-        live_staged_build_fallthrough or live_staged_rank2_build_fallthrough
+        live_staged_build_fallthrough
+        or live_staged_rank2_build_fallthrough
+        or live_staged_ingest_build_fallthrough
     ):
         raise ValueError(
             "live_manual_relationship_fallthrough and staged build fallthrough flags "
             "are mutually exclusive."
         )
-    if live_staged_build_fallthrough and live_staged_rank2_build_fallthrough:
+    if sum(
+        (
+            live_staged_build_fallthrough,
+            live_staged_rank2_build_fallthrough,
+            live_staged_ingest_build_fallthrough,
+        )
+    ) > 1:
         raise ValueError(
-            "live_staged_build_fallthrough and live_staged_rank2_build_fallthrough "
-            "are mutually exclusive."
+            "Only one staged live build fallthrough flag may be set per build run."
         )
     if live_staged_rank2_build_fallthrough:
         from rge.modules.staged_spine_heuristics import is_staged_rank2_fetch_spine_source
@@ -374,6 +385,19 @@ def build_relationships_for_source(
             raise ValueError(
                 "live_staged_rank2_build_fallthrough requires staged OpenAlex rank-2 "
                 "ingest source title (constraint management marker)."
+            )
+        model_client = client or get_model_client(cfg, mode="ollama")
+    elif live_staged_ingest_build_fallthrough:
+        from rge.modules.staged_spine_heuristics import is_staged_ingest_source
+
+        if fixture_name:
+            raise ValueError(
+                "live_staged_ingest_build_fallthrough cannot be combined with --fixture; "
+                "live Ollama relationship drafting uses accepted claims from the source."
+            )
+        if not is_staged_ingest_source(source_record, conn=conn):
+            raise ValueError(
+                "live_staged_ingest_build_fallthrough requires an ingest-staged OpenAlex source."
             )
         model_client = client or get_model_client(cfg, mode="ollama")
     elif live_staged_build_fallthrough:
@@ -409,6 +433,7 @@ def build_relationships_for_source(
         live_manual_relationship_fallthrough=live_manual_relationship_fallthrough,
         live_staged_build_fallthrough=live_staged_build_fallthrough,
         live_staged_rank2_build_fallthrough=live_staged_rank2_build_fallthrough,
+        live_staged_ingest_build_fallthrough=live_staged_ingest_build_fallthrough,
     )
     validated = validate_relationship_candidates(
         proposed,

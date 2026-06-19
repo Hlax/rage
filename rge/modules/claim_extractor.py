@@ -129,11 +129,14 @@ def extract_and_validate_for_chunk(
     source: Any | None = None,
     live_manual_fallthrough: bool = False,
     live_staged_fallthrough: bool = False,
+    live_staged_ingest_fallthrough: bool = False,
 ) -> dict[str, list[dict[str, Any]]]:
     """Extract candidates for one chunk and validate them deterministically."""
     contract: dict[str, Any] = {"domain_pack": domain_pack}
     if live_manual_fallthrough:
         contract["manual_text_arbitrary_live"] = True
+    if live_staged_ingest_fallthrough:
+        contract["staged_ingest_arbitrary_live"] = True
     candidates = extract_candidate_claims(
         chunk,
         contract,
@@ -157,6 +160,7 @@ def extract_claims_for_source(
     live_manual_fallthrough: bool = False,
     live_staged_fallthrough: bool = False,
     live_staged_rank2_fallthrough: bool = False,
+    live_staged_ingest_fallthrough: bool = False,
     client: Any | None = None,
     config: Any | None = None,
 ) -> dict[str, Any]:
@@ -185,15 +189,22 @@ def extract_claims_for_source(
         }
 
     if live_manual_fallthrough and (
-        live_staged_fallthrough or live_staged_rank2_fallthrough
+        live_staged_fallthrough
+        or live_staged_rank2_fallthrough
+        or live_staged_ingest_fallthrough
     ):
         raise ValueError(
             "live_manual_fallthrough cannot be combined with staged live fallthrough."
         )
-    if live_staged_fallthrough and live_staged_rank2_fallthrough:
+    if sum(
+        (
+            live_staged_fallthrough,
+            live_staged_rank2_fallthrough,
+            live_staged_ingest_fallthrough,
+        )
+    ) > 1:
         raise ValueError(
-            "live_staged_fallthrough and live_staged_rank2_fallthrough are mutually "
-            "exclusive."
+            "Only one staged live fallthrough flag may be set per extraction run."
         )
 
     cfg = config if config is not None else load_config()
@@ -209,6 +220,28 @@ def extract_claims_for_source(
             raise ValueError(
                 "live_staged_rank2_fallthrough requires staged OpenAlex rank-2 ingest "
                 "chunk text (constraint management marker)."
+            )
+        model_client = client or get_model_client(cfg, mode="ollama")
+    elif live_staged_ingest_fallthrough:
+        from rge.modules.staged_spine_heuristics import (
+            MIN_STAGED_INGEST_TEXT_CHARS,
+            is_staged_ingest_source,
+            staged_ingest_has_sufficient_text,
+        )
+
+        if fixture_name:
+            raise ValueError(
+                "live_staged_ingest_fallthrough cannot be combined with --fixture; "
+                "live Ollama extraction uses the ingested chunk text."
+            )
+        if not is_staged_ingest_source(source, conn=conn):
+            raise ValueError(
+                "live_staged_ingest_fallthrough requires an ingest-staged OpenAlex source."
+            )
+        if not staged_ingest_has_sufficient_text(chunks):
+            raise ValueError(
+                "live_staged_ingest_fallthrough requires staged ingest chunk text "
+                f"of at least {MIN_STAGED_INGEST_TEXT_CHARS} characters."
             )
         model_client = client or get_model_client(cfg, mode="ollama")
     elif live_staged_fallthrough:
@@ -253,6 +286,7 @@ def extract_claims_for_source(
             source=source,
             live_manual_fallthrough=live_manual_fallthrough,
             live_staged_fallthrough=live_staged_fallthrough,
+            live_staged_ingest_fallthrough=live_staged_ingest_fallthrough,
         )
         for claim in result["accepted"]:
             char_start, char_end = locate_quote_offsets(
