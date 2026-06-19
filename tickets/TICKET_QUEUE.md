@@ -365,7 +365,8 @@ superseded
 | 337 | ticket-337 | done | Autonomous researcher loop staged-spine mock orchestrator v0 | `phase-3/ticket-337-autonomous-loop-staged-spine-mock-v0` | `agent_reports/2026-06-18_phase-3_ticket-337_autonomous-loop-staged-spine-mock-v0.md` |
 | 338 | ticket-338 | done | Autonomous loop operator autocycle hook v0 | `phase-3/ticket-338-autonomous-loop-operator-autocycle-hook-v0` | `agent_reports/2026-06-18_phase-3_ticket-338_autonomous-loop-operator-autocycle-hook-v0.md` |
 | 339 | ticket-339 | done | Autonomous loop scratch artifact inspection in operator plan v0 | `phase-3/ticket-339-autonomous-loop-scratch-inspection-v0` | `agent_reports/2026-06-18_phase-3_ticket-339_autonomous-loop-scratch-inspection-v0.md` |
-| 355 | ticket-355 | proposed | README operator quickstart autonomous loop improvement reason enrichment v0 | | |
+| 356 | ticket-356 | proposed | Execute-safe post-run recommended action reason refresh after autonomous loop proof v0 | | |
+| 355 | ticket-355 | done | README operator quickstart autonomous loop improvement reason enrichment v0 | `phase-3/ticket-355-readme-autonomous-loop-improvement-reason-v0` | `agent_reports/2026-06-18_phase-3_ticket-355_readme-autonomous-loop-improvement-reason-v0.md` |
 | 354 | ticket-354 | done | Autonomous loop operator plan improvement summary in recommended action v0 | `phase-3/ticket-354-autonomous-loop-improvement-summary-v0` | `agent_reports/2026-06-18_phase-3_ticket-354_autonomous-loop-improvement-summary-v0.md` |
 | 353 | ticket-353 | done | Principal audit post-ticket-352 autonomous loop checkpoint | `phase-3/ticket-353-principal-audit-post-ticket-352` | `agent_reports/2026-06-18_phase-3_ticket-353_principal-audit-post-ticket-352.md` |
 | 352 | ticket-352 | done | README operator quickstart autonomous loop improvement status fields v0 | `phase-3/ticket-352-readme-autonomous-loop-improvement-fields-v0` | `agent_reports/2026-06-18_phase-3_ticket-352_readme-autonomous-loop-improvement-fields-v0.md` |
@@ -1116,9 +1117,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-355 (proposed) — README operator quickstart autonomous loop improvement reason enrichment v0
+ticket-356 (proposed) — Execute-safe post-run recommended action reason refresh after autonomous loop proof v0
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-355 README autonomous loop improvement reason enrichment v0)
+
+- README documents ticket-354 improvement append to `next_recommended_action.reason`
+- README notes `not_run` leaves scratch-only reason baseline
+- ticket-356 seeded: execute-safe post-run reason refresh after loop proof
+- Report: `agent_reports/2026-06-18_phase-3_ticket-355_readme-autonomous-loop-improvement-reason-v0.md`
 
 ## Queue Notes (2026-06-18, ticket-354 autonomous loop improvement summary in recommended action v0)
 

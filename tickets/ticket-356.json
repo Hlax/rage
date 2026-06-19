@@ -1,0 +1,37 @@
+{
+  "id": "ticket-356",
+  "title": "Execute-safe post-run recommended action reason refresh after autonomous loop proof v0",
+  "problem": "Tickets 343/350 refresh scratch and improvement status fields after execute-safe autonomous loop proof, but next_recommended_action.reason is built pre-run and is not rebuilt with post-proof scratch/improvement summaries (ticket-341/354).",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-355_readme-autonomous-loop-improvement-reason-v0.md",
+    "agent_reports/2026-06-18_phase-3_ticket-350_autonomous-loop-execute-safe-improvement-refresh-v0.md",
+    "rge/modules/operator_loop.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "tests/unit"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop_autonomous_execute_safe_improvement_refresh.py",
+    "agent_reports/2026-06-18_phase-3_ticket-356_execute-safe-reason-refresh-v0.md"
+  ],
+  "acceptance_criteria": [
+    "After successful execute-safe autonomous loop proof, next_recommended_action.reason reflects post-run scratch and improvement summaries.",
+    "Failed execute-safe leaves pre-run reason unchanged.",
+    "No allowlist or queue changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_loop_autonomous_execute_safe_improvement_refresh.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama runs.",
+    "Autocycle changes.",
+    "Public export or site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert execute-safe reason refresh hook only.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher"
+}

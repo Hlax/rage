@@ -1083,7 +1083,7 @@ Regression layer for fixture-mode chain:
 Golden MVP contract fixture remains at
 `fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json`.
 
-**Autonomous researcher loop operator visibility** (tickets 332–351; mock LLM only):
+**Autonomous researcher loop operator visibility** (tickets 332–354; mock LLM only):
 fixture-mode `autonomous-researcher-loop` proofs write to gitignored scratch paths only —
 no queue writes, no `export-public`, no ticket promotion.
 
@@ -1134,7 +1134,7 @@ proof just written. Failed or blocked execute-safe runs leave the pre-run inspec
 unchanged.
 
 **`autonomous_loop_improvement_status`** (operator plan and autocycle JSON; tickets
-348–351): read-only inspection of improvement artifacts referenced from the scratch
+348–354): read-only inspection of improvement artifacts referenced from the scratch
 `autonomous_loop_report.json` (`artifacts.improvement_tickets` and
 `artifacts.recommended_improvement_ticket`). Paths resolve under the scratch artifact dir
 — typically `data/reports/operator_autonomous_loop/tickets/` and
@@ -1155,6 +1155,12 @@ unchanged.
 Operator autocycle plan/summary JSON passes through the same
 `autonomous_loop_improvement_status` object (ticket-349). Autocycle summary also
 surfaces `recommended_ticket_id` and `draft_count` at the top level when present.
+
+When `status` is `ok`, `next_recommended_action.reason` also appends the recommended
+improvement ticket id and `source_weakness` (or `draft_count` when weakness is absent;
+ticket-354). When improvement status is `not_run`, the reason remains the scratch-only
+baseline — scratch quality append from ticket-341 still applies when scratch `status` is
+`ok`.
 
 **Execute-safe post-run improvement refresh** (ticket-350): after a **successful**
 execute-safe run when the recommended action is `run_autonomous_researcher_loop`,
