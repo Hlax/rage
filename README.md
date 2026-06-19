@@ -1083,7 +1083,7 @@ Regression layer for fixture-mode chain:
 Golden MVP contract fixture remains at
 `fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json`.
 
-**Autonomous researcher loop operator visibility** (tickets 332–343; mock LLM only):
+**Autonomous researcher loop operator visibility** (tickets 332–351; mock LLM only):
 fixture-mode `autonomous-researcher-loop` proofs write to gitignored scratch paths only —
 no queue writes, no `export-public`, no ticket promotion.
 
@@ -1091,6 +1091,8 @@ no queue writes, no `export-public`, no ticket promotion.
 | --- | --- | --- |
 | `data/db/operator_autonomous_loop_scratch.sqlite` | gitignored | Scratch DB for operator loop proofs |
 | `data/reports/operator_autonomous_loop/` | gitignored | Loop artifacts; inspect `autonomous_loop_report.json` |
+| `data/reports/operator_autonomous_loop/tickets/improvement_ticket_latest.json` | gitignored | Draft improvement tickets from loop quality eval (ticket-333) |
+| `data/reports/operator_autonomous_loop/recommended_improvement_ticket.json` | gitignored | Queue-style recommended ticket id/title from loop (not promoted) |
 | `data/sources/staged/operator_autonomous_loop/` | gitignored | Staged sources for operator loop proofs |
 
 When the implementation queue has no open tickets, operator plan mode recommends
@@ -1130,6 +1132,41 @@ when the recommended action is `run_autonomous_researcher_loop`, the execute-saf
 re-reads `autonomous_loop_report.json` so `autonomous_loop_scratch_status` reflects the
 proof just written. Failed or blocked execute-safe runs leave the pre-run inspection
 unchanged.
+
+**`autonomous_loop_improvement_status`** (operator plan and autocycle JSON; tickets
+348–351): read-only inspection of improvement artifacts referenced from the scratch
+`autonomous_loop_report.json` (`artifacts.improvement_tickets` and
+`artifacts.recommended_improvement_ticket`). Paths resolve under the scratch artifact dir
+— typically `data/reports/operator_autonomous_loop/tickets/` and
+`data/reports/operator_autonomous_loop/recommended_improvement_ticket.json`.
+
+| Field | When present |
+| --- | --- |
+| `status` | `ok` when referenced artifacts exist; `not_run` when loop report missing; `invalid` / `incomplete` otherwise |
+| `recommended_ticket_id` | Id from `recommended_improvement_ticket.json` or loop report |
+| `recommended_ticket_title` | Title from recommended ticket artifact |
+| `recommended_ticket_status` | Status from recommended ticket (e.g. `proposed`, `draft`) |
+| `source_weakness` | Quality weakness that drove the recommendation (e.g. `weak_concept_mapping`) |
+| `quality_driven_ticket_ids` | Ids from loop `run_summary.quality_driven_ticket_ids` |
+| `draft_count` / `draft_tickets` | Pending draft improvement tickets from `improvement_ticket_latest.json` |
+| `improvement_tickets_path` / `recommended_improvement_ticket_path` | Relative paths inspected |
+| `loop_report_path` | Relative path to the inspected loop report |
+
+Operator autocycle plan/summary JSON passes through the same
+`autonomous_loop_improvement_status` object (ticket-349). Autocycle summary also
+surfaces `recommended_ticket_id` and `draft_count` at the top level when present.
+
+**Execute-safe post-run improvement refresh** (ticket-350): after a **successful**
+execute-safe run when the recommended action is `run_autonomous_researcher_loop`,
+`execute_safe_checks` re-inspects improvement artifacts alongside scratch refresh so
+`autonomous_loop_improvement_status` reflects the proof just written. Failed or blocked
+execute-safe runs leave the pre-run inspection unchanged.
+
+**Autocycle execute-safe improvement sync** (ticket-351): after a **successful**
+operator autocycle execute-safe run, `evaluation.autonomous_loop_improvement_status`
+and the autocycle summary sync from the refreshed `execution` payload (same pattern as
+scratch sync in ticket-346). Failed autocycle execute-safe leaves pre-run improvement
+status unchanged.
 
 Manual operator commands (not run by execute-safe allowlist):
 
@@ -1187,7 +1224,7 @@ Golden tests always run in mock LLM mode and do not require Ollama.
 |---|---|---|
 | `data/db/` | gitignored | Private SQLite database (default: `creative_research.sqlite`) |
 | `data/reports/` | gitignored | Run, cluster, theory, and other private reports |
-| `data/reports/operator_autonomous_loop/` | gitignored | Operator autonomous loop scratch report (`autonomous_loop_report.json`) |
+| `data/reports/operator_autonomous_loop/` | gitignored | Operator autonomous loop scratch report (`autonomous_loop_report.json`) and improvement drafts under `tickets/` |
 | `data/db/operator_autonomous_loop_scratch.sqlite` | gitignored | Scratch DB for operator autonomous loop proofs |
 | `data/sources/staged/operator_autonomous_loop/` | gitignored | Staged sources for operator autonomous loop proofs |
 | `data/exports/` | gitignored | Generated export JSON copies |
