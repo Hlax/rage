@@ -1,0 +1,34 @@
+{
+  "id": "ticket-359",
+  "title": "README operator quickstart execute-safe and autocycle reason sync v0",
+  "problem": "Tickets 356–357 shipped execute-safe post-run reason refresh and autocycle execute-safe reason sync, but README Operator Quickstart does not yet document these behaviors alongside ticket-355 plan reason enrichment.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-357_autocycle-execute-safe-reason-sync-v0.md",
+    "agent_reports/2026-06-18_phase-3_ticket-355_readme-autonomous-loop-improvement-reason-v0.md",
+    "README.md"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-18_phase-3_ticket-359_readme-execute-safe-autocycle-reason-sync-v0.md"
+  ],
+  "acceptance_criteria": [
+    "README notes execute-safe post-run reason refresh (ticket-356).",
+    "README notes autocycle execute-safe recommended_action reason sync (ticket-357).",
+    "No CLI or export code changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama runs.",
+    "Public site changes.",
+    "Operator loop code changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}
