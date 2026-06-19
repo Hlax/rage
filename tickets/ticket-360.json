@@ -1,0 +1,35 @@
+{
+  "id": "ticket-360",
+  "title": "Principal audit post-ticket-359 autonomous loop reason stack checkpoint",
+  "problem": "Tickets 357 and 359 completed the autonomous loop reason execute-safe refresh, autocycle sync, and README operator docs since the post-ticket-356 principal audit. Cadence policy requires a read-only checkpoint before the next implementation batch.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-359_readme-execute-safe-autocycle-reason-sync-v0.md",
+    "agent_reports/2026-06-18_principal-audit-post-ticket-356.md",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [
+    "agent_reports"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-359.md",
+    "agent_reports/2026-06-18_phase-3_ticket-360_principal-audit-post-ticket-359.md"
+  ],
+  "acceptance_criteria": [
+    "Audit report documents scope reviewed for tickets 357 and 359.",
+    "Audit confirms no public export, site, schema, or live-Ollama regressions in the batch.",
+    "Cadence counter reset with explicit next-ticket recommendation.",
+    "No implementation of queued feature tickets in the audit run."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Implementing new operator features.",
+    "Public site or export changes.",
+    "Live Ollama runs."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Delete audit report only.",
+  "status": "proposed",
+  "category": "Phase 3 / audit"
+}
