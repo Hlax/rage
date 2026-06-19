@@ -1,0 +1,37 @@
+{
+  "id": "ticket-348",
+  "title": "Autonomous loop improvement ticket artifact inspection in operator plan v0",
+  "problem": "Autonomous researcher loop may seed improvement ticket drafts under scratch artifact paths, but operator plan mode does not yet surface the latest improvement ticket artifact status alongside autonomous_loop_scratch_status.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-347_orphan-agent-reports-hygiene-v0.md",
+    "rge/modules/autonomous_researcher_loop.py",
+    "rge/modules/operator_loop.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "tests/unit"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop_autonomous_improvement_inspection.py",
+    "agent_reports/2026-06-18_phase-3_ticket-348_autonomous-loop-improvement-inspection-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Operator plan includes read-only improvement ticket artifact status when scratch loop report references seeded drafts.",
+    "Missing artifact reports honest not_run status without failing plan mode.",
+    "No queue writes, promotion, or public surface changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_loop_autonomous_improvement_inspection.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama runs.",
+    "Auto-promote improvement drafts.",
+    "Public export or site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert improvement artifact inspection helper only.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher"
+}
