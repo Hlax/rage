@@ -1,0 +1,37 @@
+{
+  "id": "ticket-349",
+  "title": "Autonomous loop improvement status in operator autocycle plan summary v0",
+  "problem": "Ticket-348 surfaces autonomous_loop_improvement_status in operator plan mode, but operator autocycle plan/execute JSON does not yet pass through the field for cycle visibility.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-348_autonomous-loop-improvement-inspection-v0.md",
+    "rge/modules/operator_autocycle.py",
+    "rge/modules/operator_loop.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_autocycle.py",
+    "tests/unit"
+  ],
+  "expected_files": [
+    "rge/modules/operator_autocycle.py",
+    "tests/unit/test_operator_autocycle_autonomous_improvement.py",
+    "agent_reports/2026-06-18_phase-3_ticket-349_autocycle-improvement-status-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Operator autocycle plan JSON includes autonomous_loop_improvement_status from build_operator_plan.",
+    "When loop improvement artifacts exist, autocycle summary exposes recommended_ticket_id and draft_count.",
+    "No execute-safe command allowlist changes or queue writes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_autocycle_autonomous_improvement.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama runs.",
+    "Auto-promote improvement drafts.",
+    "Public export or site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert autocycle improvement field passthrough only.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher"
+}
