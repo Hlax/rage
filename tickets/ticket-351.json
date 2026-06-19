@@ -1,0 +1,37 @@
+{
+  "id": "ticket-351",
+  "title": "Operator autocycle execute-safe improvement status sync from execution v0",
+  "problem": "Ticket-350 refreshes autonomous_loop_improvement_status in operator loop execute-safe output, but operator autocycle execute-safe stores execution without updating evaluation.autonomous_loop_improvement_status from the refreshed payload.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-350_autonomous-loop-execute-safe-improvement-refresh-v0.md",
+    "rge/modules/operator_autocycle.py",
+    "rge/modules/operator_loop.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_autocycle.py",
+    "tests/unit"
+  ],
+  "expected_files": [
+    "rge/modules/operator_autocycle.py",
+    "tests/unit/test_operator_autocycle_autonomous_execute_safe_improvement_sync.py",
+    "agent_reports/2026-06-18_phase-3_ticket-351_autocycle-execute-safe-improvement-sync-v0.md"
+  ],
+  "acceptance_criteria": [
+    "After autocycle execute-safe pass, evaluation and summary autonomous_loop_improvement_status match execution payload when present.",
+    "Failed autocycle execute-safe leaves pre-run improvement status unchanged.",
+    "No execute-safe command allowlist changes or queue writes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_autocycle_autonomous_execute_safe_improvement_sync.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama runs.",
+    "README changes.",
+    "Public export or site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert autocycle improvement execution sync only.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher"
+}
