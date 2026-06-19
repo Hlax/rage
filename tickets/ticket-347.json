@@ -1,0 +1,32 @@
+{
+  "id": "ticket-347",
+  "title": "Orphan agent_reports principal-audit-post-ticket-330 hygiene",
+  "problem": "Multiple principal audits note untracked orphan agent_reports/2026-06-18_principal-audit-post-ticket-330.md from cancelled ticket-331; it should be removed or superseded to keep agent_reports hygiene honest.",
+  "evidence": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-343.md",
+    "agent_reports/2026-06-18_phase-3_ticket-346_autocycle-execute-safe-scratch-sync-v0.md",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [
+    "agent_reports"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-18_phase-3_ticket-347_orphan-agent-reports-hygiene-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Orphan principal-audit-post-ticket-330.md removed or explicitly superseded with queue note.",
+    "No production code or ticket queue logic changes.",
+    "Working tree no longer lists the orphan as untracked after ticket completion."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Rewriting historical audit content.",
+    "Public site or CLI changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Restore deleted orphan file if needed.",
+  "status": "proposed",
+  "category": "Phase 3 / hygiene"
+}

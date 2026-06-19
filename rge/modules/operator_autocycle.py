@@ -517,6 +517,10 @@ def run_autocycle(
                 break
             executed = runner(root=project_root)
             evaluation["execution"] = executed
+            if executed.get("execution_status") == "pass":
+                refreshed_scratch = executed.get("autonomous_loop_scratch_status")
+                if refreshed_scratch:
+                    evaluation["autonomous_loop_scratch_status"] = refreshed_scratch
             if executed.get("execution_status") != "pass":
                 overall_status = "stopped"
                 final_stop_reason = "verification_failed"
