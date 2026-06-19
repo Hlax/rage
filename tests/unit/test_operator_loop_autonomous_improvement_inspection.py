@@ -7,6 +7,7 @@ from pathlib import Path
 
 from rge.modules.operator_loop import (
     WorkingTreeStatus,
+    _autonomous_loop_recommended_reason,
     build_operator_plan,
     inspect_autonomous_loop_improvement_artifact,
 )
@@ -28,7 +29,7 @@ def _seed_done_only_queue(tmp_path: Path) -> None:
     (
         tmp_path
         / "agent_reports"
-        / "2026-06-18_principal-audit-post-ticket-346.md"
+        / "2026-06-18_principal-audit-post-ticket-352.md"
     ).write_text("# audit", encoding="utf-8")
 
 
@@ -146,3 +147,40 @@ def test_plan_includes_not_run_improvement_status_when_artifacts_missing(
     assert improvement["status"] == "not_run"
     assert improvement["recommended_ticket_id"] is None
     assert plan["next_recommended_action"]["gate"] == "safe_autonomous"
+
+
+def test_recommended_action_reason_includes_improvement_when_ok(tmp_path: Path) -> None:
+    _seed_done_only_queue(tmp_path)
+    artifact_dir = tmp_path / "data" / "reports" / "operator_autonomous_loop"
+    _write_loop_improvement_artifacts(
+        artifact_dir,
+        recommended_id="ticket-354",
+        weakness="weak_concept_mapping",
+    )
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+    reason = plan["next_recommended_action"]["reason"]
+
+    assert plan["autonomous_loop_improvement_status"]["status"] == "ok"
+    assert "ticket-354" in reason
+    assert "weak_concept_mapping" in reason
+    assert "Last loop improvement" in reason
+
+
+def test_recommended_action_reason_unchanged_when_improvement_not_run(
+    tmp_path: Path,
+) -> None:
+    _seed_done_only_queue(tmp_path)
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+    improvement = plan["autonomous_loop_improvement_status"]
+
+    assert improvement["status"] == "not_run"
+    expected = _autonomous_loop_recommended_reason(
+        plan["autonomous_loop_scratch_status"],
+        None,
+    )
+    assert plan["next_recommended_action"]["reason"] == expected
+    assert "Last loop improvement" not in plan["next_recommended_action"]["reason"]

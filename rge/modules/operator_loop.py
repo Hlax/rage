@@ -448,21 +448,37 @@ _AUTONOMOUS_LOOP_BASE_REASON = (
 
 def _autonomous_loop_recommended_reason(
     scratch_status: dict[str, Any] | None,
+    improvement_status: dict[str, Any] | None = None,
 ) -> str:
-    """Build recommended-action reason, appending scratch quality when available."""
+    """Build recommended-action reason, appending scratch quality and improvement when available."""
+    reason = _AUTONOMOUS_LOOP_BASE_REASON
+
     scratch = scratch_status or {}
-    if scratch.get("status") != "ok":
-        return _AUTONOMOUS_LOOP_BASE_REASON
-    verdict = scratch.get("research_quality_verdict")
-    weakest = scratch.get("weakest_dimension")
-    if not verdict or not weakest:
-        return _AUTONOMOUS_LOOP_BASE_REASON
-    score = scratch.get("weakest_dimension_score")
-    score_suffix = f" ({score}/100)" if score is not None else ""
-    return (
-        f"{_AUTONOMOUS_LOOP_BASE_REASON} Last scratch loop quality: {verdict}; "
-        f"weakest dimension {weakest}{score_suffix}."
-    )
+    if scratch.get("status") == "ok":
+        verdict = scratch.get("research_quality_verdict")
+        weakest = scratch.get("weakest_dimension")
+        if verdict and weakest:
+            score = scratch.get("weakest_dimension_score")
+            score_suffix = f" ({score}/100)" if score is not None else ""
+            reason = (
+                f"{reason} Last scratch loop quality: {verdict}; "
+                f"weakest dimension {weakest}{score_suffix}."
+            )
+
+    improvement = improvement_status or {}
+    if improvement.get("status") == "ok":
+        ticket_id = improvement.get("recommended_ticket_id")
+        weakness = improvement.get("source_weakness")
+        draft_count = improvement.get("draft_count")
+        if ticket_id:
+            detail = f"recommended {ticket_id}"
+            if weakness:
+                detail = f"{detail}; source weakness {weakness}"
+            elif draft_count:
+                detail = f"{detail}; {draft_count} draft(s)"
+            reason = f"{reason} Last loop improvement: {detail}."
+
+    return reason
 
 
 def inspect_working_tree(
@@ -803,6 +819,7 @@ def _action_from_state(
     proof_bundle_status: dict[str, Any] | None = None,
     autonomous_loop_status: dict[str, Any] | None = None,
     autonomous_loop_scratch_status: dict[str, Any] | None = None,
+    autonomous_loop_improvement_status: dict[str, Any] | None = None,
     root: Path | None = None,
 ) -> RecommendedAction:
     if drift_violations:
@@ -1009,7 +1026,10 @@ def _action_from_state(
         action_id="run_autonomous_researcher_loop",
         label="Run mock autonomous researcher loop proof on scratch DB",
         gate="safe_autonomous",
-        reason=_autonomous_loop_recommended_reason(autonomous_loop_scratch_status),
+        reason=_autonomous_loop_recommended_reason(
+            autonomous_loop_scratch_status,
+            autonomous_loop_improvement_status,
+        ),
         commands=[
             {
                 "shell": (
@@ -1356,6 +1376,7 @@ def build_operator_plan(
         proof_bundle_status=arbitrary_source_proof_bundle_status,
         autonomous_loop_status=autonomous_researcher_loop_status,
         autonomous_loop_scratch_status=autonomous_loop_scratch_status,
+        autonomous_loop_improvement_status=autonomous_loop_improvement_status,
         root=project_root,
     )
 
