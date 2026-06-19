@@ -1,0 +1,36 @@
+{
+  "id": "ticket-350",
+  "title": "Autonomous loop execute-safe improvement status refresh after proof v0",
+  "problem": "Ticket-349 surfaces autonomous_loop_improvement_status in operator autocycle JSON, but execute-safe mode returns pre-run improvement inspection only; after a successful autonomous loop proof the payload should re-read improvement artifacts from the loop report.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-349_autocycle-improvement-status-v0.md",
+    "rge/modules/operator_loop.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "tests/unit"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop_autonomous_execute_safe_improvement_refresh.py",
+    "agent_reports/2026-06-18_phase-3_ticket-350_autonomous-loop-execute-safe-improvement-refresh-v0.md"
+  ],
+  "acceptance_criteria": [
+    "After successful execute-safe autonomous loop proof, payload autonomous_loop_improvement_status reflects written improvement artifacts.",
+    "Failed or blocked execute-safe runs leave pre-run improvement status unchanged.",
+    "No execute-safe command allowlist changes or queue writes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_loop_autonomous_execute_safe_improvement_refresh.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama runs.",
+    "Operator autocycle behavior changes.",
+    "Public export or site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert post-run improvement re-inspection in execute_safe_checks only.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher"
+}

@@ -365,7 +365,8 @@ superseded
 | 337 | ticket-337 | done | Autonomous researcher loop staged-spine mock orchestrator v0 | `phase-3/ticket-337-autonomous-loop-staged-spine-mock-v0` | `agent_reports/2026-06-18_phase-3_ticket-337_autonomous-loop-staged-spine-mock-v0.md` |
 | 338 | ticket-338 | done | Autonomous loop operator autocycle hook v0 | `phase-3/ticket-338-autonomous-loop-operator-autocycle-hook-v0` | `agent_reports/2026-06-18_phase-3_ticket-338_autonomous-loop-operator-autocycle-hook-v0.md` |
 | 339 | ticket-339 | done | Autonomous loop scratch artifact inspection in operator plan v0 | `phase-3/ticket-339-autonomous-loop-scratch-inspection-v0` | `agent_reports/2026-06-18_phase-3_ticket-339_autonomous-loop-scratch-inspection-v0.md` |
-| 349 | ticket-349 | proposed | Autonomous loop improvement status in operator autocycle plan summary v0 | | |
+| 350 | ticket-350 | proposed | Autonomous loop execute-safe improvement status refresh after proof v0 | | |
+| 349 | ticket-349 | done | Autonomous loop improvement status in operator autocycle plan summary v0 | `phase-3/ticket-349-autocycle-improvement-status-v0` | `agent_reports/2026-06-18_phase-3_ticket-349_autocycle-improvement-status-v0.md` |
 | 348 | ticket-348 | done | Autonomous loop improvement ticket artifact inspection in operator plan v0 | `phase-3/ticket-348-autonomous-loop-improvement-inspection-v0` | `agent_reports/2026-06-18_phase-3_ticket-348_autonomous-loop-improvement-inspection-v0.md` |
 | 347 | ticket-347 | done | Orphan agent_reports principal-audit-post-ticket-330 hygiene | `phase-3/ticket-347-orphan-agent-reports-hygiene-v0` | `agent_reports/2026-06-18_phase-3_ticket-347_orphan-agent-reports-hygiene-v0.md` |
 | 346 | ticket-346 | done | Operator autocycle execute-safe scratch status sync from execution v0 | `phase-3/ticket-346-autocycle-execute-safe-scratch-sync-v0` | `agent_reports/2026-06-18_phase-3_ticket-346_autocycle-execute-safe-scratch-sync-v0.md` |
@@ -1110,9 +1111,16 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-349 (proposed) — Autonomous loop improvement status in operator autocycle plan summary v0
+ticket-350 (proposed) — Autonomous loop execute-safe improvement status refresh after proof v0
 (ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-18, ticket-349 autonomous loop improvement status in operator autocycle plan summary v0)
+
+- `evaluate_autocycle_cycle` and `run_autocycle` pass through `autonomous_loop_improvement_status`
+- Summary exposes recommended_ticket_id and draft_count when loop improvement artifacts exist
+- ticket-350 seeded: execute-safe post-run improvement status refresh
+- Report: `agent_reports/2026-06-18_phase-3_ticket-349_autocycle-improvement-status-v0.md`
 
 ## Queue Notes (2026-06-18, ticket-348 autonomous loop improvement artifact inspection v0)
 
