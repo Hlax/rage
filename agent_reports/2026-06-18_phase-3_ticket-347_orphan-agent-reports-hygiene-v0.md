@@ -52,7 +52,7 @@ Safety audit not required — untracked file deletion only.
 
 ## Merge to main
 
-Merge commit: *(pending merge)*
+Merge commit: `6c39e87b8b695e46fbf96ef4e3bb909d7be7d983`
 
 ## Recommended next ticket
 
