@@ -1,0 +1,35 @@
+{
+  "id": "ticket-352",
+  "title": "README operator quickstart autonomous loop improvement status fields v0",
+  "problem": "Tickets 348–351 shipped autonomous loop improvement inspection, autocycle passthrough, execute-safe refresh, and autocycle execute-safe sync, but README Operator Quickstart does not yet document improvement artifact paths or autonomous_loop_improvement_status operator fields.",
+  "evidence": [
+    "agent_reports/2026-06-18_phase-3_ticket-351_autocycle-execute-safe-improvement-sync-v0.md",
+    "agent_reports/2026-06-18_phase-3_ticket-345_readme-autonomous-loop-operator-fields-v0.md",
+    "README.md"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/2026-06-18_phase-3_ticket-352_readme-autonomous-loop-improvement-fields-v0.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart documents gitignored improvement artifact paths for autonomous loop proofs.",
+    "README describes autonomous_loop_improvement_status in operator plan and autocycle JSON.",
+    "README notes execute-safe post-run improvement refresh (ticket-350) and autocycle sync (ticket-351).",
+    "No CLI or export code changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama runs.",
+    "Public site changes.",
+    "Operator loop code changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}
