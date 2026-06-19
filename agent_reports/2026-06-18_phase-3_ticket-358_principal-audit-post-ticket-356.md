@@ -51,7 +51,7 @@ Results: principal gate **overdue** (353–356) → reset by this audit; **144 g
 
 ## Merge to main
 
-Merge commit: *(pending merge)*
+Merge commit: `74554d7915bacc5157bd0237bf91b1053bff5fb7`
 
 ## Recommended next ticket
 
