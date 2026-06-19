@@ -2,19 +2,35 @@
 
 from __future__ import annotations
 
+import io
 import json
 import os
+from itertools import cycle
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
-from rge.cli import FIXTURE_RUN_ID, GOLDEN_MVP_TOPIC, execute_fixture_mode_run
+from rge.cli import (
+    FIXTURE_RUN_ID,
+    GOLDEN_MVP_TOPIC,
+    STAGED_FIXTURE_RUN_ID,
+    execute_fixture_mode_run,
+    main,
+)
 from rge.modules.card_exporter import (
     FIXTURE_EXPORT_TIMESTAMP,
     default_ticket_output_dir,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+OPENALEX_FIXTURE = REPO_ROOT / "fixtures" / "source_providers" / "openalex_works_sample.json"
+RANK1_HTML = (
+    b"<html><body><p>Human-AI co-creativity supports diverse songwriting outputs.</p></body></html>"
+)
+RANK2_HTML = (
+    b"<html><body><p>Constraint management improves AI-assisted creative team workflows.</p></body></html>"
+)
 SITE_DIR = REPO_ROOT / "apps" / "public-site"
 SITE_OUT_DIR = SITE_DIR / "out"
 COMMITTED_PUBLIC_DATA = SITE_DIR / "public" / "data"
@@ -158,19 +174,79 @@ def test_research_run_cli_matches_golden_command(
     assert exit_code == 0
 
 
-def test_non_fixture_run_remains_unimplemented() -> None:
-    from rge.cli import main
+def test_default_research_run_uses_mock_staged_spine(
+    temp_db: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    import rge.modules.source_providers  # noqa: F401
 
-    exit_code = main(
-        [
-            "run",
-            "--topic",
-            GOLDEN_MVP_TOPIC,
-            "--domain",
-            "creativity",
-        ]
-    )
-    assert exit_code != 0
+    monkeypatch.setenv("RGE_ALLOW_SOURCE_NETWORK", "1")
+    monkeypatch.setenv("OPENALEX_MAILTO", "operator@example.com")
+    monkeypatch.delenv("RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR", raising=False)
+
+    fixture_payload = json.loads(OPENALEX_FIXTURE.read_text(encoding="utf-8"))
+    html_cycle = cycle([RANK1_HTML, RANK2_HTML])
+
+    def _urlopen(request, timeout=30):  # noqa: ARG001
+        url = request.full_url if hasattr(request, "full_url") else str(request)
+        if "api.openalex.org" in url:
+            return io.BytesIO(json.dumps(fixture_payload).encode("utf-8"))
+        html = next(html_cycle)
+
+        class _Response(io.BytesIO):
+            headers = {"Content-Type": "text/html; charset=utf-8"}
+
+        return _Response(html)
+
+    staging_dir = tmp_path / "staged"
+    report_dir = tmp_path / "reports"
+    staging_dir.mkdir()
+    report_dir.mkdir()
+
+    with patch(
+        "rge.modules.source_providers.openalex.urllib.request.urlopen",
+        _urlopen,
+    ), patch(
+        "rge.modules.fetcher.urllib.request.urlopen",
+        _urlopen,
+    ):
+        exit_code = main(
+            [
+                "run",
+                "--topic",
+                GOLDEN_MVP_TOPIC,
+                "--domain",
+                "creativity",
+                "--db",
+                str(temp_db),
+                "--staging-dir",
+                str(staging_dir),
+                "--output-dir",
+                str(report_dir),
+                "--run-id",
+                STAGED_FIXTURE_RUN_ID,
+            ]
+        )
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    decoder = json.JSONDecoder()
+    idx = 0
+    stdout = captured.out
+    document = None
+    while idx < len(stdout):
+        while idx < len(stdout) and stdout[idx].isspace():
+            idx += 1
+        if idx >= len(stdout):
+            break
+        document, end = decoder.raw_decode(stdout, idx)
+        idx = end
+    assert document is not None
+    assert document["status"] == "completed"
+    assert document["default_run_mode"] == "staged_spine"
+    assert document["mode"] == "fixture_staged"
 
 
 def test_public_site_build_succeeds_after_export() -> None:

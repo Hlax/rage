@@ -367,6 +367,8 @@ superseded
 | 339 | ticket-339 | done | Autonomous loop scratch artifact inspection in operator plan v0 | `phase-3/ticket-339-autonomous-loop-scratch-inspection-v0` | `agent_reports/2026-06-18_phase-3_ticket-339_autonomous-loop-scratch-inspection-v0.md` |
 | 358 | ticket-358 | done | Principal audit post-ticket-356 autonomous loop checkpoint | `phase-3/ticket-358-principal-audit-post-ticket-356` | `agent_reports/2026-06-18_phase-3_ticket-358_principal-audit-post-ticket-356.md` |
 | 361 | ticket-361 | proposed | README operator quickstart arbitrary source proof bundle recommendation v0 | | |
+| 363 | ticket-363 | done | Autonomous loop improvement promotion golden proof | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md` |
+| 362 | ticket-362 | done | Default research run mock staged-spine path | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-362_default-research-run-staged-spine.md` |
 | 360 | ticket-360 | done | Principal audit post-ticket-359 autonomous loop reason stack checkpoint | `phase-3/ticket-360-principal-audit-post-ticket-359` | `agent_reports/2026-06-18_phase-3_ticket-360_principal-audit-post-ticket-359.md` |
 | 359 | ticket-359 | done | README operator quickstart execute-safe and autocycle reason sync v0 | `phase-3/ticket-359-readme-execute-safe-autocycle-reason-sync-v0` | `agent_reports/2026-06-18_phase-3_ticket-359_readme-execute-safe-autocycle-reason-sync-v0.md` |
 | 357 | ticket-357 | done | Operator autocycle execute-safe recommended action reason sync from execution v0 | `phase-3/ticket-357-autocycle-execute-safe-reason-sync-v0` | `agent_reports/2026-06-18_phase-3_ticket-357_autocycle-execute-safe-reason-sync-v0.md` |
@@ -1122,9 +1124,20 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-361 (proposed) — README operator quickstart arbitrary source proof bundle recommendation v0
-(ticket-059 OpenAI placeholder remains deferred)
+ticket-364 (proposed) — CI weekly live_network staged ingest smoke
+(ticket-361 README proof bundle deferred; ticket-059 OpenAI placeholder remains deferred)
 ```
+
+## Queue Notes (2026-06-19, ticket-363 autonomous loop improvement promotion proof)
+
+- Autonomous loop quality-driven drafts promote via DB lookup and --from-json
+- Report: `agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md`
+
+## Queue Notes (2026-06-19, ticket-362 default research run staged-spine)
+
+- Bare `research run --topic --domain` defaults to mock staged-spine (`default_run_mode: staged_spine`)
+- GT26 updated: `test_default_research_run_uses_mock_staged_spine`
+- Report: `agent_reports/2026-06-19_phase-3_ticket-362_default-research-run-staged-spine.md`
 
 ## Queue Notes (2026-06-18, ticket-360 principal audit post-ticket-359)
 

@@ -49,7 +49,7 @@ What is **mock or checksum-pinned fixture content** (not arbitrary live inferenc
 - Golden tests, CI, and `research verify` always use `RGE_LLM_MODE=mock`
 - Fixture-mode orchestration forces mock regardless of `.env` settings
 - Manual synthnote spine (`fixtures/manual_source_fixture_map.json`) ingests real bytes but resolves **canned** LLM candidate JSON by `raw_text_checksum` — the validator runs for real, the candidates are pinned fixtures
-- Live discovery (`research run` without `--fixture-mode`) returns `not_implemented`
+- Live discovery (`research run` without flags) defaults to mock staged-spine orchestration (ticket-362); use `--fixture-mode` for the full MVP export pipeline
 
 What is **live report-only** (no graph writes unless operator explicitly opts in):
 

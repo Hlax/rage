@@ -1,0 +1,42 @@
+{
+  "id": "ticket-362",
+  "title": "Default research run mock staged-spine path",
+  "problem": "Bare `research run --topic --domain` returns not_implemented (exit 2) after 360 tickets. The advertised entry command is unusable without knowing --fixture-mode or --staged-spine flags.",
+  "evidence": [
+    "agent_reports/2026-06-19_principal-audit-independent-repo-audit.md",
+    "rge/cli.py _cmd_run",
+    "tests/golden/test_26_full_mvp_run.py test_non_fixture_run_remains_unimplemented"
+  ],
+  "affected_modules": [
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/cli.py",
+    "tests/golden/test_26_full_mvp_run.py",
+    "tests/unit/test_staged_fixture_mode_run_spine.py",
+    "tickets/ticket-362.json",
+    "agent_reports/2026-06-19_phase-3_ticket-362_default-research-run-staged-spine.md"
+  ],
+  "acceptance_criteria": [
+    "Bare `research run --topic --domain` runs mock staged-spine orchestrator (exit 0 on temp --db with patched network).",
+    "`--fixture-mode` without `--staged-spine` still runs full fixture MVP pipeline.",
+    "Explicit `--staged-spine` behavior unchanged.",
+    "GT26 golden test updated; golden + full pytest pass in mock mode."
+  ],
+  "test_plan": [
+    "pytest tests/golden/test_26_full_mvp_run.py",
+    "pytest tests/unit/test_staged_fixture_mode_run_spine.py",
+    "pytest tests/golden -q",
+    "python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Live Ollama default run.",
+    "Live OpenAlex without mock network patches in CI.",
+    "Public export or schema migrations.",
+    "README doc chain (deferred)."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Restore not_implemented guard in _cmd_run and GT26 bare-run test.",
+  "status": "done",
+  "category": "Phase 3 / default research run"
+}

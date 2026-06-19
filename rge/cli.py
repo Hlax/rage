@@ -888,14 +888,10 @@ def execute_staged_fixture_mode_run(
 
 
 def _cmd_run(args: argparse.Namespace) -> int:
-    staged_spine = getattr(args, "staged_spine", False)
-    if not args.fixture_mode and not staged_spine:
-        return _not_implemented(
-            "run",
-            "Live discovery MVP runs are not implemented. Use --fixture-mode for the "
-            "deterministic MVP pipeline or --staged-spine for Phase 3 staged "
-            "discover→report.",
-        )
+    explicit_fixture = bool(args.fixture_mode)
+    explicit_staged = bool(getattr(args, "staged_spine", False))
+    default_staged_spine = not explicit_fixture and not explicit_staged
+    use_staged_spine = explicit_staged or default_staged_spine
     if not args.topic:
         payload = {
             "status": "error",
@@ -922,7 +918,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
             if getattr(args, "export_dir", None)
             else None
         )
-        if staged_spine:
+        if use_staged_spine:
             staging_dir = (
                 Path(args.staging_dir) if getattr(args, "staging_dir", None) else None
             )
@@ -936,6 +932,9 @@ def _cmd_run(args: argparse.Namespace) -> int:
                 question_id=getattr(args, "question_id", None)
                 or STAGED_FIXTURE_QUESTION_ID,
             )
+            if default_staged_spine:
+                result = dict(result)
+                result["default_run_mode"] = "staged_spine"
         else:
             result = execute_fixture_mode_run(
                 topic=args.topic,
@@ -2788,10 +2787,10 @@ def build_parser() -> argparse.ArgumentParser:
         "run",
         help="Run a research workflow for a topic.",
         description=(
-            "Run a research workflow. --fixture-mode runs the deterministic MVP pipeline "
-            "from contract through public export. --staged-spine runs Phase 3 staged "
-            "discover→report (mock LLM; network env for discover/fetch). Bare run without "
-            "either flag is not implemented."
+            "Run a research workflow. Default (no flags) runs Phase 3 staged "
+            "discover→report with mock LLM (network env for discover/fetch). "
+            "--fixture-mode runs the deterministic MVP pipeline from contract through "
+            "public export. --staged-spine is an explicit alias for the default staged path."
         ),
     )
     run_parser.add_argument("--topic", help="Root research topic.")

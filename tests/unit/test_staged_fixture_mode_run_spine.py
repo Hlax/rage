@@ -297,3 +297,38 @@ def test_staged_spine_run_cli_entry_without_fixture_mode(
     captured = capsys.readouterr()
     assert exit_code == 0
     _assert_staged_spine_stdout_candidate_ids(captured.out)
+
+
+def test_default_research_run_cli_without_mode_flags(
+    mock_network_env: None,
+    patched_staged_network: None,
+    temp_db: Path,
+    staging_dir: Path,
+    report_dir: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    exit_code = main(
+        [
+            "run",
+            "--topic",
+            STAGED_TOPIC,
+            "--domain",
+            "creativity",
+            "--db",
+            str(temp_db),
+            "--staging-dir",
+            str(staging_dir),
+            "--output-dir",
+            str(report_dir),
+            "--run-id",
+            STAGED_FIXTURE_RUN_ID,
+            "--question-id",
+            STAGED_FIXTURE_QUESTION_ID,
+        ]
+    )
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    payload = _staged_spine_run_stdout_payload(captured.out)
+    assert payload["status"] == "completed"
+    assert payload["default_run_mode"] == "staged_spine"
+    _assert_staged_spine_stdout_candidate_ids(captured.out)
