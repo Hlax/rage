@@ -1,0 +1,42 @@
+{
+  "id": "ticket-366",
+  "title": "Live staged orchestrator fetch fallback on candidate 403",
+  "problem": "Live staged orchestrator runs fail when the top-ranked OpenAlex candidate's publisher URLs all return HTTP 403, even though lower-ranked candidates may be fetchable. Ticket-233 retries URL routes within one candidate but does not advance to the next queued candidate.",
+  "evidence": [
+    "agent_reports/2026-06-19_principal-audit-independent-repo-audit.md",
+    "Option B operator run: fetch-candidate forbidden on disc_openalex_W4400578758 after live discover succeeded",
+    "rge/modules/fetcher.py structured reason forbidden when all routes 401/403"
+  ],
+  "affected_modules": [
+    "rge/cli.py",
+    "rge/modules/fetcher.py",
+    "rge/modules/staged_candidate_selection.py",
+    "tests/unit/test_live_staged_orchestrator_fetch_fallback.py"
+  ],
+  "expected_files": [
+    "rge/cli.py",
+    "rge/modules/staged_candidate_selection.py",
+    "tests/unit/test_live_staged_orchestrator_fetch_fallback.py",
+    "tickets/ticket-366.json",
+    "agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md"
+  ],
+  "acceptance_criteria": [
+    "When fetch-candidate returns forbidden/paywall_blocked for rank-1, orchestrator tries the next eligible candidate (up to a bounded scan) before failing the run.",
+    "Rank-2 selection skips candidates already failed or used for rank-1.",
+    "Mock-only pytest proves fallback without network (patched fetch responses).",
+    "Default CI pytest and golden tests remain network-free."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_live_staged_orchestrator_fetch_fallback.py",
+    "python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Browser automation, CAPTCHA bypass, or publisher credential flows.",
+    "Changing ticket-233 per-URL retry ordering.",
+    "Live_network CI enforcement (ticket-364)."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert orchestrator candidate retry loop; restore single-candidate fetch fail-fast.",
+  "status": "proposed",
+  "category": "Phase 3 / staged spine acquisition"
+}
