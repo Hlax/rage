@@ -11,7 +11,8 @@
     "agent_reports"
   ],
   "expected_files": [
-    "agent_reports/2026-06-18_principal-audit-post-ticket-352.md"
+    "agent_reports/2026-06-18_principal-audit-post-ticket-352.md",
+    "agent_reports/2026-06-18_phase-3_ticket-353_principal-audit-post-ticket-352.md"
   ],
   "acceptance_criteria": [
     "Audit report documents scope reviewed for tickets 350–352.",
@@ -29,6 +30,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Delete audit report only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / audit"
 }

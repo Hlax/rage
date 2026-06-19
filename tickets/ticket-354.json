@@ -1,0 +1,37 @@
+{
+  "id": "ticket-354",
+  "title": "Autonomous loop operator plan improvement summary in recommended action v0",
+  "problem": "Tickets 348–352 surface autonomous_loop_improvement_status in plan, autocycle, execute-safe, and README, but next_recommended_action.reason does not yet mention recommended_ticket_id or source_weakness when improvement artifacts exist (ticket-341 parity for scratch quality).",
+  "evidence": [
+    "agent_reports/2026-06-18_principal-audit-post-ticket-352.md",
+    "agent_reports/2026-06-18_phase-3_ticket-341_autonomous-loop-quality-summary-v0.md",
+    "rge/modules/operator_loop.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "tests/unit"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop_autonomous_improvement_inspection.py",
+    "agent_reports/2026-06-18_phase-3_ticket-354_autonomous-loop-improvement-summary-v0.md"
+  ],
+  "acceptance_criteria": [
+    "When improvement status is ok, next_recommended_action.reason includes recommended_ticket_id and source_weakness or draft_count.",
+    "When improvement status is not_run, reason unchanged from scratch-only baseline.",
+    "No queue writes or ticket promotion."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_loop_autonomous_improvement_inspection.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama runs.",
+    "Changing execute-safe command allowlist.",
+    "Public export or site changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert reason-string hook only.",
+  "status": "proposed",
+  "category": "Phase 3 / autonomous researcher"
+}
