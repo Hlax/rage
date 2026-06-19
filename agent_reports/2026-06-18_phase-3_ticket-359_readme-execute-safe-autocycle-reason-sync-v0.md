@@ -48,7 +48,7 @@ Safety audit not required — README documentation only.
 
 ## Merge to main
 
-Merge commit: *(pending merge)*
+Merge commit: `cfe88c0ad6b91a9b96daa0106d769123a63cece0`
 
 ## Recommended next ticket
 
