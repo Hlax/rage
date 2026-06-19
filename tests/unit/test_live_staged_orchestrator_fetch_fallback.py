@@ -14,6 +14,7 @@ from rge.db.connection import ensure_database
 from rge.modules.fetcher import ERROR_EXIT_CODE, OK_EXIT_CODE
 from rge.modules.staged_candidate_selection import (
     Rank1StagedFetchAccessBlockedError,
+    UnsuitableLiveArtifactError,
     fetch_rank1_with_access_fallback,
     list_rank1_fetch_candidate_ids,
     resolve_live_staged_spine_fetch_pair,
@@ -126,6 +127,11 @@ def test_list_rank1_fetch_candidate_ids_prefers_pdf_routes_when_live(conn) -> No
 
 
 def test_fetch_rank1_with_access_fallback_skips_forbidden(tmp_path: Path, conn) -> None:
+    artifact = tmp_path / f"{RANK1_FALLBACK}.html"
+    artifact.write_text(
+        "Human-AI co-creativity supports diverse songwriting workshops.",
+        encoding="utf-8",
+    )
     fetch_command = _mock_fetch_responses(
         {
             RANK1_BLOCKED: (
@@ -137,13 +143,17 @@ def test_fetch_rank1_with_access_fallback_skips_forbidden(tmp_path: Path, conn) 
                 ERROR_EXIT_CODE,
             ),
             RANK1_FALLBACK: (
-                {"status": "completed", "candidate_id": RANK1_FALLBACK},
+                {
+                    "status": "completed",
+                    "candidate_id": RANK1_FALLBACK,
+                    "artifact_path": str(artifact),
+                },
                 OK_EXIT_CODE,
             ),
         }
     )
 
-    candidate_id, blocked_ids = fetch_rank1_with_access_fallback(
+    candidate_id, blocked_ids, incompatible = fetch_rank1_with_access_fallback(
         conn,
         research_question_id=QUESTION_ID,
         output_dir=tmp_path,
@@ -154,6 +164,60 @@ def test_fetch_rank1_with_access_fallback_skips_forbidden(tmp_path: Path, conn) 
 
     assert candidate_id == RANK1_FALLBACK
     assert blocked_ids == [RANK1_BLOCKED]
+    assert incompatible == []
+
+
+def test_fetch_rank1_with_access_fallback_raises_unsuitable_without_mock_markers(
+    tmp_path: Path,
+    conn,
+) -> None:
+    artifact = tmp_path / f"{RANK1_FALLBACK}.html"
+    artifact.write_text(
+        "Generic creativity research abstract without mock-spine marker phrases.",
+        encoding="utf-8",
+    )
+    rank2_artifact = tmp_path / f"{RANK2_MATCH}.html"
+    rank2_artifact.write_text(
+        "Another generic creativity paper abstract without spine markers.",
+        encoding="utf-8",
+    )
+    fetch_command = _mock_fetch_responses(
+        {
+            RANK1_BLOCKED: (
+                {"status": "error", "reason": "forbidden", "detail": "blocked"},
+                ERROR_EXIT_CODE,
+            ),
+            RANK1_FALLBACK: (
+                {
+                    "status": "completed",
+                    "candidate_id": RANK1_FALLBACK,
+                    "artifact_path": str(artifact),
+                },
+                OK_EXIT_CODE,
+            ),
+            RANK2_MATCH: (
+                {
+                    "status": "completed",
+                    "candidate_id": RANK2_MATCH,
+                    "artifact_path": str(rank2_artifact),
+                },
+                OK_EXIT_CODE,
+            ),
+        }
+    )
+
+    with pytest.raises(UnsuitableLiveArtifactError) as exc_info:
+        fetch_rank1_with_access_fallback(
+            conn,
+            research_question_id=QUESTION_ID,
+            output_dir=tmp_path,
+            fetch_command=fetch_command,
+            live_orchestrator_fallback=True,
+            max_scan=10,
+        )
+
+    assert exc_info.value.incompatible_candidates
+    assert exc_info.value.incompatible_candidates[0]["candidate_id"] == RANK1_FALLBACK
 
 
 def test_fetch_rank1_with_access_fallback_raises_when_all_blocked(
@@ -206,6 +270,11 @@ def test_select_rank2_skips_excluded_candidates(conn) -> None:
 
 
 def test_resolve_live_staged_spine_fetch_pair(tmp_path: Path, conn) -> None:
+    artifact = tmp_path / f"{RANK1_FALLBACK}.html"
+    artifact.write_text(
+        "Human-AI co-creativity supports diverse songwriting workshops.",
+        encoding="utf-8",
+    )
     fetch_command = _mock_fetch_responses(
         {
             RANK1_BLOCKED: (
@@ -213,7 +282,11 @@ def test_resolve_live_staged_spine_fetch_pair(tmp_path: Path, conn) -> None:
                 ERROR_EXIT_CODE,
             ),
             RANK1_FALLBACK: (
-                {"status": "completed", "candidate_id": RANK1_FALLBACK},
+                {
+                    "status": "completed",
+                    "candidate_id": RANK1_FALLBACK,
+                    "artifact_path": str(artifact),
+                },
                 OK_EXIT_CODE,
             ),
         }
@@ -237,7 +310,9 @@ OPENALEX_FIXTURE = REPO_ROOT / "fixtures" / "source_providers" / "openalex_works
 RANK2_HTML = (
     b"<html><body><p>Constraint management improves AI-assisted creative team workflows.</p></body></html>"
 )
-THIRD_HTML = b"<html><body><p>Fallback fetchable creativity evidence.</p></body></html>"
+THIRD_HTML = (
+    b"<html><body><p>Human-AI co-creativity supports diverse songwriting workshops.</p></body></html>"
+)
 
 
 def _three_work_openalex_payload() -> dict:

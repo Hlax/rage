@@ -134,6 +134,7 @@ from rge.modules.staged_candidate_selection import (
     resolve_live_staged_spine_fetch_pair,
     select_rank1_staged_candidate_id,
     select_rank2_staged_candidate_id,
+    UnsuitableLiveArtifactError,
 )
 
 
@@ -539,7 +540,7 @@ def execute_staged_fixture_mode_run(
     resolved_staging = staging_dir or (root / "data" / "sources" / "staged")
     resolved_staging.mkdir(parents=True, exist_ok=True)
     resolved_reports.mkdir(parents=True, exist_ok=True)
-    db_args = _db_cli_args(db_path)
+    db_args = ["--db", str(resolved_db)]
     rank1_run_id = f"{run_id}_rank1"
     rank2_run_id = f"{run_id}_rank2"
     steps_completed: list[str] = []
@@ -592,14 +593,17 @@ def execute_staged_fixture_mode_run(
             if live_orchestrator:
                 from rge.modules.fetcher import run_fetch_candidate_command
 
-                rank1_candidate_id, rank2_candidate_id, rank1_blocked_ids = (
-                    resolve_live_staged_spine_fetch_pair(
-                        conn,
-                        research_question_id=question_id,
-                        output_dir=resolved_staging,
-                        fetch_command=run_fetch_candidate_command,
+                try:
+                    rank1_candidate_id, rank2_candidate_id, rank1_blocked_ids = (
+                        resolve_live_staged_spine_fetch_pair(
+                            conn,
+                            research_question_id=question_id,
+                            output_dir=resolved_staging,
+                            fetch_command=run_fetch_candidate_command,
+                        )
                     )
-                )
+                except UnsuitableLiveArtifactError as exc:
+                    return exc.to_payload()
                 _run_cli_step(
                     [
                         "ingest-staged",
@@ -646,56 +650,14 @@ def execute_staged_fixture_mode_run(
                 rank1_id = _source_id_by_title_fragment(conn, "songwriting")
                 rank2_id = _source_id_by_title_fragment(conn, "Constraint management")
 
-            if live_orchestrator:
-                _run_cli_step(
-                    [
-                        "extract-claims",
-                        "--source",
-                        rank1_id,
-                        "--fixture",
-                        _STAGED_RANK1_LLM["extract"],
-                        *db_args,
-                    ]
-                )
-                _run_cli_step(
-                    [
-                        "link-concepts",
-                        "--source",
-                        rank1_id,
-                        "--fixture",
-                        _STAGED_RANK1_LLM["link"],
-                        *db_args,
-                    ]
-                )
-                _run_cli_step(
-                    [
-                        "build-relationships",
-                        "--source",
-                        rank1_id,
-                        "--fixture",
-                        _STAGED_RANK1_LLM["relationship"],
-                        *db_args,
-                    ]
-                )
-                _run_cli_step(
-                    [
-                        "detect-contradictions",
-                        "--source",
-                        rank1_id,
-                        "--fixture",
-                        _STAGED_RANK1_LLM["detect"],
-                        *db_args,
-                    ]
-                )
-            else:
-                _run_cli_step(["extract-claims", "--source", rank1_id, *db_args])
-                _run_cli_step(["link-concepts", "--source", rank1_id, *db_args])
-                _run_cli_step(
-                    ["build-relationships", "--source", rank1_id, *db_args]
-                )
-                _run_cli_step(
-                    ["detect-contradictions", "--source", rank1_id, *db_args]
-                )
+            _run_cli_step(["extract-claims", "--source", rank1_id, *db_args])
+            _run_cli_step(["link-concepts", "--source", rank1_id, *db_args])
+            _run_cli_step(
+                ["build-relationships", "--source", rank1_id, *db_args]
+            )
+            _run_cli_step(
+                ["detect-contradictions", "--source", rank1_id, *db_args]
+            )
             _run_cli_step(["reconcile-scores", "--source", rank1_id, *db_args])
             _run_cli_step(
                 [

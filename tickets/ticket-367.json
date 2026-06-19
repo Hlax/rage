@@ -1,0 +1,42 @@
+{
+  "id": "ticket-367",
+  "title": "Live staged orchestrator mock-spine compatibility skip",
+  "problem": "Live staged orchestrator runs fail at link-concepts with 'No accepted claims' when fetched publisher HTML lacks checksum-pinned mock fixture marker phrases. Operators need a clean skip instead of a misleading spine error.",
+  "evidence": [
+    "Option B operator run: link-concepts failed after live fetch returned paywall HTML stub",
+    "rge/modules/staged_spine_compatibility.py evaluate_mock_spine_compatibility",
+    "tests/unit/test_live_staged_proof_layers.py unsuitable_live_artifact semantics"
+  ],
+  "affected_modules": [
+    "rge/cli.py",
+    "rge/modules/staged_candidate_selection.py",
+    "rge/modules/staged_spine_compatibility.py",
+    "tests/unit/test_live_staged_orchestrator_fetch_fallback.py"
+  ],
+  "expected_files": [
+    "rge/cli.py",
+    "rge/modules/staged_candidate_selection.py",
+    "rge/modules/staged_spine_compatibility.py",
+    "tests/unit/test_live_staged_orchestrator_fetch_fallback.py",
+    "tickets/ticket-367.json",
+    "agent_reports/2026-06-19_phase-3_ticket-367_live-staged-mock-spine-compatibility-skip.md"
+  ],
+  "acceptance_criteria": [
+    "Live orchestrator skips with status skipped and reason unsuitable_live_artifact when fetch succeeds but artifact lacks mock-spine markers.",
+    "Compatible artifacts still proceed through the mock spine path.",
+    "Mock-only pytest proves skip and compatibility paths without network.",
+    "Default CI pytest remains network-free."
+  ],
+  "test_plan": [
+    "pytest tests/unit/test_live_staged_orchestrator_fetch_fallback.py",
+    "python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Live Ollama extraction on arbitrary fetched text (ticket-368).",
+    "Changing layer-3 proof skip semantics in existing live_network tests."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert staged_spine_compatibility checks; restore link-concepts fail-fast on incompatible live HTML.",
+  "status": "in_progress",
+  "category": "Phase 3 / staged spine acquisition"
+}

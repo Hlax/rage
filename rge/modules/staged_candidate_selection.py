@@ -9,6 +9,11 @@ from typing import Any
 
 from rge.config import DEFAULT_STAGED_RANK2_SCAN_MAX, parse_staged_rank2_scan_max
 from rge.modules.fetcher import OK_EXIT_CODE, is_fetch_access_blocked
+from rge.modules.staged_spine_compatibility import (
+    MOCK_STAGED_RANK1_ARTIFACT_MARKERS,
+    UNSUITABLE_LIVE_ARTIFACT,
+    evaluate_mock_spine_compatibility,
+)
 from rge.modules.staged_spine_heuristics import is_staged_rank2_fetch_spine_source
 
 DEFAULT_RANK2_SCAN_WINDOW = DEFAULT_STAGED_RANK2_SCAN_MAX
@@ -198,6 +203,49 @@ class Rank1StagedFetchAccessBlockedError(RuntimeError):
         )
 
 
+class UnsuitableLiveArtifactError(RuntimeError):
+    """No fetched rank-1 artifact satisfied mock-spine marker preconditions."""
+
+    def __init__(
+        self,
+        *,
+        research_question_id: str,
+        blocked_candidate_ids: list[str],
+        incompatible_candidates: list[dict[str, Any]],
+        max_scan: int,
+    ) -> None:
+        self.research_question_id = research_question_id
+        self.blocked_candidate_ids = blocked_candidate_ids
+        self.incompatible_candidates = incompatible_candidates
+        self.max_scan = max_scan
+        super().__init__(
+            "no mock-spine-compatible rank-1 staged fetch candidate for "
+            f"{research_question_id}"
+        )
+
+    def to_payload(self) -> dict[str, Any]:
+        return {
+            "status": "skipped",
+            "command": "run",
+            "mode": "fixture_staged",
+            "reason": UNSUITABLE_LIVE_ARTIFACT,
+            "detail": (
+                "Live source acquisition succeeded for one or more candidates, but "
+                "none of the fetched top-N artifacts satisfy mock-spine marker "
+                "preconditions."
+            ),
+            "research_question_id": self.research_question_id,
+            "required_markers": list(MOCK_STAGED_RANK1_ARTIFACT_MARKERS),
+            "blocked_candidate_ids": self.blocked_candidate_ids,
+            "incompatible_candidates": self.incompatible_candidates,
+            "max_scan": self.max_scan,
+            "assessment": (
+                "Not a fetch regression — live OpenAlex catalog text does not match "
+                "checksum-pinned mock fixture phrases for this query."
+            ),
+        }
+
+
 def fetch_rank1_with_access_fallback(
     conn: Any,
     *,
@@ -206,7 +254,7 @@ def fetch_rank1_with_access_fallback(
     fetch_command: Callable[..., tuple[dict[str, Any], int]],
     live_orchestrator_fallback: bool = False,
     max_scan: int | None = None,
-) -> tuple[str, list[str]]:
+) -> tuple[str, list[str], list[dict[str, Any]]]:
     """Fetch rank-1 candidate bytes, skipping publisher access blocks."""
     effective_max_scan = (
         parse_staged_rank2_scan_max(max_scan)
@@ -220,6 +268,7 @@ def fetch_rank1_with_access_fallback(
         max_scan=effective_max_scan,
     )
     blocked_ids: list[str] = []
+    incompatible_candidates: list[dict[str, Any]] = []
     for candidate_id in candidate_ids:
         payload, exit_code = fetch_command(
             conn,
@@ -227,16 +276,45 @@ def fetch_rank1_with_access_fallback(
             output_dir=output_dir,
         )
         if exit_code == OK_EXIT_CODE and payload.get("status") == "completed":
-            return candidate_id, blocked_ids
+            if live_orchestrator_fallback:
+                compatibility = evaluate_mock_spine_compatibility(payload)
+                if not compatibility.get("compatible"):
+                    incompatible_candidates.append(
+                        {
+                            "candidate_id": candidate_id,
+                            **compatibility,
+                        }
+                    )
+                    continue
+            return candidate_id, blocked_ids, incompatible_candidates
 
         reason = str(payload.get("reason") or "")
-        if live_orchestrator_fallback and is_fetch_access_blocked(reason):
-            blocked_ids.append(candidate_id)
-            continue
+        if live_orchestrator_fallback:
+            if is_fetch_access_blocked(reason):
+                blocked_ids.append(candidate_id)
+                continue
+            if exit_code != OK_EXIT_CODE or payload.get("status") != "completed":
+                incompatible_candidates.append(
+                    {
+                        "candidate_id": candidate_id,
+                        "reason": reason or "fetch_failed",
+                        "detail": payload.get("detail") or "fetch-candidate failed",
+                        "attempted_urls": payload.get("attempted_urls", []),
+                    }
+                )
+                continue
 
         detail = payload.get("detail") or reason or "fetch-candidate failed"
         raise RuntimeError(
             f"fetch-candidate failed for {candidate_id}: {detail}"
+        )
+
+    if incompatible_candidates:
+        raise UnsuitableLiveArtifactError(
+            research_question_id=research_question_id,
+            blocked_candidate_ids=blocked_ids,
+            incompatible_candidates=incompatible_candidates,
+            max_scan=effective_max_scan,
         )
 
     raise Rank1StagedFetchAccessBlockedError(
@@ -255,20 +333,30 @@ def resolve_live_staged_spine_fetch_pair(
     max_scan: int | None = None,
 ) -> tuple[str, str, list[str]]:
     """Resolve rank-1/rank-2 candidate ids with rank-1 fetch access fallback."""
-    rank1_candidate_id, blocked_ids = fetch_rank1_with_access_fallback(
-        conn,
-        research_question_id=research_question_id,
-        output_dir=output_dir,
-        fetch_command=fetch_command,
-        live_orchestrator_fallback=True,
-        max_scan=max_scan,
+    rank1_candidate_id, blocked_ids, incompatible_candidates = (
+        fetch_rank1_with_access_fallback(
+            conn,
+            research_question_id=research_question_id,
+            output_dir=output_dir,
+            fetch_command=fetch_command,
+            live_orchestrator_fallback=True,
+            max_scan=max_scan,
+        )
     )
-    exclude_ids = frozenset(blocked_ids) | {rank1_candidate_id}
+    skipped_ids = {
+        candidate_id
+        for candidate_id in blocked_ids
+    } | {
+        str(item.get("candidate_id"))
+        for item in incompatible_candidates
+        if item.get("candidate_id")
+    }
+    exclude_ids = skipped_ids | {rank1_candidate_id}
     rank2_candidate_id = select_rank2_staged_candidate_id(
         conn,
         research_question_id,
         live_orchestrator_fallback=True,
-        exclude_ids=exclude_ids,
+        exclude_ids=frozenset(exclude_ids),
         max_scan=max_scan,
     )
-    return rank1_candidate_id, rank2_candidate_id, blocked_ids
+    return rank1_candidate_id, rank2_candidate_id, sorted(skipped_ids)
