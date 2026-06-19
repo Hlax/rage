@@ -1,7 +1,8 @@
 # Agent report: ticket-368 — live staged orchestrator real-data spine v0
 
 **Date:** 2026-06-19  
-**Branch:** `phase-3/ticket-368-live-staged-orchestrator-real-spine`
+**Branch:** `phase-3/ticket-368-live-staged-orchestrator-real-spine`  
+**Merge commit:** `9462da6` (fast-forward into `main`)
 
 ## Summary
 
