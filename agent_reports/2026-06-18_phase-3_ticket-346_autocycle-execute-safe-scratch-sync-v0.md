@@ -51,7 +51,7 @@ Safety audit not required — operator autocycle JSON sync only.
 
 ## Merge to main
 
-Merge commit: *(pending merge)*
+Merge commit: `6653295440eb9a1624f91db6f2320ccad1a3b6a5`
 
 ## Recommended next ticket
 
