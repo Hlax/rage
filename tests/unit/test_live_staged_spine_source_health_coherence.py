@@ -160,10 +160,21 @@ def require_live_staged_source_health_coherence_env() -> None:
         pytest.skip("live staged source-health coherence requires OPENALEX_MAILTO")
 
 
+@pytest.fixture()
+def live_staged_spine_source_health_coherence_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR", "1")
+    monkeypatch.setenv("RGE_ALLOW_SOURCE_NETWORK", "1")
+    monkeypatch.setenv("OPENALEX_MAILTO", "operator@example.com")
+    monkeypatch.setenv("RGE_LLM_MODE", "mock")
+    monkeypatch.delenv("OPENALEX_API_KEY", raising=False)
+
+
 @pytest.mark.live_network
 def test_live_staged_spine_source_health_coherence(
+    live_staged_spine_source_health_coherence_env: None,
     tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Live staged orchestrator temp export coheres with source-health artifact."""
     from tests.unit.test_live_staged_atlas_snapshot_coherence import (

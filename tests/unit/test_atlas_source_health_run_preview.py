@@ -35,6 +35,9 @@ def test_atlas_preview_wires_source_health_resolver() -> None:
     assert "resolveReadinessPanelPreview" in page
     assert "resolvePurposePanelPreview" in lib
     assert "resolvePurposePanelPreview" in page
+    assert "resolveGraphSummaryPanelPreview" in lib
+    assert "resolveGraphSummaryPanelPreview" in page
+    assert "Graph summary panel" in page
     assert "atlas_source_health_run_latest.json" in lib
     assert "fetch(" not in page
 
@@ -54,6 +57,24 @@ def test_atlas_source_health_run_artifact_includes_purpose_panel_fields() -> Non
     assert purpose.get("evidence_need")
     assert purpose.get("output_targets")
     assert purpose.get("acceptable_source_types")
+
+
+def test_atlas_source_health_run_artifact_includes_graph_summary_fields() -> None:
+    artifact = json.loads(ARTIFACT_PATH.read_text(encoding="utf-8"))
+    graph = artifact.get("graph_summary") or {}
+    totals = (graph.get("connection_metrics") or {}).get("totals") or {}
+    assert graph.get("relationships") is not None or totals.get("relationships") is not None
+    assert totals.get("weak_atom_count") is not None
+    assert totals.get("frontend_ready_trace_count") is not None
+    assert totals.get("clustered_atom_count") is not None
+    assert artifact.get("next_recommended_packet")
+
+
+def test_atlas_preview_graph_summary_resolver_supports_fixture_fallback() -> None:
+    lib = ATLAS_PREVIEW_LIB.read_text(encoding="utf-8")
+    assert "mapFixtureGraphSummaryPanel" in lib
+    assert "preview_source: 'fixture'" in lib
+    assert "mapRunArtifactToGraphSummaryPanel" in lib
 
 
 def test_atlas_source_health_run_artifact_includes_gaps_fields() -> None:

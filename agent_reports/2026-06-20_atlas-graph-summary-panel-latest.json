@@ -1,0 +1,78 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "Atlas Graph Summary Panel from Run Artifact",
+  "date": "2026-06-20",
+  "verdict": "GO",
+  "verdict_scope": "mock/proof layers; graph summary panel on /atlas-preview; live_network coherence skipped with documented unsuitable_live_artifact",
+  "prior_bundle_commit": "cc534c9",
+  "live_coherence_result": {
+    "command": "python -m pytest tests/unit/test_live_staged_spine_source_health_coherence.py -m live_network -q",
+    "status": "SKIPPED",
+    "reason": "unsuitable_live_artifact",
+    "detail": "Live fetch lacked mock-spine markers human-ai co-creativity and songwriting; layer-3 catalog skip not a regression",
+    "mock_layer_status": "PASS",
+    "mock_layer_command": "python -m pytest tests/unit/test_live_staged_spine_source_health_coherence.py::test_mock_staged_spine_source_health_coherence -q"
+  },
+  "panel_fields_added": [
+    "relationship_density",
+    "relationship_count",
+    "edge_type_counts",
+    "clustered_atom_count",
+    "weak_atom_count",
+    "multi_claim_atom_count",
+    "source_diverse_atom_count",
+    "orphan_claim_count",
+    "orphan_atom_count",
+    "synthesis_ready_cluster_count",
+    "frontend_ready_trace_count",
+    "graph_readiness_verdict",
+    "top_graph_blockers",
+    "next_recommended_packet",
+    "recommender_reason"
+  ],
+  "resolvers": {
+    "run_artifact": "resolveGraphSummaryPanelPreview -> mapRunArtifactToGraphSummaryPanel",
+    "fixture_fallback": "resolveGraphSummaryPanelPreview -> mapFixtureGraphSummaryPanel"
+  },
+  "public_private_boundary": {
+    "read_only_static_json": true,
+    "no_fetch_routes": true,
+    "no_private_ids": true,
+    "no_raw_quotes": true,
+    "no_local_paths": true,
+    "no_prompts_or_hidden_notes": true,
+    "no_unsafe_html": true,
+    "safety_audit": "pass"
+  },
+  "verification": [
+    {
+      "command": "python -m pytest tests/unit/test_atlas_source_health_run_preview.py tests/unit/test_tiny_atlas_connection_preview.py tests/unit/test_live_staged_spine_source_health_coherence.py::test_mock_staged_spine_source_health_coherence -q",
+      "status": "PASS",
+      "result": "13 passed"
+    },
+    {
+      "command": "cd apps/public-site && npm run build",
+      "status": "PASS"
+    },
+    {
+      "command": "python -m rge.modules.safety_auditor --audit full",
+      "status": "PASS"
+    },
+    {
+      "command": "python -m pytest tests/unit/test_live_staged_spine_source_health_coherence.py -m live_network -q",
+      "status": "SKIPPED",
+      "reason": "unsuitable_live_artifact"
+    }
+  ],
+  "top_blockers": [
+    "Live staged coherence skipped: fetched catalog lacks mock-spine marker phrases.",
+    "Committed run artifact weak_atom_count=1 keeps graph verdict PARTIAL.",
+    "clustered_atom_count=0 in run artifact; clustering packet still recommended.",
+    "Live fetch dominated by publisher 403/bot-challenge artifacts."
+  ],
+  "next_recommended_packets": [
+    "Public Site Graph Panel Golden Gate",
+    "Operator Loop Full Atlas Refresh Checklist",
+    "Atlas Graph Summary Snapshot Coherence Badge"
+  ]
+}

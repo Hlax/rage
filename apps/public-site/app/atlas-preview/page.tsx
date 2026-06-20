@@ -10,6 +10,7 @@ import {
   humanizeLabel,
   resolveAtlasCoherencePreview,
   resolveGapsNextMovePreview,
+  resolveGraphSummaryPanelPreview,
   resolvePurposePanelPreview,
   resolveQuestionHeaderPreview,
   resolveReadinessPanelPreview,
@@ -158,6 +159,7 @@ export default function AtlasPreviewPage() {
   const questionHeaderPreview = resolveQuestionHeaderPreview();
   const readinessPanelPreview = resolveReadinessPanelPreview();
   const purposePanelPreview = resolvePurposePanelPreview();
+  const graphSummaryPreview = resolveGraphSummaryPanelPreview();
   const readinessEntries = Object.entries(connectionPreview.readiness);
 
   return (
@@ -333,6 +335,85 @@ export default function AtlasPreviewPage() {
             ))}
           </div>
         ) : null}
+      </section>
+
+      <section style={sectionStyle}>
+        <h2 style={headingStyle}>Graph summary panel</h2>
+        <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+          Preview source:{' '}
+          {graphSummaryPreview.preview_source === 'run_artifact'
+            ? 'Atlas-safe run artifact graph summary'
+            : 'fixture-backed cluster and relationship preview'}
+        </p>
+        <div style={smallGridStyle}>
+          <MetricTile
+            label="Relationship density"
+            value={graphSummaryPreview.relationship_density}
+          />
+          <MetricTile
+            label="Relationship count"
+            value={graphSummaryPreview.relationship_count}
+          />
+          <MetricTile
+            label="Clustered atoms"
+            value={graphSummaryPreview.clustered_atom_count}
+          />
+          <MetricTile
+            label="Weak atoms"
+            value={graphSummaryPreview.weak_atom_count}
+          />
+          <MetricTile
+            label="Multi-claim atoms"
+            value={graphSummaryPreview.multi_claim_atom_count}
+          />
+          <MetricTile
+            label="Source-diverse atoms"
+            value={graphSummaryPreview.source_diverse_atom_count}
+          />
+          <MetricTile
+            label="Orphan claims"
+            value={graphSummaryPreview.orphan_claim_count}
+          />
+          <MetricTile
+            label="Orphan atoms"
+            value={graphSummaryPreview.orphan_atom_count}
+          />
+          <MetricTile
+            label="Synthesis-ready clusters"
+            value={graphSummaryPreview.synthesis_ready_cluster_count}
+          />
+          <MetricTile
+            label="Frontend-ready traces"
+            value={graphSummaryPreview.frontend_ready_trace_count}
+          />
+        </div>
+        <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+          <p style={mutedLabelStyle}>Edge type counts</p>
+          <p style={{ margin: '0.45rem 0 0', color: '#aeb4c0', lineHeight: 1.55 }}>
+            {Object.entries(graphSummaryPreview.edge_type_counts)
+              .map(([edgeType, count]) => `${humanizeLabel(edgeType)}: ${count}`)
+              .join(' · ') || 'No relationship edges recorded.'}
+          </p>
+          <p style={{ margin: '0.75rem 0 0', color: '#f0ce78', lineHeight: 1.45 }}>
+            Graph readiness verdict: {graphSummaryPreview.graph_readiness_verdict}
+          </p>
+        </div>
+        <div style={{ ...panelStyle, marginTop: '0.75rem', borderColor: '#5b4332' }}>
+          <p style={{ ...mutedLabelStyle, color: '#d9a66f' }}>Top graph blockers</p>
+          <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#e0c6ad' }}>
+            {graphSummaryPreview.top_graph_blockers.map((blocker) => (
+              <li key={blocker} style={{ marginBottom: '0.35rem' }}>
+                {blocker}
+              </li>
+            ))}
+          </ul>
+          <p style={{ margin: '0.9rem 0 0', color: '#e6e8ec' }}>
+            Next recommended packet: {graphSummaryPreview.next_recommended_packet}
+          </p>
+          <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.45 }}>
+            {graphSummaryPreview.recommender_reason}
+          </p>
+        </div>
       </section>
 
       <section style={sectionStyle}>

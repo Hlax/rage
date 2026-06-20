@@ -125,6 +125,8 @@ def test_atlas_preview_route_renders_tiny_connection_sections_from_static_fixtur
     assert "Relationship view" in page
     assert "Evidence trace detail panel" in page
     assert "Gaps / next move panel" in page
+    assert "Graph summary panel" in page
+    assert "resolveGraphSummaryPanelPreview" in lib
     assert "Relationship-density warning" in page
     assert "Next recommended packet" in page
     assert "tiny_atlas_connection_preview.json" in lib

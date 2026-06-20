@@ -126,6 +126,19 @@ export type AtlasSourceHealthRunArtifact = {
     accepted_evidence_count?: number;
     rejected_evidence_count?: number;
   };
+  graph_summary?: {
+    claims?: number;
+    atoms?: number;
+    relationships?: number;
+    connection_metrics?: {
+      clusters?: Array<{
+        cluster_id?: string;
+        relationship_density?: number;
+        low_relationship_density?: boolean;
+      }>;
+      totals?: Record<string, number>;
+    };
+  };
   purpose?: {
     research_intent?: string[];
     asset_affordance?: string[];
@@ -173,6 +186,24 @@ export type AtlasReadinessPanelPreview = {
 export type AtlasGapsNextMovePanel = {
   top_blockers: string[];
   graph_health_warnings: string[];
+  next_recommended_packet: string;
+  recommender_reason: string;
+};
+
+export type AtlasGraphSummaryPanelPreview = {
+  relationship_density: number;
+  relationship_count: number;
+  edge_type_counts: Record<string, number>;
+  clustered_atom_count: number;
+  weak_atom_count: number;
+  multi_claim_atom_count: number;
+  source_diverse_atom_count: number;
+  orphan_claim_count: number;
+  orphan_atom_count: number;
+  synthesis_ready_cluster_count: number;
+  frontend_ready_trace_count: number;
+  graph_readiness_verdict: string;
+  top_graph_blockers: string[];
   next_recommended_packet: string;
   recommender_reason: string;
 };
@@ -438,6 +469,180 @@ export function resolvePurposePanelPreview(): AtlasPurposePanelPreview & {
     output_targets: [],
     purpose_fit_counts: {},
     gate_decision_counts: {},
+    preview_source: 'fixture',
+  };
+}
+
+function graphWarningMatches(text: string): boolean {
+  const lowered = text.toLowerCase();
+  return (
+    lowered.includes('relationship') ||
+    lowered.includes('graph') ||
+    lowered.includes('atom') ||
+    lowered.includes('cluster') ||
+    lowered.includes('orphan') ||
+    lowered.includes('edge') ||
+    lowered.includes('density')
+  );
+}
+
+function deriveGraphReadinessVerdict(input: {
+  relationship_count: number;
+  weak_atom_count: number;
+  orphan_claim_count: number;
+  orphan_atom_count: number;
+  low_relationship_density: boolean;
+}): string {
+  if (input.relationship_count <= 0) {
+    return 'NO-GO — no relationship graph produced';
+  }
+  if (
+    input.low_relationship_density ||
+    input.weak_atom_count > 0 ||
+    input.orphan_claim_count > 0 ||
+    input.orphan_atom_count > 0
+  ) {
+    return 'PARTIAL — graph exists but clustering/density gaps remain';
+  }
+  return 'PASS — graph connection metrics meet preview thresholds';
+}
+
+export function mapRunArtifactToGraphSummaryPanel(
+  artifact: AtlasSourceHealthRunArtifact,
+): AtlasGraphSummaryPanelPreview {
+  const graph = artifact.graph_summary || {};
+  const metrics = graph.connection_metrics || {};
+  const totals = metrics.totals || {};
+  const clusters = metrics.clusters || [];
+  const relationshipCount = Number(totals.relationships ?? graph.relationships ?? 0);
+  const claimCount = Number(totals.claims ?? graph.claims ?? 0);
+  const clusterDensity = clusters.map((cluster) => Number(cluster.relationship_density ?? 0));
+  const relationshipDensity =
+    claimCount > 0
+      ? relationshipCount / claimCount
+      : clusterDensity.length > 0
+        ? clusterDensity.reduce((sum, value) => sum + value, 0) / clusterDensity.length
+        : 0;
+  const contradicts = Number(totals.contradiction_edge_count ?? 0);
+  const qualifies = Number(totals.qualification_edge_count ?? 0);
+  const supports = Math.max(0, relationshipCount - contradicts - qualifies);
+  const lowRelationshipDensity = clusters.some(
+    (cluster) => cluster.low_relationship_density === true,
+  );
+  const readinessWarnings = list(artifact.readiness_warnings).filter(graphWarningMatches);
+  const derivedBlockers: string[] = [];
+  if (relationshipCount <= 0) {
+    derivedBlockers.push('No relationship graph was produced for this run.');
+  }
+  if (lowRelationshipDensity) {
+    derivedBlockers.push('At least one cluster reports low relationship density.');
+  }
+  if (Number(totals.weak_atom_count ?? 0) > 0) {
+    derivedBlockers.push(
+      `${totals.weak_atom_count} evidence atom(s) remain weak or seed maturity.`,
+    );
+  }
+  if (Number(totals.orphan_claim_count ?? 0) > 0) {
+    derivedBlockers.push(
+      `${totals.orphan_claim_count} orphan claim(s) lack relationship coverage.`,
+    );
+  }
+  if (Number(totals.orphan_atom_count ?? 0) > 0) {
+    derivedBlockers.push(
+      `${totals.orphan_atom_count} orphan atom(s) lack relationship coverage.`,
+    );
+  }
+  const topGraphBlockers = [...new Set([...readinessWarnings, ...derivedBlockers])].slice(0, 6);
+  return {
+    relationship_density: Number(relationshipDensity.toFixed(4)),
+    relationship_count: relationshipCount,
+    edge_type_counts: {
+      supports,
+      contradicts,
+      qualifies,
+    },
+    clustered_atom_count: Number(totals.clustered_atom_count ?? 0),
+    weak_atom_count: Number(totals.weak_atom_count ?? 0),
+    multi_claim_atom_count: Number(totals.multi_claim_atom_count ?? 0),
+    source_diverse_atom_count: Number(totals.source_diverse_atom_count ?? 0),
+    orphan_claim_count: Number(totals.orphan_claim_count ?? 0),
+    orphan_atom_count: Number(totals.orphan_atom_count ?? 0),
+    synthesis_ready_cluster_count: Number(totals.synthesis_ready_cluster_count ?? 0),
+    frontend_ready_trace_count: Number(totals.frontend_ready_trace_count ?? 0),
+    graph_readiness_verdict: deriveGraphReadinessVerdict({
+      relationship_count: relationshipCount,
+      weak_atom_count: Number(totals.weak_atom_count ?? 0),
+      orphan_claim_count: Number(totals.orphan_claim_count ?? 0),
+      orphan_atom_count: Number(totals.orphan_atom_count ?? 0),
+      low_relationship_density: lowRelationshipDensity,
+    }),
+    top_graph_blockers: topGraphBlockers,
+    next_recommended_packet:
+      artifact.next_recommended_packet || 'graph-connection-metrics',
+    recommender_reason:
+      artifact.next_recommended_reason ||
+      'Run artifact did not include a graph recommender rationale.',
+  };
+}
+
+function mapFixtureGraphSummaryPanel(): AtlasGraphSummaryPanelPreview {
+  const cluster = tinyAtlasConnectionPreview.cluster;
+  const atoms = tinyAtlasConnectionPreview.evidence_atoms;
+  const relationships = tinyAtlasConnectionPreview.relationships;
+  const traces = tinyAtlasConnectionPreview.trace_details;
+  const gaps = tinyAtlasConnectionPreview.gaps_next_move;
+  const edgeTypeCounts = relationships.reduce<Record<string, number>>((counts, relationship) => {
+    const key = humanizeLabel(relationship.type);
+    counts[key] = (counts[key] || 0) + 1;
+    return counts;
+  }, {});
+  const clusteredAtomCount = atoms.filter((atom) =>
+    ['clustered', 'synthesis_ready', 'eval_ready', 'training_ready'].includes(atom.maturity),
+  ).length;
+  const weakAtomCount = atoms.filter((atom) =>
+    ['seed', 'weak', 'promising'].includes(atom.maturity),
+  ).length;
+  const multiClaimAtomCount = atoms.filter((atom) =>
+    /clusters?\s+\d+\s+compatible claim/i.test(atom.why_clustered || ''),
+  ).length;
+  const sourceDiverseAtomCount = atoms.filter((atom) => atom.source_count >= 2).length;
+  const topGraphBlockers = [
+    ...gaps.graph_health_warnings,
+    ...gaps.top_blockers.filter(graphWarningMatches),
+  ].slice(0, 6);
+  return {
+    relationship_density: cluster.relationship_density,
+    relationship_count: cluster.relationships_per_cluster,
+    edge_type_counts: edgeTypeCounts,
+    clustered_atom_count: clusteredAtomCount,
+    weak_atom_count: weakAtomCount,
+    multi_claim_atom_count: multiClaimAtomCount,
+    source_diverse_atom_count: sourceDiverseAtomCount,
+    orphan_claim_count: cluster.orphan_claim_count,
+    orphan_atom_count: cluster.orphan_atom_count,
+    synthesis_ready_cluster_count: cluster.synthesis_readiness.includes('ready') ? 1 : 0,
+    frontend_ready_trace_count: traces.length,
+    graph_readiness_verdict: cluster.low_relationship_density
+      ? 'PARTIAL — fixture cluster density below threshold'
+      : 'PARTIAL — fixture-backed graph preview only',
+    top_graph_blockers: topGraphBlockers,
+    next_recommended_packet: gaps.next_recommended_packet,
+    recommender_reason: gaps.recommender_reason,
+  };
+}
+
+/** Prefer Atlas-safe run artifact graph summary; fall back to fixture cluster graph block. */
+export function resolveGraphSummaryPanelPreview(): AtlasGraphSummaryPanelPreview & {
+  preview_source: 'run_artifact' | 'fixture';
+} {
+  if (atlasSourceHealthRunArtifact.schema_version === ATLAS_SOURCE_HEALTH_RUN_SCHEMA) {
+    return {
+      ...mapRunArtifactToGraphSummaryPanel(atlasSourceHealthRunArtifact),
+      preview_source: 'run_artifact',
+    };
+  }
+  return {
+    ...mapFixtureGraphSummaryPanel(),
     preview_source: 'fixture',
   };
 }
