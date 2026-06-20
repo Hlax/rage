@@ -90,15 +90,28 @@ def test_atlas_preview_trace_resolver_supports_fixture_fallback() -> None:
 
 def test_atlas_source_health_run_artifact_includes_trace_summary_fields() -> None:
     artifact = json.loads(ARTIFACT_PATH.read_text(encoding="utf-8"))
-    trace_summary = artifact.get("trace_summary")
-    if trace_summary is None:
-        pytest.skip("Committed run artifact predates trace_summary; refresh after live smoke.")
-    assert "trace_count" in trace_summary
-    assert "atlas_trace_preview" in trace_summary
+    trace_summary = artifact.get("trace_summary") or {}
+    assert int(trace_summary.get("trace_count") or 0) >= 1
+    assert trace_summary.get("atlas_trace_preview")
+    assert int(trace_summary.get("atom_count") or 0) >= 1
+    assert int(trace_summary.get("accepted_claim_count") or 0) >= 1
+
+
+def test_committed_artifact_enables_run_artifact_trace_panel_by_default() -> None:
+    """Golden gate: trace panel resolver prefers run artifact when preview rows exist."""
+    artifact = json.loads(ARTIFACT_PATH.read_text(encoding="utf-8"))
+    trace_summary = artifact.get("trace_summary") or {}
+    preview_rows = trace_summary.get("atlas_trace_preview") or []
+    assert artifact["schema_version"] == "atlas_source_health_run_v0.1.0"
+    assert len(preview_rows) >= 1
+    first = preview_rows[0]
+    assert first.get("trace_ref")
+    assert first.get("visibility") == "public_safe"
+    assert assert_no_private_fields({"trace_preview_row": first}) == []
 
 
 def test_atlas_source_health_run_artifact_includes_gaps_fields() -> None:
     artifact = json.loads(ARTIFACT_PATH.read_text(encoding="utf-8"))
-    assert artifact.get("readiness_warnings")
+    assert "readiness_warnings" in artifact
     assert artifact.get("next_recommended_packet")
     assert artifact.get("next_recommended_reason")

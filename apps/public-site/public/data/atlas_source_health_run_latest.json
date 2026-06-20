@@ -177,40 +177,159 @@
     "gate_decision_counts": {
       "accepted": 5
     },
-    "accepted_evidence_count": 0,
-    "rejected_evidence_count": 5
+    "accepted_evidence_count": 5,
+    "rejected_evidence_count": 0
   },
   "graph_summary": {
     "claims": 5,
-    "atoms": 0,
-    "relationships": 0,
+    "atoms": 5,
+    "relationships": 5,
     "connection_metrics": {
       "schema_version": "graph_connection_metrics_v0.1.0",
-      "clusters": [],
+      "clusters": [
+        {
+          "cluster_id": "cluster_unassigned",
+          "claims_per_cluster": 5,
+          "atoms_per_cluster": 5,
+          "relationships_per_cluster": 5,
+          "sources_per_cluster": 5,
+          "contradiction_edges": 1,
+          "qualification_edges": 1,
+          "contradiction_edge_count": 1,
+          "qualification_edge_count": 1,
+          "orphan_claims": 0,
+          "orphan_atoms": 0,
+          "orphan_claim_count": 0,
+          "orphan_atom_count": 0,
+          "relationship_density": 1.0,
+          "low_relationship_density": false
+        }
+      ],
       "totals": {
-        "claims": 0,
-        "atoms": 0,
-        "relationships": 0,
-        "sources": 0,
+        "claims": 5,
+        "atoms": 5,
+        "relationships": 5,
+        "sources": 5,
         "orphan_claims": 0,
         "orphan_atoms": 0,
         "orphan_claim_count": 0,
         "orphan_atom_count": 0,
-        "contradiction_edge_count": 0,
-        "qualification_edge_count": 0,
+        "contradiction_edge_count": 1,
+        "qualification_edge_count": 1,
         "multi_claim_atom_count": 0,
         "source_diverse_atom_count": 0,
         "purpose_mismatch_count": 0,
-        "weak_atom_count": 0,
+        "weak_atom_count": 5,
         "clustered_atom_count": 0,
         "synthesis_ready_cluster_count": 0,
-        "frontend_ready_trace_count": 0
+        "frontend_ready_trace_count": 5
       }
     }
   },
-  "readiness_warnings": [
-    "No relationship graph was produced for this run."
-  ],
-  "next_recommended_packet": "MVP-P6-pdf-parser-milestone",
-  "next_recommended_reason": "High unsupported_claim volume with dirty or parsed PDF text indicates acquisition/parsing failure rather than ranking failure."
+  "trace_summary": {
+    "trace_count": 5,
+    "frontend_ready_trace_count": 5,
+    "atom_count": 5,
+    "accepted_claim_count": 5,
+    "atlas_trace_preview": [
+      {
+        "trace_ref": "trace_001",
+        "connection_type": "source_quote_claim_atom_concept_cluster",
+        "maturity": "weak",
+        "atom_cluster_maturity": "weak",
+        "purpose_match_status": "match",
+        "evidence_decision": "accepted",
+        "visibility": "public_safe",
+        "has_quote": true,
+        "concept_count": 0,
+        "relationship_count": 1,
+        "relationship_types": [
+          "support"
+        ],
+        "relationship_type": "support",
+        "why_clustered": "",
+        "why_evidence_downgraded_or_rejected": "",
+        "why_connected": "Accepted quote-backed claim links source provenance to 0 concept(s), 1 relationship(s), relationship type(s) ['support'], and cluster cluster_unassigned."
+      },
+      {
+        "trace_ref": "trace_002",
+        "connection_type": "source_quote_claim_atom_concept_cluster",
+        "maturity": "weak",
+        "atom_cluster_maturity": "weak",
+        "purpose_match_status": "match",
+        "evidence_decision": "accepted",
+        "visibility": "public_safe",
+        "has_quote": true,
+        "concept_count": 0,
+        "relationship_count": 1,
+        "relationship_types": [
+          "support"
+        ],
+        "relationship_type": "support",
+        "why_clustered": "",
+        "why_evidence_downgraded_or_rejected": "",
+        "why_connected": "Accepted quote-backed claim links source provenance to 0 concept(s), 1 relationship(s), relationship type(s) ['support'], and cluster cluster_unassigned."
+      },
+      {
+        "trace_ref": "trace_003",
+        "connection_type": "source_quote_claim_atom_concept_cluster",
+        "maturity": "weak",
+        "atom_cluster_maturity": "weak",
+        "purpose_match_status": "match",
+        "evidence_decision": "accepted",
+        "visibility": "public_safe",
+        "has_quote": true,
+        "concept_count": 0,
+        "relationship_count": 1,
+        "relationship_types": [
+          "support"
+        ],
+        "relationship_type": "support",
+        "why_clustered": "",
+        "why_evidence_downgraded_or_rejected": "",
+        "why_connected": "Accepted quote-backed claim links source provenance to 0 concept(s), 1 relationship(s), relationship type(s) ['support'], and cluster cluster_unassigned."
+      },
+      {
+        "trace_ref": "trace_004",
+        "connection_type": "source_quote_claim_atom_concept_cluster",
+        "maturity": "weak",
+        "atom_cluster_maturity": "weak",
+        "purpose_match_status": "match",
+        "evidence_decision": "accepted",
+        "visibility": "public_safe",
+        "has_quote": true,
+        "concept_count": 0,
+        "relationship_count": 1,
+        "relationship_types": [
+          "qualification"
+        ],
+        "relationship_type": "qualification",
+        "why_clustered": "",
+        "why_evidence_downgraded_or_rejected": "",
+        "why_connected": "Accepted quote-backed claim links source provenance to 0 concept(s), 1 relationship(s), relationship type(s) ['qualification'], and cluster cluster_unassigned."
+      },
+      {
+        "trace_ref": "trace_005",
+        "connection_type": "source_quote_claim_atom_concept_cluster",
+        "maturity": "weak",
+        "atom_cluster_maturity": "weak",
+        "purpose_match_status": "match",
+        "evidence_decision": "accepted",
+        "visibility": "public_safe",
+        "has_quote": true,
+        "concept_count": 0,
+        "relationship_count": 1,
+        "relationship_types": [
+          "contradiction"
+        ],
+        "relationship_type": "contradiction",
+        "why_clustered": "",
+        "why_evidence_downgraded_or_rejected": "",
+        "why_connected": "Accepted quote-backed claim links source provenance to 0 concept(s), 1 relationship(s), relationship type(s) ['contradiction'], and cluster cluster_unassigned."
+      }
+    ]
+  },
+  "readiness_warnings": [],
+  "next_recommended_packet": "Phase4-P10-evidence-atom-clustering",
+  "next_recommended_reason": "Most evidence atoms remain weak one-claim objects; cluster compatible claims before UI synthesis."
 }
