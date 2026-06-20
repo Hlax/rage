@@ -45,7 +45,12 @@ from rge.modules.source_resolver.status import (
 
 LOCAL_SAFE_ARBITRARY_QUESTION = "How does AI affect human creativity?"
 LOCAL_SAFE_RUN_ID = "run_local_safe_ai_human_creativity"
+LIVE_NETWORK_RUN_ID = "run_live_network_ai_human_creativity"
 LOCAL_SAFE_ATLAS_ARTIFACT_SCHEMA_VERSION = "atlas_source_health_run_v0.1.0"
+LIVE_NETWORK_SOURCE_LIMIT = 5
+LIVE_NETWORK_BACKENDS = ("openalex", "arxiv")
+LIVE_NETWORK_RESOLVER_QUERY = "human AI creativity"
+LIVE_SOURCE_HEALTH_ARTIFACT_NAME = "atlas_source_health_run_latest.json"
 
 _EXTRACTABLE_STATUSES = frozenset(
     {
@@ -476,22 +481,87 @@ def _readiness_warnings(
     return warnings
 
 
-def run_local_safe_arbitrary_source_health_proof(
-    conn: sqlite3.Connection,
+def assert_live_source_health_smoke_env() -> dict[str, str]:
+    """Fail closed unless operator explicitly opts into live source-health smoke."""
+    import os
+
+    allow_smoke = os.environ.get("RGE_ALLOW_LIVE_SOURCE_HEALTH_SMOKE", "0").strip().casefold()
+    if allow_smoke not in {"1", "true", "yes"}:
+        raise RuntimeError(
+            "Live source-health smoke requires RGE_ALLOW_LIVE_SOURCE_HEALTH_SMOKE=1."
+        )
+    allow_network = os.environ.get("RGE_ALLOW_SOURCE_NETWORK", "0").strip().casefold()
+    if allow_network not in {"1", "true", "yes"}:
+        raise RuntimeError(
+            "Live source-health smoke requires RGE_ALLOW_SOURCE_NETWORK=1."
+        )
+    mailto = os.environ.get("OPENALEX_MAILTO", "").strip()
+    if not mailto:
+        raise RuntimeError("Live source-health smoke requires OPENALEX_MAILTO.")
+    return {
+        "RGE_ALLOW_LIVE_SOURCE_HEALTH_SMOKE": allow_smoke,
+        "RGE_ALLOW_SOURCE_NETWORK": allow_network,
+        "OPENALEX_MAILTO": mailto,
+    }
+
+
+def resolve_live_network_source_records(
     *,
     question: str = LOCAL_SAFE_ARBITRARY_QUESTION,
+    resolver_query: str = LIVE_NETWORK_RESOLVER_QUERY,
     domain_pack: str = "creativity",
-    output_dir: Path | None = None,
-    client: Any | None = None,
+    limit: int = LIVE_NETWORK_SOURCE_LIMIT,
+    backends: tuple[str, ...] = LIVE_NETWORK_BACKENDS,
 ) -> dict[str, Any]:
-    """Execute the local-safe arbitrary question proof and optionally write artifacts."""
+    """Resolve a bounded live OpenAlex/arXiv source set (metadata/abstracts only)."""
+    assert_live_source_health_smoke_env()
     resolved = resolve_work_candidates(
-        query=question,
+        query=resolver_query,
         domain_pack=domain_pack,
-        limit=10,
-        fixture_mode=True,
+        limit=limit,
+        backends=list(backends),
+        fixture_mode=False,
+        enrich_unpaywall=False,
     )
     records = list(resolved.get("records") or [])
+    if len(records) > limit:
+        resolved["records"] = records[:limit]
+        resolved["resolved_count"] = limit
+    resolved["research_question"] = question
+    resolved["resolver_query"] = resolver_query
+    return resolved
+
+
+def _write_atlas_safe_artifact(
+    artifact: dict[str, Any],
+    *,
+    output_dir: Path | None,
+) -> str | None:
+    if output_dir is None:
+        return None
+    output_dir.mkdir(parents=True, exist_ok=True)
+    path = output_dir / LIVE_SOURCE_HEALTH_ARTIFACT_NAME
+    path.write_text(json.dumps(artifact, indent=2), encoding="utf-8")
+    return str(path)
+
+
+def _execute_source_health_proof_pipeline(
+    conn: sqlite3.Connection,
+    *,
+    resolved: dict[str, Any],
+    question: str,
+    domain_pack: str,
+    run_id: str,
+    output_dir: Path | None = None,
+    client: Any | None = None,
+    include_graph_proof: bool = True,
+    resolver_mode: str,
+) -> dict[str, Any]:
+    """Shared source-health persistence, abstract evidence, report, and artifact path."""
+    records = list(resolved.get("records") or [])
+    if not records:
+        raise ValueError("Source resolver returned zero records.")
+
     persist_resolved_source_health(
         conn,
         records,
@@ -508,7 +578,7 @@ def run_local_safe_arbitrary_source_health_proof(
 
     graph_result: dict[str, Any] = {"status": "skipped", "reason": "no_accepted_claims"}
     accepted_claim_ids = list(evidence.get("accepted_claim_ids") or [])
-    if accepted_claim_ids:
+    if include_graph_proof and accepted_claim_ids:
         from rge.modules.concept_linker import link_concepts_for_source
         from rge.modules.relationship_density_proof import (
             ensure_purpose_gated_relationship_density_proof,
@@ -549,7 +619,7 @@ def run_local_safe_arbitrary_source_health_proof(
 
     report_result = generate_run_report(
         conn,
-        run_id=LOCAL_SAFE_RUN_ID,
+        run_id=run_id,
         topic=question,
         domain_pack=domain_pack,
         output_dir=output_dir,
@@ -561,22 +631,84 @@ def run_local_safe_arbitrary_source_health_proof(
         domain_pack=domain_pack,
         run_report=run_report,
     )
-
-    artifact_path: str | None = None
-    if output_dir is not None:
-        output_dir.mkdir(parents=True, exist_ok=True)
-        path = output_dir / "atlas_source_health_run_latest.json"
-        path.write_text(json.dumps(artifact, indent=2), encoding="utf-8")
-        artifact_path = str(path)
-
+    artifact_path = _write_atlas_safe_artifact(artifact, output_dir=output_dir)
+    source_health = acquisition_quality_summary(conn)
+    resolver_breakdown = {
+        backend: int((resolved.get("backend_counts") or {}).get(backend) or 0)
+        for backend in resolved.get("backends") or []
+    }
     return {
         "status": "completed",
         "question": question,
+        "resolver_mode": resolver_mode,
+        "resolver_query": resolved.get("resolver_query") or question,
         "resolved_count": int(resolved.get("resolved_count") or len(records)),
-        "source_health": acquisition_quality_summary(conn),
+        "backend_counts": dict(resolved.get("backend_counts") or {}),
+        "resolver_breakdown": resolver_breakdown,
+        "source_health": source_health,
         "evidence": evidence,
         "graph": graph_result,
         "run_report": run_report,
         "atlas_safe_artifact": artifact,
         "artifact_path": artifact_path,
     }
+
+
+def run_local_safe_arbitrary_source_health_proof(
+    conn: sqlite3.Connection,
+    *,
+    question: str = LOCAL_SAFE_ARBITRARY_QUESTION,
+    domain_pack: str = "creativity",
+    output_dir: Path | None = None,
+    client: Any | None = None,
+) -> dict[str, Any]:
+    """Execute the local-safe arbitrary question proof and optionally write artifacts."""
+    resolved = resolve_work_candidates(
+        query=question,
+        domain_pack=domain_pack,
+        limit=10,
+        fixture_mode=True,
+    )
+    return _execute_source_health_proof_pipeline(
+        conn,
+        resolved=resolved,
+        question=question,
+        domain_pack=domain_pack,
+        run_id=LOCAL_SAFE_RUN_ID,
+        output_dir=output_dir,
+        client=client,
+        include_graph_proof=True,
+        resolver_mode="manual_fixture",
+    )
+
+
+def run_live_network_source_health_smoke(
+    conn: sqlite3.Connection,
+    *,
+    question: str = LOCAL_SAFE_ARBITRARY_QUESTION,
+    resolver_query: str = LIVE_NETWORK_RESOLVER_QUERY,
+    domain_pack: str = "creativity",
+    output_dir: Path | None = None,
+    limit: int = LIVE_NETWORK_SOURCE_LIMIT,
+    backends: tuple[str, ...] = LIVE_NETWORK_BACKENDS,
+    client: Any | None = None,
+) -> dict[str, Any]:
+    """Operator-gated live OpenAlex/arXiv source-health smoke on a temp DB."""
+    resolved = resolve_live_network_source_records(
+        question=question,
+        resolver_query=resolver_query,
+        domain_pack=domain_pack,
+        limit=limit,
+        backends=backends,
+    )
+    return _execute_source_health_proof_pipeline(
+        conn,
+        resolved=resolved,
+        question=question,
+        domain_pack=domain_pack,
+        run_id=LIVE_NETWORK_RUN_ID,
+        output_dir=output_dir,
+        client=client,
+        include_graph_proof=False,
+        resolver_mode="live_network",
+    )
