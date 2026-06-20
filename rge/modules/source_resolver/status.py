@@ -57,6 +57,23 @@ _STATUS_RANK: dict[str, int] = {
 }
 
 
+def source_status_rank(status: str | None) -> int:
+    """Higher rank means more extractable / acquisition-ready."""
+    return _STATUS_RANK.get(str(status or "").strip(), 0)
+
+
+def rank_records_by_extractability(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Prefer abstract/OA-ready records before metadata-only truncation."""
+    return sorted(
+        records,
+        key=lambda record: (
+            source_status_rank(str(record.get("source_status") or "")),
+            bool(str(record.get("abstract_text") or "").strip()),
+        ),
+        reverse=True,
+    )
+
+
 def normalize_doi(doi: str | None) -> str | None:
     if not doi:
         return None

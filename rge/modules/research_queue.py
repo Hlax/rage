@@ -218,6 +218,8 @@ def score_discovered_candidate(
         novelty_score=novelty_score,
         drift_risk=drift_risk,
     )
+    if str(abstract).strip():
+        priority_score = round(min(1.0, priority_score + 0.15), 4)
 
     purpose_fit = evaluate_text_purpose_fit(
         f"{title} {abstract}",

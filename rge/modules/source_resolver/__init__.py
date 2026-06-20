@@ -163,6 +163,12 @@ def resolve_work_candidates(
             enricher=enricher,
         )
 
+    from rge.modules.source_resolver.status import rank_records_by_extractability
+
+    records = rank_records_by_extractability(records)
+    if len(records) > limit:
+        records = records[:limit]
+
     evidence = explain_resolved_sources(records)
     return {
         "query": query,

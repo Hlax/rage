@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from pathlib import Path
 from typing import Any
 
 from rge.db.repositories import sha256_hex, utc_now_iso
@@ -398,6 +399,64 @@ ACQUISITION_STATUS_TO_FAILURE: dict[str, str] = {
     "download_failed": "download_failed",
     "full_text_available": "download_failed",
 }
+
+
+def staged_ingest_health_metadata(
+    *,
+    candidate: dict[str, Any] | None,
+    source_type: str,
+    raw_text: str,
+    domain: str,
+    artifact_path: Path,
+    title: str,
+    question: str | None = None,
+) -> dict[str, Any]:
+    """Build durable source-health metadata for staged ingest rows."""
+    from rge.modules.purpose_gating import evaluate_text_purpose_fit
+    from rge.modules.source_resolver.status import CLEAN_TEXT_READY
+
+    suffix = artifact_path.suffix.casefold()
+    parser_backend = "html_parser" if suffix in {".html", ".htm"} else "staged_text"
+    resolver_source = "staged_fetch"
+    if candidate:
+        resolver_source = str(
+            candidate.get("source_type")
+            or candidate.get("provider")
+            or resolver_source
+        )
+    purpose_question = question or str((candidate or {}).get("title") or title or domain)
+    purpose_fit = evaluate_text_purpose_fit(
+        f"{title} {raw_text[:500]}",
+        question=purpose_question,
+        domain_pack=domain,
+        evidence_ref=title,
+    )
+    metadata = acquisition_metadata_from_payload(
+        {
+            "source_status": CLEAN_TEXT_READY,
+            "acquisition_status": CLEAN_TEXT_READY,
+            "parser_backend": parser_backend,
+            "extractable": True,
+            "quality_gate_status": "extractable",
+        },
+        source_type=source_type,
+        source_status=CLEAN_TEXT_READY,
+        acquisition_status=CLEAN_TEXT_READY,
+        parser_backend=parser_backend,
+        resolver_source=resolver_source,
+    )
+    metadata.update(
+        {
+            "purpose_fit_status": str(purpose_fit["purpose_match_status"]),
+            "purpose_fit_reason": str(
+                purpose_fit.get("why_purpose_match")
+                or purpose_fit.get("why_evidence_downgraded_or_rejected")
+                or ""
+            ),
+            "purpose_gate_decision": str(purpose_fit["decision"]),
+        }
+    )
+    return metadata
 
 
 def failure_modes_from_acquisition_summary(

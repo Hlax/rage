@@ -206,6 +206,11 @@ def test_staged_spine_through_generate_run_report(
         assert report["tickets_generated"] == 0
         reasons = {item["reason"] for item in report["top_failure_modes"]}
         assert "missing_quote_span" in reasons
+        acquisition = report["acquisition_quality_summary"]
+        assert acquisition["sources_with_metadata"] >= 1
+        assert acquisition["source_status_counts"].get("clean_text_ready", 0) >= 1
+        assert acquisition["purpose_fit_status_counts"]
+        assert acquisition["parser_backend_counts"].get("html_parser", 0) >= 1
 
         research_run = conn.execute(
             "SELECT status FROM research_runs WHERE id = ?",

@@ -1,0 +1,225 @@
+{
+  "schema_version": "atlas_source_health_run_v0.1.0",
+  "status": "completed",
+  "question": "How does AI affect human creativity?",
+  "domain_pack": "creativity",
+  "purpose": {
+    "schema_version": "purpose_metadata_v0.1.0",
+    "question_id": "local_safe_arbitrary_run",
+    "question": "How does AI affect human creativity?",
+    "domain": "creativity",
+    "research_intent": [
+      "theory_building",
+      "evidence_review"
+    ],
+    "asset_affordance": [
+      "reasoning_training_candidate",
+      "argument_map_candidate",
+      "concept_ontology_candidate"
+    ],
+    "evidence_need": "mixed_empirical_theory",
+    "acceptable_source_types": [
+      "paper",
+      "abstract",
+      "essay",
+      "book",
+      "interview",
+      "webpage"
+    ],
+    "output_targets": [
+      "cluster_report",
+      "evidence_cards",
+      "atlas_map"
+    ],
+    "evidence_maturity": "seed",
+    "training_suitability": "not_ready",
+    "classifier_version": "purpose_classifier_v0.1.0"
+  },
+  "source_health_summary": {
+    "source_status_counts": {
+      "abstract_available": 1,
+      "metadata_only": 1,
+      "oa_tei_available": 1,
+      "oa_pdf_available": 1
+    },
+    "acquisition_status_counts": {
+      "abstract_available": 1,
+      "metadata_only": 1,
+      "oa_tei_available": 1,
+      "oa_pdf_available": 1
+    },
+    "parser_backend_counts": {
+      "abstract_record": 3,
+      "none": 1
+    },
+    "source_type_counts": {
+      "manual_fixture": 4
+    },
+    "quality_gate_status_counts": {
+      "extractable": 3,
+      "blocked": 1
+    },
+    "extractable_counts": {
+      "true": 3,
+      "false": 1
+    },
+    "failure_reason_counts": {
+      "skip_llm_extraction": 1
+    },
+    "resolver_source_counts": {
+      "manual_fixture": 4
+    },
+    "availability_counts": {
+      "oa_available": 2,
+      "pdf_available": 1,
+      "tei_available": 1
+    },
+    "purpose_fit_status_counts": {
+      "match": 4
+    },
+    "purpose_gate_decision_counts": {
+      "accepted": 4
+    },
+    "sources_with_metadata": 4,
+    "source_rows": [
+      {
+        "source_ref": "source_001",
+        "source_status": "abstract_available",
+        "acquisition_status": "abstract_available",
+        "parser_backend": "abstract_record",
+        "source_type": "manual_fixture",
+        "quality_gate_status": "extractable",
+        "extractable": true,
+        "resolver_source": "manual_fixture",
+        "oa_available": false,
+        "pdf_available": false,
+        "tei_available": false,
+        "is_oa": false,
+        "oa_status": "closed",
+        "purpose_fit_status": "match",
+        "purpose_fit_reason": "No purpose-specific concept gate was required.",
+        "purpose_gate_decision": "accepted",
+        "db_status": "parsed"
+      },
+      {
+        "source_ref": "source_002",
+        "source_status": "metadata_only",
+        "acquisition_status": "metadata_only",
+        "parser_backend": "none",
+        "source_type": "manual_fixture",
+        "quality_gate_status": "blocked",
+        "extractable": false,
+        "failure_reason": "skip_llm_extraction",
+        "resolver_source": "manual_fixture",
+        "oa_available": false,
+        "pdf_available": false,
+        "tei_available": false,
+        "is_oa": false,
+        "oa_status": "closed",
+        "purpose_fit_status": "match",
+        "purpose_fit_reason": "No purpose-specific concept gate was required.",
+        "purpose_gate_decision": "accepted",
+        "db_status": "failed"
+      },
+      {
+        "source_ref": "source_003",
+        "source_status": "oa_tei_available",
+        "acquisition_status": "oa_tei_available",
+        "parser_backend": "abstract_record",
+        "source_type": "manual_fixture",
+        "quality_gate_status": "extractable",
+        "extractable": true,
+        "resolver_source": "manual_fixture",
+        "oa_available": true,
+        "pdf_available": false,
+        "tei_available": true,
+        "is_oa": true,
+        "oa_status": "gold",
+        "purpose_fit_status": "match",
+        "purpose_fit_reason": "No purpose-specific concept gate was required.",
+        "purpose_gate_decision": "accepted",
+        "db_status": "parsed"
+      },
+      {
+        "source_ref": "source_004",
+        "source_status": "oa_pdf_available",
+        "acquisition_status": "oa_pdf_available",
+        "parser_backend": "abstract_record",
+        "source_type": "manual_fixture",
+        "quality_gate_status": "extractable",
+        "extractable": true,
+        "resolver_source": "manual_fixture",
+        "oa_available": true,
+        "pdf_available": true,
+        "tei_available": false,
+        "is_oa": true,
+        "oa_status": "gold",
+        "purpose_fit_status": "match",
+        "purpose_fit_reason": "No purpose-specific concept gate was required.",
+        "purpose_gate_decision": "accepted",
+        "db_status": "parsed"
+      }
+    ]
+  },
+  "purpose_fit_summary": {
+    "source_counts": {
+      "match": 4
+    },
+    "gate_decision_counts": {
+      "accepted": 4
+    },
+    "accepted_evidence_count": 1,
+    "rejected_evidence_count": 2
+  },
+  "graph_summary": {
+    "claims": 3,
+    "atoms": 1,
+    "relationships": 1,
+    "connection_metrics": {
+      "schema_version": "graph_connection_metrics_v0.1.0",
+      "clusters": [
+        {
+          "cluster_id": "cluster_unassigned",
+          "claims_per_cluster": 1,
+          "atoms_per_cluster": 1,
+          "relationships_per_cluster": 1,
+          "sources_per_cluster": 1,
+          "contradiction_edges": 0,
+          "qualification_edges": 0,
+          "contradiction_edge_count": 0,
+          "qualification_edge_count": 0,
+          "orphan_claims": 0,
+          "orphan_atoms": 0,
+          "orphan_claim_count": 0,
+          "orphan_atom_count": 0,
+          "relationship_density": 1.0,
+          "low_relationship_density": false
+        }
+      ],
+      "totals": {
+        "claims": 1,
+        "atoms": 1,
+        "relationships": 1,
+        "sources": 1,
+        "orphan_claims": 0,
+        "orphan_atoms": 0,
+        "orphan_claim_count": 0,
+        "orphan_atom_count": 0,
+        "contradiction_edge_count": 0,
+        "qualification_edge_count": 0,
+        "multi_claim_atom_count": 0,
+        "source_diverse_atom_count": 0,
+        "purpose_mismatch_count": 0,
+        "weak_atom_count": 1,
+        "clustered_atom_count": 0,
+        "synthesis_ready_cluster_count": 0,
+        "frontend_ready_trace_count": 1
+      }
+    }
+  },
+  "readiness_warnings": [
+    "Acquisition or purpose blockers present: skip_llm_extraction"
+  ],
+  "next_recommended_packet": "Phase4-P10-evidence-atom-clustering",
+  "next_recommended_reason": "Most evidence atoms remain weak one-claim objects; cluster compatible claims before UI synthesis."
+}

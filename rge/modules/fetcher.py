@@ -716,6 +716,7 @@ def ingest_staged_artifact(
             f"Checksum mismatch for {path}: expected {expected_checksum}, got {checksum}."
         )
 
+    candidate: dict[str, Any] | None = None
     if candidate_id:
         candidate = CandidateSourceRepository(conn).get_by_id(candidate_id)
         if candidate is not None:
@@ -745,6 +746,29 @@ def ingest_staged_artifact(
         raw_text=raw_text,
         title=effective_title,
         source_type=effective_source_type,
+    )
+    from rge.modules.acquisition_quality import (
+        merge_source_acquisition_metadata,
+        staged_ingest_health_metadata,
+    )
+
+    candidate_row = (
+        CandidateSourceRepository(conn).get_by_id(candidate_id)
+        if candidate_id
+        else None
+    )
+    merge_source_acquisition_metadata(
+        conn,
+        source_id=str(result["source_id"]),
+        metadata=staged_ingest_health_metadata(
+            candidate=candidate,
+            source_type=effective_source_type,
+            raw_text=raw_text,
+            domain=domain,
+            artifact_path=path,
+            title=effective_title,
+        ),
+        status="parsed",
     )
     return {
         **result,

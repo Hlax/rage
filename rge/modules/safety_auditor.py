@@ -35,6 +35,7 @@ ATLAS_PREVIEW_PUBLIC_DATA_FILES = (
     "atlas_snapshot_preview.json",
     "atlas_coherence_preview.json",
     "tiny_atlas_connection_preview.json",
+    "atlas_source_health_run_latest.json",
 )
 
 _PASS_EXIT_CODE = 0

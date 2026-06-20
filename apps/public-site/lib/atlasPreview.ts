@@ -1,6 +1,7 @@
 import snapshot from '../public/data/atlas_snapshot_preview.json';
 import coherence from '../public/data/atlas_coherence_preview.json';
 import connectionPreview from '../public/data/tiny_atlas_connection_preview.json';
+import sourceHealthRun from '../public/data/atlas_source_health_run_latest.json';
 
 import { formatPublicTimestamp, humanizeLabel } from './publicCards';
 
@@ -95,6 +96,29 @@ export type AtlasCoherencePreview = {
   preview_label: string;
 };
 
+export type AtlasSourceHealthPanel = {
+  source_counts_by_status: Record<string, number>;
+  acquisition_parser_status: Array<{ status: string; count: number; note: string }>;
+  quality_gate_outcomes: Array<{ outcome: string; count: number }>;
+  blocked_dirty_failed_reasons: Array<{ reason: string; count: number }>;
+};
+
+export type AtlasSourceHealthRunArtifact = {
+  schema_version: string;
+  status: string;
+  question: string;
+  domain_pack: string;
+  source_health_summary: {
+    source_status_counts: Record<string, number>;
+    acquisition_status_counts: Record<string, number>;
+    parser_backend_counts: Record<string, number>;
+    quality_gate_status_counts: Record<string, number>;
+    failure_reason_counts: Record<string, number>;
+    purpose_fit_status_counts?: Record<string, number>;
+    sources_with_metadata: number;
+  };
+};
+
 export type TinyAtlasConnectionPreview = {
   schema_version: string;
   generated_at: string;
@@ -108,12 +132,7 @@ export type TinyAtlasConnectionPreview = {
     asset_affordance_tags: string[];
     readiness_verdict: string;
   };
-  source_health: {
-    source_counts_by_status: Record<string, number>;
-    acquisition_parser_status: Array<{ status: string; count: number; note: string }>;
-    quality_gate_outcomes: Array<{ outcome: string; count: number }>;
-    blocked_dirty_failed_reasons: Array<{ reason: string; count: number }>;
-  };
+  source_health: AtlasSourceHealthPanel;
   cluster: {
     cluster_id: string;
     cluster_name: string;
@@ -173,6 +192,48 @@ export const atlasSnapshot = snapshot as AtlasPreviewSnapshot;
 export const atlasCoherence = coherence as AtlasCoherencePreview;
 export const tinyAtlasConnectionPreview =
   connectionPreview as TinyAtlasConnectionPreview;
+export const atlasSourceHealthRunArtifact =
+  sourceHealthRun as AtlasSourceHealthRunArtifact;
+
+const ATLAS_SOURCE_HEALTH_RUN_SCHEMA = 'atlas_source_health_run_v0.1.0';
+
+export function mapRunArtifactToSourceHealthPanel(
+  artifact: AtlasSourceHealthRunArtifact,
+): AtlasSourceHealthPanel {
+  const summary = artifact.source_health_summary;
+  return {
+    source_counts_by_status: summary.source_status_counts,
+    acquisition_parser_status: Object.entries(summary.parser_backend_counts).map(
+      ([status, count]) => ({
+        status,
+        count,
+        note: 'Parser backend from Atlas-safe source-health run artifact.',
+      }),
+    ),
+    quality_gate_outcomes: Object.entries(summary.quality_gate_status_counts).map(
+      ([outcome, count]) => ({ outcome, count }),
+    ),
+    blocked_dirty_failed_reasons: Object.entries(summary.failure_reason_counts).map(
+      ([reason, count]) => ({ reason, count }),
+    ),
+  };
+}
+
+/** Prefer Atlas-safe run artifact source health; fall back to tiny connection preview. */
+export function resolveSourceHealthPreview(): AtlasSourceHealthPanel & {
+  preview_source: 'run_artifact' | 'fixture';
+} {
+  if (atlasSourceHealthRunArtifact.schema_version === ATLAS_SOURCE_HEALTH_RUN_SCHEMA) {
+    return {
+      ...mapRunArtifactToSourceHealthPanel(atlasSourceHealthRunArtifact),
+      preview_source: 'run_artifact',
+    };
+  }
+  return {
+    ...tinyAtlasConnectionPreview.source_health,
+    preview_source: 'fixture',
+  };
+}
 
 /** Prefer inline snapshot coherence_summary; fall back to separate preview JSON. */
 export function resolveAtlasCoherencePreview(): AtlasCoherenceSummary & {

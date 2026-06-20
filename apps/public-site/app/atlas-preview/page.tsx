@@ -9,6 +9,7 @@ import {
   formatPublicTimestamp,
   humanizeLabel,
   resolveAtlasCoherencePreview,
+  resolveSourceHealthPreview,
   tinyAtlasConnectionPreview,
 } from '../../lib/atlasPreview';
 import { conceptToSlug, findCardById, findConceptBySlug } from '../../lib/publicCards';
@@ -148,6 +149,7 @@ export default function AtlasPreviewPage() {
     resolveAtlasCoherencePreview();
   const primaryRun = atlasSnapshot.runs[0];
   const connectionPreview = tinyAtlasConnectionPreview;
+  const sourceHealthPreview = resolveSourceHealthPreview();
   const readinessEntries = Object.entries(connectionPreview.readiness);
 
   return (
@@ -227,8 +229,14 @@ export default function AtlasPreviewPage() {
 
       <section style={sectionStyle}>
         <h2 style={headingStyle}>Source health panel</h2>
+        <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+          Preview source:{' '}
+          {sourceHealthPreview.preview_source === 'run_artifact'
+            ? 'Atlas-safe source-health run artifact'
+            : 'fixture-backed tiny connection preview'}
+        </p>
         <div style={smallGridStyle}>
-          {Object.entries(connectionPreview.source_health.source_counts_by_status).map(
+          {Object.entries(sourceHealthPreview.source_counts_by_status).map(
             ([status, count]) => (
               <MetricTile key={status} label={humanizeLabel(status)} value={count} />
             ),
@@ -237,7 +245,7 @@ export default function AtlasPreviewPage() {
         <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
           <p style={mutedLabelStyle}>Acquisition / parser status</p>
           <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#aeb4c0' }}>
-            {connectionPreview.source_health.acquisition_parser_status.map((item) => (
+            {sourceHealthPreview.acquisition_parser_status.map((item) => (
               <li key={item.status} style={{ marginBottom: '0.4rem' }}>
                 <strong style={{ color: '#e6e8ec' }}>{humanizeLabel(item.status)}</strong>{' '}
                 ({item.count}) · {item.note}
@@ -248,7 +256,7 @@ export default function AtlasPreviewPage() {
             Quality gate outcomes
           </p>
           <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0' }}>
-            {connectionPreview.source_health.quality_gate_outcomes
+            {sourceHealthPreview.quality_gate_outcomes
               .map((item) => `${humanizeLabel(item.outcome)}: ${item.count}`)
               .join(' · ')}
           </p>
@@ -258,7 +266,7 @@ export default function AtlasPreviewPage() {
             Blocked / dirty / failed source reasons
           </p>
           <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#e0c6ad' }}>
-            {connectionPreview.source_health.blocked_dirty_failed_reasons.map((item) => (
+            {sourceHealthPreview.blocked_dirty_failed_reasons.map((item) => (
               <li key={item.reason}>
                 {humanizeLabel(item.reason)} ({item.count})
               </li>
