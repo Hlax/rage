@@ -141,6 +141,10 @@ def resolve_work_candidates(
     if fixture_mode:
         selected_backends = ["manual_fixture"]
 
+    from rge.modules.source_resolver.query_expansion import openalex_safe_query
+
+    discovery_query = query if fixture_mode else openalex_safe_query(query)
+
     records: list[dict[str, Any]] = []
     backend_counts: dict[str, int] = {}
 
@@ -149,7 +153,7 @@ def resolve_work_candidates(
             continue
         candidates = _discover_backend_candidates(
             backend,
-            query=query,
+            query=discovery_query,
             domain_pack=domain_pack,
             limit=limit,
         )
@@ -186,6 +190,7 @@ def resolve_work_candidates(
     evidence = explain_resolved_sources(records)
     return {
         "query": query,
+        "discovery_query": discovery_query,
         "domain_pack": domain_pack,
         "limit": limit,
         "backends": selected_backends,

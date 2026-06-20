@@ -21,6 +21,13 @@ def test_purpose_aware_alternate_queries_strips_question_mark() -> None:
     assert "human AI creativity" in queries
 
 
+def test_openalex_safe_query_rewrites_question_strings() -> None:
+    from rge.modules.source_resolver.query_expansion import openalex_safe_query
+
+    assert "?" not in openalex_safe_query("How does AI affect human creativity?")
+    assert openalex_safe_query("human AI creativity") == "human AI creativity"
+
+
 def test_metadata_only_dominates_detects_skewed_set() -> None:
     records = [
         {"source_status": METADATA_ONLY},
@@ -44,7 +51,7 @@ def test_resolve_work_candidates_expands_when_metadata_only_dominates(
     ) -> list[dict[str, Any]]:
         del backend, domain_pack, limit
         queries_seen.append(query)
-        if query == "How does AI affect human creativity?":
+        if query == "affect creativity":
             return [
                 {
                     "source_id": "openalex:meta1",

@@ -1,0 +1,53 @@
+{
+  "report_type": "agent_packet_report",
+  "date": "2026-06-20",
+  "packets": [
+    {
+      "name": "README / Operator Quickstart Refresh Hooks",
+      "verdict": "GO",
+      "files": ["README.md"]
+    },
+    {
+      "name": "Live Network Query-Expansion Smoke",
+      "verdict": "GO",
+      "files": [
+        "rge/modules/source_resolver/query_expansion.py",
+        "tests/unit/test_live_network_query_expansion_smoke.py"
+      ]
+    },
+    {
+      "name": "Atlas Gaps Panel from Run Artifact",
+      "verdict": "GO",
+      "files": [
+        "apps/public-site/lib/atlasPreview.ts",
+        "apps/public-site/app/atlas-preview/page.tsx"
+      ]
+    }
+  ],
+  "verification": [
+    {
+      "command": "python -m pytest tests/unit/test_atlas_source_health_run_preview.py tests/unit/test_purpose_aware_query_expansion.py tests/unit/test_live_network_query_expansion_smoke.py::test_live_query_expansion_smoke_blocked_without_opt_in -q",
+      "status": "PASS",
+      "result": "7 passed"
+    },
+    {
+      "command": "python -m pytest tests/unit/test_live_network_query_expansion_smoke.py -m live_network -q",
+      "status": "PASS",
+      "note": "operator opt-in with live network env"
+    },
+    {
+      "command": "npm run build",
+      "working_directory": "apps/public-site",
+      "status": "PASS"
+    },
+    {
+      "command": "python -m rge.modules.safety_auditor --audit full",
+      "status": "PASS"
+    }
+  ],
+  "next_3_recommended_packets": [
+    "Atlas Question Header from Run Artifact",
+    "Operator Loop Refresh Hook",
+    "Live Source-Health + Query-Expansion Combined Smoke"
+  ]
+}

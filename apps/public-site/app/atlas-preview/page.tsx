@@ -9,6 +9,7 @@ import {
   formatPublicTimestamp,
   humanizeLabel,
   resolveAtlasCoherencePreview,
+  resolveGapsNextMovePreview,
   resolveSourceHealthPreview,
   tinyAtlasConnectionPreview,
 } from '../../lib/atlasPreview';
@@ -150,6 +151,7 @@ export default function AtlasPreviewPage() {
   const primaryRun = atlasSnapshot.runs[0];
   const connectionPreview = tinyAtlasConnectionPreview;
   const sourceHealthPreview = resolveSourceHealthPreview();
+  const gapsNextMovePreview = resolveGapsNextMovePreview();
   const readinessEntries = Object.entries(connectionPreview.readiness);
 
   return (
@@ -395,6 +397,12 @@ export default function AtlasPreviewPage() {
 
       <section style={sectionStyle}>
         <h2 style={headingStyle}>Gaps / next move panel</h2>
+        <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+          Preview source:{' '}
+          {gapsNextMovePreview.preview_source === 'run_artifact'
+            ? 'Atlas-safe source-health run artifact'
+            : 'fixture-backed tiny connection preview'}
+        </p>
         <div style={smallGridStyle}>
           {readinessEntries.map(([surface, readiness]) => (
             <div key={surface} style={{ ...panelStyle, marginBottom: 0 }}>
@@ -417,7 +425,7 @@ export default function AtlasPreviewPage() {
         <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
           <p style={mutedLabelStyle}>Top blockers</p>
           <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#aeb4c0' }}>
-            {connectionPreview.gaps_next_move.top_blockers.map((blocker) => (
+            {gapsNextMovePreview.top_blockers.map((blocker) => (
               <li key={blocker} style={{ marginBottom: '0.35rem' }}>
                 {blocker}
               </li>
@@ -425,17 +433,17 @@ export default function AtlasPreviewPage() {
           </ul>
           <p style={{ ...mutedLabelStyle, marginTop: '0.9rem' }}>Graph health warnings</p>
           <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#d9a66f' }}>
-            {connectionPreview.gaps_next_move.graph_health_warnings.map((warning) => (
+            {gapsNextMovePreview.graph_health_warnings.map((warning) => (
               <li key={warning} style={{ marginBottom: '0.35rem' }}>
                 {warning}
               </li>
             ))}
           </ul>
           <p style={{ margin: '0.9rem 0 0', color: '#e6e8ec' }}>
-            Next recommended packet: {connectionPreview.gaps_next_move.next_recommended_packet}
+            Next recommended packet: {gapsNextMovePreview.next_recommended_packet}
           </p>
           <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.45 }}>
-            {connectionPreview.gaps_next_move.recommender_reason}
+            {gapsNextMovePreview.recommender_reason}
           </p>
         </div>
       </section>

@@ -117,6 +117,16 @@ export type AtlasSourceHealthRunArtifact = {
     purpose_fit_status_counts?: Record<string, number>;
     sources_with_metadata: number;
   };
+  readiness_warnings?: string[];
+  next_recommended_packet?: string;
+  next_recommended_reason?: string;
+};
+
+export type AtlasGapsNextMovePanel = {
+  top_blockers: string[];
+  graph_health_warnings: string[];
+  next_recommended_packet: string;
+  recommender_reason: string;
 };
 
 export type TinyAtlasConnectionPreview = {
@@ -231,6 +241,49 @@ export function resolveSourceHealthPreview(): AtlasSourceHealthPanel & {
   }
   return {
     ...tinyAtlasConnectionPreview.source_health,
+    preview_source: 'fixture',
+  };
+}
+
+export function mapRunArtifactToGapsNextMovePanel(
+  artifact: AtlasSourceHealthRunArtifact,
+): AtlasGapsNextMovePanel {
+  const summary = artifact.source_health_summary;
+  const failureReasons = summary.failure_reason_counts || {};
+  const topBlockers = Object.entries(failureReasons).map(
+    ([reason, count]) => `${humanizeLabel(reason)} (${count})`,
+  );
+  const readinessWarnings = list(artifact.readiness_warnings);
+  return {
+    top_blockers:
+      topBlockers.length > 0
+        ? topBlockers
+        : readinessWarnings.slice(0, 2),
+    graph_health_warnings: readinessWarnings,
+    next_recommended_packet:
+      artifact.next_recommended_packet || 'source-health-persistence',
+    recommender_reason:
+      artifact.next_recommended_reason ||
+      'Run artifact did not include a recommender rationale.',
+  };
+}
+
+function list(values: string[] | undefined): string[] {
+  return Array.isArray(values) ? values.filter(Boolean) : [];
+}
+
+/** Prefer Atlas-safe run artifact gaps; fall back to tiny connection preview. */
+export function resolveGapsNextMovePreview(): AtlasGapsNextMovePanel & {
+  preview_source: 'run_artifact' | 'fixture';
+} {
+  if (atlasSourceHealthRunArtifact.schema_version === ATLAS_SOURCE_HEALTH_RUN_SCHEMA) {
+    return {
+      ...mapRunArtifactToGapsNextMovePanel(atlasSourceHealthRunArtifact),
+      preview_source: 'run_artifact',
+    };
+  }
+  return {
+    ...tinyAtlasConnectionPreview.gaps_next_move,
     preview_source: 'fixture',
   };
 }

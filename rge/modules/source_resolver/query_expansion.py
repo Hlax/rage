@@ -50,10 +50,6 @@ _DEFAULT_ALTERNATE_QUERIES = (
 )
 
 
-def _record_key(record: dict[str, Any]) -> str:
-    return str(record.get("source_id") or record.get("provider_id") or "")
-
-
 def purpose_aware_alternate_queries(query: str) -> list[str]:
     """Build OpenAlex-safe alternate queries from a research question or keyword query."""
     cleaned = str(query or "").replace("?", "").strip()
@@ -76,6 +72,14 @@ def purpose_aware_alternate_queries(query: str) -> list[str]:
             continue
         ordered.append(normalized)
     return ordered
+
+
+def openalex_safe_query(query: str) -> str:
+    """Return an OpenAlex-safe search string for live resolver discovery."""
+    if "?" not in str(query or ""):
+        return str(query or "").strip()
+    alternates = purpose_aware_alternate_queries(query)
+    return alternates[0] if alternates else str(query or "").replace("?", "").strip()
 
 
 def metadata_only_dominates(records: list[dict[str, Any]]) -> bool:
@@ -169,3 +173,31 @@ def expand_records_for_metadata_dominance(
         if merged
         else 0,
     }
+
+
+def assert_live_query_expansion_smoke_env() -> dict[str, str]:
+    """Fail closed unless operator explicitly opts into live query-expansion smoke."""
+    import os
+
+    allow_smoke = os.environ.get("RGE_ALLOW_LIVE_QUERY_EXPANSION_SMOKE", "0").strip().casefold()
+    if allow_smoke not in {"1", "true", "yes"}:
+        raise RuntimeError(
+            "Live query-expansion smoke requires RGE_ALLOW_LIVE_QUERY_EXPANSION_SMOKE=1."
+        )
+    allow_network = os.environ.get("RGE_ALLOW_SOURCE_NETWORK", "0").strip().casefold()
+    if allow_network not in {"1", "true", "yes"}:
+        raise RuntimeError(
+            "Live query-expansion smoke requires RGE_ALLOW_SOURCE_NETWORK=1."
+        )
+    mailto = os.environ.get("OPENALEX_MAILTO", "").strip()
+    if not mailto:
+        raise RuntimeError("Live query-expansion smoke requires OPENALEX_MAILTO.")
+    return {
+        "RGE_ALLOW_LIVE_QUERY_EXPANSION_SMOKE": allow_smoke,
+        "RGE_ALLOW_SOURCE_NETWORK": allow_network,
+        "OPENALEX_MAILTO": mailto,
+    }
+
+
+def _record_key(record: dict[str, Any]) -> str:
+    return str(record.get("source_id") or record.get("provider_id") or "")

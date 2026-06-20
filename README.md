@@ -1020,6 +1020,45 @@ and **auto-syncs** the offline reference
 labels the result as a mock staged-spine preview (ticket-321). Regression:
 `tests/unit/test_public_atlas_preview_fixture.py` (committed preview + fixture parity).
 
+**Atlas source-health preview refresh** (local-safe proof → public `/atlas-preview` source
+health + gaps panels; temp DB only):
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+python scripts/refresh_atlas_source_health_preview.py
+```
+
+The script runs the local-safe arbitrary source-health proof on a temp SQLite DB,
+validates `atlas_source_health_run_v0.1.0` plus private-field policy, and writes
+`apps/public-site/public/data/atlas_source_health_run_latest.json`. `/atlas-preview`
+prefers this artifact for the **Source health** and **Gaps / next move** panels when
+present; otherwise it falls back to `tiny_atlas_connection_preview.json`.
+
+Copy an operator-generated artifact instead of regenerating:
+
+```powershell
+python scripts/refresh_atlas_source_health_preview.py `
+  --input path/to/atlas_source_health_run_latest.json
+```
+
+Regression: `tests/unit/test_atlas_source_health_run_preview.py`,
+`tests/unit/test_refresh_atlas_source_health_preview.py`.
+
+**Live network query-expansion smoke** (operator opt-in; temp resolver only; no PDF
+download; mock LLM):
+
+```powershell
+$env:RGE_ALLOW_LIVE_QUERY_EXPANSION_SMOKE = "1"
+$env:RGE_ALLOW_SOURCE_NETWORK = "1"
+$env:OPENALEX_MAILTO = "operator@example.com"
+$env:RGE_LLM_MODE = "mock"
+python -m pytest tests/unit/test_live_network_query_expansion_smoke.py -m live_network -q
+```
+
+Proves purpose-aware alternate OpenAlex/arXiv queries run when metadata-only records
+dominate the first resolver pass. Not CI-enforced (`live_network` marker excluded in
+default `pytest`).
+
 **Live layer-3 boundary (tickets 285, 328–329):** the opt-in live OpenAlex +
 `live_network` atlas coherence pytest
 (`tests/unit/test_live_staged_atlas_snapshot_coherence.py`; see *Live staged orchestrator
@@ -1035,6 +1074,7 @@ python -m rge.modules.safety_auditor --audit full
 cd apps/public-site; npm run build; cd ../..
 python -m pytest tests/golden/test_12_public_site_static_render.py -q
 python -m pytest tests/unit/test_public_atlas_preview_fixture.py -q
+python -m pytest tests/unit/test_atlas_source_health_run_preview.py -q
 ```
 
 Stage the refreshed snapshots for commit:
@@ -1042,6 +1082,7 @@ Stage the refreshed snapshots for commit:
 ```powershell
 git add apps/public-site/public/data/atlas_snapshot_preview.json `
   apps/public-site/public/data/atlas_coherence_preview.json `
+  apps/public-site/public/data/atlas_source_health_run_latest.json `
   fixtures/atlas/atlas_snapshot_staged_spine_preview.json
 ```
 

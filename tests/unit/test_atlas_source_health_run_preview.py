@@ -27,5 +27,14 @@ def test_atlas_preview_wires_source_health_resolver() -> None:
     lib = ATLAS_PREVIEW_LIB.read_text(encoding="utf-8")
     assert "resolveSourceHealthPreview" in lib
     assert "resolveSourceHealthPreview" in page
+    assert "resolveGapsNextMovePreview" in lib
+    assert "resolveGapsNextMovePreview" in page
     assert "atlas_source_health_run_latest.json" in lib
     assert "fetch(" not in page
+
+
+def test_atlas_source_health_run_artifact_includes_gaps_fields() -> None:
+    artifact = json.loads(ARTIFACT_PATH.read_text(encoding="utf-8"))
+    assert artifact.get("readiness_warnings")
+    assert artifact.get("next_recommended_packet")
+    assert artifact.get("next_recommended_reason")
