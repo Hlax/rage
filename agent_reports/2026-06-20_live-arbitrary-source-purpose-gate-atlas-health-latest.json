@@ -1,0 +1,117 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "Live/Arbitrary Source Purpose Gate Enforcement + Atlas Source Health Persistence",
+  "date": "2026-06-20",
+  "verdict": "GO",
+  "verdict_scope": "mock/local-safe arbitrary-source proof; live network and live Ollama not exercised",
+  "route_or_artifact_updated": {
+    "route": "/atlas-preview still builds; no larger frontend added",
+    "artifact_builder": "rge.modules.live_arbitrary_source_health.build_atlas_safe_run_artifact",
+    "atlas_snapshot_field": "source_health_preview",
+    "optional_output_artifact": "atlas_source_health_run_latest.json"
+  },
+  "arbitrary_local_safe_run_summary": {
+    "question": "How does AI affect human creativity?",
+    "mode": "mock/local-safe fixture resolver",
+    "resolver": "manual_fixture",
+    "paid_api_calls": false,
+    "live_network_calls": false,
+    "behavior": [
+      "persists source health for resolved records",
+      "skips dirty/unextractable records before abstract extraction",
+      "purpose-gates abstract evidence before accepted DB writes",
+      "persists accepted and rejected claim outcomes",
+      "generates DB-backed run report and Atlas-safe source-health artifact"
+    ]
+  },
+  "source_health_persistence_findings": {
+    "status": "GO",
+    "durable_location": "sources.domain_metadata_json",
+    "fields": [
+      "source_status",
+      "acquisition_status",
+      "parser_backend",
+      "source_type",
+      "quality_gate_status",
+      "extractable",
+      "failure_reason",
+      "resolver_source",
+      "oa_available",
+      "pdf_available",
+      "tei_available",
+      "purpose_fit_status",
+      "purpose_fit_reason",
+      "purpose_gate_decision"
+    ],
+    "run_report_summary": "acquisition_quality_summary now includes purpose_fit_status_counts and purpose_gate_decision_counts"
+  },
+  "purpose_gating_findings": {
+    "status": "GO",
+    "enforced_at": [
+      "source ranking via existing research_queue purpose gate",
+      "abstract evidence generation",
+      "claim acceptance/rejection persistence",
+      "atom promotion",
+      "relationship density proof",
+      "Atlas trace/connection metrics",
+      "Atlas-safe source health projection"
+    ],
+    "rejected_or_downgraded_reasoning": "purpose_fit_reason and purpose_gate_decision are persisted and summarized"
+  },
+  "atlas_preview_export_findings": {
+    "status": "GO",
+    "public_safe_projection": "source_health_preview uses source_ref labels and whitelisted status fields",
+    "private_fields_excluded": [
+      "source_id",
+      "claim_id",
+      "quote_id",
+      "chunk_id",
+      "local_path",
+      "raw_text",
+      "prompt",
+      "private notes",
+      "raw HTML"
+    ]
+  },
+  "readiness": {
+    "graph_relationship": "PARTIAL - local-safe proof can produce claims, atoms, and deterministic relationship-density edges; live source diversity remains opt-in",
+    "local_model": "GO for mock/local-safe mode; live Ollama not run",
+    "paid_api": "NO-GO by design; no paid provider calls added",
+    "automation": "PARTIAL - module/test proof only; no broad automation added"
+  },
+  "top_blockers": [
+    "Live OpenAlex/arXiv source health smoke remains operator-gated and unrun in this packet.",
+    "DB-backed source-health preview is exported in Atlas snapshot/artifact projection, not wired into a larger frontend.",
+    "Relationship maturity still depends on enough accepted, purpose-matching claims and concept links."
+  ],
+  "next_3_recommended_packets": [
+    "Atlas Source Health Preview Wiring",
+    "Live Network Source Health Smoke",
+    "Purpose-Gated Source Expansion"
+  ],
+  "verification": [
+    {
+      "command": "python -m py_compile rge/modules/live_arbitrary_source_health.py rge/modules/acquisition_quality.py rge/modules/atlas_snapshot_builder.py rge/modules/failure_recommender.py",
+      "status": "PASS"
+    },
+    {
+      "command": "python -m pytest tests/unit/test_live_arbitrary_source_health.py tests/unit/test_failure_recommender.py tests/unit/test_web_source_adapter.py tests/unit/test_purpose_gated_relationship_density_proof.py tests/unit/test_tiny_atlas_connection_preview.py -q",
+      "status": "PASS",
+      "result": "32 passed"
+    },
+    {
+      "command": "python -m pytest tests/golden/test_12_public_site_static_render.py tests/unit/test_safety_auditor_atlas_preview.py -q",
+      "status": "PASS",
+      "result": "16 passed"
+    },
+    {
+      "command": "npm run build",
+      "working_directory": "apps/public-site",
+      "status": "PASS"
+    },
+    {
+      "command": "python -m rge.modules.safety_auditor --audit full",
+      "status": "PASS"
+    }
+  ]
+}

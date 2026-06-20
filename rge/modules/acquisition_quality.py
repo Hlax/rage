@@ -23,6 +23,9 @@ ACQUISITION_METADATA_FIELDS = (
     "tei_available",
     "is_oa",
     "oa_status",
+    "purpose_fit_status",
+    "purpose_fit_reason",
+    "purpose_gate_decision",
 )
 
 
@@ -237,6 +240,8 @@ def summarize_source_metadata_rows(
     extractable_counts: dict[str, int] = {}
     failure_reason_counts: dict[str, int] = {}
     resolver_source_counts: dict[str, int] = {}
+    purpose_fit_counts: dict[str, int] = {}
+    purpose_gate_decision_counts: dict[str, int] = {}
     availability_counts = {"oa_available": 0, "pdf_available": 0, "tei_available": 0}
     source_rows: list[dict[str, Any]] = []
     parsed_rows = 0
@@ -282,6 +287,19 @@ def summarize_source_metadata_rows(
         if resolver_source:
             resolver_source_counts[resolver_source] = resolver_source_counts.get(resolver_source, 0) + 1
 
+        purpose_fit = _clean_string(
+            metadata.get("purpose_fit_status")
+            or metadata.get("purpose_match_status")
+        )
+        if purpose_fit:
+            purpose_fit_counts[purpose_fit] = purpose_fit_counts.get(purpose_fit, 0) + 1
+
+        purpose_decision = _clean_string(metadata.get("purpose_gate_decision"))
+        if purpose_decision:
+            purpose_gate_decision_counts[purpose_decision] = (
+                purpose_gate_decision_counts.get(purpose_decision, 0) + 1
+            )
+
         availability = _availability_from_metadata(metadata)
         for key, available in availability.items():
             if available:
@@ -307,6 +325,8 @@ def summarize_source_metadata_rows(
         "extractable_counts": extractable_counts,
         "failure_reason_counts": failure_reason_counts,
         "resolver_source_counts": resolver_source_counts,
+        "purpose_fit_status_counts": purpose_fit_counts,
+        "purpose_gate_decision_counts": purpose_gate_decision_counts,
         "availability_counts": availability_counts,
         "sources_with_metadata": parsed_rows,
         "scoped_source_count": len(source_ids) if source_ids is not None else None,

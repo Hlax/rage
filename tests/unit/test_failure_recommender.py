@@ -10,8 +10,11 @@ from rge.cli import main
 from rge.modules.failure_recommender import (
     PACKET_PDF_PARSER,
     PACKET_QUALITY_GATES,
+    PACKET_SOURCE_EXPANSION,
+    PACKET_SOURCE_HEALTH,
     PACKET_SOURCE_RESOLVER,
     PACKET_FIELD_MAP,
+    PACKET_PURPOSE_GATING,
     PACKET_WEB_ADAPTER,
     REJECTION_UNSUPPORTED_WALL,
     classify_dominant_bottleneck,
@@ -124,3 +127,72 @@ def test_recommend_from_run_report_webpage_dirty_text() -> None:
 
     assert result["recommended_packet"] in {PACKET_WEB_ADAPTER, PACKET_QUALITY_GATES}
     assert result["source_run"] == "run_report"
+
+
+def test_recommend_from_run_report_missing_source_health() -> None:
+    run_report = {
+        "claims_accepted": 0,
+        "claims_rejected": 0,
+        "top_failure_modes": [],
+        "acquisition_quality_summary": {},
+    }
+    result = recommend_from_run_report(run_report)
+
+    assert result["dominant_signal"] == "source_health_missing"
+    assert result["recommended_packet"] == PACKET_SOURCE_HEALTH
+
+
+def test_recommend_from_run_report_extractable_sources_too_thin() -> None:
+    run_report = {
+        "claims_accepted": 0,
+        "claims_rejected": 0,
+        "top_failure_modes": [],
+        "acquisition_quality_summary": {
+            "sources_with_metadata": 2,
+            "source_status_counts": {},
+            "acquisition_status_counts": {},
+            "extractable_counts": {"false": 2},
+        },
+    }
+    result = recommend_from_run_report(run_report)
+
+    assert result["dominant_signal"] == "extractable_sources_too_thin"
+    assert result["recommended_packet"] == PACKET_SOURCE_EXPANSION
+
+
+def test_recommend_from_run_report_purpose_mismatch_dominates_without_acquisition() -> None:
+    run_report = {
+        "claims_accepted": 0,
+        "claims_rejected": 4,
+        "top_failure_modes": [{"reason": "purpose_mismatch", "count": 4}],
+        "acquisition_quality_summary": {
+            "sources_with_metadata": 4,
+            "source_status_counts": {"abstract_available": 4},
+            "acquisition_status_counts": {},
+            "extractable_counts": {"true": 4},
+        },
+    }
+    result = recommend_from_run_report(run_report)
+
+    assert result["dominant_signal"] == "purpose_mismatch"
+    assert result["recommended_packet"] == PACKET_PURPOSE_GATING
+
+
+def test_recommend_from_run_report_preserves_acquisition_precedence() -> None:
+    run_report = {
+        "claims_accepted": 0,
+        "claims_rejected": 4,
+        "top_failure_modes": [{"reason": "purpose_mismatch", "count": 4}],
+        "acquisition_quality_summary": {
+            "sources_with_metadata": 4,
+            "source_status_counts": {"dirty_text": 2},
+            "acquisition_status_counts": {"dirty_text": 2},
+            "source_type_counts": {"webpage": 2},
+            "parser_backend_counts": {"html_to_text": 2},
+            "extractable_counts": {"false": 2},
+        },
+    }
+    result = recommend_from_run_report(run_report)
+
+    assert result["dominant_signal"] == "blocked_by_quality_gate"
+    assert result["recommended_packet"] == PACKET_QUALITY_GATES

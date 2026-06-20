@@ -31,6 +31,8 @@ PACKET_QUALITY_GATES = "Phase4-P3-quality-gates"
 PACKET_PURPOSE_GATING = "Phase4-P9-purpose-gated-retrieval"
 PACKET_ATOM_CLUSTERING = "Phase4-P10-evidence-atom-clustering"
 PACKET_RELATIONSHIP_DENSITY = "Phase4-P11-relationship-density"
+PACKET_SOURCE_HEALTH = "Phase4-P12-source-health-persistence"
+PACKET_SOURCE_EXPANSION = "Phase4-P13-acquisition-source-expansion"
 
 REJECTION_UNSUPPORTED = "unsupported_claim"
 REJECTION_UNSUPPORTED_WALL = "unsupported_claim_wall"
@@ -185,6 +187,18 @@ PACKET_RECOMMENDATIONS: dict[str, dict[str, Any]] = {
         "rationale": "Claims and atoms exist, but graph edges are too sparse for meaningful Atlas navigation.",
         "priority": "medium",
     },
+    "source_health_missing": {
+        "recommended_packet": PACKET_SOURCE_HEALTH,
+        "title": "Source health persistence",
+        "rationale": "Run artifacts lack durable source health metadata needed for Atlas inspection.",
+        "priority": "high",
+    },
+    "extractable_sources_too_thin": {
+        "recommended_packet": PACKET_SOURCE_EXPANSION,
+        "title": "Acquisition / source expansion",
+        "rationale": "Resolved sources exist, but too few are extractable for quote-grounded evidence.",
+        "priority": "high",
+    },
 }
 
 
@@ -272,6 +286,18 @@ def classify_dominant_bottleneck(
     ):
         signal = dominant_status
         signal_kind = "source_status"
+
+    if dominant_acquisition is None and metrics.get("source_health_missing"):
+        signal = "source_health_missing"
+        signal_kind = "source_health"
+
+    if dominant_acquisition is None and signal in {None, dominant_rejection, dominant_status}:
+        extractable_counts = metrics.get("extractable_counts") or {}
+        true_count = int(extractable_counts.get("true") or 0)
+        false_count = int(extractable_counts.get("false") or 0)
+        if true_count == 0 and false_count > 0:
+            signal = "extractable_sources_too_thin"
+            signal_kind = "source_health"
 
     graph_metrics = metrics.get("graph_connection_metrics") or {}
     graph_totals = graph_metrics.get("totals") if isinstance(graph_metrics, dict) else {}
@@ -397,6 +423,8 @@ def recommend_from_run_report(run_report: dict[str, Any]) -> dict[str, Any]:
         or summary.get("acquisition_status_counts")
         or {},
         "acquisition_status_counts": summary.get("acquisition_status_counts") or {},
+        "extractable_counts": summary.get("extractable_counts") or {},
+        "source_health_missing": not bool(summary.get("sources_with_metadata")),
         "graph_connection_metrics": run_report.get("graph_connection_metrics") or {},
     }
     recommendation = recommend_improvement_packet(

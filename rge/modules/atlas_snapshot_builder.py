@@ -511,6 +511,55 @@ def _build_cluster_summaries(conn: sqlite3.Connection) -> list[dict[str, Any]]:
     return summaries
 
 
+def _build_source_health_preview(conn: sqlite3.Connection) -> dict[str, Any]:
+    """Project source health metadata into Atlas-safe counts and source refs."""
+    from rge.modules.acquisition_quality import acquisition_quality_summary
+
+    summary = acquisition_quality_summary(conn)
+    allowed_row_fields = (
+        "source_status",
+        "acquisition_status",
+        "parser_backend",
+        "source_type",
+        "quality_gate_status",
+        "extractable",
+        "failure_reason",
+        "resolver_source",
+        "oa_available",
+        "pdf_available",
+        "tei_available",
+        "is_oa",
+        "oa_status",
+        "purpose_fit_status",
+        "purpose_fit_reason",
+        "purpose_gate_decision",
+        "db_status",
+    )
+    rows: list[dict[str, Any]] = []
+    for index, row in enumerate(summary.get("source_status_rows") or [], start=1):
+        rows.append(
+            {
+                "source_ref": f"source_{index:03d}",
+                **{field: row[field] for field in allowed_row_fields if field in row},
+            }
+        )
+    return {
+        "source_status_counts": summary.get("source_status_counts") or {},
+        "acquisition_status_counts": summary.get("acquisition_status_counts") or {},
+        "parser_backend_counts": summary.get("parser_backend_counts") or {},
+        "source_type_counts": summary.get("source_type_counts") or {},
+        "quality_gate_status_counts": summary.get("quality_gate_status_counts") or {},
+        "extractable_counts": summary.get("extractable_counts") or {},
+        "failure_reason_counts": summary.get("failure_reason_counts") or {},
+        "resolver_source_counts": summary.get("resolver_source_counts") or {},
+        "availability_counts": summary.get("availability_counts") or {},
+        "purpose_fit_status_counts": summary.get("purpose_fit_status_counts") or {},
+        "purpose_gate_decision_counts": summary.get("purpose_gate_decision_counts") or {},
+        "sources_with_metadata": summary.get("sources_with_metadata") or 0,
+        "source_rows": rows,
+    }
+
+
 def _iter_keys(value: object, prefix: str = "") -> list[str]:
     keys: list[str] = []
     if isinstance(value, dict):
@@ -700,6 +749,7 @@ def build_atlas_snapshot_from_db(
         "reports": _build_report_summaries(conn),
         "cards": cards,
         "evidence_cards_preview": evidence_cards_preview,
+        "source_health_preview": _build_source_health_preview(conn),
         "atlas_trace_preview": atlas_trace_preview,
         "connection_metrics": connection_metrics,
         "follow_up_questions": _build_follow_up_questions(conn),
