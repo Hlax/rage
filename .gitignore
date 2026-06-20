@@ -18,6 +18,8 @@ venv/
 
 # Local data (durable private memory; never committed)
 data/
+!apps/public-site/public/data/
+!apps/public-site/public/data/tiny_atlas_connection_preview.json
 
 # Node / Next.js
 node_modules/

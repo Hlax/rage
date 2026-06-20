@@ -93,6 +93,12 @@ def test_atlas_preview_page_is_static_fixture_only() -> None:
     assert "fixture-mode" in text
     assert "atlasSnapshot" in text
     assert "resolveAtlasCoherencePreview" in text
+    assert "tinyAtlasConnectionPreview" in text
+    assert "Tiny Atlas connection preview" in text
+    assert "Source health panel" in text
+    assert "Evidence atom cards" in text
+    assert "Relationship view" in text
+    assert "Gaps / next move panel" in text
     assert "conceptToSlug" in text
     assert "findConceptBySlug" in text
     assert "renderConceptLabelList" in text
@@ -100,6 +106,7 @@ def test_atlas_preview_page_is_static_fixture_only() -> None:
 
     preview_lib = (SITE_DIR / "lib" / "atlasPreview.ts").read_text(encoding="utf-8")
     assert "atlas_coherence_preview.json" in preview_lib
+    assert "tiny_atlas_connection_preview.json" in preview_lib
     assert "coherence_summary" in preview_lib
 
 
@@ -185,6 +192,12 @@ def test_static_export_atlas_preview_page_exists() -> None:
     atlas_html = atlas_html_path.read_text(encoding="utf-8")
     assert primary_question in atlas_html
     assert "Coherence:" in atlas_html
+    assert "Tiny Atlas connection preview" in atlas_html
+    assert "Source health panel" in atlas_html
+    assert "Evidence atom cards" in atlas_html
+    assert "Relationship view" in atlas_html
+    assert "Gaps / next move panel" in atlas_html
+    assert "Next recommended packet:" in atlas_html
     assert "Pass" in atlas_html
     assert "Research Atlas" in atlas_html
     atlas = _atlas_snapshot_preview()

@@ -1,5 +1,6 @@
 import snapshot from '../public/data/atlas_snapshot_preview.json';
 import coherence from '../public/data/atlas_coherence_preview.json';
+import connectionPreview from '../public/data/tiny_atlas_connection_preview.json';
 
 import { formatPublicTimestamp, humanizeLabel } from './publicCards';
 
@@ -94,8 +95,84 @@ export type AtlasCoherencePreview = {
   preview_label: string;
 };
 
+export type TinyAtlasConnectionPreview = {
+  schema_version: string;
+  generated_at: string;
+  source_snapshot_id: string;
+  source_audit_report: string;
+  public_safe: boolean;
+  question: {
+    topic: string;
+    primary_question: string;
+    research_purpose: string;
+    asset_affordance_tags: string[];
+    readiness_verdict: string;
+  };
+  source_health: {
+    source_counts_by_status: Record<string, number>;
+    acquisition_parser_status: Array<{ status: string; count: number; note: string }>;
+    quality_gate_outcomes: Array<{ outcome: string; count: number }>;
+    blocked_dirty_failed_reasons: Array<{ reason: string; count: number }>;
+  };
+  cluster: {
+    cluster_id: string;
+    cluster_name: string;
+    maturity: string;
+    synthesis_readiness: string;
+    relationship_density: number;
+    relationship_density_threshold: number;
+    low_relationship_density: boolean;
+    source_diversity: number;
+    claims_per_cluster: number;
+    atoms_per_cluster: number;
+    relationships_per_cluster: number;
+    orphan_claim_count: number;
+    orphan_atom_count: number;
+    warning: string;
+  };
+  evidence_atoms: Array<{
+    atom_ref: string;
+    canonical_atom_text: string;
+    maturity: string;
+    support_count: number;
+    contradiction_count: number;
+    qualification_count: number;
+    source_count: number;
+    purpose_match_status: string;
+    asset_tags: string[];
+    why_clustered: string;
+    why_weak: string;
+  }>;
+  relationships: Array<{
+    relationship_ref: string;
+    type: string;
+    connected_concepts: string[];
+    summary: string;
+    explanation: string;
+  }>;
+  trace_details: Array<{
+    trace_ref: string;
+    source_status: string;
+    claim_summary: string;
+    atom_ref: string;
+    concept_links: string[];
+    relationship_links: string[];
+    cluster_link: string;
+    public_safe_connection_explanation: string;
+  }>;
+  readiness: Record<string, { status: string; reason: string }>;
+  gaps_next_move: {
+    top_blockers: string[];
+    graph_health_warnings: string[];
+    next_recommended_packet: string;
+    recommender_reason: string;
+  };
+};
+
 export const atlasSnapshot = snapshot as AtlasPreviewSnapshot;
 export const atlasCoherence = coherence as AtlasCoherencePreview;
+export const tinyAtlasConnectionPreview =
+  connectionPreview as TinyAtlasConnectionPreview;
 
 /** Prefer inline snapshot coherence_summary; fall back to separate preview JSON. */
 export function resolveAtlasCoherencePreview(): AtlasCoherenceSummary & {

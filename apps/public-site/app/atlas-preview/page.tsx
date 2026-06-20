@@ -9,6 +9,7 @@ import {
   formatPublicTimestamp,
   humanizeLabel,
   resolveAtlasCoherencePreview,
+  tinyAtlasConnectionPreview,
 } from '../../lib/atlasPreview';
 import { conceptToSlug, findCardById, findConceptBySlug } from '../../lib/publicCards';
 
@@ -28,6 +29,52 @@ const panelStyle = {
   marginBottom: '0.75rem',
   background: '#161922',
 } as const;
+const smallGridStyle = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+  gap: '0.75rem',
+} as const;
+const mutedLabelStyle = {
+  margin: 0,
+  fontSize: '0.75rem',
+  color: '#8b93a3',
+} as const;
+
+function renderBadgeList(items: string[]) {
+  return items.map((item) => (
+    <span
+      key={item}
+      style={{
+        display: 'inline-block',
+        margin: '0.35rem 0.35rem 0 0',
+        padding: '0.2rem 0.5rem',
+        border: '1px solid #364052',
+        borderRadius: 999,
+        color: '#c8d2e8',
+        fontSize: '0.75rem',
+      }}
+    >
+      {humanizeLabel(item)}
+    </span>
+  ));
+}
+
+function MetricTile({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div style={{ ...panelStyle, marginBottom: 0 }}>
+      <p style={mutedLabelStyle}>{label}</p>
+      <p style={{ margin: '0.35rem 0 0', color: '#e6e8ec', fontWeight: 700 }}>
+        {value}
+      </p>
+    </div>
+  );
+}
 
 function renderConceptLabelList(labels: string[], separator: string) {
   return labels.map((label, index) => {
@@ -100,6 +147,8 @@ export default function AtlasPreviewPage() {
   const { population, overall_coherence_verdict, preview_label } =
     resolveAtlasCoherencePreview();
   const primaryRun = atlasSnapshot.runs[0];
+  const connectionPreview = tinyAtlasConnectionPreview;
+  const readinessEntries = Object.entries(connectionPreview.readiness);
 
   return (
     <main style={{ maxWidth: 820, margin: '0 auto', padding: '3rem 1.5rem' }}>
@@ -155,6 +204,232 @@ export default function AtlasPreviewPage() {
           {population.nodes}, edges {population.edges}, reports {population.reports},
           clusters {population.clusters}, follow-ups {population.follow_up_questions}
         </p>
+      </section>
+
+      <section style={sectionStyle}>
+        <h2 style={headingStyle}>Tiny Atlas connection preview</h2>
+        <div style={panelStyle}>
+          <p style={mutedLabelStyle}>Research question header</p>
+          <h3 style={{ margin: '0.35rem 0', color: '#e6e8ec' }}>
+            {connectionPreview.question.primary_question}
+          </h3>
+          <p style={{ margin: 0, color: '#aeb4c0', lineHeight: 1.55 }}>
+            Purpose: {connectionPreview.question.research_purpose}
+          </p>
+          <p style={{ margin: '0.65rem 0 0', color: '#f0ce78', lineHeight: 1.45 }}>
+            Readiness verdict: {connectionPreview.question.readiness_verdict}
+          </p>
+          <div style={{ marginTop: '0.4rem' }}>
+            {renderBadgeList(connectionPreview.question.asset_affordance_tags)}
+          </div>
+        </div>
+      </section>
+
+      <section style={sectionStyle}>
+        <h2 style={headingStyle}>Source health panel</h2>
+        <div style={smallGridStyle}>
+          {Object.entries(connectionPreview.source_health.source_counts_by_status).map(
+            ([status, count]) => (
+              <MetricTile key={status} label={humanizeLabel(status)} value={count} />
+            ),
+          )}
+        </div>
+        <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+          <p style={mutedLabelStyle}>Acquisition / parser status</p>
+          <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#aeb4c0' }}>
+            {connectionPreview.source_health.acquisition_parser_status.map((item) => (
+              <li key={item.status} style={{ marginBottom: '0.4rem' }}>
+                <strong style={{ color: '#e6e8ec' }}>{humanizeLabel(item.status)}</strong>{' '}
+                ({item.count}) · {item.note}
+              </li>
+            ))}
+          </ul>
+          <p style={{ ...mutedLabelStyle, marginTop: '0.8rem' }}>
+            Quality gate outcomes
+          </p>
+          <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0' }}>
+            {connectionPreview.source_health.quality_gate_outcomes
+              .map((item) => `${humanizeLabel(item.outcome)}: ${item.count}`)
+              .join(' · ')}
+          </p>
+        </div>
+        <div style={{ ...panelStyle, borderColor: '#5b4332' }}>
+          <p style={{ ...mutedLabelStyle, color: '#d9a66f' }}>
+            Blocked / dirty / failed source reasons
+          </p>
+          <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#e0c6ad' }}>
+            {connectionPreview.source_health.blocked_dirty_failed_reasons.map((item) => (
+              <li key={item.reason}>
+                {humanizeLabel(item.reason)} ({item.count})
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section style={sectionStyle}>
+        <h2 style={headingStyle}>Evidence cluster panel</h2>
+        <div style={panelStyle}>
+          <p style={mutedLabelStyle}>
+            {connectionPreview.cluster.cluster_id} · {humanizeLabel(connectionPreview.cluster.maturity)}
+          </p>
+          <h3 style={{ margin: '0.35rem 0', color: '#e6e8ec' }}>
+            {connectionPreview.cluster.cluster_name}
+          </h3>
+          <p style={{ margin: 0, color: '#aeb4c0' }}>
+            Synthesis readiness: {humanizeLabel(connectionPreview.cluster.synthesis_readiness)}
+          </p>
+          <div style={{ ...smallGridStyle, marginTop: '0.9rem' }}>
+            <MetricTile
+              label="Relationship density"
+              value={connectionPreview.cluster.relationship_density}
+            />
+            <MetricTile
+              label="Source diversity"
+              value={connectionPreview.cluster.source_diversity}
+            />
+            <MetricTile
+              label="Claims / atoms / relationships"
+              value={`${connectionPreview.cluster.claims_per_cluster} / ${connectionPreview.cluster.atoms_per_cluster} / ${connectionPreview.cluster.relationships_per_cluster}`}
+            />
+            <MetricTile
+              label="Orphan claims / atoms"
+              value={`${connectionPreview.cluster.orphan_claim_count} / ${connectionPreview.cluster.orphan_atom_count}`}
+            />
+          </div>
+          <p
+            style={{
+              margin: '0.9rem 0 0',
+              color: connectionPreview.cluster.low_relationship_density ? '#f0a0a0' : '#d9a66f',
+            }}
+          >
+            Relationship-density warning:{' '}
+            {connectionPreview.cluster.low_relationship_density
+              ? 'low density is active.'
+              : connectionPreview.cluster.warning}
+          </p>
+        </div>
+      </section>
+
+      <section style={sectionStyle}>
+        <h2 style={headingStyle}>Evidence atom cards</h2>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+          {connectionPreview.evidence_atoms.map((atom) => (
+            <li key={atom.atom_ref} style={panelStyle}>
+              <p style={mutedLabelStyle}>
+                {atom.atom_ref} · maturity {humanizeLabel(atom.maturity)} · purpose{' '}
+                {humanizeLabel(atom.purpose_match_status)}
+              </p>
+              <p style={{ margin: '0.45rem 0 0', color: '#e6e8ec', lineHeight: 1.5 }}>
+                {atom.canonical_atom_text}
+              </p>
+              <p style={{ margin: '0.6rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+                Supports {atom.support_count} · contradicts {atom.contradiction_count} ·
+                qualifies {atom.qualification_count} · sources {atom.source_count}
+              </p>
+              <div>{renderBadgeList(atom.asset_tags)}</div>
+              <p style={{ margin: '0.6rem 0 0', color: '#aeb4c0', lineHeight: 1.45 }}>
+                Why clustered: {atom.why_clustered || 'Not clustered yet.'}
+              </p>
+              <p style={{ margin: '0.35rem 0 0', color: '#d9a66f', lineHeight: 1.45 }}>
+                Why weak/partial: {atom.why_weak}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section style={sectionStyle}>
+        <h2 style={headingStyle}>Relationship view</h2>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+          {connectionPreview.relationships.map((relationship) => (
+            <li key={relationship.relationship_ref} style={panelStyle}>
+              <p style={mutedLabelStyle}>
+                {humanizeLabel(relationship.type)} ·{' '}
+                {renderConceptLabelList(relationship.connected_concepts, ' -> ')}
+              </p>
+              <p style={{ margin: '0.45rem 0 0', color: '#e6e8ec' }}>
+                {relationship.summary}
+              </p>
+              <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.45 }}>
+                {relationship.explanation}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section style={sectionStyle}>
+        <h2 style={headingStyle}>Evidence trace detail panel</h2>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+          {connectionPreview.trace_details.map((trace) => (
+            <li key={trace.trace_ref} style={panelStyle}>
+              <p style={mutedLabelStyle}>
+                {trace.trace_ref} · source status {humanizeLabel(trace.source_status)}
+              </p>
+              <p style={{ margin: '0.45rem 0 0', color: '#e6e8ec' }}>
+                Claim summary: {trace.claim_summary}
+              </p>
+              <p style={{ margin: '0.45rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+                Atom {trace.atom_ref} · relationships {trace.relationship_links.join(', ')} ·
+                cluster {trace.cluster_link}
+              </p>
+              <p style={{ margin: '0.35rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+                Concepts: {renderConceptLabelList(trace.concept_links, ', ')}
+              </p>
+              <p style={{ margin: '0.6rem 0 0', color: '#aeb4c0', lineHeight: 1.45 }}>
+                {trace.public_safe_connection_explanation}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section style={sectionStyle}>
+        <h2 style={headingStyle}>Gaps / next move panel</h2>
+        <div style={smallGridStyle}>
+          {readinessEntries.map(([surface, readiness]) => (
+            <div key={surface} style={{ ...panelStyle, marginBottom: 0 }}>
+              <p style={mutedLabelStyle}>{humanizeLabel(surface)}</p>
+              <p
+                style={{
+                  margin: '0.35rem 0 0',
+                  color: readiness.status === 'NO-GO' ? '#f0a0a0' : '#f0ce78',
+                  fontWeight: 700,
+                }}
+              >
+                {readiness.status}
+              </p>
+              <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.45 }}>
+                {readiness.reason}
+              </p>
+            </div>
+          ))}
+        </div>
+        <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+          <p style={mutedLabelStyle}>Top blockers</p>
+          <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#aeb4c0' }}>
+            {connectionPreview.gaps_next_move.top_blockers.map((blocker) => (
+              <li key={blocker} style={{ marginBottom: '0.35rem' }}>
+                {blocker}
+              </li>
+            ))}
+          </ul>
+          <p style={{ ...mutedLabelStyle, marginTop: '0.9rem' }}>Graph health warnings</p>
+          <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#d9a66f' }}>
+            {connectionPreview.gaps_next_move.graph_health_warnings.map((warning) => (
+              <li key={warning} style={{ marginBottom: '0.35rem' }}>
+                {warning}
+              </li>
+            ))}
+          </ul>
+          <p style={{ margin: '0.9rem 0 0', color: '#e6e8ec' }}>
+            Next recommended packet: {connectionPreview.gaps_next_move.next_recommended_packet}
+          </p>
+          <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.45 }}>
+            {connectionPreview.gaps_next_move.recommender_reason}
+          </p>
+        </div>
       </section>
 
       <section style={sectionStyle}>

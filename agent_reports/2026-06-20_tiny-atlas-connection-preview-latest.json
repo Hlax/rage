@@ -1,0 +1,124 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "Tiny Atlas Connection Preview",
+  "date": "2026-06-20",
+  "verdict": "GO",
+  "status": "completed",
+  "scope": "smallest read-only fixture-backed Atlas connection preview; no broad frontend refactor; no new automation",
+  "route_page_component": {
+    "route": "/atlas-preview",
+    "component": "apps/public-site/app/atlas-preview/page.tsx",
+    "supporting_library": "apps/public-site/lib/atlasPreview.ts"
+  },
+  "data_source": {
+    "fixture": "apps/public-site/public/data/tiny_atlas_connection_preview.json",
+    "source_snapshot_id": "snap_creativity_fixture_v0_001",
+    "source_audit_report": "agent_reports/2026-06-19_data-quality-evidence-atoms-acquisition-audit-latest.json",
+    "mode": "static public-safe fixture"
+  },
+  "changed_files": [
+    "apps/public-site/app/atlas-preview/page.tsx",
+    "apps/public-site/lib/atlasPreview.ts",
+    "apps/public-site/public/data/tiny_atlas_connection_preview.json",
+    ".gitignore",
+    "rge/modules/safety_auditor.py",
+    "tests/unit/test_tiny_atlas_connection_preview.py",
+    "tests/unit/test_safety_auditor_atlas_preview.py",
+    "tests/golden/test_12_public_site_static_render.py"
+  ],
+  "sections_added": [
+    "Research question header with purpose, asset affordance tags, and readiness verdict",
+    "Source health panel with status counts, acquisition/parser notes, quality gates, and blocked/dirty/failed reasons",
+    "Evidence cluster panel with maturity, synthesis readiness, relationship density, source diversity, and orphan counts",
+    "Evidence atom cards with maturity, purpose status, stance counts, source count, asset tags, why clustered, and why weak",
+    "Relationship view with support, contradiction, qualification, definition, and scope-difference explanations",
+    "Evidence trace detail panel with source status, claim summary, atom/concept/relationship/cluster links, and public-safe connection explanation",
+    "Gaps / next move panel with readiness statuses, graph warnings, next recommended packet, and recommender reason"
+  ],
+  "public_private_boundary": {
+    "public_safe": true,
+    "static_only": true,
+    "excluded": [
+      "raw quote text",
+      "local paths",
+      "private row IDs",
+      "prompt fields",
+      "private notes",
+      "hidden evaluator details",
+      "unsafe raw HTML"
+    ],
+    "safety_auditor_change": "ATLAS_PREVIEW_PUBLIC_DATA_FILES now includes tiny_atlas_connection_preview.json"
+  },
+  "frontend_readiness_findings": {
+    "status": "PARTIAL",
+    "notes": "The route now makes the fixture-backed graph understandable and the public-site build passes. It remains a debug preview, not a polished graph visualization."
+  },
+  "graph_observability_findings": {
+    "status": "GO_FOR_FIXTURE_DEBUG",
+    "notes": "A human can follow the path from question to purpose tags, source health, atom cards, relationships, cluster metrics, trace details, warnings, and next packet.",
+    "relationship_density": 0.6667,
+    "source_diversity": 3,
+    "orphan_claim_count": 0,
+    "orphan_atom_count": 0
+  },
+  "readiness": {
+    "local_model": {
+      "status": "PARTIAL",
+      "reason": "Purpose gates and typed fixture traces are visible, but arbitrary live Ollama source runs remain unproven."
+    },
+    "paid_api": {
+      "status": "NO-GO",
+      "reason": "No paid provider, cloud model, or escalation route is wired."
+    },
+    "frontend_public_display": {
+      "status": "PARTIAL",
+      "reason": "The preview is static and safe for debugging, but fixture labels and readiness warnings must remain visible."
+    },
+    "automation": {
+      "status": "NO-GO",
+      "reason": "Acquisition/parser failures and live-source purpose enforcement remain blockers."
+    }
+  },
+  "screenshot_manual_inspection_notes": {
+    "screenshot_taken": false,
+    "manual_inspection": "Static build generated /atlas-preview; targeted golden test verified exported HTML contains Tiny Atlas sections and next recommended packet."
+  },
+  "verification": [
+    {
+      "command": "npm run build",
+      "working_directory": "apps/public-site",
+      "status": "pass",
+      "result": "Next static build completed and exported /atlas-preview"
+    },
+    {
+      "command": "python -m pytest tests/unit/test_tiny_atlas_connection_preview.py tests/unit/test_safety_auditor_atlas_preview.py tests/golden/test_12_public_site_static_render.py -q",
+      "status": "pass",
+      "result": "21 passed"
+    },
+    {
+      "command": "python -m rge.modules.safety_auditor --audit full",
+      "status": "pass",
+      "result": "blocked_reasons=[]; checked_secrets includes tiny_atlas_connection_preview.json"
+    }
+  ],
+  "top_blockers": [
+    "Relationship density is fixture-proven, not arbitrary live research proof.",
+    "Purpose gates are not yet enforced across every future live arbitrary-source path.",
+    "Acquisition/parser status is still partially report-derived rather than consistently persisted into source metadata.",
+    "Paid API and automation readiness remain NO-GO."
+  ],
+  "next_recommended_packets": [
+    {
+      "title": "Live/Arbitrary Source Purpose Gate Enforcement",
+      "goal": "Apply purpose gates to staged live discover/fetch/ingest/extract/link/build/detect paths."
+    },
+    {
+      "title": "Relationship Type Contract Formalization",
+      "goal": "Promote relationship type metadata into a validated contract/enum and update typed graph tests."
+    },
+    {
+      "title": "Source Health Persistence for Atlas Preview",
+      "goal": "Persist acquisition/parser status and quality gate outcomes into Atlas-safe source health fields."
+    }
+  ]
+}

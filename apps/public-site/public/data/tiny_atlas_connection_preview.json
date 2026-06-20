@@ -1,0 +1,276 @@
+{
+  "schema_version": "tiny_atlas_connection_preview_v0.1.0",
+  "generated_at": "2026-06-20T00:00:00Z",
+  "source_snapshot_id": "snap_creativity_fixture_v0_001",
+  "source_audit_report": "2026-06-19_data-quality-evidence-atoms-acquisition-audit-latest.json",
+  "public_safe": true,
+  "question": {
+    "topic": "Does AI improve creative output while reducing diversity?",
+    "primary_question": "Does AI improve creative output while reducing diversity?",
+    "research_purpose": "Understand whether AI-assisted ideation improves creative output while preserving diversity, and expose the evidence conditions that keep the graph from being overclaimed.",
+    "asset_affordance_tags": [
+      "reasoning_training_candidate",
+      "argument_map_candidate"
+    ],
+    "readiness_verdict": "PARTIAL - fixture-backed graph is debug/frontend-readable; live arbitrary-source and automation readiness remain gated."
+  },
+  "source_health": {
+    "source_counts_by_status": {
+      "full_fixture_sources_ingested": 3,
+      "full_fixture_sources_discovered": 5,
+      "dirty_fixture_sources_blocked": 1,
+      "abstract_available": 1,
+      "metadata_only": 1,
+      "oa_tei_available": 1,
+      "oa_pdf_available": 1
+    },
+    "acquisition_parser_status": [
+      {
+        "status": "ingested",
+        "count": 3,
+        "note": "Full fixture graph sources were ingested into the mock-safe graph spine."
+      },
+      {
+        "status": "metadata_only",
+        "count": 1,
+        "note": "One abstract-first candidate had metadata but no accepted source text."
+      },
+      {
+        "status": "oa_tei_available",
+        "count": 1,
+        "note": "One candidate had TEI availability in acquisition audit metadata."
+      },
+      {
+        "status": "oa_pdf_available",
+        "count": 1,
+        "note": "One candidate had PDF availability but parser readiness remained partial."
+      }
+    ],
+    "quality_gate_outcomes": [
+      {
+        "outcome": "accepted_fixture_graph",
+        "count": 3
+      },
+      {
+        "outcome": "blocked_or_failed_acquisition",
+        "count": 4
+      }
+    ],
+    "blocked_dirty_failed_reasons": [
+      {
+        "reason": "blocked_by_quality_gate",
+        "count": 1
+      },
+      {
+        "reason": "parse_failed",
+        "count": 1
+      },
+      {
+        "reason": "webpage_dirty_text",
+        "count": 1
+      },
+      {
+        "reason": "pdf_parser_unavailable",
+        "count": 1
+      }
+    ]
+  },
+  "cluster": {
+    "cluster_id": "cluster_golden_creativity_ai_diversity",
+    "cluster_name": "AI assistance and semantic diversity",
+    "maturity": "synthesis_ready_fixture_cluster",
+    "synthesis_readiness": "ready_for_fixture_debug_preview",
+    "relationship_density": 0.6667,
+    "relationship_density_threshold": 0.5,
+    "low_relationship_density": false,
+    "source_diversity": 3,
+    "claims_per_cluster": 15,
+    "atoms_per_cluster": 7,
+    "relationships_per_cluster": 10,
+    "orphan_claim_count": 0,
+    "orphan_atom_count": 0,
+    "warning": "Relationship density clears the fixture threshold, but this is not live arbitrary-source proof."
+  },
+  "evidence_atoms": [
+    {
+      "atom_ref": "atom_preview_001",
+      "canonical_atom_text": "AI-assisted brainstorming can increase rated idea diversity under explicit divergent-generation instructions.",
+      "maturity": "clustered",
+      "support_count": 1,
+      "contradiction_count": 0,
+      "qualification_count": 0,
+      "source_count": 1,
+      "purpose_match_status": "match",
+      "asset_tags": [
+        "reasoning_training_candidate",
+        "argument_map_candidate"
+      ],
+      "why_clustered": "Atom clusters 3 compatible claim(s) with shared scope/concepts.",
+      "why_weak": "Fixture-backed seed evidence; not enough live-source diversity for automation."
+    },
+    {
+      "atom_ref": "atom_preview_002",
+      "canonical_atom_text": "AI assistance may raise ideation throughput without guaranteeing originality gains in professional creative work.",
+      "maturity": "promising",
+      "support_count": 1,
+      "contradiction_count": 0,
+      "qualification_count": 0,
+      "source_count": 1,
+      "purpose_match_status": "match",
+      "asset_tags": [
+        "reasoning_training_candidate",
+        "argument_map_candidate"
+      ],
+      "why_clustered": "Atom clusters 2 compatible claim(s) with shared scope/concepts.",
+      "why_weak": "Originality transfer remains a caveat outside controlled fixture tasks."
+    },
+    {
+      "atom_ref": "atom_preview_003",
+      "canonical_atom_text": "Semantic diversity trade-offs may be task-specific rather than universal across creative domains.",
+      "maturity": "clustered",
+      "support_count": 0,
+      "contradiction_count": 0,
+      "qualification_count": 1,
+      "source_count": 1,
+      "purpose_match_status": "match",
+      "asset_tags": [
+        "reasoning_training_candidate",
+        "argument_map_candidate"
+      ],
+      "why_clustered": "Atom clusters 3 compatible claim(s) with shared scope/concepts.",
+      "why_weak": "The atom is useful for scoping, but still fixture-derived."
+    },
+    {
+      "atom_ref": "atom_preview_004",
+      "canonical_atom_text": "Originality evidence remains sparse relative to diversity metrics in current fixture sources.",
+      "maturity": "promising",
+      "support_count": 0,
+      "contradiction_count": 1,
+      "qualification_count": 0,
+      "source_count": 1,
+      "purpose_match_status": "match",
+      "asset_tags": [
+        "reasoning_training_candidate",
+        "argument_map_candidate"
+      ],
+      "why_clustered": "Atom remains a partial connection point for originality caveats.",
+      "why_weak": "Sparse originality evidence keeps model/public readiness partial."
+    }
+  ],
+  "relationships": [
+    {
+      "relationship_ref": "rel_preview_support",
+      "type": "supports",
+      "connected_concepts": [
+        "AI assistance",
+        "semantic diversity"
+      ],
+      "summary": "AI assistance may reduce semantic diversity in short-form writing tasks.",
+      "explanation": "Accepted quote-backed claims connect the same purpose-matched atom family to AI assistance and semantic diversity."
+    },
+    {
+      "relationship_ref": "rel_preview_contradiction",
+      "type": "contradicts",
+      "connected_concepts": [
+        "AI assistance",
+        "diversity"
+      ],
+      "summary": "Divergent prompting can increase rated diversity, creating a metric/condition contradiction with reduction claims.",
+      "explanation": "The contradiction is preserved as an apparent metric-or-condition difference, not flattened into a generic mixed-effect summary."
+    },
+    {
+      "relationship_ref": "rel_preview_qualification",
+      "type": "qualifies",
+      "connected_concepts": [
+        "prompt engineering",
+        "semantic diversity"
+      ],
+      "summary": "Prompting and human-control conditions qualify whether diversity loss appears.",
+      "explanation": "Qualification edges show why readiness stays partial for local model or public claims."
+    },
+    {
+      "relationship_ref": "rel_preview_definition",
+      "type": "defines",
+      "connected_concepts": [
+        "semantic diversity",
+        "diversity"
+      ],
+      "summary": "Semantic diversity is treated as a measured dimension of diversity.",
+      "explanation": "Definition edges make the concept path legible before a graph visualization exists."
+    },
+    {
+      "relationship_ref": "rel_preview_scope_difference",
+      "type": "scope-difference",
+      "connected_concepts": [
+        "semantic diversity",
+        "diversity"
+      ],
+      "summary": "Writing-task diversity and broader creative diversity differ by scope.",
+      "explanation": "Scope-difference edges keep fixture findings from being generalized beyond the contract."
+    }
+  ],
+  "trace_details": [
+    {
+      "trace_ref": "trace_001",
+      "source_status": "fixture_ingested",
+      "claim_summary": "AI-assisted brainstorming can increase rated idea diversity under explicit divergent-generation instructions.",
+      "atom_ref": "atom_preview_001",
+      "concept_links": [
+        "AI assistance",
+        "semantic diversity"
+      ],
+      "relationship_links": [
+        "rel_preview_support"
+      ],
+      "cluster_link": "cluster_golden_creativity_ai_diversity",
+      "public_safe_connection_explanation": "Accepted quote-backed claim links source provenance to concepts, a support relationship, and the fixture cluster without exposing raw quote text or private row IDs."
+    },
+    {
+      "trace_ref": "trace_005",
+      "source_status": "fixture_ingested",
+      "claim_summary": "Originality evidence remains sparse relative to diversity metrics in current fixture sources.",
+      "atom_ref": "atom_preview_004",
+      "concept_links": [
+        "AI assistance",
+        "originality"
+      ],
+      "relationship_links": [
+        "rel_preview_contradiction"
+      ],
+      "cluster_link": "cluster_golden_creativity_ai_diversity",
+      "public_safe_connection_explanation": "The trace shows a weak originality path that explains readiness gaps while keeping raw quotes, local paths, raw prompt fields, and private diagnostics out of the preview."
+    }
+  ],
+  "readiness": {
+    "local_model": {
+      "status": "PARTIAL",
+      "reason": "Purpose gates and typed fixture traces are in place, but arbitrary live Ollama source runs are not proven."
+    },
+    "paid_api": {
+      "status": "NO-GO",
+      "reason": "No paid provider, cloud model, or escalation route is wired."
+    },
+    "frontend_public_display": {
+      "status": "PARTIAL",
+      "reason": "The static preview is safe and useful for debugging; public claims must still stay fixture-labeled."
+    },
+    "automation": {
+      "status": "NO-GO",
+      "reason": "Acquisition/parser failures and live-source purpose enforcement remain blockers."
+    }
+  },
+  "gaps_next_move": {
+    "top_blockers": [
+      "Purpose gates are not yet enforced across every future live arbitrary-source path.",
+      "Relationship density is fixture-proven, not arbitrary live research proof.",
+      "Acquisition status/parser metadata is not consistently persisted into source metadata for the full fixture graph path.",
+      "Paid API and automation readiness remain NO-GO."
+    ],
+    "graph_health_warnings": [
+      "Weak/partial readiness is visible even though fixture relationship density clears the 0.5 threshold.",
+      "Source health includes blocked quality-gate, parse failure, dirty webpage, and unavailable PDF parser reasons."
+    ],
+    "next_recommended_packet": "Live/Arbitrary Source Purpose Gate Enforcement",
+    "recommender_reason": "The current graph is understandable from fixture data; the next risk is preventing purpose-mismatched or parser-weak live evidence from entering later graph stages."
+  }
+}

@@ -44,6 +44,7 @@ def test_full_audit_includes_atlas_preview_in_checked_secrets() -> None:
     checked = report["checked_secrets"]
     assert any("atlas_snapshot_preview.json" in item for item in checked)
     assert any("atlas_coherence_preview.json" in item for item in checked)
+    assert any("tiny_atlas_connection_preview.json" in item for item in checked)
 
 
 def test_atlas_preview_audit_fails_closed_on_forbidden_path(tmp_path: Path) -> None:
@@ -70,3 +71,23 @@ def test_atlas_preview_audit_fails_closed_on_secret_like_content(tmp_path: Path)
     report = run_safety_audit("secrets", root=tmp_path)
     assert report["status"] == "fail"
     assert any("atlas_coherence_preview.json" in item for item in report["blocked_reasons"])
+
+
+def test_tiny_atlas_connection_preview_audit_fails_closed_on_forbidden_content(
+    tmp_path: Path,
+) -> None:
+    site_data = tmp_path / "apps" / "public-site" / "public" / "data"
+    _copy_public_site_data(site_data)
+    preview_path = site_data / "tiny_atlas_connection_preview.json"
+    preview = json.loads(preview_path.read_text(encoding="utf-8"))
+    preview["trace_details"][0][
+        "claim_summary"
+    ] = "Leaked local path C:\\Users\\private\\source.pdf"
+    preview_path.write_text(json.dumps(preview, indent=2) + "\n", encoding="utf-8")
+
+    report = run_safety_audit("secrets", root=tmp_path)
+    assert report["status"] == "fail"
+    assert any(
+        "tiny_atlas_connection_preview.json" in item
+        for item in report["blocked_reasons"]
+    )

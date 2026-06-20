@@ -34,6 +34,7 @@ AUDIT_TYPES = (
 ATLAS_PREVIEW_PUBLIC_DATA_FILES = (
     "atlas_snapshot_preview.json",
     "atlas_coherence_preview.json",
+    "tiny_atlas_connection_preview.json",
 )
 
 _PASS_EXIT_CODE = 0
