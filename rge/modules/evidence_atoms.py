@@ -26,17 +26,22 @@ def atom_maturity_for_stance(
     contradiction_count: int,
     qualifying_count: int = 0,
     linked_claim_count: int = 1,
+    source_count: int = 1,
 ) -> tuple[str, str]:
     """Return conservative evidence_maturity and training_suitability for an atom."""
     if linked_claim_count <= 0:
         return "seed", "not_ready"
     if support_count == 0 and contradiction_count == 0 and qualifying_count == 0:
+        if linked_claim_count >= 2 or source_count >= MIN_SOURCES_FOR_PROMISING_MATURITY:
+            return "promising", "not_ready"
         return "weak", "not_ready"
-    if linked_claim_count >= MIN_CLAIMS_FOR_CLUSTERED_MATURITY and (
-        contradiction_count > 0 or qualifying_count > 0
+    if (
+        linked_claim_count >= MIN_CLAIMS_FOR_CLUSTERED_MATURITY
+        and source_count >= MIN_SOURCES_FOR_PROMISING_MATURITY
+        and (support_count >= 2 or contradiction_count > 0 or qualifying_count > 0)
     ):
         return "clustered", "needs_human_review"
-    if support_count >= 2:
+    if support_count >= 2 or linked_claim_count >= 2 or source_count >= MIN_SOURCES_FOR_PROMISING_MATURITY:
         return "promising", "not_ready"
     return "weak", "not_ready"
 
@@ -115,6 +120,209 @@ def _stance_profile(conn: sqlite3.Connection, claim_id: str) -> dict[str, int]:
         if stance in profile:
             profile[stance] = int(row["count"])
     return profile
+
+
+def _claim_rows_for_clustering(
+    conn: sqlite3.Connection,
+    *,
+    domain: str,
+    claim_ids: list[str] | None = None,
+) -> list[sqlite3.Row]:
+    if claim_ids:
+        placeholders = ",".join("?" for _ in claim_ids)
+        return conn.execute(
+            f"""
+            SELECT id, source_id, claim_text, scope, evidence_type, confidence
+            FROM claims
+            WHERE domain = ? AND status = 'accepted' AND id IN ({placeholders})
+            ORDER BY id
+            """,
+            (domain, *claim_ids),
+        ).fetchall()
+    return conn.execute(
+        """
+        SELECT id, source_id, claim_text, scope, evidence_type, confidence
+        FROM claims
+        WHERE domain = ? AND status = 'accepted'
+        ORDER BY id
+        """,
+        (domain,),
+    ).fetchall()
+
+
+def _quote_ids_for_claim(conn: sqlite3.Connection, claim_id: str) -> list[str]:
+    return [str(row["id"]) for row in _quote_rows(conn, claim_id)]
+
+
+def _cluster_concept_signature(concepts: list[str]) -> tuple[str, ...]:
+    ignored = {"ai assistance", "creativity", "ideation", "brainstorming"}
+    selected = [
+        concept.strip().casefold()
+        for concept in concepts
+        if concept.strip() and concept.strip().casefold() not in ignored
+    ]
+    if not selected:
+        selected = [concept.strip().casefold() for concept in concepts if concept.strip()]
+    return tuple(sorted(set(selected)))
+
+
+def _scope_signature(scope: str) -> str:
+    return " ".join(scope.strip().casefold().split())
+
+
+def _cluster_atom_id(scope_signature: str, concept_signature: tuple[str, ...]) -> str:
+    digest = sha256_hex(f"{scope_signature}:{'|'.join(concept_signature)}")
+    return f"atom_cluster_{digest[:16]}"
+
+
+def _source_count_for_claims(conn: sqlite3.Connection, claim_ids: list[str]) -> int:
+    if not claim_ids:
+        return 0
+    placeholders = ",".join("?" for _ in claim_ids)
+    row = conn.execute(
+        f"""
+        SELECT COUNT(DISTINCT source_id)
+        FROM claims
+        WHERE id IN ({placeholders})
+        """,
+        tuple(claim_ids),
+    ).fetchone()
+    return int(row[0]) if row else 0
+
+
+def _delete_merged_single_claim_atoms(
+    conn: sqlite3.Connection,
+    *,
+    keep_atom_id: str,
+    claim_ids: list[str],
+) -> int:
+    rows = conn.execute(
+        "SELECT id, source_claim_ids_json FROM evidence_atoms"
+    ).fetchall()
+    deleted = 0
+    claim_set = set(claim_ids)
+    for row in rows:
+        atom_id = str(row["id"])
+        if atom_id == keep_atom_id:
+            continue
+        atom_claims = set(json.loads(row["source_claim_ids_json"] or "[]"))
+        if atom_claims and atom_claims <= claim_set:
+            conn.execute("DELETE FROM evidence_atoms WHERE id = ?", (atom_id,))
+            deleted += 1
+    if deleted:
+        conn.commit()
+    return deleted
+
+
+def cluster_compatible_evidence_atoms(
+    conn: sqlite3.Connection,
+    *,
+    domain: str,
+    claim_ids: list[str] | None = None,
+) -> dict[str, Any]:
+    """Group compatible quote-backed accepted claims into shared evidence atoms."""
+    rows = _claim_rows_for_clustering(conn, domain=domain, claim_ids=claim_ids)
+    groups: dict[tuple[str, tuple[str, ...]], list[sqlite3.Row]] = {}
+    separate_claims: list[str] = []
+    for row in rows:
+        concepts = _concept_labels(conn, str(row["id"]))
+        signature = _cluster_concept_signature(concepts)
+        if not signature:
+            separate_claims.append(str(row["id"]))
+            continue
+        groups.setdefault((_scope_signature(str(row["scope"] or "")), signature), []).append(row)
+
+    clustered_atoms: list[dict[str, Any]] = []
+    duplicate_merged_count = 0
+    for (scope_sig, concept_sig), group in groups.items():
+        if len(group) < 2:
+            separate_claims.extend(str(row["id"]) for row in group)
+            continue
+        group_claim_ids = [str(row["id"]) for row in group]
+        source_quote_ids: list[str] = []
+        concepts: list[str] = []
+        stance_profile = {"supports": 0, "contradicts": 0, "qualifies": 0}
+        confidence_values: list[float] = []
+        for row in group:
+            claim_id = str(row["id"])
+            source_quote_ids.extend(_quote_ids_for_claim(conn, claim_id))
+            for concept in _concept_labels(conn, claim_id):
+                if concept not in concepts:
+                    concepts.append(concept)
+            profile = _stance_profile(conn, claim_id)
+            for key in stance_profile:
+                stance_profile[key] += int(profile.get(key, 0))
+            if row["confidence"] is not None:
+                confidence_values.append(float(row["confidence"]))
+        source_count = len({str(row["source_id"]) for row in group})
+        maturity, suitability = atom_maturity_for_stance(
+            support_count=stance_profile["supports"],
+            contradiction_count=stance_profile["contradicts"],
+            qualifying_count=stance_profile["qualifies"],
+            linked_claim_count=len(group_claim_ids),
+            source_count=source_count,
+        )
+        atom_id = _cluster_atom_id(scope_sig, concept_sig)
+        canonical = (
+            f"Clustered evidence atom linking {len(group_claim_ids)} compatible "
+            f"claims about {', '.join(concept_sig)} within scope: {group[0]['scope']}."
+        )
+        payload = {
+            "atom_id": atom_id,
+            "atom_type": "claim",
+            "canonical_text": canonical,
+            "source_claim_ids": group_claim_ids,
+            "source_quote_ids": list(dict.fromkeys(source_quote_ids)),
+            "concepts": sorted(concepts),
+            "stance_profile": stance_profile,
+            "support_count": stance_profile["supports"],
+            "contradiction_count": stance_profile["contradicts"],
+            "scope": str(group[0]["scope"] or "shared scope"),
+            "evidence_type": str(group[0]["evidence_type"] or "unknown"),
+            "asset_tags": list(DEFAULT_ATOM_ASSET_TAGS),
+            "evidence_maturity": maturity,
+            "training_suitability": suitability,
+            "confidence": confidence_label(
+                sum(confidence_values) / len(confidence_values)
+                if confidence_values
+                else None
+            ),
+        }
+        atom = validate_evidence_atom(payload)
+        persisted = persist_evidence_atom(conn, atom)
+        duplicate_merged_count += _delete_merged_single_claim_atoms(
+            conn,
+            keep_atom_id=atom_id,
+            claim_ids=group_claim_ids,
+        )
+        common_concepts = set(_concept_labels(conn, group_claim_ids[0]))
+        for claim_id in group_claim_ids[1:]:
+            common_concepts &= set(_concept_labels(conn, claim_id))
+        clustered_atoms.append(
+            {
+                **persisted,
+                "source_count": source_count,
+                "source_diverse": source_count >= MIN_SOURCES_FOR_PROMISING_MATURITY,
+                "concept_overlap_count": len(common_concepts),
+                "scope_compatible": True,
+                "qualification_count": stance_profile["qualifies"],
+                "why_clustered": (
+                    f"{len(group_claim_ids)} claims share compatible scope, "
+                    f"{len(common_concepts)} overlapping concept(s), and {source_count} source(s)."
+                ),
+            }
+        )
+
+    return {
+        "status": "completed",
+        "domain": domain,
+        "candidate_claim_count": len(rows),
+        "clustered_atom_count": len(clustered_atoms),
+        "duplicate_merged_atom_count": duplicate_merged_count,
+        "separate_claim_count": len(separate_claims),
+        "separate_claim_ids": sorted(set(separate_claims)),
+        "clustered_atoms": clustered_atoms,
+    }
 
 
 def build_evidence_atom_for_claim(

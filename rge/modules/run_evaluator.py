@@ -130,6 +130,7 @@ def build_run_report(
     graph_connection_metrics = build_graph_connection_metrics(
         conn,
         domain_pack=domain_pack,
+        question=topic,
     )
     resolved_contract = contract_id or GOLDEN_CONTRACT_ID
     purpose = _purpose_for_report(

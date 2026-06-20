@@ -664,12 +664,14 @@ def build_atlas_snapshot_from_db(
     private_traces = build_atlas_trace_export(
         conn,
         domain_pack=domain_pack,
+        question=resolved_question,
         visibility="private",
     )
     atlas_trace_preview = build_atlas_trace_preview(private_traces)
     connection_metrics = build_graph_connection_metrics(
         conn,
         domain_pack=domain_pack,
+        question=resolved_question,
     )
 
     if fixture_mode:

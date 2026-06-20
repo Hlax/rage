@@ -10,6 +10,8 @@ import json
 import sqlite3
 from typing import Any
 
+from rge.modules.purpose_gating import evaluate_claim_purpose_fit
+
 ATLAS_TRACE_SCHEMA_VERSION = "atlas_trace_v0.1.0"
 GRAPH_CONNECTION_METRICS_SCHEMA_VERSION = "graph_connection_metrics_v0.1.0"
 
@@ -83,15 +85,22 @@ def _cluster_claim_map(conn: sqlite3.Connection) -> dict[str, str]:
 def _atom_for_claim(conn: sqlite3.Connection, claim_id: str) -> dict[str, Any] | None:
     rows = conn.execute(
         """
-        SELECT id, source_claim_ids_json, evidence_maturity
+        SELECT id, source_claim_ids_json, stance_profile_json, evidence_maturity
         FROM evidence_atoms
         ORDER BY updated_at DESC, id
         """
     ).fetchall()
     for row in rows:
-        if claim_id in {str(item) for item in _json_list(row["source_claim_ids_json"])}:
+        source_claim_ids = [str(item) for item in _json_list(row["source_claim_ids_json"])]
+        if claim_id in set(source_claim_ids):
+            try:
+                stance_profile = json.loads(row["stance_profile_json"] or "{}")
+            except json.JSONDecodeError:
+                stance_profile = {}
             return {
                 "atom_id": str(row["id"]),
+                "source_claim_ids": source_claim_ids,
+                "stance_profile": stance_profile if isinstance(stance_profile, dict) else {},
                 "maturity": str(row["evidence_maturity"] or "seed"),
             }
     return None
@@ -128,6 +137,7 @@ def build_atlas_trace_export(
     *,
     domain_pack: str,
     question_id: str | None = None,
+    question: str | None = None,
     visibility: str = "private",
 ) -> list[dict[str, Any]]:
     """Build private source -> quote -> claim -> atom -> concept -> cluster traces."""
@@ -147,12 +157,33 @@ def build_atlas_trace_export(
     for row in rows:
         claim_id = str(row["claim_id"])
         atom = _atom_for_claim(conn, claim_id) or {}
+        atom_claim_ids = list(atom.get("source_claim_ids") or [])
         concept_ids = _concept_ids_for_claim(conn, claim_id)
         relationship_ids = _relationship_ids_for_claim(conn, claim_id)
         cluster_id = cluster_map.get(claim_id, "cluster_unassigned")
+        purpose_fit = (
+            evaluate_claim_purpose_fit(
+                conn,
+                claim_id,
+                question=question,
+                domain_pack=domain_pack,
+            )
+            if question
+            else {
+                "purpose_match_status": "not_evaluated",
+                "decision": "not_evaluated",
+                "why_purpose_match": "",
+                "why_evidence_downgraded_or_rejected": "",
+            }
+        )
         connection_type = "source_quote_claim_atom_concept_cluster"
         if not atom:
             connection_type = "source_quote_claim_concept_cluster"
+        why_clustered = ""
+        if len(atom_claim_ids) > 1:
+            why_clustered = (
+                f"Atom clusters {len(atom_claim_ids)} compatible claim(s) with shared scope/concepts."
+            )
         traces.append(
             {
                 "question_id": resolved_question_id,
@@ -165,6 +196,14 @@ def build_atlas_trace_export(
                 "relationship_ids": relationship_ids,
                 "connection_type": connection_type,
                 "maturity": atom.get("maturity", "seed"),
+                "atom_cluster_maturity": atom.get("maturity", "seed"),
+                "purpose_match_status": purpose_fit["purpose_match_status"],
+                "evidence_decision": purpose_fit["decision"],
+                "why_clustered": why_clustered,
+                "why_evidence_downgraded_or_rejected": purpose_fit.get(
+                    "why_evidence_downgraded_or_rejected",
+                    "",
+                ),
                 "visibility": visibility,
                 "why_connected": (
                     "Accepted quote-backed claim links source provenance to "
@@ -185,10 +224,17 @@ def build_atlas_trace_preview(traces: list[dict[str, Any]]) -> list[dict[str, An
                 "trace_ref": f"trace_{index + 1:03d}",
                 "connection_type": str(trace.get("connection_type") or ""),
                 "maturity": str(trace.get("maturity") or "seed"),
+                "atom_cluster_maturity": str(trace.get("atom_cluster_maturity") or "seed"),
+                "purpose_match_status": str(trace.get("purpose_match_status") or "not_evaluated"),
+                "evidence_decision": str(trace.get("evidence_decision") or "not_evaluated"),
                 "visibility": "public_safe",
                 "has_quote": bool(trace.get("quote_id")),
                 "concept_count": len(trace.get("concept_ids") or []),
                 "relationship_count": len(trace.get("relationship_ids") or []),
+                "why_clustered": str(trace.get("why_clustered") or ""),
+                "why_evidence_downgraded_or_rejected": str(
+                    trace.get("why_evidence_downgraded_or_rejected") or ""
+                ),
                 "why_connected": str(trace.get("why_connected") or ""),
             }
         )
@@ -262,10 +308,36 @@ def _atom_ids_for_claims(conn: sqlite3.Connection, claim_ids: set[str]) -> set[s
     return atom_ids
 
 
+def _atom_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute(
+        """
+        SELECT id, source_claim_ids_json, stance_profile_json, evidence_maturity
+        FROM evidence_atoms
+        ORDER BY id
+        """
+    ).fetchall()
+
+
+def _source_count_for_atom(conn: sqlite3.Connection, claim_ids: list[str]) -> int:
+    if not claim_ids:
+        return 0
+    placeholders = ",".join("?" for _ in claim_ids)
+    rows = conn.execute(
+        f"""
+        SELECT DISTINCT source_id
+        FROM claims
+        WHERE id IN ({placeholders})
+        """,
+        tuple(claim_ids),
+    ).fetchall()
+    return len(rows)
+
+
 def build_graph_connection_metrics(
     conn: sqlite3.Connection,
     *,
     domain_pack: str,
+    question: str | None = None,
 ) -> dict[str, Any]:
     """Return graph/Atlas connection metrics per cluster and in aggregate."""
     clusters = _cluster_definitions(conn, domain_pack)
@@ -322,6 +394,45 @@ def build_graph_connection_metrics(
                 "low_relationship_density": claims_per_cluster > 0 and density < 0.5,
             }
         )
+    atom_rows = _atom_rows(conn)
+    multi_claim_atom_count = 0
+    source_diverse_atom_count = 0
+    weak_atom_count = 0
+    clustered_atom_count = 0
+    for row in atom_rows:
+        atom_claim_ids = [str(item) for item in _json_list(row["source_claim_ids_json"])]
+        if len(atom_claim_ids) > 1:
+            multi_claim_atom_count += 1
+        if _source_count_for_atom(conn, atom_claim_ids) >= 2:
+            source_diverse_atom_count += 1
+        maturity = str(row["evidence_maturity"] or "")
+        if maturity in {"seed", "weak"}:
+            weak_atom_count += 1
+        if maturity in {"clustered", "synthesis_ready", "eval_ready", "training_ready"}:
+            clustered_atom_count += 1
+
+    traces = build_atlas_trace_export(
+        conn,
+        domain_pack=domain_pack,
+        question=question,
+    )
+    purpose_mismatch_count = sum(
+        1 for trace in traces if trace.get("purpose_match_status") == "mismatch"
+    )
+    frontend_ready_trace_count = sum(
+        1
+        for trace in traces
+        if trace.get("atom_id")
+        and trace.get("purpose_match_status") in {"match", "not_evaluated"}
+    )
+    synthesis_ready_cluster_count = sum(
+        1
+        for item in cluster_metrics
+        if item["relationships_per_cluster"] >= 1
+        and multi_claim_atom_count >= 1
+        and purpose_mismatch_count == 0
+    )
+
     return {
         "schema_version": GRAPH_CONNECTION_METRICS_SCHEMA_VERSION,
         "clusters": cluster_metrics,
@@ -332,5 +443,12 @@ def build_graph_connection_metrics(
             "sources": sum(item["sources_per_cluster"] for item in cluster_metrics),
             "orphan_claims": sum(item["orphan_claims"] for item in cluster_metrics),
             "orphan_atoms": sum(item["orphan_atoms"] for item in cluster_metrics),
+            "multi_claim_atom_count": multi_claim_atom_count,
+            "source_diverse_atom_count": source_diverse_atom_count,
+            "purpose_mismatch_count": purpose_mismatch_count,
+            "weak_atom_count": weak_atom_count,
+            "clustered_atom_count": clustered_atom_count,
+            "synthesis_ready_cluster_count": synthesis_ready_cluster_count,
+            "frontend_ready_trace_count": frontend_ready_trace_count,
         },
     }

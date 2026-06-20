@@ -28,6 +28,9 @@ PACKET_EVIDENCE_CARDS = "Phase4-P5-evidence-card-export"
 PACKET_WEB_ADAPTER = "Phase4-P6-web-adapter"
 PACKET_ASSET_EXPORT = "Phase4-P8-asset-export-candidates"
 PACKET_QUALITY_GATES = "Phase4-P3-quality-gates"
+PACKET_PURPOSE_GATING = "Phase4-P9-purpose-gated-retrieval"
+PACKET_ATOM_CLUSTERING = "Phase4-P10-evidence-atom-clustering"
+PACKET_RELATIONSHIP_DENSITY = "Phase4-P11-relationship-density"
 
 REJECTION_UNSUPPORTED = "unsupported_claim"
 REJECTION_UNSUPPORTED_WALL = "unsupported_claim_wall"
@@ -164,6 +167,24 @@ PACKET_RECOMMENDATIONS: dict[str, dict[str, Any]] = {
         ),
         "priority": "medium",
     },
+    "purpose_mismatch": {
+        "recommended_packet": PACKET_PURPOSE_GATING,
+        "title": "Purpose-gated retrieval calibration",
+        "rationale": "Evidence does not satisfy the question purpose; tighten retrieval and evidence acceptance gates.",
+        "priority": "high",
+    },
+    "one_claim_atoms": {
+        "recommended_packet": PACKET_ATOM_CLUSTERING,
+        "title": "Evidence atom clustering",
+        "rationale": "Most evidence atoms remain weak one-claim objects; cluster compatible claims before UI synthesis.",
+        "priority": "high",
+    },
+    "sparse_graph_edges": {
+        "recommended_packet": PACKET_RELATIONSHIP_DENSITY,
+        "title": "Relationship density expansion",
+        "rationale": "Claims and atoms exist, but graph edges are too sparse for meaningful Atlas navigation.",
+        "priority": "medium",
+    },
 }
 
 
@@ -251,6 +272,24 @@ def classify_dominant_bottleneck(
     ):
         signal = dominant_status
         signal_kind = "source_status"
+
+    graph_metrics = metrics.get("graph_connection_metrics") or {}
+    graph_totals = graph_metrics.get("totals") if isinstance(graph_metrics, dict) else {}
+    if dominant_acquisition is None and isinstance(graph_totals, dict):
+        purpose_mismatch = int(graph_totals.get("purpose_mismatch_count") or 0)
+        weak_atoms = int(graph_totals.get("weak_atom_count") or 0)
+        multi_claim_atoms = int(graph_totals.get("multi_claim_atom_count") or 0)
+        relationships = int(graph_totals.get("relationships") or 0)
+        claims = int(graph_totals.get("claims") or accepted or 0)
+        if purpose_mismatch > 0 and purpose_mismatch >= max(weak_atoms, 1):
+            signal = "purpose_mismatch"
+            signal_kind = "graph_readiness"
+        elif weak_atoms > 0 and multi_claim_atoms == 0:
+            signal = "one_claim_atoms"
+            signal_kind = "graph_readiness"
+        elif claims >= 3 and relationships / max(claims, 1) < 0.5:
+            signal = "sparse_graph_edges"
+            signal_kind = "graph_readiness"
 
     if accepted >= 3 and rejected <= 1 and not signal:
         signal = "weak_synthesis"
@@ -358,6 +397,7 @@ def recommend_from_run_report(run_report: dict[str, Any]) -> dict[str, Any]:
         or summary.get("acquisition_status_counts")
         or {},
         "acquisition_status_counts": summary.get("acquisition_status_counts") or {},
+        "graph_connection_metrics": run_report.get("graph_connection_metrics") or {},
     }
     recommendation = recommend_improvement_packet(
         rejection_reasons=rejection_reasons,

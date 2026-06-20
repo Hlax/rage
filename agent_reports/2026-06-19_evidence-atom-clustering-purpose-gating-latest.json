@@ -1,0 +1,124 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "Evidence Atom Clustering + Purpose-Gated Retrieval",
+  "date": "2026-06-19",
+  "verdict": "PARTIAL",
+  "status": "completed_with_product_gaps",
+  "summary": {
+    "atom_clustering": "Compatible quote-backed claims can now cluster into shared evidence atoms using scope and concept signatures; duplicate one-claim atoms are removed when superseded.",
+    "purpose_gating": "Purpose-specific gates reject generic AI/diversity evidence for style/originality and agency/co-creation questions unless required concepts are present.",
+    "atlas_trace": "Trace previews now include atom cluster maturity, purpose match status, evidence decision, why_clustered, and downgrade/rejection reason.",
+    "readiness": "Contracts and tests are stronger, but the fixture graph remains thin with many weak atoms and sparse relationships."
+  },
+  "metrics_before": {
+    "multi_claim_atom_count": "not_exposed",
+    "source_diverse_atom_count": "not_exposed",
+    "purpose_mismatch_count": "not_exposed",
+    "weak_atom_count": "not_exposed",
+    "clustered_atom_count": "not_exposed",
+    "synthesis_ready_cluster_count": "not_exposed",
+    "frontend_ready_trace_count": "not_exposed"
+  },
+  "metrics_after": {
+    "claims": 15,
+    "atoms": 14,
+    "relationships": 2,
+    "sources": 3,
+    "orphan_claims": 12,
+    "orphan_atoms": 11,
+    "multi_claim_atom_count": 1,
+    "source_diverse_atom_count": 1,
+    "purpose_mismatch_count": 0,
+    "weak_atom_count": 13,
+    "clustered_atom_count": 0,
+    "synthesis_ready_cluster_count": 1,
+    "frontend_ready_trace_count": 15,
+    "relationship_density": 0.1333
+  },
+  "atom_clustering_findings": [
+    "Compatible same-scope claims cluster into a shared atom.",
+    "Incompatible scope claims remain separate.",
+    "Clustered atom results expose support_count, contradiction_count, qualification_count, source_count, concept_overlap_count, source diversity, and why_clustered.",
+    "Duplicate/merged atom count is reported.",
+    "Maturity promotion works in targeted tests, including clustered maturity.",
+    "Committed fixture still has mostly weak atoms."
+  ],
+  "purpose_gating_findings": [
+    "Style/originality questions require style, originality, aesthetic, design, novelty, visual, or visual-language evidence.",
+    "Agency/co-creation questions require agency, control, collaboration, autonomy, co-creation, authorship, ownership, or human-control evidence.",
+    "Generic AI/diversity evidence is rejected for unrelated style or agency questions.",
+    "Purpose-matched originality/design evidence passes."
+  ],
+  "graph_atlas_readiness_findings": [
+    "Atlas-safe previews include maturity and purpose-fit explanations without private IDs or raw quotes.",
+    "Readiness metrics expose weak atom dominance and sparse graph edges.",
+    "The current fixture has 15 frontend-ready traces but only 2 relationships for 15 claims."
+  ],
+  "frontend_readiness_notes": [
+    "Frontend can consume richer trace/metric fields for honest empty/weak states.",
+    "Do not build broad UI yet; graph density and clustered atom maturity remain insufficient for polished Atlas views."
+  ],
+  "local_model_readiness": {
+    "status": "PARTIAL",
+    "notes": "Deterministic gates are mock-safe and can constrain local model outputs, but live Ollama was not required or exercised."
+  },
+  "paid_api_readiness": {
+    "status": "NO-GO",
+    "notes": "No paid-provider path was added, and graph maturity remains too low for paid synthesis escalation."
+  },
+  "top_blockers": [
+    "Relationship density remains low at 0.1333.",
+    "Fixture graph still has 13 weak atoms and 0 clustered atoms.",
+    "Purpose gates are not yet enforced pipeline-wide during source ranking and evidence generation."
+  ],
+  "verification": [
+    {
+      "command": "python -m pytest tests/unit/test_evidence_atom_clustering_purpose_gating.py -q",
+      "status": "pass",
+      "result": "11 passed"
+    },
+    {
+      "command": "python -m pytest tests/unit/test_evidence_atom_clustering_purpose_gating.py tests/unit/test_evidence_atoms.py tests/unit/test_connection_layer_atlas_trace.py tests/unit/test_failure_recommender.py tests/unit/test_research_purpose_classifier.py tests/unit/test_atlas_snapshot_builder.py -q",
+      "status": "pass",
+      "result": "40 passed"
+    },
+    {
+      "command": "python -m pytest tests/unit/test_safety_auditor_atlas_preview.py tests/unit/test_atlas_snapshot_contract.py tests/unit/test_atlas_coherence_report.py -q",
+      "status": "pass",
+      "result": "16 passed"
+    },
+    {
+      "command": "python -m pytest tests/golden/test_19_run_report.py tests/golden/test_35_acquisition_quality_tickets.py tests/golden/test_34_asset_export_candidates.py -q",
+      "status": "pass",
+      "result": "8 passed"
+    },
+    {
+      "command": "python -m rge.modules.safety_auditor --audit full",
+      "status": "pass",
+      "result": "blocked_reasons=[]"
+    },
+    {
+      "command": "python -m py_compile rge/modules/purpose_gating.py rge/modules/evidence_atoms.py rge/modules/atlas_trace.py rge/modules/failure_recommender.py rge/modules/run_evaluator.py rge/modules/atlas_snapshot_builder.py tests/unit/test_evidence_atom_clustering_purpose_gating.py",
+      "status": "pass",
+      "result": "syntax ok"
+    }
+  ],
+  "full_verification": {
+    "status": "not_run",
+    "reason": "No migrations, public card export schema changes, quote validation changes, or source download behavior changes were introduced. Atlas-safe preview changes were covered by targeted tests and full safety audit."
+  },
+  "next_recommended_packets": [
+    {
+      "title": "Relationship Density Expansion",
+      "goal": "Create more typed support, qualification, and contradiction edges per cluster and reduce orphan claims."
+    },
+    {
+      "title": "Pipeline-Wide Purpose Gate Enforcement",
+      "goal": "Apply purpose-fit decisions during source ranking, abstract evidence generation, and full-text claim acceptance."
+    },
+    {
+      "title": "Clustered Atom Fixture Spine",
+      "goal": "Add or adjust fixture evidence so committed Atlas previews contain at least one truly clustered atom."
+    }
+  ]
+}
