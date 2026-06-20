@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from rge.modules.domain_pack_loader import load_domain_pack, source_type_credibility_prior
+from rge.modules.purpose_gating import evaluate_text_purpose_fit
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_FIXTURE_PATH = (
@@ -218,9 +219,21 @@ def score_discovered_candidate(
         drift_risk=drift_risk,
     )
 
+    purpose_fit = evaluate_text_purpose_fit(
+        f"{title} {abstract}",
+        question=query,
+        domain_pack=domain_pack,
+        evidence_ref=str(candidate.get("provider_id") or candidate.get("id") or ""),
+    )
+    if purpose_fit["purpose_match_status"] == "mismatch":
+        priority_score = round(priority_score * 0.25, 4)
+
     if source_type == "marketing_page":
         status = "rejected"
         reason = REJECTED_MARKETING_REASON
+    elif purpose_fit["decision"] == "rejected":
+        status = "rejected"
+        reason = str(purpose_fit["why_evidence_downgraded_or_rejected"])
     else:
         status = "queued"
         doi_note = "DOI present" if candidate.get("doi") else "no DOI"
@@ -228,6 +241,8 @@ def score_discovered_candidate(
             f"Inferred {source_type}; {doi_note}; relevance {relevance_score} "
             f"from query overlap."
         )
+        if purpose_fit["decision"] == "downgraded":
+            reason += " Purpose gate downgraded candidate for weak purpose fit."
 
     scored = dict(candidate)
     scored.update(
@@ -241,6 +256,9 @@ def score_discovered_candidate(
             "source_diversity_score": source_diversity_score,
             "drift_risk": drift_risk,
             "priority_score": priority_score,
+            "purpose_match_status": purpose_fit["purpose_match_status"],
+            "purpose_gate_decision": purpose_fit["decision"],
+            "purpose_gate_reason": purpose_fit.get("why_evidence_downgraded_or_rejected") or "",
             "reason": reason,
             "status": status,
             "formula_version": FORMULA_VERSION,

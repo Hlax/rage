@@ -1,0 +1,156 @@
+{
+  "verdict": "PARTIAL",
+  "tested_questions": [
+    {
+      "question": "How does AI affect human creativity?",
+      "mode": "mock fixture abstract-first",
+      "resolved_sources": 4,
+      "source_status_counts": {
+        "abstract_available": 1,
+        "metadata_only": 1,
+        "oa_tei_available": 1,
+        "oa_pdf_available": 1
+      },
+      "accepted_claims": 1,
+      "rejected_claims": 2,
+      "skipped_sources": 1,
+      "packet_recommendation": "MVP-P2-abstract-evidence"
+    },
+    {
+      "question": "Does AI assistance improve idea quality or reduce diversity?",
+      "mode": "mock fixture abstract-first plus full fixture graph spine",
+      "resolved_sources": 4,
+      "source_status_counts": {
+        "abstract_available": 1,
+        "metadata_only": 1,
+        "oa_tei_available": 1,
+        "oa_pdf_available": 1
+      },
+      "accepted_claims": 1,
+      "rejected_claims": 2,
+      "skipped_sources": 1,
+      "packet_recommendation": "MVP-P2-abstract-evidence"
+    },
+    {
+      "question": "How do artists/designers describe originality, style, or visual novelty?",
+      "mode": "mock fixture abstract-first",
+      "resolved_sources": 4,
+      "source_status_counts": {
+        "abstract_available": 1,
+        "metadata_only": 1,
+        "oa_tei_available": 1,
+        "oa_pdf_available": 1
+      },
+      "accepted_claims": 1,
+      "rejected_claims": 2,
+      "skipped_sources": 1,
+      "packet_recommendation": "MVP-P2-abstract-evidence",
+      "audit_note": "Purpose classifier labels visual/style affordance correctly, but fixture evidence remains AI-diversity rather than artist/designer originality/style evidence."
+    },
+    {
+      "question": "What makes human-AI co-creation preserve or reduce agency?",
+      "mode": "mock fixture abstract-first",
+      "resolved_sources": 4,
+      "source_status_counts": {
+        "abstract_available": 1,
+        "metadata_only": 1,
+        "oa_tei_available": 1,
+        "oa_pdf_available": 1
+      },
+      "accepted_claims": 1,
+      "rejected_claims": 2,
+      "skipped_sources": 1,
+      "packet_recommendation": "MVP-P2-abstract-evidence",
+      "audit_note": "Ranking prefers the co-creation TEI fixture, but accepted abstract evidence still centers idea diversity, not agency preservation."
+    }
+  ],
+  "source_counts": {
+    "abstract_first_per_question": 4,
+    "full_fixture_sources_ingested": 3,
+    "full_fixture_sources_discovered": 5,
+    "dirty_fixture_sources_blocked": 1,
+    "abstract_status_counts_per_question": {
+      "abstract_available": 1,
+      "metadata_only": 1,
+      "oa_tei_available": 1,
+      "oa_pdf_available": 1
+    }
+  },
+  "claim_counts": {
+    "abstract_first_per_question": {
+      "accepted": 1,
+      "rejected": 2,
+      "skipped_sources": 1
+    },
+    "full_fixture_graph": {
+      "accepted": 15,
+      "rejected": 1,
+      "accepted_without_primary_quote": 0,
+      "quote_rows": 15
+    }
+  },
+  "rejection_counts": {
+    "abstract_first_per_question": {
+      "overgeneralized_scope": 1,
+      "unsupported_claim": 1,
+      "abstract_missing": 1
+    },
+    "full_fixture_graph": {
+      "missing_quote_span": 1
+    }
+  },
+  "evidence_atom_counts": {
+    "promoted_count": 15,
+    "persisted_unique_atoms": 14,
+    "skipped_count": 0,
+    "maturity_counts": {
+      "weak": 11,
+      "promising": 3
+    },
+    "training_suitability_counts": {
+      "not_ready": 14
+    }
+  },
+  "acquisition_failure_modes": [
+    {
+      "reason": "blocked_by_quality_gate",
+      "count": 1
+    },
+    {
+      "reason": "parse_failed",
+      "count": 1
+    },
+    {
+      "reason": "webpage_dirty_text",
+      "count": 1
+    },
+    {
+      "reason": "pdf_parser_unavailable",
+      "count": 1
+    }
+  ],
+  "improvement_tickets_generated": [
+    "blocked_by_quality_gate",
+    "parse_failed",
+    "pdf_parser_unavailable",
+    "webpage_dirty_text"
+  ],
+  "packet_recommendations": {
+    "abstract_first_questions": "MVP-P2-abstract-evidence",
+    "dirty_acquisition_fixture": "Phase4-P6-web-adapter",
+    "full_fixture_run_report": "MVP-P7-demo-loop",
+    "audit_note": "Full fixture report recommendation misdiagnoses missing_quote_span as unmapped low-priority demo-loop diagnostics."
+  },
+  "graph_readiness_score": 0.62,
+  "local_model_readiness_score": 0.58,
+  "paid_api_readiness_score": 0.68,
+  "frontend_card_readiness_score": 0.7,
+  "top_blockers": [
+    "Acquisition status/parser metadata is not consistently persisted into source metadata for the full fixture graph path.",
+    "Abstract-first runs produce only one accepted claim per question and reuse the same narrow fixture evidence across unrelated questions.",
+    "Packet recommender does not map missing_quote_span and can fall through to low-priority demo-loop diagnostics.",
+    "Evidence atoms are mostly weak/not_ready and remain one-claim objects despite useful quote/concept structure.",
+    "The graph has meaningful typed edges, but only two relationship edges in the full fixture proof."
+  ],
+  "next_recommended_packet": "Phase4-P6-web-adapter plus acquisition-status persistence and recommender precedence fix"
+}

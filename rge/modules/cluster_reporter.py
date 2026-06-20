@@ -34,6 +34,10 @@ from rge.modules.research_purpose import (
     classify_research_purpose,
     conservative_maturity_profile,
 )
+from rge.modules.relationship_density_proof import (
+    CORE_DENSITY_QUESTION,
+    ensure_purpose_gated_relationship_density_proof,
+)
 
 GOLDEN_CLAIM_THRESHOLD = 15
 GOLDEN_SOURCE_THRESHOLD = 3
@@ -261,10 +265,17 @@ def build_evidence_packet(
     *,
     cluster_id: str,
     domain: str,
+    question: str = CORE_DENSITY_QUESTION,
 ) -> dict[str, Any]:
     """Build a balanced evidence packet from cluster-linked claims."""
     claim_ids = _cluster_claim_ids(conn, domain=domain)
-    promote_cluster_evidence_atoms(conn, domain=domain, claim_ids=claim_ids)
+    promote_cluster_evidence_atoms(
+        conn,
+        domain=domain,
+        claim_ids=claim_ids,
+        question=question,
+        enforce_purpose_gate=True,
+    )
     claim_id_set = set(claim_ids)
     by_stance = _claims_by_stance(conn, claim_id_set)
 
@@ -359,7 +370,10 @@ def build_cluster_report(
         )
 
     evidence_packet = build_evidence_packet(
-        conn, cluster_id=cluster_id, domain=domain
+        conn,
+        cluster_id=cluster_id,
+        domain=domain,
+        question=CORE_DENSITY_QUESTION,
     )
     relationships = RelationshipRepository(conn).list_active()
     strongest = sorted(
@@ -427,8 +441,15 @@ def generate_cluster_report(
     """Evaluate thresholds, optionally pad golden fixtures, persist cluster report."""
     if pad_golden:
         padding = ensure_golden_cluster_thresholds(conn, domain=domain)
+        density_proof = ensure_purpose_gated_relationship_density_proof(
+            conn,
+            domain=domain,
+            question=CORE_DENSITY_QUESTION,
+            claim_ids=_cluster_claim_ids(conn, domain=domain),
+        )
     else:
         padding = {"status": "skipped", "padding_claims_added": 0}
+        density_proof = {"status": "skipped"}
 
     existing = ClusterReportRepository(conn).get_latest_for_label(GOLDEN_CLUSTER_LABEL)
     readiness = assess_cluster_readiness(conn, domain=domain)
@@ -438,6 +459,7 @@ def generate_cluster_report(
             "status": "already_generated",
             "cluster_report_id": existing.id,
             "padding": padding,
+            "density_proof": density_proof,
             "readiness": readiness,
             "report": report,
             "output_path": None,
@@ -466,6 +488,7 @@ def generate_cluster_report(
         "status": "generated",
         "cluster_report_id": record.id,
         "padding": padding,
+        "density_proof": density_proof,
         "readiness": readiness,
         "report": report,
         "output_path": str(output_path),

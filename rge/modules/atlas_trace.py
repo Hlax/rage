@@ -132,6 +132,32 @@ def _relationship_ids_for_claim(conn: sqlite3.Connection, claim_id: str) -> list
     return [str(row["relationship_id"]) for row in rows]
 
 
+def _relationship_types_for_claim(conn: sqlite3.Connection, claim_id: str) -> list[str]:
+    rows = conn.execute(
+        """
+        SELECT DISTINCT r.predicate, r.domain_metadata_json, re.stance
+        FROM relationship_evidence re
+        JOIN relationships r ON r.id = re.relationship_id
+        WHERE re.claim_id = ?
+        ORDER BY r.predicate, re.stance
+        """,
+        (claim_id,),
+    ).fetchall()
+    types: list[str] = []
+    for row in rows:
+        metadata: dict[str, Any] = {}
+        try:
+            metadata = json.loads(row["domain_metadata_json"] or "{}")
+        except json.JSONDecodeError:
+            metadata = {}
+        relationship_type = str(
+            metadata.get("relationship_type") or row["stance"] or row["predicate"]
+        )
+        if relationship_type not in types:
+            types.append(relationship_type)
+    return types
+
+
 def build_atlas_trace_export(
     conn: sqlite3.Connection,
     *,
@@ -160,6 +186,7 @@ def build_atlas_trace_export(
         atom_claim_ids = list(atom.get("source_claim_ids") or [])
         concept_ids = _concept_ids_for_claim(conn, claim_id)
         relationship_ids = _relationship_ids_for_claim(conn, claim_id)
+        relationship_types = _relationship_types_for_claim(conn, claim_id)
         cluster_id = cluster_map.get(claim_id, "cluster_unassigned")
         purpose_fit = (
             evaluate_claim_purpose_fit(
@@ -194,6 +221,8 @@ def build_atlas_trace_export(
                 "source_id": str(row["source_id"]),
                 "concept_ids": concept_ids,
                 "relationship_ids": relationship_ids,
+                "relationship_types": relationship_types,
+                "relationship_type": relationship_types[0] if relationship_types else "",
                 "connection_type": connection_type,
                 "maturity": atom.get("maturity", "seed"),
                 "atom_cluster_maturity": atom.get("maturity", "seed"),
@@ -208,6 +237,7 @@ def build_atlas_trace_export(
                 "why_connected": (
                     "Accepted quote-backed claim links source provenance to "
                     f"{len(concept_ids)} concept(s), {len(relationship_ids)} relationship(s), "
+                    f"relationship type(s) {relationship_types or ['untyped']}, "
                     f"and cluster {cluster_id}."
                 ),
             }
@@ -231,6 +261,8 @@ def build_atlas_trace_preview(traces: list[dict[str, Any]]) -> list[dict[str, An
                 "has_quote": bool(trace.get("quote_id")),
                 "concept_count": len(trace.get("concept_ids") or []),
                 "relationship_count": len(trace.get("relationship_ids") or []),
+                "relationship_types": list(trace.get("relationship_types") or []),
+                "relationship_type": str(trace.get("relationship_type") or ""),
                 "why_clustered": str(trace.get("why_clustered") or ""),
                 "why_evidence_downgraded_or_rejected": str(
                     trace.get("why_evidence_downgraded_or_rejected") or ""
@@ -388,8 +420,12 @@ def build_graph_connection_metrics(
                 "sources_per_cluster": len(source_rows),
                 "contradiction_edges": contradiction_edges,
                 "qualification_edges": qualification_edges,
+                "contradiction_edge_count": contradiction_edges,
+                "qualification_edge_count": qualification_edges,
                 "orphan_claims": len(orphan_claims),
                 "orphan_atoms": orphan_atoms,
+                "orphan_claim_count": len(orphan_claims),
+                "orphan_atom_count": orphan_atoms,
                 "relationship_density": round(density, 4),
                 "low_relationship_density": claims_per_cluster > 0 and density < 0.5,
             }
@@ -443,6 +479,10 @@ def build_graph_connection_metrics(
             "sources": sum(item["sources_per_cluster"] for item in cluster_metrics),
             "orphan_claims": sum(item["orphan_claims"] for item in cluster_metrics),
             "orphan_atoms": sum(item["orphan_atoms"] for item in cluster_metrics),
+            "orphan_claim_count": sum(item["orphan_claims"] for item in cluster_metrics),
+            "orphan_atom_count": sum(item["orphan_atoms"] for item in cluster_metrics),
+            "contradiction_edge_count": sum(item["contradiction_edges"] for item in cluster_metrics),
+            "qualification_edge_count": sum(item["qualification_edges"] for item in cluster_metrics),
             "multi_claim_atom_count": multi_claim_atom_count,
             "source_diverse_atom_count": source_diverse_atom_count,
             "purpose_mismatch_count": purpose_mismatch_count,

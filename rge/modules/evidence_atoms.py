@@ -13,6 +13,7 @@ from rge.contracts.evidence_atom_v0 import (
     validate_evidence_card,
 )
 from rge.db.repositories import sha256_hex
+from rge.modules.purpose_gating import purpose_gate_claim_ids
 
 DEFAULT_ATOM_ASSET_TAGS = ["reasoning_training_candidate", "argument_map_candidate"]
 MAX_CARD_QUOTE_CHARS = 600
@@ -128,7 +129,9 @@ def _claim_rows_for_clustering(
     domain: str,
     claim_ids: list[str] | None = None,
 ) -> list[sqlite3.Row]:
-    if claim_ids:
+    if claim_ids is not None:
+        if not claim_ids:
+            return []
         placeholders = ",".join("?" for _ in claim_ids)
         return conn.execute(
             f"""
@@ -219,8 +222,28 @@ def cluster_compatible_evidence_atoms(
     *,
     domain: str,
     claim_ids: list[str] | None = None,
+    question: str | None = None,
+    enforce_purpose_gate: bool = False,
 ) -> dict[str, Any]:
     """Group compatible quote-backed accepted claims into shared evidence atoms."""
+    purpose_gate: dict[str, Any] = {
+        "promotable_claim_ids": claim_ids,
+        "gated_claims": [],
+        "purpose_match_count": len(claim_ids or []),
+        "purpose_mismatch_count": 0,
+    }
+    if enforce_purpose_gate and question:
+        if claim_ids is None:
+            all_rows = _claim_rows_for_clustering(conn, domain=domain)
+            claim_ids = [str(row["id"]) for row in all_rows]
+        purpose_gate = purpose_gate_claim_ids(
+            conn,
+            claim_ids,
+            question=question,
+            domain_pack=domain,
+        )
+        claim_ids = list(purpose_gate["promotable_claim_ids"])
+
     rows = _claim_rows_for_clustering(conn, domain=domain, claim_ids=claim_ids)
     groups: dict[tuple[str, tuple[str, ...]], list[sqlite3.Row]] = {}
     separate_claims: list[str] = []
@@ -321,6 +344,7 @@ def cluster_compatible_evidence_atoms(
         "duplicate_merged_atom_count": duplicate_merged_count,
         "separate_claim_count": len(separate_claims),
         "separate_claim_ids": sorted(set(separate_claims)),
+        "purpose_gate": purpose_gate,
         "clustered_atoms": clustered_atoms,
     }
 
@@ -396,6 +420,13 @@ def _merge_atom_payload(existing: sqlite3.Row, incoming: EvidenceAtom_v0_1) -> E
         qualifying_count=merged_profile["qualifies"],
         linked_claim_count=len(merged_claim_ids),
     )
+    existing_maturity = str(existing["evidence_maturity"] or "")
+    if existing_maturity in {"clustered", "synthesis_ready", "eval_ready", "training_ready"}:
+        maturity = existing_maturity
+        suitability = str(existing["training_suitability"] or suitability)
+    if incoming.evidence_maturity in {"clustered", "synthesis_ready", "eval_ready", "training_ready"}:
+        maturity = incoming.evidence_maturity
+        suitability = incoming.training_suitability
     merged_payload = {
         **incoming_payload,
         "atom_id": existing["id"],
@@ -499,6 +530,8 @@ def promote_accepted_claims_for_domain(
     domain: str,
     claim_ids: list[str] | None = None,
     asset_tags: list[str] | None = None,
+    question: str | None = None,
+    enforce_purpose_gate: bool = False,
 ) -> dict[str, Any]:
     """Promote accepted quote-backed claims in a domain into evidence atoms."""
     if claim_ids is None:
@@ -511,6 +544,21 @@ def promote_accepted_claims_for_domain(
             (domain,),
         ).fetchall()
         claim_ids = [str(row["id"]) for row in rows]
+
+    purpose_gate: dict[str, Any] = {
+        "promotable_claim_ids": claim_ids,
+        "gated_claims": [],
+        "purpose_match_count": len(claim_ids),
+        "purpose_mismatch_count": 0,
+    }
+    if enforce_purpose_gate and question:
+        purpose_gate = purpose_gate_claim_ids(
+            conn,
+            claim_ids,
+            question=question,
+            domain_pack=domain,
+        )
+        claim_ids = list(purpose_gate["promotable_claim_ids"])
 
     promoted: list[str] = []
     skipped: list[dict[str, str]] = []
@@ -532,6 +580,7 @@ def promote_accepted_claims_for_domain(
         "skipped_count": len(skipped),
         "atom_ids": promoted,
         "skipped": skipped,
+        "purpose_gate": purpose_gate,
     }
 
 
@@ -540,6 +589,8 @@ def promote_cluster_evidence_atoms(
     *,
     domain: str,
     claim_ids: list[str],
+    question: str | None = None,
+    enforce_purpose_gate: bool = False,
 ) -> dict[str, Any]:
     """Promote atoms for cluster-linked accepted claims before report synthesis."""
     if not claim_ids:
@@ -562,11 +613,28 @@ def promote_cluster_evidence_atoms(
             (domain, *claim_ids),
         ).fetchall()
     ]
-    return promote_accepted_claims_for_domain(
+    promoted = promote_accepted_claims_for_domain(
         conn,
         domain=domain,
         claim_ids=accepted_ids,
+        question=question,
+        enforce_purpose_gate=enforce_purpose_gate,
     )
+    promotable_ids = list(promoted.get("purpose_gate", {}).get("promotable_claim_ids") or accepted_ids)
+    clustered = cluster_compatible_evidence_atoms(
+        conn,
+        domain=domain,
+        claim_ids=promotable_ids,
+        question=question,
+        enforce_purpose_gate=enforce_purpose_gate,
+    )
+    promoted["clustered_atom_count"] = clustered["clustered_atom_count"]
+    promoted["duplicate_merged_atom_count"] = clustered["duplicate_merged_atom_count"]
+    promoted["clustered_atom_ids"] = [
+        str(atom["atom_id"]) for atom in clustered["clustered_atoms"]
+    ]
+    promoted["cluster_result"] = clustered
+    return promoted
 
 
 def list_top_evidence_atoms(

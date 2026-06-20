@@ -1,0 +1,140 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "Purpose-Gated Relationship Density Proof",
+  "date": "2026-06-20",
+  "verdict": "GO",
+  "status": "completed",
+  "scope": "backend/data-contract proof only; no frontend UI and no broad automation",
+  "summary": {
+    "purpose_gates": "Purpose-fit decisions are now used in source ranking, abstract evidence generation, atom promotion, compatible atom clustering, and graph/readiness evaluation.",
+    "relationship_density": "The deterministic core fixture now creates typed support, contradiction, qualification, definition, and scope-difference relationship evidence.",
+    "atlas_trace": "Atlas-safe trace previews include relationship type, connection reason, cluster maturity, purpose-match status, and evidence decision without private IDs or raw quotes.",
+    "acceptance": "The regenerated fixture meets all numeric acceptance targets for the deterministic proof scope."
+  },
+  "metrics_before": {
+    "claims": 15,
+    "atoms": 14,
+    "relationships": 2,
+    "orphan_claims": 12,
+    "orphan_atoms": 11,
+    "weak_atom_count": 13,
+    "clustered_atom_count": 0,
+    "relationship_density": 0.1333,
+    "synthesis_ready_cluster_count": 1
+  },
+  "metrics_after": {
+    "claims": 15,
+    "atoms": 7,
+    "relationships": 10,
+    "sources": 3,
+    "orphan_claims": 0,
+    "orphan_atoms": 0,
+    "orphan_claim_count": 0,
+    "orphan_atom_count": 0,
+    "contradiction_edge_count": 2,
+    "qualification_edge_count": 6,
+    "multi_claim_atom_count": 6,
+    "source_diverse_atom_count": 6,
+    "purpose_mismatch_count": 0,
+    "weak_atom_count": 0,
+    "clustered_atom_count": 4,
+    "synthesis_ready_cluster_count": 1,
+    "frontend_ready_trace_count": 15,
+    "relationship_density": 0.6667
+  },
+  "acceptance_targets": {
+    "clustered_atoms_at_least_2": "met: 4",
+    "multi_claim_atoms_at_least_3": "met: 6",
+    "typed_relationships_at_least_8": "met: 10",
+    "relationship_density_at_least_0_5": "met: 0.6667",
+    "orphan_claims_under_5": "met: 0",
+    "orphan_atoms_under_5": "met: 0",
+    "contradiction_or_qualification_edge_at_least_1": "met: contradiction=2 qualification=6",
+    "synthesis_ready_cluster_at_least_1": "met: 1",
+    "purpose_mismatch_rejected_before_graph_promotion": "met in targeted test"
+  },
+  "purpose_gate_findings": [
+    "Source ranking annotates purpose_match_status, purpose_gate_decision, and purpose_gate_reason.",
+    "Source ranking rejects hard purpose mismatches for purpose-specific queries.",
+    "Abstract evidence skips source-level hard mismatches and moves claim-level mismatches into rejected evidence.",
+    "Atom promotion and clustering can enforce purpose gates before graph promotion."
+  ],
+  "atom_clustering_findings": [
+    "Clustered maturity is preserved during repeated atom merges.",
+    "Regenerated fixture has 6 multi-claim atoms and 4 clustered atoms.",
+    "Purpose-mismatched claims do not promote into atoms when enforcement is enabled."
+  ],
+  "relationship_density_findings": [
+    "Deterministic proof edges cover support, contradiction, qualification, definition, and scope-difference.",
+    "Regenerated fixture has 10 relationships for 15 claims.",
+    "Orphan claims and orphan atoms are both zero."
+  ],
+  "atlas_frontend_readiness_notes": [
+    "Atlas-safe previews now include relationship_type and relationship_types.",
+    "Previews include why_connected, why_clustered, purpose_match_status, evidence_decision, and atom_cluster_maturity.",
+    "Public-safe boundaries remain intact; no raw quotes, private IDs, prompts, local paths, or hidden notes are exposed."
+  ],
+  "local_model_readiness": {
+    "status": "PARTIAL",
+    "notes": "Deterministic proof is mock-safe and local-model outputs can now be purpose-gated, but arbitrary live Ollama source runs remain unproven."
+  },
+  "paid_api_readiness": {
+    "status": "NO-GO",
+    "notes": "No paid provider, cloud model, or escalation path was added."
+  },
+  "top_blockers": [
+    "Purpose gates are not yet enforced across every future live arbitrary-source path.",
+    "Relationship density is proven for the deterministic fixture, not arbitrary live research.",
+    "Relationship type metadata is not yet a dedicated validated enum contract."
+  ],
+  "verification": [
+    {
+      "command": "python -m pytest tests/unit/test_purpose_gated_relationship_density_proof.py -q",
+      "status": "pass",
+      "result": "6 passed"
+    },
+    {
+      "command": "python -m pytest tests/unit/test_purpose_gated_relationship_density_proof.py tests/unit/test_evidence_atom_clustering_purpose_gating.py tests/unit/test_connection_layer_atlas_trace.py tests/unit/test_failure_recommender.py tests/unit/test_manual_relationship_building.py tests/unit/test_atlas_snapshot_builder.py -q",
+      "status": "pass",
+      "result": "44 passed"
+    },
+    {
+      "command": "python -m pytest tests/unit/test_safety_auditor_atlas_preview.py tests/unit/test_atlas_snapshot_contract.py tests/unit/test_atlas_coherence_report.py -q",
+      "status": "pass",
+      "result": "16 passed"
+    },
+    {
+      "command": "python -m pytest tests/golden/test_19_run_report.py tests/golden/test_35_acquisition_quality_tickets.py tests/golden/test_34_asset_export_candidates.py -q",
+      "status": "pass",
+      "result": "8 passed"
+    },
+    {
+      "command": "python -m rge.modules.safety_auditor --audit full",
+      "status": "pass",
+      "result": "blocked_reasons=[]"
+    },
+    {
+      "command": "python -m py_compile rge/modules/purpose_gating.py rge/modules/relationship_density_proof.py rge/modules/evidence_atoms.py rge/modules/atlas_trace.py rge/modules/cluster_reporter.py rge/modules/research_queue.py rge/modules/abstract_evidence.py tests/unit/test_purpose_gated_relationship_density_proof.py",
+      "status": "pass",
+      "result": "syntax ok"
+    }
+  ],
+  "full_verification": {
+    "status": "not_run",
+    "reason": "No migrations, quote validation changes, source download behavior changes, safety auditor changes, or public card export schema changes. Atlas-safe preview changes were covered by targeted tests and full safety audit."
+  },
+  "next_recommended_packets": [
+    {
+      "title": "Live/Arbitrary Source Purpose Gate Enforcement",
+      "goal": "Apply purpose gates to staged live discover/fetch/ingest/extract/link/build/detect paths."
+    },
+    {
+      "title": "Relationship Type Contract Formalization",
+      "goal": "Promote relationship type metadata into a validated contract/enum and update typed graph tests."
+    },
+    {
+      "title": "Atlas Cluster UI Readiness Pass",
+      "goal": "Consume the ready trace/metric fields in a minimal read-only Atlas preview state."
+    }
+  ]
+}

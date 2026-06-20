@@ -173,6 +173,17 @@
   ],
   "edges": [
     {
+      "id": "rel_072c9339661e349d",
+      "edge_type": "relationship",
+      "predicate": "may_increase",
+      "source_node_id": "cpt_ai_assistance",
+      "target_node_id": "cpt_semantic_diversity",
+      "source_label": "AI assistance",
+      "target_label": "semantic diversity",
+      "scope": "Does AI assistance improve idea quality or reduce diversity? :: proof edge 5",
+      "confidence": 0.65
+    },
+    {
       "id": "rel_28254d9b65c568be",
       "edge_type": "relationship",
       "predicate": "may_increase",
@@ -201,6 +212,83 @@
         "contradiction_classification": "apparent_contradiction_metric_or_condition_difference",
         "qualifies_relationship_id": "rel_28254d9b65c568be"
       }
+    },
+    {
+      "id": "rel_4cdcf685834cdbc1",
+      "edge_type": "relationship",
+      "predicate": "may_improve",
+      "source_node_id": "cpt_ai_assistance",
+      "target_node_id": "cpt_taste",
+      "source_label": "AI assistance",
+      "target_label": "taste",
+      "scope": "Does AI assistance improve idea quality or reduce diversity? :: proof edge 2",
+      "confidence": 0.65
+    },
+    {
+      "id": "rel_4db6c4b48b4641a3",
+      "edge_type": "relationship",
+      "predicate": "may_increase",
+      "source_node_id": "cpt_ai_assistance",
+      "target_node_id": "cpt_diversity",
+      "source_label": "AI assistance",
+      "target_label": "diversity",
+      "scope": "Does AI assistance improve idea quality or reduce diversity? :: proof edge 3",
+      "confidence": 0.65
+    },
+    {
+      "id": "rel_8694635cc4646d55",
+      "edge_type": "relationship",
+      "predicate": "may_qualify",
+      "source_node_id": "cpt_human_control",
+      "target_node_id": "cpt_ai_assistance",
+      "source_label": "human control",
+      "target_label": "AI assistance",
+      "scope": "Does AI assistance improve idea quality or reduce diversity? :: proof edge 8",
+      "confidence": 0.65
+    },
+    {
+      "id": "rel_a0ed34cdadfb81fc",
+      "edge_type": "relationship",
+      "predicate": "may_qualify",
+      "source_node_id": "cpt_prompt_engineering",
+      "target_node_id": "cpt_semantic_diversity",
+      "source_label": "prompt engineering",
+      "target_label": "semantic diversity",
+      "scope": "Does AI assistance improve idea quality or reduce diversity? :: proof edge 4",
+      "confidence": 0.65
+    },
+    {
+      "id": "rel_a3a209562e8f8cdb",
+      "edge_type": "relationship",
+      "predicate": "is_dimension_of",
+      "source_node_id": "cpt_semantic_diversity",
+      "target_node_id": "cpt_diversity",
+      "source_label": "semantic diversity",
+      "target_label": "diversity",
+      "scope": "Does AI assistance improve idea quality or reduce diversity? :: proof edge 6",
+      "confidence": 0.65
+    },
+    {
+      "id": "rel_ef4307169b32f9ff",
+      "edge_type": "relationship",
+      "predicate": "differs_by_scope_from",
+      "source_node_id": "cpt_semantic_diversity",
+      "target_node_id": "cpt_diversity",
+      "source_label": "semantic diversity",
+      "target_label": "diversity",
+      "scope": "Does AI assistance improve idea quality or reduce diversity? :: proof edge 7",
+      "confidence": 0.65
+    },
+    {
+      "id": "rel_f6e2bdd16722f61b",
+      "edge_type": "relationship",
+      "predicate": "may_reduce",
+      "source_node_id": "cpt_ai_assistance",
+      "target_node_id": "cpt_semantic_diversity",
+      "source_label": "AI assistance",
+      "target_label": "semantic diversity",
+      "scope": "Does AI assistance improve idea quality or reduce diversity? :: proof edge 1",
+      "confidence": 0.65
     }
   ],
   "clusters": [
@@ -222,7 +310,7 @@
       "schema_version": "0.1.0",
       "run_id": "run_golden_fixture_mvp",
       "status": "informational",
-      "public_summary": "15 claims accepted from 3 ingested sources; 1 rejected; 2 relationships; 1 score event; 2 public cards; 1 cluster report."
+      "public_summary": "15 claims accepted from 3 ingested sources; 1 rejected; 10 relationships; 1 score event; 2 public cards; 1 cluster report."
     }
   ],
   "cards": [
@@ -445,17 +533,21 @@
     {
       "trace_ref": "trace_001",
       "connection_type": "source_quote_claim_atom_concept_cluster",
-      "maturity": "weak",
-      "atom_cluster_maturity": "weak",
+      "maturity": "clustered",
+      "atom_cluster_maturity": "clustered",
       "purpose_match_status": "match",
       "evidence_decision": "accepted",
       "visibility": "public_safe",
       "has_quote": true,
       "concept_count": 1,
-      "relationship_count": 0,
-      "why_clustered": "",
+      "relationship_count": 1,
+      "relationship_types": [
+        "support"
+      ],
+      "relationship_type": "support",
+      "why_clustered": "Atom clusters 3 compatible claim(s) with shared scope/concepts.",
       "why_evidence_downgraded_or_rejected": "",
-      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 1 relationship(s), relationship type(s) ['support'], and cluster cluster_golden_creativity_ai_diversity."
     },
     {
       "trace_ref": "trace_002",
@@ -467,40 +559,52 @@
       "visibility": "public_safe",
       "has_quote": true,
       "concept_count": 1,
-      "relationship_count": 0,
+      "relationship_count": 1,
+      "relationship_types": [
+        "support"
+      ],
+      "relationship_type": "support",
       "why_clustered": "Atom clusters 2 compatible claim(s) with shared scope/concepts.",
       "why_evidence_downgraded_or_rejected": "",
-      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 1 relationship(s), relationship type(s) ['support'], and cluster cluster_golden_creativity_ai_diversity."
     },
     {
       "trace_ref": "trace_003",
       "connection_type": "source_quote_claim_atom_concept_cluster",
-      "maturity": "weak",
-      "atom_cluster_maturity": "weak",
+      "maturity": "clustered",
+      "atom_cluster_maturity": "clustered",
       "purpose_match_status": "match",
       "evidence_decision": "accepted",
       "visibility": "public_safe",
       "has_quote": true,
       "concept_count": 1,
-      "relationship_count": 0,
-      "why_clustered": "",
+      "relationship_count": 1,
+      "relationship_types": [
+        "support"
+      ],
+      "relationship_type": "support",
+      "why_clustered": "Atom clusters 3 compatible claim(s) with shared scope/concepts.",
       "why_evidence_downgraded_or_rejected": "",
-      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 1 relationship(s), relationship type(s) ['support'], and cluster cluster_golden_creativity_ai_diversity."
     },
     {
       "trace_ref": "trace_004",
       "connection_type": "source_quote_claim_atom_concept_cluster",
-      "maturity": "weak",
-      "atom_cluster_maturity": "weak",
+      "maturity": "clustered",
+      "atom_cluster_maturity": "clustered",
       "purpose_match_status": "match",
       "evidence_decision": "accepted",
       "visibility": "public_safe",
       "has_quote": true,
       "concept_count": 1,
-      "relationship_count": 0,
-      "why_clustered": "",
+      "relationship_count": 1,
+      "relationship_types": [
+        "qualification"
+      ],
+      "relationship_type": "qualification",
+      "why_clustered": "Atom clusters 3 compatible claim(s) with shared scope/concepts.",
       "why_evidence_downgraded_or_rejected": "",
-      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 1 relationship(s), relationship type(s) ['qualification'], and cluster cluster_golden_creativity_ai_diversity."
     },
     {
       "trace_ref": "trace_005",
@@ -512,160 +616,208 @@
       "visibility": "public_safe",
       "has_quote": true,
       "concept_count": 1,
-      "relationship_count": 0,
+      "relationship_count": 1,
+      "relationship_types": [
+        "contradiction"
+      ],
+      "relationship_type": "contradiction",
       "why_clustered": "Atom clusters 2 compatible claim(s) with shared scope/concepts.",
       "why_evidence_downgraded_or_rejected": "",
-      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 1 relationship(s), relationship type(s) ['contradiction'], and cluster cluster_golden_creativity_ai_diversity."
     },
     {
       "trace_ref": "trace_006",
       "connection_type": "source_quote_claim_atom_concept_cluster",
-      "maturity": "weak",
-      "atom_cluster_maturity": "weak",
+      "maturity": "clustered",
+      "atom_cluster_maturity": "clustered",
       "purpose_match_status": "match",
       "evidence_decision": "accepted",
       "visibility": "public_safe",
       "has_quote": true,
       "concept_count": 1,
-      "relationship_count": 0,
-      "why_clustered": "",
+      "relationship_count": 1,
+      "relationship_types": [
+        "definition"
+      ],
+      "relationship_type": "definition",
+      "why_clustered": "Atom clusters 3 compatible claim(s) with shared scope/concepts.",
       "why_evidence_downgraded_or_rejected": "",
-      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 1 relationship(s), relationship type(s) ['definition'], and cluster cluster_golden_creativity_ai_diversity."
     },
     {
       "trace_ref": "trace_007",
       "connection_type": "source_quote_claim_atom_concept_cluster",
-      "maturity": "weak",
-      "atom_cluster_maturity": "weak",
+      "maturity": "clustered",
+      "atom_cluster_maturity": "clustered",
       "purpose_match_status": "match",
       "evidence_decision": "accepted",
       "visibility": "public_safe",
       "has_quote": true,
       "concept_count": 1,
-      "relationship_count": 0,
-      "why_clustered": "",
+      "relationship_count": 1,
+      "relationship_types": [
+        "scope_difference"
+      ],
+      "relationship_type": "scope_difference",
+      "why_clustered": "Atom clusters 3 compatible claim(s) with shared scope/concepts.",
       "why_evidence_downgraded_or_rejected": "",
-      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 1 relationship(s), relationship type(s) ['scope_difference'], and cluster cluster_golden_creativity_ai_diversity."
     },
     {
       "trace_ref": "trace_008",
       "connection_type": "source_quote_claim_atom_concept_cluster",
-      "maturity": "weak",
-      "atom_cluster_maturity": "weak",
+      "maturity": "clustered",
+      "atom_cluster_maturity": "clustered",
       "purpose_match_status": "match",
       "evidence_decision": "accepted",
       "visibility": "public_safe",
       "has_quote": true,
       "concept_count": 1,
-      "relationship_count": 0,
-      "why_clustered": "",
+      "relationship_count": 1,
+      "relationship_types": [
+        "qualification"
+      ],
+      "relationship_type": "qualification",
+      "why_clustered": "Atom clusters 3 compatible claim(s) with shared scope/concepts.",
       "why_evidence_downgraded_or_rejected": "",
-      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 1 relationship(s), relationship type(s) ['qualification'], and cluster cluster_golden_creativity_ai_diversity."
     },
     {
       "trace_ref": "trace_009",
       "connection_type": "source_quote_claim_atom_concept_cluster",
-      "maturity": "weak",
-      "atom_cluster_maturity": "weak",
+      "maturity": "promising",
+      "atom_cluster_maturity": "promising",
       "purpose_match_status": "match",
       "evidence_decision": "accepted",
       "visibility": "public_safe",
       "has_quote": true,
       "concept_count": 5,
-      "relationship_count": 1,
-      "why_clustered": "",
+      "relationship_count": 2,
+      "relationship_types": [
+        "supports",
+        "support"
+      ],
+      "relationship_type": "supports",
+      "why_clustered": "Atom clusters 2 compatible claim(s) with shared scope/concepts.",
       "why_evidence_downgraded_or_rejected": "",
-      "why_connected": "Accepted quote-backed claim links source provenance to 5 concept(s), 1 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+      "why_connected": "Accepted quote-backed claim links source provenance to 5 concept(s), 2 relationship(s), relationship type(s) ['supports', 'support'], and cluster cluster_golden_creativity_ai_diversity."
     },
     {
       "trace_ref": "trace_010",
       "connection_type": "source_quote_claim_atom_concept_cluster",
-      "maturity": "weak",
-      "atom_cluster_maturity": "weak",
+      "maturity": "clustered",
+      "atom_cluster_maturity": "clustered",
       "purpose_match_status": "match",
       "evidence_decision": "accepted",
       "visibility": "public_safe",
       "has_quote": true,
       "concept_count": 1,
-      "relationship_count": 0,
-      "why_clustered": "",
+      "relationship_count": 1,
+      "relationship_types": [
+        "support"
+      ],
+      "relationship_type": "support",
+      "why_clustered": "Atom clusters 3 compatible claim(s) with shared scope/concepts.",
       "why_evidence_downgraded_or_rejected": "",
-      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 1 relationship(s), relationship type(s) ['support'], and cluster cluster_golden_creativity_ai_diversity."
     },
     {
       "trace_ref": "trace_011",
       "connection_type": "source_quote_claim_atom_concept_cluster",
-      "maturity": "weak",
-      "atom_cluster_maturity": "weak",
+      "maturity": "clustered",
+      "atom_cluster_maturity": "clustered",
       "purpose_match_status": "match",
       "evidence_decision": "accepted",
       "visibility": "public_safe",
       "has_quote": true,
       "concept_count": 1,
-      "relationship_count": 0,
-      "why_clustered": "",
+      "relationship_count": 1,
+      "relationship_types": [
+        "support"
+      ],
+      "relationship_type": "support",
+      "why_clustered": "Atom clusters 3 compatible claim(s) with shared scope/concepts.",
       "why_evidence_downgraded_or_rejected": "",
-      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 1 relationship(s), relationship type(s) ['support'], and cluster cluster_golden_creativity_ai_diversity."
     },
     {
       "trace_ref": "trace_012",
       "connection_type": "source_quote_claim_atom_concept_cluster",
-      "maturity": "weak",
-      "atom_cluster_maturity": "weak",
+      "maturity": "clustered",
+      "atom_cluster_maturity": "clustered",
       "purpose_match_status": "match",
       "evidence_decision": "accepted",
       "visibility": "public_safe",
       "has_quote": true,
       "concept_count": 1,
-      "relationship_count": 0,
-      "why_clustered": "",
+      "relationship_count": 1,
+      "relationship_types": [
+        "qualification"
+      ],
+      "relationship_type": "qualification",
+      "why_clustered": "Atom clusters 3 compatible claim(s) with shared scope/concepts.",
       "why_evidence_downgraded_or_rejected": "",
-      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 1 relationship(s), relationship type(s) ['qualification'], and cluster cluster_golden_creativity_ai_diversity."
     },
     {
       "trace_ref": "trace_013",
       "connection_type": "source_quote_claim_atom_concept_cluster",
-      "maturity": "weak",
-      "atom_cluster_maturity": "weak",
+      "maturity": "clustered",
+      "atom_cluster_maturity": "clustered",
       "purpose_match_status": "match",
       "evidence_decision": "accepted",
       "visibility": "public_safe",
       "has_quote": true,
       "concept_count": 1,
-      "relationship_count": 0,
-      "why_clustered": "",
+      "relationship_count": 1,
+      "relationship_types": [
+        "contradiction"
+      ],
+      "relationship_type": "contradiction",
+      "why_clustered": "Atom clusters 3 compatible claim(s) with shared scope/concepts.",
       "why_evidence_downgraded_or_rejected": "",
-      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 1 relationship(s), relationship type(s) ['contradiction'], and cluster cluster_golden_creativity_ai_diversity."
     },
     {
       "trace_ref": "trace_014",
       "connection_type": "source_quote_claim_atom_concept_cluster",
-      "maturity": "weak",
-      "atom_cluster_maturity": "weak",
+      "maturity": "promising",
+      "atom_cluster_maturity": "promising",
       "purpose_match_status": "match",
       "evidence_decision": "accepted",
       "visibility": "public_safe",
       "has_quote": true,
       "concept_count": 4,
-      "relationship_count": 2,
+      "relationship_count": 3,
+      "relationship_types": [
+        "definition",
+        "supports",
+        "qualifies"
+      ],
+      "relationship_type": "definition",
       "why_clustered": "",
       "why_evidence_downgraded_or_rejected": "",
-      "why_connected": "Accepted quote-backed claim links source provenance to 4 concept(s), 2 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+      "why_connected": "Accepted quote-backed claim links source provenance to 4 concept(s), 3 relationship(s), relationship type(s) ['definition', 'supports', 'qualifies'], and cluster cluster_golden_creativity_ai_diversity."
     },
     {
       "trace_ref": "trace_015",
       "connection_type": "source_quote_claim_atom_concept_cluster",
-      "maturity": "weak",
-      "atom_cluster_maturity": "weak",
+      "maturity": "promising",
+      "atom_cluster_maturity": "promising",
       "purpose_match_status": "match",
       "evidence_decision": "accepted",
       "visibility": "public_safe",
       "has_quote": true,
       "concept_count": 5,
-      "relationship_count": 1,
-      "why_clustered": "",
+      "relationship_count": 2,
+      "relationship_types": [
+        "scope_difference",
+        "supports"
+      ],
+      "relationship_type": "scope_difference",
+      "why_clustered": "Atom clusters 2 compatible claim(s) with shared scope/concepts.",
       "why_evidence_downgraded_or_rejected": "",
-      "why_connected": "Accepted quote-backed claim links source provenance to 5 concept(s), 1 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+      "why_connected": "Accepted quote-backed claim links source provenance to 5 concept(s), 2 relationship(s), relationship type(s) ['scope_difference', 'supports'], and cluster cluster_golden_creativity_ai_diversity."
     }
   ],
   "connection_metrics": {
@@ -674,29 +826,37 @@
       {
         "cluster_id": "cluster_golden_creativity_ai_diversity",
         "claims_per_cluster": 15,
-        "atoms_per_cluster": 14,
-        "relationships_per_cluster": 2,
+        "atoms_per_cluster": 7,
+        "relationships_per_cluster": 10,
         "sources_per_cluster": 3,
-        "contradiction_edges": 0,
-        "qualification_edges": 1,
-        "orphan_claims": 12,
-        "orphan_atoms": 11,
-        "relationship_density": 0.1333,
-        "low_relationship_density": true
+        "contradiction_edges": 2,
+        "qualification_edges": 6,
+        "contradiction_edge_count": 2,
+        "qualification_edge_count": 6,
+        "orphan_claims": 0,
+        "orphan_atoms": 0,
+        "orphan_claim_count": 0,
+        "orphan_atom_count": 0,
+        "relationship_density": 0.6667,
+        "low_relationship_density": false
       }
     ],
     "totals": {
       "claims": 15,
-      "atoms": 14,
-      "relationships": 2,
+      "atoms": 7,
+      "relationships": 10,
       "sources": 3,
-      "orphan_claims": 12,
-      "orphan_atoms": 11,
-      "multi_claim_atom_count": 1,
-      "source_diverse_atom_count": 1,
+      "orphan_claims": 0,
+      "orphan_atoms": 0,
+      "orphan_claim_count": 0,
+      "orphan_atom_count": 0,
+      "contradiction_edge_count": 2,
+      "qualification_edge_count": 6,
+      "multi_claim_atom_count": 6,
+      "source_diverse_atom_count": 6,
       "purpose_mismatch_count": 0,
-      "weak_atom_count": 13,
-      "clustered_atom_count": 0,
+      "weak_atom_count": 0,
+      "clustered_atom_count": 4,
       "synthesis_ready_cluster_count": 1,
       "frontend_ready_trace_count": 15
     }
