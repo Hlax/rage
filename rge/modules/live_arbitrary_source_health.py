@@ -47,6 +47,7 @@ LOCAL_SAFE_ARBITRARY_QUESTION = "How does AI affect human creativity?"
 LOCAL_SAFE_RUN_ID = "run_local_safe_ai_human_creativity"
 LIVE_NETWORK_RUN_ID = "run_live_network_ai_human_creativity"
 LIVE_ABSTRACT_ATOM_TRACE_RUN_ID = "run_live_network_abstract_evidence_atom_trace"
+LIVE_ABSTRACT_EVIDENCE_QUALITY_RUN_ID = "run_live_network_abstract_evidence_quality"
 LOCAL_SAFE_ATLAS_ARTIFACT_SCHEMA_VERSION = "atlas_source_health_run_v0.1.0"
 LIVE_NETWORK_SOURCE_LIMIT = 5
 LIVE_NETWORK_BACKENDS = ("openalex", "arxiv")
@@ -818,6 +819,195 @@ def run_live_network_abstract_evidence_atom_trace_smoke(
         live_abstract_mode=True,
         resolver_mode="live_network_abstract_atom_trace",
     )
+
+
+def _count_abstract_availability(records: list[dict[str, Any]]) -> int:
+    return sum(
+        1
+        for record in records
+        if bool(str(record.get("abstract_text") or "").strip())
+        or bool((explain_source_evidence(record).get("has_abstract")))
+    )
+
+
+def _rejection_reason_counts_from_evidence(cards: list[dict[str, Any]]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for card in cards:
+        for claim in card.get("rejected_claims") or []:
+            reason = str(claim.get("rejection_reason") or "unknown")
+            counts[reason] = counts.get(reason, 0) + 1
+        skip_reason = card.get("skip_reason")
+        if skip_reason and card.get("status") == "skipped":
+            key = f"skipped:{skip_reason}"
+            counts[key] = counts.get(key, 0) + 1
+    return counts
+
+
+def build_live_abstract_evidence_quality_summary(
+    pipeline_result: dict[str, Any],
+    *,
+    records: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Aggregate public-safe evidence-quality metrics for operator reports."""
+    artifact = dict(pipeline_result.get("atlas_safe_artifact") or {})
+    run_report = dict(pipeline_result.get("run_report") or {})
+    evidence = dict(pipeline_result.get("evidence") or {})
+    source_health = dict(pipeline_result.get("source_health") or {})
+    trace_summary = dict(artifact.get("trace_summary") or {})
+    graph_summary = dict(artifact.get("graph_summary") or {})
+    cards = list(evidence.get("cards") or [])
+    resolved_records = list(records or [])
+    rejection_counts = _rejection_reason_counts_from_evidence(cards)
+    for item in run_report.get("top_failure_modes") or []:
+        reason = str(item.get("reason") or "")
+        if reason:
+            rejection_counts[reason] = int(item.get("count") or 0)
+
+    quote_backed_accepted = sum(
+        int(card.get("accepted_count") or 0)
+        for card in cards
+        if card.get("extraction_mode") == "live_deterministic_quote"
+        or card.get("status") == "completed"
+    )
+    purpose_fit_counts = dict(source_health.get("purpose_fit_status_counts") or {})
+    purpose_gate_counts = dict(source_health.get("purpose_gate_decision_counts") or {})
+
+    return {
+        "question": pipeline_result.get("question") or LOCAL_SAFE_ARBITRARY_QUESTION,
+        "resolver_mode": pipeline_result.get("resolver_mode"),
+        "live_source_count": int(pipeline_result.get("resolved_count") or 0),
+        "abstract_availability_count": _count_abstract_availability(resolved_records),
+        "sources_with_metadata": int(source_health.get("sources_with_metadata") or 0),
+        "claims_accepted": int(run_report.get("claims_accepted") or evidence.get("accepted_count") or 0),
+        "claims_rejected": int(run_report.get("claims_rejected") or evidence.get("rejected_count") or 0),
+        "quote_backed_accepted_count": quote_backed_accepted,
+        "rejection_reason_counts": rejection_counts,
+        "purpose_fit_status_counts": purpose_fit_counts,
+        "purpose_gate_decision_counts": purpose_gate_counts,
+        "evidence_atom_count": int(
+            run_report.get("evidence_atoms_created")
+            or trace_summary.get("atom_count")
+            or (graph_summary.get("connection_metrics") or {}).get("totals", {}).get("atoms")
+            or 0
+        ),
+        "relationship_count": int(run_report.get("relationships_updated") or 0),
+        "trace_summary": {
+            "trace_count": int(trace_summary.get("trace_count") or 0),
+            "atom_count": int(trace_summary.get("atom_count") or 0),
+            "accepted_claim_count": int(trace_summary.get("accepted_claim_count") or 0),
+            "frontend_ready_trace_count": int(
+                trace_summary.get("frontend_ready_trace_count") or 0
+            ),
+            "preview_row_count": len(trace_summary.get("atlas_trace_preview") or []),
+        },
+        "atlas_artifact_public_safe": assert_no_private_fields({"artifact": artifact}) == [],
+        "atlas_preview_panels_present": {
+            "source_health": bool(artifact.get("source_health_summary")),
+            "graph_summary": bool(artifact.get("graph_summary")),
+            "readiness": "readiness_warnings" in artifact,
+            "trace_summary": int(trace_summary.get("trace_count") or 0) >= 1,
+        },
+        "live_abstract_mode": bool(evidence.get("live_abstract_mode")),
+    }
+
+
+def classify_live_abstract_evidence_quality_verdict(
+    summary: dict[str, Any],
+) -> tuple[str, str]:
+    """Return (verdict, rationale) for live abstract evidence quality."""
+    if int(summary.get("live_source_count") or 0) < 1:
+        return "NO-GO", "Live source discovery returned zero records."
+    if int(summary.get("sources_with_metadata") or 0) < 1:
+        return "NO-GO", "Source health persistence did not store metadata."
+    trace_count = int((summary.get("trace_summary") or {}).get("trace_count") or 0)
+    panels = summary.get("atlas_preview_panels_present") or {}
+    if not all(
+        panels.get(key)
+        for key in ("source_health", "graph_summary", "readiness", "trace_summary")
+    ):
+        return "NO-GO", "Atlas-safe artifact missing required preview panels or trace rows."
+    if trace_count < 1:
+        return "NO-GO", "Trace summary is empty despite artifact write."
+
+    accepted = int(summary.get("claims_accepted") or 0)
+    quote_backed = int(summary.get("quote_backed_accepted_count") or 0)
+    if accepted >= 1 and quote_backed >= 1 and summary.get("live_abstract_mode"):
+        return (
+            "GO",
+            "At least one live abstract produced a quote-backed, purpose-matched accepted claim "
+            "with Atlas trace summary from the run artifact.",
+        )
+    if int(summary.get("abstract_availability_count") or 0) >= 1:
+        return (
+            "PARTIAL",
+            "Live discovery and abstract availability work, but accepted quote-backed evidence "
+            "is too thin for a full GO.",
+        )
+    return "NO-GO", "Live discovery failed to resolve abstracts suitable for evidence extraction."
+
+
+def assert_live_abstract_evidence_quality_smoke_env() -> dict[str, str]:
+    """Fail closed unless operator opts into live abstract evidence quality smoke."""
+    import os
+
+    combined = assert_live_abstract_evidence_atom_trace_smoke_env()
+    allow_quality = os.environ.get(
+        "RGE_ALLOW_LIVE_ABSTRACT_EVIDENCE_QUALITY_SMOKE",
+        "0",
+    ).strip().casefold()
+    if allow_quality not in {"1", "true", "yes"}:
+        raise RuntimeError(
+            "Live abstract evidence quality smoke requires "
+            "RGE_ALLOW_LIVE_ABSTRACT_EVIDENCE_QUALITY_SMOKE=1."
+        )
+    combined["RGE_ALLOW_LIVE_ABSTRACT_EVIDENCE_QUALITY_SMOKE"] = allow_quality
+    return combined
+
+
+def run_live_network_abstract_evidence_quality_smoke(
+    conn: sqlite3.Connection,
+    *,
+    question: str = LOCAL_SAFE_ARBITRARY_QUESTION,
+    resolver_query: str = LIVE_NETWORK_RESOLVER_QUERY,
+    domain_pack: str = "creativity",
+    output_dir: Path | None = None,
+    limit: int = LIVE_NETWORK_SOURCE_LIMIT,
+    backends: tuple[str, ...] = LIVE_NETWORK_BACKENDS,
+    client: Any | None = None,
+) -> dict[str, Any]:
+    """Operator-gated live abstract evidence quality proof on a temp DB."""
+    assert_live_abstract_evidence_quality_smoke_env()
+    resolved = resolve_live_network_source_records(
+        question=question,
+        resolver_query=resolver_query,
+        domain_pack=domain_pack,
+        limit=limit,
+        backends=backends,
+    )
+    records = list(resolved.get("records") or [])
+    pipeline = _execute_source_health_proof_pipeline(
+        conn,
+        resolved=resolved,
+        question=question,
+        domain_pack=domain_pack,
+        run_id=LIVE_ABSTRACT_EVIDENCE_QUALITY_RUN_ID,
+        output_dir=output_dir,
+        client=client,
+        include_graph_proof=True,
+        live_abstract_mode=True,
+        resolver_mode="live_network_abstract_evidence_quality",
+    )
+    quality_summary = build_live_abstract_evidence_quality_summary(
+        pipeline,
+        records=records,
+    )
+    verdict, rationale = classify_live_abstract_evidence_quality_verdict(quality_summary)
+    return {
+        **pipeline,
+        "evidence_quality_summary": quality_summary,
+        "evidence_quality_verdict": verdict,
+        "evidence_quality_rationale": rationale,
+    }
 
 
 def run_live_network_source_health_smoke(
