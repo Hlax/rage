@@ -31,6 +31,7 @@ def _population_audit(snapshot: dict[str, Any]) -> dict[str, Any]:
         "follow_up_questions": len(snapshot.get("follow_up_questions") or []),
         "domains": len(snapshot.get("domains") or []),
         "clusters": len(snapshot.get("clusters") or []),
+        "atlas_trace_preview": len(snapshot.get("atlas_trace_preview") or []),
     }
 
 

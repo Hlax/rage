@@ -441,6 +441,184 @@
       "limitations_count": 1
     }
   ],
+  "atlas_trace_preview": [
+    {
+      "trace_ref": "trace_001",
+      "connection_type": "source_quote_claim_atom_concept_cluster",
+      "maturity": "weak",
+      "visibility": "public_safe",
+      "has_quote": true,
+      "concept_count": 1,
+      "relationship_count": 0,
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+    },
+    {
+      "trace_ref": "trace_002",
+      "connection_type": "source_quote_claim_atom_concept_cluster",
+      "maturity": "weak",
+      "visibility": "public_safe",
+      "has_quote": true,
+      "concept_count": 1,
+      "relationship_count": 0,
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+    },
+    {
+      "trace_ref": "trace_003",
+      "connection_type": "source_quote_claim_atom_concept_cluster",
+      "maturity": "weak",
+      "visibility": "public_safe",
+      "has_quote": true,
+      "concept_count": 1,
+      "relationship_count": 0,
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+    },
+    {
+      "trace_ref": "trace_004",
+      "connection_type": "source_quote_claim_atom_concept_cluster",
+      "maturity": "weak",
+      "visibility": "public_safe",
+      "has_quote": true,
+      "concept_count": 1,
+      "relationship_count": 0,
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+    },
+    {
+      "trace_ref": "trace_005",
+      "connection_type": "source_quote_claim_atom_concept_cluster",
+      "maturity": "weak",
+      "visibility": "public_safe",
+      "has_quote": true,
+      "concept_count": 1,
+      "relationship_count": 0,
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+    },
+    {
+      "trace_ref": "trace_006",
+      "connection_type": "source_quote_claim_atom_concept_cluster",
+      "maturity": "weak",
+      "visibility": "public_safe",
+      "has_quote": true,
+      "concept_count": 1,
+      "relationship_count": 0,
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+    },
+    {
+      "trace_ref": "trace_007",
+      "connection_type": "source_quote_claim_atom_concept_cluster",
+      "maturity": "weak",
+      "visibility": "public_safe",
+      "has_quote": true,
+      "concept_count": 1,
+      "relationship_count": 0,
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+    },
+    {
+      "trace_ref": "trace_008",
+      "connection_type": "source_quote_claim_atom_concept_cluster",
+      "maturity": "weak",
+      "visibility": "public_safe",
+      "has_quote": true,
+      "concept_count": 1,
+      "relationship_count": 0,
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+    },
+    {
+      "trace_ref": "trace_009",
+      "connection_type": "source_quote_claim_atom_concept_cluster",
+      "maturity": "weak",
+      "visibility": "public_safe",
+      "has_quote": true,
+      "concept_count": 5,
+      "relationship_count": 1,
+      "why_connected": "Accepted quote-backed claim links source provenance to 5 concept(s), 1 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+    },
+    {
+      "trace_ref": "trace_010",
+      "connection_type": "source_quote_claim_atom_concept_cluster",
+      "maturity": "weak",
+      "visibility": "public_safe",
+      "has_quote": true,
+      "concept_count": 1,
+      "relationship_count": 0,
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+    },
+    {
+      "trace_ref": "trace_011",
+      "connection_type": "source_quote_claim_atom_concept_cluster",
+      "maturity": "weak",
+      "visibility": "public_safe",
+      "has_quote": true,
+      "concept_count": 1,
+      "relationship_count": 0,
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+    },
+    {
+      "trace_ref": "trace_012",
+      "connection_type": "source_quote_claim_atom_concept_cluster",
+      "maturity": "weak",
+      "visibility": "public_safe",
+      "has_quote": true,
+      "concept_count": 1,
+      "relationship_count": 0,
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+    },
+    {
+      "trace_ref": "trace_013",
+      "connection_type": "source_quote_claim_atom_concept_cluster",
+      "maturity": "weak",
+      "visibility": "public_safe",
+      "has_quote": true,
+      "concept_count": 1,
+      "relationship_count": 0,
+      "why_connected": "Accepted quote-backed claim links source provenance to 1 concept(s), 0 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+    },
+    {
+      "trace_ref": "trace_014",
+      "connection_type": "source_quote_claim_atom_concept_cluster",
+      "maturity": "weak",
+      "visibility": "public_safe",
+      "has_quote": true,
+      "concept_count": 4,
+      "relationship_count": 2,
+      "why_connected": "Accepted quote-backed claim links source provenance to 4 concept(s), 2 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+    },
+    {
+      "trace_ref": "trace_015",
+      "connection_type": "source_quote_claim_atom_concept_cluster",
+      "maturity": "weak",
+      "visibility": "public_safe",
+      "has_quote": true,
+      "concept_count": 5,
+      "relationship_count": 1,
+      "why_connected": "Accepted quote-backed claim links source provenance to 5 concept(s), 1 relationship(s), and cluster cluster_golden_creativity_ai_diversity."
+    }
+  ],
+  "connection_metrics": {
+    "schema_version": "graph_connection_metrics_v0.1.0",
+    "clusters": [
+      {
+        "cluster_id": "cluster_golden_creativity_ai_diversity",
+        "claims_per_cluster": 15,
+        "atoms_per_cluster": 14,
+        "relationships_per_cluster": 2,
+        "sources_per_cluster": 3,
+        "contradiction_edges": 0,
+        "qualification_edges": 1,
+        "orphan_claims": 12,
+        "orphan_atoms": 11,
+        "relationship_density": 0.1333,
+        "low_relationship_density": true
+      }
+    ],
+    "totals": {
+      "claims": 15,
+      "atoms": 14,
+      "relationships": 2,
+      "sources": 3,
+      "orphan_claims": 12,
+      "orphan_atoms": 11
+    }
+  },
   "follow_up_questions": [
     {
       "id": "que_71bb9ab6a8a7bc76",

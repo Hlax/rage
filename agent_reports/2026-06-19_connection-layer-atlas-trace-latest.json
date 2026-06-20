@@ -1,0 +1,86 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "Connection Layer + Atlas Trace Contract",
+  "date": "2026-06-19",
+  "status": "completed",
+  "summary": {
+    "acquisition_status_persistence": "Durable source rows now preserve source_status, acquisition_status, parser_backend, source_type, quality_gate_status, extractable, failure_reason, resolver_source, and OA/PDF/TEI availability where present.",
+    "recommender_precedence": "Acquisition/parser blockers outrank extractor and demo-loop recommendations; missing_quote_span maps to quoteability remediation.",
+    "atlas_trace_contract": "Private trace export connects question, cluster, atom, claim, quote, source, concepts, relationships, connection type, maturity, visibility, and why_connected.",
+    "atlas_safe_preview": "Atlas snapshot preview strips private IDs and raw text while keeping connection counts and maturity.",
+    "graph_metrics": "Run reports and Atlas snapshots expose claims, atoms, relationships, sources, contradiction/qualification edges, orphan claims, orphan atoms, and relationship density per cluster."
+  },
+  "changed_files": [
+    "rge/modules/acquisition_quality.py",
+    "rge/modules/web_source_adapter.py",
+    "rge/modules/research_spine.py",
+    "rge/modules/failure_recommender.py",
+    "rge/modules/atlas_trace.py",
+    "rge/modules/run_evaluator.py",
+    "rge/modules/atlas_snapshot_builder.py",
+    "rge/modules/atlas_coherence_report.py",
+    "rge/contracts/atlas_snapshot_v0.py",
+    "tests/unit/test_connection_layer_atlas_trace.py",
+    "fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json",
+    "agent_reports/2026-06-19_connection-layer-atlas-trace.md",
+    "agent_reports/2026-06-19_connection-layer-atlas-trace-latest.json"
+  ],
+  "verification": [
+    {
+      "command": "python -m pytest tests/unit/test_connection_layer_atlas_trace.py tests/unit/test_acquisition_quality.py tests/unit/test_failure_recommender.py tests/unit/test_atlas_snapshot_builder.py -q",
+      "status": "pass",
+      "result": "28 passed"
+    },
+    {
+      "command": "python -m pytest tests/unit/test_safety_auditor_atlas_preview.py tests/unit/test_atlas_snapshot_contract.py tests/unit/test_atlas_coherence_report.py -q",
+      "status": "pass",
+      "result": "16 passed"
+    },
+    {
+      "command": "python -m pytest tests/golden/test_19_run_report.py tests/golden/test_35_acquisition_quality_tickets.py -q",
+      "status": "pass",
+      "result": "7 passed"
+    },
+    {
+      "command": "python -m rge.modules.safety_auditor --audit full",
+      "status": "pass",
+      "result": "blocked_reasons=[]"
+    },
+    {
+      "command": "ReadLints on edited files",
+      "status": "pass",
+      "result": "No linter errors found"
+    }
+  ],
+  "full_verification": {
+    "status": "not_run",
+    "reason": "No migrations, public card export schema changes, quote validation changes, or source download behavior changes were introduced. Targeted tests plus full safety audit were run for Atlas-safe boundary changes."
+  },
+  "safety": {
+    "status": "pass",
+    "notes": [
+      "Private trace export may include quote_id, claim_id, source_id, and atom_id.",
+      "Atlas-safe trace preview strips private IDs, raw text, prompts, local paths, and hidden evaluator notes.",
+      "Full safety audit passed."
+    ]
+  },
+  "known_risks": [
+    "Evidence atoms are still mostly one-claim objects; this packet measures the weakness but does not merge atoms.",
+    "Relationship density is exposed but relationship generation itself remains thin.",
+    "No broad frontend UI was built."
+  ],
+  "next_recommended_packets": [
+    {
+      "title": "Multi-claim Evidence Atom Consolidation",
+      "goal": "Merge compatible quote-backed claims into stronger evidence atoms with support/contradiction/qualification profiles."
+    },
+    {
+      "title": "Relationship Density Expansion",
+      "goal": "Generate and validate additional typed relationships per cluster without duplicating existing edges."
+    },
+    {
+      "title": "Question-Aware Source Diversification",
+      "goal": "Prevent abstract-first runs from reusing narrow evidence across unrelated questions by adding question/source-fit memory and diversity penalties."
+    }
+  ]
+}

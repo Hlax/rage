@@ -125,6 +125,12 @@ def build_run_report(
     """Build canonical run report JSON from aggregated DB metrics."""
     metrics = aggregate_run_metrics(conn)
     failure_modes = aggregate_top_failure_modes(conn)
+    from rge.modules.atlas_trace import build_graph_connection_metrics
+
+    graph_connection_metrics = build_graph_connection_metrics(
+        conn,
+        domain_pack=domain_pack,
+    )
     resolved_contract = contract_id or GOLDEN_CONTRACT_ID
     purpose = _purpose_for_report(
         conn,
@@ -158,6 +164,7 @@ def build_run_report(
         "theory_candidates_created": metrics["theory_candidates_created"],
         "evidence_atoms_created": metrics["evidence_atoms_created"],
         "acquisition_quality_summary": _acquisition_quality_summary(conn),
+        "graph_connection_metrics": graph_connection_metrics,
         "top_failure_modes": failure_modes,
         "tickets_generated": metrics["tickets_generated"],
         "safety_audit_status": "not_run",

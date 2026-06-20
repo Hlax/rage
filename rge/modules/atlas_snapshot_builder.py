@@ -650,11 +650,26 @@ def build_atlas_snapshot_from_db(
     edges = _build_relationship_edges(conn, domain_pack)
 
     from rge.modules.evidence_card_exporter import build_atlas_evidence_cards_preview
+    from rge.modules.atlas_trace import (
+        build_atlas_trace_export,
+        build_atlas_trace_preview,
+        build_graph_connection_metrics,
+    )
 
     evidence_cards_preview = build_atlas_evidence_cards_preview(
         conn,
         domain_pack=domain_pack,
         limit=8,
+    )
+    private_traces = build_atlas_trace_export(
+        conn,
+        domain_pack=domain_pack,
+        visibility="private",
+    )
+    atlas_trace_preview = build_atlas_trace_preview(private_traces)
+    connection_metrics = build_graph_connection_metrics(
+        conn,
+        domain_pack=domain_pack,
     )
 
     if fixture_mode:
@@ -683,6 +698,8 @@ def build_atlas_snapshot_from_db(
         "reports": _build_report_summaries(conn),
         "cards": cards,
         "evidence_cards_preview": evidence_cards_preview,
+        "atlas_trace_preview": atlas_trace_preview,
+        "connection_metrics": connection_metrics,
         "follow_up_questions": _build_follow_up_questions(conn),
         "safety": {
             "public_safe": True,

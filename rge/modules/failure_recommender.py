@@ -35,8 +35,19 @@ REJECTION_DIRTY_TEXT = "dirty_text"
 REJECTION_ZERO_QUOTES = "zero_quoteable_spans"
 REJECTION_ABSTRACT_MISSING = "abstract_missing"
 REJECTION_OVERGENERALIZED = "overgeneralized_scope"
+REJECTION_MISSING_QUOTE_SPAN = "missing_quote_span"
 REJECTION_RANKER_BAD = "ranker_selected_bad_source"
 REJECTION_EXTRACTOR_DRIFT = "extractor_prompt_drift"
+
+ACQUISITION_BLOCKER_SIGNALS = {
+    PARSE_FAILED,
+    DOWNLOAD_FAILED,
+    "dirty_text",
+    "full_text_parse_failed",
+    "blocked_by_quality_gate",
+    "webpage_dirty_text",
+    "pdf_parser_unavailable",
+}
 
 PACKET_RECOMMENDATIONS: dict[str, dict[str, Any]] = {
     REJECTION_UNSUPPORTED_WALL: {
@@ -49,8 +60,8 @@ PACKET_RECOMMENDATIONS: dict[str, dict[str, Any]] = {
         "priority": "high",
     },
     REJECTION_DIRTY_TEXT: {
-        "recommended_packet": PACKET_PDF_PARSER,
-        "title": "PDF parser quality gates",
+        "recommended_packet": PACKET_QUALITY_GATES,
+        "title": "Acquisition quality gates",
         "rationale": "Parsed document text failed readability/quoteability gates.",
         "priority": "high",
     },
@@ -58,6 +69,12 @@ PACKET_RECOMMENDATIONS: dict[str, dict[str, Any]] = {
         "recommended_packet": PACKET_PDF_PARSER,
         "title": "PDF/TEI parse failure remediation",
         "rationale": "Document parse failures block quote-grounded extraction.",
+        "priority": "high",
+    },
+    "full_text_parse_failed": {
+        "recommended_packet": PACKET_PDF_PARSER,
+        "title": "PDF/TEI parse failure remediation",
+        "rationale": "Full-text acquisition reached parser failure before quote-grounded extraction.",
         "priority": "high",
     },
     DOWNLOAD_FAILED: {
@@ -82,6 +99,12 @@ PACKET_RECOMMENDATIONS: dict[str, dict[str, Any]] = {
         "recommended_packet": PACKET_QUALITY_GATES,
         "title": "Text quality / quoteability gates",
         "rationale": "Text exists but yielded zero quoteable spans for grounding.",
+        "priority": "high",
+    },
+    REJECTION_MISSING_QUOTE_SPAN: {
+        "recommended_packet": PACKET_QUALITY_GATES,
+        "title": "Quote span grounding contract",
+        "rationale": "Extractor outputs lacked durable quote spans; treat as quoteability/grounding blocker.",
         "priority": "high",
     },
     "blocked_by_quality_gate": {
@@ -173,6 +196,8 @@ def classify_dominant_bottleneck(
         rejection_counts[str(reason)] = rejection_counts.get(str(reason), 0) + int(count)
     for status, count in metrics.get("source_status_counts", {}).items():
         status_counts[str(status)] = status_counts.get(str(status), 0) + int(count)
+    for status, count in metrics.get("acquisition_status_counts", {}).items():
+        status_counts[str(status)] = status_counts.get(str(status), 0) + int(count)
 
     accepted = int(metrics.get("claims_accepted") or metrics.get("accepted_claims") or 0)
     rejected = int(metrics.get("claims_rejected") or metrics.get("rejected_claims") or 0)
@@ -186,14 +211,43 @@ def classify_dominant_bottleneck(
     if metadata_only_count > abstract_available_count and metadata_only_count >= 2:
         status_counts[METADATA_ONLY] = metadata_only_count
 
+    if REJECTION_MISSING_QUOTE_SPAN in rejection_counts:
+        rejection_counts[REJECTION_ZERO_QUOTES] = max(
+            rejection_counts.get(REJECTION_ZERO_QUOTES, 0),
+            rejection_counts[REJECTION_MISSING_QUOTE_SPAN],
+        )
+
+    acquisition_blockers = {
+        key: int(count)
+        for key, count in status_counts.items()
+        if key in ACQUISITION_BLOCKER_SIGNALS and int(count) > 0
+    }
+    for key, count in rejection_counts.items():
+        if key in ACQUISITION_BLOCKER_SIGNALS and int(count) > 0:
+            acquisition_blockers[key] = acquisition_blockers.get(key, 0) + int(count)
+    if "dirty_text" in acquisition_blockers:
+        acquisition_blockers["blocked_by_quality_gate"] = max(
+            acquisition_blockers.get("blocked_by_quality_gate", 0),
+            acquisition_blockers["dirty_text"],
+        )
+        del acquisition_blockers["dirty_text"]
+
+    dominant_acquisition = _dominant_key(acquisition_blockers)
     dominant_rejection = _dominant_key(rejection_counts)
     dominant_status = _dominant_key(status_counts)
 
-    signal = dominant_rejection or dominant_status
-    signal_kind = "rejection_reason" if dominant_rejection else "source_status"
+    signal = dominant_acquisition or dominant_rejection or dominant_status
+    signal_kind = (
+        "acquisition_status"
+        if dominant_acquisition
+        else "rejection_reason"
+        if dominant_rejection
+        else "source_status"
+    )
     if (
         dominant_rejection == REJECTION_UNSUPPORTED
         and dominant_status in {PARSE_FAILED, DOWNLOAD_FAILED}
+        and dominant_acquisition is None
     ):
         signal = dominant_status
         signal_kind = "source_status"
@@ -300,7 +354,10 @@ def recommend_from_run_report(run_report: dict[str, Any]) -> dict[str, Any]:
     metrics: dict[str, Any] = {
         "claims_accepted": run_report.get("claims_accepted", 0),
         "claims_rejected": run_report.get("claims_rejected", 0),
-        "source_status_counts": summary.get("acquisition_status_counts") or {},
+        "source_status_counts": summary.get("source_status_counts")
+        or summary.get("acquisition_status_counts")
+        or {},
+        "acquisition_status_counts": summary.get("acquisition_status_counts") or {},
     }
     recommendation = recommend_improvement_packet(
         rejection_reasons=rejection_reasons,

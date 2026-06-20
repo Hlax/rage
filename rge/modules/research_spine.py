@@ -6,6 +6,12 @@ import json
 from pathlib import Path
 from typing import Any
 
+from rge.db.repositories import sha256_hex
+from rge.modules.acquisition_quality import (
+    acquisition_metadata_from_payload,
+    merge_source_acquisition_metadata,
+    persist_source_acquisition_status,
+)
 from rge.modules.fulltext_evidence import FULLTEXT_EVIDENCE_BASIS, generate_fulltext_evidence_cards
 from rge.modules.selective_fulltext import FULL_TEXT_CLEAN_TEXT_READY, acquire_selective_fulltext
 
@@ -35,11 +41,52 @@ def ingest_acquisition_to_db(
     """Persist selective full-text clean text as an ingested source + chunks."""
     from rge.db.repositories import ingest_local_source
 
+    resolver_source_id = str(acquisition.get("source_id") or record.get("source_id") or "unknown")
+    metadata = {
+        **{
+            key: record.get(key)
+            for key in (
+                "is_oa",
+                "oa_status",
+                "best_oa_location_url",
+                "pdf_url",
+                "tei_url",
+                "source_status",
+                "resolver_backend",
+                "raw_provider",
+            )
+            if record.get(key) not in (None, "")
+        },
+        **acquisition_metadata_from_payload(
+            {**record, **acquisition},
+            source_type="selective_fulltext",
+            source_status=record.get("source_status"),
+            acquisition_status=acquisition.get("acquisition_status"),
+            parser_backend=(acquisition.get("parse") or {}).get("parser_backend"),
+            failure_reason=acquisition.get("skip_reason")
+            or acquisition.get("blocked_reason")
+            or acquisition.get("failure_class"),
+            resolver_source=record.get("resolver_backend") or record.get("raw_provider"),
+        ),
+    }
+
     if acquisition.get("acquisition_status") != FULL_TEXT_CLEAN_TEXT_READY:
+        persist_source_acquisition_status(
+            conn,
+            source_id=resolver_source_id,
+            title=str(record.get("title") or resolver_source_id),
+            domain=domain,
+            source_type="selective_fulltext",
+            raw_text_checksum=sha256_hex(
+                f"{resolver_source_id}:{acquisition.get('acquisition_status')}:{metadata}"
+            ),
+            status="failed",
+            metadata=metadata,
+        )
         return {
             "status": "skipped",
             "reason": "full_text_not_clean",
-            "resolver_source_id": acquisition.get("source_id"),
+            "resolver_source_id": resolver_source_id,
         }
 
     clean_text = str(acquisition.get("clean_text") or "").strip()
@@ -47,10 +94,10 @@ def ingest_acquisition_to_db(
         return {
             "status": "skipped",
             "reason": "empty_clean_text",
-            "resolver_source_id": acquisition.get("source_id"),
+            "resolver_source_id": resolver_source_id,
         }
 
-    source_id = str(acquisition.get("source_id") or "unknown")
+    source_id = resolver_source_id
     safe_id = source_id.replace(":", "_")
     target_dir = staging_dir or default_db_staging_dir()
     target_dir.mkdir(parents=True, exist_ok=True)
@@ -64,6 +111,14 @@ def ingest_acquisition_to_db(
         raw_text=clean_text,
         title=str(record.get("title") or source_id),
         source_type="selective_fulltext",
+    )
+    db_source_id = str(ingest_result["source_id"])
+    metadata["resolver_source"] = source_id
+    merge_source_acquisition_metadata(
+        conn,
+        source_id=db_source_id,
+        metadata=metadata,
+        status="parsed",
     )
     return {
         **ingest_result,

@@ -12,6 +12,11 @@ from pathlib import Path
 from typing import Any
 
 from rge.db.repositories import sha256_hex, utc_now_iso
+from rge.modules.acquisition_quality import (
+    acquisition_metadata_from_payload,
+    merge_source_acquisition_metadata,
+    persist_source_acquisition_status,
+)
 from rge.modules.fetcher import html_to_text
 from rge.modules.text_quality_gate import assess_chunk_extractability
 
@@ -137,23 +142,25 @@ def _attach_webpage_source_metadata(
     domain_metadata = {
         "url": artifact.get("url"),
         "published_date": artifact.get("published_date"),
-        "acquisition_status": artifact.get("acquisition_status"),
-        "quality_metrics": artifact.get("quality_metrics") or {},
-        "parser_backend": "html_to_text",
         "source_adapter": "web_source_adapter",
-    }
-    conn.execute(
-        """
-        UPDATE sources
-        SET domain_metadata_json = ?, authors_json = ?, updated_at = ?
-        WHERE id = ?
-        """,
-        (
-            json.dumps(domain_metadata),
-            json.dumps(artifact.get("authors") or []),
-            utc_now_iso(),
-            source_id,
+        **acquisition_metadata_from_payload(
+            artifact,
+            source_type="webpage",
+            source_status=artifact.get("acquisition_status"),
+            acquisition_status=artifact.get("acquisition_status"),
+            parser_backend="html_to_text",
+            resolver_source="web_source_adapter",
         ),
+    }
+    merge_source_acquisition_metadata(
+        conn,
+        source_id=source_id,
+        metadata=domain_metadata,
+        status="parsed" if artifact.get("acquisition_status") == ACQUISITION_CLEAN else None,
+    )
+    conn.execute(
+        "UPDATE sources SET authors_json = ?, updated_at = ? WHERE id = ?",
+        (json.dumps(artifact.get("authors") or []), utc_now_iso(), source_id),
     )
     conn.commit()
 
@@ -170,10 +177,37 @@ def ingest_webpage_artifact_to_db(
 
     acquisition_status = str(artifact.get("acquisition_status") or "")
     if acquisition_status != ACQUISITION_CLEAN:
+        source_id = str(artifact.get("source_id") or "")
+        metadata = {
+            "url": artifact.get("url"),
+            "published_date": artifact.get("published_date"),
+            "source_adapter": "web_source_adapter",
+            **acquisition_metadata_from_payload(
+                artifact,
+                source_type="webpage",
+                source_status=acquisition_status,
+                acquisition_status=acquisition_status,
+                parser_backend="html_to_text",
+                failure_reason=acquisition_status or ACQUISITION_DIRTY,
+                resolver_source="web_source_adapter",
+            ),
+        }
+        persist_source_acquisition_status(
+            conn,
+            source_id=source_id,
+            title=str(artifact.get("title") or source_id or "webpage acquisition"),
+            domain=domain,
+            source_type="webpage",
+            raw_text_checksum=str(artifact.get("raw_text_checksum") or "")
+            or sha256_hex(str(artifact.get("clean_text") or artifact.get("raw_text") or source_id)),
+            status="failed",
+            authors=list(artifact.get("authors") or []),
+            metadata=metadata,
+        )
         return {
             "status": "blocked_dirty_text",
             "reason": acquisition_status or ACQUISITION_DIRTY,
-            "source_id": str(artifact.get("source_id") or ""),
+            "source_id": source_id,
             "quality_metrics": artifact.get("quality_metrics") or {},
         }
 
