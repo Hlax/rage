@@ -46,6 +46,7 @@ from rge.modules.source_resolver.status import (
 LOCAL_SAFE_ARBITRARY_QUESTION = "How does AI affect human creativity?"
 LOCAL_SAFE_RUN_ID = "run_local_safe_ai_human_creativity"
 LIVE_NETWORK_RUN_ID = "run_live_network_ai_human_creativity"
+LIVE_ABSTRACT_ATOM_TRACE_RUN_ID = "run_live_network_abstract_evidence_atom_trace"
 LOCAL_SAFE_ATLAS_ARTIFACT_SCHEMA_VERSION = "atlas_source_health_run_v0.1.0"
 LIVE_NETWORK_SOURCE_LIMIT = 5
 LIVE_NETWORK_BACKENDS = ("openalex", "arxiv")
@@ -276,6 +277,7 @@ def persist_abstract_evidence_outcomes(
     question: str = LOCAL_SAFE_ARBITRARY_QUESTION,
     domain_pack: str = "creativity",
     client: Any | None = None,
+    live_abstract_mode: bool = False,
 ) -> dict[str, Any]:
     """Purpose-gate abstract evidence and persist accepted/rejected claim rows."""
     claim_repo = ClaimRepository(conn)
@@ -311,6 +313,7 @@ def persist_abstract_evidence_outcomes(
             domain_pack=domain_pack,
             question=question,
             client=client,
+            live_abstract_mode=live_abstract_mode,
         )
         cards.append(card)
         if card.get("skip_reason") == "purpose_mismatch":
@@ -329,11 +332,15 @@ def persist_abstract_evidence_outcomes(
             continue
 
         _ensure_abstract_chunk(conn, record, domain_pack=domain_pack)
+        extractor_provider = "deterministic" if live_abstract_mode else "mock"
+        extractor_model = (
+            "live_abstract_quote" if live_abstract_mode else "abstract_fixture"
+        )
         for claim in card.get("accepted_claims") or []:
             stored = claim_repo.insert_accepted(
                 claim,
-                extractor_provider="mock",
-                extractor_model="abstract_fixture",
+                extractor_provider=extractor_provider,
+                extractor_model=extractor_model,
                 llm_schema_version="0.1.0",
             )
             accepted_ids.append(stored.id)
@@ -341,14 +348,15 @@ def persist_abstract_evidence_outcomes(
             stored = claim_repo.insert_rejected(
                 claim,
                 rejection_reason=str(claim.get("rejection_reason") or "invalid_claim"),
-                extractor_provider="mock",
-                extractor_model="abstract_fixture",
+                extractor_provider=extractor_provider,
+                extractor_model=extractor_model,
                 llm_schema_version="0.1.0",
             )
             rejected_ids.append(stored.id)
 
     return {
         "status": "completed",
+        "live_abstract_mode": live_abstract_mode,
         "accepted_claim_ids": sorted(set(accepted_ids)),
         "rejected_claim_ids": sorted(set(rejected_ids)),
         "accepted_count": len(set(accepted_ids)),
@@ -404,6 +412,40 @@ def _source_health_preview(summary: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _build_trace_summary_for_artifact(
+    conn: sqlite3.Connection,
+    *,
+    question: str,
+    domain_pack: str,
+    run_report: dict[str, Any],
+) -> dict[str, Any]:
+    """Build public-safe trace preview rows for Atlas run artifacts."""
+    from rge.modules.atlas_trace import (
+        build_atlas_trace_export,
+        build_atlas_trace_preview,
+    )
+
+    private_traces = build_atlas_trace_export(
+        conn,
+        domain_pack=domain_pack,
+        question=question,
+        visibility="private",
+    )
+    preview_rows = build_atlas_trace_preview(private_traces)
+    totals = (run_report.get("graph_connection_metrics") or {}).get("totals") or {}
+    return {
+        "trace_count": len(preview_rows),
+        "frontend_ready_trace_count": int(
+            totals.get("frontend_ready_trace_count") or len(preview_rows)
+        ),
+        "atom_count": int(
+            totals.get("atoms") or run_report.get("evidence_atoms_created") or 0
+        ),
+        "accepted_claim_count": int(run_report.get("claims_accepted") or 0),
+        "atlas_trace_preview": preview_rows[:12],
+    }
+
+
 def build_atlas_safe_run_artifact(
     conn: sqlite3.Connection,
     *,
@@ -420,6 +462,12 @@ def build_atlas_safe_run_artifact(
         "rationale": "Run report was not available.",
     }
     graph_metrics = report.get("graph_connection_metrics") or {}
+    trace_summary = _build_trace_summary_for_artifact(
+        conn,
+        question=question,
+        domain_pack=domain_pack,
+        run_report=report,
+    )
     artifact = {
         "schema_version": LOCAL_SAFE_ATLAS_ARTIFACT_SCHEMA_VERSION,
         "status": "completed",
@@ -443,9 +491,11 @@ def build_atlas_safe_run_artifact(
             "relationships": int(report.get("relationships_updated") or 0),
             "connection_metrics": graph_metrics,
         },
+        "trace_summary": trace_summary,
         "readiness_warnings": _readiness_warnings(
             source_health=_source_health_preview(summary),
             run_report=report,
+            trace_summary=trace_summary,
         ),
         "next_recommended_packet": recommendation.get("recommended_packet"),
         "next_recommended_reason": recommendation.get("rationale"),
@@ -463,6 +513,7 @@ def _readiness_warnings(
     *,
     source_health: dict[str, Any],
     run_report: dict[str, Any],
+    trace_summary: dict[str, Any] | None = None,
 ) -> list[str]:
     warnings: list[str] = []
     if int(source_health.get("sources_with_metadata") or 0) == 0:
@@ -479,7 +530,30 @@ def _readiness_warnings(
     graph_totals = (run_report.get("graph_connection_metrics") or {}).get("totals") or {}
     if int(graph_totals.get("relationships") or 0) == 0:
         warnings.append("No relationship graph was produced for this run.")
+    trace = trace_summary or {}
+    if int(trace.get("trace_count") or 0) == 0 and int(
+        run_report.get("claims_accepted") or 0
+    ) > 0:
+        warnings.append("Accepted claims exist but no Atlas trace preview rows were built.")
     return warnings
+
+
+def assert_live_abstract_evidence_atom_trace_smoke_env() -> dict[str, str]:
+    """Fail closed unless operator opts into live abstract → atom → trace smoke."""
+    import os
+
+    combined = assert_live_source_health_smoke_env()
+    allow_trace = os.environ.get(
+        "RGE_ALLOW_LIVE_ABSTRACT_EVIDENCE_ATOM_TRACE_SMOKE",
+        "0",
+    ).strip().casefold()
+    if allow_trace not in {"1", "true", "yes"}:
+        raise RuntimeError(
+            "Live abstract evidence atom trace smoke requires "
+            "RGE_ALLOW_LIVE_ABSTRACT_EVIDENCE_ATOM_TRACE_SMOKE=1."
+        )
+    combined["RGE_ALLOW_LIVE_ABSTRACT_EVIDENCE_ATOM_TRACE_SMOKE"] = allow_trace
+    return combined
 
 
 def assert_live_source_health_smoke_env() -> dict[str, str]:
@@ -567,6 +641,7 @@ def _execute_source_health_proof_pipeline(
     output_dir: Path | None = None,
     client: Any | None = None,
     include_graph_proof: bool = True,
+    live_abstract_mode: bool = False,
     resolver_mode: str,
 ) -> dict[str, Any]:
     """Shared source-health persistence, abstract evidence, report, and artifact path."""
@@ -586,37 +661,41 @@ def _execute_source_health_proof_pipeline(
         question=question,
         domain_pack=domain_pack,
         client=client,
+        live_abstract_mode=live_abstract_mode,
     )
 
     graph_result: dict[str, Any] = {"status": "skipped", "reason": "no_accepted_claims"}
+    atom_trace_result: dict[str, Any] = {"status": "skipped", "reason": "no_accepted_claims"}
     accepted_claim_ids = list(evidence.get("accepted_claim_ids") or [])
     if include_graph_proof and accepted_claim_ids:
-        from rge.modules.concept_linker import link_concepts_for_source
         from rge.modules.relationship_density_proof import (
             ensure_purpose_gated_relationship_density_proof,
         )
 
-        source_ids = sorted(
-            {
-                str(row["source_id"])
-                for row in conn.execute(
-                    """
-                    SELECT DISTINCT source_id
-                    FROM claims
-                    WHERE status = 'accepted'
-                    ORDER BY source_id
-                    """
-                ).fetchall()
-            }
-        )
-        link_results = []
-        for source_id in source_ids:
-            try:
-                link_results.append(link_concepts_for_source(conn, source_id))
-            except ValueError as exc:
-                link_results.append(
-                    {"status": "skipped", "source_ref": "source", "reason": str(exc)}
-                )
+        link_results: list[dict[str, Any]] = []
+        if not live_abstract_mode:
+            from rge.modules.concept_linker import link_concepts_for_source
+
+            source_ids = sorted(
+                {
+                    str(row["source_id"])
+                    for row in conn.execute(
+                        """
+                        SELECT DISTINCT source_id
+                        FROM claims
+                        WHERE status = 'accepted'
+                        ORDER BY source_id
+                        """
+                    ).fetchall()
+                }
+            )
+            for source_id in source_ids:
+                try:
+                    link_results.append(link_concepts_for_source(conn, source_id))
+                except ValueError as exc:
+                    link_results.append(
+                        {"status": "skipped", "source_ref": "source", "reason": str(exc)}
+                    )
         density = ensure_purpose_gated_relationship_density_proof(
             conn,
             domain=domain_pack,
@@ -627,6 +706,14 @@ def _execute_source_health_proof_pipeline(
             "status": "completed",
             "link_results": link_results,
             "density_proof": density,
+        }
+        atom_trace_result = {
+            "status": "completed",
+            "promoted_atom_count": int(
+                (density.get("atom_result") or {}).get("promoted_count") or 0
+            ),
+            "relationship_count": int(density.get("relationship_count") or 0),
+            "trace_count": 0,
         }
 
     report_result = generate_run_report(
@@ -643,6 +730,10 @@ def _execute_source_health_proof_pipeline(
         domain_pack=domain_pack,
         run_report=run_report,
     )
+    if atom_trace_result.get("status") == "completed":
+        atom_trace_result["trace_count"] = int(
+            (artifact.get("trace_summary") or {}).get("trace_count") or 0
+        )
     artifact_path = _write_atlas_safe_artifact(artifact, output_dir=output_dir)
     source_health = acquisition_quality_summary(conn)
     resolver_breakdown = {
@@ -660,6 +751,7 @@ def _execute_source_health_proof_pipeline(
         "source_health": source_health,
         "evidence": evidence,
         "graph": graph_result,
+        "atom_trace": atom_trace_result,
         "run_report": run_report,
         "atlas_safe_artifact": artifact,
         "artifact_path": artifact_path,
@@ -691,6 +783,40 @@ def run_local_safe_arbitrary_source_health_proof(
         client=client,
         include_graph_proof=True,
         resolver_mode="manual_fixture",
+    )
+
+
+def run_live_network_abstract_evidence_atom_trace_smoke(
+    conn: sqlite3.Connection,
+    *,
+    question: str = LOCAL_SAFE_ARBITRARY_QUESTION,
+    resolver_query: str = LIVE_NETWORK_RESOLVER_QUERY,
+    domain_pack: str = "creativity",
+    output_dir: Path | None = None,
+    limit: int = LIVE_NETWORK_SOURCE_LIMIT,
+    backends: tuple[str, ...] = LIVE_NETWORK_BACKENDS,
+    client: Any | None = None,
+) -> dict[str, Any]:
+    """Operator-gated live abstract quote → atom → trace smoke on a temp DB."""
+    assert_live_abstract_evidence_atom_trace_smoke_env()
+    resolved = resolve_live_network_source_records(
+        question=question,
+        resolver_query=resolver_query,
+        domain_pack=domain_pack,
+        limit=limit,
+        backends=backends,
+    )
+    return _execute_source_health_proof_pipeline(
+        conn,
+        resolved=resolved,
+        question=question,
+        domain_pack=domain_pack,
+        run_id=LIVE_ABSTRACT_ATOM_TRACE_RUN_ID,
+        output_dir=output_dir,
+        client=client,
+        include_graph_proof=True,
+        live_abstract_mode=True,
+        resolver_mode="live_network_abstract_atom_trace",
     )
 
 

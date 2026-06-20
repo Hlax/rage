@@ -17,8 +17,16 @@ from rge.modules.operator_loop import (
     build_operator_plan,
     execute_safe_checks,
     inspect_autonomous_researcher_loop_status,
+    safe_verification_commands,
 )
 
+
+
+
+@pytest.fixture(autouse=True)
+def _operator_autonomous_live_smoke_gates(monkeypatch: pytest.MonkeyPatch) -> None:
+    from tests.unit.operator_loop_helpers import apply_live_smoke_env_gates
+    apply_live_smoke_env_gates(monkeypatch)
 
 def _seed_done_only_queue(tmp_path: Path) -> None:
     (tmp_path / "tickets").mkdir(parents=True, exist_ok=True)
@@ -37,6 +45,8 @@ def _seed_done_only_queue(tmp_path: Path) -> None:
         "# audit",
         encoding="utf-8",
     )
+    from tests.unit.operator_loop_helpers import seed_public_site_preview_paths
+    seed_public_site_preview_paths(tmp_path, include_source_health=True)
 
 
 def _seed_open_ticket_queue(tmp_path: Path) -> None:
@@ -112,7 +122,7 @@ def test_execute_safe_runs_autonomous_loop_fixture_proof(tmp_path: Path) -> None
 
     assert result["execution_status"] == "pass"
     assert result["next_recommended_action"]["action_id"] == "run_autonomous_researcher_loop"
-    assert len(result["execution_results"]) == 4
+    assert len(result["execution_results"]) == len(safe_verification_commands(tmp_path)) + 1
     autonomous = next(
         item for item in result["execution_results"]
         if item["name"] == "autonomous_loop_fixture_proof"

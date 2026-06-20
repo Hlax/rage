@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import pytest
 import json
 from pathlib import Path
 from unittest.mock import patch
@@ -13,6 +14,13 @@ from rge.modules.operator_loop import (
     execute_safe_checks,
 )
 
+
+
+
+@pytest.fixture(autouse=True)
+def _operator_autonomous_live_smoke_gates(monkeypatch: pytest.MonkeyPatch) -> None:
+    from tests.unit.operator_loop_helpers import apply_live_smoke_env_gates
+    apply_live_smoke_env_gates(monkeypatch)
 
 def _seed_done_only_queue(tmp_path: Path) -> None:
     (tmp_path / "tickets").mkdir(parents=True, exist_ok=True)
@@ -32,6 +40,8 @@ def _seed_done_only_queue(tmp_path: Path) -> None:
         / "agent_reports"
         / "2026-06-18_principal-audit-post-ticket-356.md"
     ).write_text("# audit", encoding="utf-8")
+    from tests.unit.operator_loop_helpers import seed_public_site_preview_paths
+    seed_public_site_preview_paths(tmp_path, include_source_health=True)
 
 
 def _write_pre_run_loop_artifacts(

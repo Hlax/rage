@@ -1,0 +1,68 @@
+{
+  "report_type": "verify_skip_site_triage",
+  "date": "2026-06-20",
+  "branch": "phase-4/packets-002-004-evidence-quality-extraction",
+  "verdict": "GO",
+  "commands": [
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q",
+    "RGE_LLM_MODE=mock python -m pytest -q",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full"
+  ],
+  "results": {
+    "verify_skip_site": { "status": "pass", "exit_code": 0 },
+    "golden_tests": { "passed": 164, "failed": 0 },
+    "full_pytest": { "passed": 1051, "failed": 0, "skipped": 1, "deselected": 41 },
+    "safety_audit": { "status": "pass" }
+  },
+  "initial_failure_count": 37,
+  "failure_groups": [
+    {
+      "id": "operator_loop_scratch_autocycle",
+      "count": 26,
+      "root_cause": "stale_test_expectations_after_atlas_refresh_and_live_smoke_plan_priority",
+      "introduced_by_current_packet": false,
+      "fix": "operator_loop_helpers neutral seed + test expectation updates"
+    },
+    {
+      "id": "atlas_snapshot_coherence_export",
+      "count": 8,
+      "root_cause": "committed_creativity_atlas_fixture_byte_drift",
+      "introduced_by_current_packet": false,
+      "fix": "regenerated fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json"
+    },
+    {
+      "id": "public_atlas_preview_fixture",
+      "count": 4,
+      "root_cause": "staged_spine_public_preview_accidentally_overwritten_during_triage",
+      "introduced_by_current_packet": false,
+      "fix": "restored from fixtures/atlas/atlas_snapshot_staged_spine_preview.json"
+    },
+    {
+      "id": "source_resolver",
+      "count": 2,
+      "root_cause": "global_limit_cap_and_oa_tei_status_expectation_drift",
+      "introduced_by_current_packet": false,
+      "fix": "updated test_source_resolver expectations"
+    },
+    {
+      "id": "connection_layer_recommender",
+      "count": 1,
+      "root_cause": "source_health_missing_signal_priority_over_missing_quote_span",
+      "introduced_by_current_packet": false,
+      "fix": "test acquisition summary includes sources_with_metadata"
+    }
+  ],
+  "current_packet_regressions": 0,
+  "fixes_applied": [
+    "tests/unit/operator_loop_helpers.py",
+    "operator loop/autocycle test seeds and execute-safe counts",
+    "fixtures/atlas/atlas_snapshot_v0_creativity_fixture.json regen",
+    "public atlas preview restored from staged spine reference",
+    "test_source_resolver.py",
+    "test_connection_layer_atlas_trace.py"
+  ],
+  "remaining_failures": [],
+  "safe_to_commit_current_packet": true,
+  "next_recommended_packet": "public-site-graph-panel-golden-gate"
+}

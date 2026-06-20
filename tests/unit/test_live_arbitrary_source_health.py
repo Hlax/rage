@@ -58,6 +58,36 @@ def test_local_safe_arbitrary_run_persists_source_health_and_artifact(
         conn.close()
 
 
+def test_local_safe_live_abstract_mode_accepts_fixture_abstracts(tmp_path: Path) -> None:
+    conn = ensure_database(tmp_path / "live_abstract_fixture.sqlite")
+    try:
+        records = load_manual_fixture_records(domain_pack="creativity")
+        persist_resolved_source_health(
+            conn,
+            records,
+            question=LOCAL_SAFE_ARBITRARY_QUESTION,
+            domain_pack="creativity",
+        )
+        outcome = persist_abstract_evidence_outcomes(
+            conn,
+            records,
+            question=LOCAL_SAFE_ARBITRARY_QUESTION,
+            live_abstract_mode=True,
+        )
+        assert outcome["live_abstract_mode"] is True
+        assert outcome["accepted_count"] >= 1
+        artifact = build_atlas_safe_run_artifact(
+            conn,
+            question=LOCAL_SAFE_ARBITRARY_QUESTION,
+            domain_pack="creativity",
+            run_report={"claims_accepted": outcome["accepted_count"]},
+        )
+        trace_summary = artifact.get("trace_summary") or {}
+        assert int(trace_summary.get("trace_count") or 0) >= 1
+    finally:
+        conn.close()
+
+
 def test_atlas_snapshot_exports_source_health_without_private_ids(tmp_path: Path) -> None:
     conn = ensure_database(tmp_path / "atlas_health.sqlite")
     try:

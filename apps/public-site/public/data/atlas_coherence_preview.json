@@ -8,7 +8,8 @@
     "reports": 2,
     "follow_up_questions": 1,
     "domains": 1,
-    "clusters": 2
+    "clusters": 2,
+    "atlas_trace_preview": 0
   },
   "preview_label": "Mock staged-spine atlas preview (fixture-safe)",
   "schema_version": "atlas_coherence_preview_v0"

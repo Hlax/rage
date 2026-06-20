@@ -6,6 +6,13 @@ import json
 import subprocess
 from pathlib import Path
 
+import pytest
+
+from rge.modules.live_probe_scratch import (
+    build_scratch_record,
+    ensure_scratch_database,
+    insert_reviewed_report,
+)
 from rge.modules.operator_loop import (
     WorkingTreeStatus,
     build_operator_plan,
@@ -20,12 +27,17 @@ from rge.modules.operator_loop import (
     safe_verification_commands,
     ticket_has_implementation_commit,
 )
-from rge.modules.live_probe_scratch import (
-    build_scratch_record,
-    ensure_scratch_database,
-    insert_reviewed_report,
-)
 from rge.modules.principal_audit_gate import QueueTicketRow
+from tests.unit.operator_loop_helpers import (
+    apply_live_smoke_env_gates,
+    seed_operator_neutral_plan_state,
+    seed_public_site_preview_paths,
+)
+
+
+@pytest.fixture(autouse=True)
+def _operator_loop_live_smoke_gates(monkeypatch: pytest.MonkeyPatch) -> None:
+    apply_live_smoke_env_gates(monkeypatch)
 
 
 def _seed_queue(tmp_path: Path, body: str) -> None:
@@ -159,16 +171,7 @@ def test_pending_improvement_ticket_requires_human_confirmation(tmp_path: Path) 
 
 
 def test_clean_safe_check_pass_when_no_open_ticket(tmp_path: Path) -> None:
-    _seed_queue(
-        tmp_path,
-        """
-| 40 | ticket-040 | done | prev | | |
-""",
-    )
-    (tmp_path / "agent_reports" / "2026-06-12_pre-phase-2_principal-audit.md").write_text(
-        "# audit", encoding="utf-8"
-    )
-    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+    clean_tree = seed_operator_neutral_plan_state(tmp_path)
 
     plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
     action = plan["next_recommended_action"]
@@ -211,11 +214,7 @@ def test_execute_safe_blocked_on_dirty_tree(tmp_path: Path) -> None:
 
 
 def test_execute_safe_runs_allowlisted_commands(tmp_path: Path) -> None:
-    _seed_queue(tmp_path, "| 40 | ticket-040 | done | prev | | |\n")
-    (tmp_path / "agent_reports" / "2026-06-12_pre-phase-2_principal-audit.md").write_text(
-        "# audit", encoding="utf-8"
-    )
-    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+    clean_tree = seed_operator_neutral_plan_state(tmp_path)
 
     def fake_runner(argv: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
         return subprocess.CompletedProcess(argv, 0, stdout="ok", stderr="")
@@ -227,7 +226,8 @@ def test_execute_safe_runs_allowlisted_commands(tmp_path: Path) -> None:
     )
 
     assert result["execution_status"] == "pass"
-    assert len(result["execution_results"]) == 4
+    expected_count = len(safe_verification_commands(tmp_path)) + 1
+    assert len(result["execution_results"]) == expected_count
     assert all(item["passed"] for item in result["execution_results"])
 
 
@@ -736,6 +736,7 @@ def test_evidence_review_action_not_when_scratch_empty(tmp_path: Path) -> None:
     _seed_queue(tmp_path, "| 73 | ticket-073 | done | evidence action | | |\n")
     scratch_db = tmp_path / "data" / "db" / "live_probe_scratch.sqlite"
     ensure_scratch_database(scratch_db).close()
+    seed_public_site_preview_paths(tmp_path, include_source_health=True)
     clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
 
     plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)

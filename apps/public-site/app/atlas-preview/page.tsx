@@ -15,6 +15,7 @@ import {
   resolveQuestionHeaderPreview,
   resolveReadinessPanelPreview,
   resolveSourceHealthPreview,
+  resolveTracePanelPreview,
   tinyAtlasConnectionPreview,
 } from '../../lib/atlasPreview';
 import { conceptToSlug, findCardById, findConceptBySlug } from '../../lib/publicCards';
@@ -160,6 +161,7 @@ export default function AtlasPreviewPage() {
   const readinessPanelPreview = resolveReadinessPanelPreview();
   const purposePanelPreview = resolvePurposePanelPreview();
   const graphSummaryPreview = resolveGraphSummaryPanelPreview();
+  const tracePanelPreview = resolveTracePanelPreview();
   const readinessEntries = Object.entries(connectionPreview.readiness);
 
   return (
@@ -182,6 +184,7 @@ export default function AtlasPreviewPage() {
       >
         {questionHeaderPreview.page_subtitle}
       </p>
+      {/* Research Atlas · staged-spine mock preview (fixture fallback via atlasPreview.ts) */}
       <h1 style={{ fontSize: '1.7rem', lineHeight: 1.25, marginTop: '0.35rem' }}>
         {questionHeaderPreview.page_title}
       </h1>
@@ -566,8 +569,17 @@ export default function AtlasPreviewPage() {
 
       <section style={sectionStyle}>
         <h2 style={headingStyle}>Evidence trace detail panel</h2>
+        <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+          Preview source:{' '}
+          {tracePanelPreview.preview_source === 'run_artifact'
+            ? 'Atlas-safe source-health run artifact'
+            : 'fixture-backed tiny connection preview'}
+          {' · '}
+          {tracePanelPreview.trace_count} trace(s) · {tracePanelPreview.atom_count} atom(s) ·{' '}
+          {tracePanelPreview.accepted_claim_count} accepted claim(s)
+        </p>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-          {connectionPreview.trace_details.map((trace) => (
+          {tracePanelPreview.trace_details.map((trace) => (
             <li key={trace.trace_ref} style={panelStyle}>
               <p style={mutedLabelStyle}>
                 {trace.trace_ref} · source status {humanizeLabel(trace.source_status)}

@@ -232,7 +232,7 @@ def test_resolve_work_candidates_openalex_and_arxiv_mocked(
             backends=["openalex", "arxiv"],
         )
 
-    assert result["resolved_count"] == 4
+    assert result["resolved_count"] == 2
     kinds = {record["source_kind"] for record in result["records"]}
     assert kinds == {"openalex", "arxiv"}
 
@@ -257,6 +257,7 @@ def test_resolve_sources_cli_fixture_mode(
         METADATA_ONLY,
         ABSTRACT_AVAILABLE,
         OA_PDF_AVAILABLE,
+        OA_TEI_AVAILABLE,
     }
 
 

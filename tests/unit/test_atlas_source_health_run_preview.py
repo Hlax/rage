@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from rge.modules.atlas_snapshot_builder import assert_no_private_fields
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -37,6 +39,8 @@ def test_atlas_preview_wires_source_health_resolver() -> None:
     assert "resolvePurposePanelPreview" in page
     assert "resolveGraphSummaryPanelPreview" in lib
     assert "resolveGraphSummaryPanelPreview" in page
+    assert "resolveTracePanelPreview" in lib
+    assert "resolveTracePanelPreview" in page
     assert "Graph summary panel" in page
     assert "atlas_source_health_run_latest.json" in lib
     assert "fetch(" not in page
@@ -75,6 +79,22 @@ def test_atlas_preview_graph_summary_resolver_supports_fixture_fallback() -> Non
     assert "mapFixtureGraphSummaryPanel" in lib
     assert "preview_source: 'fixture'" in lib
     assert "mapRunArtifactToGraphSummaryPanel" in lib
+
+
+def test_atlas_preview_trace_resolver_supports_fixture_fallback() -> None:
+    lib = ATLAS_PREVIEW_LIB.read_text(encoding="utf-8")
+    assert "mapFixtureTracePanel" in lib
+    assert "mapRunArtifactToTracePanel" in lib
+    assert "preview_source: 'fixture'" in lib
+
+
+def test_atlas_source_health_run_artifact_includes_trace_summary_fields() -> None:
+    artifact = json.loads(ARTIFACT_PATH.read_text(encoding="utf-8"))
+    trace_summary = artifact.get("trace_summary")
+    if trace_summary is None:
+        pytest.skip("Committed run artifact predates trace_summary; refresh after live smoke.")
+    assert "trace_count" in trace_summary
+    assert "atlas_trace_preview" in trace_summary
 
 
 def test_atlas_source_health_run_artifact_includes_gaps_fields() -> None:

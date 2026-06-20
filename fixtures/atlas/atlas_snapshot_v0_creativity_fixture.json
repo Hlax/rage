@@ -529,6 +529,40 @@
       "limitations_count": 1
     }
   ],
+  "source_health_preview": {
+    "source_status_counts": {},
+    "acquisition_status_counts": {},
+    "parser_backend_counts": {},
+    "source_type_counts": {
+      "fixture": 3
+    },
+    "quality_gate_status_counts": {},
+    "extractable_counts": {},
+    "failure_reason_counts": {},
+    "resolver_source_counts": {},
+    "availability_counts": {
+      "oa_available": 0,
+      "pdf_available": 0,
+      "tei_available": 0
+    },
+    "purpose_fit_status_counts": {},
+    "purpose_gate_decision_counts": {},
+    "sources_with_metadata": 3,
+    "source_rows": [
+      {
+        "source_ref": "source_001",
+        "db_status": "ingested"
+      },
+      {
+        "source_ref": "source_002",
+        "db_status": "ingested"
+      },
+      {
+        "source_ref": "source_003",
+        "db_status": "ingested"
+      }
+    ]
+  },
   "atlas_trace_preview": [
     {
       "trace_ref": "trace_001",

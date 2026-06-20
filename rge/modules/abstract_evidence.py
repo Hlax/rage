@@ -13,6 +13,11 @@ from pathlib import Path
 from typing import Any
 
 from rge.modules.claim_extractor import extract_and_validate_for_chunk
+from rge.modules.claim_validator import (
+    REJECTION_UNSUPPORTED,
+    REJECTION_ZERO_QUOTEABLE,
+    validate_candidate_claim,
+)
 from rge.modules.purpose_gating import evaluate_text_purpose_fit
 from rge.modules.source_resolver.evidence import explain_source_evidence
 from rge.modules.source_resolver.status import (
@@ -69,6 +74,115 @@ def build_abstract_chunk(
     }
 
 
+def _collapse_whitespace(text: str) -> str:
+    return " ".join(text.split())
+
+
+def select_quote_span_from_abstract(
+    abstract_text: str,
+    *,
+    min_chars: int = 40,
+    max_chars: int = 280,
+) -> str | None:
+    """Pick the first substantive abstract sentence for deterministic live quoting."""
+    text = abstract_text.strip()
+    if not text:
+        return None
+
+    sentences = re.split(r"(?<=[.!?])\s+", text)
+    for sentence in sentences:
+        candidate = sentence.strip()
+        if len(candidate) < min_chars:
+            continue
+        if len(candidate) > max_chars:
+            truncated = candidate[:max_chars]
+            if " " in truncated:
+                truncated = truncated.rsplit(" ", 1)[0]
+            candidate = truncated.strip()
+        return candidate.rstrip(".")
+
+    collapsed = _collapse_whitespace(text)
+    if len(collapsed) < min_chars:
+        return None
+    snippet = collapsed[:max_chars]
+    if len(snippet) == max_chars and " " in snippet:
+        snippet = snippet.rsplit(" ", 1)[0]
+    return snippet.strip().rstrip(".")
+
+
+def propose_quote_grounded_claim_from_abstract(
+    abstract_text: str,
+    *,
+    source_id: str,
+    chunk_id: str,
+    domain_pack: str = "creativity",
+) -> dict[str, Any] | None:
+    """Build a validator-ready candidate claim from a live abstract excerpt."""
+    quote_span = select_quote_span_from_abstract(abstract_text)
+    if not quote_span:
+        return None
+    return {
+        "claim_text": quote_span,
+        "quote_span": quote_span,
+        "subject": "Abstract",
+        "predicate": "reports",
+        "object": "content from the quoted excerpt",
+        "scope": quote_span,
+        "evidence_type": "empirical",
+        "confidence": 0.55,
+        "limitations": [
+            "Abstract-only evidence from a deterministic live quote span.",
+        ],
+        "domain": domain_pack,
+        "domain_metadata": {"evidence_basis": ABSTRACT_EVIDENCE_BASIS},
+        "source_id": source_id,
+        "chunk_id": chunk_id,
+    }
+
+
+def extract_and_validate_live_abstract_chunk(
+    chunk: dict[str, Any],
+    *,
+    domain_pack: str | None = None,
+) -> dict[str, list[dict[str, Any]]]:
+    """Validate one abstract chunk using a deterministic quote span (no mock LLM)."""
+    pack = domain_pack or str(chunk.get("domain_pack") or "creativity")
+    candidate = propose_quote_grounded_claim_from_abstract(
+        str(chunk.get("chunk_text") or ""),
+        source_id=str(chunk.get("source_id") or ""),
+        chunk_id=str(chunk.get("id") or ""),
+        domain_pack=pack,
+    )
+    if candidate is None:
+        return {
+            "accepted": [],
+            "rejected": [
+                {
+                    "source_id": chunk.get("source_id"),
+                    "chunk_id": chunk.get("id"),
+                    "rejection_reason": REJECTION_ZERO_QUOTEABLE,
+                }
+            ],
+        }
+
+    status, claim_dict, reason = validate_candidate_claim(
+        candidate,
+        chunk_text=str(chunk.get("chunk_text") or ""),
+        domain_pack=pack,
+    )
+    if status == "accepted" and claim_dict is not None:
+        return {"accepted": [claim_dict], "rejected": []}
+    return {
+        "accepted": [],
+        "rejected": [
+            {
+                **candidate,
+                "rejection_reason": reason or REJECTION_UNSUPPORTED,
+            }
+        ],
+    }
+
+
 def _fixture_for_abstract(abstract_text: str) -> str:
     lowered = abstract_text.casefold()
     if "human-ai" in lowered and "songwriting" in lowered:
@@ -85,6 +199,7 @@ def extract_abstract_evidence_card(
     question: str | None = None,
     fixture_name: str | None = None,
     client: Any | None = None,
+    live_abstract_mode: bool = False,
 ) -> dict[str, Any]:
     """Extract quote-grounded claims from one resolver record's abstract."""
     evidence_summary = explain_source_evidence(record)
@@ -150,13 +265,22 @@ def extract_abstract_evidence_card(
             "rejected_claims": [],
         }
 
-    resolved_fixture = fixture_name or _fixture_for_abstract(chunk["chunk_text"])
-    validation = extract_and_validate_for_chunk(
-        chunk,
-        domain_pack=pack,
-        fixture_name=resolved_fixture,
-        client=client,
-    )
+    if live_abstract_mode:
+        validation = extract_and_validate_live_abstract_chunk(
+            chunk,
+            domain_pack=pack,
+        )
+        resolved_fixture = None
+        extraction_mode = "live_deterministic_quote"
+    else:
+        resolved_fixture = fixture_name or _fixture_for_abstract(chunk["chunk_text"])
+        validation = extract_and_validate_for_chunk(
+            chunk,
+            domain_pack=pack,
+            fixture_name=resolved_fixture,
+            client=client,
+        )
+        extraction_mode = "mock_fixture"
     accepted = []
     purpose_rejected = []
     for claim in validation.get("accepted", []):
@@ -199,6 +323,7 @@ def extract_abstract_evidence_card(
         "evidence_basis": ABSTRACT_EVIDENCE_BASIS,
         "status": "completed",
         "abstract_char_count": len(chunk["chunk_text"]),
+        "extraction_mode": extraction_mode,
         "fixture_name": resolved_fixture,
         "purpose_match_status": source_purpose_fit["purpose_match_status"],
         "purpose_gate_decision": source_purpose_fit["decision"],
@@ -218,6 +343,7 @@ def generate_abstract_evidence_cards(
     domain_pack: str | None = None,
     question: str | None = None,
     client: Any | None = None,
+    live_abstract_mode: bool = False,
 ) -> dict[str, Any]:
     """Generate abstract evidence cards for many resolved source records."""
     cards: list[dict[str, Any]] = []
@@ -228,6 +354,7 @@ def generate_abstract_evidence_cards(
                 domain_pack=domain_pack,
                 question=question,
                 client=client,
+                live_abstract_mode=live_abstract_mode,
             )
         )
     completed = [card for card in cards if card.get("status") == "completed"]

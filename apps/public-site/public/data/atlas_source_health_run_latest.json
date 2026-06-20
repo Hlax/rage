@@ -37,65 +37,56 @@
   },
   "source_health_summary": {
     "source_status_counts": {
-      "oa_tei_available": 1,
-      "oa_pdf_available": 1,
-      "abstract_available": 1,
-      "metadata_only": 1
+      "oa_pdf_available": 5
     },
     "acquisition_status_counts": {
-      "oa_tei_available": 1,
-      "oa_pdf_available": 1,
-      "abstract_available": 1,
-      "metadata_only": 1
+      "oa_pdf_available": 5
     },
     "parser_backend_counts": {
-      "abstract_record": 3,
-      "none": 1
+      "abstract_record": 5
     },
     "source_type_counts": {
-      "manual_fixture": 4
+      "openalex": 1,
+      "arxiv": 4
     },
     "quality_gate_status_counts": {
-      "extractable": 3,
-      "blocked": 1
+      "extractable": 5
     },
     "extractable_counts": {
-      "true": 3,
-      "false": 1
+      "true": 5
     },
-    "failure_reason_counts": {
-      "skip_llm_extraction": 1
-    },
+    "failure_reason_counts": {},
     "resolver_source_counts": {
-      "manual_fixture": 4
+      "openalex": 1,
+      "arxiv": 4
     },
     "availability_counts": {
-      "oa_available": 2,
-      "pdf_available": 1,
-      "tei_available": 1
+      "oa_available": 5,
+      "pdf_available": 5,
+      "tei_available": 0
     },
     "purpose_fit_status_counts": {
-      "match": 4
+      "match": 5
     },
     "purpose_gate_decision_counts": {
-      "accepted": 4
+      "accepted": 5
     },
-    "sources_with_metadata": 4,
+    "sources_with_metadata": 5,
     "source_rows": [
       {
         "source_ref": "source_001",
-        "source_status": "oa_tei_available",
-        "acquisition_status": "oa_tei_available",
+        "source_status": "oa_pdf_available",
+        "acquisition_status": "oa_pdf_available",
         "parser_backend": "abstract_record",
-        "source_type": "manual_fixture",
+        "source_type": "openalex",
         "quality_gate_status": "extractable",
         "extractable": true,
-        "resolver_source": "manual_fixture",
+        "resolver_source": "openalex",
         "oa_available": true,
-        "pdf_available": false,
-        "tei_available": true,
+        "pdf_available": true,
+        "tei_available": false,
         "is_oa": true,
-        "oa_status": "gold",
+        "oa_status": "open",
         "purpose_fit_status": "match",
         "purpose_fit_reason": "No purpose-specific concept gate was required.",
         "purpose_gate_decision": "accepted",
@@ -106,15 +97,15 @@
         "source_status": "oa_pdf_available",
         "acquisition_status": "oa_pdf_available",
         "parser_backend": "abstract_record",
-        "source_type": "manual_fixture",
+        "source_type": "arxiv",
         "quality_gate_status": "extractable",
         "extractable": true,
-        "resolver_source": "manual_fixture",
+        "resolver_source": "arxiv",
         "oa_available": true,
         "pdf_available": true,
         "tei_available": false,
         "is_oa": true,
-        "oa_status": "gold",
+        "oa_status": "open",
         "purpose_fit_status": "match",
         "purpose_fit_reason": "No purpose-specific concept gate was required.",
         "purpose_gate_decision": "accepted",
@@ -122,18 +113,18 @@
       },
       {
         "source_ref": "source_003",
-        "source_status": "abstract_available",
-        "acquisition_status": "abstract_available",
+        "source_status": "oa_pdf_available",
+        "acquisition_status": "oa_pdf_available",
         "parser_backend": "abstract_record",
-        "source_type": "manual_fixture",
+        "source_type": "arxiv",
         "quality_gate_status": "extractable",
         "extractable": true,
-        "resolver_source": "manual_fixture",
-        "oa_available": false,
-        "pdf_available": false,
+        "resolver_source": "arxiv",
+        "oa_available": true,
+        "pdf_available": true,
         "tei_available": false,
-        "is_oa": false,
-        "oa_status": "closed",
+        "is_oa": true,
+        "oa_status": "open",
         "purpose_fit_status": "match",
         "purpose_fit_reason": "No purpose-specific concept gate was required.",
         "purpose_gate_decision": "accepted",
@@ -141,66 +132,66 @@
       },
       {
         "source_ref": "source_004",
-        "source_status": "metadata_only",
-        "acquisition_status": "metadata_only",
-        "parser_backend": "none",
-        "source_type": "manual_fixture",
-        "quality_gate_status": "blocked",
-        "extractable": false,
-        "failure_reason": "skip_llm_extraction",
-        "resolver_source": "manual_fixture",
-        "oa_available": false,
-        "pdf_available": false,
+        "source_status": "oa_pdf_available",
+        "acquisition_status": "oa_pdf_available",
+        "parser_backend": "abstract_record",
+        "source_type": "arxiv",
+        "quality_gate_status": "extractable",
+        "extractable": true,
+        "resolver_source": "arxiv",
+        "oa_available": true,
+        "pdf_available": true,
         "tei_available": false,
-        "is_oa": false,
-        "oa_status": "closed",
+        "is_oa": true,
+        "oa_status": "open",
         "purpose_fit_status": "match",
         "purpose_fit_reason": "No purpose-specific concept gate was required.",
         "purpose_gate_decision": "accepted",
-        "db_status": "failed"
+        "db_status": "parsed"
+      },
+      {
+        "source_ref": "source_005",
+        "source_status": "oa_pdf_available",
+        "acquisition_status": "oa_pdf_available",
+        "parser_backend": "abstract_record",
+        "source_type": "arxiv",
+        "quality_gate_status": "extractable",
+        "extractable": true,
+        "resolver_source": "arxiv",
+        "oa_available": true,
+        "pdf_available": true,
+        "tei_available": false,
+        "is_oa": true,
+        "oa_status": "open",
+        "purpose_fit_status": "match",
+        "purpose_fit_reason": "No purpose-specific concept gate was required.",
+        "purpose_gate_decision": "accepted",
+        "db_status": "parsed"
       }
     ]
   },
   "purpose_fit_summary": {
     "source_counts": {
-      "match": 4
+      "match": 5
     },
     "gate_decision_counts": {
-      "accepted": 4
+      "accepted": 5
     },
-    "accepted_evidence_count": 1,
-    "rejected_evidence_count": 2
+    "accepted_evidence_count": 0,
+    "rejected_evidence_count": 5
   },
   "graph_summary": {
-    "claims": 3,
-    "atoms": 1,
-    "relationships": 1,
+    "claims": 5,
+    "atoms": 0,
+    "relationships": 0,
     "connection_metrics": {
       "schema_version": "graph_connection_metrics_v0.1.0",
-      "clusters": [
-        {
-          "cluster_id": "cluster_unassigned",
-          "claims_per_cluster": 1,
-          "atoms_per_cluster": 1,
-          "relationships_per_cluster": 1,
-          "sources_per_cluster": 1,
-          "contradiction_edges": 0,
-          "qualification_edges": 0,
-          "contradiction_edge_count": 0,
-          "qualification_edge_count": 0,
-          "orphan_claims": 0,
-          "orphan_atoms": 0,
-          "orphan_claim_count": 0,
-          "orphan_atom_count": 0,
-          "relationship_density": 1.0,
-          "low_relationship_density": false
-        }
-      ],
+      "clusters": [],
       "totals": {
-        "claims": 1,
-        "atoms": 1,
-        "relationships": 1,
-        "sources": 1,
+        "claims": 0,
+        "atoms": 0,
+        "relationships": 0,
+        "sources": 0,
         "orphan_claims": 0,
         "orphan_atoms": 0,
         "orphan_claim_count": 0,
@@ -210,16 +201,16 @@
         "multi_claim_atom_count": 0,
         "source_diverse_atom_count": 0,
         "purpose_mismatch_count": 0,
-        "weak_atom_count": 1,
+        "weak_atom_count": 0,
         "clustered_atom_count": 0,
         "synthesis_ready_cluster_count": 0,
-        "frontend_ready_trace_count": 1
+        "frontend_ready_trace_count": 0
       }
     }
   },
   "readiness_warnings": [
-    "Acquisition or purpose blockers present: skip_llm_extraction"
+    "No relationship graph was produced for this run."
   ],
-  "next_recommended_packet": "Phase4-P10-evidence-atom-clustering",
-  "next_recommended_reason": "Most evidence atoms remain weak one-claim objects; cluster compatible claims before UI synthesis."
+  "next_recommended_packet": "MVP-P6-pdf-parser-milestone",
+  "next_recommended_reason": "High unsupported_claim volume with dirty or parsed PDF text indicates acquisition/parsing failure rather than ranking failure."
 }

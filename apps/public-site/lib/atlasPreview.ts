@@ -148,6 +148,29 @@ export type AtlasSourceHealthRunArtifact = {
     acceptable_source_types?: string[];
     output_targets?: string[];
   };
+  trace_summary?: {
+    trace_count?: number;
+    frontend_ready_trace_count?: number;
+    atom_count?: number;
+    accepted_claim_count?: number;
+    atlas_trace_preview?: Array<{
+      trace_ref?: string;
+      connection_type?: string;
+      maturity?: string;
+      atom_cluster_maturity?: string;
+      purpose_match_status?: string;
+      evidence_decision?: string;
+      visibility?: string;
+      has_quote?: boolean;
+      concept_count?: number;
+      relationship_count?: number;
+      relationship_types?: string[];
+      relationship_type?: string;
+      why_clustered?: string;
+      why_evidence_downgraded_or_rejected?: string;
+      why_connected?: string;
+    }>;
+  };
 };
 
 export type AtlasPurposePanelPreview = {
@@ -206,6 +229,25 @@ export type AtlasGraphSummaryPanelPreview = {
   top_graph_blockers: string[];
   next_recommended_packet: string;
   recommender_reason: string;
+};
+
+export type AtlasTracePanelRow = {
+  trace_ref: string;
+  source_status: string;
+  claim_summary: string;
+  atom_ref: string;
+  concept_links: string[];
+  relationship_links: string[];
+  cluster_link: string;
+  public_safe_connection_explanation: string;
+};
+
+export type AtlasTracePanelPreview = {
+  trace_count: number;
+  frontend_ready_trace_count: number;
+  atom_count: number;
+  accepted_claim_count: number;
+  trace_details: AtlasTracePanelRow[];
 };
 
 export type TinyAtlasConnectionPreview = {
@@ -706,6 +748,77 @@ export function resolveAtlasCoherencePreview(): AtlasCoherenceSummary & {
     preview_label: atlasCoherence.preview_label,
     population: atlasCoherence.population,
   };
+}
+
+/** Prefer Atlas-safe run artifact trace rows; fall back to fixture trace details. */
+export function mapRunArtifactTraceRow(
+  trace: NonNullable<
+    NonNullable<AtlasSourceHealthRunArtifact['trace_summary']>['atlas_trace_preview']
+  >[number],
+): AtlasTracePanelRow {
+  const relationshipTypes = list(trace.relationship_types);
+  const relationshipType = String(trace.relationship_type || '');
+  const relationshipLinks =
+    relationshipTypes.length > 0
+      ? relationshipTypes.map((item) => humanizeLabel(item))
+      : relationshipType
+        ? [humanizeLabel(relationshipType)]
+        : [];
+  const conceptCount = Number(trace.concept_count ?? 0);
+  return {
+    trace_ref: String(trace.trace_ref || 'trace_unknown'),
+    source_status: String(trace.purpose_match_status || 'live_abstract'),
+    claim_summary:
+      String(trace.why_connected || trace.why_clustered || '').trim() ||
+      'Quote-backed abstract evidence trace',
+    atom_ref: trace.has_quote ? 'atom_present' : 'atom_pending',
+    concept_links:
+      conceptCount > 0 ? [`${conceptCount} linked concept(s)`] : ['concepts pending'],
+    relationship_links: relationshipLinks.length > 0 ? relationshipLinks : ['relationships pending'],
+    cluster_link: String(trace.atom_cluster_maturity || 'seed'),
+    public_safe_connection_explanation:
+      String(trace.why_connected || trace.why_clustered || '').trim() ||
+      'Live abstract evidence trace preview without private row IDs or raw quote text.',
+  };
+}
+
+export function mapRunArtifactToTracePanel(
+  artifact: AtlasSourceHealthRunArtifact,
+): AtlasTracePanelPreview {
+  const summary = artifact.trace_summary || {};
+  const rows = (summary.atlas_trace_preview ?? []).map(mapRunArtifactTraceRow);
+  return {
+    trace_count: Number(summary.trace_count ?? rows.length),
+    frontend_ready_trace_count: Number(
+      summary.frontend_ready_trace_count ?? rows.length,
+    ),
+    atom_count: Number(summary.atom_count ?? 0),
+    accepted_claim_count: Number(summary.accepted_claim_count ?? 0),
+    trace_details: rows,
+  };
+}
+
+function mapFixtureTracePanel(): AtlasTracePanelPreview {
+  const traces = tinyAtlasConnectionPreview.trace_details;
+  return {
+    trace_count: traces.length,
+    frontend_ready_trace_count: traces.length,
+    atom_count: tinyAtlasConnectionPreview.evidence_atoms.length,
+    accepted_claim_count: tinyAtlasConnectionPreview.cluster.claims_per_cluster,
+    trace_details: traces,
+  };
+}
+
+export function resolveTracePanelPreview(): AtlasTracePanelPreview & {
+  preview_source: 'run_artifact' | 'fixture';
+} {
+  if (atlasSourceHealthRunArtifact.schema_version === ATLAS_SOURCE_HEALTH_RUN_SCHEMA) {
+    const panel = mapRunArtifactToTracePanel(atlasSourceHealthRunArtifact);
+    if (panel.trace_details.length > 0) {
+      return { ...panel, preview_source: 'run_artifact' };
+    }
+  }
+  return { ...mapFixtureTracePanel(), preview_source: 'fixture' };
 }
 
 export function coherenceBadgeColor(verdict: string): string {

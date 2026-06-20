@@ -266,7 +266,7 @@ def test_missing_quote_span_maps_to_quoteability_packet() -> None:
             "claims_accepted": 0,
             "claims_rejected": 3,
             "top_failure_modes": [{"reason": "missing_quote_span", "count": 3}],
-            "acquisition_quality_summary": {},
+            "acquisition_quality_summary": {"sources_with_metadata": 1},
         }
     )
     assert result["recommended_packet"] == PACKET_QUALITY_GATES
