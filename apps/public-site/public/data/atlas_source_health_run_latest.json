@@ -37,16 +37,16 @@
   },
   "source_health_summary": {
     "source_status_counts": {
-      "abstract_available": 1,
-      "metadata_only": 1,
       "oa_tei_available": 1,
-      "oa_pdf_available": 1
+      "oa_pdf_available": 1,
+      "abstract_available": 1,
+      "metadata_only": 1
     },
     "acquisition_status_counts": {
-      "abstract_available": 1,
-      "metadata_only": 1,
       "oa_tei_available": 1,
-      "oa_pdf_available": 1
+      "oa_pdf_available": 1,
+      "abstract_available": 1,
+      "metadata_only": 1
     },
     "parser_backend_counts": {
       "abstract_record": 3,
@@ -84,45 +84,6 @@
     "source_rows": [
       {
         "source_ref": "source_001",
-        "source_status": "abstract_available",
-        "acquisition_status": "abstract_available",
-        "parser_backend": "abstract_record",
-        "source_type": "manual_fixture",
-        "quality_gate_status": "extractable",
-        "extractable": true,
-        "resolver_source": "manual_fixture",
-        "oa_available": false,
-        "pdf_available": false,
-        "tei_available": false,
-        "is_oa": false,
-        "oa_status": "closed",
-        "purpose_fit_status": "match",
-        "purpose_fit_reason": "No purpose-specific concept gate was required.",
-        "purpose_gate_decision": "accepted",
-        "db_status": "parsed"
-      },
-      {
-        "source_ref": "source_002",
-        "source_status": "metadata_only",
-        "acquisition_status": "metadata_only",
-        "parser_backend": "none",
-        "source_type": "manual_fixture",
-        "quality_gate_status": "blocked",
-        "extractable": false,
-        "failure_reason": "skip_llm_extraction",
-        "resolver_source": "manual_fixture",
-        "oa_available": false,
-        "pdf_available": false,
-        "tei_available": false,
-        "is_oa": false,
-        "oa_status": "closed",
-        "purpose_fit_status": "match",
-        "purpose_fit_reason": "No purpose-specific concept gate was required.",
-        "purpose_gate_decision": "accepted",
-        "db_status": "failed"
-      },
-      {
-        "source_ref": "source_003",
         "source_status": "oa_tei_available",
         "acquisition_status": "oa_tei_available",
         "parser_backend": "abstract_record",
@@ -141,7 +102,7 @@
         "db_status": "parsed"
       },
       {
-        "source_ref": "source_004",
+        "source_ref": "source_002",
         "source_status": "oa_pdf_available",
         "acquisition_status": "oa_pdf_available",
         "parser_backend": "abstract_record",
@@ -158,6 +119,45 @@
         "purpose_fit_reason": "No purpose-specific concept gate was required.",
         "purpose_gate_decision": "accepted",
         "db_status": "parsed"
+      },
+      {
+        "source_ref": "source_003",
+        "source_status": "abstract_available",
+        "acquisition_status": "abstract_available",
+        "parser_backend": "abstract_record",
+        "source_type": "manual_fixture",
+        "quality_gate_status": "extractable",
+        "extractable": true,
+        "resolver_source": "manual_fixture",
+        "oa_available": false,
+        "pdf_available": false,
+        "tei_available": false,
+        "is_oa": false,
+        "oa_status": "closed",
+        "purpose_fit_status": "match",
+        "purpose_fit_reason": "No purpose-specific concept gate was required.",
+        "purpose_gate_decision": "accepted",
+        "db_status": "parsed"
+      },
+      {
+        "source_ref": "source_004",
+        "source_status": "metadata_only",
+        "acquisition_status": "metadata_only",
+        "parser_backend": "none",
+        "source_type": "manual_fixture",
+        "quality_gate_status": "blocked",
+        "extractable": false,
+        "failure_reason": "skip_llm_extraction",
+        "resolver_source": "manual_fixture",
+        "oa_available": false,
+        "pdf_available": false,
+        "tei_available": false,
+        "is_oa": false,
+        "oa_status": "closed",
+        "purpose_fit_status": "match",
+        "purpose_fit_reason": "No purpose-specific concept gate was required.",
+        "purpose_gate_decision": "accepted",
+        "db_status": "failed"
       }
     ]
   },

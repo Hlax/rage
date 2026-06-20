@@ -226,3 +226,13 @@ def test_live_staged_orchestrator_atlas_snapshot_coherence(
         )
 
     assert audit["edges"] >= 1
+
+    source_health = snapshot.get("source_health_preview") or {}
+    assert int(source_health.get("sources_with_metadata") or 0) >= 1
+    assert source_health.get("source_status_counts")
+    assert source_health.get("source_rows")
+    health_leaks = assert_no_private_fields({"source_health_preview": source_health})
+    assert health_leaks == []
+    joined = json.dumps(source_health)
+    assert "source_id" not in joined
+    assert "local_path" not in joined

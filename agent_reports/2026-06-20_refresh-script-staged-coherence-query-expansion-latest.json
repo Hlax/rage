@@ -1,0 +1,41 @@
+{
+  "report_type": "agent_packet_report",
+  "date": "2026-06-20",
+  "packets": [
+    {
+      "name": "Operator Refresh Script for Atlas Source Health",
+      "verdict": "GO",
+      "artifact": "scripts/refresh_atlas_source_health_preview.py"
+    },
+    {
+      "name": "Live Staged Atlas Source-Health Coherence",
+      "verdict": "GO",
+      "test": "tests/unit/test_live_staged_atlas_snapshot_coherence.py"
+    },
+    {
+      "name": "Purpose-Aware Query Expansion",
+      "verdict": "GO",
+      "module": "rge/modules/source_resolver/query_expansion.py"
+    }
+  ],
+  "verification": [
+    {
+      "command": "python -m pytest tests/unit/test_refresh_atlas_source_health_preview.py tests/unit/test_purpose_aware_query_expansion.py tests/unit/test_live_staged_atlas_snapshot_coherence.py::test_require_live_staged_atlas_coherence_skips_without_opt_in -q",
+      "status": "PASS",
+      "result": "11 passed"
+    },
+    {
+      "command": "python scripts/refresh_atlas_source_health_preview.py",
+      "status": "PASS"
+    },
+    {
+      "command": "python -m rge.modules.safety_auditor --audit full",
+      "status": "PASS"
+    }
+  ],
+  "next_3_recommended_packets": [
+    "README / Operator Quickstart Refresh Hooks",
+    "Live Network Query-Expansion Smoke",
+    "Atlas Gaps Panel from Run Artifact"
+  ]
+}

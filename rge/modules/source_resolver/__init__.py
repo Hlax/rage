@@ -163,9 +163,23 @@ def resolve_work_candidates(
             enricher=enricher,
         )
 
+    from rge.modules.source_resolver.query_expansion import (
+        expand_records_for_metadata_dominance,
+        metadata_only_dominates,
+    )
     from rge.modules.source_resolver.status import rank_records_by_extractability
 
     records = rank_records_by_extractability(records)
+    query_expansion: dict[str, Any] = {"expanded": False}
+    if not fixture_mode and metadata_only_dominates(records):
+        records, query_expansion = expand_records_for_metadata_dominance(
+            records,
+            query=query,
+            domain_pack=domain_pack,
+            limit=limit,
+            backends=selected_backends,
+            discover_backend=_discover_backend_candidates,
+        )
     if len(records) > limit:
         records = records[:limit]
 
@@ -182,6 +196,7 @@ def resolve_work_candidates(
         "records": records,
         "evidence_summaries": evidence,
         "unpaywall_skipped": unpaywall_skipped,
+        "query_expansion": query_expansion,
     }
 
 
