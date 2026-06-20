@@ -1,0 +1,89 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "Live network source health → Atlas visibility",
+  "date": "2026-06-20",
+  "verdict": "GO",
+  "verdict_scope": "real source discovery → source health persistence → purpose-fit/extractable counts → Atlas preview visibility",
+  "evidence_layer_verdict": "PARTIAL",
+  "commits": ["1ae4aaf", "cc534c9"],
+  "what_we_tested": [
+    "real source discovery",
+    "source health persistence",
+    "purpose-fit counts",
+    "blocked/extractable status",
+    "Atlas preview visibility"
+  ],
+  "go_criteria": "Real source acquisition visible and debuggable in Atlas",
+  "partial_note": "OpenAlex/arXiv found 5 extractable sources; abstract claim acceptance thin (0 accepted) under mock LLM — acceptable for this gate",
+  "live_commands": [
+    "$env:RGE_ALLOW_LIVE_SOURCE_HEALTH_SMOKE = \"1\"; $env:RGE_ALLOW_SOURCE_NETWORK = \"1\"; $env:OPENALEX_MAILTO = \"operator@example.com\"; $env:RGE_LLM_MODE = \"mock\"; python -m pytest tests/unit/test_live_network_source_health_smoke.py -m live_network -q",
+    "python scripts/refresh_atlas_source_health_preview.py --input data/exports/live_network_source_health_smoke/atlas_source_health_run_latest.json",
+    "cd apps/public-site && npm run build"
+  ],
+  "live_run_summary": {
+    "resolved_count": 5,
+    "backend_counts": {"openalex": 5, "arxiv": 5},
+    "persisted_resolver_source_counts": {"openalex": 1, "arxiv": 4},
+    "sources_with_metadata": 5,
+    "source_status_counts": {"oa_pdf_available": 5},
+    "quality_gate_status_counts": {"extractable": 5},
+    "purpose_fit_status_counts": {"match": 5},
+    "purpose_gate_decision_counts": {"accepted": 5},
+    "failure_reason_counts": {},
+    "claims_accepted": 0,
+    "claims_rejected": 5,
+    "rejection_reason": "unsupported_claim (mock fixture claim vs live abstract text)",
+    "atlas_artifact_public_safe": true
+  },
+  "atlas_preview_panels_verified": [
+    "question",
+    "purpose",
+    "source_health",
+    "graph_summary",
+    "readiness",
+    "gaps_next_move"
+  ],
+  "public_private_boundary": {
+    "operator_export_path": "data/exports/live_network_source_health_smoke/",
+    "public_artifact": "apps/public-site/public/data/atlas_source_health_run_latest.json",
+    "no_private_ids_in_public_artifact": true,
+    "safety_audit": "pass"
+  },
+  "verification": [
+    {
+      "command": "python -m pytest tests/unit/test_live_network_source_health_smoke.py -m live_network -q",
+      "status": "PASS",
+      "result": "2 passed"
+    },
+    {
+      "command": "python scripts/refresh_atlas_source_health_preview.py --input data/exports/live_network_source_health_smoke/atlas_source_health_run_latest.json",
+      "status": "PASS"
+    },
+    {
+      "command": "cd apps/public-site && npm run build",
+      "status": "PASS"
+    },
+    {
+      "command": "python -m rge.modules.safety_auditor --audit full",
+      "status": "PASS"
+    }
+  ],
+  "top_blockers": [
+    "Mock abstract extractor uses checksum fixture claim; all 5 live abstracts rejected unsupported_claim.",
+    "No live quote-backed abstract → atom → trace bridge yet.",
+    "Graph/relationship panels thin until claims accepted.",
+    "Lower atlas-preview sections still fixture-backed."
+  ],
+  "next_recommended_packet": {
+    "id": "live-abstract-evidence-atom-trace",
+    "title": "Live Abstract Evidence → Atom Trace",
+    "pipeline": [
+      "live OpenAlex/arXiv abstract",
+      "quote-backed abstract claim",
+      "purpose-gated acceptance",
+      "evidence atom",
+      "relationship/cluster if possible",
+      "Atlas trace preview"
+    ]
+  }
+}
