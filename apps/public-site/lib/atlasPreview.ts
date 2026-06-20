@@ -120,6 +120,54 @@ export type AtlasSourceHealthRunArtifact = {
   readiness_warnings?: string[];
   next_recommended_packet?: string;
   next_recommended_reason?: string;
+  purpose_fit_summary?: {
+    source_counts?: Record<string, number>;
+    gate_decision_counts?: Record<string, number>;
+    accepted_evidence_count?: number;
+    rejected_evidence_count?: number;
+  };
+  purpose?: {
+    research_intent?: string[];
+    asset_affordance?: string[];
+    evidence_maturity?: string;
+    training_suitability?: string;
+    evidence_need?: string;
+    acceptable_source_types?: string[];
+    output_targets?: string[];
+  };
+};
+
+export type AtlasPurposePanelPreview = {
+  domain_pack: string;
+  research_intents: string[];
+  asset_affordances: string[];
+  evidence_maturity: string;
+  training_suitability: string;
+  evidence_need: string;
+  acceptable_source_types: string[];
+  output_targets: string[];
+  purpose_fit_counts: Record<string, number>;
+  gate_decision_counts: Record<string, number>;
+};
+
+export type AtlasQuestionHeaderPreview = {
+  topic: string;
+  primary_question: string;
+  research_purpose: string;
+  asset_affordance_tags: string[];
+  readiness_verdict: string;
+};
+
+export type AtlasReadinessWarning = {
+  label: string;
+  detail: string;
+  severity: 'warning' | 'blocker' | 'info';
+};
+
+export type AtlasReadinessPanelPreview = {
+  warnings: AtlasReadinessWarning[];
+  warning_count: number;
+  readiness_surfaces: Record<string, { status: string; reason: string }>;
 };
 
 export type AtlasGapsNextMovePanel = {
@@ -285,6 +333,156 @@ export function resolveGapsNextMovePreview(): AtlasGapsNextMovePanel & {
   return {
     ...tinyAtlasConnectionPreview.gaps_next_move,
     preview_source: 'fixture',
+  };
+}
+
+export function mapRunArtifactToReadinessPanel(
+  artifact: AtlasSourceHealthRunArtifact,
+): AtlasReadinessPanelPreview {
+  const warnings = list(artifact.readiness_warnings).map((detail) => ({
+    label: 'Run readiness',
+    detail,
+    severity: detail.toLowerCase().includes('blocker') ? 'blocker' as const : 'warning' as const,
+  }));
+  return {
+    warnings,
+    warning_count: warnings.length,
+    readiness_surfaces: {},
+  };
+}
+
+function mapFixtureReadinessSurfaces(): Record<string, { status: string; reason: string }> {
+  const surfaces = tinyAtlasConnectionPreview.readiness || {};
+  return Object.fromEntries(
+    Object.entries(surfaces).map(([surface, readiness]) => [
+      surface,
+      { status: readiness.status, reason: readiness.reason },
+    ]),
+  );
+}
+
+/** Prefer Atlas-safe run artifact readiness warnings; fall back to fixture surfaces. */
+export function resolveReadinessPanelPreview(): AtlasReadinessPanelPreview & {
+  preview_source: 'run_artifact' | 'fixture';
+} {
+  if (atlasSourceHealthRunArtifact.schema_version === ATLAS_SOURCE_HEALTH_RUN_SCHEMA) {
+    return {
+      ...mapRunArtifactToReadinessPanel(atlasSourceHealthRunArtifact),
+      preview_source: 'run_artifact',
+    };
+  }
+  const surfaces = mapFixtureReadinessSurfaces();
+  const warnings = Object.entries(surfaces).map(([surface, readiness]) => ({
+    label: humanizeLabel(surface),
+    detail: `${readiness.status}: ${readiness.reason}`,
+    severity:
+      readiness.status === 'NO-GO'
+        ? ('blocker' as const)
+        : readiness.status === 'PARTIAL'
+          ? ('warning' as const)
+          : ('info' as const),
+  }));
+  return {
+    warnings,
+    warning_count: warnings.length,
+    readiness_surfaces: surfaces,
+    preview_source: 'fixture',
+  };
+}
+
+export function mapRunArtifactToPurposePanel(
+  artifact: AtlasSourceHealthRunArtifact,
+): AtlasPurposePanelPreview {
+  const purpose = artifact.purpose || {};
+  const purposeFit = artifact.source_health_summary.purpose_fit_status_counts || {};
+  const gateCounts = artifact.purpose_fit_summary?.gate_decision_counts || {};
+  return {
+    domain_pack: artifact.domain_pack,
+    research_intents: list(purpose.research_intent).map((item) => humanizeLabel(item)),
+    asset_affordances: list(purpose.asset_affordance).map((item) => humanizeLabel(item)),
+    evidence_maturity: humanizeLabel(purpose.evidence_maturity || 'seed'),
+    training_suitability: humanizeLabel(purpose.training_suitability || 'not_ready'),
+    evidence_need: humanizeLabel(purpose.evidence_need || 'mixed_empirical_theory'),
+    acceptable_source_types: list(purpose.acceptable_source_types).map((item) =>
+      humanizeLabel(item),
+    ),
+    output_targets: list(purpose.output_targets).map((item) => humanizeLabel(item)),
+    purpose_fit_counts: Object.fromEntries(
+      Object.entries(purposeFit).map(([key, count]) => [humanizeLabel(key), count]),
+    ),
+    gate_decision_counts: Object.fromEntries(
+      Object.entries(gateCounts).map(([key, count]) => [humanizeLabel(key), count]),
+    ),
+  };
+}
+
+/** Prefer Atlas-safe run artifact purpose metadata; fall back to fixture question block. */
+export function resolvePurposePanelPreview(): AtlasPurposePanelPreview & {
+  preview_source: 'run_artifact' | 'fixture';
+} {
+  if (atlasSourceHealthRunArtifact.schema_version === ATLAS_SOURCE_HEALTH_RUN_SCHEMA) {
+    return {
+      ...mapRunArtifactToPurposePanel(atlasSourceHealthRunArtifact),
+      preview_source: 'run_artifact',
+    };
+  }
+  const fixture = tinyAtlasConnectionPreview.question;
+  return {
+    domain_pack: fixture.topic,
+    research_intents: fixture.research_purpose.split(' · ').filter(Boolean),
+    asset_affordances: fixture.asset_affordance_tags.map((item) => humanizeLabel(item)),
+    evidence_maturity: 'Seed',
+    training_suitability: 'Not ready',
+    evidence_need: 'Mixed empirical theory',
+    acceptable_source_types: [],
+    output_targets: [],
+    purpose_fit_counts: {},
+    gate_decision_counts: {},
+    preview_source: 'fixture',
+  };
+}
+
+export function mapRunArtifactToQuestionHeader(
+  artifact: AtlasSourceHealthRunArtifact,
+): AtlasQuestionHeaderPreview {
+  const purpose = artifact.purpose || {};
+  const intents = list(purpose.research_intent);
+  const affordances = list(purpose.asset_affordance);
+  const maturity = purpose.evidence_maturity || 'seed';
+  const training = purpose.training_suitability || 'not_ready';
+  return {
+    topic: artifact.domain_pack,
+    primary_question: artifact.question,
+    research_purpose:
+      intents.length > 0
+        ? intents.map((item) => humanizeLabel(item)).join(' · ')
+        : 'Research review',
+    asset_affordance_tags: affordances.map((item) => humanizeLabel(item)),
+    readiness_verdict: `PARTIAL — ${humanizeLabel(maturity)} evidence / ${humanizeLabel(training)} training`,
+  };
+}
+
+/** Prefer Atlas-safe run artifact question header; fall back to tiny connection preview. */
+export function resolveQuestionHeaderPreview(): AtlasQuestionHeaderPreview & {
+  preview_source: 'run_artifact' | 'fixture';
+  page_title: string;
+  page_subtitle: string;
+} {
+  if (atlasSourceHealthRunArtifact.schema_version === ATLAS_SOURCE_HEALTH_RUN_SCHEMA) {
+    const header = mapRunArtifactToQuestionHeader(atlasSourceHealthRunArtifact);
+    return {
+      ...header,
+      preview_source: 'run_artifact',
+      page_title: header.primary_question,
+      page_subtitle: 'Atlas-safe source-health run artifact preview',
+    };
+  }
+  const fixture = tinyAtlasConnectionPreview.question;
+  return {
+    ...fixture,
+    preview_source: 'fixture',
+    page_title: atlasSnapshot.root.primary_question,
+    page_subtitle: 'Research Atlas · staged-spine mock preview',
   };
 }
 

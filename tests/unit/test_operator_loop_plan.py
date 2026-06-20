@@ -156,3 +156,106 @@ def test_proof_bundle_action_deferred_when_open_ticket_exists(
 
     assert plan["arbitrary_source_proof_bundle_status"]["proof_bundle_recommended"] is True
     assert plan["next_recommended_action"]["action_id"] == "begin_ticket_implementation"
+
+
+def _seed_public_site_preview_paths(tmp_path: Path, *, include_source_health: bool) -> None:
+    site = tmp_path / "apps" / "public-site"
+    public_data = site / "public" / "data"
+    public_data.mkdir(parents=True)
+    (site / "package.json").write_text("{}", encoding="utf-8")
+    (public_data / "atlas_snapshot_preview.json").write_text("{}", encoding="utf-8")
+    (public_data / "atlas_coherence_preview.json").write_text("{}", encoding="utf-8")
+    if include_source_health:
+        (public_data / "atlas_source_health_run_latest.json").write_text(
+            "{}", encoding="utf-8"
+        )
+    scripts = tmp_path / "scripts"
+    scripts.mkdir(parents=True)
+    (scripts / "refresh_atlas_preview_from_staged_spine.py").write_text(
+        "# refresh staged spine preview\n",
+        encoding="utf-8",
+    )
+    (scripts / "refresh_atlas_source_health_preview.py").write_text(
+        "# refresh source health preview\n",
+        encoding="utf-8",
+    )
+
+
+def test_plan_includes_atlas_preview_refresh_status(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("RGE_STAGED_RANK2_SCAN_MAX", raising=False)
+    _seed_done_only_queue(tmp_path)
+    _seed_public_site_preview_paths(tmp_path, include_source_health=False)
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+    status = plan["atlas_preview_refresh_status"]
+
+    assert status["status"] == "available"
+    assert status["refresh_recommended"] is True
+    assert status["single_refresh_recommended"] is True
+    assert "atlas_source_health_run_latest" in status["missing_outputs"]
+    assert "refresh_atlas_preview_from_staged_spine.py" in status["operator_commands"][
+        "staged_spine_refresh"
+    ]
+    assert "refresh_atlas_source_health_preview.py" in status["operator_commands"][
+        "source_health_refresh"
+    ]
+
+
+def test_atlas_refresh_recommended_action_when_missing_source_health_artifact(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _seed_done_only_queue(tmp_path)
+    _seed_public_site_preview_paths(tmp_path, include_source_health=False)
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+    action = plan["next_recommended_action"]
+
+    assert plan["atlas_preview_refresh_status"]["refresh_recommended"] is True
+    assert plan["atlas_preview_refresh_status"]["single_refresh_recommended"] is True
+    assert action["action_id"] == "refresh_atlas_public_previews"
+    assert len(action["commands"]) == 2
+    assert "refresh_atlas_preview_from_staged_spine.py" in action["commands"][0]["shell"]
+    assert "npm run build" in action["commands"][1]["shell"]
+
+
+def test_plan_includes_live_combined_source_health_smoke_status(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _seed_done_only_queue(tmp_path)
+    _seed_public_site_preview_paths(tmp_path, include_source_health=True)
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+    status = plan["live_combined_source_health_smoke_status"]
+
+    assert status["status"] == "available"
+    assert status["source_health_work_detected"] is True
+    assert status["live_smoke_recommended"] is True
+    assert "combined_source_health_smoke" in status["operator_commands"]["combined_smoke"]
+
+
+def test_live_combined_smoke_recommended_action_when_gates_unset(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _seed_done_only_queue(tmp_path)
+    _seed_public_site_preview_paths(tmp_path, include_source_health=True)
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+    monkeypatch.delenv("RGE_ALLOW_LIVE_SOURCE_HEALTH_SMOKE", raising=False)
+    monkeypatch.delenv("RGE_ALLOW_LIVE_QUERY_EXPANSION_SMOKE", raising=False)
+    monkeypatch.delenv("RGE_ALLOW_SOURCE_NETWORK", raising=False)
+    monkeypatch.delenv("OPENALEX_MAILTO", raising=False)
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+    action = plan["next_recommended_action"]
+
+    assert plan["live_combined_source_health_smoke_status"]["live_smoke_recommended"] is True
+    assert action["action_id"] == "run_live_combined_source_health_smoke"
+    assert "combined_source_health_smoke" in action["commands"][-1]["shell"]

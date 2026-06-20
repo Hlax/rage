@@ -170,3 +170,41 @@ def export_staged_spine_preview_to_paths(
         coherence_path=coherence_path,
         fixtures_reference_path=fixtures_reference_path,
     )
+
+
+def export_staged_spine_source_health_artifact(
+    conn: Any,
+    *,
+    run_id: str,
+    question: str,
+    domain_pack: str = "creativity",
+    output_path: Path,
+    question_id: str | None = None,
+) -> dict[str, Any]:
+    """Bridge staged-spine temp DB export to public source-health run artifact JSON."""
+    import json
+
+    from rge.db.repositories import RunReportRepository
+    from rge.modules.live_arbitrary_source_health import build_atlas_safe_run_artifact
+
+    record = RunReportRepository(conn).get_by_run_id(run_id)
+    run_report = json.loads(record.report_json) if record is not None else {}
+    artifact = build_atlas_safe_run_artifact(
+        conn,
+        question=question,
+        domain_pack=domain_pack,
+        run_report=run_report,
+        question_id=question_id or run_id,
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(artifact, indent=2), encoding="utf-8")
+    return {
+        "status": "completed",
+        "output_path": str(output_path),
+        "run_id": run_id,
+        "schema_version": artifact.get("schema_version"),
+        "sources_with_metadata": artifact.get("source_health_summary", {}).get(
+            "sources_with_metadata"
+        ),
+        "readiness_warning_count": len(artifact.get("readiness_warnings") or []),
+    }

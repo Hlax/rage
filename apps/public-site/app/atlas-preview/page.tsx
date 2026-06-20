@@ -10,6 +10,9 @@ import {
   humanizeLabel,
   resolveAtlasCoherencePreview,
   resolveGapsNextMovePreview,
+  resolvePurposePanelPreview,
+  resolveQuestionHeaderPreview,
+  resolveReadinessPanelPreview,
   resolveSourceHealthPreview,
   tinyAtlasConnectionPreview,
 } from '../../lib/atlasPreview';
@@ -152,6 +155,9 @@ export default function AtlasPreviewPage() {
   const connectionPreview = tinyAtlasConnectionPreview;
   const sourceHealthPreview = resolveSourceHealthPreview();
   const gapsNextMovePreview = resolveGapsNextMovePreview();
+  const questionHeaderPreview = resolveQuestionHeaderPreview();
+  const readinessPanelPreview = resolveReadinessPanelPreview();
+  const purposePanelPreview = resolvePurposePanelPreview();
   const readinessEntries = Object.entries(connectionPreview.readiness);
 
   return (
@@ -172,10 +178,10 @@ export default function AtlasPreviewPage() {
           color: '#8b93a3',
         }}
       >
-        Research Atlas · staged-spine mock preview
+        {questionHeaderPreview.page_subtitle}
       </p>
       <h1 style={{ fontSize: '1.7rem', lineHeight: 1.25, marginTop: '0.35rem' }}>
-        {atlasSnapshot.root.primary_question}
+        {questionHeaderPreview.page_title}
       </h1>
       <p style={bodyStyle}>
         This page renders a committed mock-safe staged-spine Atlas snapshot (fixture-mode
@@ -213,18 +219,23 @@ export default function AtlasPreviewPage() {
       <section style={sectionStyle}>
         <h2 style={headingStyle}>Tiny Atlas connection preview</h2>
         <div style={panelStyle}>
-          <p style={mutedLabelStyle}>Research question header</p>
+          <p style={mutedLabelStyle}>
+            Research question header ·{' '}
+            {questionHeaderPreview.preview_source === 'run_artifact'
+              ? 'Atlas-safe run artifact'
+              : 'fixture-backed tiny connection preview'}
+          </p>
           <h3 style={{ margin: '0.35rem 0', color: '#e6e8ec' }}>
-            {connectionPreview.question.primary_question}
+            {questionHeaderPreview.primary_question}
           </h3>
           <p style={{ margin: 0, color: '#aeb4c0', lineHeight: 1.55 }}>
-            Purpose: {connectionPreview.question.research_purpose}
+            Purpose: {questionHeaderPreview.research_purpose}
           </p>
           <p style={{ margin: '0.65rem 0 0', color: '#f0ce78', lineHeight: 1.45 }}>
-            Readiness verdict: {connectionPreview.question.readiness_verdict}
+            Readiness verdict: {questionHeaderPreview.readiness_verdict}
           </p>
           <div style={{ marginTop: '0.4rem' }}>
-            {renderBadgeList(connectionPreview.question.asset_affordance_tags)}
+            {renderBadgeList(questionHeaderPreview.asset_affordance_tags)}
           </div>
         </div>
       </section>
@@ -275,6 +286,109 @@ export default function AtlasPreviewPage() {
             ))}
           </ul>
         </div>
+      </section>
+
+      <section style={sectionStyle}>
+        <h2 style={headingStyle}>Purpose panel</h2>
+        <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+          Preview source:{' '}
+          {purposePanelPreview.preview_source === 'run_artifact'
+            ? 'Atlas-safe run artifact purpose metadata'
+            : 'fixture-backed question purpose block'}
+        </p>
+        <div style={panelStyle}>
+          <p style={mutedLabelStyle}>Domain pack · {purposePanelPreview.domain_pack}</p>
+          <p style={{ margin: '0.45rem 0 0', color: '#e6e8ec', lineHeight: 1.5 }}>
+            Research intents: {purposePanelPreview.research_intents.join(' · ') || '—'}
+          </p>
+          <p style={{ margin: '0.45rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+            Evidence need: {purposePanelPreview.evidence_need}
+          </p>
+          <p style={{ margin: '0.45rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+            Maturity / training: {purposePanelPreview.evidence_maturity} ·{' '}
+            {purposePanelPreview.training_suitability}
+          </p>
+          <div style={{ marginTop: '0.55rem' }}>
+            {renderBadgeList(purposePanelPreview.asset_affordances)}
+          </div>
+          {purposePanelPreview.acceptable_source_types.length > 0 ? (
+            <p style={{ margin: '0.75rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+              Acceptable sources: {purposePanelPreview.acceptable_source_types.join(', ')}
+            </p>
+          ) : null}
+          {purposePanelPreview.output_targets.length > 0 ? (
+            <p style={{ margin: '0.35rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+              Output targets: {purposePanelPreview.output_targets.join(', ')}
+            </p>
+          ) : null}
+        </div>
+        {Object.keys(purposePanelPreview.purpose_fit_counts).length > 0 ||
+        Object.keys(purposePanelPreview.gate_decision_counts).length > 0 ? (
+          <div style={{ ...smallGridStyle, marginTop: '0.75rem' }}>
+            {Object.entries(purposePanelPreview.purpose_fit_counts).map(([label, count]) => (
+              <MetricTile key={`fit-${label}`} label={`Purpose fit · ${label}`} value={count} />
+            ))}
+            {Object.entries(purposePanelPreview.gate_decision_counts).map(([label, count]) => (
+              <MetricTile key={`gate-${label}`} label={`Gate · ${label}`} value={count} />
+            ))}
+          </div>
+        ) : null}
+      </section>
+
+      <section style={sectionStyle}>
+        <h2 style={headingStyle}>Readiness panel</h2>
+        <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+          Preview source:{' '}
+          {readinessPanelPreview.preview_source === 'run_artifact'
+            ? 'Atlas-safe run artifact readiness warnings'
+            : 'fixture-backed readiness surfaces'}
+        </p>
+        <div style={panelStyle}>
+          <p style={mutedLabelStyle}>
+            Readiness warnings ({readinessPanelPreview.warning_count})
+          </p>
+          <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#aeb4c0' }}>
+            {readinessPanelPreview.warnings.map((warning) => (
+              <li
+                key={`${warning.label}-${warning.detail}`}
+                style={{
+                  marginBottom: '0.45rem',
+                  color:
+                    warning.severity === 'blocker'
+                      ? '#f0a0a0'
+                      : warning.severity === 'warning'
+                        ? '#f0ce78'
+                        : '#aeb4c0',
+                }}
+              >
+                <strong style={{ color: '#e6e8ec' }}>{warning.label}</strong>: {warning.detail}
+              </li>
+            ))}
+          </ul>
+        </div>
+        {readinessPanelPreview.preview_source === 'fixture' ? (
+          <div style={{ ...smallGridStyle, marginTop: '0.75rem' }}>
+            {Object.entries(readinessPanelPreview.readiness_surfaces).map(
+              ([surface, readiness]) => (
+                <div key={surface} style={{ ...panelStyle, marginBottom: 0 }}>
+                  <p style={mutedLabelStyle}>{humanizeLabel(surface)}</p>
+                  <p
+                    style={{
+                      margin: '0.35rem 0 0',
+                      color: readiness.status === 'NO-GO' ? '#f0a0a0' : '#f0ce78',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {readiness.status}
+                  </p>
+                  <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.45 }}>
+                    {readiness.reason}
+                  </p>
+                </div>
+              ),
+            )}
+          </div>
+        ) : null}
       </section>
 
       <section style={sectionStyle}>

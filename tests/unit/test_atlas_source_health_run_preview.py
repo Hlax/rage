@@ -29,8 +29,31 @@ def test_atlas_preview_wires_source_health_resolver() -> None:
     assert "resolveSourceHealthPreview" in page
     assert "resolveGapsNextMovePreview" in lib
     assert "resolveGapsNextMovePreview" in page
+    assert "resolveQuestionHeaderPreview" in lib
+    assert "resolveQuestionHeaderPreview" in page
+    assert "resolveReadinessPanelPreview" in lib
+    assert "resolveReadinessPanelPreview" in page
+    assert "resolvePurposePanelPreview" in lib
+    assert "resolvePurposePanelPreview" in page
     assert "atlas_source_health_run_latest.json" in lib
     assert "fetch(" not in page
+
+
+def test_atlas_source_health_run_artifact_includes_purpose_for_header() -> None:
+    artifact = json.loads(ARTIFACT_PATH.read_text(encoding="utf-8"))
+    purpose = artifact.get("purpose") or {}
+    assert purpose.get("research_intent")
+    assert purpose.get("asset_affordance")
+    assert artifact.get("purpose_fit_summary")
+    assert artifact["question"]
+
+
+def test_atlas_source_health_run_artifact_includes_purpose_panel_fields() -> None:
+    artifact = json.loads(ARTIFACT_PATH.read_text(encoding="utf-8"))
+    purpose = artifact.get("purpose") or {}
+    assert purpose.get("evidence_need")
+    assert purpose.get("output_targets")
+    assert purpose.get("acceptable_source_types")
 
 
 def test_atlas_source_health_run_artifact_includes_gaps_fields() -> None:

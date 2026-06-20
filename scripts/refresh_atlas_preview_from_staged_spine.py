@@ -21,6 +21,7 @@ from rge.db.connection import connect
 from rge.modules.atlas_preview_curator import (
     STAGED_PREVIEW_TOPIC,
     export_staged_spine_preview_to_paths,
+    export_staged_spine_source_health_artifact,
     FIXTURES_ATLAS_STAGED_SPINE_PREVIEW,
 )
 from tests.unit.test_staged_fixture_mode_run_spine import (
@@ -32,6 +33,7 @@ from tests.unit.test_staged_fixture_mode_run_spine import (
 )
 
 PUBLIC_DATA = REPO_ROOT / "apps" / "public-site" / "public" / "data"
+SOURCE_HEALTH_ARTIFACT = PUBLIC_DATA / "atlas_source_health_run_latest.json"
 
 
 def main() -> None:
@@ -88,6 +90,19 @@ def main() -> None:
                 repo_root=REPO_ROOT,
                 fixtures_reference_path=REPO_ROOT / FIXTURES_ATLAS_STAGED_SPINE_PREVIEW,
             )
+            if os.environ.get("RGE_SYNC_STAGED_SOURCE_HEALTH", "1").strip().casefold() in {
+                "1",
+                "true",
+                "yes",
+            }:
+                result["source_health_artifact"] = export_staged_spine_source_health_artifact(
+                    conn,
+                    run_id=STAGED_FIXTURE_RUN_ID,
+                    question=STAGED_TOPIC,
+                    domain_pack="creativity",
+                    output_path=SOURCE_HEALTH_ARTIFACT,
+                    question_id=STAGED_FIXTURE_QUESTION_ID,
+                )
         finally:
             conn.close()
 

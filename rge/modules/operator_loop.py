@@ -236,6 +236,142 @@ def inspect_autonomous_researcher_loop_status(
     }
 
 
+def inspect_atlas_preview_refresh_status(*, root: Path | None = None) -> dict[str, Any]:
+    """Read-only atlas public preview refresh readiness for operator plan mode."""
+    project_root = root or repo_root()
+    public_data = project_root / "apps" / "public-site" / "public" / "data"
+    outputs = {
+        "atlas_snapshot_preview": public_data / "atlas_snapshot_preview.json",
+        "atlas_coherence_preview": public_data / "atlas_coherence_preview.json",
+        "atlas_source_health_run_latest": public_data / "atlas_source_health_run_latest.json",
+    }
+    missing_outputs = [
+        name for name, path in outputs.items() if not path.is_file()
+    ]
+    latest_report = latest_agent_report(root=project_root)
+    refresh_reasons: list[str] = []
+    if missing_outputs:
+        refresh_reasons.append(
+            "missing public preview JSON: " + ", ".join(missing_outputs)
+        )
+    staged_outputs = ("atlas_snapshot_preview", "atlas_coherence_preview")
+    staged_stale = any(name in missing_outputs for name in staged_outputs)
+    source_health_missing = "atlas_source_health_run_latest" in missing_outputs
+    sync_source_health_via_staged = os.environ.get(
+        "RGE_SYNC_STAGED_SOURCE_HEALTH", "1"
+    ).strip().casefold() in {"1", "true", "yes"}
+    single_refresh_recommended = staged_stale or (
+        source_health_missing and sync_source_health_via_staged
+    )
+    if latest_report and (
+        "source-health" in latest_report
+        or "atlas" in latest_report.casefold()
+    ):
+        report_path = project_root / latest_report
+        source_health_path = outputs["atlas_source_health_run_latest"]
+        if report_path.is_file() and source_health_path.is_file():
+            if report_path.stat().st_mtime > source_health_path.stat().st_mtime:
+                refresh_reasons.append(
+                    "latest agent report is newer than atlas_source_health_run_latest.json"
+                )
+    return {
+        "status": "available" if public_site_applicable(project_root) else "unavailable",
+        "refresh_recommended": bool(refresh_reasons),
+        "refresh_reasons": refresh_reasons,
+        "missing_outputs": missing_outputs,
+        "single_refresh_recommended": single_refresh_recommended,
+        "sync_source_health_via_staged": sync_source_health_via_staged,
+        "operator_commands": {
+            "staged_single_refresh": (
+                "python scripts/refresh_atlas_preview_from_staged_spine.py"
+            ),
+            "staged_spine_refresh": (
+                "python scripts/refresh_atlas_preview_from_staged_spine.py"
+            ),
+            "source_health_refresh": (
+                "python scripts/refresh_atlas_source_health_preview.py"
+            ),
+        },
+        "output_paths": {
+            name: str(path.relative_to(project_root))
+            for name, path in outputs.items()
+        },
+    }
+
+
+def _live_smoke_gate_enabled(name: str) -> bool:
+    import os
+
+    value = os.environ.get(name, "0").strip().casefold()
+    return value in {"1", "true", "yes"}
+
+
+def _source_health_work_detected(*, root: Path) -> bool:
+    public_artifact = (
+        root
+        / "apps"
+        / "public-site"
+        / "public"
+        / "data"
+        / "atlas_source_health_run_latest.json"
+    )
+    if public_artifact.is_file():
+        return True
+    latest_report = latest_agent_report(root=root)
+    if not latest_report:
+        return False
+    lowered = latest_report.casefold().replace("_", "-")
+    markers = (
+        "source-health",
+        "source health",
+        "query-expansion",
+        "query expansion",
+        "atlas-health",
+        "atlas health",
+    )
+    return any(marker in lowered for marker in markers)
+
+
+def inspect_live_combined_source_health_smoke_status(
+    *,
+    root: Path | None = None,
+) -> dict[str, Any]:
+    """Read-only combined live smoke recommendation for operator plan mode."""
+    project_root = root or repo_root()
+    health_gate = _live_smoke_gate_enabled("RGE_ALLOW_LIVE_SOURCE_HEALTH_SMOKE")
+    expansion_gate = _live_smoke_gate_enabled("RGE_ALLOW_LIVE_QUERY_EXPANSION_SMOKE")
+    network_gate = _live_smoke_gate_enabled("RGE_ALLOW_SOURCE_NETWORK")
+    mailto = os.environ.get("OPENALEX_MAILTO", "").strip()
+    gates_set = health_gate and expansion_gate and network_gate and bool(mailto)
+    source_health_work = _source_health_work_detected(root=project_root)
+    return {
+        "status": "available",
+        "live_smoke_recommended": source_health_work and not gates_set,
+        "source_health_work_detected": source_health_work,
+        "gates_set": gates_set,
+        "gates": {
+            "RGE_ALLOW_LIVE_SOURCE_HEALTH_SMOKE": health_gate,
+            "RGE_ALLOW_LIVE_QUERY_EXPANSION_SMOKE": expansion_gate,
+            "RGE_ALLOW_SOURCE_NETWORK": network_gate,
+            "OPENALEX_MAILTO": bool(mailto),
+        },
+        "operator_commands": {
+            "combined_smoke": (
+                "python -m pytest "
+                "tests/unit/test_live_network_combined_source_health_smoke.py "
+                "-m live_network -q"
+            ),
+            "env_setup": [
+                "$env:RGE_ALLOW_LIVE_SOURCE_HEALTH_SMOKE = \"1\"",
+                "$env:RGE_ALLOW_LIVE_QUERY_EXPANSION_SMOKE = \"1\"",
+                "$env:RGE_ALLOW_SOURCE_NETWORK = \"1\"",
+                "$env:OPENALEX_MAILTO = \"operator@example.com\"",
+                "$env:RGE_LLM_MODE = \"mock\"",
+            ],
+        },
+    }
+
+
 def inspect_autonomous_loop_scratch_artifact(
     *,
     root: Path | None = None,
@@ -820,6 +956,8 @@ def _action_from_state(
     autonomous_loop_status: dict[str, Any] | None = None,
     autonomous_loop_scratch_status: dict[str, Any] | None = None,
     autonomous_loop_improvement_status: dict[str, Any] | None = None,
+    atlas_preview_refresh_status: dict[str, Any] | None = None,
+    live_combined_source_health_smoke_status: dict[str, Any] | None = None,
     root: Path | None = None,
 ) -> RecommendedAction:
     if drift_violations:
@@ -1018,6 +1156,96 @@ def _action_from_state(
                         "python -m rge.modules.operator_loop --mode plan"
                     ),
                     "purpose": "re-check proof bundle status after run",
+                },
+            ],
+        )
+
+    atlas_refresh = atlas_preview_refresh_status or {}
+    if atlas_refresh.get("refresh_recommended") and not (
+        active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"}
+    ):
+        commands = atlas_refresh.get("operator_commands") or {}
+        refresh_commands: list[dict[str, str]] = []
+        if atlas_refresh.get("single_refresh_recommended"):
+            refresh_commands.append(
+                {
+                    "shell": commands.get(
+                        "staged_single_refresh",
+                        "python scripts/refresh_atlas_preview_from_staged_spine.py",
+                    ),
+                    "purpose": (
+                        "refresh staged-spine snapshot, coherence, and source-health "
+                        "preview JSON in one operator script"
+                    ),
+                }
+            )
+        else:
+            refresh_commands.extend(
+                [
+                    {
+                        "shell": commands.get(
+                            "staged_spine_refresh",
+                            "python scripts/refresh_atlas_preview_from_staged_spine.py",
+                        ),
+                        "purpose": "refresh staged-spine snapshot + coherence preview",
+                    },
+                    {
+                        "shell": commands.get(
+                            "source_health_refresh",
+                            "python scripts/refresh_atlas_source_health_preview.py",
+                        ),
+                        "purpose": "refresh source-health + gaps run artifact preview",
+                    },
+                ]
+            )
+        refresh_commands.append(
+            {
+                "shell": "cd apps/public-site && npm run build",
+                "purpose": "rebuild static site after preview JSON refresh",
+            }
+        )
+        return RecommendedAction(
+            action_id="refresh_atlas_public_previews",
+            label="Refresh committed atlas public preview JSON",
+            gate="review_gated",
+            reason=(
+                "Public /atlas-preview fixtures should be regenerated before review: "
+                + "; ".join(atlas_refresh.get("refresh_reasons") or ["preview refresh due"])
+            ),
+            commands=refresh_commands,
+        )
+
+    live_smoke = live_combined_source_health_smoke_status or {}
+    if live_smoke.get("live_smoke_recommended") and not (
+        active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"}
+    ):
+        commands = live_smoke.get("operator_commands") or {}
+        env_setup = commands.get("env_setup") or []
+        return RecommendedAction(
+            action_id="run_live_combined_source_health_smoke",
+            label="Run combined live source-health + query-expansion smoke",
+            gate="review_gated",
+            reason=(
+                "Source-health preview work is present but combined live smoke gates "
+                "are unset; run the operator-gated pytest to validate live resolver "
+                "expansion plus health persistence on a temp DB."
+            ),
+            commands=[
+                {
+                    "shell": command,
+                    "purpose": "set combined live smoke env gate",
+                }
+                for command in env_setup
+            ]
+            + [
+                {
+                    "shell": commands.get(
+                        "combined_smoke",
+                        "python -m pytest "
+                        "tests/unit/test_live_network_combined_source_health_smoke.py "
+                        "-m live_network -q",
+                    ),
+                    "purpose": "combined live OpenAlex smoke (temp DB only)",
                 },
             ],
         )
@@ -1362,6 +1590,12 @@ def build_operator_plan(
     autonomous_loop_improvement_status = inspect_autonomous_loop_improvement_artifact(
         root=project_root,
     )
+    atlas_preview_refresh_status = inspect_atlas_preview_refresh_status(
+        root=project_root,
+    )
+    live_combined_source_health_smoke_status = (
+        inspect_live_combined_source_health_smoke_status(root=project_root)
+    )
     domain_pack_status = inspect_domain_pack_status(root=project_root)
     nm4_evidence_spine_status = inspect_nm4_evidence_spine_status(root=project_root)
     runtime_config = load_config()
@@ -1377,6 +1611,8 @@ def build_operator_plan(
         autonomous_loop_status=autonomous_researcher_loop_status,
         autonomous_loop_scratch_status=autonomous_loop_scratch_status,
         autonomous_loop_improvement_status=autonomous_loop_improvement_status,
+        atlas_preview_refresh_status=atlas_preview_refresh_status,
+        live_combined_source_health_smoke_status=live_combined_source_health_smoke_status,
         root=project_root,
     )
 
@@ -1430,6 +1666,8 @@ def build_operator_plan(
         "autonomous_researcher_loop_status": autonomous_researcher_loop_status,
         "autonomous_loop_scratch_status": autonomous_loop_scratch_status,
         "autonomous_loop_improvement_status": autonomous_loop_improvement_status,
+        "atlas_preview_refresh_status": atlas_preview_refresh_status,
+        "live_combined_source_health_smoke_status": live_combined_source_health_smoke_status,
         "staged_rank2_scan_max": runtime_config.staged_rank2_scan_max,
         "domain_pack_status": domain_pack_status,
         "nm4_evidence_spine_status": nm4_evidence_spine_status,

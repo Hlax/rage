@@ -410,6 +410,7 @@ def build_atlas_safe_run_artifact(
     question: str = LOCAL_SAFE_ARBITRARY_QUESTION,
     domain_pack: str = "creativity",
     run_report: dict[str, Any] | None = None,
+    question_id: str = "local_safe_arbitrary_run",
 ) -> dict[str, Any]:
     """Build public-safe run artifact for Atlas/operator inspection."""
     summary = acquisition_quality_summary(conn)
@@ -427,7 +428,7 @@ def build_atlas_safe_run_artifact(
         "purpose": classify_research_purpose(
             question,
             domain=domain_pack,
-            question_id="local_safe_arbitrary_run",
+            question_id=question_id,
         ),
         "source_health_summary": _source_health_preview(summary),
         "purpose_fit_summary": {
@@ -503,6 +504,17 @@ def assert_live_source_health_smoke_env() -> dict[str, str]:
         "RGE_ALLOW_SOURCE_NETWORK": allow_network,
         "OPENALEX_MAILTO": mailto,
     }
+
+
+def assert_live_combined_source_health_smoke_env() -> dict[str, str]:
+    """Fail closed unless both live source-health and query-expansion smokes are opted in."""
+    from rge.modules.source_resolver.query_expansion import (
+        assert_live_query_expansion_smoke_env,
+    )
+
+    combined = assert_live_source_health_smoke_env()
+    combined.update(assert_live_query_expansion_smoke_env())
+    return combined
 
 
 def resolve_live_network_source_records(
@@ -712,3 +724,42 @@ def run_live_network_source_health_smoke(
         include_graph_proof=False,
         resolver_mode="live_network",
     )
+
+
+def run_live_combined_source_health_query_expansion_smoke(
+    conn: sqlite3.Connection,
+    *,
+    question: str = LOCAL_SAFE_ARBITRARY_QUESTION,
+    domain_pack: str = "creativity",
+    output_dir: Path | None = None,
+    limit: int = LIVE_NETWORK_SOURCE_LIMIT,
+    backends: tuple[str, ...] = LIVE_NETWORK_BACKENDS,
+    client: Any | None = None,
+) -> dict[str, Any]:
+    """Operator-gated live smoke chaining query expansion with source-health persistence."""
+    assert_live_combined_source_health_smoke_env()
+    expansion_resolved = resolve_work_candidates(
+        query=question,
+        domain_pack=domain_pack,
+        limit=limit,
+        backends=list(backends),
+        fixture_mode=False,
+    )
+    health_result = run_live_network_source_health_smoke(
+        conn,
+        question=question,
+        domain_pack=domain_pack,
+        output_dir=output_dir,
+        limit=limit,
+        backends=backends,
+        client=client,
+    )
+    return {
+        "status": "completed",
+        "question": question,
+        "discovery_query": expansion_resolved.get("discovery_query"),
+        "query_expansion": dict(expansion_resolved.get("query_expansion") or {}),
+        "expansion_resolved_count": int(expansion_resolved.get("resolved_count") or 0),
+        "expansion_records": list(expansion_resolved.get("records") or []),
+        **health_result,
+    }

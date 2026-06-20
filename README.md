@@ -1016,9 +1016,13 @@ The script runs `research run --fixture-mode --staged-spine` on a temp SQLite DB
 OpenAlex fixtures), exports via `atlas_preview_curator` (maps `active` follow-ups to
 `queued` for UI), writes both preview JSON files under `apps/public-site/public/data/`,
 and **auto-syncs** the offline reference
-`fixtures/atlas/atlas_snapshot_staged_spine_preview.json` (tickets 322, 325). Page copy
-labels the result as a mock staged-spine preview (ticket-321). Regression:
-`tests/unit/test_public_atlas_preview_fixture.py` (committed preview + fixture parity).
+`fixtures/atlas/atlas_snapshot_staged_spine_preview.json` (tickets 322, 325). By
+default it also syncs `atlas_source_health_run_latest.json` from the staged temp DB
+(`export_staged_spine_source_health_artifact`; disable with
+`RGE_SYNC_STAGED_SOURCE_HEALTH=0`). Page copy labels the result as a mock
+staged-spine preview (ticket-321). Regression:
+`tests/unit/test_public_atlas_preview_fixture.py` (committed preview + fixture parity),
+`tests/unit/test_staged_spine_source_health_sync.py` (source-health bridge).
 
 **Atlas source-health preview refresh** (local-safe proof → public `/atlas-preview` source
 health + gaps panels; temp DB only):
@@ -1044,6 +1048,24 @@ python scripts/refresh_atlas_source_health_preview.py `
 Regression: `tests/unit/test_atlas_source_health_run_preview.py`,
 `tests/unit/test_refresh_atlas_source_health_preview.py`.
 
+**Operator loop atlas preview refresh hook** (plan mode only; no writes): when
+`python -m rge.modules.operator_loop --mode plan` runs, inspect
+`atlas_preview_refresh_status` for missing or stale public preview JSON and
+`next_recommended_action.action_id == refresh_atlas_public_previews` when no open
+ticket blocks refresh. When staged snapshot/coherence or synced source-health JSON
+is stale, plan mode prefers the **single** staged refresh command
+(`python scripts/refresh_atlas_preview_from_staged_spine.py`, which syncs all three
+preview files by default) plus `cd apps/public-site && npm run build`. Set
+`RGE_SYNC_STAGED_SOURCE_HEALTH=0` to fall back to separate source-health refresh.
+Regression: `tests/unit/test_operator_loop_plan.py`.
+
+**Operator loop combined live smoke hint** (plan mode only): when source-health
+preview work is detected (`atlas_source_health_run_latest.json` committed or a
+recent source-health/atlas agent report) but combined live smoke gates are unset,
+plan mode surfaces `live_combined_source_health_smoke_status` and may recommend
+`run_live_combined_source_health_smoke` with env setup commands. Regression:
+`tests/unit/test_operator_loop_plan.py`.
+
 **Live network query-expansion smoke** (operator opt-in; temp resolver only; no PDF
 download; mock LLM):
 
@@ -1058,6 +1080,41 @@ python -m pytest tests/unit/test_live_network_query_expansion_smoke.py -m live_n
 Proves purpose-aware alternate OpenAlex/arXiv queries run when metadata-only records
 dominate the first resolver pass. Not CI-enforced (`live_network` marker excluded in
 default `pytest`).
+
+**Live network combined source-health + query-expansion smoke** (operator opt-in; temp
+DB + resolver; mock LLM):
+
+```powershell
+$env:RGE_ALLOW_LIVE_SOURCE_HEALTH_SMOKE = "1"
+$env:RGE_ALLOW_LIVE_QUERY_EXPANSION_SMOKE = "1"
+$env:RGE_ALLOW_SOURCE_NETWORK = "1"
+$env:OPENALEX_MAILTO = "operator@example.com"
+$env:RGE_LLM_MODE = "mock"
+python -m pytest tests/unit/test_live_network_combined_source_health_smoke.py -m live_network -q
+```
+
+Chains full-question `resolve_work_candidates` query expansion with the live
+source-health persistence + Atlas-safe artifact writer. Requires **both**
+`RGE_ALLOW_LIVE_SOURCE_HEALTH_SMOKE=1` and `RGE_ALLOW_LIVE_QUERY_EXPANSION_SMOKE=1`.
+Not CI-enforced.
+
+**Live staged spine source-health coherence** (mock staged orchestrator in default
+pytest; opt-in live_network layer):
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+python -m pytest tests/unit/test_live_staged_spine_source_health_coherence.py -q
+
+# Opt-in live layer (same gates as live staged atlas coherence):
+$env:RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR = "1"
+$env:RGE_ALLOW_SOURCE_NETWORK = "1"
+$env:OPENALEX_MAILTO = "operator@example.com"
+python -m pytest tests/unit/test_live_staged_spine_source_health_coherence.py -m live_network -q
+```
+
+Asserts staged temp DB `source_health_preview` counts match
+`export_staged_spine_source_health_artifact` output (schema, purpose, readiness
+warnings, private-field policy).
 
 **Live layer-3 boundary (tickets 285, 328–329):** the opt-in live OpenAlex +
 `live_network` atlas coherence pytest
