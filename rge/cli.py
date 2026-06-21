@@ -1002,6 +1002,75 @@ def execute_staged_fixture_mode_run(
 
 
 def _cmd_run(args: argparse.Namespace) -> int:
+    one_button_mode = any(
+        [
+            getattr(args, "artifact_dir", None),
+            getattr(args, "export_atlas", False),
+            getattr(args, "quality_report", None),
+            getattr(args, "live_network", False),
+            getattr(args, "live_llm_extract", False),
+            getattr(args, "sync_atlas_public", False),
+            getattr(args, "source_limit", None) is not None,
+        ]
+    )
+    if one_button_mode:
+        from rge.modules.one_button_research_run import (
+            OneButtonResearchRunGateError,
+            execute_one_button_research_run,
+        )
+
+        if not args.topic:
+            payload = {
+                "status": "error",
+                "command": "run",
+                "detail": "--topic is required for one-button research run.",
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+        if not args.domain:
+            payload = {
+                "status": "error",
+                "command": "run",
+                "detail": "--domain is required for one-button research run.",
+            }
+            print(json.dumps(payload, indent=2))
+            return 1
+        try:
+            db_path = Path(args.db) if args.db else None
+            artifact_dir = (
+                Path(args.artifact_dir) if getattr(args, "artifact_dir", None) else None
+            )
+            quality_report = (
+                Path(args.quality_report)
+                if getattr(args, "quality_report", None)
+                else None
+            )
+            result = execute_one_button_research_run(
+                topic=args.topic,
+                domain=args.domain,
+                db_path=db_path,
+                artifact_dir=artifact_dir,
+                export_atlas=bool(
+                    getattr(args, "export_atlas", False)
+                    or getattr(args, "artifact_dir", None)
+                    or getattr(args, "quality_report", None)
+                ),
+                quality_report_path=quality_report,
+                live_network=bool(getattr(args, "live_network", False)),
+                live_llm_extract=bool(getattr(args, "live_llm_extract", False)),
+                sync_atlas_public=bool(getattr(args, "sync_atlas_public", False)),
+                skip_site_build=bool(getattr(args, "skip_site_build", False)),
+                source_limit=getattr(args, "source_limit", None),
+                run_id=args.run_id or STAGED_FIXTURE_RUN_ID,
+                question_id=getattr(args, "question_id", None),
+            )
+            print(json.dumps(result, indent=2))
+            return 0 if result.get("status") == "completed" else 1
+        except OneButtonResearchRunGateError as exc:
+            payload = {"status": "error", "command": "run", "detail": str(exc)}
+            print(json.dumps(payload, indent=2))
+            return 2
+
     explicit_fixture = bool(args.fixture_mode)
     explicit_staged = bool(getattr(args, "staged_spine", False))
     default_staged_spine = not explicit_fixture and not explicit_staged
@@ -3221,6 +3290,50 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument(
         "--export-dir",
         help="Optional single export directory (for tests; skips default export paths).",
+    )
+    run_parser.add_argument(
+        "--artifact-dir",
+        help=(
+            "One-button mode: scratch artifact directory "
+            "(default: data/reports/scratch_research)."
+        ),
+    )
+    run_parser.add_argument(
+        "--export-atlas",
+        action="store_true",
+        help="One-button mode: export private atlas snapshot to artifact-dir.",
+    )
+    run_parser.add_argument(
+        "--quality-report",
+        help=(
+            "One-button mode: write research quality JSON "
+            "(default: artifact-dir/research_quality.json when --export-atlas)."
+        ),
+    )
+    run_parser.add_argument(
+        "--live-network",
+        action="store_true",
+        help="One-button mode: enable live OpenAlex network (requires env gates).",
+    )
+    run_parser.add_argument(
+        "--live-llm-extract",
+        action="store_true",
+        help="One-button mode: live Ollama extract (requires env gates).",
+    )
+    run_parser.add_argument(
+        "--sync-atlas-public",
+        action="store_true",
+        help="One-button mode: sync fixture operator packets to public preview JSON.",
+    )
+    run_parser.add_argument(
+        "--skip-site-build",
+        action="store_true",
+        help="One-button mode: skip npm run build after --sync-atlas-public.",
+    )
+    run_parser.add_argument(
+        "--source-limit",
+        type=int,
+        help="One-button mode: reserved discover source limit metadata.",
     )
     run_parser.set_defaults(func=_cmd_run)
 

@@ -1,0 +1,31 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "Live Ollama Abstract Extract Gate",
+  "packet_id": "live-ollama-abstract-extract-gate",
+  "date": "2026-06-20",
+  "verdict": "GO",
+  "requires_env": [
+    "RGE_ALLOW_LIVE_LLM=1",
+    "RGE_LLM_MODE=ollama",
+    "RGE_ALLOW_LOCAL_MODEL_EXTRACTION_COMPARISON=1"
+  ],
+  "acceptance": {
+    "literal_quote_spans_required": true,
+    "unsupported_claims_rejected": true,
+    "mock_vs_ollama_counts_reported": true,
+    "readiness_partial_until_quote_threshold": true
+  },
+  "quote_validity_threshold": 0.95,
+  "changed_files": [
+    "rge/modules/local_model_extraction_comparison.py",
+    "tests/unit/test_local_model_extraction_comparison.py"
+  ],
+  "verification": {
+    "local_model_readiness_tests": "PASS",
+    "verify_skip_site": "exit 0"
+  },
+  "next_recommended_packet": {
+    "id": "multi-claim-atom-clustering",
+    "title": "Multi-Claim Atom Clustering"
+  }
+}

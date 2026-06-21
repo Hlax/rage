@@ -1,0 +1,29 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "Local Scheduled Research Loop",
+  "packet_id": "local-scheduled-research-loop",
+  "date": "2026-06-20",
+  "verdict": "GO",
+  "profile": "local_mock_daily",
+  "blocks": [
+    "live_network",
+    "live_llm",
+    "paid_apis",
+    "merge",
+    "push",
+    "ticket_promotion",
+    "public_publish"
+  ],
+  "entrypoints": [
+    "scripts/run_scheduled_research_loop.py",
+    "scripts/run_scheduled_research_loop.ps1"
+  ],
+  "verification": {
+    "test_scheduled_research_loop": "PASS",
+    "verify_skip_site": "exit 0"
+  },
+  "next_recommended_packet": {
+    "id": "live-ollama-abstract-extract-gate",
+    "title": "Live Ollama Abstract Extract Gate"
+  }
+}

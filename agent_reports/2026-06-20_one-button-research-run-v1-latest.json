@@ -1,0 +1,25 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "One-Button Research Run v1",
+  "packet_id": "one-button-research-run-v1",
+  "date": "2026-06-20",
+  "verdict": "GO",
+  "default_mode": {
+    "llm": "mock",
+    "network": false,
+    "research_path": "fixture_mode",
+    "db": "data/db/scratch_research.sqlite",
+    "artifact_dir": "data/reports/scratch_research"
+  },
+  "cli_example": "python -m rge.cli run --topic \"...\" --domain creativity --artifact-dir data/reports/scratch_research --export-atlas --quality-report data/reports/scratch_research/research_quality.json",
+  "live_flags_fail_closed": true,
+  "no_auto_promotion": true,
+  "verification": {
+    "test_one_button_research_run": "PASS",
+    "verify_skip_site": "exit 0"
+  },
+  "next_recommended_packet": {
+    "id": "local-scheduled-research-loop",
+    "title": "Local Scheduled Research Loop"
+  }
+}

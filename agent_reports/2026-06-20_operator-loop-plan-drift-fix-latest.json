@@ -1,0 +1,19 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "Operator Loop Plan Drift Fix",
+  "packet_id": "operator-loop-plan-drift-fix",
+  "date": "2026-06-20",
+  "verdict": "GO",
+  "fix_summary": "full_atlas_refresh_recommended now requires live abstract work AND stale source health; missing source-health alone recommends refresh_atlas_public_previews",
+  "changed_files": [
+    "rge/modules/full_atlas_refresh_checklist.py"
+  ],
+  "verification": {
+    "verify_skip_site": "exit 0",
+    "targeted_test": "test_atlas_refresh_recommended_action_when_missing_source_health_artifact PASS"
+  },
+  "next_recommended_packet": {
+    "id": "one-button-research-run-v1",
+    "title": "One-Button Research Run v1"
+  }
+}

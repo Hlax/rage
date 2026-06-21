@@ -1306,6 +1306,40 @@ python -m rge.cli autonomous-researcher-loop --staged-spine `
   --staging-dir data/sources/staged/operator_autonomous_loop
 ```
 
+**One-button research run v1** (mock default; scratch paths; no auto-merge/publish):
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+python -m rge.cli run `
+  --topic "Does AI improve creative output while reducing diversity?" `
+  --domain creativity `
+  --db data/db/scratch_research.sqlite `
+  --artifact-dir data/reports/scratch_research `
+  --export-atlas `
+  --quality-report data/reports/scratch_research/research_quality.json
+```
+
+Optional flags (all fail closed unless env gates are set): `--live-network`,
+`--live-llm-extract`, `--sync-atlas-public`, `--skip-site-build`, `--source-limit N`.
+
+**Local scheduled research loop** (`local_mock_daily` profile — mock only; blocks live
+network/LLM/paid APIs; no merge/push/promote/public publish):
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+python scripts/run_scheduled_research_loop.py --profile local_mock_daily
+# or: .\scripts\run_scheduled_research_loop.ps1
+```
+
+Windows Task Scheduler example (daily 06:00):
+
+```powershell
+schtasks /Create /TN "RGE Local Mock Daily" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\path\to\rage\scripts\run_scheduled_research_loop.ps1" /SC DAILY /ST 06:00
+```
+
+Writes timestamped reports under `agent_reports/` and compact status JSON under
+`data/reports/scheduled_research/`.
+
 **Live probe scratch evidence workflow** (local Ollama opt-in; report-only until
 operator persist): use the numbered checklist in
 [`docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md`](docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md)
