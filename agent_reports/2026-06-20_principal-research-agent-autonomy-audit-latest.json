@@ -1,0 +1,186 @@
+{
+  "report_type": "principal_research_agent_autonomy_audit",
+  "date": "2026-06-20",
+  "auditor": "principal_agentic_systems_auditor",
+  "baseline_head": "3708e9c",
+  "working_tree": {
+    "clean": false,
+    "modified_and_untracked_count_estimate": 60,
+    "note": "Large uncommitted operator-packet wave (atlas panels, live abstract scripts, operator_loop drift)."
+  },
+  "verdict": "PARTIAL",
+  "verdict_scope": {
+    "mvp_engine": "GO",
+    "mvp_research_live_arbitrary": "PARTIAL",
+    "autonomous_research_agent": "NO-GO",
+    "self_improvement_loop": "PARTIAL",
+    "atlas_research_cockpit": "PARTIAL"
+  },
+  "scores": {
+    "research_data_quality": 0.55,
+    "atlas_frontend_readiness": 0.62,
+    "graph_maturity": 0.48,
+    "local_model_readiness": 0.52,
+    "paid_openai_api_readiness": 0.15,
+    "automation_readiness": 0.58,
+    "safety_public_private_boundaries": 0.88
+  },
+  "verification": {
+    "git_status_short": "dirty — apps/public-site atlas files, rge modules, many untracked agent_reports and operator packets",
+    "git_log_recent": [
+      "3708e9c Add live abstract evidence quality smoke and checkpoint reports.",
+      "20873bd Add live network source health Atlas GO agent report.",
+      "0b0e9c8 Refresh public atlas artifact with live trace summary golden gate.",
+      "5f82119 Live abstract evidence atom trace plus verify triage fixes.",
+      "1ae4aaf Add Atlas graph summary panel from run artifacts."
+    ],
+    "verify_skip_site": {
+      "status": "fail",
+      "golden_tests": "164 passed",
+      "full_pytest": "1117 passed, 1 failed",
+      "failure": "tests/unit/test_operator_loop_plan.py::test_atlas_refresh_recommended_action_when_missing_source_health_artifact — action_id drift (run_full_atlas_refresh_checklist vs refresh_atlas_public_previews)",
+      "safety_audit": "pass",
+      "skip_site": true
+    },
+    "targeted_tests": {
+      "test_live_abstract_evidence_quality": "11 passed",
+      "test_operator_loop_plan_regression": "1 failed (same drift)"
+    },
+    "safety_audit_full": "pass",
+    "public_site_build": "pass"
+  },
+  "real_vs_fixture_mock": {
+    "ci_default": "mock LLM, no network, golden + unit pytest",
+    "research_run_default": "staged_spine mock orchestrator (ticket-362; not bare not_implemented)",
+    "live_openalex_arxiv": "operator opt-in RGE_ALLOW_SOURCE_NETWORK=1 + OPENALEX_MAILTO; discover/fetch/resolve proven on temp DBs",
+    "live_abstract_evidence_path": "live metadata + abstract text; extraction still mock unless RGE_ALLOW_LIVE_LLM=1 + ollama",
+    "atlas_snapshot_preview": "staged-fixture mock graph (snap_staged_fixture_preview_v0_001)",
+    "atlas_source_health_run_latest": "live abstract run artifact (How does AI affect human creativity?)",
+    "public_cards": "golden fixture export",
+    "autonomous_researcher_loop": "fixture or staged-spine mock only; writes inspection JSON not queue merges"
+  },
+  "operator_loop": {
+    "execute_safe_eligible_on_dirty_tree": false,
+    "next_action_on_dirty_tree": "resolve_documentation_git_drift (blocked)",
+    "safe_autonomous": [
+      "golden_tests",
+      "full_pytest (when clean)",
+      "safety_audit",
+      "public_site_build",
+      "autonomous-researcher-loop fixture proof on scratch DB"
+    ],
+    "review_gated": [
+      "run_full_atlas_refresh_checklist",
+      "refresh_atlas_public_previews",
+      "run_live_combined_source_health_smoke",
+      "run_scratch_evidence_review",
+      "run_arbitrary_source_proof_bundle"
+    ],
+    "forbidden": [
+      "merge",
+      "push",
+      "promote-improvement-ticket without confirm",
+      "export-public publish",
+      "live LLM in execute-safe",
+      "live_smoke in execute-safe"
+    ],
+    "manual_burden_score": 0.72
+  },
+  "live_abstract_quality": {
+    "single_question_verdict": "GO",
+    "multi_question_verdict": "GO",
+    "aggregate_accepted_claims_5q": 19,
+    "strict_questions_behavior": "agency/style strict gates reject or downgrade most claims — honest, not shallow pass",
+    "extraction_mode_in_smokes": "mock",
+    "local_ollama_vs_mock": "thinner — 2 vs 5 accepted on 5 abstracts (qwen3.5:9b-q4_K_M)"
+  },
+  "graph_maturity": {
+    "verdict": "PARTIAL",
+    "live_run_relationships": 8,
+    "multi_claim_atoms": 0,
+    "synthesis_ready_clusters": 0,
+    "weak_atoms": 8,
+    "relationship_density_after_upgrade": 1.0,
+    "note": "Density improved via concept-seed upgrade; semantic multi-source consolidation still thin"
+  },
+  "openalex_arxiv_unpaywall": {
+    "openalex": "implemented discover/fetch/resolve with network gate",
+    "arxiv": "implemented in resolver breakdown (live proofs)",
+    "unpaywall": "optional enrich flag; live-source-expansion packet exercises enrichment",
+    "web_adapter": "scrapling proof packet PARTIAL — not default acquisition"
+  },
+  "openai_paid_api": {
+    "implementation": "none",
+    "ticket_059": "proposed placeholder",
+    "policy_doc": "docs/agents/13_MODEL_ESCALATION_POLICY.md"
+  },
+  "top_blockers": [
+    "Full pytest failing on operator_loop plan action_id drift (uncommitted full_atlas_refresh_checklist priority)",
+    "Live abstract GO proofs use mock extraction — not end-to-end live LLM research",
+    "Local Ollama extraction thinner than mock on same live abstracts",
+    "No paid/cloud synthesis adapter (ticket-059 deferred)",
+    "Evidence atoms single-claim weak; synthesis_ready_cluster_count 0",
+    "Operator env gate fragmentation (dozens of RGE_ALLOW_* vars)",
+    "Atlas graph snapshot panel still staged-fixture while health/trace panels are live-run",
+    "Scale beyond ~5 sources/question untested — no batch orchestration proof",
+    "Self-improvement stops at JSON drafts and human ticket branches",
+    "Dirty working tree blocks execute-safe and hides CI truth"
+  ],
+  "top_roi_improvements": [
+    "Commit or revert operator_loop drift; restore pytest green",
+    "One-button mock staged-spine run with optional live-fetch flag (single env profile)",
+    "Live Ollama extract on abstract path with quality gates before synthesis",
+    "Multi-claim atom clustering on related abstracts",
+    "Synthesis readiness metrics gating paid API ticket-059",
+    "Atlas cockpit: unify snapshot source (live DB export vs fixture)",
+    "10-source live abstract batch proof",
+    "Operator loop execute-safe packet runner for approved live smokes",
+    "Improvement recommender tie to live metrics not fixture scaffolding",
+    "PDF/TEI acquisition path to reduce abstract-only thinness"
+  ],
+  "recommended_next_packets": [
+    {
+      "id": "operator-loop-plan-drift-fix",
+      "title": "Fix operator_loop plan vs full_atlas_refresh_checklist test drift and commit packet wave"
+    },
+    {
+      "id": "live-ollama-abstract-extract-gate",
+      "title": "Live Ollama abstract extraction with quote-validity gate vs mock baseline"
+    },
+    {
+      "id": "multi-claim-atom-clustering",
+      "title": "Cross-source evidence atom consolidation for synthesis readiness"
+    },
+    {
+      "id": "one-button-research-run-v1",
+      "title": "Single CLI: question + domain → staged spine + atlas export + quality report"
+    },
+    {
+      "id": "openai-synthesis-adapter-spec",
+      "title": "ticket-059 implementation spec with packetized evidence-only input"
+    }
+  ],
+  "one_button_research_run_design": {
+    "command_sketch": "python -m rge.cli research run --topic ... --domain ... --db data/db/scratch.sqlite --artifact-dir data/reports/run_latest --export-atlas",
+    "default_llm": "mock",
+    "optional_flags": [
+      "--live-network",
+      "--live-llm-extract",
+      "--sync-atlas-public",
+      "--skip-site-build"
+    ],
+    "must_not": [
+      "auto merge",
+      "auto promote tickets",
+      "export-public publish without review"
+    ]
+  },
+  "openai_integration_plan_summary": "Env-key only, fail-closed, mock default, cost caps, evidence packets only, cite claim/atom/source refs — see markdown report",
+  "do_not_build_yet": [
+    "Polished public research UI",
+    "Auto ticket queue promotion",
+    "Cloud LLM in CI",
+    "Raw document upload to paid APIs",
+    "1000-source batch without 10-source proof"
+  ]
+}

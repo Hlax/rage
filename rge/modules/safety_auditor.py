@@ -36,6 +36,14 @@ ATLAS_PREVIEW_PUBLIC_DATA_FILES = (
     "atlas_coherence_preview.json",
     "tiny_atlas_connection_preview.json",
     "atlas_source_health_run_latest.json",
+    "atlas_multi_question_live_abstract_latest.json",
+    "atlas_local_model_extraction_comparison_latest.json",
+    "atlas_graph_maturity_evidence_atom_upgrade_latest.json",
+    "atlas_web_adapter_scrapling_proof_latest.json",
+    "atlas_pdf_tei_milestone_latest.json",
+    "atlas_demo_loop_polish_latest.json",
+    "atlas_full_atlas_refresh_checklist_latest.json",
+    "atlas_openai_synthesis_adapter_spec_latest.json",
 )
 
 _PASS_EXIT_CODE = 0

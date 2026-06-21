@@ -28,6 +28,10 @@ def seed_public_site_preview_paths(tmp_path: Path, *, include_source_health: boo
         "# refresh source health preview\n",
         encoding="utf-8",
     )
+    (scripts / "run_full_atlas_refresh_checklist.py").write_text(
+        "# full atlas refresh checklist\n",
+        encoding="utf-8",
+    )
 
 
 def seed_operator_neutral_plan_state(

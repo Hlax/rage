@@ -291,6 +291,9 @@ def inspect_atlas_preview_refresh_status(*, root: Path | None = None) -> dict[st
             "source_health_refresh": (
                 "python scripts/refresh_atlas_source_health_preview.py"
             ),
+            "full_atlas_refresh": (
+                "python scripts/run_full_atlas_refresh_checklist.py"
+            ),
         },
         "output_paths": {
             name: str(path.relative_to(project_root))
@@ -957,6 +960,7 @@ def _action_from_state(
     autonomous_loop_scratch_status: dict[str, Any] | None = None,
     autonomous_loop_improvement_status: dict[str, Any] | None = None,
     atlas_preview_refresh_status: dict[str, Any] | None = None,
+    full_atlas_refresh_checklist_status: dict[str, Any] | None = None,
     live_combined_source_health_smoke_status: dict[str, Any] | None = None,
     root: Path | None = None,
 ) -> RecommendedAction:
@@ -1161,11 +1165,45 @@ def _action_from_state(
         )
 
     atlas_refresh = atlas_preview_refresh_status or {}
+    full_atlas_refresh = full_atlas_refresh_checklist_status or {}
     if atlas_refresh.get("refresh_recommended") and not (
         active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"}
     ):
+        if full_atlas_refresh.get("full_atlas_refresh_recommended"):
+            env_setup = full_atlas_refresh.get("env_setup") or []
+            refresh_commands: list[dict[str, str]] = [
+                {
+                    "shell": command,
+                    "purpose": "set live abstract evidence quality gate",
+                }
+                for command in env_setup
+            ]
+            refresh_commands.append(
+                {
+                    "shell": full_atlas_refresh.get(
+                        "operator_command",
+                        "python scripts/run_full_atlas_refresh_checklist.py",
+                    ),
+                    "purpose": (
+                        "live abstract evidence quality smoke, sync atlas artifact, "
+                        "validate trace summary, rebuild public site, write report"
+                    ),
+                }
+            )
+            return RecommendedAction(
+                action_id="run_full_atlas_refresh_checklist",
+                label="Run full Atlas refresh checklist (live abstract → sync → build)",
+                gate="review_gated",
+                reason=(
+                    "Live abstract evidence quality is proven but the Atlas run artifact "
+                    "is stale or missing; run the single operator checklist to refresh "
+                    "/atlas-preview."
+                ),
+                commands=refresh_commands,
+            )
+
         commands = atlas_refresh.get("operator_commands") or {}
-        refresh_commands: list[dict[str, str]] = []
+        refresh_commands = []
         if atlas_refresh.get("single_refresh_recommended"):
             refresh_commands.append(
                 {
@@ -1593,6 +1631,13 @@ def build_operator_plan(
     atlas_preview_refresh_status = inspect_atlas_preview_refresh_status(
         root=project_root,
     )
+    from rge.modules.full_atlas_refresh_checklist import (
+        inspect_full_atlas_refresh_checklist_status,
+    )
+
+    full_atlas_refresh_checklist_status = inspect_full_atlas_refresh_checklist_status(
+        root=project_root,
+    )
     live_combined_source_health_smoke_status = (
         inspect_live_combined_source_health_smoke_status(root=project_root)
     )
@@ -1612,6 +1657,7 @@ def build_operator_plan(
         autonomous_loop_scratch_status=autonomous_loop_scratch_status,
         autonomous_loop_improvement_status=autonomous_loop_improvement_status,
         atlas_preview_refresh_status=atlas_preview_refresh_status,
+        full_atlas_refresh_checklist_status=full_atlas_refresh_checklist_status,
         live_combined_source_health_smoke_status=live_combined_source_health_smoke_status,
         root=project_root,
     )
@@ -1667,6 +1713,7 @@ def build_operator_plan(
         "autonomous_loop_scratch_status": autonomous_loop_scratch_status,
         "autonomous_loop_improvement_status": autonomous_loop_improvement_status,
         "atlas_preview_refresh_status": atlas_preview_refresh_status,
+        "full_atlas_refresh_checklist_status": full_atlas_refresh_checklist_status,
         "live_combined_source_health_smoke_status": live_combined_source_health_smoke_status,
         "staged_rank2_scan_max": runtime_config.staged_rank2_scan_max,
         "domain_pack_status": domain_pack_status,

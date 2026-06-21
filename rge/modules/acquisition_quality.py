@@ -27,6 +27,7 @@ ACQUISITION_METADATA_FIELDS = (
     "purpose_fit_status",
     "purpose_fit_reason",
     "purpose_gate_decision",
+    "enrichment_backends",
 )
 
 
@@ -117,6 +118,9 @@ def acquisition_metadata_from_payload(
     for optional in ("is_oa", "oa_status", "best_oa_location_url", "pdf_url", "tei_url"):
         if payload.get(optional) not in (None, ""):
             normalized[optional] = payload[optional]
+    enrichment_backends = payload.get("enrichment_backends")
+    if enrichment_backends:
+        normalized["enrichment_backends"] = list(enrichment_backends)
     if parse:
         normalized["parse"] = {
             key: value
@@ -241,6 +245,7 @@ def summarize_source_metadata_rows(
     extractable_counts: dict[str, int] = {}
     failure_reason_counts: dict[str, int] = {}
     resolver_source_counts: dict[str, int] = {}
+    enrichment_backend_counts: dict[str, int] = {}
     purpose_fit_counts: dict[str, int] = {}
     purpose_gate_decision_counts: dict[str, int] = {}
     availability_counts = {"oa_available": 0, "pdf_available": 0, "tei_available": 0}
@@ -288,6 +293,11 @@ def summarize_source_metadata_rows(
         if resolver_source:
             resolver_source_counts[resolver_source] = resolver_source_counts.get(resolver_source, 0) + 1
 
+        for backend in metadata.get("enrichment_backends") or []:
+            label = _clean_string(backend)
+            if label:
+                enrichment_backend_counts[label] = enrichment_backend_counts.get(label, 0) + 1
+
         purpose_fit = _clean_string(
             metadata.get("purpose_fit_status")
             or metadata.get("purpose_match_status")
@@ -326,6 +336,7 @@ def summarize_source_metadata_rows(
         "extractable_counts": extractable_counts,
         "failure_reason_counts": failure_reason_counts,
         "resolver_source_counts": resolver_source_counts,
+        "enrichment_backend_counts": enrichment_backend_counts,
         "purpose_fit_status_counts": purpose_fit_counts,
         "purpose_gate_decision_counts": purpose_gate_decision_counts,
         "availability_counts": availability_counts,

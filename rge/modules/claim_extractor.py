@@ -157,6 +157,7 @@ def extract_and_validate_for_chunk(
     live_staged_fallthrough: bool = False,
     live_staged_rank2_fallthrough: bool = False,
     live_staged_ingest_fallthrough: bool = False,
+    live_abstract_ollama_fallthrough: bool = False,
     skip_quoteability_gate: bool = False,
 ) -> dict[str, list[dict[str, Any]]]:
     """Extract candidates for one chunk and validate them deterministically."""
@@ -167,6 +168,7 @@ def extract_and_validate_for_chunk(
         or live_staged_fallthrough
         or live_staged_rank2_fallthrough
         or live_staged_ingest_fallthrough
+        or live_abstract_ollama_fallthrough
     )
     if (
         not skip_quoteability_gate
@@ -199,6 +201,8 @@ def extract_and_validate_for_chunk(
         contract["manual_text_arbitrary_live"] = True
     if live_staged_ingest_fallthrough:
         contract["staged_ingest_arbitrary_live"] = True
+    if live_abstract_ollama_fallthrough:
+        contract["live_abstract_ollama"] = True
     candidates = extract_candidate_claims(
         chunk,
         contract,

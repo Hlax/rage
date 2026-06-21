@@ -1,0 +1,24 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "PDF / TEI Milestone",
+  "packet_id": "pdf-tei-milestone",
+  "date": "2026-06-20",
+  "cycle_note": "operator_loop_cycle_3_after_web_adapter_scrapling_proof",
+  "verdict": "GO",
+  "run_summary": {
+    "tei_parser": "tei_xml",
+    "tei_accepted_claims": 1,
+    "tei_trace_rows": 1,
+    "pdf_spine_accepted_claims": 1,
+    "dirty_pdf_gate": "blocked_pre_llm",
+    "local_pdf_parser": "pdf_unavailable",
+    "grobid_enabled": false
+  },
+  "next_recommended_packet": {"id": "demo-loop-polish", "title": "Demo Loop Polish"},
+  "verification": {
+    "fixture_run_sync_public": "exit 0 GO",
+    "pytest": "8 passed",
+    "safety_audit": "pass",
+    "public_site_build": "exit 0"
+  }
+}

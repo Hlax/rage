@@ -1,0 +1,162 @@
+{
+  "schema_version": "atlas_graph_maturity_evidence_atom_upgrade_v0.1.0",
+  "status": "completed",
+  "packet_id": "graph-maturity-evidence-atom-upgrade",
+  "run_id": "run_graph_maturity_evidence_atom_upgrade",
+  "domain_pack": "creativity",
+  "graph_maturity_verdict": "PARTIAL",
+  "graph_maturity_rationale": "Graph maturity upgrade produced relationships and cluster explanations, but multi-claim atom consolidation remains thin on live abstracts.",
+  "question_ingest_summary": [
+    {
+      "question_id": "mq_ai_human_creativity",
+      "gate_mode": "open",
+      "live_source_count": 3,
+      "accepted_claim_count": 3,
+      "relationship_count": 8
+    },
+    {
+      "question_id": "mq_ai_assistance_diversity",
+      "gate_mode": "open",
+      "live_source_count": 3,
+      "accepted_claim_count": 3,
+      "relationship_count": 8
+    },
+    {
+      "question_id": "mq_cocreation_agency",
+      "gate_mode": "strict",
+      "live_source_count": 3,
+      "accepted_claim_count": 0,
+      "relationship_count": 8
+    },
+    {
+      "question_id": "mq_artist_style_originality",
+      "gate_mode": "strict",
+      "live_source_count": 3,
+      "accepted_claim_count": 2,
+      "relationship_count": 8
+    },
+    {
+      "question_id": "mq_ai_creativity_benchmark",
+      "gate_mode": "open",
+      "live_source_count": 3,
+      "accepted_claim_count": 3,
+      "relationship_count": 8
+    }
+  ],
+  "question_count": 5,
+  "total_accepted_claims": 11,
+  "maturity_before": {
+    "single_claim_atom_count": 0,
+    "clustered_atom_count": 0,
+    "multi_claim_atom_count": 0,
+    "weak_atom_count": 0,
+    "orphan_claim_count": 8,
+    "orphan_atom_count": 0,
+    "relationship_density": 0.0,
+    "synthesis_ready_cluster_count": 0
+  },
+  "maturity_after": {
+    "single_claim_atom_count": 8,
+    "clustered_atom_count": 0,
+    "multi_claim_atom_count": 0,
+    "weak_atom_count": 8,
+    "orphan_claim_count": 0,
+    "orphan_atom_count": 0,
+    "relationship_density": 1.0,
+    "synthesis_ready_cluster_count": 0
+  },
+  "maturity_delta": {
+    "single_claim_atom_delta": 8,
+    "clustered_atom_delta": 0,
+    "multi_claim_atom_delta": 0,
+    "orphan_claim_delta": -8,
+    "orphan_atom_delta": 0,
+    "relationship_density_delta": 1.0
+  },
+  "upgrade_actions": {
+    "concept_seed": {
+      "seeded_link_count": 14,
+      "claims_touched": 8,
+      "skipped_existing": 0
+    },
+    "cluster_result": {
+      "clustered_atom_count": 0,
+      "duplicate_merged_atom_count": 0,
+      "separate_claim_count": 8
+    },
+    "density_result": {
+      "relationship_count": 8,
+      "purpose_match_count": 8
+    }
+  },
+  "cluster_maturity_explanations": [
+    {
+      "cluster_ref": "cluster_unassigned",
+      "maturity_label": "synthesis_ready",
+      "relationship_density": 1.0,
+      "relationship_count": 8,
+      "contradiction_edges": 1,
+      "qualification_edges": 3,
+      "orphan_claim_count": 0,
+      "reasons": [
+        "Contradiction or qualification edges exist with full claim coverage."
+      ]
+    }
+  ],
+  "next_recommended_packet": {
+    "id": "web-adapter-scrapling-proof",
+    "title": "Web Adapter / Scrapling Proof"
+  },
+  "linked_source_health_artifact": {
+    "graph_summary": {
+      "claims": 11,
+      "atoms": 8,
+      "relationships": 8,
+      "connection_metrics": {
+        "schema_version": "graph_connection_metrics_v0.1.0",
+        "clusters": [
+          {
+            "cluster_id": "cluster_unassigned",
+            "claims_per_cluster": 8,
+            "atoms_per_cluster": 8,
+            "relationships_per_cluster": 8,
+            "sources_per_cluster": 8,
+            "contradiction_edges": 1,
+            "qualification_edges": 3,
+            "contradiction_edge_count": 1,
+            "qualification_edge_count": 3,
+            "orphan_claims": 0,
+            "orphan_atoms": 0,
+            "orphan_claim_count": 0,
+            "orphan_atom_count": 0,
+            "relationship_density": 1.0,
+            "low_relationship_density": false
+          }
+        ],
+        "totals": {
+          "claims": 8,
+          "atoms": 8,
+          "relationships": 8,
+          "sources": 8,
+          "orphan_claims": 0,
+          "orphan_atoms": 0,
+          "orphan_claim_count": 0,
+          "orphan_atom_count": 0,
+          "contradiction_edge_count": 1,
+          "qualification_edge_count": 3,
+          "multi_claim_atom_count": 0,
+          "source_diverse_atom_count": 0,
+          "purpose_mismatch_count": 0,
+          "weak_atom_count": 8,
+          "clustered_atom_count": 0,
+          "synthesis_ready_cluster_count": 0,
+          "frontend_ready_trace_count": 8
+        }
+      }
+    },
+    "trace_summary": {
+      "trace_count": 8,
+      "atom_count": 8
+    }
+  }
+}

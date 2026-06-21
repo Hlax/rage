@@ -1,0 +1,85 @@
+{
+  "schema_version": "atlas_pdf_tei_milestone_v0.1.0",
+  "status": "completed",
+  "packet_id": "pdf-tei-milestone",
+  "run_id": "run_pdf_tei_milestone",
+  "pdf_tei_verdict": "GO",
+  "pdf_tei_rationale": "TEI produced quote-backed claims with trace rows; dirty PDF blocked pre-LLM. PDF fixture also produced quote-backed claims.",
+  "evaluation_only": false,
+  "tei_fixture_ref": "fixtures/source_documents/manual_oa_tei.xml",
+  "pdf_fixture_ref": "fixtures/source_documents/manual_oa_minimal.pdf",
+  "tei_parse_summary": {
+    "source_status": "clean_text_ready",
+    "parser_backend": "tei_xml",
+    "readable_char_ratio": 1.0,
+    "sentence_count": 2,
+    "quoteable_span_count": 2,
+    "extracted_char_count": 234,
+    "page_count": null,
+    "detail": "Clean text ready for quote-first extraction."
+  },
+  "pdf_parse_summary": {
+    "source_status": "parse_failed",
+    "parser_backend": "pdf_unavailable",
+    "readable_char_ratio": 0.0,
+    "sentence_count": 0,
+    "quoteable_span_count": 0,
+    "extracted_char_count": 0,
+    "page_count": null,
+    "detail": "No PDF parser backend available (install pypdf or pymupdf)."
+  },
+  "parser_comparison": {
+    "local_pdf_parser": {
+      "source_status": "parse_failed",
+      "parser_backend": "pdf_unavailable",
+      "readable_char_ratio": 0.0,
+      "sentence_count": 0,
+      "quoteable_span_count": 0,
+      "extracted_char_count": 0,
+      "page_count": null,
+      "detail": "No PDF parser backend available (install pypdf or pymupdf)."
+    },
+    "grobid_enabled": false
+  },
+  "dirty_pdf_gate_summary": {
+    "source_status": "parse_failed",
+    "parser_backend": "pdf_unavailable",
+    "quality_gate_passed": false,
+    "llm_extraction_blocked": true,
+    "detail": "No PDF parser backend available (install pypdf or pymupdf)."
+  },
+  "tei_spine_summary": {
+    "status": "completed",
+    "accepted_count": 1,
+    "rejected_count": 0,
+    "evidence_atom_count": 1,
+    "relationship_count": 1,
+    "parser_backend": "tei_xml",
+    "acquisition_status": "full_text_clean_text_ready",
+    "quality_gate_passed": true,
+    "trace_summary": {
+      "trace_count": 1,
+      "atom_count": 1,
+      "preview_row_count": 1
+    }
+  },
+  "pdf_spine_summary": {
+    "status": "completed",
+    "accepted_count": 1,
+    "rejected_count": 0,
+    "evidence_atom_count": 1,
+    "relationship_count": 1,
+    "parser_backend": "plain_text",
+    "acquisition_status": "full_text_clean_text_ready",
+    "quality_gate_passed": false,
+    "trace_summary": {
+      "trace_count": 2,
+      "atom_count": 1,
+      "preview_row_count": 2
+    }
+  },
+  "next_recommended_packet": {
+    "id": "demo-loop-polish",
+    "title": "Demo Loop Polish"
+  }
+}

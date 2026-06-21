@@ -133,6 +133,7 @@ def _health_metadata_for_record(
             else "blocked",
             "failure_reason": failure_reason,
             "resolver_source": str(record.get("source_kind") or "manual_fixture"),
+            "enrichment_backends": list(record.get("enrichment_backends") or []),
         },
         source_type=_source_type(record),
         source_status=status,
@@ -387,6 +388,7 @@ def _source_health_preview(summary: dict[str, Any]) -> dict[str, Any]:
         "purpose_fit_status",
         "purpose_fit_reason",
         "purpose_gate_decision",
+        "enrichment_backends",
         "db_status",
     )
     for index, row in enumerate(summary.get("source_status_rows") or [], start=1):
@@ -405,6 +407,7 @@ def _source_health_preview(summary: dict[str, Any]) -> dict[str, Any]:
         "extractable_counts": summary.get("extractable_counts") or {},
         "failure_reason_counts": summary.get("failure_reason_counts") or {},
         "resolver_source_counts": summary.get("resolver_source_counts") or {},
+        "enrichment_backend_counts": summary.get("enrichment_backend_counts") or {},
         "availability_counts": summary.get("availability_counts") or {},
         "purpose_fit_status_counts": summary.get("purpose_fit_status_counts") or {},
         "purpose_gate_decision_counts": summary.get("purpose_gate_decision_counts") or {},
@@ -454,6 +457,7 @@ def build_atlas_safe_run_artifact(
     domain_pack: str = "creativity",
     run_report: dict[str, Any] | None = None,
     question_id: str = "local_safe_arbitrary_run",
+    resolved: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build public-safe run artifact for Atlas/operator inspection."""
     summary = acquisition_quality_summary(conn)
@@ -501,6 +505,13 @@ def build_atlas_safe_run_artifact(
         "next_recommended_packet": recommendation.get("recommended_packet"),
         "next_recommended_reason": recommendation.get("rationale"),
     }
+    if resolved and resolved.get("source_expansion_enabled"):
+        from rge.modules.live_source_expansion import build_source_expansion_summary
+
+        artifact["source_expansion_summary"] = build_source_expansion_summary(
+            resolved,
+            source_health=summary,
+        )
     violations = assert_no_private_fields({"atlas_safe_run_artifact": artifact})
     if violations:
         raise ValueError(
@@ -730,6 +741,7 @@ def _execute_source_health_proof_pipeline(
         question=question,
         domain_pack=domain_pack,
         run_report=run_report,
+        resolved=resolved if resolved.get("source_expansion_enabled") else None,
     )
     if atom_trace_result.get("status") == "completed":
         atom_trace_result["trace_count"] = int(

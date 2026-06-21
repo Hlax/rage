@@ -1,0 +1,21 @@
+{
+  "report_type": "operator_full_atlas_refresh_checklist",
+  "checklist_id": "operator-loop-full-atlas-refresh-checklist",
+  "date": "2026-06-20",
+  "overall_verdict": "GO",
+  "evidence_quality_verdict": "GO",
+  "fixture_only": false,
+  "operator_packet_validation": {"status": "valid", "valid_count": 7, "total_count": 7},
+  "cycle_restart": {
+    "cycle_number": 3,
+    "multi_question_verdict": "GO",
+    "aggregate_accepted_claims": 19
+  },
+  "next_recommended_packet": {"id": "live-source-expansion", "title": "Live Source Expansion"},
+  "verification": {
+    "live_full_atlas_close": "exit 0 GO 7/7",
+    "cycle_restart_multi_question": "exit 0 GO",
+    "pytest": "8 passed",
+    "safety_audit": "pass"
+  }
+}

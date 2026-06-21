@@ -1,0 +1,103 @@
+{
+  "schema_version": "atlas_openai_synthesis_adapter_spec_v0.1.0",
+  "status": "completed",
+  "packet_id": "openai-synthesis-adapter-spec",
+  "run_id": "run_openai_synthesis_adapter_spec",
+  "spec_verdict": "PARTIAL",
+  "spec_rationale": "Spec complete but graph synthesis readiness thresholds not met in live graph.",
+  "ticket_059_status": "proposed_spec_ready",
+  "implementation_blocked": true,
+  "no_paid_api_calls": true,
+  "adapter_spec": {
+    "schema_version": "atlas_openai_synthesis_adapter_spec_v0.1.0",
+    "ticket_id": "ticket-059",
+    "status": "spec_only_not_implemented",
+    "implementation_status": "NO-GO until human promotes ticket-059",
+    "input_contract": {
+      "schema_version": "synthesis_evidence_packet_v0.1.0",
+      "allowed_keys": [
+        "atoms",
+        "claims",
+        "cluster_id",
+        "packet_id",
+        "purpose",
+        "research_question",
+        "schema_version",
+        "source_refs",
+        "trace_refs"
+      ],
+      "forbidden_content": [
+        "raw PDF/HTML/text",
+        "quote_span",
+        "claim_text",
+        "prompts",
+        "local paths"
+      ]
+    },
+    "output_contract": {
+      "required_citations": [
+        "claim_ids",
+        "atom_ids",
+        "source_refs"
+      ],
+      "reject_orphan_prose": true,
+      "human_confirm_flag": "--confirm",
+      "cli_sketch": "research synthesize --packet PATH --confirm"
+    },
+    "env_gates": {
+      "required": [
+        "RGE_CLOUD_LLM_ENABLED",
+        "RGE_ALLOW_OPENAI_SYNTHESIS",
+        "operator_cloud_credential_env"
+      ],
+      "default_fail_closed": {
+        "RGE_CLOUD_LLM_ENABLED": "0",
+        "RGE_ALLOW_OPENAI_SYNTHESIS": "0"
+      },
+      "cost_caps": {
+        "RGE_CLOUD_MAX_USD_PER_RUN": "0.50",
+        "RGE_CLOUD_MAX_TOKENS_PER_CALL": "4096"
+      }
+    },
+    "readiness_gates": {
+      "multi_claim_atom_count_min": 1,
+      "source_diverse_atom_count_min": 1,
+      "synthesis_ready_cluster_count_min": 1,
+      "weak_atom_share_max": 0.5
+    },
+    "forbidden_in_execute_safe": [
+      "cloud_synthesis",
+      "openai_api_call",
+      "auto_promote_ticket",
+      "export_public_publish"
+    ],
+    "ci_policy": {
+      "real_api_calls": false,
+      "mock_client_only": true,
+      "dry_run_default": true
+    },
+    "escalation_policy_ref": "docs/agents/13_MODEL_ESCALATION_POLICY.md"
+  },
+  "synthesis_readiness": {
+    "thresholds": {
+      "multi_claim_atom_count_min": 1,
+      "source_diverse_atom_count_min": 1,
+      "synthesis_ready_cluster_count_min": 1,
+      "weak_atom_share_max": 0.5
+    },
+    "checks": {
+      "multi_claim_atoms": false,
+      "source_diverse_atoms": false,
+      "synthesis_ready_clusters": false,
+      "weak_atom_share": true
+    },
+    "synthesis_readiness_passed": false,
+    "openai_synthesis_blocked": true,
+    "openai_block_reason": "Synthesis readiness thresholds not met; paid synthesis remains blocked."
+  },
+  "example_packet_valid": true,
+  "next_recommended_packet": {
+    "id": "ticket-059-implementation",
+    "title": "OpenAI opt-in cloud adapter implementation (human promotion required)"
+  }
+}

@@ -73,6 +73,13 @@
         "reason": "pdf_parser_unavailable",
         "count": 1
       }
+    ],
+    "resolver_breakdown": [
+      {
+        "backend": "openalex",
+        "count": 2,
+        "note": "Fixture-backed discovery resolver placeholder."
+      }
     ]
   },
   "cluster": {

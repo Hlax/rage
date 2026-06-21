@@ -37,41 +37,42 @@
   },
   "source_health_summary": {
     "source_status_counts": {
-      "oa_pdf_available": 5
+      "oa_pdf_available": 6
     },
     "acquisition_status_counts": {
-      "oa_pdf_available": 5
+      "oa_pdf_available": 6
     },
     "parser_backend_counts": {
-      "abstract_record": 5
+      "abstract_record": 6
     },
     "source_type_counts": {
       "openalex": 1,
-      "arxiv": 4
+      "arxiv": 5
     },
     "quality_gate_status_counts": {
-      "extractable": 5
+      "extractable": 6
     },
     "extractable_counts": {
-      "true": 5
+      "true": 6
     },
     "failure_reason_counts": {},
     "resolver_source_counts": {
       "openalex": 1,
-      "arxiv": 4
+      "arxiv": 5
     },
+    "enrichment_backend_counts": {},
     "availability_counts": {
-      "oa_available": 5,
-      "pdf_available": 5,
+      "oa_available": 6,
+      "pdf_available": 6,
       "tei_available": 0
     },
     "purpose_fit_status_counts": {
-      "match": 5
+      "match": 6
     },
     "purpose_gate_decision_counts": {
-      "accepted": 5
+      "accepted": 6
     },
-    "sources_with_metadata": 5,
+    "sources_with_metadata": 6,
     "source_rows": [
       {
         "source_ref": "source_001",
@@ -167,15 +168,34 @@
         "purpose_fit_reason": "No purpose-specific concept gate was required.",
         "purpose_gate_decision": "accepted",
         "db_status": "parsed"
+      },
+      {
+        "source_ref": "source_006",
+        "source_status": "oa_pdf_available",
+        "acquisition_status": "oa_pdf_available",
+        "parser_backend": "abstract_record",
+        "source_type": "arxiv",
+        "quality_gate_status": "extractable",
+        "extractable": true,
+        "resolver_source": "arxiv",
+        "oa_available": true,
+        "pdf_available": true,
+        "tei_available": false,
+        "is_oa": true,
+        "oa_status": "open",
+        "purpose_fit_status": "match",
+        "purpose_fit_reason": "No purpose-specific concept gate was required.",
+        "purpose_gate_decision": "accepted",
+        "db_status": "parsed"
       }
     ]
   },
   "purpose_fit_summary": {
     "source_counts": {
-      "match": 5
+      "match": 6
     },
     "gate_decision_counts": {
-      "accepted": 5
+      "accepted": 6
     },
     "accepted_evidence_count": 5,
     "rejected_evidence_count": 0
@@ -227,7 +247,7 @@
     }
   },
   "trace_summary": {
-    "trace_count": 5,
+    "trace_count": 6,
     "frontend_ready_trace_count": 5,
     "atom_count": 5,
     "accepted_claim_count": 5,
@@ -235,8 +255,8 @@
       {
         "trace_ref": "trace_001",
         "connection_type": "source_quote_claim_atom_concept_cluster",
-        "maturity": "weak",
-        "atom_cluster_maturity": "weak",
+        "maturity": "promising",
+        "atom_cluster_maturity": "promising",
         "purpose_match_status": "match",
         "evidence_decision": "accepted",
         "visibility": "public_safe",
@@ -254,8 +274,8 @@
       {
         "trace_ref": "trace_002",
         "connection_type": "source_quote_claim_atom_concept_cluster",
-        "maturity": "weak",
-        "atom_cluster_maturity": "weak",
+        "maturity": "promising",
+        "atom_cluster_maturity": "promising",
         "purpose_match_status": "match",
         "evidence_decision": "accepted",
         "visibility": "public_safe",
@@ -273,8 +293,8 @@
       {
         "trace_ref": "trace_003",
         "connection_type": "source_quote_claim_atom_concept_cluster",
-        "maturity": "weak",
-        "atom_cluster_maturity": "weak",
+        "maturity": "promising",
+        "atom_cluster_maturity": "promising",
         "purpose_match_status": "match",
         "evidence_decision": "accepted",
         "visibility": "public_safe",
@@ -320,6 +340,25 @@
         "concept_count": 0,
         "relationship_count": 1,
         "relationship_types": [
+          "qualification"
+        ],
+        "relationship_type": "qualification",
+        "why_clustered": "",
+        "why_evidence_downgraded_or_rejected": "",
+        "why_connected": "Accepted quote-backed claim links source provenance to 0 concept(s), 1 relationship(s), relationship type(s) ['qualification'], and cluster cluster_unassigned."
+      },
+      {
+        "trace_ref": "trace_006",
+        "connection_type": "source_quote_claim_atom_concept_cluster",
+        "maturity": "weak",
+        "atom_cluster_maturity": "weak",
+        "purpose_match_status": "match",
+        "evidence_decision": "accepted",
+        "visibility": "public_safe",
+        "has_quote": true,
+        "concept_count": 0,
+        "relationship_count": 1,
+        "relationship_types": [
           "contradiction"
         ],
         "relationship_type": "contradiction",
@@ -330,6 +369,43 @@
     ]
   },
   "readiness_warnings": [],
-  "next_recommended_packet": "Phase4-P10-evidence-atom-clustering",
-  "next_recommended_reason": "Most evidence atoms remain weak one-claim objects; cluster compatible claims before UI synthesis."
+  "next_recommended_packet": {
+    "id": "local-model-extraction-comparison",
+    "title": "Local Model Extraction Comparison"
+  },
+  "next_recommended_reason": "Most evidence atoms remain weak one-claim objects; cluster compatible claims before UI synthesis.",
+  "source_expansion_summary": {
+    "discovery_backends": [
+      "openalex",
+      "arxiv"
+    ],
+    "enrich_unpaywall": true,
+    "resolver_breakdown": {
+      "openalex": 5,
+      "arxiv": 5
+    },
+    "persisted_resolver_source_counts": {
+      "openalex": 1,
+      "arxiv": 5
+    },
+    "source_diversity_count": 2,
+    "doi_backed_count": 1,
+    "unpaywall_enriched_count": 0,
+    "unpaywall_skipped_counts": {
+      "unpaywall_error": 5,
+      "missing_doi": 5
+    },
+    "enrichment_backend_counts": {},
+    "availability_counts": {
+      "oa_available": 6,
+      "pdf_available": 6,
+      "tei_available": 0
+    },
+    "blocked_source_reason_counts": {},
+    "blocked_sources_visible": false,
+    "resolved_count": 5
+  },
+  "packet_id": "live-source-expansion",
+  "source_expansion_verdict": "GO",
+  "source_expansion_rationale": "Expanded OpenAlex/arXiv discovery with Unpaywall enrichment produced multi-backend source diversity and quote-backed evidence."
 }

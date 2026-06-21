@@ -1,0 +1,20 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "Local Model Extraction Comparison",
+  "packet_id": "local-model-extraction-comparison",
+  "date": "2026-06-20",
+  "cycle_note": "operator_loop_cycle_3_after_live_source_expansion",
+  "verdict": "GO",
+  "comparison_verdict": "GO",
+  "ollama_model": "qwen3.5:9b-q4_K_M",
+  "live_run_summary": {
+    "compared_abstract_count": 5,
+    "mock_total_accepted": 5,
+    "local_ollama_total_accepted": 2,
+    "quality_vs_mock_overall": "thinner",
+    "local_better_count": 1,
+    "local_thinner_count": 4
+  },
+  "next_recommended_packet": {"id": "graph-maturity-evidence-atom-upgrade", "title": "Graph Maturity / Evidence Atom Upgrade"},
+  "verification": {"live_run_sync_public": "exit 0 GO", "pytest": "9 passed", "safety_audit": "pass", "public_site_build": "exit 0"}
+}

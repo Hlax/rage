@@ -195,6 +195,15 @@ class OllamaModelClient(ModelClient):
                 f"Ollama output failed schema validation for {task_name}: {exc}"
             ) from exc
 
+    def _live_abstract_ollama_calibration(self) -> str:
+        return (
+            "Live abstract comparison mode:\n"
+            "- Source text is ONLY an academic abstract (no full paper body).\n"
+            "- quote_span MUST be copied VERBATIM from the abstract text above.\n"
+            "- If no literal quote supports a scoped claim, return an empty items array.\n"
+            "- Claims without literal quote spans are rejected by Python validation.\n\n"
+        )
+
     def _manual_text_arbitrary_live_calibration(self) -> str:
         return (
             "Manual arbitrary source mode (live fall-through):\n"
@@ -236,8 +245,12 @@ class OllamaModelClient(ModelClient):
             contract.get("manual_text_arbitrary_live")
             or contract.get("staged_ingest_arbitrary_live")
         )
+        live_abstract_mode = bool(contract.get("live_abstract_ollama"))
         manual_calibration = (
             self._manual_text_arbitrary_live_calibration() if manual_text_mode else ""
+        )
+        live_abstract_calibration = (
+            self._live_abstract_ollama_calibration() if live_abstract_mode else ""
         )
         quote_hints = contract.get("quoteable_span_hints") or []
         quote_hint_block = ""
@@ -255,6 +268,7 @@ class OllamaModelClient(ModelClient):
             f"--- UNTRUSTED SOURCE TEXT END ---\n\n"
             f"Research contract context (JSON): {json.dumps(contract, ensure_ascii=False)}\n\n"
             f"{manual_calibration}"
+            f"{live_abstract_calibration}"
             f"{quote_hint_block}"
             "Quote-first extraction rules:\n"
             "- Select an exact quote_span from the source text FIRST.\n"

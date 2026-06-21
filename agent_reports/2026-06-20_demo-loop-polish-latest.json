@@ -1,0 +1,31 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "Demo Loop Polish",
+  "packet_id": "demo-loop-polish",
+  "date": "2026-06-20",
+  "cycle_note": "operator_loop_cycle_2_closes_fixture_spine_before_full_atlas_refresh",
+  "verdict": "GO",
+  "demo_loop_verdict": "GO",
+  "demo_loop_rationale": "Fixture demo loop produced quote-grounded abstract evidence, selective full-text status (2 clean), improvement recommendation (MVP-P2-abstract-evidence), and DB/trace spine rows.",
+  "llm_mode": "mock",
+  "run_summary": {
+    "sources_resolved": 4,
+    "abstract_claims_accepted": 1,
+    "fulltext_clean_acquisitions": 2,
+    "db_spine_accepted": 2,
+    "trace_rows": 2,
+    "improvement_recommendation": "MVP-P2-abstract-evidence"
+  },
+  "public_artifact": "apps/public-site/public/data/atlas_demo_loop_polish_latest.json",
+  "operator_export_path": "data/exports/demo_loop_polish",
+  "next_recommended_packet": {
+    "id": "operator-loop-full-atlas-refresh-checklist",
+    "title": "Operator Loop Full Atlas Refresh Checklist"
+  },
+  "verification": {
+    "operator_run_persist_claims_sync_public": "exit 0 GO",
+    "pytest": "7 passed",
+    "safety_audit": "pass",
+    "public_site_build": "exit 0"
+  }
+}

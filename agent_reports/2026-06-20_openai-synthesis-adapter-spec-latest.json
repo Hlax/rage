@@ -1,0 +1,30 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "OpenAI Synthesis Adapter Spec",
+  "packet_id": "openai-synthesis-adapter-spec",
+  "date": "2026-06-20",
+  "verdict": "GO",
+  "ticket_id": "ticket-059",
+  "implementation_status": "spec_only_not_implemented",
+  "no_paid_api_calls": true,
+  "input_contract": "synthesis_evidence_packet_v0.1.0",
+  "readiness_gates": {
+    "multi_claim_atom_count_min": 1,
+    "source_diverse_atom_count_min": 1,
+    "synthesis_ready_cluster_count_min": 1
+  },
+  "env_gates_fail_closed": [
+    "RGE_CLOUD_LLM_ENABLED",
+    "RGE_ALLOW_OPENAI_SYNTHESIS",
+    "OPENAI_API_KEY"
+  ],
+  "public_artifact": "apps/public-site/public/data/atlas_openai_synthesis_adapter_spec_latest.json",
+  "verification": {
+    "test_openai_synthesis_adapter_spec": "PASS",
+    "verify_skip_site": "exit 0"
+  },
+  "next_recommended_packet": {
+    "id": "ticket-059-implementation",
+    "title": "OpenAI opt-in cloud adapter (human promotion required)"
+  }
+}

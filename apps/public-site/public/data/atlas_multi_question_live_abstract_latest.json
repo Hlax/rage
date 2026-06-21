@@ -1,0 +1,162 @@
+{
+  "schema_version": "atlas_multi_question_live_abstract_v0.1.0",
+  "status": "completed",
+  "packet_id": "multi-question-live-abstract-runs",
+  "question_count": 5,
+  "multi_question_verdict": "GO",
+  "multi_question_rationale": "Each question resolved live sources with purpose-fit counts; strict agency/style questions route separately from open creativity questions.",
+  "purpose_routing_validation": {
+    "purpose_routing_valid": true,
+    "strict_questions_reject_generic": true,
+    "open_questions_allow_generic": true
+  },
+  "question_runs": [
+    {
+      "question_id": "mq_ai_human_creativity",
+      "question": "How does AI affect human creativity?",
+      "resolver_query": "human AI creativity",
+      "gate_mode": "open",
+      "purpose_family": null,
+      "evidence_quality_verdict": "GO",
+      "evidence_quality_rationale": "At least one live abstract produced a quote-backed, purpose-matched accepted claim with Atlas trace summary from the run artifact.",
+      "live_source_count": 5,
+      "abstract_availability_count": 5,
+      "claims_accepted": 5,
+      "claims_rejected": 0,
+      "purpose_fit_status_counts": {
+        "match": 6
+      },
+      "purpose_gate_decision_counts": {
+        "accepted": 6
+      },
+      "evidence_atom_count": 5,
+      "relationship_count": 5,
+      "trace_summary": {
+        "trace_count": 6,
+        "preview_row_count": 6
+      },
+      "operator_artifact_ref": "data/exports/multi_question_live_abstract/mq_ai_human_creativity/atlas_source_health_run_latest.json",
+      "atlas_artifact_public_safe": true
+    },
+    {
+      "question_id": "mq_ai_assistance_diversity",
+      "question": "Does AI assistance improve idea quality while reducing semantic diversity?",
+      "resolver_query": "AI assistance idea diversity creativity",
+      "gate_mode": "open",
+      "purpose_family": null,
+      "evidence_quality_verdict": "GO",
+      "evidence_quality_rationale": "At least one live abstract produced a quote-backed, purpose-matched accepted claim with Atlas trace summary from the run artifact.",
+      "live_source_count": 5,
+      "abstract_availability_count": 5,
+      "claims_accepted": 5,
+      "claims_rejected": 0,
+      "purpose_fit_status_counts": {
+        "match": 5
+      },
+      "purpose_gate_decision_counts": {
+        "accepted": 5
+      },
+      "evidence_atom_count": 5,
+      "relationship_count": 5,
+      "trace_summary": {
+        "trace_count": 5,
+        "preview_row_count": 5
+      },
+      "operator_artifact_ref": "data/exports/multi_question_live_abstract/mq_ai_assistance_diversity/atlas_source_health_run_latest.json",
+      "atlas_artifact_public_safe": true
+    },
+    {
+      "question_id": "mq_cocreation_agency",
+      "question": "How does human-AI co-creation affect author agency and creative control?",
+      "resolver_query": "human AI co-creation agency creative control",
+      "gate_mode": "strict",
+      "purpose_family": "agency_cocreation",
+      "evidence_quality_verdict": "GO",
+      "evidence_quality_rationale": "At least one live abstract produced a quote-backed, purpose-matched accepted claim with Atlas trace summary from the run artifact.",
+      "live_source_count": 5,
+      "abstract_availability_count": 5,
+      "claims_accepted": 1,
+      "claims_rejected": 4,
+      "purpose_fit_status_counts": {
+        "mismatch": 3,
+        "match": 2
+      },
+      "purpose_gate_decision_counts": {
+        "downgraded": 3,
+        "accepted": 2
+      },
+      "evidence_atom_count": 0,
+      "relationship_count": 0,
+      "trace_summary": {
+        "trace_count": 1,
+        "preview_row_count": 1
+      },
+      "operator_artifact_ref": "data/exports/multi_question_live_abstract/mq_cocreation_agency/atlas_source_health_run_latest.json",
+      "atlas_artifact_public_safe": true
+    },
+    {
+      "question_id": "mq_artist_style_originality",
+      "question": "How do artists and designers preserve originality and visual style when using AI tools?",
+      "resolver_query": "artist designer originality visual style AI",
+      "gate_mode": "strict",
+      "purpose_family": "style_originality",
+      "evidence_quality_verdict": "GO",
+      "evidence_quality_rationale": "At least one live abstract produced a quote-backed, purpose-matched accepted claim with Atlas trace summary from the run artifact.",
+      "live_source_count": 5,
+      "abstract_availability_count": 5,
+      "claims_accepted": 3,
+      "claims_rejected": 2,
+      "purpose_fit_status_counts": {
+        "match": 5
+      },
+      "purpose_gate_decision_counts": {
+        "accepted": 5
+      },
+      "evidence_atom_count": 0,
+      "relationship_count": 0,
+      "trace_summary": {
+        "trace_count": 3,
+        "preview_row_count": 3
+      },
+      "operator_artifact_ref": "data/exports/multi_question_live_abstract/mq_artist_style_originality/atlas_source_health_run_latest.json",
+      "atlas_artifact_public_safe": true
+    },
+    {
+      "question_id": "mq_ai_creativity_benchmark",
+      "question": "How should AI creativity be evaluated and benchmarked?",
+      "resolver_query": "AI creativity evaluation benchmark",
+      "gate_mode": "open",
+      "purpose_family": null,
+      "evidence_quality_verdict": "GO",
+      "evidence_quality_rationale": "At least one live abstract produced a quote-backed, purpose-matched accepted claim with Atlas trace summary from the run artifact.",
+      "live_source_count": 5,
+      "abstract_availability_count": 5,
+      "claims_accepted": 5,
+      "claims_rejected": 0,
+      "purpose_fit_status_counts": {
+        "match": 5
+      },
+      "purpose_gate_decision_counts": {
+        "accepted": 5
+      },
+      "evidence_atom_count": 5,
+      "relationship_count": 5,
+      "trace_summary": {
+        "trace_count": 5,
+        "preview_row_count": 5
+      },
+      "operator_artifact_ref": "data/exports/multi_question_live_abstract/mq_ai_creativity_benchmark/atlas_source_health_run_latest.json",
+      "atlas_artifact_public_safe": true
+    }
+  ],
+  "aggregate": {
+    "questions_with_live_sources": 5,
+    "questions_with_accepted_claims": 5,
+    "total_accepted_claims": 19,
+    "total_rejected_claims": 6
+  },
+  "next_recommended_packet": {
+    "id": "live-source-expansion",
+    "title": "Live Source Expansion"
+  }
+}

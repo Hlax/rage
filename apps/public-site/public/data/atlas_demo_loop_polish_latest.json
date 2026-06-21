@@ -1,0 +1,69 @@
+{
+  "schema_version": "atlas_demo_loop_polish_v0.1.0",
+  "status": "completed",
+  "packet_id": "demo-loop-polish",
+  "run_id": "run_demo_loop_polish",
+  "demo_loop_verdict": "GO",
+  "demo_loop_rationale": "Fixture demo loop produced quote-grounded abstract evidence, selective full-text status (2 clean), improvement recommendation (MVP-P2-abstract-evidence), and DB/trace spine rows.",
+  "evaluation_only": false,
+  "topic": "AI assisted creativity and idea diversity",
+  "domain_pack": "creativity",
+  "mode": "abstract-first",
+  "fixture_mode": true,
+  "resolver_summary": {
+    "resolved_count": 4,
+    "backend_counts": {
+      "manual_fixture": 4
+    }
+  },
+  "source_status_counts": {
+    "abstract_available": 1,
+    "metadata_only": 1,
+    "oa_pdf_available": 1,
+    "oa_tei_available": 1
+  },
+  "ranked_source_count": 4,
+  "abstract_evidence_summary": {
+    "card_count": 4,
+    "completed_count": 3,
+    "accepted_claims_total": 1,
+    "rejected_claims_total": 2,
+    "skipped_count": 1
+  },
+  "selective_fulltext_summary": {
+    "acquisition_count": 3,
+    "status_counts": {
+      "full_text_not_needed": 1,
+      "full_text_clean_text_ready": 2
+    }
+  },
+  "field_report_summary": {
+    "report_type": "field_map",
+    "metadata_record_count": 4,
+    "cluster_count": 4,
+    "weak_evidence_area_count": 1,
+    "accepted_claims_total": 1,
+    "rejected_claims_total": 2
+  },
+  "improvement_recommendation": {
+    "recommended_packet": "MVP-P2-abstract-evidence",
+    "dominant_signal": "unsupported_claim",
+    "rationale": "Claims failed quote grounding \u2014 tighten quote-first extraction."
+  },
+  "db_spine_summary": {
+    "status": "completed",
+    "accepted_claims_total": 2,
+    "rejected_claims_total": 0,
+    "fulltext_completed_count": 2,
+    "fulltext_accepted_total": 2
+  },
+  "trace_summary": {
+    "trace_count": 2,
+    "atom_count": 0,
+    "preview_row_count": 2
+  },
+  "next_recommended_packet": {
+    "id": "operator-loop-full-atlas-refresh-checklist",
+    "title": "Operator Loop Full Atlas Refresh Checklist"
+  }
+}

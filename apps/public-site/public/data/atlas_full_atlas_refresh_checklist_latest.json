@@ -1,0 +1,80 @@
+{
+  "schema_version": "atlas_full_atlas_refresh_checklist_v0.1.0",
+  "status": "completed",
+  "packet_id": "operator-loop-full-atlas-refresh-checklist",
+  "run_id": "run_live_network_abstract_evidence_quality",
+  "full_atlas_refresh_verdict": "GO",
+  "full_atlas_refresh_rationale": "At least one live abstract produced a quote-backed, purpose-matched accepted claim with Atlas trace summary from the run artifact.",
+  "evidence_quality_verdict": "GO",
+  "operator_packet_validation": {
+    "status": "valid",
+    "valid_count": 7,
+    "total_count": 7,
+    "artifacts": [
+      {
+        "packet_id": "live-source-health",
+        "status": "valid",
+        "error_count": 0
+      },
+      {
+        "packet_id": "multi-question-live-abstract-runs",
+        "status": "valid",
+        "error_count": 0
+      },
+      {
+        "packet_id": "local-model-extraction-comparison",
+        "status": "valid",
+        "error_count": 0
+      },
+      {
+        "packet_id": "graph-maturity-evidence-atom-upgrade",
+        "status": "valid",
+        "error_count": 0
+      },
+      {
+        "packet_id": "web-adapter-scrapling-proof",
+        "status": "valid",
+        "error_count": 0
+      },
+      {
+        "packet_id": "pdf-tei-milestone",
+        "status": "valid",
+        "error_count": 0
+      },
+      {
+        "packet_id": "demo-loop-polish",
+        "status": "valid",
+        "error_count": 0
+      }
+    ]
+  },
+  "fixture_refresh_summary": {
+    "status": "completed",
+    "refreshed_packets": {
+      "web-adapter-scrapling-proof": "GO",
+      "pdf-tei-milestone": "GO",
+      "demo-loop-polish": "GO"
+    }
+  },
+  "checklist_steps": [
+    "live_abstract_evidence_quality_smoke",
+    "atlas_source_health_sync",
+    "trace_summary_validation",
+    "fixture_operator_packet_refresh",
+    "operator_packet_artifact_validation",
+    "public_site_build",
+    "final_status_report"
+  ],
+  "step_status": {
+    "live_abstract_evidence_quality_smoke": "completed",
+    "atlas_source_health_sync": "completed",
+    "trace_summary_validation": "completed",
+    "fixture_operator_packet_refresh": "completed",
+    "operator_packet_artifact_validation": "valid",
+    "public_site_build": "completed"
+  },
+  "next_recommended_packet": {
+    "id": "multi-question-live-abstract-runs",
+    "title": "Multi-Question Live Abstract Runs"
+  }
+}

@@ -10,12 +10,21 @@ import {
   humanizeLabel,
   resolveAtlasCoherencePreview,
   resolveGapsNextMovePreview,
+  resolveGraphMaturityUpgradePreview,
   resolveGraphSummaryPanelPreview,
+  resolveLocalModelExtractionComparisonPreview,
+  resolveLiveSourceExpansionPreview,
+  resolveMultiQuestionLiveAbstractPreview,
   resolvePurposePanelPreview,
   resolveQuestionHeaderPreview,
   resolveReadinessPanelPreview,
   resolveSourceHealthPreview,
   resolveTracePanelPreview,
+  resolveWebAdapterScraplingProofPreview,
+  resolvePdfTeiMilestonePreview,
+  resolveDemoLoopPolishPreview,
+  resolveFullAtlasRefreshChecklistPreview,
+  resolveOpenAISynthesisAdapterSpecPreview,
   tinyAtlasConnectionPreview,
 } from '../../lib/atlasPreview';
 import { conceptToSlug, findCardById, findConceptBySlug } from '../../lib/publicCards';
@@ -156,6 +165,15 @@ export default function AtlasPreviewPage() {
   const primaryRun = atlasSnapshot.runs[0];
   const connectionPreview = tinyAtlasConnectionPreview;
   const sourceHealthPreview = resolveSourceHealthPreview();
+  const liveSourceExpansionPreview = resolveLiveSourceExpansionPreview();
+  const multiQuestionPreview = resolveMultiQuestionLiveAbstractPreview();
+  const localModelComparisonPreview = resolveLocalModelExtractionComparisonPreview();
+  const graphMaturityPreview = resolveGraphMaturityUpgradePreview();
+  const webAdapterPreview = resolveWebAdapterScraplingProofPreview();
+  const pdfTeiPreview = resolvePdfTeiMilestonePreview();
+  const demoLoopPreview = resolveDemoLoopPolishPreview();
+  const fullAtlasRefreshPreview = resolveFullAtlasRefreshChecklistPreview();
+  const openaiSynthesisSpecPreview = resolveOpenAISynthesisAdapterSpecPreview();
   const gapsNextMovePreview = resolveGapsNextMovePreview();
   const questionHeaderPreview = resolveQuestionHeaderPreview();
   const readinessPanelPreview = resolveReadinessPanelPreview();
@@ -261,7 +279,18 @@ export default function AtlasPreviewPage() {
           )}
         </div>
         <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
-          <p style={mutedLabelStyle}>Acquisition / parser status</p>
+          <p style={mutedLabelStyle}>Resolver breakdown</p>
+          <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#aeb4c0' }}>
+            {sourceHealthPreview.resolver_breakdown.map((item) => (
+              <li key={item.backend} style={{ marginBottom: '0.4rem' }}>
+                <strong style={{ color: '#e6e8ec' }}>{humanizeLabel(item.backend)}</strong>{' '}
+                ({item.count}) · {item.note}
+              </li>
+            ))}
+          </ul>
+          <p style={{ ...mutedLabelStyle, marginTop: '0.8rem' }}>
+            Acquisition / parser status
+          </p>
           <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#aeb4c0' }}>
             {sourceHealthPreview.acquisition_parser_status.map((item) => (
               <li key={item.status} style={{ marginBottom: '0.4rem' }}>
@@ -292,6 +321,515 @@ export default function AtlasPreviewPage() {
           </ul>
         </div>
       </section>
+
+      {liveSourceExpansionPreview ? (
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>Live source expansion</h2>
+          <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+            OpenAlex + arXiv discovery with Unpaywall DOI/OA enrichment. Abstract-first;
+            blocked/unavailable sources remain visible in Atlas-safe summaries.
+          </p>
+          <div style={smallGridStyle}>
+            <MetricTile
+              label="Expansion verdict"
+              value={humanizeLabel(liveSourceExpansionPreview.verdict)}
+            />
+            <MetricTile
+              label="Source diversity"
+              value={liveSourceExpansionPreview.source_diversity_count}
+            />
+            <MetricTile
+              label="Resolved records"
+              value={liveSourceExpansionPreview.resolved_count}
+            />
+            <MetricTile
+              label="DOI-backed"
+              value={liveSourceExpansionPreview.doi_backed_count}
+            />
+            <MetricTile
+              label="Unpaywall enriched"
+              value={liveSourceExpansionPreview.unpaywall_enriched_count}
+            />
+            <MetricTile
+              label="Unpaywall enabled"
+              value={liveSourceExpansionPreview.enrich_unpaywall ? 'Yes' : 'No'}
+            />
+          </div>
+          <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+            <p style={mutedLabelStyle}>Discovery breakdown (pre-persist)</p>
+            <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#aeb4c0' }}>
+              {liveSourceExpansionPreview.discovery_breakdown.map((item) => (
+                <li key={item.backend}>
+                  {humanizeLabel(item.backend)} ({item.count})
+                </li>
+              ))}
+            </ul>
+            <p style={{ ...mutedLabelStyle, marginTop: '0.8rem' }}>
+              Persisted resolver sources
+            </p>
+            <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#aeb4c0' }}>
+              {liveSourceExpansionPreview.persisted_breakdown.map((item) => (
+                <li key={item.backend}>
+                  {humanizeLabel(item.backend)} ({item.count})
+                </li>
+              ))}
+            </ul>
+            {liveSourceExpansionPreview.unpaywall_skipped.length ? (
+              <>
+                <p style={{ ...mutedLabelStyle, marginTop: '0.8rem' }}>
+                  Unpaywall skip reasons
+                </p>
+                <ul
+                  style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#aeb4c0' }}
+                >
+                  {liveSourceExpansionPreview.unpaywall_skipped.map((item) => (
+                    <li key={item.reason}>
+                      {humanizeLabel(item.reason)} ({item.count})
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
+            <p style={{ ...mutedLabelStyle, marginTop: '0.8rem' }}>Rationale</p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              {liveSourceExpansionPreview.rationale}
+            </p>
+          </div>
+        </section>
+      ) : null}
+
+      {multiQuestionPreview ? (
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>Multi-question live abstract runs</h2>
+          <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+            Five purpose-gated live abstract evidence runs across open and strict
+            creativity questions. Preview source: Atlas-safe multi-question bundle.
+          </p>
+          <div style={smallGridStyle}>
+            <MetricTile
+              label="Multi-question verdict"
+              value={humanizeLabel(multiQuestionPreview.verdict)}
+            />
+            <MetricTile
+              label="Questions"
+              value={multiQuestionPreview.question_count}
+            />
+            <MetricTile
+              label="With live sources"
+              value={multiQuestionPreview.questions_with_live_sources}
+            />
+            <MetricTile
+              label="With accepted claims"
+              value={multiQuestionPreview.questions_with_accepted_claims}
+            />
+            <MetricTile
+              label="Total accepted claims"
+              value={multiQuestionPreview.total_accepted_claims}
+            />
+            <MetricTile
+              label="Purpose routing"
+              value={multiQuestionPreview.purpose_routing_valid ? 'Valid' : 'Invalid'}
+            />
+            <MetricTile
+              label="Strict gates"
+              value={multiQuestionPreview.strict_gate_count}
+            />
+            <MetricTile
+              label="Open gates"
+              value={multiQuestionPreview.open_gate_count}
+            />
+          </div>
+          <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+            <p style={mutedLabelStyle}>Per-question summary</p>
+            <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#aeb4c0' }}>
+              {multiQuestionPreview.per_question_rows.map((row) => (
+                <li key={row.question_id} style={{ marginBottom: '0.4rem' }}>
+                  <strong style={{ color: '#e6e8ec' }}>{row.question_id}</strong> (
+                  {humanizeLabel(row.gate_mode)}) · accepted {row.accepted} / rejected{' '}
+                  {row.rejected} · {humanizeLabel(row.verdict)}
+                </li>
+              ))}
+            </ul>
+            <p style={{ ...mutedLabelStyle, marginTop: '0.8rem' }}>Rationale</p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              {multiQuestionPreview.rationale}
+            </p>
+          </div>
+        </section>
+      ) : null}
+
+      {localModelComparisonPreview ? (
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>Local model extraction comparison</h2>
+          <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+            Evaluation-only: mock deterministic vs local Ollama on the same live
+            abstracts. Preview source: Atlas-safe comparison run artifact.
+          </p>
+          <div style={smallGridStyle}>
+            <MetricTile
+              label="Comparison verdict"
+              value={humanizeLabel(localModelComparisonPreview.comparison_verdict)}
+            />
+            <MetricTile
+              label="Quality vs mock"
+              value={humanizeLabel(localModelComparisonPreview.quality_vs_mock_overall)}
+            />
+            <MetricTile
+              label="Abstracts compared"
+              value={localModelComparisonPreview.compared_abstract_count}
+            />
+            <MetricTile
+              label="Mock accepted"
+              value={localModelComparisonPreview.mock_total_accepted}
+            />
+            <MetricTile
+              label="Ollama accepted"
+              value={localModelComparisonPreview.local_ollama_total_accepted}
+            />
+            <MetricTile
+              label="Ollama model"
+              value={localModelComparisonPreview.ollama_model}
+            />
+            <MetricTile
+              label="Mock quote validity"
+              value={localModelComparisonPreview.mock_quote_validity_rate}
+            />
+            <MetricTile
+              label="Ollama quote validity"
+              value={localModelComparisonPreview.local_ollama_quote_validity_rate}
+            />
+          </div>
+          <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+            <p style={mutedLabelStyle}>Per-abstract comparison</p>
+            <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#aeb4c0' }}>
+              {localModelComparisonPreview.per_abstract_rows.map((row) => (
+                <li key={row.source_ref} style={{ marginBottom: '0.4rem' }}>
+                  <strong style={{ color: '#e6e8ec' }}>{row.source_ref}</strong> (
+                  {humanizeLabel(row.resolver_backend)}) · mock {row.mock_accepted} / ollama{' '}
+                  {row.ollama_accepted} · {humanizeLabel(row.quality_vs_mock)}
+                </li>
+              ))}
+            </ul>
+            {localModelComparisonPreview.ollama_rejection_totals.length > 0 ? (
+              <>
+                <p style={{ ...mutedLabelStyle, marginTop: '0.8rem' }}>
+                  Ollama rejection reasons (aggregate)
+                </p>
+                <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0' }}>
+                  {localModelComparisonPreview.ollama_rejection_totals
+                    .map((item) => `${humanizeLabel(item.reason)}: ${item.count}`)
+                    .join(' · ')}
+                </p>
+              </>
+            ) : null}
+            <p style={{ ...mutedLabelStyle, marginTop: '0.8rem' }}>Rationale</p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              {localModelComparisonPreview.comparison_rationale}
+            </p>
+          </div>
+        </section>
+      ) : null}
+
+      {graphMaturityPreview ? (
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>Graph maturity / evidence atom upgrade</h2>
+          <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+            Multi-question live abstract ingest with deterministic concept seeding and
+            atom re-clustering. Preview source: Atlas-safe graph maturity artifact.
+          </p>
+          <div style={smallGridStyle}>
+            <MetricTile
+              label="Maturity verdict"
+              value={humanizeLabel(graphMaturityPreview.verdict)}
+            />
+            <MetricTile
+              label="Questions ingested"
+              value={graphMaturityPreview.question_count}
+            />
+            <MetricTile
+              label="Accepted claims"
+              value={graphMaturityPreview.total_accepted_claims}
+            />
+            <MetricTile
+              label="Single-claim atoms (before → after)"
+              value={`${graphMaturityPreview.before_single_claim_atoms} → ${graphMaturityPreview.after_single_claim_atoms}`}
+            />
+            <MetricTile
+              label="Clustered atoms (before → after)"
+              value={`${graphMaturityPreview.before_clustered_atoms} → ${graphMaturityPreview.after_clustered_atoms}`}
+            />
+            <MetricTile
+              label="Relationship density"
+              value={`${graphMaturityPreview.relationship_density_before} → ${graphMaturityPreview.relationship_density_after}`}
+            />
+          </div>
+          <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+            <p style={mutedLabelStyle}>Cluster maturity explanations</p>
+            <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', color: '#aeb4c0' }}>
+              {graphMaturityPreview.cluster_explanations.map((cluster) => (
+                <li key={cluster.cluster_ref} style={{ marginBottom: '0.5rem' }}>
+                  <strong style={{ color: '#e6e8ec' }}>{cluster.cluster_ref}</strong> ·{' '}
+                  {humanizeLabel(cluster.maturity_label)} · density{' '}
+                  {cluster.relationship_density}
+                  {cluster.orphan_claim_count > 0
+                    ? ` · ${cluster.orphan_claim_count} orphan claim(s)`
+                    : ''}
+                  <br />
+                  <span style={{ fontSize: '0.85rem' }}>{cluster.reasons.join(' ')}</span>
+                </li>
+              ))}
+            </ul>
+            <p style={{ ...mutedLabelStyle, marginTop: '0.8rem' }}>Rationale</p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              {graphMaturityPreview.rationale}
+            </p>
+          </div>
+        </section>
+      ) : null}
+
+      {webAdapterPreview ? (
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>Web adapter / Scrapling proof</h2>
+          <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+            Public webpage → clean text → quality gate → quote-backed claim → atom/trace.
+            Scrapling is acquisition-only; html_to_text is the default CI path.
+          </p>
+          <div style={smallGridStyle}>
+            <MetricTile
+              label="Web adapter verdict"
+              value={humanizeLabel(webAdapterPreview.verdict)}
+            />
+            <MetricTile
+              label="Parser backend"
+              value={humanizeLabel(webAdapterPreview.parser_backend)}
+            />
+            <MetricTile
+              label="Quality gate"
+              value={webAdapterPreview.quality_gate_passed ? 'Passed' : 'Failed'}
+            />
+            <MetricTile
+              label="Accepted claims"
+              value={webAdapterPreview.accepted_count}
+            />
+            <MetricTile
+              label="Trace rows"
+              value={webAdapterPreview.trace_count}
+            />
+            <MetricTile
+              label="Evidence atoms"
+              value={webAdapterPreview.evidence_atom_count}
+            />
+            <MetricTile
+              label="Relationships"
+              value={webAdapterPreview.relationship_count}
+            />
+            <MetricTile
+              label="Scrapling available"
+              value={webAdapterPreview.scrapling_available ? 'Yes' : 'No'}
+            />
+            <MetricTile
+              label="Live fetch"
+              value={humanizeLabel(webAdapterPreview.live_fetch_status)}
+            />
+          </div>
+          <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+            <p style={mutedLabelStyle}>Parser comparison (text length)</p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0' }}>
+              html_to_text: {webAdapterPreview.html_to_text_length} chars · scrapling:{' '}
+              {webAdapterPreview.scrapling_text_length} chars
+            </p>
+            <p style={{ ...mutedLabelStyle, marginTop: '0.8rem' }}>Rationale</p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              {webAdapterPreview.rationale}
+            </p>
+          </div>
+        </section>
+      ) : null}
+
+      {pdfTeiPreview ? (
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>PDF / TEI milestone</h2>
+          <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+            TEI/XML and PDF parsing with quality gates, dirty-PDF pre-LLM blocking, and
+            quote-first full-text extraction through atom/trace reporting.
+          </p>
+          <div style={smallGridStyle}>
+            <MetricTile
+              label="PDF / TEI verdict"
+              value={humanizeLabel(pdfTeiPreview.verdict)}
+            />
+            <MetricTile
+              label="TEI parser"
+              value={humanizeLabel(pdfTeiPreview.tei_parser_backend)}
+            />
+            <MetricTile
+              label="PDF parser"
+              value={humanizeLabel(pdfTeiPreview.pdf_parser_backend)}
+            />
+            <MetricTile
+              label="TEI quality gate"
+              value={pdfTeiPreview.tei_quality_gate_passed ? 'Passed' : 'Failed'}
+            />
+            <MetricTile
+              label="Dirty PDF blocked"
+              value={pdfTeiPreview.dirty_pdf_blocked ? 'Yes' : 'No'}
+            />
+            <MetricTile
+              label="TEI accepted claims"
+              value={pdfTeiPreview.tei_accepted_count}
+            />
+            <MetricTile
+              label="TEI trace rows"
+              value={pdfTeiPreview.tei_trace_count}
+            />
+            <MetricTile
+              label="PDF accepted claims"
+              value={pdfTeiPreview.pdf_accepted_count}
+            />
+            <MetricTile
+              label="TEI quoteable spans"
+              value={pdfTeiPreview.tei_quoteable_spans}
+            />
+          </div>
+          <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+            <p style={mutedLabelStyle}>Rationale</p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              {pdfTeiPreview.rationale}
+            </p>
+          </div>
+        </section>
+      ) : null}
+
+      {demoLoopPreview ? (
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>Demo loop polish</h2>
+          <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+            One-command fixture research-run: source resolution → abstract evidence → selective
+            full-text summary → improvement recommendation → optional DB/trace spine.
+          </p>
+          <div style={smallGridStyle}>
+            <MetricTile
+              label="Demo verdict"
+              value={humanizeLabel(demoLoopPreview.verdict)}
+            />
+            <MetricTile
+              label="Sources resolved"
+              value={demoLoopPreview.resolved_count}
+            />
+            <MetricTile
+              label="Ranked sources"
+              value={demoLoopPreview.ranked_source_count}
+            />
+            <MetricTile
+              label="Abstract claims accepted"
+              value={demoLoopPreview.accepted_claims_total}
+            />
+            <MetricTile
+              label="Full-text acquisitions"
+              value={demoLoopPreview.fulltext_acquisition_count}
+            />
+            <MetricTile
+              label="Full-text clean"
+              value={demoLoopPreview.fulltext_clean_count}
+            />
+            <MetricTile
+              label="Trace rows"
+              value={demoLoopPreview.trace_count}
+            />
+            <MetricTile
+              label="DB accepted claims"
+              value={demoLoopPreview.db_accepted_claims}
+            />
+            <MetricTile
+              label="Recommended packet"
+              value={humanizeLabel(demoLoopPreview.recommended_packet)}
+            />
+          </div>
+          <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+            <p style={mutedLabelStyle}>Topic</p>
+            <p style={{ margin: '0.35rem 0 0', color: '#e6e8ec', lineHeight: 1.5 }}>
+              {demoLoopPreview.topic}
+            </p>
+            <p style={{ ...mutedLabelStyle, marginTop: '0.8rem' }}>Rationale</p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              {demoLoopPreview.rationale}
+            </p>
+            <p style={{ margin: '0.55rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+              Dominant signal: {humanizeLabel(demoLoopPreview.dominant_signal)}
+            </p>
+          </div>
+        </section>
+      ) : null}
+
+      {fullAtlasRefreshPreview ? (
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>Full Atlas refresh checklist</h2>
+          <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+            Full-cycle operator validation across live source health and all operator-product
+            packet artifacts, with optional fixture packet refresh.
+          </p>
+          <div style={smallGridStyle}>
+            <MetricTile
+              label="Refresh verdict"
+              value={humanizeLabel(fullAtlasRefreshPreview.verdict)}
+            />
+            <MetricTile
+              label="Evidence quality"
+              value={humanizeLabel(fullAtlasRefreshPreview.evidence_quality_verdict)}
+            />
+            <MetricTile
+              label="Valid operator packets"
+              value={`${fullAtlasRefreshPreview.valid_packet_count} / ${fullAtlasRefreshPreview.total_packet_count}`}
+            />
+            <MetricTile
+              label="Fixture refresh"
+              value={humanizeLabel(fullAtlasRefreshPreview.fixture_refresh_status)}
+            />
+          </div>
+          <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+            <p style={mutedLabelStyle}>Rationale</p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              {fullAtlasRefreshPreview.rationale}
+            </p>
+          </div>
+        </section>
+      ) : null}
+
+      {openaiSynthesisSpecPreview ? (
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>OpenAI synthesis adapter spec (ticket-059)</h2>
+          <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+            Evidence-packet-only contract and fail-closed env gates. Spec validation only —
+            no paid API calls or cloud adapter implementation.
+          </p>
+          <div style={smallGridStyle}>
+            <MetricTile
+              label="Spec verdict"
+              value={humanizeLabel(openaiSynthesisSpecPreview.verdict)}
+            />
+            <MetricTile
+              label="Ticket-059 status"
+              value={humanizeLabel(openaiSynthesisSpecPreview.ticket_status)}
+            />
+            <MetricTile
+              label="Implementation"
+              value={
+                openaiSynthesisSpecPreview.implementation_blocked ? 'Blocked' : 'Allowed'
+              }
+            />
+            <MetricTile
+              label="Example packet"
+              value={openaiSynthesisSpecPreview.example_packet_valid ? 'Valid' : 'Invalid'}
+            />
+          </div>
+          <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+            <p style={mutedLabelStyle}>Rationale</p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              {openaiSynthesisSpecPreview.rationale}
+            </p>
+          </div>
+        </section>
+      ) : null}
 
       <section style={sectionStyle}>
         <h2 style={headingStyle}>Purpose panel</h2>

@@ -1,0 +1,189 @@
+{
+  "schema_version": "atlas_local_model_extraction_comparison_v0.1.0",
+  "status": "completed",
+  "packet_id": "local-model-extraction-comparison",
+  "run_id": "run_local_model_extraction_comparison",
+  "research_question": "How does AI affect human creativity?",
+  "resolver_query": "human AI creativity",
+  "comparison_verdict": "GO",
+  "comparison_rationale": "Mock and local Ollama extractions were compared on the same live abstracts (5 chunks). Local model quality vs mock: thinner.",
+  "evaluation_only": true,
+  "no_db_writes": true,
+  "ollama_model": "qwen3.5:9b-q4_K_M",
+  "comparison_aggregate": {
+    "compared_abstract_count": 5,
+    "mock_total_accepted": 5,
+    "local_ollama_total_accepted": 2,
+    "mock_quote_validity_rate": 1.0,
+    "local_ollama_quote_validity_rate": 1.0,
+    "local_thinner_count": 4,
+    "local_better_count": 1,
+    "quality_vs_mock_overall": "thinner",
+    "quality_vs_mock_counts": {
+      "better": 1,
+      "thinner": 4
+    },
+    "ollama_rejection_reason_totals": {
+      "overgeneralized_scope": 6,
+      "unsupported_claim": 2
+    }
+  },
+  "abstract_comparisons": [
+    {
+      "chunk_ref": "abstract_openalex_W4386697415",
+      "abstract_char_count": 1289,
+      "mock_deterministic": {
+        "backend": "mock_deterministic",
+        "accepted_count": 1,
+        "rejected_count": 0,
+        "quote_valid_accepted_count": 1,
+        "quote_validity_rate": 1.0,
+        "rejection_reason_counts": {}
+      },
+      "local_ollama": {
+        "backend": "local_ollama",
+        "accepted_count": 2,
+        "rejected_count": 1,
+        "quote_valid_accepted_count": 2,
+        "quote_validity_rate": 1.0,
+        "rejection_reason_counts": {
+          "overgeneralized_scope": 1
+        }
+      },
+      "comparison": {
+        "accepted_delta": 1,
+        "local_thinner_than_mock": false,
+        "local_worse_quote_validity": false,
+        "quality_vs_mock": "better"
+      },
+      "source_ref": "source_001",
+      "resolver_backend": "openalex"
+    },
+    {
+      "chunk_ref": "abstract_arxiv_2506.10249v2",
+      "abstract_char_count": 1138,
+      "mock_deterministic": {
+        "backend": "mock_deterministic",
+        "accepted_count": 1,
+        "rejected_count": 0,
+        "quote_valid_accepted_count": 1,
+        "quote_validity_rate": 1.0,
+        "rejection_reason_counts": {}
+      },
+      "local_ollama": {
+        "backend": "local_ollama",
+        "accepted_count": 0,
+        "rejected_count": 5,
+        "quote_valid_accepted_count": 0,
+        "quote_validity_rate": null,
+        "rejection_reason_counts": {
+          "unsupported_claim": 1,
+          "overgeneralized_scope": 4
+        }
+      },
+      "comparison": {
+        "accepted_delta": -1,
+        "local_thinner_than_mock": true,
+        "local_worse_quote_validity": false,
+        "quality_vs_mock": "thinner"
+      },
+      "source_ref": "source_002",
+      "resolver_backend": "arxiv"
+    },
+    {
+      "chunk_ref": "abstract_arxiv_2504.16770v1",
+      "abstract_char_count": 1473,
+      "mock_deterministic": {
+        "backend": "mock_deterministic",
+        "accepted_count": 1,
+        "rejected_count": 0,
+        "quote_valid_accepted_count": 1,
+        "quote_validity_rate": 1.0,
+        "rejection_reason_counts": {}
+      },
+      "local_ollama": {
+        "backend": "local_ollama",
+        "accepted_count": 0,
+        "rejected_count": 0,
+        "quote_valid_accepted_count": 0,
+        "quote_validity_rate": null,
+        "rejection_reason_counts": {}
+      },
+      "comparison": {
+        "accepted_delta": -1,
+        "local_thinner_than_mock": true,
+        "local_worse_quote_validity": false,
+        "quality_vs_mock": "thinner"
+      },
+      "source_ref": "source_003",
+      "resolver_backend": "arxiv"
+    },
+    {
+      "chunk_ref": "abstract_arxiv_2504.14689v1",
+      "abstract_char_count": 749,
+      "mock_deterministic": {
+        "backend": "mock_deterministic",
+        "accepted_count": 1,
+        "rejected_count": 0,
+        "quote_valid_accepted_count": 1,
+        "quote_validity_rate": 1.0,
+        "rejection_reason_counts": {}
+      },
+      "local_ollama": {
+        "backend": "local_ollama",
+        "accepted_count": 0,
+        "rejected_count": 0,
+        "quote_valid_accepted_count": 0,
+        "quote_validity_rate": null,
+        "rejection_reason_counts": {}
+      },
+      "comparison": {
+        "accepted_delta": -1,
+        "local_thinner_than_mock": true,
+        "local_worse_quote_validity": false,
+        "quality_vs_mock": "thinner"
+      },
+      "source_ref": "source_004",
+      "resolver_backend": "arxiv"
+    },
+    {
+      "chunk_ref": "abstract_arxiv_2401.01623v4",
+      "abstract_char_count": 1791,
+      "mock_deterministic": {
+        "backend": "mock_deterministic",
+        "accepted_count": 1,
+        "rejected_count": 0,
+        "quote_valid_accepted_count": 1,
+        "quote_validity_rate": 1.0,
+        "rejection_reason_counts": {}
+      },
+      "local_ollama": {
+        "backend": "local_ollama",
+        "accepted_count": 0,
+        "rejected_count": 2,
+        "quote_valid_accepted_count": 0,
+        "quote_validity_rate": null,
+        "rejection_reason_counts": {
+          "unsupported_claim": 1,
+          "overgeneralized_scope": 1
+        }
+      },
+      "comparison": {
+        "accepted_delta": -1,
+        "local_thinner_than_mock": true,
+        "local_worse_quote_validity": false,
+        "quality_vs_mock": "thinner"
+      },
+      "source_ref": "source_005",
+      "resolver_backend": "arxiv"
+    }
+  ],
+  "local_model_readiness": {
+    "status": "PARTIAL",
+    "notes": "Local Ollama extraction was compared against deterministic mock baseline on live abstracts. Comparison is evaluation-only and does not write accepted claims."
+  },
+  "next_recommended_packet": {
+    "id": "graph-maturity-evidence-atom-upgrade",
+    "title": "Graph Maturity / Evidence Atom Upgrade"
+  }
+}

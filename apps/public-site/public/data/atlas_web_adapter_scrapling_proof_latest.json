@@ -1,0 +1,58 @@
+{
+  "schema_version": "atlas_web_adapter_scrapling_proof_v0.1.0",
+  "status": "completed",
+  "packet_id": "web-adapter-scrapling-proof",
+  "run_id": "run_web_adapter_scrapling_proof",
+  "web_adapter_verdict": "GO",
+  "web_adapter_rationale": "Fixture webpage produced quote-backed claims with trace rows. Scrapling not installed; html_to_text baseline used.",
+  "evaluation_only": false,
+  "fixture_ref": "fixtures/sources/web_article_creativity_fixture.html",
+  "parser_comparison": {
+    "scrapling_available": false,
+    "html_to_text": {
+      "text_length": 481,
+      "parser_backend": "html_to_text"
+    },
+    "scrapling": {
+      "text_length": 481,
+      "parser_backend": "html_to_text",
+      "fallback_reason": "scrapling_not_installed",
+      "scrapling_used": false
+    }
+  },
+  "parser_backend_summary": {
+    "parser_backend": "html_to_text",
+    "acquisition_status": "clean_text_ready",
+    "extractable": true,
+    "quoteable_span_count": 4,
+    "text_length": 481,
+    "parser_request": {
+      "requested_backend": "html_to_text",
+      "scrapling_available": false,
+      "scrapling_used": false,
+      "fallback_reason": null
+    }
+  },
+  "fixture_spine_summary": {
+    "status": "completed",
+    "accepted_count": 2,
+    "rejected_count": 0,
+    "evidence_atom_count": 2,
+    "relationship_count": 2,
+    "acquisition_status": "clean_text_ready",
+    "quality_gate_passed": true,
+    "trace_summary": {
+      "trace_count": 2,
+      "atom_count": 2,
+      "preview_row_count": 2
+    }
+  },
+  "live_fetch_summary": {
+    "status": "skipped",
+    "reason": "not_requested"
+  },
+  "next_recommended_packet": {
+    "id": "pdf-tei-milestone",
+    "title": "PDF / TEI Milestone"
+  }
+}

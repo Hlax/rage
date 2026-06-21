@@ -1,0 +1,10 @@
+{
+  "report_type": "agent_packet_report",
+  "packet": "Multi-Question Live Abstract Runs",
+  "packet_id": "multi-question-live-abstract-runs",
+  "date": "2026-06-20",
+  "cycle_note": "operator_loop_cycle_3_restart_after_cycle_2_full_atlas_close",
+  "verdict": "GO",
+  "aggregate": {"question_count": 5, "total_accepted_claims": 19, "total_rejected_claims": 6},
+  "next_recommended_packet": {"id": "live-source-expansion", "title": "Live Source Expansion"}
+}

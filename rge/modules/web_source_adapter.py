@@ -18,6 +18,11 @@ from rge.modules.acquisition_quality import (
     persist_source_acquisition_status,
 )
 from rge.modules.fetcher import html_to_text
+from rge.modules.scrapling_html_parser import (
+    PARSER_HTML_TO_TEXT,
+    PARSER_SCRAPLING,
+    extract_webpage_clean_text,
+)
 from rge.modules.text_quality_gate import assess_chunk_extractability
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -46,10 +51,12 @@ def normalize_webpage_artifact(
     authors: list[str] | None = None,
     published_date: str | None = None,
     source_id: str | None = None,
+    parser_backend: str = PARSER_HTML_TO_TEXT,
 ) -> dict[str, Any]:
     """Normalize HTML into the shared source artifact shape for webpage ingestion."""
     raw_text = html
-    clean_text = html_to_text(html)
+    extraction = extract_webpage_clean_text(html, parser_backend=parser_backend)
+    clean_text = str(extraction.get("clean_text") or "")
     checksum = sha256_hex(clean_text)
     resolved_source_id = source_id or f"src_{checksum[:16]}"
     metrics = build_webpage_quality_metrics(clean_text)
@@ -68,6 +75,13 @@ def normalize_webpage_artifact(
         "quality_metrics": metrics,
         "acquisition_status": acquisition_status,
         "raw_text_checksum": checksum,
+        "parser_backend": str(extraction.get("parser_backend") or PARSER_HTML_TO_TEXT),
+        "parser_request": {
+            "requested_backend": extraction.get("requested_backend"),
+            "scrapling_available": extraction.get("scrapling_available"),
+            "scrapling_used": extraction.get("scrapling_used"),
+            "fallback_reason": extraction.get("fallback_reason"),
+        },
         "created_at": utc_now_iso(),
     }
 
@@ -77,6 +91,7 @@ def acquire_webpage_from_path(
     *,
     url: str | None = None,
     title: str | None = None,
+    parser_backend: str = PARSER_HTML_TO_TEXT,
 ) -> dict[str, Any]:
     """Load a local HTML fixture and return a normalized webpage artifact."""
     html = path.read_text(encoding="utf-8")
@@ -94,6 +109,42 @@ def acquire_webpage_from_path(
         html=html,
         url=url or f"file://{path.as_posix()}",
         title=inferred_title or path.stem,
+        parser_backend=parser_backend,
+    )
+
+
+def acquire_webpage_from_url(
+    url: str,
+    *,
+    title: str | None = None,
+    parser_backend: str = PARSER_HTML_TO_TEXT,
+) -> dict[str, Any]:
+    """Fetch a public webpage URL and return a normalized artifact (network opt-in)."""
+    from rge.modules.fetcher import FetchError, fetch_url_bytes
+    from rge.modules.source_network import assert_source_network_enabled
+
+    assert_source_network_enabled(command="acquire-webpage-from-url")
+    body, content_type = fetch_url_bytes(url)
+    charset = "utf-8"
+    if content_type and "charset=" in content_type.casefold():
+        charset = content_type.split("charset=", 1)[-1].split(";", 1)[0].strip()
+    try:
+        html = body.decode(charset)
+    except UnicodeDecodeError as exc:
+        raise FetchError(
+            f"Webpage fetch returned non-{charset} bytes.",
+            reason="encoding_error",
+        ) from exc
+    if "<html" not in html.casefold():
+        raise FetchError(
+            "Webpage fetch did not return HTML content.",
+            reason="not_html",
+        )
+    return normalize_webpage_artifact(
+        html=html,
+        url=url,
+        title=title or url,
+        parser_backend=parser_backend,
     )
 
 
@@ -148,7 +199,9 @@ def _attach_webpage_source_metadata(
             source_type="webpage",
             source_status=artifact.get("acquisition_status"),
             acquisition_status=artifact.get("acquisition_status"),
-            parser_backend="html_to_text",
+            parser_backend=str(
+                artifact.get("parser_backend") or PARSER_HTML_TO_TEXT
+            ),
             resolver_source="web_source_adapter",
         ),
     }
@@ -187,7 +240,9 @@ def ingest_webpage_artifact_to_db(
                 source_type="webpage",
                 source_status=acquisition_status,
                 acquisition_status=acquisition_status,
-                parser_backend="html_to_text",
+                parser_backend=str(
+                    artifact.get("parser_backend") or PARSER_HTML_TO_TEXT
+                ),
                 failure_reason=acquisition_status or ACQUISITION_DIRTY,
                 resolver_source="web_source_adapter",
             ),
