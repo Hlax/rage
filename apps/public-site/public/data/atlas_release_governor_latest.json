@@ -9,7 +9,7 @@
   "latest_batch_path": "data/operator/release_batches/batch-draft-tier2-rehearsal.json",
   "latest_batch_id": "batch-draft-tier2-rehearsal",
   "batch_status": "available",
-  "governor_verdict": "UNKNOWN",
+  "governor_verdict": "NO-GO",
   "release_governor_dry_run_recommended": true,
   "batch_candidate_recommended": false,
   "implementation_branch_recommended": false,
@@ -21,10 +21,15 @@
   "next_release_action": "resolve_working_tree",
   "autonomy_tier_required_for_next_action": 0,
   "batch_assembly_block_reasons": [
-    "unsafe dirty paths: apps/public-site/public/data/atlas_release_governor_latest.json, tests/unit/operator_loop_helpers.py, tests/unit/test_operator_autocycle_autonomous_execute_safe_improvement_sync.py, tests/unit/test_operator_autocycle_autonomous_execute_safe_reason_sync.py, tests/unit/test_operator_autocycle_autonomous_execute_safe_sync.py",
-    "non-operator dirty paths: apps/public-site/public/data/atlas_release_governor_latest.json, tests/unit/operator_loop_helpers.py, tests/unit/test_operator_autocycle_autonomous_execute_safe_improvement_sync.py, tests/unit/test_operator_autocycle_autonomous_execute_safe_reason_sync.py, tests/unit/test_operator_autocycle_autonomous_execute_safe_sync.py"
+    "unsafe dirty paths: apps/public-site/public/data/atlas_release_governor_latest.json",
+    "non-operator dirty paths: apps/public-site/public/data/atlas_release_governor_latest.json"
   ],
-  "failure_reasons": [],
+  "failure_reasons": [
+    "working tree is not clean",
+    "unsafe dirty paths: apps/public-site/public/data/atlas_release_governor_latest.json",
+    "synthesis governor NO-GO review present: syn_gov_c8f498f9f233",
+    "synthesis governor NO-GO review present: syn_gov_d2555e428c61"
+  ],
   "forbidden_actions": [
     "auto_merge",
     "auto_push",
@@ -46,5 +51,5 @@
     "tier2_patch_apply": "python scripts/run_tier2_local_implementation.py --latest --apply-staged PATH --require-staged-validation",
     "tier2_patch_preview_refresh": "python scripts/refresh_tier2_patch_staging_preview.py --latest --sync-public"
   },
-  "updated_at": "2026-06-22T22:36:05+00:00"
+  "updated_at": "2026-06-22T23:22:03+00:00"
 }
