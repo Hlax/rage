@@ -1,0 +1,64 @@
+{
+  "schema_version": "autonomous_synthesis_governor_ledger_v0.1.0",
+  "resolutions": [
+    {
+      "review_id": "syn_gov_c8f498f9f233",
+      "status": "resolved",
+      "resolved_at": "2026-06-22T23:33:03+00:00",
+      "operator_label": "release-readiness-reconciliation",
+      "original_governor_verdict": "NO-GO",
+      "original_failure_reasons": [
+        "circuit breaker open: consecutive_synthesis_failures_threshold",
+        "provider 'openai' not in explicit allowlist",
+        "RGE_CLOUD_MAX_USD_PER_RUN is required",
+        "RGE_CLOUD_MAX_TOKENS_PER_CALL is required"
+      ],
+      "current_gate_checks": {
+        "circuit_breaker": {
+          "passed": true,
+          "status": "closed"
+        },
+        "budget_gate": {
+          "passed": true,
+          "reasons": [],
+          "provider_id": "openai",
+          "provider_allowlist": "openai",
+          "max_usd_per_run": 0.25,
+          "max_tokens_per_call": 2048,
+          "recorded_cost_usd": null,
+          "no_paid_api_calls": false
+        }
+      },
+      "preserves_original_review_row": true,
+      "forbidden_actions": [
+        "auto_merge",
+        "auto_push",
+        "auto_publish",
+        "auto_promote_ticket"
+      ]
+    },
+    {
+      "review_id": "syn_gov_d2555e428c61",
+      "status": "resolved",
+      "resolved_at": "2026-06-22T23:33:04+00:00",
+      "operator_label": "release-readiness-reconciliation",
+      "original_governor_verdict": "NO-GO",
+      "original_failure_reasons": [
+        "circuit breaker open: consecutive_synthesis_failures_threshold"
+      ],
+      "current_gate_checks": {
+        "circuit_breaker": {
+          "passed": true,
+          "status": "closed"
+        }
+      },
+      "preserves_original_review_row": true,
+      "forbidden_actions": [
+        "auto_merge",
+        "auto_push",
+        "auto_publish",
+        "auto_promote_ticket"
+      ]
+    }
+  ]
+}

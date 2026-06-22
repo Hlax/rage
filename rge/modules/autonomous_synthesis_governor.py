@@ -36,6 +36,8 @@ CIRCUIT_SCHEMA_VERSION = "autonomy_circuit_breaker_v0.1.0"
 
 GOVERNOR_PACKET_ID = "autonomous-synthesis-safety-governor"
 DEFAULT_LEDGER_REL = Path("data/operator/autonomous_synthesis_governor_ledger.json")
+DEFAULT_REMEDIATION_REL = Path("data/operator/autonomous_synthesis_governor_remediations.json")
+DEFAULT_REMEDIATION_AUDIT_REL = Path("data/operator/autonomous_synthesis_governor_remediation_audit.jsonl")
 DEFAULT_CIRCUIT_REL = Path("data/operator/autonomy_circuit_breaker.json")
 DEFAULT_INSTRUCTION_DIR_REL = Path("data/operator/instruction_packets")
 DEFAULT_CIRCUIT_AUDIT_REL = Path("data/operator/autonomy_circuit_breaker_audit.jsonl")
@@ -121,6 +123,14 @@ def circuit_breaker_path(*, root: Path | None = None) -> Path:
 
 def ledger_path(*, root: Path | None = None) -> Path:
     return _operator_path(root or repo_root(), DEFAULT_LEDGER_REL)
+
+
+def remediation_path(*, root: Path | None = None) -> Path:
+    return _operator_path(root or repo_root(), DEFAULT_REMEDIATION_REL)
+
+
+def remediation_audit_path(*, root: Path | None = None) -> Path:
+    return _operator_path(root or repo_root(), DEFAULT_REMEDIATION_AUDIT_REL)
 
 
 def instruction_packet_dir(*, root: Path | None = None) -> Path:
@@ -299,6 +309,51 @@ def save_governor_ledger(ledger: dict[str, Any], *, root: Path | None = None) ->
     path.parent.mkdir(parents=True, exist_ok=True)
     ledger["schema_version"] = LEDGER_SCHEMA_VERSION
     path.write_text(json.dumps(ledger, indent=2) + "\n", encoding="utf-8")
+    return path
+
+
+def load_governor_remediations(*, root: Path | None = None) -> dict[str, Any]:
+    path = remediation_path(root=root)
+    payload = _load_json(path) if path.is_file() else None
+    if payload is None:
+        return {"schema_version": LEDGER_SCHEMA_VERSION, "resolutions": []}
+    rows = payload.get("resolutions")
+    return {
+        "schema_version": str(payload.get("schema_version") or LEDGER_SCHEMA_VERSION),
+        "resolutions": [row for row in rows if isinstance(row, dict)] if isinstance(rows, list) else [],
+    }
+
+
+def save_governor_remediations(payload: dict[str, Any], *, root: Path | None = None) -> Path:
+    path = remediation_path(root=root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload["schema_version"] = LEDGER_SCHEMA_VERSION
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    return path
+
+
+def resolved_governor_review_ids(*, root: Path | None = None) -> set[str]:
+    remediations = load_governor_remediations(root=root)
+    return {
+        str(row.get("review_id"))
+        for row in remediations.get("resolutions") or []
+        if row.get("status") == "resolved" and row.get("review_id")
+    }
+
+
+def append_governor_remediation_audit_record(
+    record: dict[str, Any],
+    *,
+    root: Path | None = None,
+) -> Path:
+    project_root = root or repo_root()
+    path = remediation_audit_path(root=project_root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = dict(record)
+    payload.setdefault("recorded_at", utc_now_iso())
+    payload.setdefault("schema_version", LEDGER_SCHEMA_VERSION)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload, sort_keys=True) + "\n")
     return path
 
 
@@ -894,6 +949,123 @@ def reset_circuit_breaker(
     }
 
 
+def _review_has_provider_budget_failure(review: dict[str, Any]) -> bool:
+    reasons = " ".join(str(item) for item in review.get("failure_reasons") or [])
+    budget = ((review.get("metrics") or {}).get("budget_gate") or {})
+    return (
+        "provider" in reasons
+        or "budget" in reasons
+        or "RGE_CLOUD_MAX" in reasons
+        or budget.get("passed") is False
+    )
+
+
+def resolve_historical_no_go_review(
+    review_id: str,
+    *,
+    root: Path | None = None,
+    operator_label: str,
+    confirm: bool = False,
+) -> dict[str, Any]:
+    """Resolve a historical governor blocker without deleting the review row."""
+    if not confirm:
+        raise GovernorOperatorSurfaceError(
+            "Historical NO-GO remediation requires --confirm."
+        )
+    label = operator_label.strip()
+    if not label or label == "operator":
+        raise GovernorOperatorSurfaceError(
+            "Historical NO-GO remediation requires an explicit --operator label."
+        )
+    project_root = root or repo_root()
+    circuit = load_circuit_breaker(root=project_root)
+    if circuit.get("status") != "closed":
+        raise GovernorOperatorSurfaceError(
+            "Historical NO-GO remediation requires current circuit breaker status closed."
+        )
+    ledger = load_governor_ledger(root=project_root)
+    review = next(
+        (
+            row
+            for row in ledger.get("reviews") or []
+            if str(row.get("review_id") or "") == review_id
+        ),
+        None,
+    )
+    if review is None:
+        raise GovernorOperatorSurfaceError(f"Review not found: {review_id}")
+    verdict = str(review.get("governor_verdict") or "")
+    if verdict not in {"PARTIAL", "NO-GO"}:
+        raise GovernorOperatorSurfaceError(
+            f"Review {review_id} has verdict {verdict!r}; only PARTIAL/NO-GO reviews require remediation."
+        )
+
+    current_gate_checks: dict[str, Any] = {
+        "circuit_breaker": {
+            "passed": True,
+            "status": circuit.get("status"),
+        }
+    }
+    if _review_has_provider_budget_failure(review):
+        provider_id = str(
+            (((review.get("metrics") or {}).get("budget_gate") or {}).get("provider_id"))
+            or "mock_cloud"
+        )
+        budget_gate = evaluate_budget_gate(provider_id=provider_id)
+        current_gate_checks["budget_gate"] = budget_gate
+        if not budget_gate.get("passed"):
+            raise GovernorOperatorSurfaceError(
+                "Historical NO-GO provider/budget remediation blocked: "
+                + "; ".join(budget_gate.get("reasons") or ["budget gate failed"])
+            )
+
+    remediations = load_governor_remediations(root=project_root)
+    existing = [
+        row
+        for row in remediations.get("resolutions") or []
+        if row.get("review_id") != review_id
+    ]
+    resolution = {
+        "review_id": review_id,
+        "status": "resolved",
+        "resolved_at": utc_now_iso(),
+        "operator_label": label,
+        "original_governor_verdict": verdict,
+        "original_failure_reasons": list(review.get("failure_reasons") or []),
+        "current_gate_checks": current_gate_checks,
+        "preserves_original_review_row": True,
+        "forbidden_actions": [
+            "auto_merge",
+            "auto_push",
+            "auto_publish",
+            "auto_promote_ticket",
+        ],
+    }
+    existing.append(resolution)
+    remediations["resolutions"] = existing
+    remediation_file = save_governor_remediations(remediations, root=project_root)
+    audit_path = append_governor_remediation_audit_record(
+        {
+            "event": "historical_no_go_resolved",
+            "review_id": review_id,
+            "operator_label": label,
+            "original_governor_verdict": verdict,
+            "original_failure_reasons": list(review.get("failure_reasons") or []),
+            "current_gate_checks": current_gate_checks,
+            "remediation_path": _safe_rel(remediation_file, project_root),
+        },
+        root=project_root,
+    )
+    return {
+        "status": "completed",
+        "command": "resolve_historical_no_go",
+        "review_id": review_id,
+        "remediation_path": _safe_rel(remediation_file, project_root),
+        "audit_record_path": _safe_rel(audit_path, project_root),
+        "current_gate_checks": current_gate_checks,
+    }
+
+
 def _artifact_is_stale(artifact_path: Path, *, root: Path) -> bool:
     if not artifact_path.is_file():
         return True
@@ -1171,6 +1343,8 @@ def run_autonomous_governor_operator_command(
     reset_circuit_breaker_flag: bool = False,
     confirm_reset: bool = False,
     inspect_circuit_breaker: bool = False,
+    resolve_historical_no_go: str | None = None,
+    confirm: bool = False,
     operator_label: str = "operator",
     reset_reason: str = "",
     root: Path | None = None,
@@ -1198,6 +1372,15 @@ def run_autonomous_governor_operator_command(
             )
             payload["status"] = reset_result.get("status", "completed")
         return payload, 0 if payload.get("status") != "error" else 1
+
+    if resolve_historical_no_go:
+        payload = resolve_historical_no_go_review(
+            resolve_historical_no_go,
+            root=project_root,
+            operator_label=operator_label,
+            confirm=confirm,
+        )
+        return payload, 0
 
     circuit = load_circuit_breaker(root=project_root)
     if circuit.get("status") == "open":
@@ -1268,6 +1451,9 @@ def governor_operator_commands(*, root: Path | None = None) -> dict[str, str]:
         "inspect_circuit_breaker": f"{prefix} --inspect-circuit-breaker",
         "reset_circuit_breaker": (
             f"{prefix} --reset-circuit-breaker --confirm-reset --operator operator"
+        ),
+        "resolve_historical_no_go": (
+            f"{prefix} --resolve-historical-no-go REVIEW_ID --confirm --operator operator-label"
         ),
         "instruction_packet_ticket_draft": (
             "python scripts/run_instruction_packet_ticket_draft.py --latest"
@@ -1493,9 +1679,19 @@ def main(argv: list[str] | None = None) -> int:
         help="Confirm explicit circuit breaker reset.",
     )
     parser.add_argument(
+        "--resolve-historical-no-go",
+        default=None,
+        help="Resolve a historical PARTIAL/NO-GO review ID after current gates pass.",
+    )
+    parser.add_argument(
+        "--confirm",
+        action="store_true",
+        help="Confirm explicit local-only remediation action.",
+    )
+    parser.add_argument(
         "--operator",
         default="operator",
-        help="Operator label stored in circuit breaker audit records.",
+        help="Operator label stored in circuit breaker/remediation audit records.",
     )
     parser.add_argument(
         "--reset-reason",
@@ -1514,6 +1710,29 @@ def main(argv: list[str] | None = None) -> int:
             reset_reason=args.reset_reason,
             root=args.root,
         )
+        print(json.dumps(_public_cli_payload(payload), indent=2))
+        return exit_code
+
+    if args.resolve_historical_no_go:
+        try:
+            payload, exit_code = run_autonomous_governor_operator_command(
+                resolve_historical_no_go=args.resolve_historical_no_go,
+                confirm=args.confirm,
+                operator_label=args.operator,
+                root=args.root,
+            )
+        except GovernorOperatorSurfaceError as exc:
+            print(
+                json.dumps(
+                    {
+                        "status": "blocked",
+                        "command": "resolve_historical_no_go",
+                        "detail": str(exc),
+                    },
+                    indent=2,
+                )
+            )
+            return 2
         print(json.dumps(_public_cli_payload(payload), indent=2))
         return exit_code
 

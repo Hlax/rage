@@ -14,8 +14,12 @@ from rge.modules.autonomy_tier_policy import (
     summarize_tier_policy,
 )
 from rge.modules.autonomous_synthesis_governor import (
+    GovernorOperatorSurfaceError,
     LEDGER_SCHEMA_VERSION,
     load_circuit_breaker,
+    load_governor_ledger,
+    load_governor_remediations,
+    resolve_historical_no_go_review,
     save_circuit_breaker,
 )
 from rge.modules.operator_loop import build_operator_plan, execute_safe_checks
@@ -153,6 +157,88 @@ def test_partial_synthesis_output_blocks(tmp_path: Path) -> None:
         run_safety=False,
     )
     assert any("PARTIAL" in reason for reason in evaluation["failure_reasons"])
+
+
+def test_historical_no_go_resolution_preserves_review_and_unblocks_release_governor(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    batch_path = _seed_safe_batch(tmp_path)
+    ledger_path = tmp_path / "data/operator/autonomous_synthesis_governor_ledger.json"
+    ledger_path.parent.mkdir(parents=True, exist_ok=True)
+    ledger_path.write_text(
+        json.dumps(
+            {
+                "schema_version": LEDGER_SCHEMA_VERSION,
+                "reviews": [
+                    {
+                        "review_id": "syn_gov_budget",
+                        "governor_verdict": "NO-GO",
+                        "failure_reasons": [
+                            "provider 'openai' not in explicit allowlist",
+                            "RGE_CLOUD_MAX_USD_PER_RUN is required",
+                        ],
+                        "metrics": {
+                            "budget_gate": {
+                                "passed": False,
+                                "provider_id": "openai",
+                            }
+                        },
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    batch = load_release_batch(batch_path, root=tmp_path)
+    blocked = evaluate_release_governor(
+        batch,
+        root=tmp_path,
+        run_verify=False,
+        run_safety=False,
+    )
+    assert any("syn_gov_budget" in reason for reason in blocked["failure_reasons"])
+
+    with pytest.raises(GovernorOperatorSurfaceError, match="requires --confirm"):
+        resolve_historical_no_go_review(
+            "syn_gov_budget",
+            root=tmp_path,
+            operator_label="release-readiness-test",
+            confirm=False,
+        )
+    with pytest.raises(GovernorOperatorSurfaceError, match="provider/budget"):
+        resolve_historical_no_go_review(
+            "syn_gov_budget",
+            root=tmp_path,
+            operator_label="release-readiness-test",
+            confirm=True,
+        )
+
+    monkeypatch.setenv("RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST", "openai")
+    monkeypatch.setenv("RGE_CLOUD_MAX_USD_PER_RUN", "0.25")
+    monkeypatch.setenv("RGE_CLOUD_MAX_TOKENS_PER_CALL", "2048")
+
+    result = resolve_historical_no_go_review(
+        "syn_gov_budget",
+        root=tmp_path,
+        operator_label="release-readiness-test",
+        confirm=True,
+    )
+
+    assert result["status"] == "completed"
+    assert load_governor_ledger(root=tmp_path)["reviews"][0]["governor_verdict"] == "NO-GO"
+    resolutions = load_governor_remediations(root=tmp_path)["resolutions"]
+    assert resolutions[0]["review_id"] == "syn_gov_budget"
+    assert resolutions[0]["status"] == "resolved"
+    assert (tmp_path / result["audit_record_path"]).is_file()
+
+    unblocked = evaluate_release_governor(
+        batch,
+        root=tmp_path,
+        run_verify=False,
+        run_safety=False,
+    )
+    assert unblocked["governor_verdict"] == "GO"
 
 
 def test_batch_size_limit_blocks(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

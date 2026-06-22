@@ -20,6 +20,7 @@ from rge.modules.autonomous_synthesis_governor import (
     dirty_paths_in_unsafe_paths,
     load_circuit_breaker,
     load_governor_ledger,
+    resolved_governor_review_ids,
     update_circuit_breaker,
     utc_now_iso,
 )
@@ -356,13 +357,17 @@ def _check_circuit_breaker(*, root: Path) -> list[str]:
 def _check_synthesis_governor(*, root: Path) -> list[str]:
     reasons: list[str] = []
     ledger = load_governor_ledger(root=root)
+    resolved = resolved_governor_review_ids(root=root)
     for review in ledger.get("reviews") or []:
         if not isinstance(review, dict):
+            continue
+        review_id = str(review.get("review_id") or "")
+        if review_id in resolved:
             continue
         verdict = review.get("governor_verdict")
         if verdict in {"PARTIAL", "NO-GO"}:
             reasons.append(
-                f"synthesis governor {verdict} review present: {review.get('review_id')}"
+                f"synthesis governor {verdict} review present: {review_id}"
             )
     return reasons
 
