@@ -2,32 +2,56 @@
   "schema_version": "atlas_release_governor_v0.1.0",
   "status": "available",
   "autonomy_tier": {
-    "configured_tier": 1,
-    "effective_tier": 1,
-    "tier_name": "draft_autonomy"
+    "configured_tier": 2,
+    "effective_tier": 2,
+    "tier_name": "branch_autonomy"
   },
-  "latest_batch_path": null,
-  "latest_batch_id": null,
-  "batch_status": "missing",
-  "governor_verdict": "UNKNOWN",
+  "latest_batch_path": "data/operator/release_batches/batch-draft-tier2-rehearsal.json",
+  "latest_batch_id": "batch-draft-tier2-rehearsal",
+  "batch_status": "available",
+  "governor_verdict": "NO-GO",
   "release_governor_dry_run_recommended": false,
   "batch_candidate_recommended": false,
   "implementation_branch_recommended": false,
   "release_push_recommended": false,
   "release_merge_recommended": false,
   "release_publish_recommended": false,
-  "circuit_breaker_status": "closed",
-  "latest_draft_ticket_path": null,
-  "next_release_action": "none",
+  "circuit_breaker_status": "open",
+  "latest_draft_ticket_path": "data/operator/draft_tickets/draft_tier2_rehearsal.json",
+  "next_release_action": "inspect_circuit_breaker",
   "autonomy_tier_required_for_next_action": 0,
-  "batch_assembly_block_reasons": [],
-  "failure_reasons": [],
+  "batch_assembly_block_reasons": [
+    "autonomy circuit breaker is open: consecutive_synthesis_failures_threshold",
+    "unsafe dirty paths: apps/public-site/public/data/atlas_release_governor_latest.json",
+    "non-operator dirty paths: apps/public-site/public/data/atlas_release_governor_latest.json"
+  ],
+  "failure_reasons": [
+    "working tree is not clean",
+    "unsafe dirty paths: apps/public-site/public/data/atlas_release_governor_latest.json",
+    "batch missing agent report latest JSON",
+    "autonomy circuit breaker is open: consecutive_synthesis_failures_threshold",
+    "synthesis governor NO-GO review present: syn_gov_c8f498f9f233"
+  ],
   "forbidden_actions": [
     "auto_merge",
     "auto_push",
     "auto_publish",
     "auto_promote_ticket_without_governor_go"
   ],
-  "operator_commands": {},
-  "updated_at": null
+  "operator_commands": {
+    "assemble_batch": "python scripts/run_release_batch_assembler.py --latest",
+    "inspect": "python scripts/run_release_governor.py --inspect",
+    "dry_run": "python scripts/run_release_governor.py --candidate data/operator/release_batches/batch-draft-tier2-rehearsal.json --dry-run",
+    "promote_tickets": "python scripts/run_release_governor.py --candidate data/operator/release_batches/batch-draft-tier2-rehearsal.json --promote-tickets --confirm",
+    "push_branches": "python scripts/run_release_governor.py --candidate data/operator/release_batches/batch-draft-tier2-rehearsal.json --push-branches --confirm",
+    "merge_batch": "python scripts/run_release_governor.py --candidate data/operator/release_batches/batch-draft-tier2-rehearsal.json --merge-batch --confirm",
+    "publish": "python scripts/run_release_governor.py --candidate data/operator/release_batches/batch-draft-tier2-rehearsal.json --publish --confirm",
+    "tier2_implementation": "python scripts/run_tier2_local_implementation.py --latest",
+    "tier2_dry_run": "python scripts/run_tier2_local_implementation.py --latest --dry-run",
+    "tier2_patch_stage": "python scripts/run_tier2_patch_staging.py --latest",
+    "tier2_patch_validate": "python scripts/run_tier2_patch_staging.py --bundle PATH --validate",
+    "tier2_patch_apply": "python scripts/run_tier2_local_implementation.py --latest --apply-staged PATH --require-staged-validation",
+    "tier2_patch_preview_refresh": "python scripts/refresh_tier2_patch_staging_preview.py --latest --sync-public"
+  },
+  "updated_at": "2026-06-22T20:48:43+00:00"
 }
