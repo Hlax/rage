@@ -236,6 +236,24 @@ def inspect_autonomous_researcher_loop_status(
     }
 
 
+def _execute_safe_working_tree_eligible(
+    working_tree: WorkingTreeStatus,
+    *,
+    root: Path,
+) -> bool:
+    if working_tree.clean:
+        return True
+    from rge.modules.tier2_patch_staging import (
+        execute_safe_patch_staging_enabled,
+        patch_staging_execute_safe_tree_ok,
+    )
+
+    return execute_safe_patch_staging_enabled() and patch_staging_execute_safe_tree_ok(
+        working_tree,
+        root=root,
+    )
+
+
 def inspect_atlas_preview_refresh_status(*, root: Path | None = None) -> dict[str, Any]:
     """Read-only atlas public preview refresh readiness for operator plan mode."""
     project_root = root or repo_root()
@@ -961,6 +979,10 @@ def _action_from_state(
     autonomous_loop_improvement_status: dict[str, Any] | None = None,
     atlas_preview_refresh_status: dict[str, Any] | None = None,
     full_atlas_refresh_checklist_status: dict[str, Any] | None = None,
+    synthesis_human_review_plan_status: dict[str, Any] | None = None,
+    synthesis_sign_off_plan_status: dict[str, Any] | None = None,
+    autonomous_synthesis_governor_status: dict[str, Any] | None = None,
+    release_governor_status: dict[str, Any] | None = None,
     live_combined_source_health_smoke_status: dict[str, Any] | None = None,
     root: Path | None = None,
 ) -> RecommendedAction:
@@ -982,7 +1004,37 @@ def _action_from_state(
             ],
         )
 
-    if not working_tree.clean:
+    from rge.modules.release_governor import assess_release_batch_working_tree
+
+    tree_assessment = assess_release_batch_working_tree(working_tree)
+    if tree_assessment.get("blocks_plan_recommendations"):
+        unsafe = tree_assessment.get("unsafe_paths") or []
+        non_safe = tree_assessment.get("non_safe_dirty_paths") or []
+        if unsafe:
+            reason = (
+                "Working tree has unsafe dirty paths that block release batch assembly: "
+                + ", ".join(unsafe[:5])
+            )
+        else:
+            reason = (
+                f"Working tree has {len(non_safe)} non-operator dirty path(s); "
+                "commit or stash before assembling a release batch candidate."
+            )
+        return RecommendedAction(
+            action_id="resolve_unsafe_working_tree",
+            label="Resolve unsafe working tree before release batch actions",
+            gate="blocked",
+            reason=reason,
+            commands=[
+                {"shell": "git status --short", "purpose": "inspect dirty paths"},
+                {
+                    "shell": "python -m rge.modules.operator_loop --mode plan",
+                    "purpose": "re-check release governor recommendations after cleanup",
+                },
+            ],
+        )
+
+    if not working_tree.clean and not tree_assessment.get("controlled_dirty"):
         return RecommendedAction(
             action_id="resolve_dirty_working_tree",
             label="Resolve dirty working tree before operator actions",
@@ -1166,6 +1218,10 @@ def _action_from_state(
 
     atlas_refresh = atlas_preview_refresh_status or {}
     full_atlas_refresh = full_atlas_refresh_checklist_status or {}
+    synthesis_review = synthesis_human_review_plan_status or {}
+    sign_off_plan = synthesis_sign_off_plan_status or {}
+    synthesis_governor = autonomous_synthesis_governor_status or {}
+    release_governor = release_governor_status or {}
     if atlas_refresh.get("refresh_recommended") and not (
         active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"}
     ):
@@ -1178,27 +1234,45 @@ def _action_from_state(
                 }
                 for command in env_setup
             ]
+            checklist_command = full_atlas_refresh.get(
+                "operator_command",
+                "python scripts/run_full_atlas_refresh_checklist.py",
+            )
+            if synthesis_review.get("synthesis_loop_recommended"):
+                checklist_command = (
+                    f"{checklist_command} --with-synthesis-loop"
+                )
             refresh_commands.append(
                 {
-                    "shell": full_atlas_refresh.get(
-                        "operator_command",
-                        "python scripts/run_full_atlas_refresh_checklist.py",
-                    ),
+                    "shell": checklist_command,
                     "purpose": (
                         "live abstract evidence quality smoke, sync atlas artifact, "
                         "validate trace summary, rebuild public site, write report"
                     ),
                 }
             )
+            reason = (
+                "Live abstract evidence quality is proven but the Atlas run artifact "
+                "is stale or missing; run the single operator checklist to refresh "
+                "/atlas-preview."
+            )
+            if synthesis_review.get("synthesis_loop_recommended"):
+                reason += (
+                    " Include --with-synthesis-loop to refresh stale synthesis "
+                    "human-review artifacts."
+                )
+                if sign_off_plan.get("sign_off_recommended") and synthesis_governor.get(
+                    "governor_verdict"
+                ) != "GO":
+                    reason += (
+                        " Run the autonomous synthesis governor before any "
+                        "legacy sign-off workflow."
+                    )
             return RecommendedAction(
                 action_id="run_full_atlas_refresh_checklist",
                 label="Run full Atlas refresh checklist (live abstract → sync → build)",
                 gate="review_gated",
-                reason=(
-                    "Live abstract evidence quality is proven but the Atlas run artifact "
-                    "is stale or missing; run the single operator checklist to refresh "
-                    "/atlas-preview."
-                ),
+                reason=reason,
                 commands=refresh_commands,
             )
 
@@ -1253,6 +1327,558 @@ def _action_from_state(
             commands=refresh_commands,
         )
 
+    if (
+        synthesis_governor.get("circuit_breaker_inspection_recommended")
+        and not (
+            active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"}
+        )
+    ):
+        commands_map = synthesis_governor.get("operator_commands") or {}
+        guidance = synthesis_governor.get("circuit_breaker_guidance") or {}
+        return RecommendedAction(
+            action_id="run_circuit_breaker_inspection",
+            label="Inspect autonomous synthesis circuit breaker",
+            gate="review_gated",
+            reason=(
+                "Autonomous synthesis circuit breaker is open"
+                + (
+                    f" ({guidance.get('reason_opened')})."
+                    if guidance.get("reason_opened")
+                    else "."
+                )
+                + " Inspect stop reason and ledger before attempting more synthesis."
+            ),
+            commands=[
+                {
+                    "shell": commands_map.get(
+                        "inspect_circuit_breaker",
+                        "python scripts/run_autonomous_synthesis_governor.py --inspect-circuit-breaker",
+                    ),
+                    "purpose": "print public-safe circuit breaker status and reset instructions",
+                },
+                {
+                    "shell": commands_map.get(
+                        "reset_circuit_breaker",
+                        "python scripts/run_autonomous_synthesis_governor.py "
+                        "--reset-circuit-breaker --confirm-reset --operator operator",
+                    ),
+                    "purpose": "explicit local-only reset after operator review (writes audit record)",
+                },
+            ],
+        )
+
+    if (
+        synthesis_governor.get("governor_recommended")
+        and not synthesis_review.get("synthesis_loop_recommended")
+        and not (
+            active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"}
+        )
+    ):
+        commands_map = synthesis_governor.get("operator_commands") or {}
+        return RecommendedAction(
+            action_id="run_autonomous_synthesis_governor",
+            label="Run automated synthesis safety governor",
+            gate="review_gated",
+            reason=(
+                "Grounding-passed synthesis output is pending automated governor review; "
+                "run deterministic input/output/budget/circuit checks before "
+                "downstream packet generation."
+            ),
+            commands=[
+                {
+                    "shell": commands_map.get(
+                        "run_governor_latest",
+                        "python scripts/run_autonomous_synthesis_governor.py "
+                        "--latest --write-instruction-packet --sync-public",
+                    ),
+                    "purpose": "evaluate synthesis output with automated governor",
+                }
+            ],
+        )
+
+    if (
+        release_governor.get("release_publish_recommended")
+        and release_governor.get("circuit_breaker_status") != "open"
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        commands_map = release_governor.get("operator_commands") or {}
+        return RecommendedAction(
+            action_id="run_release_governor_publish",
+            label="Publish public export (release governor gated)",
+            gate="review_gated",
+            reason="Release governor dry-run passed; tier allows publish with explicit confirm.",
+            commands=[{"shell": commands_map.get("publish", ""), "purpose": "gated publish only"}],
+        )
+
+    if (
+        release_governor.get("release_merge_recommended")
+        and release_governor.get("circuit_breaker_status") != "open"
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        commands_map = release_governor.get("operator_commands") or {}
+        return RecommendedAction(
+            action_id="run_release_governor_merge",
+            label="Merge release batch (release governor gated)",
+            gate="review_gated",
+            reason="Release governor dry-run passed; tier allows batch merge with explicit confirm.",
+            commands=[
+                {"shell": commands_map.get("merge_batch", ""), "purpose": "gated merge only"}
+            ],
+        )
+
+    if (
+        release_governor.get("release_push_recommended")
+        and release_governor.get("circuit_breaker_status") != "open"
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        commands_map = release_governor.get("operator_commands") or {}
+        return RecommendedAction(
+            action_id="run_release_governor_push",
+            label="Push feature branches (release governor gated)",
+            gate="review_gated",
+            reason="Release governor dry-run passed; tier allows feature-branch push with confirm.",
+            commands=[
+                {"shell": commands_map.get("push_branches", ""), "purpose": "gated push only"}
+            ],
+        )
+
+    if (
+        release_governor.get("release_governor_dry_run_recommended")
+        and release_governor.get("circuit_breaker_status") != "open"
+        and not release_governor.get("batch_assembly_blocked")
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        commands_map = release_governor.get("operator_commands") or {}
+        batch_path = (
+            release_governor.get("latest_batch_for_draft_path")
+            or release_governor.get("latest_batch_path")
+            or "PATH"
+        )
+        return RecommendedAction(
+            action_id="run_release_governor_dry_run",
+            label="Run release governor dry-run on batch candidate",
+            gate="safe_autonomous",
+            reason=(
+                f"Release batch candidate exists at {batch_path}; evaluate gates before "
+                "push/merge/publish."
+            ),
+            commands=[
+                {
+                    "shell": commands_map.get(
+                        "dry_run",
+                        f"python scripts/run_release_governor.py --candidate {batch_path} --dry-run",
+                    ),
+                    "purpose": "deterministic release governor evaluation only",
+                }
+            ],
+        )
+
+    if (
+        release_governor.get("batch_candidate_recommended")
+        and release_governor.get("circuit_breaker_status") != "open"
+        and not release_governor.get("batch_assembly_blocked")
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        draft_path = release_governor.get("latest_draft_ticket_path") or "unknown"
+        return RecommendedAction(
+            action_id="create_release_batch_candidate",
+            label="Refresh release batch candidate after Tier 2 commit",
+            gate="safe_autonomous",
+            reason=(
+                f"Tier 2 implementation commit exists for draft at {draft_path}; assemble or "
+                "refresh the release batch under data/operator/release_batches/."
+            ),
+            commands=[
+                {
+                    "shell": (
+                        release_governor.get("operator_commands") or {}
+                    ).get(
+                        "assemble_batch",
+                        "python scripts/run_release_batch_assembler.py --latest",
+                    ),
+                    "purpose": "assemble release batch JSON under data/operator/release_batches/",
+                }
+            ],
+        )
+
+    if (
+        synthesis_governor.get("draft_expected_files_backfill_recommended")
+        and synthesis_governor.get("circuit_breaker_status") != "open"
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        commands_map = synthesis_governor.get("operator_commands") or {}
+        draft_path = synthesis_governor.get("latest_draft_ticket_path") or "unknown"
+        return RecommendedAction(
+            action_id="run_draft_expected_files_backfill",
+            label="Backfill draft ticket expected_files inference",
+            gate="safe_autonomous",
+            reason=(
+                f"Draft ticket at {draft_path} lacks inferred expected_files; "
+                "re-infer paths and optionally re-validate staged patch bundles."
+            ),
+            commands=[
+                {
+                    "shell": commands_map.get(
+                        "backfill_expected_files_latest",
+                        commands_map.get(
+                            "draft_expected_files_backfill",
+                            "python scripts/run_draft_expected_files_backfill.py --latest",
+                        ),
+                    ),
+                    "purpose": "backfill expected_files on existing draft ticket",
+                }
+            ],
+        )
+
+    if (
+        release_governor.get("tier2_patch_fix_recommended")
+        and release_governor.get("circuit_breaker_status") != "open"
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        verdict = (
+            (release_governor.get("tier2_patch_staging_status") or {}).get(
+                "latest_patch_validation_verdict"
+            )
+            or "NO-GO"
+        )
+        bundle_path = (
+            (release_governor.get("tier2_patch_staging_status") or {}).get(
+                "latest_patch_bundle_path"
+            )
+            or "PATH"
+        )
+        return RecommendedAction(
+            action_id="fix_tier2_patch_staging",
+            label="Fix Tier 2 staged patch before apply/commit",
+            gate="blocked" if verdict == "NO-GO" else "review_gated",
+            reason=(
+                f"Staged patch bundle at {bundle_path} failed diff quality gates "
+                f"({verdict}); revise changes and re-stage."
+            ),
+            commands=[
+                {
+                    "shell": (
+                        release_governor.get("operator_commands") or {}
+                    ).get(
+                        "tier2_patch_stage",
+                        "python scripts/run_tier2_patch_staging.py --latest",
+                    ),
+                    "purpose": "re-stage patch bundle after fixes",
+                }
+            ],
+        )
+
+    if (
+        release_governor.get("tier2_patch_validation_recommended")
+        and release_governor.get("circuit_breaker_status") != "open"
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        bundle_path = (
+            (release_governor.get("tier2_patch_staging_status") or {}).get(
+                "latest_patch_bundle_path"
+            )
+            or "PATH"
+        )
+        return RecommendedAction(
+            action_id="run_tier2_patch_validation",
+            label="Validate Tier 2 staged patch bundle",
+            gate="safe_autonomous",
+            reason=(
+                f"Staged patch bundle at {bundle_path} needs diff quality validation "
+                "before apply/commit."
+            ),
+            commands=[
+                {
+                    "shell": (
+                        release_governor.get("operator_commands") or {}
+                    ).get(
+                        "tier2_patch_validate",
+                        f"python scripts/run_tier2_patch_staging.py --bundle {bundle_path} --validate",
+                    ).replace("PATH", str(bundle_path)),
+                    "purpose": "validate staged patch diff quality gates",
+                }
+            ],
+        )
+
+    if (
+        release_governor.get("tier2_patch_staging_preview_refresh_recommended")
+        and release_governor.get("circuit_breaker_status") != "open"
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        commands_map = release_governor.get("operator_commands") or {}
+        return RecommendedAction(
+            action_id="refresh_tier2_patch_staging_preview",
+            label="Refresh Atlas Tier 2 patch staging preview",
+            gate="safe_autonomous",
+            reason=(
+                "Latest staged patch bundle is newer than the Atlas preview artifact; "
+                "sync public-safe summary to atlas_tier2_patch_staging_latest.json."
+            ),
+            commands=[
+                {
+                    "shell": commands_map.get(
+                        "tier2_patch_preview_refresh",
+                        "python scripts/refresh_tier2_patch_staging_preview.py --latest --sync-public",
+                    ),
+                    "purpose": "refresh atlas tier2 patch staging operator preview",
+                }
+            ],
+        )
+
+    if (
+        release_governor.get("tier2_patch_apply_recommended")
+        and release_governor.get("circuit_breaker_status") != "open"
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        commands_map = release_governor.get("operator_commands") or {}
+        bundle_path = (
+            (release_governor.get("tier2_patch_staging_status") or {}).get(
+                "latest_patch_bundle_path"
+            )
+            or "PATH"
+        )
+        draft_path = release_governor.get("latest_draft_ticket_path") or "unknown"
+        return RecommendedAction(
+            action_id="run_tier2_local_implementation",
+            label="Apply validated Tier 2 staged patch and commit locally",
+            gate="safe_autonomous",
+            reason=(
+                f"GO-validated patch bundle at {bundle_path} for draft at {draft_path}; "
+                "apply staged files, run tests, and commit locally."
+            ),
+            commands=[
+                {
+                    "shell": commands_map.get(
+                        "tier2_patch_apply",
+                        (
+                            f"python scripts/run_tier2_local_implementation.py --latest "
+                            f"--apply-staged {bundle_path} --require-staged-validation"
+                        ),
+                    ).replace("PATH", str(bundle_path)),
+                    "purpose": "apply staged patch and run tier 2 local commit flow",
+                }
+            ],
+        )
+
+    if (
+        release_governor.get("tier2_patch_staging_recommended")
+        and release_governor.get("circuit_breaker_status") != "open"
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        draft_path = release_governor.get("latest_draft_ticket_path") or "unknown"
+        return RecommendedAction(
+            action_id="run_tier2_patch_staging",
+            label="Stage Tier 2 patch bundle for diff validation",
+            gate="safe_autonomous",
+            reason=(
+                f"Draft ticket at {draft_path} has working-tree changes to stage; "
+                "create a patch bundle and run diff quality gates before commit."
+            ),
+            commands=[
+                {
+                    "shell": (
+                        release_governor.get("operator_commands") or {}
+                    ).get(
+                        "tier2_patch_stage",
+                        "python scripts/run_tier2_patch_staging.py --latest",
+                    ),
+                    "purpose": "stage patch bundle under data/operator/tier2_patch_staging/",
+                }
+            ],
+        )
+
+    if (
+        release_governor.get("tier2_continue_recommended")
+        and release_governor.get("circuit_breaker_status") != "open"
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        commands_map = release_governor.get("operator_commands") or {}
+        draft_path = release_governor.get("latest_draft_ticket_path") or "unknown"
+        return RecommendedAction(
+            action_id="run_tier2_local_implementation",
+            label="Continue Tier 2 local implementation on feature branch",
+            gate="safe_autonomous",
+            reason=(
+                f"Draft ticket at {draft_path} has a Tier 2 branch without a passing commit yet; "
+                "apply allowed-path changes, run tests, and commit locally."
+            ),
+            commands=[
+                {
+                    "shell": commands_map.get(
+                        "tier2_implementation",
+                        "python scripts/run_tier2_local_implementation.py --latest",
+                    ),
+                    "purpose": "tier 2 local branch implementation runner",
+                }
+            ],
+        )
+
+    if (
+        release_governor.get("tier2_implementation_recommended")
+        and release_governor.get("circuit_breaker_status") != "open"
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        commands_map = release_governor.get("operator_commands") or {}
+        draft_path = release_governor.get("latest_draft_ticket_path") or "unknown"
+        return RecommendedAction(
+            action_id="run_tier2_local_implementation",
+            label="Run Tier 2 local implementation from draft ticket",
+            gate="safe_autonomous",
+            reason=(
+                f"GO draft ticket at {draft_path} is ready for Tier 2 local branch "
+                "implementation (branch + tests + local commit; no push/merge/publish)."
+            ),
+            commands=[
+                {
+                    "shell": commands_map.get(
+                        "tier2_dry_run",
+                        "python scripts/run_tier2_local_implementation.py --latest --dry-run",
+                    ),
+                    "purpose": "preview tier 2 branch plan without modifying repo",
+                },
+                {
+                    "shell": commands_map.get(
+                        "tier2_implementation",
+                        "python scripts/run_tier2_local_implementation.py --latest",
+                    ),
+                    "purpose": "tier 2 local branch implementation runner",
+                },
+            ],
+        )
+
+    if (
+        release_governor.get("implementation_branch_recommended")
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        draft_path = release_governor.get("latest_draft_ticket_path") or "unknown"
+        return RecommendedAction(
+            action_id="create_implementation_branch",
+            label="Create local implementation branch from draft ticket",
+            gate="safe_autonomous",
+            reason=(
+                f"Draft ticket at {draft_path} has no feature branch yet; create a local "
+                "implementation branch (tier 2+; no push/merge/publish)."
+            ),
+            commands=[
+                {
+                    "shell": f"git checkout -b phase-3/implement-{draft_path.replace('/', '-')}",
+                    "purpose": "create local feature branch only",
+                }
+            ],
+        )
+
+    if synthesis_governor.get("local_implementation_handoff_recommended") and not (
+        active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"}
+    ):
+        commands_map = synthesis_governor.get("operator_commands") or {}
+        draft_path = synthesis_governor.get("latest_draft_ticket_path") or "unknown"
+        return RecommendedAction(
+            action_id="run_local_implementation_handoff",
+            label="Hand off local draft ticket to CLI/IDE agent",
+            gate="safe_autonomous",
+            reason=(
+                "A local implementation draft ticket exists at "
+                f"{draft_path}; implement locally without auto-merge/push/publish."
+            ),
+            commands=[
+                {
+                    "shell": commands_map.get(
+                        "local_implementation_handoff",
+                        f"Inspect local draft ticket: {draft_path}",
+                    ),
+                    "purpose": "local implementation handoff only",
+                }
+            ],
+        )
+
+    if synthesis_governor.get("instruction_packet_ticket_draft_recommended") and not (
+        active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"}
+    ):
+        commands_map = synthesis_governor.get("operator_commands") or {}
+        packet_path = synthesis_governor.get("latest_generated_instruction_packet") or "unknown"
+        return RecommendedAction(
+            action_id="run_instruction_packet_ticket_draft",
+            label="Create local implementation ticket draft from instruction packet",
+            gate="safe_autonomous",
+            reason=(
+                "Automated synthesis governor returned GO and a local instruction packet "
+                f"exists at {packet_path}; convert to a draft ticket without promoting "
+                "the canonical queue."
+            ),
+            commands=[
+                {
+                    "shell": commands_map.get(
+                        "instruction_packet_ticket_draft",
+                        "python scripts/run_instruction_packet_ticket_draft.py --latest",
+                    ),
+                    "purpose": "write draft ticket under data/operator/draft_tickets/ only",
+                }
+            ],
+        )
+
+    if synthesis_governor.get("instruction_packet_generation_recommended") and not (
+        active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"}
+    ):
+        commands_map = synthesis_governor.get("operator_commands") or {}
+        return RecommendedAction(
+            action_id="run_instruction_packet_generation",
+            label="Generate synthesis instruction packet",
+            gate="safe_autonomous",
+            reason=(
+                "Automated synthesis governor returned GO; generate or refresh the "
+                "local instruction packet without promoting tickets or touching Git."
+            ),
+            commands=[
+                {
+                    "shell": commands_map.get(
+                        "run_governor_latest",
+                        "python scripts/run_autonomous_synthesis_governor.py "
+                        "--latest --write-instruction-packet --sync-public",
+                    ),
+                    "purpose": "create local build-instruction artifact only",
+                }
+            ],
+        )
+
+    if sign_off_plan.get("sign_off_recommended") and synthesis_governor.get(
+        "governor_verdict"
+    ) != "GO" and not synthesis_review.get(
+        "synthesis_loop_recommended"
+    ) and not (
+        active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"}
+    ):
+        commands_map = sign_off_plan.get("operator_commands") or {}
+        return RecommendedAction(
+            action_id="run_synthesis_review_sign_off",
+            label="Record operator sign-off for grounding-passed synthesis prose",
+            gate="review_gated",
+            reason=(
+                f"{sign_off_plan.get('pending_sign_off_count', 0)} grounding-passed "
+                "synthesis output(s) await operator sign-off before prose promotion."
+            ),
+            commands=[
+                {
+                    "shell": commands_map.get(
+                        "list_pending",
+                        "python scripts/run_synthesis_review_sign_off.py --list-pending",
+                    ),
+                    "purpose": "list pending sign-offs from fixture/export queue",
+                },
+                {
+                    "shell": (
+                        "$env:RGE_ALLOW_SYNTHESIS_REVIEW_SIGN_OFF = \"1\"; "
+                        "python scripts/run_synthesis_review_sign_off.py "
+                        "--fixture-sign-off --sync-public"
+                    ),
+                    "purpose": "record fixture sign-off and sync Atlas human-review artifact",
+                },
+                {
+                    "shell": "cd apps/public-site && npm run build",
+                    "purpose": "rebuild static site after sign-off artifact sync",
+                },
+            ],
+        )
+
     live_smoke = live_combined_source_health_smoke_status or {}
     if live_smoke.get("live_smoke_recommended") and not (
         active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"}
@@ -1286,6 +1912,73 @@ def _action_from_state(
                     "purpose": "combined live OpenAlex smoke (temp DB only)",
                 },
             ],
+        )
+
+    if synthesis_review.get("synthesis_loop_recommended") and synthesis_governor.get(
+        "governor_verdict"
+    ) != "GO" and not (
+        active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"}
+    ):
+        commands_map = synthesis_review.get("operator_commands") or {}
+        env_setup = [
+            command
+            for command in (synthesis_review.get("env_setup") or [])
+            if "SIGN_OFF" not in command and "--with-sign-off" not in command
+        ]
+        include_sign_off = False
+        loop_commands: list[dict[str, str]] = [
+            {
+                "shell": command,
+                "purpose": "set end-to-end synthesis operator loop gate",
+            }
+            for command in env_setup
+        ]
+        loop_shell = commands_map.get(
+            "standalone_mock_loop",
+            "python scripts/run_end_to_end_synthesis_operator_loop.py --fixture-packet --sync-public",
+        )
+        loop_commands.append(
+            {
+                "shell": loop_shell,
+                "purpose": (
+                    "export grounded packet, mock synthesize, scan exports, refresh "
+                    "sign-off status, sync atlas_synthesis_human_review_latest.json"
+                    + (" with fixture sign-off" if include_sign_off else "")
+                ),
+            }
+        )
+        loop_commands.append(
+            {
+                "shell": "cd apps/public-site && npm run build",
+                "purpose": "rebuild static site after human-review artifact sync",
+            }
+        )
+        loop_label = (
+            "Run mock end-to-end synthesis operator loop with governor"
+            if not include_sign_off
+            else "Run mock end-to-end synthesis operator loop with governor review"
+        )
+        loop_reason = (
+            "Synthesis human-review Atlas artifact is stale or unscanned exports "
+            "exist: "
+            + "; ".join(synthesis_review.get("stale_reasons") or ["refresh due"])
+            + (
+                f" ({synthesis_review.get('flagged_review_count', 0)} flagged on /atlas-preview)."
+                if int(synthesis_review.get("flagged_review_count") or 0) > 0
+                else ""
+            )
+        )
+        if sign_off_plan.get("sign_off_recommended"):
+            loop_reason += (
+                f" Run the autonomous governor instead of legacy sign-off for "
+                f"{sign_off_plan.get('pending_sign_off_count', 0)} pending output(s)."
+            )
+        return RecommendedAction(
+            action_id="run_synthesis_operator_loop_with_governor",
+            label=loop_label,
+            gate="review_gated",
+            reason=loop_reason,
+            commands=loop_commands,
         )
 
     return RecommendedAction(
@@ -1638,6 +2331,38 @@ def build_operator_plan(
     full_atlas_refresh_checklist_status = inspect_full_atlas_refresh_checklist_status(
         root=project_root,
     )
+    from rge.modules.synthesis_human_review_ui import (
+        inspect_synthesis_human_review_plan_status,
+    )
+    from rge.modules.synthesis_review_sign_off import (
+        inspect_synthesis_sign_off_plan_status,
+    )
+    from rge.modules.autonomous_synthesis_governor import (
+        inspect_autonomous_synthesis_governor_plan_status,
+    )
+
+    synthesis_human_review_plan_status = inspect_synthesis_human_review_plan_status(
+        root=project_root,
+    )
+    synthesis_sign_off_plan_status = inspect_synthesis_sign_off_plan_status(
+        root=project_root,
+    )
+    autonomous_synthesis_governor_status = (
+        inspect_autonomous_synthesis_governor_plan_status(root=project_root)
+    )
+    from rge.modules.instruction_packet_ticket_draft import (
+        inspect_instruction_packet_ticket_draft_status,
+    )
+
+    instruction_packet_ticket_draft_status = inspect_instruction_packet_ticket_draft_status(
+        root=project_root,
+    )
+    from rge.modules.release_governor import inspect_release_governor_plan_status
+
+    release_governor_status = inspect_release_governor_plan_status(
+        root=project_root,
+        working_tree=tree,
+    )
     live_combined_source_health_smoke_status = (
         inspect_live_combined_source_health_smoke_status(root=project_root)
     )
@@ -1658,6 +2383,10 @@ def build_operator_plan(
         autonomous_loop_improvement_status=autonomous_loop_improvement_status,
         atlas_preview_refresh_status=atlas_preview_refresh_status,
         full_atlas_refresh_checklist_status=full_atlas_refresh_checklist_status,
+        synthesis_human_review_plan_status=synthesis_human_review_plan_status,
+        synthesis_sign_off_plan_status=synthesis_sign_off_plan_status,
+        autonomous_synthesis_governor_status=autonomous_synthesis_governor_status,
+        release_governor_status=release_governor_status,
         live_combined_source_health_smoke_status=live_combined_source_health_smoke_status,
         root=project_root,
     )
@@ -1714,6 +2443,11 @@ def build_operator_plan(
         "autonomous_loop_improvement_status": autonomous_loop_improvement_status,
         "atlas_preview_refresh_status": atlas_preview_refresh_status,
         "full_atlas_refresh_checklist_status": full_atlas_refresh_checklist_status,
+        "synthesis_human_review_plan_status": synthesis_human_review_plan_status,
+        "synthesis_sign_off_plan_status": synthesis_sign_off_plan_status,
+        "autonomous_synthesis_governor_status": autonomous_synthesis_governor_status,
+        "instruction_packet_ticket_draft_status": instruction_packet_ticket_draft_status,
+        "release_governor_status": release_governor_status,
         "live_combined_source_health_smoke_status": live_combined_source_health_smoke_status,
         "staged_rank2_scan_max": runtime_config.staged_rank2_scan_max,
         "domain_pack_status": domain_pack_status,
@@ -1727,7 +2461,11 @@ def build_operator_plan(
             "commands": action.commands,
         },
         "safe_verification_commands": safe_verification_commands(project_root),
-        "execute_safe_eligible": tree.clean and action.gate != "blocked",
+        "execute_safe_eligible": _execute_safe_working_tree_eligible(
+            tree,
+            root=project_root,
+        )
+        and action.gate != "blocked",
         "forbidden_operator_actions": [
             "merge to main",
             "git push",
@@ -1736,6 +2474,7 @@ def build_operator_plan(
             "export-public --publish",
             "enable live LLM mode",
             "run live_smoke tests",
+            "auto-merge/push/publish/promote from synthesis output",
         ],
     }
 
@@ -1800,6 +2539,60 @@ def execute_safe_checks(
 
     plan["execution_results"] = results
     plan["execution_status"] = "pass" if all_passed else "fail"
+    if all_passed:
+        from rge.modules.autonomous_synthesis_governor import (
+            refresh_circuit_breaker_status_report,
+        )
+
+        try:
+            plan["circuit_breaker_status_refresh"] = refresh_circuit_breaker_status_report(
+                root=project_root
+            )
+        except ValueError as exc:
+            plan["circuit_breaker_status_refresh"] = {
+                "status": "error",
+                "detail": str(exc),
+            }
+        from rge.modules.release_governor import inspect_release_governor_plan_status
+
+        plan["release_governor_status_refresh"] = inspect_release_governor_plan_status(
+            root=project_root
+        )
+        from rge.modules.release_governor import refresh_release_governor_dry_run_if_batch
+
+        plan["release_governor_dry_run"] = refresh_release_governor_dry_run_if_batch(
+            root=project_root
+        )
+        from rge.modules.instruction_packet_ticket_draft import (
+            run_execute_safe_tier2_hook_chain,
+        )
+
+        tier2_hook_chain = run_execute_safe_tier2_hook_chain(
+            root=project_root,
+            working_tree=working_tree,
+            action_id=action_id,
+        )
+        plan["execute_safe_tier2_hook_chain"] = tier2_hook_chain
+        plan["draft_backfill_execute_safe_hook"] = tier2_hook_chain.get("backfill")
+        plan["tier2_patch_staging_execute_safe_hook"] = tier2_hook_chain.get("patch_staging")
+        if tier2_hook_chain.get("status") == "completed":
+            refreshed_tree = inspect_working_tree(project_root)
+            refreshed_plan = build_operator_plan(
+                root=project_root,
+                working_tree=refreshed_tree,
+            )
+            plan["next_recommended_action"] = refreshed_plan.get("next_recommended_action")
+            plan["instruction_packet_ticket_draft_status"] = refreshed_plan.get(
+                "instruction_packet_ticket_draft_status"
+            )
+            plan["release_governor_status"] = refreshed_plan.get("release_governor_status")
+            plan["post_tier2_hook_replan"] = True
+        if action_id == "run_release_governor_dry_run" and plan.get("release_governor_dry_run"):
+            plan["next_recommended_action"] = (plan.get("next_recommended_action") or {}) | {
+                "reason": (
+                    "Release governor dry-run completed; review verdict before push/merge/publish."
+                )
+            }
     if all_passed and action_id == "run_autonomous_researcher_loop":
         scratch_status = inspect_autonomous_loop_scratch_artifact(root=project_root)
         improvement_status = inspect_autonomous_loop_improvement_artifact(

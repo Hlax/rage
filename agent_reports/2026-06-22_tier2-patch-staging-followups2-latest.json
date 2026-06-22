@@ -1,0 +1,39 @@
+{
+  "schema_version": "agent_report_v0.1.0",
+  "report_id": "2026-06-22_tier2-patch-staging-followups2",
+  "generated_at": "2026-06-22T19:30:00Z",
+  "verdict": "GO",
+  "packets_implemented": [
+    "validate_only_preview_auto_sync",
+    "atlas_freshness_badge_styling",
+    "draft_expected_files_backfill_command"
+  ],
+  "validate_sync": {
+    "trigger": "run_tier2_patch_staging_command validate_only",
+    "env": "RGE_AUTO_SYNC_TIER2_PATCH_PREVIEW=1",
+    "payload_key": "preview_sync"
+  },
+  "freshness_badge": {
+    "page": "/atlas-preview",
+    "panel_id": "tier2-patch-staging-panel",
+    "helpers": [
+      "tier2PatchFreshnessBadgeColor",
+      "tier2PatchFreshnessBadgeLabel"
+    ]
+  },
+  "backfill_cli": {
+    "script": "scripts/run_draft_expected_files_backfill.py",
+    "flags": ["--latest", "--draft-ticket", "--all", "--dry-run"]
+  },
+  "tests": {
+    "command": "python -m pytest tests/unit/test_tier2_patch_staging_followups2.py tests/golden/test_12_public_site_static_render.py -q",
+    "status": "pass",
+    "new_tests": 7
+  },
+  "safety_audit": {
+    "status": "pass"
+  },
+  "public_site_build": {
+    "status": "pass"
+  }
+}

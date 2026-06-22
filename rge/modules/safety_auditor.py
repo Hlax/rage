@@ -44,6 +44,9 @@ ATLAS_PREVIEW_PUBLIC_DATA_FILES = (
     "atlas_demo_loop_polish_latest.json",
     "atlas_full_atlas_refresh_checklist_latest.json",
     "atlas_openai_synthesis_adapter_spec_latest.json",
+    "atlas_synthesis_human_review_latest.json",
+    "atlas_release_governor_latest.json",
+    "atlas_tier2_patch_staging_latest.json",
 )
 
 _PASS_EXIT_CODE = 0
@@ -303,6 +306,16 @@ def _audit_atlas_preview_public_data(root: Path) -> tuple[list[str], list[str]]:
 
                 preview_violations = audit_snapshot_evidence_cards_preview(payload)
                 for violation in preview_violations:
+                    blocked.append(f"{name}: {violation}")
+        if name == "atlas_synthesis_human_review_latest.json":
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                blocked.append(f"invalid JSON in atlas preview file: {name}")
+            else:
+                from rge.modules.atlas_snapshot_builder import assert_no_private_fields
+
+                for violation in assert_no_private_fields({"artifact": payload}):
                     blocked.append(f"{name}: {violation}")
     return checked, blocked
 
@@ -608,6 +621,45 @@ def _audit_ci_golden_gate_policy(root: Path) -> tuple[list[str], list[str]]:
     return checked, blocked
 
 
+def _audit_operator_env_policy(root: Path) -> tuple[list[str], list[str]]:
+    """Verify operator env loading stays CLI-only and .env.local remains gitignored."""
+    checked = [
+        "rge/modules/operator_env_loader.py",
+        ".env.example",
+        ".gitignore",
+    ]
+    blocked: list[str] = []
+    for relative_path in checked:
+        if not (root / relative_path).is_file():
+            blocked.append(f"missing operator env policy evidence: {relative_path}")
+
+    gitignore = (root / ".gitignore").read_text(encoding="utf-8") if (root / ".gitignore").is_file() else ""
+    if ".env.local" not in gitignore:
+        blocked.append(".gitignore must ignore .env.local")
+
+    env_example = (root / ".env.example").read_text(encoding="utf-8") if (root / ".env.example").is_file() else ""
+    for needle in ("RGE_CLOUD_LLM_ENABLED", "RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP"):
+        if needle not in env_example:
+            blocked.append(f".env.example missing cloud synthesis placeholder: {needle}")
+
+    public_site = root / "apps" / "public-site"
+    if public_site.is_dir():
+        from rge.modules.operator_env_loader import assert_public_site_does_not_load_operator_env
+
+        for path in public_site.rglob("*"):
+            if "node_modules" in path.parts:
+                continue
+            if path.suffix not in {".ts", ".tsx", ".js", ".jsx"}:
+                continue
+            violations = assert_public_site_does_not_load_operator_env(
+                path.read_text(encoding="utf-8"),
+                str(path.relative_to(root)),
+            )
+            blocked.extend(violations)
+
+    return checked, blocked
+
+
 def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> dict[str, Any]:
     """Run deterministic safety checks and return a machine-readable report."""
     if audit_type not in AUDIT_TYPES:
@@ -636,6 +688,7 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             "live_probe_scratch_policy",
             "ci_golden_gate_policy",
             "domain_pack_safety_notes",
+            "operator_env_policy",
         ]
     else:
         checks = [audit_type]
@@ -694,6 +747,10 @@ def run_safety_audit(audit_type: str = "full", *, root: Path | None = None) -> d
             blocked_reasons.extend(blocked)
         elif check == "domain_pack_safety_notes":
             files, blocked = _audit_domain_pack_safety_notes(project_root)
+            checked_files.extend(files)
+            blocked_reasons.extend(blocked)
+        elif check == "operator_env_policy":
+            files, blocked = _audit_operator_env_policy(project_root)
             checked_files.extend(files)
             blocked_reasons.extend(blocked)
 

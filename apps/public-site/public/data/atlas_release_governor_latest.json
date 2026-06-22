@@ -1,0 +1,33 @@
+{
+  "schema_version": "atlas_release_governor_v0.1.0",
+  "status": "available",
+  "autonomy_tier": {
+    "configured_tier": 1,
+    "effective_tier": 1,
+    "tier_name": "draft_autonomy"
+  },
+  "latest_batch_path": null,
+  "latest_batch_id": null,
+  "batch_status": "missing",
+  "governor_verdict": "UNKNOWN",
+  "release_governor_dry_run_recommended": false,
+  "batch_candidate_recommended": false,
+  "implementation_branch_recommended": false,
+  "release_push_recommended": false,
+  "release_merge_recommended": false,
+  "release_publish_recommended": false,
+  "circuit_breaker_status": "closed",
+  "latest_draft_ticket_path": null,
+  "next_release_action": "none",
+  "autonomy_tier_required_for_next_action": 0,
+  "batch_assembly_block_reasons": [],
+  "failure_reasons": [],
+  "forbidden_actions": [
+    "auto_merge",
+    "auto_push",
+    "auto_publish",
+    "auto_promote_ticket_without_governor_go"
+  ],
+  "operator_commands": {},
+  "updated_at": null
+}

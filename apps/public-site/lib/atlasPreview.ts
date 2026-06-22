@@ -10,6 +10,9 @@ import pdfTeiMilestone from '../public/data/atlas_pdf_tei_milestone_latest.json'
 import demoLoopPolish from '../public/data/atlas_demo_loop_polish_latest.json';
 import fullAtlasRefreshChecklist from '../public/data/atlas_full_atlas_refresh_checklist_latest.json';
 import openaiSynthesisAdapterSpec from '../public/data/atlas_openai_synthesis_adapter_spec_latest.json';
+import synthesisHumanReview from '../public/data/atlas_synthesis_human_review_latest.json';
+import releaseGovernor from '../public/data/atlas_release_governor_latest.json';
+import tier2PatchStaging from '../public/data/atlas_tier2_patch_staging_latest.json';
 
 import { formatPublicTimestamp, humanizeLabel } from './publicCards';
 
@@ -1243,6 +1246,424 @@ export function resolveOpenAISynthesisAdapterSpecPreview():
   };
 }
 
+export type AtlasSynthesisHumanReviewSentence = {
+  index: number;
+  text: string;
+  cited_claim_refs: string[];
+  cited_atom_refs: string[];
+  cited_source_refs: string[];
+  issues: string[];
+  min_overlap_count: number;
+};
+
+export type AtlasSynthesisHumanReviewItem = {
+  output_id: string;
+  packet_id: string;
+  review_status: string;
+  needs_human_review: boolean;
+  review_mode?: string;
+  governor_verdict?: string;
+  auto_signed_off?: boolean;
+  automated_review_status?: string;
+  provider: string;
+  sentence_count: number;
+  flagged_sentence_count: number;
+  flagged_sentences: AtlasSynthesisHumanReviewSentence[];
+  sign_off_status?: 'not_eligible' | 'pending_sign_off' | 'signed_off';
+  signed_off_at?: string;
+  sign_off_id?: string;
+};
+
+export type AtlasSynthesisHumanReviewSignOffSummary = {
+  eligible_count: number;
+  signed_off_count: number;
+  pending_sign_off_count: number;
+};
+
+export type AtlasSynthesisCircuitBreakerGuidance = {
+  schema_version: string;
+  circuit_breaker_status: string;
+  reason_opened?: string | null;
+  consecutive_synthesis_failures: number;
+  consecutive_unsupported_outputs: number;
+  opened_at?: string | null;
+  latest_ledger_path?: string | null;
+  latest_audit_log_path?: string | null;
+  reset_instructions: string;
+};
+
+export type AtlasSynthesisGovernorSummary = {
+  review_mode: string;
+  automated_review_verdict: string;
+  auto_signed_off_count: number;
+  flagged_count: number;
+  circuit_breaker_status: string;
+  latest_stop_reason?: string | null;
+  latest_generated_instruction_packet?: string | null;
+  latest_draft_ticket_path?: string | null;
+  draft_ticket_status?: string;
+  draft_expected_files_backfill_recommended?: boolean;
+  expected_files_backfilled_at?: string | null;
+  last_patch_revalidation?: {
+    status?: string | null;
+    validation_verdict?: string | null;
+    passed?: boolean | null;
+    reason_count?: number | null;
+    bundle_path_summary?: string | null;
+  } | null;
+  instruction_packet_ticket_draft_recommended?: boolean;
+  local_implementation_handoff_recommended?: boolean;
+  provider_summary: Record<string, number>;
+  cost_summary: {
+    provider_id?: string | null;
+    max_usd_per_run?: number | null;
+    max_tokens_per_call?: number | null;
+    recorded_cost_usd?: number | string | null;
+    no_paid_api_calls?: boolean | null;
+  };
+  circuit_breaker_guidance?: AtlasSynthesisCircuitBreakerGuidance;
+};
+
+export type AtlasReleaseGovernorArtifact = {
+  schema_version: string;
+  status: string;
+  autonomy_tier: {
+    configured_tier: number;
+    effective_tier: number;
+    tier_name: string;
+  };
+  latest_batch_path?: string | null;
+  latest_batch_id?: string | null;
+  batch_status: string;
+  governor_verdict: string;
+  release_governor_dry_run_recommended?: boolean;
+  batch_candidate_recommended?: boolean;
+  implementation_branch_recommended?: boolean;
+  release_push_recommended?: boolean;
+  release_merge_recommended?: boolean;
+  release_publish_recommended?: boolean;
+  circuit_breaker_status: string;
+  latest_draft_ticket_path?: string | null;
+  next_release_action?: string | null;
+  autonomy_tier_required_for_next_action?: number | null;
+  batch_assembly_block_reasons?: string[];
+  failure_reasons: string[];
+  forbidden_actions: string[];
+  operator_commands: Record<string, string>;
+  updated_at?: string | null;
+};
+
+export type AtlasReleaseGovernorPanel = AtlasReleaseGovernorArtifact;
+
+export type AtlasTier2PatchStagingArtifact = {
+  schema_version: string;
+  status: string;
+  bundle_schema_version: string;
+  bundle_id?: string | null;
+  draft_ticket_label?: string | null;
+  draft_ticket_path_summary?: string | null;
+  instruction_packet_label?: string | null;
+  instruction_packet_path_summary?: string | null;
+  branch_name?: string | null;
+  validation_verdict: string;
+  risk_class: string;
+  changed_file_count: number;
+  lines_added: number;
+  lines_removed: number;
+  safety_audit_required: boolean;
+  test_plan_count: number;
+  validation_reasons: string[];
+  next_recommended_action: string;
+  apply_ready?: boolean;
+  stop_state?: boolean;
+  preview_freshness: string;
+  patch_revalidation_summary?: {
+    status?: string | null;
+    validation_verdict?: string | null;
+    passed?: boolean | null;
+    reason_count?: number | null;
+    bundle_path_summary?: string | null;
+    backfilled_at?: string | null;
+  } | null;
+  source_bundle_path?: string | null;
+  generated_at?: string | null;
+  updated_at?: string | null;
+  forbidden_in_preview?: string[];
+};
+
+export type AtlasTier2PatchStagingPanel = AtlasTier2PatchStagingArtifact;
+
+export type AtlasSynthesisHumanReviewArtifact = {
+  schema_version: string;
+  status: string;
+  packet_id: string;
+  review_summary: {
+    total_outputs: number;
+    needs_human_review_count: number;
+    grounding_passed_count: number;
+  };
+  sign_off_summary?: AtlasSynthesisHumanReviewSignOffSummary;
+  governor_summary?: AtlasSynthesisGovernorSummary;
+  circuit_breaker_guidance?: AtlasSynthesisCircuitBreakerGuidance;
+  review_queue: AtlasSynthesisHumanReviewItem[];
+  flagged_review_queue: AtlasSynthesisHumanReviewItem[];
+  operator_actions: string[];
+};
+
+export type AtlasSynthesisHumanReviewPanel = {
+  total_outputs: number;
+  needs_human_review_count: number;
+  grounding_passed_count: number;
+  flagged_items: AtlasSynthesisHumanReviewItem[];
+  operator_actions: string[];
+  sign_off_summary: AtlasSynthesisHumanReviewSignOffSummary;
+  governor_summary: AtlasSynthesisGovernorSummary;
+  circuit_breaker_guidance: AtlasSynthesisCircuitBreakerGuidance;
+  pending_sign_offs: AtlasSynthesisHumanReviewItem[];
+  signed_off_outputs: AtlasSynthesisHumanReviewItem[];
+};
+
+export type AtlasSynthesisHumanReviewAlert = {
+  output_id: string;
+  packet_id: string;
+  provider: string;
+  review_status: string;
+  flagged_sentence_count: number;
+  sentence_preview: string;
+  primary_issue: string;
+};
+
+export type AtlasSynthesisHumanReviewAlertsPanel = {
+  alert_count: number;
+  flagged_output_count: number;
+  headline: string;
+  summary: string;
+  alerts: AtlasSynthesisHumanReviewAlert[];
+  operator_actions: string[];
+  anchor_id: string;
+};
+
+const SYNTHESIS_HUMAN_REVIEW_ANCHOR_ID = 'synthesis-human-review';
+
+function truncateAlertText(value: string, maxLength = 140): string {
+  const trimmed = value.trim();
+  if (trimmed.length <= maxLength) {
+    return trimmed;
+  }
+  return `${trimmed.slice(0, maxLength - 1).trim()}…`;
+}
+
+export function buildSynthesisHumanReviewFlaggedAlerts(
+  panel: AtlasSynthesisHumanReviewPanel,
+): AtlasSynthesisHumanReviewAlertsPanel | null {
+  if (!panel.flagged_items.length) {
+    return null;
+  }
+  const alerts: AtlasSynthesisHumanReviewAlert[] = panel.flagged_items.map((item) => {
+    const firstSentence = item.flagged_sentences[0];
+    const primaryIssue =
+      firstSentence?.issues?.find(Boolean) ||
+      'Grounding check flagged this synthesis output for human review.';
+    return {
+      output_id: item.output_id,
+      packet_id: item.packet_id,
+      provider: item.provider,
+      review_status: item.review_status,
+      flagged_sentence_count: item.flagged_sentence_count,
+      sentence_preview: truncateAlertText(firstSentence?.text || ''),
+      primary_issue: truncateAlertText(primaryIssue, 180),
+    };
+  });
+  const flaggedOutputCount = panel.flagged_items.length;
+  const alertCount = alerts.reduce(
+    (total, item) => total + Math.max(item.flagged_sentence_count, 1),
+    0,
+  );
+  return {
+    alert_count: alertCount,
+    flagged_output_count: flaggedOutputCount,
+    headline:
+      flaggedOutputCount === 1
+        ? '1 synthesis output needs human review'
+        : `${flaggedOutputCount} synthesis outputs need human review`,
+    summary: `${panel.needs_human_review_count} of ${panel.total_outputs} scanned outputs flagged after deterministic grounding checks.`,
+    alerts,
+    operator_actions: panel.operator_actions,
+    anchor_id: SYNTHESIS_HUMAN_REVIEW_ANCHOR_ID,
+  };
+}
+
+export function resolveSynthesisHumanReviewFlaggedAlerts():
+  | (AtlasSynthesisHumanReviewAlertsPanel & { preview_source: 'run_artifact' })
+  | null {
+  const preview = resolveSynthesisHumanReviewPreview();
+  if (!preview) {
+    return null;
+  }
+  const alerts = buildSynthesisHumanReviewFlaggedAlerts(preview);
+  if (!alerts) {
+    return null;
+  }
+  return {
+    ...alerts,
+    preview_source: 'run_artifact',
+  };
+}
+
+export const atlasSynthesisHumanReviewArtifact =
+  synthesisHumanReview as AtlasSynthesisHumanReviewArtifact;
+
+export const atlasReleaseGovernorArtifact =
+  releaseGovernor as AtlasReleaseGovernorArtifact;
+
+const ATLAS_RELEASE_GOVERNOR_SCHEMA = 'atlas_release_governor_v0.1.0';
+
+export function resolveReleaseGovernorPreview():
+  | (AtlasReleaseGovernorPanel & { preview_source: 'run_artifact' })
+  | null {
+  if (atlasReleaseGovernorArtifact.schema_version !== ATLAS_RELEASE_GOVERNOR_SCHEMA) {
+    return null;
+  }
+  return {
+    ...atlasReleaseGovernorArtifact,
+    preview_source: 'run_artifact',
+  };
+}
+
+const ATLAS_TIER2_PATCH_STAGING_SCHEMA = 'atlas_tier2_patch_staging_v0.1.0';
+
+export const atlasTier2PatchStagingArtifact =
+  tier2PatchStaging as AtlasTier2PatchStagingArtifact;
+
+export function resolveTier2PatchStagingPreview():
+  | (AtlasTier2PatchStagingPanel & { preview_source: 'run_artifact' })
+  | null {
+  if (atlasTier2PatchStagingArtifact.schema_version !== ATLAS_TIER2_PATCH_STAGING_SCHEMA) {
+    return null;
+  }
+  return {
+    ...atlasTier2PatchStagingArtifact,
+    preview_source: 'run_artifact',
+  };
+}
+
+const ATLAS_SYNTHESIS_HUMAN_REVIEW_SCHEMA = 'atlas_synthesis_human_review_v0.1.0';
+
+export function mapSynthesisHumanReviewArtifactToPanel(
+  artifact: AtlasSynthesisHumanReviewArtifact,
+): AtlasSynthesisHumanReviewPanel {
+  const summary = artifact.review_summary || {
+    total_outputs: 0,
+    needs_human_review_count: 0,
+    grounding_passed_count: 0,
+  };
+  const signOffSummary = artifact.sign_off_summary || {
+    eligible_count: 0,
+    signed_off_count: 0,
+    pending_sign_off_count: 0,
+  };
+  const governorSummary = artifact.governor_summary || {
+    review_mode: 'automated',
+    automated_review_verdict: 'UNKNOWN',
+    auto_signed_off_count: 0,
+    flagged_count: 0,
+    circuit_breaker_status: 'closed',
+    latest_stop_reason: null,
+    latest_generated_instruction_packet: null,
+    latest_draft_ticket_path: null,
+    draft_ticket_status: 'missing',
+    draft_expected_files_backfill_recommended: false,
+    expected_files_backfilled_at: null,
+    last_patch_revalidation: null,
+    instruction_packet_ticket_draft_recommended: false,
+    local_implementation_handoff_recommended: false,
+    provider_summary: {},
+    cost_summary: {},
+  };
+  const circuitGuidance = artifact.circuit_breaker_guidance ||
+    governorSummary.circuit_breaker_guidance || {
+      schema_version: 'autonomous_synthesis_governor_v0.1.0',
+      circuit_breaker_status: governorSummary.circuit_breaker_status || 'closed',
+      reason_opened: governorSummary.latest_stop_reason || null,
+      consecutive_synthesis_failures: 0,
+      consecutive_unsupported_outputs: 0,
+      reset_instructions:
+        'Inspect circuit breaker status via the autonomous synthesis governor operator CLI.',
+    };
+  const reviewQueue = Array.isArray(artifact.review_queue) ? artifact.review_queue : [];
+  return {
+    total_outputs: Number(summary.total_outputs || 0),
+    needs_human_review_count: Number(summary.needs_human_review_count || 0),
+    grounding_passed_count: Number(summary.grounding_passed_count || 0),
+    flagged_items: Array.isArray(artifact.flagged_review_queue)
+      ? artifact.flagged_review_queue
+      : [],
+    operator_actions: Array.isArray(artifact.operator_actions)
+      ? artifact.operator_actions.filter(Boolean)
+      : [],
+    sign_off_summary: {
+      eligible_count: Number(signOffSummary.eligible_count || 0),
+      signed_off_count: Number(signOffSummary.signed_off_count || 0),
+      pending_sign_off_count: Number(signOffSummary.pending_sign_off_count || 0),
+    },
+    governor_summary: {
+      review_mode: governorSummary.review_mode || 'automated',
+      automated_review_verdict: governorSummary.automated_review_verdict || 'UNKNOWN',
+      auto_signed_off_count: Number(governorSummary.auto_signed_off_count || 0),
+      flagged_count: Number(governorSummary.flagged_count || 0),
+      circuit_breaker_status: governorSummary.circuit_breaker_status || 'closed',
+      latest_stop_reason: governorSummary.latest_stop_reason || null,
+      latest_generated_instruction_packet:
+        governorSummary.latest_generated_instruction_packet || null,
+      latest_draft_ticket_path: governorSummary.latest_draft_ticket_path || null,
+      draft_ticket_status: governorSummary.draft_ticket_status || 'missing',
+      instruction_packet_ticket_draft_recommended: Boolean(
+        governorSummary.instruction_packet_ticket_draft_recommended,
+      ),
+      local_implementation_handoff_recommended: Boolean(
+        governorSummary.local_implementation_handoff_recommended,
+      ),
+      provider_summary: governorSummary.provider_summary || {},
+      cost_summary: governorSummary.cost_summary || {},
+      circuit_breaker_guidance: circuitGuidance,
+    },
+    circuit_breaker_guidance: {
+      schema_version: circuitGuidance.schema_version || 'autonomous_synthesis_governor_v0.1.0',
+      circuit_breaker_status: circuitGuidance.circuit_breaker_status || 'closed',
+      reason_opened: circuitGuidance.reason_opened || null,
+      consecutive_synthesis_failures: Number(
+        circuitGuidance.consecutive_synthesis_failures || 0,
+      ),
+      consecutive_unsupported_outputs: Number(
+        circuitGuidance.consecutive_unsupported_outputs || 0,
+      ),
+      opened_at: circuitGuidance.opened_at || null,
+      latest_ledger_path: circuitGuidance.latest_ledger_path || null,
+      latest_audit_log_path: circuitGuidance.latest_audit_log_path || null,
+      reset_instructions: circuitGuidance.reset_instructions || '',
+    },
+    pending_sign_offs: reviewQueue.filter(
+      (row) => row.sign_off_status === 'pending_sign_off',
+    ),
+    signed_off_outputs: reviewQueue.filter((row) => row.sign_off_status === 'signed_off'),
+  };
+}
+
+export function resolveSynthesisHumanReviewPreview():
+  | (AtlasSynthesisHumanReviewPanel & { preview_source: 'run_artifact' })
+  | null {
+  if (
+    atlasSynthesisHumanReviewArtifact.schema_version !==
+    ATLAS_SYNTHESIS_HUMAN_REVIEW_SCHEMA
+  ) {
+    return null;
+  }
+  return {
+    ...mapSynthesisHumanReviewArtifactToPanel(atlasSynthesisHumanReviewArtifact),
+    preview_source: 'run_artifact',
+  };
+}
+
 function formatNextRecommendedPacket(
   value: string | { id: string; title: string } | undefined,
   fallback: string,
@@ -1723,6 +2144,68 @@ export function coherenceBadgeColor(verdict: string): string {
     return '#c9a227';
   }
   return '#b85c5c';
+}
+
+export function tier2PatchFreshnessBadgeColor(freshness: string): string {
+  const normalized = freshness.trim().toLowerCase();
+  if (normalized === 'fresh') {
+    return '#3d8f6a';
+  }
+  if (normalized === 'stale') {
+    return '#c9a227';
+  }
+  if (normalized === 'missing') {
+    return '#b85c5c';
+  }
+  return '#5c6b8a';
+}
+
+export function tier2PatchFreshnessBadgeLabel(freshness: string): string {
+  const normalized = freshness.trim().toLowerCase();
+  if (normalized === 'fresh') {
+    return 'Atlas preview fresh';
+  }
+  if (normalized === 'stale') {
+    return 'Atlas preview stale — refresh recommended';
+  }
+  if (normalized === 'missing') {
+    return 'Atlas preview missing — refresh required';
+  }
+  return `Atlas preview ${humanizeLabel(freshness)}`;
+}
+
+export function tier2PatchValidationVerdictBadgeColor(verdict: string): string {
+  const normalized = verdict.trim().toUpperCase();
+  if (normalized === 'GO') {
+    return '#3d8f6a';
+  }
+  if (normalized === 'PARTIAL') {
+    return '#c9a227';
+  }
+  if (normalized === 'NO-GO') {
+    return '#b85c5c';
+  }
+  if (normalized === 'PENDING') {
+    return '#5c6b8a';
+  }
+  return '#5c6b8a';
+}
+
+export function tier2PatchValidationVerdictBadgeLabel(verdict: string): string {
+  const normalized = verdict.trim().toUpperCase();
+  if (normalized === 'GO') {
+    return 'Patch validation GO';
+  }
+  if (normalized === 'PARTIAL') {
+    return 'Patch validation PARTIAL — review before apply';
+  }
+  if (normalized === 'NO-GO') {
+    return 'Patch validation NO-GO — fix before apply';
+  }
+  if (normalized === 'PENDING') {
+    return 'Patch validation pending';
+  }
+  return `Patch validation ${humanizeLabel(verdict)}`;
 }
 
 export function formatEdgeSummary(edge: AtlasPreviewEdge): string {
