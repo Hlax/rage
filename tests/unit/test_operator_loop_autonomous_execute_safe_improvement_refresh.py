@@ -40,8 +40,12 @@ def _seed_done_only_queue(tmp_path: Path) -> None:
         / "agent_reports"
         / "2026-06-18_principal-audit-post-ticket-352.md"
     ).write_text("# audit", encoding="utf-8")
-    from tests.unit.operator_loop_helpers import seed_public_site_preview_paths
+    from tests.unit.operator_loop_helpers import (
+        seed_public_site_preview_paths,
+        seed_synthesis_human_review_neutral_artifact,
+    )
     seed_public_site_preview_paths(tmp_path, include_source_health=True)
+    seed_synthesis_human_review_neutral_artifact(tmp_path)
 
 
 def _write_pre_run_improvement_report(

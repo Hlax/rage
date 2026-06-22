@@ -74,11 +74,11 @@ def test_execute_safe_draft_backfill_hook_runs_when_only_blocker(
             command_runner=_fake_runner,
         )
     assert result["execution_status"] == "pass"
-    assert result["next_recommended_action"]["action_id"] == "run_draft_expected_files_backfill"
     hook = result.get("draft_backfill_execute_safe_hook")
     assert hook is not None
     assert hook["status"] == "completed"
     assert hook.get("updated_count", 0) >= 1
+    assert result["next_recommended_action"]["action_id"] == "run_tier2_patch_staging"
     draft = json.loads(
         (tmp_path / "data/operator/draft_tickets/draft_tier2_test.json").read_text(
             encoding="utf-8"

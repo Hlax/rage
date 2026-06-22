@@ -45,8 +45,12 @@ def _seed_done_only_queue(tmp_path: Path) -> None:
         "# audit",
         encoding="utf-8",
     )
-    from tests.unit.operator_loop_helpers import seed_public_site_preview_paths
+    from tests.unit.operator_loop_helpers import (
+        seed_public_site_preview_paths,
+        seed_synthesis_human_review_neutral_artifact,
+    )
     seed_public_site_preview_paths(tmp_path, include_source_health=True)
+    seed_synthesis_human_review_neutral_artifact(tmp_path)
 
 
 def _seed_open_ticket_queue(tmp_path: Path) -> None:

@@ -32,6 +32,7 @@ from tests.unit.operator_loop_helpers import (
     apply_live_smoke_env_gates,
     seed_operator_neutral_plan_state,
     seed_public_site_preview_paths,
+    seed_synthesis_human_review_neutral_artifact,
 )
 
 
@@ -198,7 +199,7 @@ def test_blocked_dirty_working_tree(tmp_path: Path) -> None:
     plan = build_operator_plan(root=tmp_path, working_tree=dirty_tree)
     action = plan["next_recommended_action"]
 
-    assert action["action_id"] == "resolve_dirty_working_tree"
+    assert action["action_id"] == "resolve_unsafe_working_tree"
     assert action["gate"] == "blocked"
     assert plan["execute_safe_eligible"] is False
 
@@ -737,6 +738,7 @@ def test_evidence_review_action_not_when_scratch_empty(tmp_path: Path) -> None:
     scratch_db = tmp_path / "data" / "db" / "live_probe_scratch.sqlite"
     ensure_scratch_database(scratch_db).close()
     seed_public_site_preview_paths(tmp_path, include_source_health=True)
+    seed_synthesis_human_review_neutral_artifact(tmp_path)
     clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
 
     plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)

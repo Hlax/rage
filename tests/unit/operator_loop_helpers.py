@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from rge.modules.operator_loop import WorkingTreeStatus
@@ -34,6 +35,37 @@ def seed_public_site_preview_paths(tmp_path: Path, *, include_source_health: boo
     )
 
 
+def seed_synthesis_human_review_neutral_artifact(tmp_path: Path) -> None:
+    """Prevent synthesis-loop gates from preempting unrelated operator-plan tests."""
+    public_data = tmp_path / "apps" / "public-site" / "public" / "data"
+    public_data.mkdir(parents=True, exist_ok=True)
+    (public_data / "atlas_synthesis_human_review_latest.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "atlas_synthesis_human_review_v0.1.0",
+                "status": "completed",
+                "review_summary": {
+                    "total_outputs": 1,
+                    "needs_human_review_count": 0,
+                    "grounding_passed_count": 1,
+                },
+                "sign_off_summary": {
+                    "eligible_count": 1,
+                    "signed_off_count": 1,
+                    "pending_sign_off_count": 0,
+                },
+                "governor_summary": {
+                    "automated_review_verdict": "UNKNOWN",
+                    "auto_signed_off_count": 0,
+                    "flagged_count": 0,
+                },
+                "review_queue": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
 def seed_operator_neutral_plan_state(
     tmp_path: Path,
     *,
@@ -46,6 +78,7 @@ def seed_operator_neutral_plan_state(
     (tmp_path / "tickets" / "TICKET_QUEUE.md").write_text(queue_markdown, encoding="utf-8")
     (tmp_path / "agent_reports" / agent_report_name).write_text("# audit", encoding="utf-8")
     seed_public_site_preview_paths(tmp_path, include_source_health=True)
+    seed_synthesis_human_review_neutral_artifact(tmp_path)
     return WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
 
 

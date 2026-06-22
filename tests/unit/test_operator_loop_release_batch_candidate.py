@@ -32,6 +32,8 @@ def _seed_draft(
         "status": "draft",
         "title": "Release loop test draft",
         "source_instruction_packet": instruction_packet,
+        "expected_files": ["rge/modules/release_governor.py"],
+        "expected_files_inferred": True,
         "rollback_plan": "Delete batch and branch.",
         "test_plan": ["python -m pytest tests/unit/test_release_governor.py -q"],
     }
