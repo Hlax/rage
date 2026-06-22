@@ -1,0 +1,7 @@
+{
+  "report_type": "agent_report_latest",
+  "slug": "phase-3_ticket-059_tier2-rehearsal-prep",
+  "branch": "phase-3/ticket-059-live-openai-http",
+  "verdict": "PARTIAL",
+  "promotion_commit": "625b604b1b2a6fdadc1589ea220ac1ef8289451f"
+}
