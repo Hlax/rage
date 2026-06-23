@@ -42,7 +42,11 @@ Safety audit not required (docs-only; no public export or route changes).
 
 ## Merge to main
 
-Placeholder — updated after merge/push.
+Merge commit: `30da5f8278828f4b606383ce1b9f9d30811d54ea`
+
+Post-merge `python -m pytest -q`: 1353 passed, 1 failed (flaky
+`test_export_atlas_snapshot_matches_committed_fixture_after_summary`; passed on isolated re-run).
+Golden gate unchanged at 165 passed.
 
 ## Recommended next ticket
 
