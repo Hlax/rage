@@ -63,7 +63,9 @@ Safety audit not required — README documentation only.
 
 ## Merge to main
 
-_(placeholder — updated after merge/push)_
+Merge commit: `44ca6a84a482d8f744b0ebb1628f9a14c1eeb818`
+
+Full pytest after merge: 1290 passed, 1 failed (transient `test_build_atlas_snapshot_matches_committed_creativity_fixture`); direct rerun **passed**.
 
 ## Recommended next ticket
 
