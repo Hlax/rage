@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 from itertools import cycle
 from pathlib import Path
 from unittest.mock import patch
@@ -181,6 +182,27 @@ def test_proof_bundle_happy_path_fixture_staged(
     assert Path(bundle["export_path"]).is_file()
     assert bundle_out.is_file()
     assert json.loads(bundle_out.read_text(encoding="utf-8"))["status"] == "completed"
+
+
+def test_proof_bundle_forces_fixture_staged_when_live_orchestrator_env_is_set(
+    monkeypatch: pytest.MonkeyPatch,
+    mock_network_env: None,
+    patched_staged_network: None,
+    temp_db: Path,
+    staging_dir: Path,
+    report_dir: Path,
+    export_dir: Path,
+) -> None:
+    monkeypatch.setenv("RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR", "1")
+
+    bundle = _run_proof_bundle(temp_db, staging_dir, report_dir, export_dir)
+
+    assert bundle["status"] == "completed"
+    assert bundle["usable_output"] is True
+    assert bundle["rank1_candidate_id"] == STAGED_RANK1_CANDIDATE_ID
+    assert bundle["claim_count"] == 2
+    assert bundle["relationship_count"] == 2
+    assert os.environ["RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR"] == "1"
 
 
 def test_proof_bundle_second_run_is_idempotent_on_same_temp_paths(
