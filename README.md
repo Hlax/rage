@@ -958,10 +958,15 @@ refresh** below (`scripts/refresh_atlas_preview_from_staged_spine.py`; patched O
 fixtures on a temp DB — not live catalog).
 
 **One-time live orchestrator verification (operator checklist; ticket-199; refreshed
-ticket-226):** after per-step **network** proofs or when validating a fresh operator
-environment, run the orchestrator proof once on a **temp `--db` path** (pytest `tmp_path`
-— never the default graph DB). **Not CI-enforced:** default `pytest` and GitHub Golden
-Gate exclude `live_network`; this is operator opt-in only.
+ticket-226; post internal MVP launch ticket-388/389):** after
+`researcher_product_proof_latest.json` reports `product_verdict: GO`, advance
+live-research maturity with this checklist (live OpenAlex + mock LLM only; temp DB).
+Mock product proof does **not** substitute for orchestrator network proof. Full operator
+report: `agent_reports/2026-06-23_phase-3_ticket-389_live-staged-orchestrator-checklist-v0.md`.
+After per-step **network** proofs or when validating a fresh operator environment, run the
+orchestrator proof once on a **temp `--db` path** (pytest `tmp_path` — never the default
+graph DB). **Not CI-enforced:** default `pytest` and GitHub Golden Gate exclude
+`live_network`; this is operator opt-in only.
 
 **LLM boundary (post ticket-223 closure):** this checklist validates **live OpenAlex +
 mock LLM** only. The orchestrator (`execute_staged_fixture_mode_run`) **always forces**
