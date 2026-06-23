@@ -1,0 +1,34 @@
+{
+  "id": "ticket-387",
+  "title": "AGENTS.md operator loop researcher product proof cross-link v0",
+  "problem": "Ticket-386 documented prove-researcher-product in README Operator Quickstart, but AGENTS.md Operator Loop section does not cross-link researcher_product_proof_status or the prove-researcher-product command.",
+  "evidence": [
+    "agent_reports/2026-06-23_phase-3_ticket-386_readme-researcher-product-proof-crosslink-v0.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "AGENTS.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-387_agents-researcher-product-proof-crosslink-v0.md"
+  ],
+  "acceptance_criteria": [
+    "AGENTS.md Operator Loop section cross-links README researcher product proof quickstart.",
+    "AGENTS.md mentions researcher_product_proof_status and product_verdict without duplicating full JSON.",
+    "No code changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "README edits.",
+    "CLI or operator loop code changes.",
+    "Live OpenAI runs."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert AGENTS.md section only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}

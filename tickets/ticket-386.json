@@ -1,0 +1,36 @@
+{
+  "id": "ticket-386",
+  "title": "README operator quickstart researcher product proof cross-link v0",
+  "problem": "Tickets 381–384 delivered prove-researcher-product and operator plan/verify/autocycle integration, but README Operator Quickstart does not document the proof command, gitignored artifact path, or researcher_product_proof_status plan fields.",
+  "evidence": [
+    "agent_reports/2026-06-23_principal-audit-post-ticket-384.md",
+    "agent_reports/2026-06-23_phase-3_ticket-384_autocycle-researcher-product-proof-status-v0.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-386_readme-researcher-product-proof-crosslink-v0.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart documents prove-researcher-product command and gitignored artifact path.",
+    "README notes researcher_product_proof_status / product_verdict without duplicating full operator_loop JSON.",
+    "No CLI or export code changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live OpenAI runs.",
+    "Public site changes.",
+    "Operator loop code changes.",
+    "AGENTS.md edits (ticket-387 follow-on)."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section only.",
+  "status": "done",
+  "category": "Phase 3 / documentation"
+}

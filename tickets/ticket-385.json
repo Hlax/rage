@@ -31,6 +31,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert audit report and queue updates only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / principal audit"
 }

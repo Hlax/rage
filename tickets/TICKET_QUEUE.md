@@ -374,7 +374,9 @@ superseded
 | 382 | ticket-382 | done | Operator loop researcher product proof status v0 | `phase-3/ticket-382-operator-loop-researcher-product-proof-status` | `agent_reports/2026-06-23_phase-3_ticket-382_operator-loop-researcher-product-proof-status-v0.md` |
 | 383 | ticket-383 | done | Verify CLI lists prove-researcher-product in mock gate | `phase-3/ticket-383-verify-researcher-product-checklist` | `agent_reports/2026-06-23_phase-3_ticket-383_verify-researcher-product-checklist-v0.md` |
 | 384 | ticket-384 | done | Autocycle researcher product proof status mirror v0 | `phase-3/ticket-384-autocycle-researcher-product-proof-status` | `agent_reports/2026-06-23_phase-3_ticket-384_autocycle-researcher-product-proof-status-v0.md` |
-| 385 | ticket-385 | proposed | Principal audit post-ticket-384 researcher product proof integration checkpoint | | |
+| 385 | ticket-385 | done | Principal audit post-ticket-384 researcher product proof integration checkpoint | | `agent_reports/2026-06-23_principal-audit-post-ticket-384.md` |
+| 386 | ticket-386 | done | README operator quickstart researcher product proof cross-link v0 | `phase-3/ticket-386-readme-researcher-product-proof-crosslink` | `agent_reports/2026-06-23_phase-3_ticket-386_readme-researcher-product-proof-crosslink-v0.md` |
+| 387 | ticket-387 | proposed | AGENTS.md operator loop researcher product proof cross-link v0 | | |
 | 366 | ticket-366 | done | Live staged orchestrator fetch fallback on candidate 403 | `phase-3/ticket-366-live-staged-orchestrator-fetch-fallback` | `agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md` |
 | 363 | ticket-363 | done | Autonomous loop improvement promotion golden proof | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md` |
 | 362 | ticket-362 | done | Default research run mock staged-spine path | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-362_default-research-run-staged-spine.md` |
@@ -1133,7 +1135,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-385 (proposed) — Principal audit post-ticket-384 researcher product proof integration checkpoint
+ticket-387 (proposed) — AGENTS.md operator loop researcher product proof cross-link v0
 ```
 
 ## Queue Notes (2026-06-19, ticket-366 live staged orchestrator fetch fallback)
