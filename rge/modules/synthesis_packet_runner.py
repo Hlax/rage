@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -56,6 +57,7 @@ def _safe_output_path(path: Path, root: Path) -> str:
     return rel
 
 
+def _scalar_count(conn: sqlite3.Connection, query: str, params: tuple[Any, ...] = ()) -> int:
     row = conn.execute(query, params).fetchone()
     return int(row[0]) if row else 0
 

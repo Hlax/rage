@@ -116,6 +116,19 @@ Review-threshold defaults (overridable via env):
 Reports/hour benchmark (mock, operator machine):
 
 ```powershell
+$env:RGE_LLM_MODE = "mock"
+python scripts/run_synthesis_packet_benchmark.py --packet fixtures/synthesis/grounded_evidence_packet_dry_run.json --runs 25
+```
+
+Writes gitignored operator artifact `data/reports/synthesis_packet_benchmark_latest.json`.
+`operator_loop --mode plan` surfaces `reports_per_hour_estimate` when the active
+branch matches synthesis packet CLI work (e.g. `phase-3/cloud-synthesis-packet-cli-throughput`).
+When the benchmark artifact is missing on that branch, plan mode recommends
+`run_synthesis_packet_benchmark` as a `safe_autonomous` dry-run action.
+
+Single-run timing fallback:
+
+```powershell
 Measure-Command {
   python -m rge.cli synthesize --packet fixtures/synthesis/grounded_evidence_packet_dry_run.json
 }

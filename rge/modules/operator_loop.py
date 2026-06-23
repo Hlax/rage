@@ -984,6 +984,7 @@ def _action_from_state(
     autonomous_synthesis_governor_status: dict[str, Any] | None = None,
     release_governor_status: dict[str, Any] | None = None,
     live_combined_source_health_smoke_status: dict[str, Any] | None = None,
+    synthesis_packet_benchmark_status: dict[str, Any] | None = None,
     root: Path | None = None,
 ) -> RecommendedAction:
     if drift_violations:
@@ -1981,6 +1982,52 @@ def _action_from_state(
             commands=loop_commands,
         )
 
+    synthesis_packet_benchmark = synthesis_packet_benchmark_status or {}
+    if (
+        synthesis_packet_benchmark.get("benchmark_recommended")
+        and synthesis_packet_benchmark.get("active_branch_match")
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        commands_map = synthesis_packet_benchmark.get("operator_commands") or {}
+        benchmark_commands: list[dict[str, str]] = [
+            {
+                "shell": command,
+                "purpose": "set mock LLM for synthesis packet benchmark",
+            }
+            for command in (synthesis_packet_benchmark.get("env_setup") or [])
+        ]
+        benchmark_commands.extend(
+            [
+                {
+                    "shell": commands_map.get(
+                        "benchmark",
+                        "python scripts/run_synthesis_packet_benchmark.py --help",
+                    ),
+                    "purpose": (
+                        "mock-first synthesis throughput + review-threshold dry run"
+                    ),
+                },
+                {
+                    "shell": "python -m rge.modules.operator_loop --mode plan",
+                    "purpose": "re-check reports_per_hour_estimate after benchmark",
+                },
+            ]
+        )
+        artifact_path = synthesis_packet_benchmark.get("artifact_path") or (
+            "data/reports/synthesis_packet_benchmark_latest.json"
+        )
+        return RecommendedAction(
+            action_id="run_synthesis_packet_benchmark",
+            label="Run synthesis packet benchmark dry-run (mock_cloud)",
+            gate="safe_autonomous",
+            reason=(
+                "Synthesis packet CLI branch is active but "
+                f"{artifact_path} is missing; run mock benchmark to populate "
+                "reports/hour and review-threshold status."
+            ),
+            commands=benchmark_commands,
+        )
+
     return RecommendedAction(
         action_id="run_autonomous_researcher_loop",
         label="Run mock autonomous researcher loop proof on scratch DB",
@@ -2393,6 +2440,14 @@ def build_operator_plan(
         root=project_root,
         working_tree=tree,
     )
+    from rge.modules.synthesis_packet_benchmark import (
+        inspect_synthesis_packet_benchmark_plan_status,
+    )
+
+    synthesis_packet_benchmark_status = inspect_synthesis_packet_benchmark_plan_status(
+        root=project_root,
+        branch=tree.branch,
+    )
     live_combined_source_health_smoke_status = (
         inspect_live_combined_source_health_smoke_status(root=project_root)
     )
@@ -2418,6 +2473,7 @@ def build_operator_plan(
         autonomous_synthesis_governor_status=autonomous_synthesis_governor_status,
         release_governor_status=release_governor_status,
         live_combined_source_health_smoke_status=live_combined_source_health_smoke_status,
+        synthesis_packet_benchmark_status=synthesis_packet_benchmark_status,
         root=project_root,
     )
 
@@ -2478,6 +2534,7 @@ def build_operator_plan(
         "autonomous_synthesis_governor_status": autonomous_synthesis_governor_status,
         "instruction_packet_ticket_draft_status": instruction_packet_ticket_draft_status,
         "release_governor_status": release_governor_status,
+        "synthesis_packet_benchmark_status": synthesis_packet_benchmark_status,
         "live_combined_source_health_smoke_status": live_combined_source_health_smoke_status,
         "staged_rank2_scan_max": runtime_config.staged_rank2_scan_max,
         "domain_pack_status": domain_pack_status,
@@ -2623,6 +2680,27 @@ def execute_safe_checks(
                     "Release governor dry-run completed; review verdict before push/merge/publish."
                 )
             }
+        if action_id == "run_synthesis_packet_benchmark":
+            from rge.modules.synthesis_packet_benchmark import (
+                run_synthesis_packet_benchmark_execute_safe_hook,
+            )
+
+            hook = run_synthesis_packet_benchmark_execute_safe_hook(
+                root=project_root,
+                branch=(plan.get("working_tree") or {}).get("branch"),
+            )
+            plan["synthesis_packet_benchmark_execute_safe_hook"] = hook
+            if hook and hook.get("status") == "completed":
+                refreshed_plan = build_operator_plan(
+                    root=project_root,
+                    working_tree=working_tree,
+                )
+                plan["synthesis_packet_benchmark_status"] = refreshed_plan.get(
+                    "synthesis_packet_benchmark_status"
+                )
+                plan["next_recommended_action"] = refreshed_plan.get(
+                    "next_recommended_action"
+                )
     if all_passed and action_id == "run_autonomous_researcher_loop":
         scratch_status = inspect_autonomous_loop_scratch_artifact(root=project_root)
         improvement_status = inspect_autonomous_loop_improvement_artifact(

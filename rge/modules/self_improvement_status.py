@@ -20,6 +20,9 @@ from rge.modules.instruction_packet_ticket_draft import (
 from rge.modules.operator_loop import inspect_working_tree
 from rge.modules.principal_audit_gate import repo_root
 from rge.modules.release_governor import inspect_release_governor_plan_status
+from rge.modules.synthesis_packet_benchmark import (
+    inspect_synthesis_packet_benchmark_plan_status,
+)
 from rge.modules.tier2_patch_staging import inspect_tier2_patch_staging_status
 
 SCHEMA_VERSION = "self_improvement_status_v0.1.0"
@@ -169,31 +172,41 @@ def build_self_improvement_status(*, root: Path | None = None) -> dict[str, Any]
         for row in ledger.get("reviews") or []
         if row.get("governor_verdict") in {"PARTIAL", "NO-GO"}
     ]
+    synthesis_packet_benchmark_status = inspect_synthesis_packet_benchmark_plan_status(
+        root=project_root,
+        branch=tree.branch,
+    )
+    current_state: dict[str, Any] = {
+        "working_tree_clean": tree.clean,
+        "dirty_path_count": len(tree.dirty_paths),
+        "circuit_breaker": load_circuit_breaker(root=project_root),
+        "flagged_synthesis_governor_reviews": flagged,
+        "instruction_packet_ticket_draft_status": inspect_instruction_packet_ticket_draft_status(
+            root=project_root
+        ),
+        "tier2_patch_staging_status": inspect_tier2_patch_staging_status(
+            root=project_root,
+            working_tree=tree,
+        ),
+        "release_governor_status": inspect_release_governor_plan_status(
+            root=project_root,
+            working_tree=tree,
+        ),
+        "autonomous_synthesis_governor_status": inspect_autonomous_synthesis_governor_plan_status(
+            root=project_root
+        ),
+    }
+    if (
+        synthesis_packet_benchmark_status.get("active_branch_match")
+        and synthesis_packet_benchmark_status.get("cli_wired")
+    ):
+        current_state["synthesis_packet_benchmark_status"] = synthesis_packet_benchmark_status
     payload = {
         "schema_version": SCHEMA_VERSION,
         "recorded_at": utc_now_iso(),
         "status": "NO-GO" if flagged else "PARTIAL",
         "spine_map": self_improvement_spine_map(),
-        "current_state": {
-            "working_tree_clean": tree.clean,
-            "dirty_path_count": len(tree.dirty_paths),
-            "circuit_breaker": load_circuit_breaker(root=project_root),
-            "flagged_synthesis_governor_reviews": flagged,
-            "instruction_packet_ticket_draft_status": inspect_instruction_packet_ticket_draft_status(
-                root=project_root
-            ),
-            "tier2_patch_staging_status": inspect_tier2_patch_staging_status(
-                root=project_root,
-                working_tree=tree,
-            ),
-            "release_governor_status": inspect_release_governor_plan_status(
-                root=project_root,
-                working_tree=tree,
-            ),
-            "autonomous_synthesis_governor_status": inspect_autonomous_synthesis_governor_plan_status(
-                root=project_root
-            ),
-        },
+        "current_state": current_state,
         "forbidden_actions": [
             "reset_circuit_breaker_without_confirmed_operator_command",
             "delete_or_mutate_governor_ledger_rows",

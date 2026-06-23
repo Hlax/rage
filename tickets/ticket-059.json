@@ -1,7 +1,7 @@
 {
   "id": "ticket-059",
   "title": "OpenAI opt-in cloud adapter contract and safe local env handling",
-  "problem": "The repo has a spec-only OpenAI synthesis adapter packet, but ticket-059 is still a placeholder with empty expected_files and placeholder acceptance criteria. Builder/autocycle handoff needs a scoped, mock-first implementation ticket for an optional OpenAI cloud synthesis adapter with fail-closed env gates, safe .env.local key handling, provider allowlist validation, budget caps, circuit-breaker compatibility, and no default live calls.",
+  "problem": "Deliver a mock-first OpenAI opt-in cloud synthesis adapter with fail-closed env gates, safe .env.local handling, provider allowlist validation, budget caps, circuit-breaker compatibility, research synthesize --packet CLI throughput instrumentation, and operator benchmark dry-run — without default live paid API calls.",
   "evidence": [
     "docs/agents/13_MODEL_ESCALATION_POLICY.md",
     "docs/agents/12_RUNTIME_CONFIG.md",
@@ -20,8 +20,15 @@
     "rge/modules/openai_synthesis_adapter_spec.py",
     "rge/modules/autonomous_synthesis_governor.py",
     "rge/modules/release_governor.py",
+    "rge/modules/synthesis_packet_runner.py",
+    "rge/modules/synthesis_review_threshold_policy.py",
+    "rge/modules/synthesis_packet_benchmark.py",
+    "rge/modules/operator_loop.py",
+    "rge/modules/self_improvement_status.py",
     "rge/config.py",
+    "rge/cli.py",
     "scripts/run_openai_synthesis_adapter_spec.py",
+    "scripts/run_synthesis_packet_benchmark.py",
     "tests/unit/test_openai_synthesis_adapter_spec.py"
   ],
   "expected_files": [
@@ -42,7 +49,26 @@
     "docs/agents/13_MODEL_ESCALATION_POLICY.md",
     ".env.example",
     "tickets/ticket-059.json",
-    "agent_reports/YYYY-MM-DD_ticket-059-openai-adapter.md"
+    "tickets/TICKET_QUEUE.md",
+    "rge/modules/synthesis_packet_runner.py",
+    "rge/modules/synthesis_review_threshold_policy.py",
+    "rge/modules/synthesis_packet_benchmark.py",
+    "rge/modules/operator_loop.py",
+    "rge/modules/self_improvement_status.py",
+    "rge/cli.py",
+    "scripts/run_synthesis_packet_benchmark.py",
+    "fixtures/synthesis/grounded_evidence_packet_dry_run.json",
+    "tests/unit/test_synthesis_packet_runner.py",
+    "tests/unit/test_synthesis_packet_benchmark.py",
+    "tests/unit/test_synthesis_packet_benchmark_operator_plan.py",
+    "tests/unit/test_self_improvement_status.py",
+    "agent_reports/2026-06-23_ticket-059-openai-adapter.md",
+    "agent_reports/2026-06-23_cloud-synthesis-packet-cli-throughput.md",
+    "agent_reports/2026-06-23_synthesis-packet-benchmark-review-trigger.md",
+    "agent_reports/2026-06-23_synthesis-packet-benchmark-operator-artifact.md",
+    "agent_reports/2026-06-23_synthesis-packet-benchmark-operator-action.md",
+    "agent_reports/2026-06-23_self-improvement-status-benchmark-snapshot.md",
+    "agent_reports/2026-06-23_principal-audit-synthesis-packet-benchmark-checkpoint.md"
   ],
   "acceptance_criteria": [
     "ticket-059 remains mock-first: default config, pytest, golden tests, operator execute-safe, fixture-mode runs, and release-governor inspect paths do not make live OpenAI or other paid provider calls.",
@@ -59,7 +85,7 @@
     "Optional live smoke documentation or scaffold is allowed only behind explicit operator env gates, small budget caps, and a command that is excluded from default pytest and CI."
   ],
   "test_plan": [
-    "RGE_LLM_MODE=mock RGE_ALLOW_LIVE_LLM=0 python -m pytest tests/unit/test_openai_synthesis_adapter_spec.py -q",
+    "RGE_LLM_MODE=mock RGE_ALLOW_LIVE_LLM=0 python -m pytest tests/unit/test_synthesis_packet_runner.py tests/unit/test_synthesis_packet_benchmark.py tests/unit/test_synthesis_packet_benchmark_operator_plan.py -q",
     "RGE_LLM_MODE=mock RGE_ALLOW_LIVE_LLM=0 python -m pytest tests/unit/test_openai_synthesis_adapter_contract.py tests/unit/test_operator_env_loader.py -q",
     "RGE_LLM_MODE=mock RGE_ALLOW_LIVE_LLM=0 python -m pytest tests/unit/test_autonomous_synthesis_governor.py tests/unit/test_release_governor.py -q",
     "RGE_LLM_MODE=mock RGE_ALLOW_LIVE_LLM=0 python -m pytest tests/golden -q",
@@ -67,7 +93,8 @@
     "python -m rge.modules.operator_loop --mode plan",
     "python scripts/run_release_governor.py --inspect",
     "python -m rge.modules.safety_auditor --audit full",
-    "Optional operator-only smoke, not CI: set explicit cloud/live gates, provider allowlist, RGE_CLOUD_MAX_USD_PER_RUN, RGE_CLOUD_MAX_TOKENS_PER_CALL, and a closed circuit breaker before running the documented smoke command."
+    "Optional operator-only smoke, not CI: set explicit cloud/live gates, provider allowlist, RGE_CLOUD_MAX_USD_PER_RUN, RGE_CLOUD_MAX_TOKENS_PER_CALL, and a closed circuit breaker before running the documented smoke command.",
+    "RGE_LLM_MODE=mock python scripts/run_synthesis_packet_benchmark.py --packet fixtures/synthesis/grounded_evidence_packet_dry_run.json --runs 25"
   ],
   "safety_notes": [
     "Do not read, print, copy, commit, or serialize .env.local or any secret value.",
@@ -134,5 +161,5 @@
     "The command must show only public-safe status such as provider id, budget cap values, estimated cost, token cap, circuit status, and openai_key_available true or false.",
     "The command must not serialize raw request prompts, raw source text, .env.local contents, local paths, or credential values."
   ],
-  "status": "proposed"
+  "status": "done"
 }
