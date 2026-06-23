@@ -57,7 +57,7 @@ Safety audit not required — operator autocycle wiring only.
 
 ## Merge to main
 
-Merge commit: (recorded after merge).
+Merge commit: `8b2683d7b65d07a8076856134684cf0fd083e68f`.
 
 ## Recommended next ticket
 
