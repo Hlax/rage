@@ -64,7 +64,7 @@ Stdout JSON includes `operator_checklist` entry with `id: prove_researcher_produ
 
 ## Merge to main
 
-Merge commit: (recorded after merge).
+Merge commit: `f52f6ee9919a588b6dba65213062da32d0123edf`.
 
 ## Recommended next ticket
 
