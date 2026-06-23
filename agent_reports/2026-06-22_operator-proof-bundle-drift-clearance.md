@@ -4,7 +4,7 @@
 
 Ran the mock arbitrary-source proof bundle requested for the product-risk/live-research drift packet. The proof bundle now completes successfully on the documented scratch paths with `usable_output: true`.
 
-The operator loop did **not** fully clear the drift warning in plan/autocycle output. Current operator-loop logic still derives `proof_bundle_recommended` from the principal-audit `drift_warning` field rather than inspecting the newly written `operator_proof_bundle.json`. Tier 2 execute-safe autocycle also stopped on a dirty working tree, so ticket-059 is not yet a clean execute-safe target in the current repo state.
+The operator loop did **not** fully clear the drift warning in plan/autocycle output until a follow-up checkpoint commit added artifact inspection (see **Checkpoint Follow-up** below). Initial operator-loop logic derived `proof_bundle_recommended` from the principal-audit `drift_warning` field rather than inspecting the newly written `operator_proof_bundle.json`.
 
 ## Changed Files
 
@@ -118,18 +118,41 @@ No ticket-059 implementation was performed. No live OpenAI calls, push, merge, p
 
 ## Recommended Next Step
 
-Review and commit or otherwise checkpoint this proof-bundle clearance packet, then rerun:
+Begin ticket-059 implementation via `/rge-run-next-ticket` when ready. Operator loop and Tier 2 autocycle now recognize the completed proof bundle artifact; drift clearance no longer blocks autocycle.
 
-```powershell
-python -m rge.modules.operator_loop --mode plan
-$env:RGE_LLM_MODE = "mock"
-$env:RGE_AUTONOMY_TIER = "2"
-$env:RGE_ALLOW_BRANCH_AUTONOMY = "1"
-$env:RGE_EXECUTE_SAFE_DRAFT_BACKFILL = "1"
-$env:RGE_EXECUTE_SAFE_PATCH_STAGING = "1"
-$env:RGE_REVALIDATE_PATCH_AFTER_BACKFILL = "1"
-$env:RGE_AUTO_SYNC_TIER2_PATCH_PREVIEW = "1"
-python -m rge.modules.operator_autocycle --mode execute-safe --max-cycles 3
-```
+## Checkpoint Follow-up (2026-06-22)
 
-If the loop still routes to ticket-361 or keeps the drift warning after checkpointing, the next narrow fix should update operator-loop proof-bundle status inspection to recognize the completed `operator_proof_bundle.json` artifact, or complete the README documentation ticket-361 as the loop currently surfaces.
+### Commits
+
+- `260d6e4` — Fix mock arbitrary-source proof bundle for operator drift clearance.
+- `256feb6` — Recognize completed operator proof bundle artifact in operator loop.
+
+### Artifact recognition fix
+
+- `inspect_operator_proof_bundle_artifact()` in `operator_proof_bundle.py` reads `data/reports/operator_proof_bundle/operator_proof_bundle.json` and sets `proof_artifact_satisfied` when `status == completed` and `usable_output == true`.
+- `inspect_arbitrary_source_proof_bundle_status()` sets `proof_bundle_recommended: false` when artifact is satisfied.
+- `_product_drift_warnings_cleared_by_proof_bundle()` filters product-risk/live-research/arbitrary-source drift warnings when artifact is satisfied.
+- Autocycle drift stop uses filtered `blocking_drift_warning` instead of raw audit drift list.
+
+### Post-checkpoint verification
+
+- `python -m pytest tests/unit/test_operator_loop_plan.py tests/unit/test_operator_autocycle_plan.py tests/unit/test_operator_proof_bundle.py -q`: 28 passed.
+- Post-commit `python -m rge.modules.operator_loop --mode plan`:
+  - `execute_safe_eligible`: true
+  - `working_tree.clean`: true
+  - `drift_warning`: none (cleared for plan display)
+  - `proof_artifact_satisfied`: true
+  - `proof_bundle_recommended`: false
+  - `next_recommended_action`: `begin_ticket_implementation` (ticket-059)
+- Post-commit Tier 2 `operator_autocycle --mode execute-safe --max-cycles 3`:
+  - Stopped after 1 cycle with `stop_reason`: `ticket_implementation_requires_agent` (expected — `/rge-run-next-ticket` is prompt-only)
+  - `run_next_ticket_allowed`: true
+  - `proof_artifact_satisfied`: true
+  - `proof_bundle_recommended`: false
+  - No `drift_warning_active` stop
+  - `recommended_action`: begin ticket-059 implementation
+  - `current_ticket` still surfaces ticket-361 (proposed README docs) in queue order; recommended action correctly targets ticket-059
+
+### Ticket-059 readiness (updated)
+
+Ticket-059 is now a clean execute-safe target: working tree clean, drift clearance satisfied via proof artifact, autocycle no longer blocked on product-risk drift. Implementation has not started.
