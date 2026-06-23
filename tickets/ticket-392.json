@@ -1,0 +1,33 @@
+{
+  "id": "ticket-392",
+  "title": "AGENTS.md live orchestrator retry runbook cross-link v0",
+  "problem": "Ticket-391 documented live orchestrator retry conditions in README and an agent report, but AGENTS.md Operator Loop does not cross-link unsuitable_live_artifact retry guidance.",
+  "evidence": [
+    "agent_reports/2026-06-23_phase-3_ticket-391_live-orchestrator-retry-runbook-v0.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "AGENTS.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-392_agents-orchestrator-retry-crosslink-v0.md"
+  ],
+  "acceptance_criteria": [
+    "AGENTS.md cross-links README unsuitable_live_artifact and ticket-391 retry runbook.",
+    "No code changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "README edits.",
+    "Engine changes.",
+    "Live network pytest in CI."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert AGENTS.md section only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}

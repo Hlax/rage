@@ -29,6 +29,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Remove runbook report only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / operator verification"
 }
