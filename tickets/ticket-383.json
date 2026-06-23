@@ -31,6 +31,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert verify_runner checklist entry and tests only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / operator integration"
 }

@@ -16,6 +16,9 @@ from rge.modules.operator_loop import (
     inspect_arbitrary_source_proof_bundle_status,
     safe_verification_commands,
 )
+from rge.modules.researcher_product_proof import (
+    inspect_researcher_product_proof_plan_status,
+)
 from rge.subprocess_capture import run_captured
 
 _MOCK_ENV = {
@@ -27,19 +30,30 @@ _MOCK_ENV = {
 
 def mock_gate_operator_checklist(root: Path) -> list[dict[str, Any]]:
     """Optional operator commands surfaced by verify (not run automatically)."""
-    status = inspect_arbitrary_source_proof_bundle_status(root=root)
+    proof_bundle_status = inspect_arbitrary_source_proof_bundle_status(root=root)
+    product_proof_status = inspect_researcher_product_proof_plan_status(root=root)
     return [
         {
             "id": "prove_arbitrary_source_bundle",
-            "command": status["command"],
-            "pipeline_mode": status["pipeline_mode"],
-            "shell": status["operator_commands"]["proof_bundle"],
+            "command": proof_bundle_status["command"],
+            "pipeline_mode": proof_bundle_status["pipeline_mode"],
+            "shell": proof_bundle_status["operator_commands"]["proof_bundle"],
             "automated_in_verify": False,
             "notes": (
                 "Optional mock arbitrary-source maturity proof on a temp or scratch "
                 "database; inspect operator_proof_bundle.json after run."
             ),
-        }
+        },
+        {
+            "id": "prove_researcher_product",
+            "command": product_proof_status["command"],
+            "shell": product_proof_status["operator_commands"]["product_proof"],
+            "automated_in_verify": False,
+            "notes": (
+                "Optional mock end-to-end researcher product proof on a scratch work "
+                "dir; inspect researcher_product_proof_latest.json after run."
+            ),
+        },
     ]
 
 
@@ -101,6 +115,9 @@ def run_verification(
         "checks": results,
         "operator_checklist": mock_gate_operator_checklist(project_root),
         "arbitrary_source_proof_bundle_status": inspect_arbitrary_source_proof_bundle_status(
+            root=project_root
+        ),
+        "researcher_product_proof_status": inspect_researcher_product_proof_plan_status(
             root=project_root
         ),
     }

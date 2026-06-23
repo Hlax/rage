@@ -1,0 +1,37 @@
+{
+  "id": "ticket-384",
+  "title": "Autocycle researcher product proof status mirror v0",
+  "problem": "Ticket-382 wired researcher_product_proof_status into operator_loop plan mode and ticket-383 added verify checklist surfacing, but operator_autocycle plan JSON does not mirror product proof readiness or block on missing artifact when product-risk drift is active.",
+  "evidence": [
+    "agent_reports/2026-06-23_phase-3_ticket-383_verify-researcher-product-checklist-v0.md",
+    "tests/unit/test_operator_autocycle_plan.py",
+    "rge/modules/operator_autocycle.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_autocycle.py"
+  ],
+  "expected_files": [
+    "rge/modules/operator_autocycle.py",
+    "tests/unit/test_operator_autocycle_plan.py",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-384_autocycle-researcher-product-proof-status-v0.md"
+  ],
+  "acceptance_criteria": [
+    "operator_autocycle --mode plan includes researcher_product_proof_status per cycle.",
+    "Autocycle blocks with operator_action_blocked_automation when product_proof_recommended and drift active.",
+    "Satisfied GO artifact clears product_proof_recommended in autocycle evaluation.",
+    "No public export or public-site changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_autocycle_plan.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Auto-run product proof during autocycle execute-safe.",
+    "README-only docs.",
+    "Live OpenAI."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert operator_autocycle status mirror and tests only.",
+  "status": "proposed",
+  "category": "Phase 3 / operator integration"
+}
