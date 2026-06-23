@@ -211,6 +211,57 @@ When synthesis artifacts are **also stale**, plan mode recommends `run_synthesis
 
 **Operator autocycle blocking:** when plan mode recommends synthesis sign-off or a synthesis loop with sign-off, `python -m rge.modules.operator_autocycle --mode plan` stops with `operator_action_blocked_automation` (same pattern as scratch evidence review and arbitrary-source proof bundle). Autocycle never runs sign-off or synthesis loop commands without explicit operator review.
 
+**Arbitrary-source operator proof bundle** (mock LLM only; temp/scratch paths): when the
+principal audit checkpoint surfaces a **product-risk / live-research /
+arbitrary-source drift warning** (for example: *"No product-risk or live-research proof
+advanced in the last 3 completed tickets."*), operator plan mode may recommend
+`run_arbitrary_source_proof_bundle` (`review_gated`) before ticket implementation when
+no higher-priority open ticket blocks it. The action runs the mock-only staged-spine proof
+on scratch paths — no live OpenAlex network, no live Ollama, and no `export-public
+--publish`.
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+python -m rge.cli prove-arbitrary-source-bundle `
+  --topic "Does AI improve creative output while reducing diversity?" `
+  --domain creativity `
+  --db data/db/operator_proof_bundle_scratch.sqlite `
+  --output-dir data/reports/operator_proof_bundle `
+  --staging-dir data/sources/staged/operator_proof_bundle `
+  --export-dir data/exports/operator_proof_bundle `
+  --bundle-out data/reports/operator_proof_bundle/operator_proof_bundle.json
+```
+
+Inspect `data/reports/operator_proof_bundle/operator_proof_bundle.json`:
+
+| Field | Expected on success |
+| --- | --- |
+| `status` | `completed` |
+| `usable_output` | `true` |
+| `pipeline_mode` | `fixture_staged_rank1` |
+
+**`arbitrary_source_proof_bundle_status`** (operator plan and autocycle JSON): read-only
+inspection of the proof bundle artifact and drift recommendation.
+
+| Field | When present |
+| --- | --- |
+| `proof_bundle_recommended` | `true` when principal-audit drift is active and the artifact is not yet satisfied |
+| `proof_artifact_satisfied` | `true` when bundle JSON has `status: completed` and `usable_output: true` |
+| `proof_artifact_path` | Absolute path to `operator_proof_bundle.json` |
+| `proof_artifact_status` | `missing`, `present`, `satisfied`, or `invalid` |
+| `operator_commands.proof_bundle` | Copy-paste mock-only shell command from plan JSON |
+
+When `proof_artifact_satisfied` is `true`, plan mode sets `proof_bundle_recommended` to
+`false` and Tier 2 autocycle no longer stops on product-risk drift for those warnings.
+Autocycle still blocks with `operator_action_blocked_automation` while the proof bundle
+remains recommended — same pattern as scratch evidence review.
+
+Re-plan after a successful run:
+
+```powershell
+python -m rge.modules.operator_loop --mode plan
+```
+
 **Full atlas refresh sign-off step:** every checklist run executes `synthesis_review_sign_off_refresh` after the human-review export scan (ledger merge into `atlas_synthesis_human_review_latest.json`). Optional fixture sign-off during refresh:
 
 ```powershell
@@ -1492,6 +1543,10 @@ Golden tests always run in mock LLM mode and do not require Ollama.
 | `data/db/` | gitignored | Private SQLite database (default: `creative_research.sqlite`) |
 | `data/reports/` | gitignored | Run, cluster, theory, and other private reports |
 | `data/reports/operator_autonomous_loop/` | gitignored | Operator autonomous loop scratch report (`autonomous_loop_report.json`) and improvement drafts under `tickets/` |
+| `data/reports/operator_proof_bundle/` | gitignored | Mock arbitrary-source proof bundle (`operator_proof_bundle.json`, run reports) |
+| `data/db/operator_proof_bundle_scratch.sqlite` | gitignored | Scratch DB for operator proof bundle |
+| `data/sources/staged/operator_proof_bundle/` | gitignored | Staged OpenAlex fixture sources for proof bundle |
+| `data/exports/operator_proof_bundle/` | gitignored | Proof-bundle public-card export scratch copy |
 | `data/db/operator_autonomous_loop_scratch.sqlite` | gitignored | Scratch DB for operator autonomous loop proofs |
 | `data/sources/staged/operator_autonomous_loop/` | gitignored | Staged sources for operator autonomous loop proofs |
 | `data/exports/` | gitignored | Generated export JSON copies |

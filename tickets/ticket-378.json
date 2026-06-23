@@ -1,0 +1,34 @@
+{
+  "id": "ticket-378",
+  "title": "AGENTS.md operator quickstart arbitrary source proof bundle cross-link v0",
+  "problem": "README Operator Quickstart now documents run_arbitrary_source_proof_bundle and prove-arbitrary-source-bundle (ticket-361), but AGENTS.md operator loop section does not cross-link the proof bundle workflow or artifact satisfaction fields.",
+  "evidence": [
+    "agent_reports/2026-06-22_phase-3_ticket-361_readme-arbitrary-source-proof-bundle-v0.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "AGENTS.md",
+    "agent_reports/2026-06-22_phase-3_ticket-378_agents-arbitrary-source-proof-bundle-crosslink-v0.md"
+  ],
+  "acceptance_criteria": [
+    "AGENTS.md Operator Loop section links to README arbitrary-source proof bundle workflow.",
+    "AGENTS.md notes proof_artifact_satisfied drift clearance without duplicating full command block.",
+    "No CLI or export code changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live Ollama runs.",
+    "Public site changes.",
+    "Operator loop code changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert AGENTS.md section only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}
