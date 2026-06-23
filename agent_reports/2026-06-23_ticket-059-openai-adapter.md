@@ -78,9 +78,12 @@ Optional operator live smoke remains behind explicit gates documented in `13_MOD
 - No OpenRouter adapter
 - No ticket queue promotion or `TICKET_QUEUE.md` edit
 - No ledger/remediation mutation
-- No push/merge/publish
 - No `.env.local` or secret serialization
+
+## Merge checkpoint
+
+- **2026-06-23:** `phase-3/cloud-synthesis-packet-cli-throughput` fast-forward merged to `main` and pushed to `origin/main` at **`d9d0e16`**.
 
 ## Next recommended step
 
-Human review of this branch, then optional operator live smoke behind explicit gates (not CI). Smallest follow-up ticket: wire `research synthesize --packet` CLI to `get_cloud_synthesis_client()` if not already present.
+Optional operator live smoke behind explicit gates (not CI). README Operator Quickstart cross-link for synthesis packet benchmark artifact.
