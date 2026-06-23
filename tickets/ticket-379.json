@@ -1,0 +1,36 @@
+{
+  "id": "ticket-379",
+  "title": "README operator quickstart synthesis packet benchmark cross-link v0",
+  "problem": "Ticket-059 delivered mock-first cloud synthesis packet CLI and operator benchmark dry-run (scripts/run_synthesis_packet_benchmark.py, operator_loop plan action, self_improvement_status snapshot). README Operator Quickstart does not yet document the benchmark command, gitignored artifact path, or plan/autocycle status fields.",
+  "evidence": [
+    "agent_reports/2026-06-23_ticket-059-openai-adapter.md",
+    "agent_reports/2026-06-23_synthesis-packet-benchmark-review-trigger.md",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-379_readme-synthesis-packet-benchmark-crosslink-v0.md"
+  ],
+  "acceptance_criteria": [
+    "README Operator Quickstart documents synthesis packet benchmark command and gitignored artifact path.",
+    "README notes synthesis_packet_benchmark_status / reports_per_hour_estimate on synthesis CLI branches without duplicating full operator_loop JSON.",
+    "No CLI or export code changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live OpenAI runs.",
+    "Public site changes.",
+    "Operator loop code changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}

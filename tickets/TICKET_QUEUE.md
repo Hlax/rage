@@ -367,7 +367,8 @@ superseded
 | 339 | ticket-339 | done | Autonomous loop scratch artifact inspection in operator plan v0 | `phase-3/ticket-339-autonomous-loop-scratch-inspection-v0` | `agent_reports/2026-06-18_phase-3_ticket-339_autonomous-loop-scratch-inspection-v0.md` |
 | 358 | ticket-358 | done | Principal audit post-ticket-356 autonomous loop checkpoint | `phase-3/ticket-358-principal-audit-post-ticket-356` | `agent_reports/2026-06-18_phase-3_ticket-358_principal-audit-post-ticket-356.md` |
 | 361 | ticket-361 | done | README operator quickstart arbitrary source proof bundle recommendation v0 | `phase-3/ticket-361-readme-arbitrary-source-proof-bundle-v0` | `agent_reports/2026-06-22_phase-3_ticket-361_readme-arbitrary-source-proof-bundle-v0.md` |
-| 378 | ticket-378 | proposed | AGENTS.md operator quickstart arbitrary source proof bundle cross-link v0 | | |
+| 378 | ticket-378 | done | AGENTS.md operator quickstart arbitrary source proof bundle cross-link v0 | `phase-3/ticket-378-agents-arbitrary-source-proof-bundle-crosslink` | `agent_reports/2026-06-23_phase-3_ticket-378_agents-arbitrary-source-proof-bundle-crosslink-v0.md` |
+| 379 | ticket-379 | proposed | README operator quickstart synthesis packet benchmark cross-link v0 | | |
 | 366 | ticket-366 | done | Live staged orchestrator fetch fallback on candidate 403 | `phase-3/ticket-366-live-staged-orchestrator-fetch-fallback` | `agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md` |
 | 363 | ticket-363 | done | Autonomous loop improvement promotion golden proof | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md` |
 | 362 | ticket-362 | done | Default research run mock staged-spine path | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-362_default-research-run-staged-spine.md` |
@@ -1126,8 +1127,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-378 (proposed) — AGENTS.md operator quickstart arbitrary source proof bundle cross-link v0
-(ticket-059 OpenAI placeholder remains deferred until promoted from proposed)
+ticket-379 (proposed) — README operator quickstart synthesis packet benchmark cross-link v0
 ```
 
 ## Queue Notes (2026-06-19, ticket-366 live staged orchestrator fetch fallback)
