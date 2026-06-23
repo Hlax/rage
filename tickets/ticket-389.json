@@ -1,0 +1,34 @@
+{
+  "id": "ticket-389",
+  "title": "Operator one-time live staged orchestrator verification checklist v0",
+  "problem": "Post internal MVP launch checkpoint, live-research maturity remains partial; operators need a documented one-time pytest checklist run for live staged orchestrator (temp DB, live_network marker) without new engine features.",
+  "evidence": [
+    "agent_reports/2026-06-23_phase-3_ticket-388_internal-mvp-launch-checkpoint-v0.md",
+    "README.md",
+    "tests/unit/test_live_staged_orchestrator_proof.py"
+  ],
+  "affected_modules": [
+    "agent_reports",
+    "README.md"
+  ],
+  "expected_files": [
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-389_live-staged-orchestrator-checklist-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Agent report records operator checklist commands, env gates, and pass/skip interpretation.",
+    "No engine feature changes unless a checklist wiring bug is found.",
+    "Temp DB only; no export-public or public-site writes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "CI enforcement of live_network tests.",
+    "Removing live env gates.",
+    "New research pipeline features."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove checklist report only.",
+  "status": "done",
+  "category": "Phase 3 / operator verification"
+}

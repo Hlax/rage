@@ -1,0 +1,37 @@
+{
+  "id": "ticket-388",
+  "title": "Internal MVP launch checkpoint v0",
+  "problem": "Researcher product proof artifact reports GO but no formal internal launch checkpoint documents launch commands, artifact paths, non-launch blockers, and operator surface clearance.",
+  "evidence": [
+    "data/reports/researcher_product_proof_latest.json",
+    "agent_reports/2026-06-23_phase-3_ticket-388_internal-mvp-launch-checkpoint-v0.md",
+    "agent_reports/2026-06-23_principal-audit-post-ticket-384.md"
+  ],
+  "affected_modules": [
+    "agent_reports"
+  ],
+  "expected_files": [
+    "agent_reports/2026-06-23_phase-3_ticket-388_internal-mvp-launch-checkpoint-v0.md",
+    "tickets/ticket-388.json",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "acceptance_criteria": [
+    "Agent report declares internal MVP launch candidate status with caveats.",
+    "Launch command sequence and artifact paths documented.",
+    "Remaining non-launch blockers listed separately.",
+    "No new product features or safety gate changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "New research features.",
+    "Loosening safety gates.",
+    "Public export or site changes.",
+    "Live OpenAI runs."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove launch checkpoint report and ticket row.",
+  "status": "done",
+  "category": "Phase 3 / launch checkpoint"
+}
