@@ -81,6 +81,19 @@ the bundle remains recommended (same pattern as scratch evidence review). Full m
 `prove-arbitrary-source-bundle` command, artifact table, and replan steps: README
 **Operator Quickstart** (*Arbitrary-source operator proof bundle*).
 
+**Synthesis packet benchmark dry-run** (mock_cloud only; ticket-059 bridge): on synthesis
+packet CLI feature branches (for example `phase-3/cloud-synthesis-packet-cli-throughput`),
+measure mock throughput and review-threshold cadence without live OpenAI HTTP. Plan JSON
+includes `synthesis_packet_benchmark_status` with `benchmark_recommended`,
+`reports_per_hour_estimate` (when artifact `status` is `available`), `artifact_path`, and
+`operator_commands.benchmark`. When the artifact is missing on a synthesis CLI branch, plan
+mode may recommend `run_synthesis_packet_benchmark` (`safe_autonomous`). Execute-safe runs
+the benchmark hook after verification when that action is recommended. Private
+`self_improvement_status` includes the same snapshot on synthesis CLI branches. Full
+mock-only benchmark command, gitignored artifact path
+(`data/reports/synthesis_packet_benchmark_latest.json`), single `synthesize --packet` run,
+and replan steps: README **Operator Quickstart** (*Synthesis packet benchmark dry-run*).
+
 **Maturity tiers (honest framing):**
 
 - **MVP-Engine:** mock/fixture-proven — golden tests, safety audit, fixture-mode run.

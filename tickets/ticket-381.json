@@ -1,0 +1,49 @@
+{
+  "id": "ticket-381",
+  "title": "Product proof: arbitrary source bundle → synthesis packet → benchmark → Atlas preview artifact",
+  "problem": "Tickets 361–380 closed docs/wiring for arbitrary-source proof bundle and synthesis packet benchmark, but no single mock-first product proof shows the researcher end-to-end: staged arbitrary-source bundle → grounded synthesis packet → benchmark throughput → Atlas/public preview visibility with a traceable operator artifact.",
+  "evidence": [
+    "agent_reports/2026-06-23_phase-3_ticket-380_agents-synthesis-packet-benchmark-crosslink-v0.md",
+    "agent_reports/2026-06-23_principal-audit-post-ticket-379.md",
+    "agent_reports/2026-06-16_phase-3_ticket-267_arbitrary-source-operator-proof-bundle.md",
+    "agent_reports/2026-06-23_ticket-059-openai-adapter.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_proof_bundle.py",
+    "rge/modules/synthesis_packet_runner.py",
+    "rge/modules/synthesis_packet_benchmark.py"
+  ],
+  "expected_files": [
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-381_product-proof-bundle-synthesis-benchmark-atlas-v0.md",
+    "tickets/ticket-381.json",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "acceptance_criteria": [
+    "Mock-first operator proof runs prove-arbitrary-source-bundle (or equivalent staged mock spine) on temp paths and records source_count, claim_count, and evidence_count in a traceable gitignored artifact.",
+    "Proof chains synthesize --packet on the grounded fixture packet (mock_cloud) and records synthesis_output_path without writing model output to accepted graph tables.",
+    "Proof runs synthesis packet benchmark dry-run and records reports_per_hour_estimate in the same artifact or linked gitignored summary.",
+    "Safety audit status (pass/fail + scan scope) is recorded in the artifact; no public export policy widening.",
+    "Atlas/public preview visibility is demonstrated (private atlas snapshot coherence and/or committed public-site atlas-preview fixture path referenced in artifact).",
+    "Live OpenAI remains opt-in only; default proof path uses mock LLM / mock_cloud.",
+    "Human-readable agent report with GO/PARTIAL/NO-GO product verdict and artifact paths.",
+    "Golden + full pytest + safety audit pass; public-site build when preview visibility is in scope."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m rge.cli verify --skip-site",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "README-only or AGENTS.md-only docs tickets.",
+    "Default live OpenAI HTTP.",
+    "Model output writing directly to accepted DB tables.",
+    "export-public policy changes.",
+    "New public write routes."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert proof script/module and agent report; leave prior docs cross-links intact.",
+  "status": "proposed",
+  "category": "Phase 3 / operator product proof"
+}
