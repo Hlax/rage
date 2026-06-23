@@ -55,7 +55,9 @@ Safety audit not required — README documentation only.
 
 ## Merge to main
 
-_(recorded after merge)_
+Merge commit: `984414d1814bc04d0e791db06afddffbdacf42f5`
+
+Post-merge pytest: **1336 passed**, 49 deselected.
 
 ## Recommended next ticket
 
