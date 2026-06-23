@@ -1002,6 +1002,13 @@ per-step live Ollama proofs (pre-ticket audits 221/222).
 4. Confirm stdout JSON includes `"status": "completed"`, `"mode": "fixture_staged"`, `rank1_candidate_id` / `rank2_candidate_id` (candidate wiring metadata on the final run document), and stable dual-spine counts: `sources` 3, `candidate_sources` 2, `research_queue` 2, `score_events` 2, `run_reports` 2, `qualifies_evidence` 2. The `score_events` and `run_reports` rows come from deterministic reconcile/report — not Ollama.
 5. Confirm temp report artifact: `run_report_latest.json` under the test temp output dir (not committed).
 
+**Orchestrator retry runbook (ticket-391):** when step 2–3 does not yield **1 passed** because
+live OpenAlex returned catalogs without mock-spine marker phrases (`human-ai co-creativity`,
+`songwriting`), see **Interpreting `unsuitable_live_artifact`** above and
+`agent_reports/2026-06-23_phase-3_ticket-391_live-orchestrator-retry-runbook-v0.md` for
+retry timing, topic tuning, and environmental NO-GO acceptance. This is **not** an engine
+regression; layer-2 mock proof remains `tests/unit/test_staged_fixture_mode_run_spine.py`.
+
 If the run times out, retry from a network-unrestricted machine; do **not** enable live network in CI. Patched-network regression remains `tests/unit/test_staged_fixture_mode_run_spine.py`. For per-step live Ollama proofs after mock ingest, see **Live staged extract/link/build/detect** (rank-1) and **One-time rank-2 per-step live Ollama verification** (rank-2) above.
 
 **Manual source ingestion** (Level-1): place operator `.txt`/`.md` files under gitignored `data/sources/manual/<domain>/` (e.g. `data/sources/manual/creativity/`) and ingest with:
