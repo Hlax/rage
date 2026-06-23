@@ -89,7 +89,7 @@ Artifact: `data/reports/researcher_product_proof_latest.json` (gitignored).
 
 ## Merge to main
 
-Merge commit: (recorded after merge).
+Merge commit: `4192e25bda1a0cca308c827f8aa75b90d81da2f8`.
 
 ## Recommended next ticket
 
