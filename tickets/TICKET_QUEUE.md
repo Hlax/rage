@@ -377,7 +377,8 @@ superseded
 | 385 | ticket-385 | done | Principal audit post-ticket-384 researcher product proof integration checkpoint | | `agent_reports/2026-06-23_principal-audit-post-ticket-384.md` |
 | 386 | ticket-386 | done | README operator quickstart researcher product proof cross-link v0 | `phase-3/ticket-386-readme-researcher-product-proof-crosslink` | `agent_reports/2026-06-23_phase-3_ticket-386_readme-researcher-product-proof-crosslink-v0.md` |
 | 387 | ticket-387 | done | AGENTS.md operator loop researcher product proof cross-link v0 | `phase-3/ticket-387-agents-researcher-product-proof-crosslink` | `agent_reports/2026-06-23_phase-3_ticket-387_agents-researcher-product-proof-crosslink-v0.md` |
-| 390 | ticket-390 | proposed | Principal audit post-ticket-389 launch hygiene checkpoint | | |
+| 390 | ticket-390 | done | Principal audit post-ticket-389 launch hygiene checkpoint | | `agent_reports/2026-06-23_principal-audit-post-ticket-389.md` |
+| 391 | ticket-391 | proposed | Operator live orchestrator verification retry runbook v0 | | |
 | 388 | ticket-388 | done | Internal MVP launch checkpoint v0 | | `agent_reports/2026-06-23_phase-3_ticket-388_internal-mvp-launch-checkpoint-v0.md` |
 | 389 | ticket-389 | done | Operator one-time live staged orchestrator verification checklist v0 | `phase-3/ticket-389-live-staged-orchestrator-checklist` | `agent_reports/2026-06-23_phase-3_ticket-389_live-staged-orchestrator-checklist-v0.md` |
 | 366 | ticket-366 | done | Live staged orchestrator fetch fallback on candidate 403 | `phase-3/ticket-366-live-staged-orchestrator-fetch-fallback` | `agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md` |
@@ -1138,7 +1139,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-390 (proposed) — Principal audit post-ticket-389 launch hygiene checkpoint
+ticket-391 (proposed) — Operator live orchestrator verification retry runbook v0
 ```
 
 ## Queue Notes (2026-06-19, ticket-366 live staged orchestrator fetch fallback)

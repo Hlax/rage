@@ -1,0 +1,34 @@
+{
+  "id": "ticket-391",
+  "title": "Operator live orchestrator verification retry runbook v0",
+  "problem": "Ticket-389 documented the live orchestrator checklist but the operator run failed with unsuitable_live_artifact; operators need a focused retry runbook when OpenAlex returns non-fixture-compatible abstracts.",
+  "evidence": [
+    "agent_reports/2026-06-23_phase-3_ticket-389_live-staged-orchestrator-checklist-v0.md",
+    "agent_reports/2026-06-23_principal-audit-post-ticket-389.md",
+    "README.md"
+  ],
+  "affected_modules": [
+    "README.md",
+    "agent_reports"
+  ],
+  "expected_files": [
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-391_live-orchestrator-retry-runbook-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Agent report documents retry conditions, marker phrases, and pass/skip/fail interpretation.",
+    "No engine changes unless wiring bug found during operator retry.",
+    "Temp DB only."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "CI live_network enforcement.",
+    "Removing env gates.",
+    "New pipeline features."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove runbook report only.",
+  "status": "proposed",
+  "category": "Phase 3 / operator verification"
+}
