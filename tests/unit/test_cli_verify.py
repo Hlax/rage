@@ -1,4 +1,4 @@
-"""Unit tests for research verify operator checklist (ticket-270)."""
+"""Unit tests for research verify operator checklist (ticket-270, ticket-383)."""
 
 from __future__ import annotations
 
@@ -9,19 +9,37 @@ from pathlib import Path
 import pytest
 
 from rge.cli import main
-from rge.modules.operator_proof_bundle import COMMAND
+from rge.modules.operator_proof_bundle import COMMAND as PROOF_BUNDLE_COMMAND
+from rge.modules.researcher_product_proof import COMMAND as PRODUCT_PROOF_COMMAND
 from rge.modules.verify_runner import mock_gate_operator_checklist, run_verification
+
+
+def _checklist_entry(checklist: list[dict], entry_id: str) -> dict:
+    for entry in checklist:
+        if entry["id"] == entry_id:
+            return entry
+    raise AssertionError(f"missing checklist entry: {entry_id}")
 
 
 def test_mock_gate_operator_checklist_references_proof_bundle(tmp_path: Path) -> None:
     checklist = mock_gate_operator_checklist(tmp_path)
 
-    assert len(checklist) == 1
-    entry = checklist[0]
-    assert entry["id"] == "prove_arbitrary_source_bundle"
-    assert entry["command"] == COMMAND
+    assert len(checklist) == 2
+    entry = _checklist_entry(checklist, "prove_arbitrary_source_bundle")
+    assert entry["command"] == PROOF_BUNDLE_COMMAND
     assert entry["automated_in_verify"] is False
     assert "prove-arbitrary-source-bundle" in entry["shell"]
+
+
+def test_mock_gate_operator_checklist_references_researcher_product_proof(
+    tmp_path: Path,
+) -> None:
+    checklist = mock_gate_operator_checklist(tmp_path)
+
+    entry = _checklist_entry(checklist, "prove_researcher_product")
+    assert entry["command"] == PRODUCT_PROOF_COMMAND
+    assert entry["automated_in_verify"] is False
+    assert "prove-researcher-product" in entry["shell"]
 
 
 def test_run_verification_includes_operator_checklist(tmp_path: Path) -> None:
@@ -38,13 +56,17 @@ def test_run_verification_includes_operator_checklist(tmp_path: Path) -> None:
 
     assert result["skip_site"] is True
     assert "operator_checklist" in result
-    assert result["operator_checklist"][0]["command"] == COMMAND
+    proof_entry = _checklist_entry(result["operator_checklist"], "prove_arbitrary_source_bundle")
+    product_entry = _checklist_entry(result["operator_checklist"], "prove_researcher_product")
+    assert proof_entry["command"] == PROOF_BUNDLE_COMMAND
+    assert product_entry["command"] == PRODUCT_PROOF_COMMAND
     assert (
-        result["arbitrary_source_proof_bundle_status"]["command"] == COMMAND
+        result["arbitrary_source_proof_bundle_status"]["command"] == PROOF_BUNDLE_COMMAND
     )
-    assert "prove-arbitrary-source-bundle" in (
-        result["operator_checklist"][0]["shell"]
-    )
+    assert result["researcher_product_proof_status"]["command"] == PRODUCT_PROOF_COMMAND
+    assert "prove-arbitrary-source-bundle" in proof_entry["shell"]
+    assert "prove-researcher-product" in product_entry["shell"]
+    assert result["researcher_product_proof_status"]["artifact_path"]
 
 
 def test_verify_cli_skip_site_stdout_includes_proof_bundle_checklist(
@@ -75,5 +97,10 @@ def test_verify_cli_skip_site_stdout_includes_proof_bundle_checklist(
     payload = json.loads(captured.out)
     assert payload["command"] == "verify"
     assert payload["skip_site"] is True
-    assert payload["operator_checklist"][0]["command"] == COMMAND
-    assert "prove-arbitrary-source-bundle" in payload["operator_checklist"][0]["shell"]
+    proof_entry = _checklist_entry(payload["operator_checklist"], "prove_arbitrary_source_bundle")
+    product_entry = _checklist_entry(payload["operator_checklist"], "prove_researcher_product")
+    assert proof_entry["command"] == PROOF_BUNDLE_COMMAND
+    assert product_entry["command"] == PRODUCT_PROOF_COMMAND
+    assert "prove-arbitrary-source-bundle" in proof_entry["shell"]
+    assert "prove-researcher-product" in product_entry["shell"]
+    assert payload["researcher_product_proof_status"]["artifact_path"]
