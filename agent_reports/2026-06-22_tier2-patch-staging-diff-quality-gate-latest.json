@@ -1,0 +1,95 @@
+{
+  "schema_version": "agent_report_v0.1.0",
+  "report_id": "2026-06-22_tier2-patch-staging-diff-quality-gate",
+  "generated_at": "2026-06-22T18:40:22Z",
+  "verdict": "GO",
+  "staging_schema": {
+    "schema_version": "tier2_patch_bundle_v0.1.0",
+    "staging_dir": "data/operator/tier2_patch_staging/",
+    "fields": [
+      "draft_ticket_path",
+      "instruction_packet_path",
+      "branch_name",
+      "intended_files",
+      "proposed_changed_files",
+      "diff_summary",
+      "risk_class",
+      "test_plan",
+      "safety_audit_required",
+      "rollback_notes",
+      "generated_at",
+      "validation_verdict",
+      "validation_reasons"
+    ]
+  },
+  "diff_quality_gates": [
+    "allowed_path_prefixes",
+    "forbidden_paths",
+    "max_files",
+    "max_lines",
+    "deleted_files_count",
+    "public_surface_safety_audit",
+    "test_only_scope",
+    "source_test_pairing",
+    "non_goal_violations",
+    "forbidden_action_language",
+    "private_field_scan"
+  ],
+  "env_vars": {
+    "RGE_REQUIRE_TIER2_PATCH_STAGING": "0",
+    "RGE_TIER2_PATCH_MAX_FILES": "20",
+    "RGE_TIER2_PATCH_MAX_LINES": "2000"
+  },
+  "cli_commands": {
+    "stage_latest": "python scripts/run_tier2_patch_staging.py --latest",
+    "validate_bundle": "python scripts/run_tier2_patch_staging.py --bundle PATH --validate",
+    "apply_bundle": "python scripts/run_tier2_patch_staging.py --bundle PATH --apply",
+    "tier2_stage_only": "python scripts/run_tier2_local_implementation.py --latest --stage-only",
+    "tier2_apply_staged": "python scripts/run_tier2_local_implementation.py --latest --apply-staged PATH --require-staged-validation"
+  },
+  "tier2_runner_flags": [
+    "--stage-only",
+    "--apply-staged",
+    "--require-staged-validation"
+  ],
+  "operator_loop_actions": [
+    "run_tier2_patch_staging",
+    "run_tier2_patch_validation",
+    "fix_tier2_patch_staging",
+    "run_tier2_local_implementation"
+  ],
+  "release_integration": {
+    "batch_metadata_key": "candidate_metadata.patch_staging",
+    "governor_check": "tier2_patch_staging",
+    "require_env": "RGE_REQUIRE_TIER2_PATCH_STAGING"
+  },
+  "tests": {
+    "command": "python -m pytest tests/unit/test_tier2_patch_staging.py tests/unit/test_tier2_local_implementation.py tests/unit/test_operator_loop_release_batch_candidate.py tests/unit/test_release_governor.py -q",
+    "status": "pass",
+    "new_tests": 23
+  },
+  "safety_audit": {
+    "command": "python -m rge.modules.safety_auditor --audit full",
+    "status": "pass",
+    "audited_at": "2026-06-22T18:40:22Z"
+  },
+  "public_site_build": {
+    "status": "skipped",
+    "reason": "no public-site frontend behavior changed"
+  },
+  "blocked_actions": [
+    "push",
+    "merge",
+    "publish",
+    "canonical_ticket_promotion",
+    "paid_api_calls",
+    "live_network_calls",
+    "commit_without_go_staged_validation_when_required",
+    "apply_on_partial_or_nogo_bundle"
+  ],
+  "next_recommended_packets": [
+    "tier2-staged-patch-atlas-operator-preview",
+    "autocycle-execute-safe-patch-staging-hook",
+    "instruction-packet-auto-expected-files-inference"
+  ]
+}

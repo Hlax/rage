@@ -45,6 +45,25 @@ def test_full_audit_includes_atlas_preview_in_checked_secrets() -> None:
     assert any("atlas_snapshot_preview.json" in item for item in checked)
     assert any("atlas_coherence_preview.json" in item for item in checked)
     assert any("tiny_atlas_connection_preview.json" in item for item in checked)
+    assert any("atlas_release_governor_latest.json" in item for item in checked)
+
+
+def test_full_audit_includes_tier2_patch_staging_preview() -> None:
+    report = run_safety_audit("full")
+    assert report["status"] == "pass", report["blocked_reasons"]
+    assert any(
+        "atlas_tier2_patch_staging_latest.json" in item
+        for item in report["checked_secrets"]
+    )
+
+
+def test_secrets_audit_scans_release_governor_artifact() -> None:
+    report = run_safety_audit("secrets")
+    assert report["status"] == "pass", report["blocked_reasons"]
+    assert any(
+        "atlas_release_governor_latest.json" in item
+        for item in report["checked_secrets"]
+    )
 
 
 def test_atlas_preview_audit_fails_closed_on_forbidden_path(tmp_path: Path) -> None:

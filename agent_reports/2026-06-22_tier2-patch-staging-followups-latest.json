@@ -1,0 +1,63 @@
+{
+  "schema_version": "agent_report_v0.1.0",
+  "report_id": "2026-06-22_tier2-patch-staging-followups",
+  "generated_at": "2026-06-22T19:11:15Z",
+  "verdict": "GO",
+  "packets_implemented": [
+    "autocycle_execute_safe_patch_staging_hook",
+    "auto_sync_preview_after_patch_bundle_write",
+    "instruction_packet_auto_expected_files_inference"
+  ],
+  "env_vars": {
+    "RGE_EXECUTE_SAFE_PATCH_STAGING": "0",
+    "RGE_AUTO_SYNC_TIER2_PATCH_PREVIEW": "1"
+  },
+  "execute_safe_hook": {
+    "function": "run_execute_safe_patch_staging_hook",
+    "steps": ["stage", "validate", "preview_refresh"],
+    "plan_key": "tier2_patch_staging_execute_safe_hook",
+    "controlled_dirty_prefixes": [
+      "rge/",
+      "tests/",
+      "scripts/",
+      "apps/public-site/",
+      "docs/",
+      "domain_packs/",
+      "fixtures/"
+    ]
+  },
+  "auto_preview_sync": {
+    "trigger": "create_patch_bundle_from_working_tree",
+    "verdicts": ["GO", "PARTIAL", "NO-GO"],
+    "artifact": "apps/public-site/public/data/atlas_tier2_patch_staging_latest.json"
+  },
+  "expected_files_inference": {
+    "function": "infer_expected_files",
+    "draft_field": "expected_files_inferred",
+    "sources": [
+      "likely_files_bullets",
+      "backtick_paths",
+      "test_command_paths",
+      "companion_unit_tests"
+    ]
+  },
+  "tests": {
+    "command": "python -m pytest tests/unit/test_tier2_patch_staging_followups.py tests/unit/test_tier2_patch_staging.py -q",
+    "status": "pass",
+    "new_tests": 10
+  },
+  "safety_audit": {
+    "command": "python -m rge.modules.safety_auditor --audit full",
+    "status": "pass",
+    "audited_at": "2026-06-22T19:11:15Z"
+  },
+  "public_site_build": {
+    "status": "skipped",
+    "reason": "no frontend or public artifact schema changes"
+  },
+  "next_recommended_packets": [
+    "auto-sync-preview-after-validate-cli",
+    "atlas-panel-freshness-badge-styling",
+    "draft-ticket-expected-files-backfill-command"
+  ]
+}

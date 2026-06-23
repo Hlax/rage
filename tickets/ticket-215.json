@@ -1,0 +1,27 @@
+{
+  "id": "ticket-215",
+  "title": "Principal audit post-ticket-213 staged live build checkpoint",
+  "problem": "Principal audit checkpoint after ticket-213 live staged build live LLM spine.",
+  "evidence": [
+    "agent_reports/2026-06-15_ticket-213_live-staged-build-live-llm-docs.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/2026-06-15_ticket-215_principal-audit-post-ticket-213.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report documents staged live build checkpoint verdict."
+  ],
+  "test_plan": [
+    "python -m rge.modules.principal_audit_gate --audit full"
+  ],
+  "non_goals": [
+    "Implementation changes.",
+    "Queue promotion.",
+    "Public export."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert audit report only.",
+  "status": "done",
+  "category": "Phase 3 / principal audit"
+}

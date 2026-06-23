@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import io
 import json
+from itertools import cycle
 from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 
 from rge.cli import (
     STAGED_FIXTURE_QUESTION_ID,
@@ -17,6 +20,24 @@ from rge.modules.card_exporter import FIXTURE_EXPORT_TIMESTAMP, export_public_ca
 PROOF_BUNDLE_SCHEMA_VERSION = "1"
 PIPELINE_MODE = "fixture_staged_rank1"
 COMMAND = "prove-arbitrary-source-bundle"
+DEFAULT_OPERATOR_PROOF_BUNDLE_REL = (
+    Path("data")
+    / "reports"
+    / "operator_proof_bundle"
+    / "operator_proof_bundle.json"
+)
+_OPENALEX_FIXTURE_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "fixtures"
+    / "source_providers"
+    / "openalex_works_sample.json"
+)
+_RANK1_HTML = (
+    b"<html><body><p>Human-AI co-creativity supports diverse songwriting outputs.</p></body></html>"
+)
+_RANK2_HTML = (
+    b"<html><body><p>Constraint management improves AI-assisted creative team workflows.</p></body></html>"
+)
 
 REQUIRED_BUNDLE_FIELDS = (
     "status",
@@ -38,6 +59,46 @@ REQUIRED_BUNDLE_FIELDS = (
 )
 
 
+def inspect_operator_proof_bundle_artifact(
+    *,
+    root: Path | None = None,
+    artifact_path: Path | None = None,
+) -> dict[str, Any]:
+    """Read the operator proof bundle JSON and report whether it satisfies drift clearance."""
+    from rge.modules.principal_audit_gate import repo_root
+
+    project_root = root or repo_root()
+    resolved_path = artifact_path or (project_root / DEFAULT_OPERATOR_PROOF_BUNDLE_REL)
+    if not resolved_path.is_file():
+        return {
+            "status": "missing",
+            "artifact_path": str(resolved_path),
+            "proof_artifact_satisfied": False,
+        }
+
+    try:
+        bundle = json.loads(resolved_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {
+            "status": "invalid",
+            "artifact_path": str(resolved_path),
+            "proof_artifact_satisfied": False,
+            "error": str(exc),
+        }
+
+    satisfied = (
+        bundle.get("status") == "completed" and bundle.get("usable_output") is True
+    )
+    return {
+        "status": "satisfied" if satisfied else "present",
+        "artifact_path": str(resolved_path),
+        "proof_artifact_satisfied": satisfied,
+        "bundle_status": bundle.get("status"),
+        "usable_output": bundle.get("usable_output"),
+        "pipeline_mode": bundle.get("pipeline_mode"),
+    }
+
+
 def _failed_step_from_runtime_error(detail: str) -> str:
     marker = "research CLI step failed"
     if marker in detail:
@@ -51,6 +112,25 @@ def _failed_step_from_runtime_error(detail: str) -> str:
     if "staged fixture run counts mismatch" in detail:
         return "orchestrator_validation"
     return "orchestrator"
+
+
+def _fixture_urlopen() -> Any:
+    openalex_payload = json.loads(_OPENALEX_FIXTURE_PATH.read_text(encoding="utf-8"))
+    html_cycle = cycle([_RANK1_HTML, _RANK2_HTML])
+
+    def _urlopen(request: Any, timeout: int = 30) -> Any:  # noqa: ARG001
+        url = request.full_url if hasattr(request, "full_url") else str(request)
+        if "api.openalex.org" in url:
+            return io.BytesIO(json.dumps(openalex_payload).encode("utf-8"))
+
+        html = next(html_cycle)
+
+        class _Response(io.BytesIO):
+            headers = {"Content-Type": "text/html; charset=utf-8"}
+
+        return _Response(html)
+
+    return _urlopen
 
 
 def collect_source_metrics(conn: Any, source_id: str) -> dict[str, int]:
@@ -235,19 +315,32 @@ def execute_arbitrary_source_proof_bundle(
     root = repo_root or _REPO_ROOT
     prior_mode = os.environ.get("RGE_LLM_MODE")
     prior_live = os.environ.get("RGE_ALLOW_LIVE_LLM")
+    prior_live_orchestrator = os.environ.get("RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR")
     os.environ["RGE_LLM_MODE"] = "mock"
     os.environ.pop("RGE_ALLOW_LIVE_LLM", None)
+    os.environ["RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR"] = "0"
+    fixture_urlopen = _fixture_urlopen()
 
     try:
-        orchestrator = execute_staged_fixture_mode_run(
-            topic=topic,
-            domain=domain,
-            db_path=resolved_db,
-            run_id=run_id,
-            report_dir=report_dir,
-            staging_dir=staging_dir,
-            question_id=question_id,
-        )
+        with patch(
+            "rge.modules.source_providers.openalex.urllib.request.urlopen",
+            fixture_urlopen,
+        ), patch("rge.modules.fetcher.urllib.request.urlopen", fixture_urlopen):
+            orchestrator = execute_staged_fixture_mode_run(
+                topic=topic,
+                domain=domain,
+                db_path=resolved_db,
+                run_id=run_id,
+                report_dir=report_dir,
+                staging_dir=staging_dir,
+                question_id=question_id,
+            )
+        if orchestrator.get("status") != "completed" or "rank1_source_id" not in orchestrator:
+            detail = json.dumps(orchestrator, sort_keys=True)
+            raise ValueError(
+                "staged fixture orchestrator did not produce a completed rank-1 "
+                f"source payload: {detail}"
+            )
         rank1_source_id = orchestrator["rank1_source_id"]
         report_path = Path(
             orchestrator.get("artifacts", {}).get(
@@ -304,3 +397,7 @@ def execute_arbitrary_source_proof_bundle(
             os.environ.pop("RGE_ALLOW_LIVE_LLM", None)
         else:
             os.environ["RGE_ALLOW_LIVE_LLM"] = prior_live
+        if prior_live_orchestrator is None:
+            os.environ.pop("RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR", None)
+        else:
+            os.environ["RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR"] = prior_live_orchestrator

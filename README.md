@@ -130,6 +130,96 @@ Use `--skip-site` for Python-only checks when Node.js is unavailable:
 python -m rge.cli verify --skip-site
 ```
 
+**End-to-end synthesis operator loop** (mock-safe default; tickets grounded export + cloud synthesis + human-review UI): one command chains grounded packet staging/export → mock cloud synthesis → export scan → sign-off ledger merge → `atlas_synthesis_human_review_latest.json` sync. Review flagged sentences and sign-off status on `/atlas-preview` after site build.
+
+Optional fixture sign-off during the loop:
+
+```powershell
+$env:RGE_ALLOW_END_TO_END_SYNTHESIS_OPERATOR_LOOP = "1"
+$env:RGE_ALLOW_END_TO_END_SYNTHESIS_OPERATOR_LOOP_SIGN_OFF = "1"
+$env:RGE_ALLOW_SYNTHESIS_REVIEW_SIGN_OFF = "1"
+python scripts/run_end_to_end_synthesis_operator_loop.py --fixture-packet --with-sign-off --sync-public
+```
+
+```powershell
+$env:RGE_ALLOW_END_TO_END_SYNTHESIS_OPERATOR_LOOP = "1"
+$env:RGE_LLM_MODE = "mock"
+$env:RGE_CLOUD_LLM_ENABLED = "1"
+$env:RGE_ALLOW_OPENAI_SYNTHESIS = "1"
+$env:OPENAI_API_KEY = "sk-operator-mock-or-live"
+
+# Fixture packet + mock synthesis (no paid API calls)
+python scripts/run_end_to_end_synthesis_operator_loop.py --fixture-packet
+
+# Export from private graph DB instead of fixture
+python scripts/run_end_to_end_synthesis_operator_loop.py --db data/db/creative_research.sqlite
+
+# Validate only (dry-run synthesis; human-review falls back to fixture queue)
+python scripts/run_end_to_end_synthesis_operator_loop.py --fixture-packet --dry-run-only
+```
+
+**Live cloud synthesis profiles** (`--profile live_openai` or `--profile live_openrouter`): operator opt-in only; enforces HTTP gates, cost caps (`RGE_CLOUD_MAX_USD_PER_RUN`, `RGE_CLOUD_MAX_TOKENS_PER_CALL`), and `RGE_ALLOW_LIVE_CLOUD_SYNTHESIS_OPERATOR_LOOP=1`. Not run in CI or scheduled mock loops.
+
+```powershell
+$env:RGE_ALLOW_END_TO_END_SYNTHESIS_OPERATOR_LOOP = "1"
+$env:RGE_ALLOW_LIVE_CLOUD_SYNTHESIS_OPERATOR_LOOP = "1"
+$env:RGE_CLOUD_LLM_ENABLED = "1"
+$env:RGE_LLM_MODE = "cloud"
+$env:RGE_CLOUD_MAX_USD_PER_RUN = "0.50"
+$env:RGE_CLOUD_MAX_TOKENS_PER_CALL = "4096"
+
+# Live OpenAI HTTP
+$env:RGE_ALLOW_OPENAI_SYNTHESIS = "1"
+$env:RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP = "1"
+$env:OPENAI_API_KEY = "<operator key>"
+python scripts/run_end_to_end_synthesis_operator_loop.py --profile live_openai --fixture-packet
+
+# Live OpenRouter HTTP
+$env:RGE_ALLOW_OPENROUTER_SYNTHESIS = "1"
+$env:RGE_ALLOW_OPENROUTER_SYNTHESIS_LIVE_HTTP = "1"
+$env:OPENROUTER_API_KEY = "<operator key>"
+python scripts/run_end_to_end_synthesis_operator_loop.py --profile live_openrouter --fixture-packet
+```
+
+Legacy `--live-cloud` maps to `--profile live_openai` (or `--provider openrouter`). Decomposed CLI steps remain available: `export-grounded-synthesis-packet`, `synthesize`, and `run_synthesis_human_review_ui.py --scan-exports --sync-public`.
+
+**Full Atlas refresh + optional synthesis loop:** the operator checklist can run a mock end-to-end synthesis loop before the human-review export scan when opted in. Default refresh skips this step; use `--with-synthesis-loop` or set `RGE_ALLOW_OPERATOR_FULL_ATLAS_REFRESH_SYNTHESIS_LOOP=1`.
+
+```powershell
+$env:RGE_ALLOW_OPERATOR_FULL_ATLAS_REFRESH = "1"
+$env:RGE_ALLOW_OPERATOR_FULL_ATLAS_REFRESH_SYNTHESIS_LOOP = "1"
+$env:RGE_ALLOW_END_TO_END_SYNTHESIS_OPERATOR_LOOP = "1"
+$env:RGE_LLM_MODE = "mock"
+python scripts/run_full_atlas_refresh_checklist.py --fixture-only --skip-site --with-synthesis-loop
+```
+
+**Operator loop plan mode:** when `atlas_synthesis_human_review_latest.json` is missing, invalid, or older than unscanned `synthesis_output.json` files under `data/exports/`, `python -m rge.modules.operator_loop --mode plan` recommends `run_synthesis_operator_loop` (mock fixture loop + site build). Full atlas refresh recommendations append `--with-synthesis-loop` when synthesis artifacts are also stale.
+
+**/atlas-preview alerts:** when the committed human-review artifact has flagged queue entries, the preview page shows an operator alert banner above the fold with packet id, provider, sentence preview, and primary grounding issue — scroll to **Synthesis human review (operator panel)** for full detail.
+
+**Synthesis sign-off workflow** (operator CLI; private ledger under gitignored `data/operator/`):
+
+```powershell
+python scripts/run_synthesis_review_sign_off.py --list-pending
+$env:RGE_ALLOW_SYNTHESIS_REVIEW_SIGN_OFF = "1"
+python scripts/run_synthesis_review_sign_off.py --fixture-sign-off --sync-public
+```
+
+Plan mode recommends `run_synthesis_review_sign_off` when grounding-passed outputs await sign-off. `/atlas-preview` shows pending and signed-off rows in the human-review panel.
+
+When synthesis artifacts are **also stale**, plan mode recommends `run_synthesis_operator_loop` with `--with-sign-off` instead of standalone sign-off. Full atlas refresh recommendations append both `--with-synthesis-loop` and `--with-synthesis-sign-off` when pending sign-offs exist.
+
+**Operator autocycle blocking:** when plan mode recommends synthesis sign-off or a synthesis loop with sign-off, `python -m rge.modules.operator_autocycle --mode plan` stops with `operator_action_blocked_automation` (same pattern as scratch evidence review and arbitrary-source proof bundle). Autocycle never runs sign-off or synthesis loop commands without explicit operator review.
+
+**Full atlas refresh sign-off step:** every checklist run executes `synthesis_review_sign_off_refresh` after the human-review export scan (ledger merge into `atlas_synthesis_human_review_latest.json`). Optional fixture sign-off during refresh:
+
+```powershell
+$env:RGE_ALLOW_OPERATOR_FULL_ATLAS_REFRESH = "1"
+$env:RGE_ALLOW_OPERATOR_FULL_ATLAS_REFRESH_SYNTHESIS_SIGN_OFF = "1"
+$env:RGE_ALLOW_SYNTHESIS_REVIEW_SIGN_OFF = "1"
+python scripts/run_full_atlas_refresh_checklist.py --fixture-only --skip-site --with-synthesis-sign-off
+```
+
 Individual checks (same gates, decomposed):
 
 ```bash
@@ -1283,6 +1373,33 @@ autocycle execute-safe run, `evaluation.recommended_action.reason` and the top-l
 summary `recommended_action` sync from the refreshed `execution.next_recommended_action`
 payload (same pattern as improvement sync in ticket-351). Failed autocycle execute-safe
 leaves the pre-run reason unchanged.
+
+**Tier 2 patch staging operator spine** (local implementation autonomy; mock-safe default):
+staged diff airlock under `data/operator/tier2_patch_staging/` (gitignored). Plan mode
+surfaces backfill → validate → preview refresh → apply in priority order. Atlas operator
+panels: `/atlas-preview` synthesis/draft governor row and Tier 2 patch staging panel.
+
+| Step | Command / gate | Execute-safe hook |
+| --- | --- | --- |
+| Backfill draft `expected_files` | `python scripts/run_draft_expected_files_backfill.py --latest` | `RGE_EXECUTE_SAFE_DRAFT_BACKFILL=1` when backfill is the only plan blocker |
+| Stage patch bundle | `python scripts/run_tier2_patch_staging.py --latest` | `RGE_EXECUTE_SAFE_PATCH_STAGING=1` on clean or controlled-dirty tree |
+| Validate staged bundle | `python scripts/run_tier2_patch_staging.py --bundle PATH --validate` | Chained after backfill when tree becomes controlled-dirty (both hooks enabled) |
+| Refresh Atlas preview | `python scripts/refresh_tier2_patch_staging_preview.py --latest --sync-public` | Auto via `RGE_AUTO_SYNC_TIER2_PATCH_PREVIEW=1` (default on) after validate/stage |
+| Apply staged patch (Tier 2 runner) | `python scripts/run_tier2_local_implementation.py --apply-staged` | Manual — not execute-safe |
+
+**Execute-safe Tier 2 hook chain:** when `RGE_EXECUTE_SAFE_DRAFT_BACKFILL=1` and
+`RGE_EXECUTE_SAFE_PATCH_STAGING=1`, a successful backfill that leaves a controlled-dirty
+tree (typically `data/operator/draft_tickets/` writes) chains patch validate + Atlas
+preview refresh in the same execute-safe pass. Payload keys: `execute_safe_tier2_hook_chain`,
+`chained_patch_staging`, `tree_became_controlled_dirty`, `post_tier2_hook_replan`.
+
+**Autocycle Tier 2 multi-cycle replan:** after a chained hook completes, autocycle
+re-plans (when `max_cycles > 1`) to pick up the next Tier 2 `safe_autonomous` action
+(e.g. validate → preview refresh → apply) without manual plan refresh.
+
+Related env (see `.env.example`): `RGE_REVALIDATE_PATCH_AFTER_BACKFILL=1` (default on),
+`RGE_REQUIRE_TIER2_PATCH_STAGING=0`, `RGE_TIER2_PATCH_MAX_FILES=20`,
+`RGE_TIER2_PATCH_MAX_LINES=2000`.
 
 Manual operator commands (not run by execute-safe allowlist):
 

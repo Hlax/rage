@@ -1,0 +1,61 @@
+{
+  "schema_version": "agent_report_v0.1.0",
+  "report_id": "2026-06-22_tier2-staged-patch-atlas-operator-preview",
+  "generated_at": "2026-06-22T18:59:43Z",
+  "verdict": "GO",
+  "artifact_path": "apps/public-site/public/data/atlas_tier2_patch_staging_latest.json",
+  "artifact_schema": "atlas_tier2_patch_staging_v0.1.0",
+  "panel_fields": [
+    "validation_verdict",
+    "risk_class",
+    "changed_file_count",
+    "lines_added",
+    "lines_removed",
+    "safety_audit_required",
+    "preview_freshness",
+    "next_recommended_action",
+    "validation_reasons",
+    "apply_ready",
+    "stop_state"
+  ],
+  "scrubbed_private_boundary": [
+    "raw_diff",
+    "raw_file_contents",
+    "secrets",
+    "env_local",
+    "raw_prompts",
+    "absolute_paths",
+    "private_notes",
+    "operator_ledger_content"
+  ],
+  "cli_commands": {
+    "refresh_latest": "python scripts/refresh_tier2_patch_staging_preview.py --latest --sync-public",
+    "refresh_bundle": "python scripts/refresh_tier2_patch_staging_preview.py --bundle PATH --sync-public",
+    "dry_run": "python scripts/refresh_tier2_patch_staging_preview.py --latest --dry-run"
+  },
+  "operator_loop": {
+    "refresh_action_id": "refresh_tier2_patch_staging_preview",
+    "refresh_when": "latest bundle newer than atlas preview artifact",
+    "go_state": "apply_ready true, next_recommended_action apply_staged_patch_and_commit",
+    "partial_nogo_state": "stop_state true, next_recommended_action fix_staged_patch"
+  },
+  "tests": {
+    "command": "python -m pytest tests/unit/test_tier2_patch_staging_preview.py tests/unit/test_safety_auditor_atlas_preview.py tests/golden/test_12_public_site_static_render.py -q",
+    "status": "pass",
+    "new_tests": 11
+  },
+  "safety_audit": {
+    "command": "python -m rge.modules.safety_auditor --audit full",
+    "status": "pass",
+    "audited_at": "2026-06-22T18:59:43Z"
+  },
+  "public_site_build": {
+    "command": "cd apps/public-site && npm run build",
+    "status": "pass"
+  },
+  "next_recommended_packets": [
+    "autocycle-execute-safe-patch-staging-hook",
+    "auto-sync-preview-after-patch-bundle-write",
+    "instruction-packet-auto-expected-files-inference"
+  ]
+}

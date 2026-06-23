@@ -15,6 +15,7 @@ from typing import Any, Callable
 
 from rge.modules.operator_loop import (
     WorkingTreeStatus,
+    _product_drift_warnings_cleared_by_proof_bundle,
     build_operator_plan,
     execute_safe_checks,
     inspect_working_tree,
@@ -31,7 +32,35 @@ from rge.modules.principal_audit_gate import (
 MAX_CYCLES_HARD_CAP = 10
 DEFAULT_MAX_CYCLES = 1
 
-_DEFERRED_OPEN_TICKETS = frozenset({"ticket-059"})
+_TIER2_HOOK_REPLAN_ACTIONS = frozenset(
+    {
+        "run_tier2_patch_validation",
+        "refresh_tier2_patch_staging_preview",
+        "run_tier2_patch_staging",
+        "run_tier2_local_implementation",
+    }
+)
+
+
+def tier2_hook_chain_warrants_replan(chain: dict[str, Any] | None) -> bool:
+    if not chain or chain.get("status") != "completed":
+        return False
+    backfill = chain.get("backfill") or {}
+    if backfill.get("status") == "completed":
+        return True
+    return bool(chain.get("chained_patch_staging"))
+
+
+def post_tier2_hook_action_continues_autocycle(action: dict[str, Any] | None) -> bool:
+    if not action:
+        return False
+    return (
+        action.get("action_id") in _TIER2_HOOK_REPLAN_ACTIONS
+        and action.get("gate") == "safe_autonomous"
+    )
+
+
+_DEFERRED_OPEN_TICKETS: frozenset[str] = frozenset()
 
 
 def _resolve_autocycle_ticket_id(
@@ -239,9 +268,22 @@ def evaluate_autocycle_cycle(
             "arbitrary_source_proof_bundle_status"
         )
         or {},
+        "synthesis_human_review_plan_status": plan.get(
+            "synthesis_human_review_plan_status"
+        )
+        or {},
+        "synthesis_sign_off_plan_status": plan.get("synthesis_sign_off_plan_status")
+        or {},
+        "autonomous_synthesis_governor_status": plan.get(
+            "autonomous_synthesis_governor_status"
+        )
+        or {},
+        "release_governor_status": plan.get("release_governor_status") or {},
         "staged_rank2_scan_max": plan.get("staged_rank2_scan_max"),
         "scratch_evidence_review_recommended": False,
         "proof_bundle_recommended": False,
+        "synthesis_sign_off_review_recommended": False,
+        "synthesis_operator_loop_sign_off_recommended": False,
         "run_next_ticket_allowed": False,
         "next_command": None,
         "next_commands": [],
@@ -308,6 +350,9 @@ def evaluate_autocycle_cycle(
         )
 
     scratch_evidence = plan.get("scratch_evidence_status") or {}
+    synthesis_review = plan.get("synthesis_human_review_plan_status") or {}
+    sign_off_plan = plan.get("synthesis_sign_off_plan_status") or {}
+    synthesis_governor = plan.get("autonomous_synthesis_governor_status") or {}
     action = plan.get("next_recommended_action") or {}
     action_id = action.get("action_id")
     if (
@@ -337,9 +382,97 @@ def evaluate_autocycle_cycle(
             commands=commands,
         )
 
-    if drift_warning:
+    if (
+        synthesis_governor.get("circuit_breaker_inspection_recommended")
+        and action_id
+        in {
+            "run_autonomous_synthesis_governor",
+            "run_synthesis_operator_loop_with_governor",
+            "run_instruction_packet_generation",
+            "run_instruction_packet_ticket_draft",
+            "run_instruction_packet_handoff",
+            "run_local_implementation_handoff",
+            "run_release_governor_push",
+            "run_release_governor_merge",
+            "run_release_governor_publish",
+        }
+    ):
+        commands = [_shell_command(cmd) for cmd in action.get("commands", [])]
+        result["recommended_action"] = action
         return stop(
-            f"drift_warning_active: {'; '.join(drift_warning)}",
+            "operator_action_blocked_automation: circuit_breaker_open",
+            next_cmd=commands[0] if commands else None,
+            commands=commands,
+        )
+
+    if (
+        synthesis_governor.get("governor_verdict") in {"PARTIAL", "NO-GO"}
+        and action_id
+        in {
+            "run_autonomous_synthesis_governor",
+            "run_synthesis_operator_loop_with_governor",
+            "run_instruction_packet_generation",
+        }
+    ):
+        commands = [_shell_command(cmd) for cmd in action.get("commands", [])]
+        result["recommended_action"] = action
+        return stop(
+            "operator_action_blocked_automation: autonomous_synthesis_governor_"
+            + str(synthesis_governor.get("governor_verdict")).lower(),
+            next_cmd=commands[0] if commands else None,
+            commands=commands,
+        )
+
+    if (
+        action_id == "run_autonomous_synthesis_governor"
+        and synthesis_governor.get("governor_verdict") != "GO"
+    ):
+        commands = [_shell_command(cmd) for cmd in action.get("commands", [])]
+        result["recommended_action"] = action
+        return stop(
+            "operator_action_blocked_automation: run_autonomous_synthesis_governor",
+            next_cmd=commands[0] if commands else None,
+            commands=commands,
+        )
+
+    if (
+        sign_off_plan.get("sign_off_recommended")
+        and action_id == "run_synthesis_review_sign_off"
+        and synthesis_governor.get("governor_verdict") != "GO"
+    ):
+        commands = [_shell_command(cmd) for cmd in action.get("commands", [])]
+        result["synthesis_sign_off_review_recommended"] = True
+        result["recommended_action"] = action
+        return stop(
+            "operator_action_blocked_automation: run_synthesis_review_sign_off",
+            next_cmd=commands[0] if commands else None,
+            commands=commands,
+        )
+
+    if (
+        synthesis_review.get("synthesis_loop_recommended")
+        and sign_off_plan.get("sign_off_recommended")
+        and action_id in {"run_synthesis_operator_loop", "run_synthesis_operator_loop_with_governor"}
+        and synthesis_governor.get("governor_verdict") != "GO"
+    ):
+        commands = [_shell_command(cmd) for cmd in action.get("commands", [])]
+        result["synthesis_operator_loop_sign_off_recommended"] = True
+        result["recommended_action"] = action
+        return stop(
+            "operator_action_blocked_automation: run_synthesis_operator_loop_with_governor",
+            next_cmd=commands[0] if commands else None,
+            commands=commands,
+        )
+
+    blocking_drift_warning = _product_drift_warnings_cleared_by_proof_bundle(
+        drift_warning,
+        proof_artifact_satisfied=bool(
+            proof_bundle_status.get("proof_artifact_satisfied")
+        ),
+    )
+    if blocking_drift_warning:
+        return stop(
+            f"drift_warning_active: {'; '.join(blocking_drift_warning)}",
             next_cmd=audit.get("recommended_override")
             or "/rge-principal-audit",
         )
@@ -428,6 +561,13 @@ def evaluate_autocycle_cycle(
         "resolve_dirty_working_tree",
         "run_scratch_evidence_review",
         "run_arbitrary_source_proof_bundle",
+        "run_synthesis_review_sign_off",
+        "run_synthesis_operator_loop",
+        "run_synthesis_operator_loop_with_governor",
+        "run_full_atlas_refresh_checklist",
+        "run_release_governor_push",
+        "run_release_governor_merge",
+        "run_release_governor_publish",
     }:
         commands = [_shell_command(cmd) for cmd in action.get("commands", [])]
         return stop(
@@ -445,6 +585,19 @@ def evaluate_autocycle_cycle(
     if action_id in {
         "run_deterministic_verification",
         "run_autonomous_researcher_loop",
+        "run_instruction_packet_generation",
+        "run_instruction_packet_ticket_draft",
+        "run_instruction_packet_handoff",
+        "run_local_implementation_handoff",
+        "run_release_governor_dry_run",
+        "create_release_batch_candidate",
+        "run_tier2_local_implementation",
+        "run_tier2_patch_staging",
+        "run_tier2_patch_validation",
+        "refresh_tier2_patch_staging_preview",
+        "run_draft_expected_files_backfill",
+        "fix_tier2_patch_staging",
+        "create_implementation_branch",
     } and gate == "safe_autonomous":
         result["execute_safe_eligible"] = True
         result["next_command"] = (
@@ -531,10 +684,35 @@ def run_autocycle(
                 refreshed_action = executed.get("next_recommended_action")
                 if refreshed_action:
                     evaluation["recommended_action"] = refreshed_action
+                refreshed_release = executed.get("release_governor_status_refresh")
+                if refreshed_release:
+                    evaluation["release_governor_status"] = refreshed_release
+                refreshed_release_dry_run = executed.get("release_governor_dry_run")
+                if refreshed_release_dry_run:
+                    evaluation["release_governor_dry_run"] = refreshed_release_dry_run
+                refreshed_patch_hook = executed.get("tier2_patch_staging_execute_safe_hook")
+                if refreshed_patch_hook:
+                    evaluation["tier2_patch_staging_execute_safe_hook"] = refreshed_patch_hook
+                refreshed_backfill_hook = executed.get("draft_backfill_execute_safe_hook")
+                if refreshed_backfill_hook:
+                    evaluation["draft_backfill_execute_safe_hook"] = refreshed_backfill_hook
+                refreshed_tier2_chain = executed.get("execute_safe_tier2_hook_chain")
+                if refreshed_tier2_chain:
+                    evaluation["execute_safe_tier2_hook_chain"] = refreshed_tier2_chain
+                if executed.get("post_tier2_hook_replan"):
+                    evaluation["post_tier2_hook_replan"] = True
             if executed.get("execution_status") != "pass":
                 overall_status = "stopped"
                 final_stop_reason = "verification_failed"
                 break
+            chain = executed.get("execute_safe_tier2_hook_chain") or {}
+            next_action = executed.get("next_recommended_action") or {}
+            if (
+                tier2_hook_chain_warrants_replan(chain)
+                and post_tier2_hook_action_continues_autocycle(next_action)
+                and index + 1 < cycles_requested
+            ):
+                continue
             break
 
     last = cycles[-1] if cycles else {}
@@ -561,11 +739,37 @@ def run_autocycle(
             "arbitrary_source_proof_bundle_status"
         )
         or {},
+        "synthesis_human_review_plan_status": last.get(
+            "synthesis_human_review_plan_status"
+        )
+        or {},
+        "synthesis_sign_off_plan_status": last.get("synthesis_sign_off_plan_status")
+        or {},
+        "autonomous_synthesis_governor_status": last.get(
+            "autonomous_synthesis_governor_status"
+        )
+        or {},
+        "release_governor_status": last.get("release_governor_status") or {},
+        "release_governor_dry_run": last.get("release_governor_dry_run") or {},
+        "tier2_patch_staging_execute_safe_hook": last.get(
+            "tier2_patch_staging_execute_safe_hook"
+        )
+        or {},
+        "draft_backfill_execute_safe_hook": last.get("draft_backfill_execute_safe_hook")
+        or {},
+        "execute_safe_tier2_hook_chain": last.get("execute_safe_tier2_hook_chain") or {},
+        "post_tier2_hook_replan": any(c.get("post_tier2_hook_replan") for c in cycles),
         "staged_rank2_scan_max": last.get("staged_rank2_scan_max"),
         "scratch_evidence_review_recommended": last.get(
             "scratch_evidence_review_recommended", False
         ),
         "proof_bundle_recommended": last.get("proof_bundle_recommended", False),
+        "synthesis_sign_off_review_recommended": last.get(
+            "synthesis_sign_off_review_recommended", False
+        ),
+        "synthesis_operator_loop_sign_off_recommended": last.get(
+            "synthesis_operator_loop_sign_off_recommended", False
+        ),
         "run_next_ticket_allowed": last.get("run_next_ticket_allowed"),
         "stop_reason": final_stop_reason or last.get("stop_reason"),
         "next_command": last.get("next_command"),
@@ -577,6 +781,9 @@ def run_autocycle(
             "autonomous ticket implementation",
             "TICKET_QUEUE.md edits",
             "promote-improvement-ticket without --confirm",
+            "synthesis review sign-off without operator env gates",
+            "auto-merge/push/publish/promote from synthesis output",
+            "release governor push/merge/publish without explicit confirm and tier",
         ],
     }
 

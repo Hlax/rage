@@ -8,9 +8,24 @@ from pathlib import Path
 import pytest
 
 from rge.config import DEFAULT_STAGED_RANK2_SCAN_MAX
-from rge.modules.operator_autocycle import run_autocycle
+from rge.modules.operator_autocycle import evaluate_autocycle_cycle, run_autocycle
 from rge.modules.operator_loop import WorkingTreeStatus
 from rge.modules.operator_proof_bundle import COMMAND, PIPELINE_MODE
+
+
+def _seed_satisfied_proof_bundle(tmp_path: Path) -> None:
+    artifact_dir = tmp_path / "data" / "reports" / "operator_proof_bundle"
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    (artifact_dir / "operator_proof_bundle.json").write_text(
+        json.dumps(
+            {
+                "status": "completed",
+                "usable_output": True,
+                "pipeline_mode": PIPELINE_MODE,
+            }
+        ),
+        encoding="utf-8",
+    )
 
 
 def _seed_minimal_queue(tmp_path: Path) -> None:
@@ -164,3 +179,46 @@ def test_autocycle_proof_bundle_recommended_when_product_drift_and_no_open_ticke
         "operator_action_blocked_automation: run_arbitrary_source_proof_bundle"
     )
     assert "prove-arbitrary-source-bundle" in cycle["next_command"]
+
+
+def test_autocycle_product_drift_cleared_when_proof_bundle_artifact_satisfied(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _seed_minimal_queue(tmp_path)
+    _seed_satisfied_proof_bundle(tmp_path)
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+    monkeypatch.setattr(
+        "rge.modules.operator_autocycle.inspect_working_tree",
+        lambda root=None: clean_tree,
+    )
+    drift_warning = [
+        "No product-risk or live-research proof advanced in the last 3 completed tickets."
+    ]
+    monkeypatch.setattr(
+        "rge.modules.operator_loop.checkpoint_status",
+        lambda **kwargs: {
+            "cadence_status": "satisfied",
+            "implementation_gate": "satisfied",
+            "drift_warning": drift_warning,
+        },
+    )
+    monkeypatch.setattr(
+        "rge.modules.operator_autocycle.checkpoint_status",
+        lambda **kwargs: {
+            "status": "satisfied",
+            "cadence_status": "satisfied",
+            "implementation_gate": "satisfied",
+            "drift_warning": drift_warning,
+        },
+    )
+
+    evaluation = evaluate_autocycle_cycle(root=tmp_path, working_tree=clean_tree)
+
+    assert (
+        evaluation["arbitrary_source_proof_bundle_status"]["proof_artifact_satisfied"]
+        is True
+    )
+    assert evaluation["arbitrary_source_proof_bundle_status"]["proof_bundle_recommended"] is False
+    assert "drift_warning_active" not in (evaluation["stop_reason"] or "")
+    assert evaluation["run_next_ticket_allowed"] is True

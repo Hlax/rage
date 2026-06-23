@@ -99,15 +99,36 @@ def test_atlas_preview_page_is_static_fixture_only() -> None:
     assert "Evidence atom cards" in text
     assert "Relationship view" in text
     assert "Gaps / next move panel" in text
+    assert "resolveSynthesisHumanReviewFlaggedAlerts" in text
+    assert "Operator alert · synthesis human review" in text
+    assert "Pending sign-off" in text
+    assert "synthesis-sign-off-pending" in text
+    assert "Circuit breaker operator guidance" in text
+    assert "Governor verdict" in text
+    assert "Release governor (operator panel)" in text
+    assert "resolveReleaseGovernorPreview" in text
+    assert "Autonomy tier" in text
+    assert "Batch status" in text
+    assert "Next release action" in text
+    assert "release-governor-panel" in text
+    assert "Tier 2 patch staging (operator panel)" in text
+    assert "resolveTier2PatchStagingPreview" in text
+    assert "tier2-patch-staging-panel" in text
+    assert "tier2PatchFreshnessBadgeLabel" in text
+    assert "Post-backfill patch revalidation" in text
+    preview_lib = (SITE_DIR / "lib" / "atlasPreview.ts").read_text(encoding="utf-8")
+    assert "last_patch_revalidation" in preview_lib
+    assert "Atlas preview stale" in preview_lib
+    assert "atlas_release_governor_latest.json" in preview_lib
+    assert "atlas_tier2_patch_staging_latest.json" in preview_lib
+    assert "patch_revalidation_summary" in preview_lib
+    assert "atlas_coherence_preview.json" in preview_lib
+    assert "tiny_atlas_connection_preview.json" in preview_lib
+    assert "coherence_summary" in preview_lib
     assert "conceptToSlug" in text
     assert "findConceptBySlug" in text
     assert "renderConceptLabelList" in text
     assert "fetch(" not in text, "atlas preview must not fetch data"
-
-    preview_lib = (SITE_DIR / "lib" / "atlasPreview.ts").read_text(encoding="utf-8")
-    assert "atlas_coherence_preview.json" in preview_lib
-    assert "tiny_atlas_connection_preview.json" in preview_lib
-    assert "coherence_summary" in preview_lib
 
 
 def test_not_found_page_uses_site_visual_language() -> None:
@@ -200,7 +221,14 @@ def test_static_export_atlas_preview_page_exists() -> None:
     assert "Next recommended packet:" in atlas_html
     assert "Pass" in atlas_html
     assert "Research Atlas" in atlas_html
-    atlas = _atlas_snapshot_preview()
+    assert "Release governor (operator panel)" in atlas_html
+    assert "Autonomy tier" in atlas_html
+    assert "Batch status" in atlas_html
+    assert "Governor verdict" in atlas_html
+    assert "Next release action" in atlas_html
+    assert "Tier 2 patch staging (operator panel)" in atlas_html
+    assert "Atlas preview" in atlas_html
+    assert "Validation verdict" in atlas_html
     if atlas["reports"] and atlas["reports"][0].get("public_summary"):
         assert atlas["reports"][0]["public_summary"] in atlas_html
     if atlas["clusters"] and atlas["clusters"][0].get("member_concepts"):
@@ -212,3 +240,17 @@ def test_static_export_atlas_preview_page_exists() -> None:
     assert "/concepts/ai-assistance" in atlas_html
     # ticket-310: card + cluster concept lines add links beyond nodes-only (ticket-309)
     assert atlas_html.count("/concepts/") >= 12
+
+
+def test_committed_tier2_patch_staging_artifact_includes_optional_revalidation_summary() -> None:
+    """Tier 2 patch staging fixture must expose optional post-backfill revalidation summary."""
+    path = DATA_DIR / "atlas_tier2_patch_staging_latest.json"
+    assert path.is_file(), "missing committed atlas tier2 patch staging fixture"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == "atlas_tier2_patch_staging_v0.1.0"
+    assert "patch_revalidation_summary" in payload
+    summary = payload["patch_revalidation_summary"]
+    assert summary is None or isinstance(summary, dict)
+    if isinstance(summary, dict):
+        for key in ("status", "validation_verdict", "passed", "reason_count", "backfilled_at"):
+            assert key in summary or summary.get(key) is None

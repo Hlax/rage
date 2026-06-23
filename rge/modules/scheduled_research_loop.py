@@ -11,6 +11,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -98,18 +99,29 @@ def assert_scheduled_mock_profile(*, profile: str) -> dict[str, str]:
 
 def run_safety_audit(*, root: Path) -> dict[str, Any]:
     """Run full safety audit subprocess."""
-    result = subprocess.run(
-        [sys.executable, "-m", "rge.modules.safety_auditor", "--audit", "full"],
-        cwd=root,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    # On Windows, nested capture_output=True inside pytest can fail while
+    # duplicating inherited handles. File-backed capture keeps the gate strict.
+    with tempfile.TemporaryDirectory() as tmpdir:
+        stdout_path = Path(tmpdir) / "stdout.txt"
+        stderr_path = Path(tmpdir) / "stderr.txt"
+        with stdout_path.open("w", encoding="utf-8") as stdout_f, stderr_path.open(
+            "w", encoding="utf-8"
+        ) as stderr_f:
+            result = subprocess.run(
+                [sys.executable, "-m", "rge.modules.safety_auditor", "--audit", "full"],
+                cwd=root,
+                stdin=subprocess.DEVNULL,
+                stdout=stdout_f,
+                stderr=stderr_f,
+                check=False,
+            )
+        stdout = stdout_path.read_text(encoding="utf-8", errors="replace")
+        stderr = stderr_path.read_text(encoding="utf-8", errors="replace")
     return {
         "exit_code": result.returncode,
         "passed": result.returncode == 0,
-        "stdout_tail": (result.stdout or "")[-2000:],
-        "stderr_tail": (result.stderr or "")[-1000:],
+        "stdout_tail": stdout[-2000:],
+        "stderr_tail": stderr[-1000:],
     }
 
 

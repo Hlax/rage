@@ -8,6 +8,10 @@ import {
   formatEdgeSummary,
   formatPublicTimestamp,
   humanizeLabel,
+  tier2PatchFreshnessBadgeColor,
+  tier2PatchFreshnessBadgeLabel,
+  tier2PatchValidationVerdictBadgeColor,
+  tier2PatchValidationVerdictBadgeLabel,
   resolveAtlasCoherencePreview,
   resolveGapsNextMovePreview,
   resolveGraphMaturityUpgradePreview,
@@ -25,6 +29,10 @@ import {
   resolveDemoLoopPolishPreview,
   resolveFullAtlasRefreshChecklistPreview,
   resolveOpenAISynthesisAdapterSpecPreview,
+  resolveSynthesisHumanReviewPreview,
+  resolveSynthesisHumanReviewFlaggedAlerts,
+  resolveReleaseGovernorPreview,
+  resolveTier2PatchStagingPreview,
   tinyAtlasConnectionPreview,
 } from '../../lib/atlasPreview';
 import { conceptToSlug, findCardById, findConceptBySlug } from '../../lib/publicCards';
@@ -174,6 +182,10 @@ export default function AtlasPreviewPage() {
   const demoLoopPreview = resolveDemoLoopPolishPreview();
   const fullAtlasRefreshPreview = resolveFullAtlasRefreshChecklistPreview();
   const openaiSynthesisSpecPreview = resolveOpenAISynthesisAdapterSpecPreview();
+  const synthesisHumanReviewPreview = resolveSynthesisHumanReviewPreview();
+  const synthesisHumanReviewAlerts = resolveSynthesisHumanReviewFlaggedAlerts();
+  const releaseGovernorPreview = resolveReleaseGovernorPreview();
+  const tier2PatchStagingPreview = resolveTier2PatchStagingPreview();
   const gapsNextMovePreview = resolveGapsNextMovePreview();
   const questionHeaderPreview = resolveQuestionHeaderPreview();
   const readinessPanelPreview = resolveReadinessPanelPreview();
@@ -238,6 +250,82 @@ export default function AtlasPreviewPage() {
           clusters {population.clusters}, follow-ups {population.follow_up_questions}
         </p>
       </section>
+
+      {synthesisHumanReviewAlerts ? (
+        <section
+          id={synthesisHumanReviewAlerts.anchor_id}
+          style={{ marginTop: '1.5rem' }}
+          aria-live="polite"
+        >
+          <div
+            style={{
+              ...panelStyle,
+              borderColor: '#7a4a32',
+              background: '#221912',
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontSize: '0.75rem',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: '#f0b07a',
+                fontWeight: 700,
+              }}
+            >
+              Operator alert · synthesis human review
+            </p>
+            <h2
+              style={{
+                margin: '0.45rem 0 0',
+                fontSize: '1.05rem',
+                color: '#ffe2cc',
+              }}
+            >
+              {synthesisHumanReviewAlerts.headline}
+            </h2>
+            <p style={{ margin: '0.55rem 0 0', color: '#e0c6ad', lineHeight: 1.55 }}>
+              {synthesisHumanReviewAlerts.summary} Review flagged sentences in the
+              operator panel below before promoting synthesis prose.
+            </p>
+            <ul
+              style={{
+                margin: '0.85rem 0 0',
+                paddingLeft: '1.15rem',
+                color: '#f5d5bd',
+                lineHeight: 1.5,
+              }}
+            >
+              {synthesisHumanReviewAlerts.alerts.map((alert) => (
+                <li key={alert.output_id} style={{ marginBottom: '0.65rem' }}>
+                  <strong style={{ color: '#ffe2cc' }}>
+                    {alert.output_id}
+                  </strong>{' '}
+                  · {humanizeLabel(alert.provider)} · packet {alert.packet_id || '—'} ·{' '}
+                  {alert.flagged_sentence_count} flagged sentence
+                  {alert.flagged_sentence_count === 1 ? '' : 's'}
+                  {alert.sentence_preview ? (
+                    <>
+                      {' '}
+                      — &ldquo;{alert.sentence_preview}&rdquo;
+                    </>
+                  ) : null}
+                  <br />
+                  <span style={{ color: '#d4a574', fontSize: '0.85rem' }}>
+                    {alert.primary_issue}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {synthesisHumanReviewAlerts.operator_actions.length > 0 ? (
+              <p style={{ margin: '0.75rem 0 0', color: '#c8b4a0', fontSize: '0.85rem' }}>
+                Next step: {synthesisHumanReviewAlerts.operator_actions[0]}
+              </p>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
 
       <section style={sectionStyle}>
         <h2 style={headingStyle}>Tiny Atlas connection preview</h2>
@@ -827,6 +915,462 @@ export default function AtlasPreviewPage() {
             <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
               {openaiSynthesisSpecPreview.rationale}
             </p>
+          </div>
+        </section>
+      ) : null}
+
+      {synthesisHumanReviewPreview ? (
+        <section style={sectionStyle} id="synthesis-human-review-panel">
+          <h2 style={headingStyle}>Synthesis human review (operator panel)</h2>
+          <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+            Atlas-safe queue for cloud synthesis outputs after deterministic grounding,
+            budget, safety, and circuit-breaker checks. Read-only preview — no
+            approve/write routes.
+          </p>
+          <div style={smallGridStyle}>
+            <MetricTile
+              label="Outputs scanned"
+              value={synthesisHumanReviewPreview.total_outputs}
+            />
+            <MetricTile
+              label="Needs human review"
+              value={synthesisHumanReviewPreview.needs_human_review_count}
+            />
+            <MetricTile
+              label="Grounding passed"
+              value={synthesisHumanReviewPreview.grounding_passed_count}
+            />
+            <MetricTile
+              label="Flagged queue"
+              value={synthesisHumanReviewPreview.flagged_items.length}
+            />
+            <MetricTile
+              label="Pending sign-off"
+              value={synthesisHumanReviewPreview.sign_off_summary.pending_sign_off_count}
+            />
+            <MetricTile
+              label="Signed off"
+              value={synthesisHumanReviewPreview.sign_off_summary.signed_off_count}
+            />
+            <MetricTile
+              label="Governor verdict"
+              value={humanizeLabel(
+                synthesisHumanReviewPreview.governor_summary.automated_review_verdict,
+              )}
+            />
+            <MetricTile
+              label="Auto-signed-off"
+              value={synthesisHumanReviewPreview.governor_summary.auto_signed_off_count}
+            />
+            <MetricTile
+              label="Governor flagged"
+              value={synthesisHumanReviewPreview.governor_summary.flagged_count}
+            />
+            <MetricTile
+              label="Circuit breaker"
+              value={humanizeLabel(
+                synthesisHumanReviewPreview.governor_summary.circuit_breaker_status,
+              )}
+            />
+          </div>
+          <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+            <p style={mutedLabelStyle}>Automated synthesis governor</p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              Latest stop reason:{' '}
+              {synthesisHumanReviewPreview.governor_summary.latest_stop_reason || 'none'}
+            </p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              Latest instruction packet:{' '}
+              {synthesisHumanReviewPreview.governor_summary.latest_generated_instruction_packet ||
+                'not generated'}
+            </p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              Latest draft ticket:{' '}
+              {synthesisHumanReviewPreview.governor_summary.latest_draft_ticket_path ||
+                'not created'}{' '}
+              ({synthesisHumanReviewPreview.governor_summary.draft_ticket_status || 'missing'})
+            </p>
+            {synthesisHumanReviewPreview.governor_summary.last_patch_revalidation ? (
+              <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+                Post-backfill patch revalidation:{' '}
+                {humanizeLabel(
+                  synthesisHumanReviewPreview.governor_summary.last_patch_revalidation
+                    .validation_verdict ||
+                    synthesisHumanReviewPreview.governor_summary.last_patch_revalidation.status ||
+                    'unknown',
+                )}
+                {synthesisHumanReviewPreview.governor_summary.expected_files_backfilled_at
+                  ? ` · backfilled ${formatPublicTimestamp(
+                      synthesisHumanReviewPreview.governor_summary.expected_files_backfilled_at,
+                    )}`
+                  : ''}
+              </p>
+            ) : null}
+            <p style={{ margin: '0.35rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+              Handoff:{' '}
+              {synthesisHumanReviewPreview.governor_summary
+                .local_implementation_handoff_recommended
+                ? 'local implementation draft ready'
+                : synthesisHumanReviewPreview.governor_summary
+                      .instruction_packet_ticket_draft_recommended
+                  ? 'create draft ticket from instruction packet'
+                  : 'not recommended'}
+            </p>
+            <p style={{ margin: '0.35rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+              Providers:{' '}
+              {Object.entries(synthesisHumanReviewPreview.governor_summary.provider_summary)
+                .map(([provider, count]) => `${humanizeLabel(provider)} (${count})`)
+                .join(' · ') || 'none'}
+            </p>
+            <p style={{ margin: '0.35rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+              Cost cap:{' '}
+              {synthesisHumanReviewPreview.governor_summary.cost_summary.max_usd_per_run ??
+                'n/a'}{' '}
+              USD · token cap{' '}
+              {synthesisHumanReviewPreview.governor_summary.cost_summary.max_tokens_per_call ??
+                'n/a'}{' '}
+              · paid calls{' '}
+              {synthesisHumanReviewPreview.governor_summary.cost_summary.no_paid_api_calls ===
+              false
+                ? 'yes'
+                : 'no/unknown'}
+            </p>
+          </div>
+          <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+            <p style={mutedLabelStyle}>Circuit breaker operator guidance</p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              Status:{' '}
+              {humanizeLabel(
+                synthesisHumanReviewPreview.circuit_breaker_guidance.circuit_breaker_status,
+              )}
+            </p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              Reason opened:{' '}
+              {synthesisHumanReviewPreview.circuit_breaker_guidance.reason_opened || 'none'}
+            </p>
+            <p style={{ margin: '0.35rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+              Failures: synthesis{' '}
+              {synthesisHumanReviewPreview.circuit_breaker_guidance.consecutive_synthesis_failures}{' '}
+              · unsupported{' '}
+              {
+                synthesisHumanReviewPreview.circuit_breaker_guidance
+                  .consecutive_unsupported_outputs
+              }
+            </p>
+            <p style={{ margin: '0.35rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+              Ledger:{' '}
+              {synthesisHumanReviewPreview.circuit_breaker_guidance.latest_ledger_path || 'none'}
+            </p>
+            <p style={{ margin: '0.35rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+              Reset: {synthesisHumanReviewPreview.circuit_breaker_guidance.reset_instructions}
+            </p>
+          </div>
+          {synthesisHumanReviewPreview.flagged_items.length > 0 ? (
+            synthesisHumanReviewPreview.flagged_items.map((item) => (
+              <div key={item.output_id} style={{ ...panelStyle, marginTop: '0.75rem' }}>
+                <p style={mutedLabelStyle}>
+                  {item.output_id} · {humanizeLabel(item.provider)} ·{' '}
+                  {humanizeLabel(item.review_status)}
+                </p>
+                <p style={{ margin: '0.35rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+                  Packet {item.packet_id || '—'} · {item.flagged_sentence_count} flagged /{' '}
+                  {item.sentence_count} sentences
+                </p>
+                {item.flagged_sentences.map((sentence) => (
+                  <div
+                    key={`${item.output_id}-${sentence.index}`}
+                    style={{
+                      marginTop: '0.65rem',
+                      paddingTop: '0.65rem',
+                      borderTop: '1px solid #2a2f3a',
+                    }}
+                  >
+                    <p style={{ margin: 0, color: '#e6e8ec', lineHeight: 1.5 }}>
+                      {sentence.text}
+                    </p>
+                    <p style={{ margin: '0.45rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+                      Claims: {sentence.cited_claim_refs.join(', ') || '—'} · Atoms:{' '}
+                      {sentence.cited_atom_refs.join(', ') || '—'} · Overlap:{' '}
+                      {sentence.min_overlap_count}
+                    </p>
+                    {sentence.issues.length > 0 ? (
+                      <ul
+                        style={{
+                          margin: '0.45rem 0 0',
+                          paddingLeft: '1.1rem',
+                          color: '#d4a574',
+                          fontSize: '0.82rem',
+                          lineHeight: 1.45,
+                        }}
+                      >
+                        {sentence.issues.map((issue) => (
+                          <li key={issue}>{issue}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            ))
+          ) : (
+            <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+              <p style={{ margin: 0, color: '#aeb4c0', lineHeight: 1.5 }}>
+                No synthesis outputs currently flagged for human review.
+              </p>
+            </div>
+          )}
+          {synthesisHumanReviewPreview.pending_sign_offs.length > 0 ? (
+            <div style={{ ...panelStyle, marginTop: '0.75rem' }} id="synthesis-sign-off-pending">
+              <p style={mutedLabelStyle}>Pending operator sign-off</p>
+              <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', fontSize: '0.85rem' }}>
+                Grounding passed — record CLI sign-off before promoting synthesis prose.
+              </p>
+              {synthesisHumanReviewPreview.pending_sign_offs.map((item) => (
+                <div
+                  key={item.output_id}
+                  style={{
+                    marginTop: '0.65rem',
+                    paddingTop: '0.65rem',
+                    borderTop: '1px solid #2a2f3a',
+                  }}
+                >
+                  <p style={{ margin: 0, color: '#e6e8ec', lineHeight: 1.5 }}>
+                    {item.output_id} · {humanizeLabel(item.provider)} ·{' '}
+                    {item.sentence_count} sentence(s)
+                  </p>
+                  <p style={{ margin: '0.35rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+                    Packet {item.packet_id || '—'} · status {humanizeLabel(item.sign_off_status || 'pending')}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : null}
+          {synthesisHumanReviewPreview.signed_off_outputs.length > 0 ? (
+            <div style={{ ...panelStyle, marginTop: '0.75rem' }} id="synthesis-sign-off-completed">
+              <p style={mutedLabelStyle}>Signed off</p>
+              {synthesisHumanReviewPreview.signed_off_outputs.map((item) => (
+                <div
+                  key={item.output_id}
+                  style={{
+                    marginTop: '0.65rem',
+                    paddingTop: '0.65rem',
+                    borderTop: '1px solid #2a2f3a',
+                  }}
+                >
+                  <p style={{ margin: 0, color: '#9fd4a8', lineHeight: 1.5 }}>
+                    {item.output_id} · {humanizeLabel(item.provider)}
+                  </p>
+                  <p style={{ margin: '0.35rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+                    {item.sign_off_id || '—'} · {item.signed_off_at || '—'}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : null}
+          {synthesisHumanReviewPreview.operator_actions.length > 0 ? (
+            <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+              <p style={mutedLabelStyle}>Operator actions</p>
+              <ul
+                style={{
+                  margin: '0.45rem 0 0',
+                  paddingLeft: '1.1rem',
+                  color: '#aeb4c0',
+                  fontSize: '0.85rem',
+                  lineHeight: 1.5,
+                }}
+              >
+                {synthesisHumanReviewPreview.operator_actions.map((action) => (
+                  <li key={action}>{action}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
+      {releaseGovernorPreview ? (
+        <section style={sectionStyle} id="release-governor-panel">
+          <h2 style={headingStyle}>Release governor (operator panel)</h2>
+          <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+            Autonomy tier, release batch status, and gated push/merge/publish recommendations.
+            Read-only preview — no auto-merge or publish routes.
+          </p>
+          <div style={smallGridStyle}>
+            <MetricTile
+              label="Autonomy tier"
+              value={humanizeLabel(releaseGovernorPreview.autonomy_tier.tier_name)}
+            />
+            <MetricTile
+              label="Governor verdict"
+              value={humanizeLabel(releaseGovernorPreview.governor_verdict)}
+            />
+            <MetricTile
+              label="Batch status"
+              value={humanizeLabel(releaseGovernorPreview.batch_status)}
+            />
+            <MetricTile
+              label="Circuit breaker"
+              value={humanizeLabel(releaseGovernorPreview.circuit_breaker_status)}
+            />
+            <MetricTile
+              label="Dry-run recommended"
+              value={releaseGovernorPreview.release_governor_dry_run_recommended ? 'yes' : 'no'}
+            />
+            <MetricTile
+              label="Batch assemble recommended"
+              value={releaseGovernorPreview.batch_candidate_recommended ? 'yes' : 'no'}
+            />
+            <MetricTile
+              label="Next release action"
+              value={humanizeLabel(releaseGovernorPreview.next_release_action || 'none')}
+            />
+          </div>
+          <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+            <p style={mutedLabelStyle}>Release batch</p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              Latest batch: {releaseGovernorPreview.latest_batch_path || 'none'}{' '}
+              {releaseGovernorPreview.latest_batch_id
+                ? `(${releaseGovernorPreview.latest_batch_id})`
+                : ''}
+            </p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              Latest draft ticket: {releaseGovernorPreview.latest_draft_ticket_path || 'none'}
+            </p>
+            <p style={{ margin: '0.35rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+              Push: {releaseGovernorPreview.release_push_recommended ? 'recommended' : 'blocked'} ·
+              Merge: {releaseGovernorPreview.release_merge_recommended ? 'recommended' : 'blocked'} ·
+              Publish:{' '}
+              {releaseGovernorPreview.release_publish_recommended ? 'recommended' : 'blocked'}
+            </p>
+            {releaseGovernorPreview.batch_assembly_block_reasons &&
+            releaseGovernorPreview.batch_assembly_block_reasons.length > 0 ? (
+              <p style={{ margin: '0.35rem 0 0', color: '#c9a227', fontSize: '0.82rem' }}>
+                Blocked reasons:{' '}
+                {releaseGovernorPreview.batch_assembly_block_reasons.join(' · ')}
+              </p>
+            ) : null}
+            {releaseGovernorPreview.failure_reasons.length > 0 ? (
+              <p style={{ margin: '0.35rem 0 0', color: '#c9a227', fontSize: '0.82rem' }}>
+                Failure reasons: {releaseGovernorPreview.failure_reasons.join(' · ')}
+              </p>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {tier2PatchStagingPreview ? (
+        <section style={sectionStyle} id="tier2-patch-staging-panel">
+          <h2 style={headingStyle}>Tier 2 patch staging (operator panel)</h2>
+          <div style={{ marginTop: '0.5rem', marginBottom: '0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <span
+              style={{
+                display: 'inline-block',
+                padding: '0.35rem 0.75rem',
+                borderRadius: 999,
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                background: tier2PatchValidationVerdictBadgeColor(
+                  tier2PatchStagingPreview.validation_verdict,
+                ),
+                color: '#0f1115',
+              }}
+            >
+              {tier2PatchValidationVerdictBadgeLabel(
+                tier2PatchStagingPreview.validation_verdict,
+              )}
+            </span>
+            <span
+              style={{
+                display: 'inline-block',
+                padding: '0.35rem 0.75rem',
+                borderRadius: 999,
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                background: tier2PatchFreshnessBadgeColor(
+                  tier2PatchStagingPreview.preview_freshness,
+                ),
+                color: '#0f1115',
+              }}
+            >
+              {tier2PatchFreshnessBadgeLabel(tier2PatchStagingPreview.preview_freshness)}
+            </span>
+          </div>
+          <p style={{ ...bodyStyle, marginTop: 0, fontSize: '0.85rem' }}>
+            Latest staged local implementation patch bundle and diff-quality verdict.
+            Read-only summary — no raw diff or file contents.
+          </p>
+          <div style={smallGridStyle}>
+            <MetricTile
+              label="Validation verdict"
+              value={humanizeLabel(tier2PatchStagingPreview.validation_verdict)}
+            />
+            <MetricTile
+              label="Risk class"
+              value={humanizeLabel(tier2PatchStagingPreview.risk_class)}
+            />
+            <MetricTile
+              label="Changed files"
+              value={tier2PatchStagingPreview.changed_file_count}
+            />
+            <MetricTile
+              label="Lines added"
+              value={tier2PatchStagingPreview.lines_added}
+            />
+            <MetricTile
+              label="Lines removed"
+              value={tier2PatchStagingPreview.lines_removed}
+            />
+            <MetricTile
+              label="Safety audit required"
+              value={tier2PatchStagingPreview.safety_audit_required ? 'yes' : 'no'}
+            />
+            <MetricTile
+              label="Preview freshness"
+              value={humanizeLabel(tier2PatchStagingPreview.preview_freshness)}
+            />
+            {tier2PatchStagingPreview.patch_revalidation_summary ? (
+              <MetricTile
+                label="Post-backfill revalidation"
+                value={
+                  tier2PatchStagingPreview.patch_revalidation_summary.validation_verdict
+                    ? humanizeLabel(
+                        tier2PatchStagingPreview.patch_revalidation_summary.validation_verdict,
+                      )
+                    : humanizeLabel(
+                        tier2PatchStagingPreview.patch_revalidation_summary.status || 'none',
+                      )
+                }
+              />
+            ) : null}
+            <MetricTile
+              label="Next action"
+              value={humanizeLabel(tier2PatchStagingPreview.next_recommended_action)}
+            />
+          </div>
+          <div style={{ ...panelStyle, marginTop: '0.75rem' }}>
+            <p style={mutedLabelStyle}>Staged patch summary</p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              Draft ticket: {tier2PatchStagingPreview.draft_ticket_label || 'none'}
+              {tier2PatchStagingPreview.draft_ticket_path_summary
+                ? ` (${tier2PatchStagingPreview.draft_ticket_path_summary})`
+                : ''}
+            </p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              Branch: {tier2PatchStagingPreview.branch_name || 'none'}
+            </p>
+            <p style={{ margin: '0.35rem 0 0', color: '#aeb4c0', lineHeight: 1.5 }}>
+              Instruction packet: {tier2PatchStagingPreview.instruction_packet_label || 'none'}
+            </p>
+            <p style={{ margin: '0.35rem 0 0', color: '#8b93a3', fontSize: '0.82rem' }}>
+              Apply ready: {tier2PatchStagingPreview.apply_ready ? 'yes' : 'no'} · Stop/fix
+              state: {tier2PatchStagingPreview.stop_state ? 'yes' : 'no'} · Test plan items:{' '}
+              {tier2PatchStagingPreview.test_plan_count}
+            </p>
+            {tier2PatchStagingPreview.validation_reasons.length > 0 ? (
+              <p style={{ margin: '0.35rem 0 0', color: '#c9a227', fontSize: '0.82rem' }}>
+                Validation reasons: {tier2PatchStagingPreview.validation_reasons.join(' · ')}
+              </p>
+            ) : null}
           </div>
         </section>
       ) : null}
