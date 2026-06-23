@@ -26,6 +26,7 @@ from rge.modules.autonomous_synthesis_governor import (
 )
 from rge.modules.instruction_packet_ticket_draft import latest_draft_ticket
 from rge.modules.operator_loop import WorkingTreeStatus, inspect_working_tree
+from rge.modules.operator_env_loader import operator_cloud_env_status
 from rge.modules.principal_audit_gate import repo_root
 from rge.modules.safety_auditor import run_safety_audit
 from rge.modules.verify_runner import run_verification
@@ -1011,6 +1012,7 @@ def inspect_release_governor_plan_status(
         "release_merge_recommended": merge_recommended,
         "release_publish_recommended": publish_recommended,
         "circuit_breaker_status": circuit.get("status"),
+        "cloud_synthesis_adapter_status": operator_cloud_env_status(root=project_root),
         "next_release_action": next_action,
         "autonomy_tier_required_for_next_action": next_action_tier,
         "operator_commands": {

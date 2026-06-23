@@ -60,16 +60,37 @@ Any other value raises `ConfigError` (fail closed).
 
 ## Not implemented (do not add to committed `.env` yet)
 
-These categories are **not** read by any `rge/` module today:
+These categories are **not** read by core pipeline modules unless a ticket wires them:
 
-- `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_BASE_URL`
 - `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`
 - `ANTHROPIC_API_KEY`
 - `GOOGLE_APPLICATION_CREDENTIALS`, Gemini / Vertex project/location vars
 - `CURSOR_API_KEY` (Cursor IDE/CLI auth — operator-level, outside RGE runtime)
 - `RGE_DB_PATH` (use CLI `--db` or default `data/db/creative_research.sqlite`)
 
-Add provider variables only when a ticket wires an adapter and documents them here.
+### Cloud synthesis (ticket-059; mock-first default)
+
+Operator-only cloud synthesis env vars are read by `rge/config.py` and
+`rge/modules/operator_env_loader.py`. Defaults fail closed (`RGE_CLOUD_LLM_ENABLED=0`).
+Live OpenAI HTTP additionally requires provider allowlist, cost caps, closed circuit
+breaker, and `RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP=1`. Never commit real keys.
+
+| Variable | Default | Purpose |
+| -------- | ------- | ------- |
+| `RGE_CLOUD_LLM_ENABLED` | `0` | Master cloud synthesis enable |
+| `RGE_CLOUD_SYNTHESIS_PROVIDER` | `mock_cloud` | Provider id (`mock_cloud` or `openai`) |
+| `RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST` | empty | Comma-separated allowlist; must include `openai` for live OpenAI |
+| `RGE_ALLOW_OPENAI_SYNTHESIS` | `0` | OpenAI synthesis opt-in |
+| `RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP` | `0` | Live HTTP opt-in (never CI) |
+| `OPENAI_API_KEY` | unset | Operator credential in `.env.local` only; never logged |
+| `OPENAI_MODEL` | `gpt-4o-mini` | OpenAI model id |
+| `OPENAI_BASE_URL` | `https://api.openai.com/v1` | OpenAI-compatible base URL |
+| `RGE_CLOUD_MAX_USD_PER_RUN` | unset | Per-run USD cap (required > 0 for live HTTP) |
+| `RGE_CLOUD_MAX_TOKENS_PER_CALL` | unset | Per-call token cap (required > 0 for live HTTP) |
+
+Load `.env.local` only through `operator_env_loader.load_operator_env()` or
+`load_config()` — never from public-site code. Key availability may be reported as
+`openai_key_available: true|false` only.
 
 ## Live smoke tests (ticket-038)
 
@@ -127,7 +148,8 @@ python -m rge.cli model-health
 ```
 
 Copy `.env.smoke.example` → `.env.smoke.local` for a committed smoke profile
-template. Cloud mode is **not implemented** (future ticket-059+).
+template. Cloud synthesis uses `mock_cloud` by default (ticket-059); live OpenAI
+HTTP is operator opt-in only and is excluded from CI, golden tests, and execute-safe.
 
 ## Live staged operator env profile (ticket-213)
 

@@ -7,9 +7,9 @@ forbidden actions for the Research Graph Engine. This document complements
 `03_MODEL_RUNTIME_SPEC.md` (adapter contract) and `12_RUNTIME_CONFIG.md`
 (environment variables and operator runbook).
 
-OpenAI, OpenRouter, and other cloud providers are **not implemented** in this
-phase. Cloud escalation rules here are policy-only until a future ticket wires
-adapters and config gates.
+OpenAI cloud synthesis is **mock-first** (ticket-059). The core extract/link/build
+pipeline still uses `mock` / `ollama` only via `rge/llm/registry.py`. Paid cloud
+synthesis is a separate opt-in path under `rge/llm/cloud_synthesis_registry.py`.
 
 ## Modes
 
@@ -17,7 +17,7 @@ adapters and config gates.
 | ---- | ---- | ----------- |
 | **mock** | CI, golden tests, fixture runs, default verification, daily development | `RGE_LLM_MODE=mock` or live opt-in off |
 | **ollama** | Real local research on an operator machine with Ollama running | `RGE_LLM_MODE=ollama`, `RGE_ALLOW_LIVE_LLM=1`, model reachable |
-| **cloud** | Not implemented — future opt-in synthesis only | Deferred (ticket-059+) |
+| **cloud** | Opt-in synthesis only (mock default) | `RGE_CLOUD_SYNTHESIS_PROVIDER=mock_cloud`; live OpenAI requires explicit gates (ticket-059) |
 
 ### mock (default for verification)
 
@@ -53,12 +53,18 @@ python -m rge.cli model-health
 Expect `reachable: true`, `model_available: true`, `live_llm_enabled: true`,
 `effective_llm_mode: ollama`.
 
-### cloud (future — not implemented)
+### cloud (opt-in synthesis — mock-first; ticket-059)
 
-- No OpenAI, OpenRouter, Anthropic, or Gemini adapters in the core engine today.
-- Cloud calls must never run from CI, golden tests, or fixture paths.
-- Future tickets will add `RGE_CLOUD_LLM_ENABLED=0` default, evidence thresholds,
-  per-run budgets, and human confirmation for paid API calls.
+- Default provider is `mock_cloud` (deterministic; no API key required).
+- Live OpenAI HTTP requires **all** of: `RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST`
+  includes `openai`, `RGE_CLOUD_LLM_ENABLED=1`, `RGE_ALLOW_OPENAI_SYNTHESIS=1`,
+  `RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP=1`, `OPENAI_API_KEY` present (never logged),
+  `RGE_CLOUD_MAX_USD_PER_RUN > 0`, `RGE_CLOUD_MAX_TOKENS_PER_CALL > 0`, and a
+  **closed** autonomy circuit breaker.
+- Cloud calls must never run from CI, golden tests, fixture paths, execute-safe, or
+  release-governor inspect.
+- Model output is candidate synthesis only; Python validators and governors gate
+  downstream artifacts. No direct writes to accepted graph tables.
 
 ## Safe verification env
 

@@ -23,7 +23,7 @@ from rge.contracts.synthesis_evidence_packet_v0 import (
     is_refs_only_packet,
     validate_grounded_synthesis_packet,
 )
-from rge.llm.cloud_synthesis_registry import normalize_provider_id
+from rge.llm.cloud_synthesis_providers import normalize_provider_id
 from rge.modules.atlas_snapshot_builder import assert_no_private_fields
 from rge.modules.multi_claim_atom_clustering import evaluate_synthesis_readiness
 from rge.modules.principal_audit_gate import repo_root

@@ -1,22 +1,138 @@
 {
   "id": "ticket-059",
-  "title": "OpenAI opt-in cloud adapter (proposed — not implemented)",
-  "problem": "Future ticket to add an optional OpenAI-compatible cloud adapter behind explicit opt-in, evidence thresholds, and budget gates. Deferred from ticket-058 which documents policy only.",
+  "title": "OpenAI opt-in cloud adapter contract and safe local env handling",
+  "problem": "The repo has a spec-only OpenAI synthesis adapter packet, but ticket-059 is still a placeholder with empty expected_files and placeholder acceptance criteria. Builder/autocycle handoff needs a scoped, mock-first implementation ticket for an optional OpenAI cloud synthesis adapter with fail-closed env gates, safe .env.local key handling, provider allowlist validation, budget caps, circuit-breaker compatibility, and no default live calls.",
   "evidence": [
     "docs/agents/13_MODEL_ESCALATION_POLICY.md",
-    "agent_reports/2026-06-12_pre-ticket-058_local-model-runtime-readiness-audit.md"
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "agent_reports/2026-06-12_pre-ticket-058_local-model-runtime-readiness-audit.md",
+    "agent_reports/2026-06-12_pre-ticket-059_local-live-structured-task-probe.md",
+    "agent_reports/2026-06-20_openai-synthesis-adapter-spec.md",
+    "rge/modules/openai_synthesis_adapter_spec.py",
+    "rge/modules/autonomous_synthesis_governor.py",
+    "rge/modules/release_governor.py",
+    ".env.example"
   ],
-  "affected_modules": [],
-  "expected_files": [],
+  "affected_modules": [
+    "rge/llm/cloud_synthesis_registry.py",
+    "rge/llm/openai_synthesis_client.py",
+    "rge/modules/operator_env_loader.py",
+    "rge/modules/openai_synthesis_adapter_spec.py",
+    "rge/modules/autonomous_synthesis_governor.py",
+    "rge/modules/release_governor.py",
+    "rge/config.py",
+    "scripts/run_openai_synthesis_adapter_spec.py",
+    "tests/unit/test_openai_synthesis_adapter_spec.py"
+  ],
+  "expected_files": [
+    "rge/llm/cloud_synthesis_registry.py",
+    "rge/llm/openai_synthesis_client.py",
+    "rge/modules/operator_env_loader.py",
+    "rge/modules/openai_synthesis_adapter_spec.py",
+    "rge/modules/autonomous_synthesis_governor.py",
+    "rge/modules/release_governor.py",
+    "rge/config.py",
+    "scripts/run_openai_synthesis_adapter_spec.py",
+    "tests/unit/test_openai_synthesis_adapter_spec.py",
+    "tests/unit/test_openai_synthesis_adapter_contract.py",
+    "tests/unit/test_operator_env_loader.py",
+    "tests/unit/test_autonomous_synthesis_governor.py",
+    "tests/unit/test_release_governor.py",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "docs/agents/13_MODEL_ESCALATION_POLICY.md",
+    ".env.example",
+    "tickets/ticket-059.json",
+    "agent_reports/YYYY-MM-DD_ticket-059-openai-adapter.md"
+  ],
   "acceptance_criteria": [
-    "Not started — placeholder only until human promotes from proposed."
+    "ticket-059 remains mock-first: default config, pytest, golden tests, operator execute-safe, fixture-mode runs, and release-governor inspect paths do not make live OpenAI or other paid provider calls.",
+    "OpenAI provider registration exists behind an explicit provider id such as openai and is selected only when the cloud synthesis path explicitly requests it; unknown or non-allowlisted providers fail closed.",
+    "A thin OpenAI synthesis adapter implements the evidence-packet-only contract: input contains grounded atoms, claim ids, source refs, and trace refs only; no raw prompts, raw source text, local paths, private notes, or secrets are sent or serialized.",
+    "OpenAI output is treated as candidate synthesis only and is validated by deterministic Python gates before any downstream artifact is written; model output never writes directly to accepted graph tables.",
+    ".env.local is loaded only through the repo's safe operator env-loading path, preferably by extending rge/modules/operator_env_loader.py as the operator wrapper over existing config loading; direct ad hoc dotenv parsing is not introduced.",
+    ".env.local remains gitignored and is blocked from patch bundles, release batches, public artifacts, reports, logs, prompts, Atlas JSON, and any serialized synthesis output.",
+    "The implementation never prints, logs, stores, or exports the API key value. Key checks may report only boolean availability, for example openai_key_available true or false.",
+    "Any live OpenAI HTTP call requires all gates: explicit provider allowlist, explicit live/cloud opt-in env flag, RGE_CLOUD_MAX_USD_PER_RUN, RGE_CLOUD_MAX_TOKENS_PER_CALL, closed autonomy circuit breaker, and successful mock-mode tests.",
+    "Budget validation rejects missing, nonnumeric, zero, or exceeded RGE_CLOUD_MAX_USD_PER_RUN and RGE_CLOUD_MAX_TOKENS_PER_CALL values before any live HTTP request is attempted.",
+    "Release governor compatibility is preserved: inspect and dry-run surfaces remain public-safe, .env.local and credential fields are never included in release batches, and irreversible release actions are not performed by this ticket.",
+    "Tests prove missing gates fail closed, mock adapter behavior is deterministic, key availability is redacted to a boolean, allowlist/cost/circuit gates block live calls, and the public-site/operator env guard still prevents public code from reading operator secrets.",
+    "Optional live smoke documentation or scaffold is allowed only behind explicit operator env gates, small budget caps, and a command that is excluded from default pytest and CI."
   ],
-  "test_plan": [],
+  "test_plan": [
+    "RGE_LLM_MODE=mock RGE_ALLOW_LIVE_LLM=0 python -m pytest tests/unit/test_openai_synthesis_adapter_spec.py -q",
+    "RGE_LLM_MODE=mock RGE_ALLOW_LIVE_LLM=0 python -m pytest tests/unit/test_openai_synthesis_adapter_contract.py tests/unit/test_operator_env_loader.py -q",
+    "RGE_LLM_MODE=mock RGE_ALLOW_LIVE_LLM=0 python -m pytest tests/unit/test_autonomous_synthesis_governor.py tests/unit/test_release_governor.py -q",
+    "RGE_LLM_MODE=mock RGE_ALLOW_LIVE_LLM=0 python -m pytest tests/golden -q",
+    "RGE_LLM_MODE=mock RGE_ALLOW_LIVE_LLM=0 python -m rge.cli verify --skip-site",
+    "python -m rge.modules.operator_loop --mode plan",
+    "python scripts/run_release_governor.py --inspect",
+    "python -m rge.modules.safety_auditor --audit full",
+    "Optional operator-only smoke, not CI: set explicit cloud/live gates, provider allowlist, RGE_CLOUD_MAX_USD_PER_RUN, RGE_CLOUD_MAX_TOKENS_PER_CALL, and a closed circuit breaker before running the documented smoke command."
+  ],
+  "safety_notes": [
+    "Do not read, print, copy, commit, or serialize .env.local or any secret value.",
+    "Do not make live OpenAI calls by default; mock mode is the default for tests, CI, fixture paths, operator execute-safe, and normal development.",
+    "Provider responses are untrusted candidate JSON/prose and require deterministic schema, grounding, citation, private-field, and cost validation before downstream use.",
+    "No model output may write directly to accepted DB tables, change source credibility, approve safety results, activate domains/concepts, or trigger shell/Git/browser actions.",
+    "Public export and Atlas artifacts must contain only public-safe fields and must never include provider keys, raw prompts, raw source text, local paths, private notes, or .env.local-derived values."
+  ],
+  "env_gates": {
+    "default_mode": "mock",
+    "required_for_any_live_openai_call": [
+      "RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST includes openai",
+      "RGE_CLOUD_LLM_ENABLED=1",
+      "RGE_ALLOW_OPENAI_SYNTHESIS=1",
+      "RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP=1",
+      "OPENAI_API_KEY is present but never printed",
+      "RGE_CLOUD_MAX_USD_PER_RUN is present and > 0",
+      "RGE_CLOUD_MAX_TOKENS_PER_CALL is present and > 0",
+      "autonomy circuit breaker status is closed"
+    ],
+    "forbidden_defaults": [
+      "No live HTTP in default pytest, golden tests, fixture-mode runs, execute-safe, or release governor inspect.",
+      "No silent fallback from failed live OpenAI calls to mock in live mode.",
+      "No cloud mode activation from .env.example defaults."
+    ]
+  },
+  "cloud_cost_caps": {
+    "required": [
+      "RGE_CLOUD_MAX_USD_PER_RUN",
+      "RGE_CLOUD_MAX_TOKENS_PER_CALL"
+    ],
+    "suggested_operator_smoke_caps": {
+      "RGE_CLOUD_MAX_USD_PER_RUN": "0.50",
+      "RGE_CLOUD_MAX_TOKENS_PER_CALL": "4096"
+    },
+    "policy": "Validate caps before request construction, record only public-safe cost/usage summaries, and fail closed if usage would exceed the configured cap."
+  },
+  "env_local_handling": [
+    ".env.local is operator-local and gitignored; it must not appear in expected patch bundles, release batches, public artifacts, reports, logs, prompts, Atlas JSON, or serialized model inputs/outputs.",
+    "Load .env.local only through the existing safe env-loading path. Prefer extending rge/modules/operator_env_loader.py as the operator-facing wrapper over rge/config.py instead of introducing independent dotenv parsing.",
+    "Never inspect or print the OPENAI_API_KEY value. If availability is reported, expose only openai_key_available true or false.",
+    "Process environment variables may override local file values, but reporting remains redacted and boolean-only for credentials."
+  ],
   "non_goals": [
-    "No implementation in ticket-058 scope.",
-    "OpenRouter deferred to a separate future ticket."
+    "Do not implement OpenRouter or other provider adapters in this ticket.",
+    "Do not make live OpenAI calls as part of normal tests, golden tests, execute-safe, fixture runs, or release-governor inspect.",
+    "Do not require a real API key for unit, golden, verify, or safety tests.",
+    "Do not weaken release governor, autonomy circuit breaker, public export policy, safety auditor, or patch-staging gates.",
+    "Do not write model output directly to accepted graph tables.",
+    "Do not add public write routes, public source ingestion routes, public agent execution routes, or public cloud-model endpoints.",
+    "Do not mutate synthesis governor ledger rows, historical remediation rows, accepted research data, public export snapshots, or unrelated tickets.",
+    "Do not edit TICKET_QUEUE.md unless a separate human-reviewed queue-status action requires it.",
+    "Do not perform remote Git, mainline integration, public-deploy, queue-advancement, or release actions."
   ],
   "risk_level": "medium",
-  "rollback_plan": "N/A — not implemented.",
+  "rollback_plan": "Disable cloud mode by leaving RGE_CLOUD_LLM_ENABLED=0 and removing openai from the provider allowlist, then revert the OpenAI adapter, env-loader, registry, docs, and tests changed by this ticket. Because the adapter must not change DB schema or public export contracts, rollback should not require data migration.",
+  "mock_first_behavior": [
+    "RGE_LLM_MODE=mock remains the default in .env.example and all automated tests.",
+    "Mock synthesis tests must prove behavior without OPENAI_API_KEY.",
+    "Live smoke, if added, must be skipped by default and require explicit operator env gates plus cost caps."
+  ],
+  "live_call_opt_in_rules": [
+    "No live HTTP request may be constructed unless provider allowlist, cloud/live env gates, cost caps, and circuit breaker checks pass.",
+    "The command must show only public-safe status such as provider id, budget cap values, estimated cost, token cap, circuit status, and openai_key_available true or false.",
+    "The command must not serialize raw request prompts, raw source text, .env.local contents, local paths, or credential values."
+  ],
   "status": "proposed"
 }

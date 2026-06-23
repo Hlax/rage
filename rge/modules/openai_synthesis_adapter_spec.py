@@ -1,8 +1,8 @@
-"""OpenAI / paid cloud synthesis adapter specification (ticket-059).
+"""OpenAI / paid cloud synthesis adapter contract (ticket-059).
 
-Policy and validation only — no paid API calls, no cloud client implementation.
-Defines fail-closed env gates, evidence-packet input contract, cost caps, and
-synthesis-readiness prerequisites before any future cloud adapter is promoted.
+Mock-first cloud synthesis adapter with fail-closed env gates, evidence-packet
+input contract, cost caps, and synthesis-readiness prerequisites. Live OpenAI
+HTTP is opt-in only and blocked unless every explicit gate passes.
 """
 
 from __future__ import annotations
@@ -16,11 +16,17 @@ from rge.contracts.synthesis_evidence_packet_v0 import (
     SCHEMA_VERSION as PACKET_SCHEMA_VERSION,
     validate_synthesis_evidence_packet,
 )
+from rge.llm.cloud_synthesis_registry import get_cloud_synthesis_client
+from rge.llm.openai_synthesis_client import (
+    build_public_safe_live_status,
+    missing_live_openai_http_gates,
+)
 from rge.modules.atlas_snapshot_builder import assert_no_private_fields
 from rge.modules.multi_claim_atom_clustering import (
     SYNTHESIS_READY_THRESHOLDS,
     evaluate_synthesis_readiness,
 )
+from rge.modules.operator_env_loader import openai_key_available
 from rge.modules.principal_audit_gate import repo_root
 
 PACKET_ID = "openai-synthesis-adapter-spec"
@@ -65,8 +71,8 @@ def _public_safe_adapter_spec(spec: dict[str, Any]) -> dict[str, Any]:
     return safe
 
 NEXT_RECOMMENDED_PACKET = {
-    "id": "ticket-059-implementation",
-    "title": "OpenAI opt-in cloud adapter implementation (human promotion required)",
+    "id": "ticket-059-live-smoke",
+    "title": "Optional operator-only OpenAI live smoke (explicit gates required)",
 }
 
 
@@ -79,16 +85,14 @@ def _truthy(name: str) -> bool:
 
 
 def missing_cloud_synthesis_gates() -> dict[str, str]:
-    """Return unset required gates (empty dict when all would pass)."""
+    """Return unset required gates for cloud synthesis enablement."""
     missing: dict[str, str] = {}
     if not _truthy("RGE_CLOUD_LLM_ENABLED"):
         missing["RGE_CLOUD_LLM_ENABLED"] = "required=1"
     if not _truthy("RGE_ALLOW_OPENAI_SYNTHESIS"):
         missing["RGE_ALLOW_OPENAI_SYNTHESIS"] = "required=1"
-    if not os.environ.get("OPENAI_API_KEY", "").strip():
+    if not openai_key_available():
         missing["OPENAI_API_KEY"] = "required (never logged or exported)"
-    if os.environ.get("RGE_LLM_MODE", "mock").strip().casefold() == "cloud":
-        missing["RGE_LLM_MODE"] = "cloud mode blocked until ticket-059 implementation"
     return missing
 
 
@@ -155,8 +159,8 @@ def build_adapter_spec_document() -> dict[str, Any]:
     return {
         "schema_version": SPEC_SCHEMA_VERSION,
         "ticket_id": "ticket-059",
-        "status": "spec_only_not_implemented",
-        "implementation_status": "NO-GO until human promotes ticket-059",
+        "status": "mock_first_wired",
+        "implementation_status": "mock adapter wired; live HTTP opt-in only",
         "input_contract": {
             "schema_version": PACKET_SCHEMA_VERSION,
             "allowed_keys": sorted(
@@ -187,7 +191,17 @@ def build_adapter_spec_document() -> dict[str, Any]:
             "cli_sketch": "research synthesize --packet PATH --confirm",
         },
         "env_gates": {
-            "required": list(REQUIRED_ENV_GATES),
+            "required": list(REQUIRED_ENV_GATES) + ["RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP"],
+            "live_http_required": [
+                "RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST includes openai",
+                "RGE_CLOUD_LLM_ENABLED=1",
+                "RGE_ALLOW_OPENAI_SYNTHESIS=1",
+                "RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP=1",
+                PUBLIC_CREDENTIAL_ENV_HINT,
+                "RGE_CLOUD_MAX_USD_PER_RUN > 0",
+                "RGE_CLOUD_MAX_TOKENS_PER_CALL > 0",
+                "autonomy circuit breaker closed",
+            ],
             "default_fail_closed": {
                 "RGE_CLOUD_LLM_ENABLED": "0",
                 "RGE_ALLOW_OPENAI_SYNTHESIS": "0",
@@ -202,6 +216,7 @@ def build_adapter_spec_document() -> dict[str, Any]:
             "real_api_calls": False,
             "mock_client_only": True,
             "dry_run_default": True,
+            "live_http_gate_function": "missing_live_openai_http_gates",
         },
         "escalation_policy_ref": "docs/agents/13_MODEL_ESCALATION_POLICY.md",
     }
@@ -223,8 +238,8 @@ def classify_spec_verdict(
         )
     return (
         "GO",
-        "Evidence-packet contract validated; synthesis readiness gates documented; "
-        "implementation remains blocked until ticket-059 human promotion.",
+        "Evidence-packet contract validated; mock adapter wired; live HTTP remains "
+        "blocked unless every explicit gate passes.",
     )
 
 
@@ -235,6 +250,7 @@ def build_atlas_safe_spec_artifact(
     rationale: str,
     readiness: dict[str, Any],
     example_packet_valid: bool,
+    root: Path | None = None,
 ) -> dict[str, Any]:
     artifact: dict[str, Any] = {
         "schema_version": SPEC_SCHEMA_VERSION,
@@ -243,8 +259,11 @@ def build_atlas_safe_spec_artifact(
         "run_id": SPEC_RUN_ID,
         "spec_verdict": verdict,
         "spec_rationale": rationale,
-        "ticket_059_status": "proposed_spec_ready",
-        "implementation_blocked": True,
+        "ticket_059_status": "mock_first_wired",
+        "implementation_blocked": False,
+        "live_http_blocked_by_default": True,
+        "live_http_gates_missing": missing_live_openai_http_gates(root=root),
+        "live_status": build_public_safe_live_status(root=root),
         "no_paid_api_calls": True,
         "adapter_spec": _public_safe_adapter_spec(spec),
         "synthesis_readiness": readiness,
@@ -264,6 +283,7 @@ def run_openai_synthesis_adapter_spec(
     graph_totals: dict[str, Any] | None = None,
     sync_public: bool = False,
     root: Path | None = None,
+    run_mock_synthesis: bool = True,
 ) -> dict[str, Any]:
     """Validate spec + example packet; optionally sync public Atlas artifact."""
     project_root = root or repo_root()
@@ -281,7 +301,18 @@ def run_openai_synthesis_adapter_spec(
         rationale=rationale,
         readiness=readiness,
         example_packet_valid=not packet_errors,
+        root=project_root,
     )
+
+    mock_output: dict[str, Any] | None = None
+    if run_mock_synthesis and not packet_errors:
+        client = get_cloud_synthesis_client("mock_cloud")
+        mock_output = client.synthesize(example)
+        artifact["mock_synthesis_output"] = {
+            "provider": mock_output.get("provider"),
+            "no_paid_api_calls": mock_output.get("no_paid_api_calls"),
+            "sentence_count": len(mock_output.get("summary_sentences") or []),
+        }
 
     export_dir = project_root / "data/exports/openai_synthesis_adapter_spec"
     export_dir.mkdir(parents=True, exist_ok=True)
@@ -301,7 +332,9 @@ def run_openai_synthesis_adapter_spec(
         "packet_id": PACKET_ID,
         "spec_verdict": verdict,
         "spec_rationale": rationale,
-        "implementation_blocked": True,
+        "implementation_blocked": False,
+        "live_http_gates_missing": artifact.get("live_http_gates_missing") or {},
+        "mock_synthesis_ran": mock_output is not None,
         "example_packet_errors": packet_errors,
         "artifact_path": str(artifact_path),
         "public_artifact_path": str(public_path) if public_path else None,

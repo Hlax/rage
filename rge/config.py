@@ -44,6 +44,15 @@ _DEFAULTS = {
     "RGE_EMBEDDING_MODE": "local_sentence_transformer",
     "RGE_EMBEDDING_MODEL": "sentence-transformers/all-MiniLM-L6-v2",
     "RGE_STAGED_RANK2_SCAN_MAX": str(DEFAULT_STAGED_RANK2_SCAN_MAX),
+    "RGE_CLOUD_LLM_ENABLED": "0",
+    "RGE_CLOUD_SYNTHESIS_PROVIDER": "mock_cloud",
+    "RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST": "",
+    "RGE_ALLOW_OPENAI_SYNTHESIS": "0",
+    "RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP": "0",
+    "OPENAI_MODEL": "gpt-4o-mini",
+    "OPENAI_BASE_URL": "https://api.openai.com/v1",
+    "RGE_CLOUD_MAX_USD_PER_RUN": "",
+    "RGE_CLOUD_MAX_TOKENS_PER_CALL": "",
 }
 
 
@@ -83,6 +92,46 @@ class RgeConfig:
     embedding_mode: str
     embedding_model: str
     staged_rank2_scan_max: int
+    cloud_llm_enabled: bool
+    cloud_synthesis_provider: str
+    cloud_synthesis_provider_allowlist: str
+    allow_openai_synthesis: bool
+    allow_openai_synthesis_live_http: bool
+    openai_model: str
+    openai_base_url: str
+    cloud_max_usd_per_run: float | None
+    cloud_max_tokens_per_call: int | None
+
+
+def _parse_bool_flag(raw: str, *, name: str) -> bool:
+    value = raw.strip().casefold()
+    if value in ("1", "true", "yes"):
+        return True
+    if value in ("0", "false", "no", ""):
+        return False
+    raise ConfigError(
+        f"Invalid {name}={raw!r}. Use 1/true/yes to enable or 0/false/no."
+    )
+
+
+def _parse_optional_positive_float(raw: str) -> float | None:
+    if not str(raw).strip():
+        return None
+    try:
+        value = float(str(raw).strip())
+    except ValueError:
+        return None
+    return value if value > 0 else None
+
+
+def _parse_optional_positive_int(raw: str) -> int | None:
+    if not str(raw).strip():
+        return None
+    try:
+        value = int(float(str(raw).strip()))
+    except ValueError:
+        return None
+    return value if value > 0 else None
 
 
 def parse_staged_rank2_scan_max(raw: str | int | None = None) -> int:
@@ -190,6 +239,19 @@ def load_config(env_file: Path | None = None) -> RgeConfig:
             "or 0/false/no."
         )
 
+    cloud_llm_enabled = _parse_bool_flag(
+        merged.get("RGE_CLOUD_LLM_ENABLED", "0"),
+        name="RGE_CLOUD_LLM_ENABLED",
+    )
+    allow_openai_synthesis = _parse_bool_flag(
+        merged.get("RGE_ALLOW_OPENAI_SYNTHESIS", "0"),
+        name="RGE_ALLOW_OPENAI_SYNTHESIS",
+    )
+    allow_openai_synthesis_live_http = _parse_bool_flag(
+        merged.get("RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP", "0"),
+        name="RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP",
+    )
+
     return RgeConfig(
         ollama_base_url=merged["OLLAMA_BASE_URL"],
         local_llm=merged["RGE_LOCAL_LLM"],
@@ -213,5 +275,22 @@ def load_config(env_file: Path | None = None) -> RgeConfig:
         embedding_model=merged["RGE_EMBEDDING_MODEL"],
         staged_rank2_scan_max=parse_staged_rank2_scan_max(
             merged.get("RGE_STAGED_RANK2_SCAN_MAX")
+        ),
+        cloud_llm_enabled=cloud_llm_enabled,
+        cloud_synthesis_provider=merged.get("RGE_CLOUD_SYNTHESIS_PROVIDER", "mock_cloud").strip()
+        or "mock_cloud",
+        cloud_synthesis_provider_allowlist=merged.get(
+            "RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST", ""
+        ).strip(),
+        allow_openai_synthesis=allow_openai_synthesis,
+        allow_openai_synthesis_live_http=allow_openai_synthesis_live_http,
+        openai_model=merged.get("OPENAI_MODEL", "gpt-4o-mini").strip() or "gpt-4o-mini",
+        openai_base_url=merged.get("OPENAI_BASE_URL", "https://api.openai.com/v1").strip()
+        or "https://api.openai.com/v1",
+        cloud_max_usd_per_run=_parse_optional_positive_float(
+            merged.get("RGE_CLOUD_MAX_USD_PER_RUN", "")
+        ),
+        cloud_max_tokens_per_call=_parse_optional_positive_int(
+            merged.get("RGE_CLOUD_MAX_TOKENS_PER_CALL", "")
         ),
     )

@@ -47,9 +47,9 @@ def test_cloud_gates_block_without_synthesis_readiness(
         assert_cloud_synthesis_env(graph_totals={"multi_claim_atom_count": 0})
 
 
-def test_spec_document_blocks_implementation() -> None:
+def test_spec_document_is_mock_first_wired() -> None:
     spec = build_adapter_spec_document()
-    assert spec["status"] == "spec_only_not_implemented"
+    assert spec["status"] == "mock_first_wired"
     assert spec["ci_policy"]["real_api_calls"] is False
 
 
@@ -70,5 +70,6 @@ def test_run_spec_produces_artifact(tmp_path, monkeypatch: pytest.MonkeyPatch) -
         root=tmp_path,
     )
     assert result["status"] == "completed"
-    assert result["implementation_blocked"] is True
+    assert result["implementation_blocked"] is False
+    assert result["mock_synthesis_ran"] is True
     assert result["spec_verdict"] == "GO"
