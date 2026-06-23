@@ -1595,6 +1595,23 @@ def _cmd_prove_arbitrary_source_bundle(args: argparse.Namespace) -> int:
     return 0 if result.get("status") == "completed" else 1
 
 
+def _cmd_prove_researcher_product(args: argparse.Namespace) -> int:
+    from rge.modules.researcher_product_proof import run_researcher_product_proof
+
+    work_dir = Path(args.work_dir)
+    artifact_out = Path(args.artifact_out) if args.artifact_out else None
+    result = run_researcher_product_proof(
+        topic=args.topic,
+        domain=args.domain,
+        work_dir=work_dir,
+        benchmark_runs=args.benchmark_runs,
+        write_artifact=not args.no_write_artifact,
+        artifact_path=artifact_out,
+    )
+    print(json.dumps(result, indent=2))
+    return 0 if result.get("product_verdict") in {"GO", "PARTIAL"} else 1
+
+
 def _cmd_autonomous_researcher_loop(args: argparse.Namespace) -> int:
     from rge.modules.autonomous_researcher_loop import execute_autonomous_researcher_loop
 
@@ -4296,6 +4313,47 @@ def build_parser() -> argparse.ArgumentParser:
         help=f"Research question id (default: {STAGED_FIXTURE_QUESTION_ID}).",
     )
     proof_bundle_parser.set_defaults(func=_cmd_prove_arbitrary_source_bundle)
+
+    researcher_product_parser = subparsers.add_parser(
+        "prove-researcher-product",
+        help="Run mock researcher product proof and write operator artifact.",
+        description=(
+            "Chain mock arbitrary-source proof bundle, grounded synthesis packet "
+            "(mock_cloud), synthesis packet benchmark dry-run, safety audit snapshot, "
+            "and atlas preview visibility into a traceable gitignored operator artifact."
+        ),
+    )
+    researcher_product_parser.add_argument(
+        "--work-dir",
+        required=True,
+        help="Scratch work directory (temp paths only).",
+    )
+    researcher_product_parser.add_argument(
+        "--artifact-out",
+        help="Gitignored product proof artifact path (optional).",
+    )
+    researcher_product_parser.add_argument(
+        "--topic",
+        default="Does AI improve creative output while reducing diversity?",
+        help="Research topic for proof bundle staged spine.",
+    )
+    researcher_product_parser.add_argument(
+        "--domain",
+        default="creativity",
+        help="Domain pack id (default: creativity).",
+    )
+    researcher_product_parser.add_argument(
+        "--benchmark-runs",
+        type=int,
+        default=25,
+        help="Synthesis packet benchmark repeat count (default: 25).",
+    )
+    researcher_product_parser.add_argument(
+        "--no-write-artifact",
+        action="store_true",
+        help="Skip writing gitignored product proof artifact.",
+    )
+    researcher_product_parser.set_defaults(func=_cmd_prove_researcher_product)
 
     autonomous_loop_parser = subparsers.add_parser(
         "autonomous-researcher-loop",

@@ -113,6 +113,7 @@ def test_cli_top_level_help() -> None:
         "export-atlas-snapshot",
         "atlas-coherence-report",
         "prove-arbitrary-source-bundle",
+        "prove-researcher-product",
         "model-health",
         "discover-sources",
         "resolve-sources",

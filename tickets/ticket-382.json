@@ -1,0 +1,37 @@
+{
+  "id": "ticket-382",
+  "title": "Operator loop researcher product proof status v0",
+  "problem": "Ticket-381 delivered prove-researcher-product and gitignored researcher_product_proof_latest.json, but operator_loop plan mode does not surface product proof readiness, artifact path, or recommended_action for operators.",
+  "evidence": [
+    "agent_reports/2026-06-23_phase-3_ticket-381_product-proof-bundle-synthesis-benchmark-atlas-v0.md",
+    "rge/modules/researcher_product_proof.py",
+    "rge/modules/operator_loop.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "rge/modules/researcher_product_proof.py"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_operator_loop_plan.py",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-382_operator-loop-researcher-product-proof-status-v0.md"
+  ],
+  "acceptance_criteria": [
+    "operator_loop --mode plan includes researcher_product_proof_status with artifact_path and product_verdict when artifact present.",
+    "Plan recommends run_researcher_product_proof when artifact missing and product-risk drift is active.",
+    "No public export or public-site changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_operator_loop_plan.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "README-only docs.",
+    "Live OpenAI.",
+    "Autocycle auto-execution of full product proof on dirty trees."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert operator_loop plan field and tests only.",
+  "status": "proposed",
+  "category": "Phase 3 / operator integration"
+}
