@@ -1,0 +1,35 @@
+{
+  "id": "ticket-380",
+  "title": "AGENTS.md operator quickstart synthesis packet benchmark cross-link v0",
+  "problem": "README Operator Quickstart now documents synthesis packet benchmark dry-run (ticket-379), but AGENTS.md Operator Loop section does not cross-link the benchmark workflow, artifact path, or synthesis_packet_benchmark_status fields.",
+  "evidence": [
+    "agent_reports/2026-06-23_phase-3_ticket-379_readme-synthesis-packet-benchmark-crosslink-v0.md",
+    "README.md",
+    "AGENTS.md",
+    "docs/agents/12_RUNTIME_CONFIG.md"
+  ],
+  "affected_modules": [
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "AGENTS.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-380_agents-synthesis-packet-benchmark-crosslink-v0.md"
+  ],
+  "acceptance_criteria": [
+    "AGENTS.md Operator Loop section links to README synthesis packet benchmark workflow.",
+    "AGENTS.md notes synthesis_packet_benchmark_status and reports_per_hour_estimate without duplicating full command block.",
+    "No CLI or export code changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live OpenAI runs.",
+    "Public site changes.",
+    "Operator loop code changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert AGENTS.md section only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}

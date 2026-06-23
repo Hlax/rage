@@ -262,6 +262,43 @@ Re-plan after a successful run:
 python -m rge.modules.operator_loop --mode plan
 ```
 
+**Synthesis packet benchmark dry-run** (mock_cloud only; ticket-059 bridge): on synthesis
+packet CLI feature branches (for example `phase-3/cloud-synthesis-packet-cli-throughput`),
+measure mock throughput and review-threshold cadence without live OpenAI HTTP. Default
+provider is `mock_cloud`; the benchmark script refuses `--provider openai`.
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+python scripts/run_synthesis_packet_benchmark.py `
+  --packet fixtures/synthesis/grounded_evidence_packet_dry_run.json `
+  --runs 25
+```
+
+Writes gitignored operator artifact `data/reports/synthesis_packet_benchmark_latest.json`
+with `reports_per_hour_estimate`, review-threshold flags, and `cloud_call_made_any`
+(always `false` under default mock). Single packet run (no repeat loop):
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+python -m rge.cli synthesize --packet fixtures/synthesis/grounded_evidence_packet_dry_run.json
+```
+
+**`synthesis_packet_benchmark_status`** (operator plan JSON on synthesis CLI branches):
+read-only inspection of the benchmark artifact.
+
+| Field | When present |
+| --- | --- |
+| `benchmark_recommended` | `true` when the artifact is missing on an active synthesis CLI branch |
+| `reports_per_hour_estimate` | Populated when artifact `status` is `available` |
+| `artifact_path` | `data/reports/synthesis_packet_benchmark_latest.json` |
+| `operator_commands.benchmark` | Copy-paste mock-only benchmark command from plan JSON |
+
+When the artifact is missing, plan mode may recommend `run_synthesis_packet_benchmark`
+(`safe_autonomous`). Execute-safe runs the benchmark hook after verification when that
+action is recommended. Private `self_improvement_status` includes the same snapshot on
+synthesis CLI branches. See also `docs/agents/12_RUNTIME_CONFIG.md` and AGENTS.md
+Operator Loop (cloud synthesis maturity bullet).
+
 **Full atlas refresh sign-off step:** every checklist run executes `synthesis_review_sign_off_refresh` after the human-review export scan (ledger merge into `atlas_synthesis_human_review_latest.json`). Optional fixture sign-off during refresh:
 
 ```powershell
@@ -1544,6 +1581,7 @@ Golden tests always run in mock LLM mode and do not require Ollama.
 | `data/reports/` | gitignored | Run, cluster, theory, and other private reports |
 | `data/reports/operator_autonomous_loop/` | gitignored | Operator autonomous loop scratch report (`autonomous_loop_report.json`) and improvement drafts under `tickets/` |
 | `data/reports/operator_proof_bundle/` | gitignored | Mock arbitrary-source proof bundle (`operator_proof_bundle.json`, run reports) |
+| `data/reports/synthesis_packet_benchmark_latest.json` | gitignored | Mock synthesis packet throughput + review-threshold benchmark summary |
 | `data/db/operator_proof_bundle_scratch.sqlite` | gitignored | Scratch DB for operator proof bundle |
 | `data/sources/staged/operator_proof_bundle/` | gitignored | Staged OpenAlex fixture sources for proof bundle |
 | `data/exports/operator_proof_bundle/` | gitignored | Proof-bundle public-card export scratch copy |
@@ -1564,7 +1602,7 @@ Use CLI flags to override paths for tests: `--db`, `--output-dir`, `--export-dir
 |---|---|
 | `RGE_LLM_MODE=mock` | **Default for tests, CI, and fixture runs.** Deterministic fixtures. |
 | `RGE_LLM_MODE=ollama` + `RGE_ALLOW_LIVE_LLM=1` | Local research on operator machine. Four pipeline structured tasks live; Python validates all writes. |
-| Cloud providers | **Not wired.** OpenAI/OpenRouter deferred to ticket-059+. |
+| Cloud providers | **Mock-first** (`mock_cloud` default on `research synthesize --packet`; ticket-059). Live OpenAI opt-in only behind explicit env gates — not CI/default pytest. |
 
 **Local research env** (copy to gitignored `.env.local` or set in shell):
 
