@@ -54,7 +54,7 @@ Safety audit not required — AGENTS.md documentation only.
 
 ## Merge to main
 
-Merge commit: (recorded after merge).
+Merge commit: `e557fa8` (fast-forward).
 
 ## Recommended next ticket
 
