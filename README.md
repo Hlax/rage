@@ -209,7 +209,7 @@ Plan mode recommends `run_synthesis_review_sign_off` when grounding-passed outpu
 
 When synthesis artifacts are **also stale**, plan mode recommends `run_synthesis_operator_loop` with `--with-sign-off` instead of standalone sign-off. Full atlas refresh recommendations append both `--with-synthesis-loop` and `--with-synthesis-sign-off` when pending sign-offs exist.
 
-**Operator autocycle blocking:** when plan mode recommends synthesis sign-off or a synthesis loop with sign-off, `python -m rge.modules.operator_autocycle --mode plan` stops with `operator_action_blocked_automation` (same pattern as scratch evidence review and arbitrary-source proof bundle). Autocycle never runs sign-off or synthesis loop commands without explicit operator review.
+**Operator autocycle blocking:** when plan mode recommends synthesis sign-off, a synthesis loop with sign-off, or researcher product proof (`run_researcher_product_proof`), `python -m rge.modules.operator_autocycle --mode plan` stops with `operator_action_blocked_automation` (same pattern as scratch evidence review and arbitrary-source proof bundle). Autocycle never runs sign-off, synthesis loop, or product proof commands without explicit operator review.
 
 **Arbitrary-source operator proof bundle** (mock LLM only; temp/scratch paths): when the
 principal audit checkpoint surfaces a **product-risk / live-research /
@@ -298,6 +298,66 @@ When the artifact is missing, plan mode may recommend `run_synthesis_packet_benc
 action is recommended. Private `self_improvement_status` includes the same snapshot on
 synthesis CLI branches. See also `docs/agents/12_RUNTIME_CONFIG.md` and AGENTS.md
 Operator Loop (cloud synthesis maturity bullet).
+
+**Researcher product proof** (mock LLM only; scratch work dir; tickets 381–384): end-to-end
+mock-first proof that chains arbitrary-source proof bundle → synthesis packet → benchmark →
+safety audit → public atlas preview visibility. Clears principal-audit **product-risk drift**
+when the gitignored artifact reports `product_verdict: GO` (or `PARTIAL` with documented
+gaps). No live OpenAlex network, no live Ollama, and no `export-public --publish`.
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+python -m rge.cli prove-researcher-product `
+  --work-dir data/tmp/researcher_product_proof_work `
+  --artifact-out data/reports/researcher_product_proof_latest.json `
+  --benchmark-runs 3
+```
+
+Operator script wrapper (same gates):
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+python scripts/run_researcher_product_proof.py `
+  --work-dir data/tmp/researcher_product_proof_work `
+  --benchmark-runs 3
+```
+
+Writes gitignored artifact `data/reports/researcher_product_proof_latest.json` with
+traceable graph counts, synthesis/benchmark summaries, and `product_verdict` (`GO`,
+`PARTIAL`, or `NO-GO`). Scratch SQLite and staged paths live under `--work-dir` only.
+
+Inspect key artifact fields:
+
+| Field | Expected on success |
+| --- | --- |
+| `status` | `completed` |
+| `product_verdict` | `GO` (or `PARTIAL` when benchmark or atlas preview gaps remain) |
+| `source_count` / `claim_count` / `evidence_count` | Non-zero after mock proof bundle |
+| `benchmark.reports_per_hour_estimate` | Populated when benchmark step completes |
+
+**`researcher_product_proof_status`** (operator plan, verify, and autocycle JSON):
+read-only inspection of the product proof artifact and drift recommendation.
+
+| Field | When present |
+| --- | --- |
+| `product_proof_recommended` | `true` when principal-audit product-risk drift is active and the artifact is missing |
+| `product_verdict` | `GO`, `PARTIAL`, or `NO-GO` when artifact `status` is `available` |
+| `artifact_path` | `data/reports/researcher_product_proof_latest.json` |
+| `source_count` / `claim_count` / `evidence_count` | Populated from the latest artifact |
+| `reports_per_hour_estimate` | Benchmark throughput from the chained run |
+| `operator_commands.product_proof` | Copy-paste mock-only shell command from plan JSON |
+
+When `product_verdict` is `GO`, plan mode sets `product_proof_recommended` to `false` and
+autocycle no longer blocks on product-risk drift for those warnings. Autocycle still blocks
+with `operator_action_blocked_automation: run_researcher_product_proof` while the artifact
+is missing and drift is active — same pattern as arbitrary-source proof bundle.
+
+`python -m rge.cli verify --skip-site` lists `prove-researcher-product` in the operator
+checklist (not run automatically). Re-plan after a successful run:
+
+```powershell
+python -m rge.modules.operator_loop --mode plan
+```
 
 **Full atlas refresh sign-off step:** every checklist run executes `synthesis_review_sign_off_refresh` after the human-review export scan (ledger merge into `atlas_synthesis_human_review_latest.json`). Optional fixture sign-off during refresh:
 
@@ -1582,6 +1642,8 @@ Golden tests always run in mock LLM mode and do not require Ollama.
 | `data/reports/operator_autonomous_loop/` | gitignored | Operator autonomous loop scratch report (`autonomous_loop_report.json`) and improvement drafts under `tickets/` |
 | `data/reports/operator_proof_bundle/` | gitignored | Mock arbitrary-source proof bundle (`operator_proof_bundle.json`, run reports) |
 | `data/reports/synthesis_packet_benchmark_latest.json` | gitignored | Mock synthesis packet throughput + review-threshold benchmark summary |
+| `data/reports/researcher_product_proof_latest.json` | gitignored | Mock end-to-end researcher product proof (`product_verdict`, graph counts, synthesis/benchmark summary) |
+| `data/tmp/researcher_product_proof_work/` | gitignored | Scratch work dir for `prove-researcher-product` (SQLite, staged sources, synthesis output) |
 | `data/db/operator_proof_bundle_scratch.sqlite` | gitignored | Scratch DB for operator proof bundle |
 | `data/sources/staged/operator_proof_bundle/` | gitignored | Staged OpenAlex fixture sources for proof bundle |
 | `data/exports/operator_proof_bundle/` | gitignored | Proof-bundle public-card export scratch copy |
