@@ -188,7 +188,7 @@ def build_adapter_spec_document() -> dict[str, Any]:
             "required_citations": ["claim_ids", "atom_ids", "source_refs"],
             "reject_orphan_prose": True,
             "human_confirm_flag": "--confirm",
-            "cli_sketch": "research synthesize --packet PATH --confirm",
+            "cli_sketch": "research synthesize --packet PATH [--provider mock_cloud|openai] --confirm",
         },
         "env_gates": {
             "required": list(REQUIRED_ENV_GATES) + ["RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP"],

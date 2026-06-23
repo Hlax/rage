@@ -92,6 +92,35 @@ Load `.env.local` only through `operator_env_loader.load_operator_env()` or
 `load_config()` — never from public-site code. Key availability may be reported as
 `openai_key_available: true|false` only.
 
+### Synthesis packet CLI (ticket-059 bridge)
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+python -m rge.cli synthesize --packet fixtures/synthesis/grounded_evidence_packet_dry_run.json
+```
+
+- Default provider: `mock_cloud` (no API key required).
+- Live OpenAI: `--provider openai --confirm` plus all cloud/live env gates.
+- Optional throughput DB counters: `--db PATH` (read-only).
+- Output: `data/exports/synthesis_packets/synthesis_output_<packet_id>.json`
+
+Review-threshold defaults (overridable via env):
+
+| Variable | Default |
+| -------- | ------- |
+| `RGE_SYNTHESIS_LOCAL_REVIEW_EVERY_REPORTS` | 25 |
+| `RGE_SYNTHESIS_LOCAL_REVIEW_EVERY_CLAIMS` | 100 |
+| `RGE_SYNTHESIS_OPENAI_REVIEW_EVERY_REPORTS` | 100 |
+| `RGE_SYNTHESIS_OPENAI_REVIEW_EVERY_CLAIMS` | 500 |
+
+Reports/hour benchmark (mock, operator machine):
+
+```powershell
+Measure-Command {
+  python -m rge.cli synthesize --packet fixtures/synthesis/grounded_evidence_packet_dry_run.json
+}
+```
+
 ## Live smoke tests (ticket-038)
 
 Optional live Ollama smoke tests live under `tests/smoke/` and are marked

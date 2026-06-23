@@ -1905,6 +1905,28 @@ def _cmd_research_run(args: argparse.Namespace) -> int:
     return exit_code
 
 
+def _cmd_synthesize(args: argparse.Namespace) -> int:
+    from rge.modules.synthesis_packet_runner import run_synthesis_packet_command
+
+    output_dir = Path(args.output_dir) if getattr(args, "output_dir", None) else None
+    if output_dir is not None and not output_dir.is_absolute():
+        output_dir = _REPO_ROOT / output_dir
+    db_path = Path(args.db) if getattr(args, "db", None) else None
+    if db_path is not None and not db_path.is_absolute():
+        db_path = _REPO_ROOT / db_path
+    payload, exit_code = run_synthesis_packet_command(
+        packet=args.packet,
+        provider=args.provider,
+        output_dir=output_dir,
+        db=db_path,
+        confirm=bool(args.confirm),
+        load_operator_env_flag=bool(args.load_operator_env),
+        root=_REPO_ROOT,
+    )
+    print(json.dumps(payload, indent=2))
+    return exit_code
+
+
 def _cmd_fetch_candidate(args: argparse.Namespace) -> int:
     from rge.db.connection import ensure_database
     from rge.modules.fetcher import run_fetch_candidate_command
@@ -4613,6 +4635,45 @@ def build_parser() -> argparse.ArgumentParser:
         help="Staging directory for selective full-text artifacts ingested to DB.",
     )
     research_run_parser.set_defaults(func=_cmd_research_run)
+
+    synthesize_parser = subparsers.add_parser(
+        "synthesize",
+        help="Run mock-first cloud synthesis on a grounded evidence packet.",
+        description=(
+            "Validate an evidence packet, call the cloud synthesis registry "
+            "(default mock_cloud), and write candidate synthesis output plus "
+            "throughput metrics. Live OpenAI requires --confirm and all env gates. "
+            "Model output never writes accepted graph rows."
+        ),
+    )
+    synthesize_parser.add_argument(
+        "--packet",
+        required=True,
+        help="Path to synthesis evidence packet JSON (v0.1.0 refs-only or v0.2.0 grounded).",
+    )
+    synthesize_parser.add_argument(
+        "--provider",
+        help="Cloud synthesis provider id (default: mock_cloud from env/config).",
+    )
+    synthesize_parser.add_argument(
+        "--output-dir",
+        help="Directory for synthesis output JSON (default: data/exports/synthesis_packets).",
+    )
+    synthesize_parser.add_argument(
+        "--db",
+        help="Optional SQLite DB path for throughput counters (read-only).",
+    )
+    synthesize_parser.add_argument(
+        "--confirm",
+        action="store_true",
+        help="Required human opt-in for OpenAI synthesis.",
+    )
+    synthesize_parser.add_argument(
+        "--load-operator-env",
+        action="store_true",
+        help="Load operator .env/.env.local via operator_env_loader before running.",
+    )
+    synthesize_parser.set_defaults(func=_cmd_synthesize)
 
     fetch_candidate_parser = subparsers.add_parser(
         "fetch-candidate",

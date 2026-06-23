@@ -65,6 +65,8 @@ Expect `reachable: true`, `model_available: true`, `live_llm_enabled: true`,
   release-governor inspect.
 - Model output is candidate synthesis only; Python validators and governors gate
   downstream artifacts. No direct writes to accepted graph tables.
+- Packet CLI: `python -m rge.cli synthesize --packet PATH` (default `mock_cloud`).
+  Live OpenAI requires `--provider openai --confirm` and all env gates from ticket-059.
 
 ## Safe verification env
 

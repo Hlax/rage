@@ -1,0 +1,51 @@
+{
+  "schema_version": "synthesis_evidence_packet_v0.2.0",
+  "packet_id": "syn_packet_grounded_dry_run_fixture",
+  "research_question": "Does AI improve creative output while reducing diversity?",
+  "purpose": "cluster_memo_draft",
+  "atoms": [
+    {
+      "atom_id": "atom_preview_001",
+      "maturity": "synthesis_ready",
+      "canonical_text": "AI-assisted brainstorming reduced semantic diversity in short-form writing tasks.",
+      "claim_ids": ["claim_preview_a", "claim_preview_b"],
+      "source_ids": ["src_preview_a", "src_preview_b"]
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "claim_preview_a",
+      "source_id": "src_preview_a",
+      "claim_text": "AI-assisted brainstorming reduced semantic diversity in short-form writing tasks.",
+      "stance": "supports",
+      "scope": "short-form writing",
+      "limitations": []
+    },
+    {
+      "claim_id": "claim_preview_b",
+      "source_id": "src_preview_b",
+      "claim_text": "Human-only brainstorming preserved broader semantic variation in comparable prompts.",
+      "stance": "supports",
+      "scope": "short-form writing",
+      "limitations": []
+    }
+  ],
+  "source_refs": [
+    {
+      "source_id": "src_preview_a",
+      "source_type": "paper",
+      "title": "Preview study A"
+    },
+    {
+      "source_id": "src_preview_b",
+      "source_type": "paper",
+      "title": "Preview study B"
+    }
+  ],
+  "trace_refs": [
+    {
+      "trace_id": "trace_preview_001",
+      "purpose_match_status": "match"
+    }
+  ]
+}
