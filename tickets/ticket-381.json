@@ -16,6 +16,12 @@
     "rge/modules/synthesis_packet_benchmark.py"
   ],
   "expected_files": [
+    "rge/modules/researcher_product_proof.py",
+    "scripts/run_researcher_product_proof.py",
+    "rge/cli.py",
+    "tests/unit/test_researcher_product_proof.py",
+    "tests/golden/test_00_scaffold.py",
+    "agent_reports/2026-06-23_pre-ticket-381_product-proof-bundle-synthesis-benchmark-atlas-audit.md",
     "agent_reports/YYYY-MM-DD_phase-3_ticket-381_product-proof-bundle-synthesis-benchmark-atlas-v0.md",
     "tickets/ticket-381.json",
     "tickets/TICKET_QUEUE.md"
@@ -44,6 +50,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert proof script/module and agent report; leave prior docs cross-links intact.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / operator product proof"
 }
