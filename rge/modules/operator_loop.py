@@ -985,6 +985,7 @@ def _action_from_state(
     release_governor_status: dict[str, Any] | None = None,
     live_combined_source_health_smoke_status: dict[str, Any] | None = None,
     synthesis_packet_benchmark_status: dict[str, Any] | None = None,
+    researcher_product_proof_status: dict[str, Any] | None = None,
     root: Path | None = None,
 ) -> RecommendedAction:
     if drift_violations:
@@ -1189,6 +1190,52 @@ def _action_from_state(
         )
 
     proof_bundle = proof_bundle_status or {}
+    researcher_product_proof = researcher_product_proof_status or {}
+    if (
+        researcher_product_proof.get("product_proof_recommended")
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        commands_map = researcher_product_proof.get("operator_commands") or {}
+        product_proof_commands: list[dict[str, str]] = [
+            {
+                "shell": command,
+                "purpose": "set mock LLM for researcher product proof",
+            }
+            for command in (researcher_product_proof.get("env_setup") or [])
+        ]
+        product_proof_commands.extend(
+            [
+                {
+                    "shell": commands_map.get(
+                        "product_proof",
+                        "python -m rge.cli prove-researcher-product --help",
+                    ),
+                    "purpose": (
+                        "end-to-end mock researcher product proof "
+                        "(bundle → synthesis → benchmark → atlas visibility)"
+                    ),
+                },
+                {
+                    "shell": "python -m rge.modules.operator_loop --mode plan",
+                    "purpose": "re-check product_verdict after proof run",
+                },
+            ]
+        )
+        artifact_path = researcher_product_proof.get("artifact_path") or (
+            "data/reports/researcher_product_proof_latest.json"
+        )
+        return RecommendedAction(
+            action_id="run_researcher_product_proof",
+            label="Run mock researcher product proof",
+            gate="review_gated",
+            reason=(
+                "Principal audit drift notes missing end-to-end product proof; run "
+                f"prove-researcher-product on a scratch work dir and inspect "
+                f"{artifact_path}."
+            ),
+            commands=product_proof_commands,
+        )
+
     if proof_bundle.get("proof_bundle_recommended"):
         proof_command = proof_bundle.get("operator_commands", {}).get(
             "proof_bundle",
@@ -2448,6 +2495,14 @@ def build_operator_plan(
         root=project_root,
         branch=tree.branch,
     )
+    from rge.modules.researcher_product_proof import (
+        inspect_researcher_product_proof_plan_status,
+    )
+
+    researcher_product_proof_status = inspect_researcher_product_proof_plan_status(
+        root=project_root,
+        audit=audit,
+    )
     live_combined_source_health_smoke_status = (
         inspect_live_combined_source_health_smoke_status(root=project_root)
     )
@@ -2474,6 +2529,7 @@ def build_operator_plan(
         release_governor_status=release_governor_status,
         live_combined_source_health_smoke_status=live_combined_source_health_smoke_status,
         synthesis_packet_benchmark_status=synthesis_packet_benchmark_status,
+        researcher_product_proof_status=researcher_product_proof_status,
         root=project_root,
     )
 
@@ -2535,6 +2591,7 @@ def build_operator_plan(
         "instruction_packet_ticket_draft_status": instruction_packet_ticket_draft_status,
         "release_governor_status": release_governor_status,
         "synthesis_packet_benchmark_status": synthesis_packet_benchmark_status,
+        "researcher_product_proof_status": researcher_product_proof_status,
         "live_combined_source_health_smoke_status": live_combined_source_health_smoke_status,
         "staged_rank2_scan_max": runtime_config.staged_rank2_scan_max,
         "domain_pack_status": domain_pack_status,

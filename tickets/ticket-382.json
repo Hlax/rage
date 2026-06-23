@@ -13,6 +13,7 @@
   ],
   "expected_files": [
     "rge/modules/operator_loop.py",
+    "rge/modules/researcher_product_proof.py",
     "tests/unit/test_operator_loop_plan.py",
     "agent_reports/YYYY-MM-DD_phase-3_ticket-382_operator-loop-researcher-product-proof-status-v0.md"
   ],
@@ -32,6 +33,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert operator_loop plan field and tests only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / operator integration"
 }

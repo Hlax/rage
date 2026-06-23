@@ -1,0 +1,36 @@
+{
+  "id": "ticket-383",
+  "title": "Verify CLI lists prove-researcher-product in mock gate",
+  "problem": "Ticket-381 added prove-researcher-product CLI and ticket-382 wired operator_loop plan status, but python -m rge.cli verify does not surface the command in its mock gate checklist output for operators.",
+  "evidence": [
+    "agent_reports/2026-06-23_phase-3_ticket-382_operator-loop-researcher-product-proof-status-v0.md",
+    "rge/modules/verify_runner.py",
+    "tests/unit/test_cli_verify.py"
+  ],
+  "affected_modules": [
+    "rge/modules/verify_runner.py"
+  ],
+  "expected_files": [
+    "rge/modules/verify_runner.py",
+    "tests/unit/test_cli_verify.py",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-383_verify-researcher-product-checklist-v0.md"
+  ],
+  "acceptance_criteria": [
+    "verify --skip-site JSON/checklist references prove-researcher-product.",
+    "Checklist includes researcher_product_proof_status mirror fields when applicable.",
+    "No public export or public-site changes."
+  ],
+  "test_plan": [
+    "python -m pytest tests/unit/test_cli_verify.py -q",
+    "python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Auto-run product proof during verify.",
+    "Live OpenAI.",
+    "README-only docs."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert verify_runner checklist entry and tests only.",
+  "status": "proposed",
+  "category": "Phase 3 / operator integration"
+}

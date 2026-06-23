@@ -10,6 +10,29 @@ import pytest
 from rge.config import DEFAULT_STAGED_RANK2_SCAN_MAX
 from rge.modules.operator_loop import WorkingTreeStatus, build_operator_plan
 from rge.modules.operator_proof_bundle import COMMAND, PIPELINE_MODE
+from rge.modules.researcher_product_proof import (
+    COMMAND as PRODUCT_PROOF_COMMAND,
+    DEFAULT_ARTIFACT_REL,
+)
+
+
+def _seed_satisfied_researcher_product_proof(tmp_path: Path) -> None:
+    artifact_dir = tmp_path / DEFAULT_ARTIFACT_REL.parent
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    (artifact_dir / DEFAULT_ARTIFACT_REL.name).write_text(
+        json.dumps(
+            {
+                "status": "completed",
+                "product_verdict": "GO",
+                "source_count": 3,
+                "claim_count": 2,
+                "evidence_count": 1,
+                "benchmark": {"reports_per_hour_estimate": 3600.0},
+                "synthesis": {"synthesis_output_path": "data/exports/synthesis_packets/out.json"},
+            }
+        ),
+        encoding="utf-8",
+    )
 
 
 def _seed_satisfied_proof_bundle(tmp_path: Path) -> None:
@@ -125,6 +148,96 @@ def test_plan_includes_arbitrary_source_proof_bundle_status(
     assert status["proof_artifact"] == "operator_proof_bundle.json"
 
 
+def _drift_audit_payload() -> dict:
+    return {
+        "cadence_status": "satisfied",
+        "implementation_gate": "satisfied",
+        "drift_warning": [
+            "No product-risk or live-research proof advanced in the last 3 completed tickets."
+        ],
+    }
+
+
+def test_plan_includes_researcher_product_proof_status(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("RGE_STAGED_RANK2_SCAN_MAX", raising=False)
+    _seed_minimal_queue(tmp_path)
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+    status = plan["researcher_product_proof_status"]
+
+    assert status["command"] == PRODUCT_PROOF_COMMAND
+    assert status["mock_llm_only"] is True
+    assert status["requires_temp_work_dir"] is True
+    assert "prove-researcher-product" in status["operator_commands"]["product_proof"]
+    assert status["artifact_path"] == DEFAULT_ARTIFACT_REL.as_posix()
+
+
+def test_product_proof_recommended_action_when_drift_and_missing_artifact(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _seed_done_only_queue(tmp_path)
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+    monkeypatch.setattr(
+        "rge.modules.operator_loop.checkpoint_status",
+        lambda **kwargs: _drift_audit_payload(),
+    )
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+    action = plan["next_recommended_action"]
+
+    assert plan["researcher_product_proof_status"]["product_proof_recommended"] is True
+    assert action["action_id"] == "run_researcher_product_proof"
+    assert any(
+        "prove-researcher-product" in cmd.get("shell", "")
+        for cmd in action["commands"]
+    )
+
+
+def test_product_proof_action_deferred_when_open_ticket_exists(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _seed_minimal_queue(tmp_path)
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+    monkeypatch.setattr(
+        "rge.modules.operator_loop.checkpoint_status",
+        lambda **kwargs: _drift_audit_payload(),
+    )
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+
+    assert plan["researcher_product_proof_status"]["product_proof_recommended"] is True
+    assert plan["next_recommended_action"]["action_id"] == "begin_ticket_implementation"
+
+
+def test_product_proof_not_recommended_when_artifact_present(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _seed_done_only_queue(tmp_path)
+    _seed_satisfied_researcher_product_proof(tmp_path)
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+    monkeypatch.setattr(
+        "rge.modules.operator_loop.checkpoint_status",
+        lambda **kwargs: _drift_audit_payload(),
+    )
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+    status = plan["researcher_product_proof_status"]
+
+    assert status["status"] == "available"
+    assert status["product_verdict"] == "GO"
+    assert status["product_proof_recommended"] is False
+    assert status["source_count"] == 3
+    assert status["reports_per_hour_estimate"] == 3600.0
+    assert plan["next_recommended_action"]["action_id"] != "run_researcher_product_proof"
+
+
 def test_proof_bundle_recommended_action_when_product_drift_and_no_open_ticket(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -133,21 +246,18 @@ def test_proof_bundle_recommended_action_when_product_drift_and_no_open_ticket(
     clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
     monkeypatch.setattr(
         "rge.modules.operator_loop.checkpoint_status",
-        lambda **kwargs: {
-            "cadence_status": "satisfied",
-            "implementation_gate": "satisfied",
-            "drift_warning": [
-                "No product-risk or live-research proof advanced in the last 3 completed tickets."
-            ],
-        },
+        lambda **kwargs: _drift_audit_payload(),
     )
 
     plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
     action = plan["next_recommended_action"]
 
     assert plan["arbitrary_source_proof_bundle_status"]["proof_bundle_recommended"] is True
-    assert action["action_id"] == "run_arbitrary_source_proof_bundle"
-    assert "prove-arbitrary-source-bundle" in action["commands"][0]["shell"]
+    assert action["action_id"] == "run_researcher_product_proof"
+    assert any(
+        "prove-researcher-product" in cmd.get("shell", "")
+        for cmd in action["commands"]
+    )
 
 
 def test_proof_bundle_action_deferred_when_open_ticket_exists(
@@ -178,17 +288,12 @@ def test_proof_bundle_not_recommended_when_artifact_satisfied(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _seed_done_only_queue(tmp_path)
+    _seed_satisfied_researcher_product_proof(tmp_path)
     _seed_satisfied_proof_bundle(tmp_path)
     clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
     monkeypatch.setattr(
         "rge.modules.operator_loop.checkpoint_status",
-        lambda **kwargs: {
-            "cadence_status": "satisfied",
-            "implementation_gate": "satisfied",
-            "drift_warning": [
-                "No product-risk or live-research proof advanced in the last 3 completed tickets."
-            ],
-        },
+        lambda **kwargs: _drift_audit_payload(),
     )
 
     plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
@@ -196,7 +301,9 @@ def test_proof_bundle_not_recommended_when_artifact_satisfied(
 
     assert status["proof_artifact_satisfied"] is True
     assert status["proof_bundle_recommended"] is False
+    assert plan["researcher_product_proof_status"]["product_proof_recommended"] is False
     assert plan["next_recommended_action"]["action_id"] != "run_arbitrary_source_proof_bundle"
+    assert plan["next_recommended_action"]["action_id"] != "run_researcher_product_proof"
 
 
 def _seed_public_site_preview_paths(tmp_path: Path, *, include_source_health: bool) -> None:
