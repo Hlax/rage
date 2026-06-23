@@ -58,7 +58,7 @@ Safety audit not required — operator plan wiring only.
 
 ## Merge to main
 
-Merge commit: (recorded after merge).
+Merge commit: `e3d83fdec73f69b32bb622fddc77a392b225ec4d`.
 
 ## Recommended next ticket
 
