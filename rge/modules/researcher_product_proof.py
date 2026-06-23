@@ -27,6 +27,7 @@ from rge.modules.synthesis_packet_runner import (
 PRODUCT_PROOF_SCHEMA_VERSION = "researcher_product_proof_v0.1.0"
 COMMAND = "prove-researcher-product"
 DEFAULT_ARTIFACT_REL = Path("data/reports/researcher_product_proof_latest.json")
+DEFAULT_WORK_DIR_REL = Path("data/tmp/researcher_product_proof_work")
 DEFAULT_TOPIC = "Does AI improve creative output while reducing diversity?"
 DEFAULT_DOMAIN = "creativity"
 PUBLIC_ATLAS_PREVIEW_REL = Path("apps/public-site/public/data/atlas_snapshot_preview.json")
@@ -50,6 +51,79 @@ def _operator_safe_path(path: Path, root: Path) -> str:
 
 def default_artifact_path(*, root: Path | None = None) -> Path:
     return (root or repo_root()) / DEFAULT_ARTIFACT_REL
+
+
+PRODUCT_PROOF_OPERATOR_COMMAND = (
+    "python -m rge.cli prove-researcher-product "
+    f"--work-dir {DEFAULT_WORK_DIR_REL.as_posix()} "
+    f"--artifact-out {DEFAULT_ARTIFACT_REL.as_posix()} "
+    f"--benchmark-runs {DEFAULT_BENCHMARK_RUNS}"
+)
+
+
+def load_product_proof_artifact(
+    *,
+    root: Path | None = None,
+    artifact_path: Path | str | None = None,
+) -> dict[str, Any] | None:
+    project_root = root or repo_root()
+    resolved = Path(artifact_path) if artifact_path else default_artifact_path(root=project_root)
+    if not resolved.is_file():
+        return None
+    try:
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _product_drift_warning_active(audit: dict[str, Any]) -> bool:
+    warnings = audit.get("drift_warning") or []
+    return any(
+        token in warning.lower()
+        for warning in warnings
+        for token in ("product", "live-research", "arbitrary-source")
+    )
+
+
+def inspect_researcher_product_proof_plan_status(
+    *,
+    root: Path | None = None,
+    audit: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Read-only researcher product proof readiness for operator plan mode."""
+    project_root = root or repo_root()
+    artifact_path = default_artifact_path(root=project_root)
+    rel_artifact = _safe_rel(artifact_path, project_root)
+    payload = load_product_proof_artifact(root=project_root, artifact_path=artifact_path)
+    product_verdict = payload.get("product_verdict") if payload else None
+    audit_payload = audit or {}
+    recommended = _product_drift_warning_active(audit_payload) and payload is None
+    if payload is None:
+        status = "missing"
+    else:
+        status = "available"
+    benchmark = (payload or {}).get("benchmark") or {}
+    return {
+        "status": status,
+        "command": COMMAND,
+        "mock_llm_only": True,
+        "requires_temp_work_dir": True,
+        "product_proof_recommended": recommended,
+        "artifact_path": rel_artifact,
+        "product_verdict": product_verdict,
+        "source_count": payload.get("source_count") if payload else None,
+        "claim_count": payload.get("claim_count") if payload else None,
+        "evidence_count": payload.get("evidence_count") if payload else None,
+        "reports_per_hour_estimate": benchmark.get("reports_per_hour_estimate"),
+        "synthesis_output_path": ((payload or {}).get("synthesis") or {}).get(
+            "synthesis_output_path"
+        ),
+        "operator_commands": {
+            "product_proof": PRODUCT_PROOF_OPERATOR_COMMAND,
+        },
+        "env_setup": ['$env:RGE_LLM_MODE = "mock"'],
+    }
 
 
 def collect_db_graph_counts(conn: Any, *, source_id: str | None = None) -> dict[str, int]:

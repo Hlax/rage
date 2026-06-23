@@ -371,7 +371,8 @@ superseded
 | 379 | ticket-379 | done | README operator quickstart synthesis packet benchmark cross-link v0 | `phase-3/ticket-379-readme-synthesis-packet-benchmark-crosslink` | `agent_reports/2026-06-23_phase-3_ticket-379_readme-synthesis-packet-benchmark-crosslink-v0.md` |
 | 380 | ticket-380 | done | AGENTS.md operator quickstart synthesis packet benchmark cross-link v0 | `phase-3/ticket-380-agents-synthesis-packet-benchmark-crosslink` | `agent_reports/2026-06-23_phase-3_ticket-380_agents-synthesis-packet-benchmark-crosslink-v0.md` |
 | 381 | ticket-381 | done | Product proof: arbitrary source bundle → synthesis packet → benchmark → Atlas preview artifact | `phase-3/ticket-381-product-proof-bundle-synthesis-benchmark-atlas` | `agent_reports/2026-06-23_phase-3_ticket-381_product-proof-bundle-synthesis-benchmark-atlas-v0.md` |
-| 382 | ticket-382 | proposed | Operator loop researcher product proof status v0 | | |
+| 382 | ticket-382 | done | Operator loop researcher product proof status v0 | `phase-3/ticket-382-operator-loop-researcher-product-proof-status` | `agent_reports/2026-06-23_phase-3_ticket-382_operator-loop-researcher-product-proof-status-v0.md` |
+| 383 | ticket-383 | proposed | Verify CLI lists prove-researcher-product in mock gate | | |
 | 366 | ticket-366 | done | Live staged orchestrator fetch fallback on candidate 403 | `phase-3/ticket-366-live-staged-orchestrator-fetch-fallback` | `agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md` |
 | 363 | ticket-363 | done | Autonomous loop improvement promotion golden proof | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md` |
 | 362 | ticket-362 | done | Default research run mock staged-spine path | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-362_default-research-run-staged-spine.md` |
@@ -1130,7 +1131,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-382 (proposed) — Operator loop researcher product proof status v0
+ticket-383 (proposed) — Verify CLI lists prove-researcher-product in mock gate
 ```
 
 ## Queue Notes (2026-06-19, ticket-366 live staged orchestrator fetch fallback)
