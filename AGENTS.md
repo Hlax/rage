@@ -94,6 +94,20 @@ mock-only benchmark command, gitignored artifact path
 (`data/reports/synthesis_packet_benchmark_latest.json`), single `synthesize --packet` run,
 and replan steps: README **Operator Quickstart** (*Synthesis packet benchmark dry-run*).
 
+**Researcher product proof** (mock LLM only; scratch work dir; tickets 381–384): end-to-end
+mock-first proof chaining arbitrary-source bundle → synthesis packet → benchmark → safety
+audit → public atlas preview visibility. Plan, verify, and autocycle JSON include
+`researcher_product_proof_status` with `product_proof_recommended`, `product_verdict`
+(`GO`, `PARTIAL`, or `NO-GO`), `artifact_path`, graph counts, and
+`operator_commands.product_proof`. When principal-audit product-risk drift is active and the
+gitignored artifact is missing, plan mode recommends `run_researcher_product_proof`
+(`review_gated`) ahead of the narrower arbitrary-source proof bundle. When
+`product_verdict` is `GO`, `product_proof_recommended` is `false` and autocycle does not
+block on `run_researcher_product_proof`. Full mock-only command, artifact table, and replan
+steps: README **Operator Quickstart** (*Researcher product proof*). Post internal MVP launch
+(ticket-388), advance live-research maturity with the one-time orchestrator checklist
+(ticket-389) after GO product proof.
+
 **Maturity tiers (honest framing):**
 
 - **MVP-Engine:** mock/fixture-proven — golden tests, safety audit, fixture-mode run.
