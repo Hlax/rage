@@ -134,7 +134,7 @@ skip as environmental. Patched-network regression remains
 
 ## Merge to main
 
-Placeholder — updated after merge.
+Merge commit: `f2ed2be` (ticket-389 branch merge).
 
 ## Recommended next ticket
 

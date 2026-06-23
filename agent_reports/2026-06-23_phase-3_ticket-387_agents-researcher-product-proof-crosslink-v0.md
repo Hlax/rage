@@ -33,7 +33,7 @@ orchestrator checklist (ticket-389).
 
 ## Merge to main
 
-Placeholder — updated after merge.
+Merge commit: `3e0baf5`.
 
 ## Recommended next ticket
 
