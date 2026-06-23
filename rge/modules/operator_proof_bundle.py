@@ -20,6 +20,12 @@ from rge.modules.card_exporter import FIXTURE_EXPORT_TIMESTAMP, export_public_ca
 PROOF_BUNDLE_SCHEMA_VERSION = "1"
 PIPELINE_MODE = "fixture_staged_rank1"
 COMMAND = "prove-arbitrary-source-bundle"
+DEFAULT_OPERATOR_PROOF_BUNDLE_REL = (
+    Path("data")
+    / "reports"
+    / "operator_proof_bundle"
+    / "operator_proof_bundle.json"
+)
 _OPENALEX_FIXTURE_PATH = (
     Path(__file__).resolve().parents[2]
     / "fixtures"
@@ -51,6 +57,46 @@ REQUIRED_BUNDLE_FIELDS = (
     "steps_completed",
     "usable_output",
 )
+
+
+def inspect_operator_proof_bundle_artifact(
+    *,
+    root: Path | None = None,
+    artifact_path: Path | None = None,
+) -> dict[str, Any]:
+    """Read the operator proof bundle JSON and report whether it satisfies drift clearance."""
+    from rge.modules.principal_audit_gate import repo_root
+
+    project_root = root or repo_root()
+    resolved_path = artifact_path or (project_root / DEFAULT_OPERATOR_PROOF_BUNDLE_REL)
+    if not resolved_path.is_file():
+        return {
+            "status": "missing",
+            "artifact_path": str(resolved_path),
+            "proof_artifact_satisfied": False,
+        }
+
+    try:
+        bundle = json.loads(resolved_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {
+            "status": "invalid",
+            "artifact_path": str(resolved_path),
+            "proof_artifact_satisfied": False,
+            "error": str(exc),
+        }
+
+    satisfied = (
+        bundle.get("status") == "completed" and bundle.get("usable_output") is True
+    )
+    return {
+        "status": "satisfied" if satisfied else "present",
+        "artifact_path": str(resolved_path),
+        "proof_artifact_satisfied": satisfied,
+        "bundle_status": bundle.get("status"),
+        "usable_output": bundle.get("usable_output"),
+        "pipeline_mode": bundle.get("pipeline_mode"),
+    }
 
 
 def _failed_step_from_runtime_error(detail: str) -> str:

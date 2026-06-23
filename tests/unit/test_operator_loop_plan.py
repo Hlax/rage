@@ -12,6 +12,21 @@ from rge.modules.operator_loop import WorkingTreeStatus, build_operator_plan
 from rge.modules.operator_proof_bundle import COMMAND, PIPELINE_MODE
 
 
+def _seed_satisfied_proof_bundle(tmp_path: Path) -> None:
+    artifact_dir = tmp_path / "data" / "reports" / "operator_proof_bundle"
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    (artifact_dir / "operator_proof_bundle.json").write_text(
+        json.dumps(
+            {
+                "status": "completed",
+                "usable_output": True,
+                "pipeline_mode": PIPELINE_MODE,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
 def _seed_minimal_queue(tmp_path: Path) -> None:
     (tmp_path / "tickets").mkdir(parents=True, exist_ok=True)
     (tmp_path / "agent_reports").mkdir(parents=True, exist_ok=True)
@@ -156,6 +171,32 @@ def test_proof_bundle_action_deferred_when_open_ticket_exists(
 
     assert plan["arbitrary_source_proof_bundle_status"]["proof_bundle_recommended"] is True
     assert plan["next_recommended_action"]["action_id"] == "begin_ticket_implementation"
+
+
+def test_proof_bundle_not_recommended_when_artifact_satisfied(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _seed_done_only_queue(tmp_path)
+    _seed_satisfied_proof_bundle(tmp_path)
+    clean_tree = WorkingTreeStatus(clean=True, branch="main", dirty_paths=[])
+    monkeypatch.setattr(
+        "rge.modules.operator_loop.checkpoint_status",
+        lambda **kwargs: {
+            "cadence_status": "satisfied",
+            "implementation_gate": "satisfied",
+            "drift_warning": [
+                "No product-risk or live-research proof advanced in the last 3 completed tickets."
+            ],
+        },
+    )
+
+    plan = build_operator_plan(root=tmp_path, working_tree=clean_tree)
+    status = plan["arbitrary_source_proof_bundle_status"]
+
+    assert status["proof_artifact_satisfied"] is True
+    assert status["proof_bundle_recommended"] is False
+    assert plan["next_recommended_action"]["action_id"] != "run_arbitrary_source_proof_bundle"
 
 
 def _seed_public_site_preview_paths(tmp_path: Path, *, include_source_health: bool) -> None:

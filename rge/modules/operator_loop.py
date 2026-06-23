@@ -2085,16 +2085,40 @@ def _product_drift_warning_active(audit: dict[str, Any]) -> bool:
     )
 
 
+def _product_drift_warnings_cleared_by_proof_bundle(
+    drift_warnings: list[str] | None,
+    *,
+    proof_artifact_satisfied: bool,
+) -> list[str]:
+    """Return drift warnings that still block after a satisfied operator proof bundle."""
+    warnings = list(drift_warnings or [])
+    if not proof_artifact_satisfied:
+        return warnings
+    return [
+        warning
+        for warning in warnings
+        if not any(
+            token in warning.lower()
+            for token in ("product-risk", "live-research", "arbitrary-source")
+        )
+    ]
+
+
 def inspect_arbitrary_source_proof_bundle_status(
     *,
     root: Path | None = None,
     audit: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Read-only arbitrary-source proof bundle CLI readiness for operator plan mode."""
-    from rge.modules.operator_proof_bundle import COMMAND, PIPELINE_MODE
+    from rge.modules.operator_proof_bundle import (
+        COMMAND,
+        PIPELINE_MODE,
+        inspect_operator_proof_bundle_artifact,
+    )
 
     project_root = root or repo_root()
     audit_payload = audit or {}
+    artifact = inspect_operator_proof_bundle_artifact(root=project_root)
     proof_bundle_command = (
         "python -m rge.cli prove-arbitrary-source-bundle "
         '--topic "Does AI improve creative output while reducing diversity?" '
@@ -2105,7 +2129,10 @@ def inspect_arbitrary_source_proof_bundle_status(
         "--export-dir data/exports/operator_proof_bundle "
         "--bundle-out data/reports/operator_proof_bundle/operator_proof_bundle.json"
     )
-    recommended = _product_drift_warning_active(audit_payload)
+    recommended = (
+        _product_drift_warning_active(audit_payload)
+        and not artifact.get("proof_artifact_satisfied")
+    )
     return {
         "status": "available",
         "command": COMMAND,
@@ -2113,6 +2140,9 @@ def inspect_arbitrary_source_proof_bundle_status(
         "mock_llm_only": True,
         "requires_temp_db": True,
         "proof_bundle_recommended": recommended,
+        "proof_artifact_path": artifact.get("artifact_path"),
+        "proof_artifact_satisfied": artifact.get("proof_artifact_satisfied", False),
+        "proof_artifact_status": artifact.get("status"),
         "operator_commands": {
             "proof_bundle": proof_bundle_command,
         },

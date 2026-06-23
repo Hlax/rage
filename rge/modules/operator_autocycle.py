@@ -15,6 +15,7 @@ from typing import Any, Callable
 
 from rge.modules.operator_loop import (
     WorkingTreeStatus,
+    _product_drift_warnings_cleared_by_proof_bundle,
     build_operator_plan,
     execute_safe_checks,
     inspect_working_tree,
@@ -463,9 +464,15 @@ def evaluate_autocycle_cycle(
             commands=commands,
         )
 
-    if drift_warning:
+    blocking_drift_warning = _product_drift_warnings_cleared_by_proof_bundle(
+        drift_warning,
+        proof_artifact_satisfied=bool(
+            proof_bundle_status.get("proof_artifact_satisfied")
+        ),
+    )
+    if blocking_drift_warning:
         return stop(
-            f"drift_warning_active: {'; '.join(drift_warning)}",
+            f"drift_warning_active: {'; '.join(blocking_drift_warning)}",
             next_cmd=audit.get("recommended_override")
             or "/rge-principal-audit",
         )
