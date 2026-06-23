@@ -268,6 +268,8 @@ def evaluate_autocycle_cycle(
             "arbitrary_source_proof_bundle_status"
         )
         or {},
+        "researcher_product_proof_status": plan.get("researcher_product_proof_status")
+        or {},
         "synthesis_human_review_plan_status": plan.get(
             "synthesis_human_review_plan_status"
         )
@@ -282,6 +284,7 @@ def evaluate_autocycle_cycle(
         "staged_rank2_scan_max": plan.get("staged_rank2_scan_max"),
         "scratch_evidence_review_recommended": False,
         "proof_bundle_recommended": False,
+        "product_proof_recommended": False,
         "synthesis_sign_off_review_recommended": False,
         "synthesis_operator_loop_sign_off_recommended": False,
         "run_next_ticket_allowed": False,
@@ -364,6 +367,20 @@ def evaluate_autocycle_cycle(
         result["recommended_action"] = action
         return stop(
             "operator_action_blocked_automation: run_scratch_evidence_review",
+            next_cmd=commands[0] if commands else None,
+            commands=commands,
+        )
+
+    product_proof_status = plan.get("researcher_product_proof_status") or {}
+    if (
+        product_proof_status.get("product_proof_recommended")
+        and action_id == "run_researcher_product_proof"
+    ):
+        commands = [_shell_command(cmd) for cmd in action.get("commands", [])]
+        result["product_proof_recommended"] = True
+        result["recommended_action"] = action
+        return stop(
+            "operator_action_blocked_automation: run_researcher_product_proof",
             next_cmd=commands[0] if commands else None,
             commands=commands,
         )
@@ -468,7 +485,8 @@ def evaluate_autocycle_cycle(
         drift_warning,
         proof_artifact_satisfied=bool(
             proof_bundle_status.get("proof_artifact_satisfied")
-        ),
+        )
+        or product_proof_status.get("product_verdict") in {"GO", "PARTIAL"},
     )
     if blocking_drift_warning:
         return stop(
@@ -560,6 +578,7 @@ def evaluate_autocycle_cycle(
         "resolve_documentation_git_drift",
         "resolve_dirty_working_tree",
         "run_scratch_evidence_review",
+        "run_researcher_product_proof",
         "run_arbitrary_source_proof_bundle",
         "run_synthesis_review_sign_off",
         "run_synthesis_operator_loop",
@@ -739,6 +758,8 @@ def run_autocycle(
             "arbitrary_source_proof_bundle_status"
         )
         or {},
+        "researcher_product_proof_status": last.get("researcher_product_proof_status")
+        or {},
         "synthesis_human_review_plan_status": last.get(
             "synthesis_human_review_plan_status"
         )
@@ -764,6 +785,7 @@ def run_autocycle(
             "scratch_evidence_review_recommended", False
         ),
         "proof_bundle_recommended": last.get("proof_bundle_recommended", False),
+        "product_proof_recommended": last.get("product_proof_recommended", False),
         "synthesis_sign_off_review_recommended": last.get(
             "synthesis_sign_off_review_recommended", False
         ),

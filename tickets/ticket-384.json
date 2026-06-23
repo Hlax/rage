@@ -32,6 +32,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert operator_autocycle status mirror and tests only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / operator integration"
 }
