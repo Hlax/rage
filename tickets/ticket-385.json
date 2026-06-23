@@ -1,0 +1,36 @@
+{
+  "id": "ticket-385",
+  "title": "Principal audit post-ticket-384 researcher product proof integration checkpoint",
+  "problem": "Three consecutive done tickets since pre-ticket-381 audit (382–384) closed researcher product proof operator integration (plan, verify, autocycle). Cadence rule requires a principal audit before further implementation.",
+  "evidence": [
+    "agent_reports/2026-06-23_phase-3_ticket-384_autocycle-researcher-product-proof-status-v0.md",
+    "agent_reports/2026-06-23_pre-ticket-381_product-proof-bundle-synthesis-benchmark-atlas-audit.md",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [],
+  "expected_files": [
+    "agent_reports/YYYY-MM-DD_principal-audit-post-ticket-384.md",
+    "tickets/ticket-385.json",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "acceptance_criteria": [
+    "Read-only principal audit report with GO/NO-GO and safety boundary checklist.",
+    "Cadence reset documented after tickets 382–384.",
+    "Recommends next product or hardening ticket honestly.",
+    "No implementation code changes in audit ticket."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m rge.cli verify --skip-site",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Feature implementation.",
+    "Public site changes.",
+    "Live OpenAI runs."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert audit report and queue updates only.",
+  "status": "proposed",
+  "category": "Phase 3 / principal audit"
+}
