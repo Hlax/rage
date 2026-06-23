@@ -53,7 +53,9 @@ Safety audit not required — AGENTS.md documentation only.
 
 ## Merge to main
 
-_(recorded after merge)_
+Merge commit: `90460408b740c91d43fec36352f60578fa2783f8`
+
+Post-merge pytest: **1336 passed**, 49 deselected.
 
 ## Recommended next ticket
 
