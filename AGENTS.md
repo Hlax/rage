@@ -69,6 +69,18 @@ checklist**). Plan mode surfaces `scratch_evidence_status` and may recommend
 `run_scratch_evidence_review` when reviewed scratch rows exist. See also README
 Operator Quickstart.
 
+**Arbitrary-source operator proof bundle** (mock LLM only; temp/scratch paths): when a
+principal-audit checkpoint surfaces **product-risk / live-research / arbitrary-source
+drift**, plan mode may recommend `run_arbitrary_source_proof_bundle` (`review_gated`).
+Plan JSON includes `arbitrary_source_proof_bundle_status` with
+`proof_bundle_recommended`, `proof_artifact_satisfied`, `proof_artifact_path`, and
+`operator_commands.proof_bundle`. When `proof_artifact_satisfied` is `true` (bundle JSON
+has `status: completed` and `usable_output: true`), drift clearance is recorded and the
+recommendation clears. Autocycle blocks with `operator_action_blocked_automation` while
+the bundle remains recommended (same pattern as scratch evidence review). Full mock-only
+`prove-arbitrary-source-bundle` command, artifact table, and replan steps: README
+**Operator Quickstart** (*Arbitrary-source operator proof bundle*).
+
 **Maturity tiers (honest framing):**
 
 - **MVP-Engine:** mock/fixture-proven — golden tests, safety audit, fixture-mode run.
@@ -92,7 +104,7 @@ Operator Quickstart.
   mock link + mock build (ticket-217; operator opt-in); evidence DB NM-4 proven; default graph
   synthnote checksum-mock; bare `research run --topic --domain` (no flags) remains
   `not_implemented`; full live MVP without golden fixtures remains out of scope.
-- **Cloud providers:** deferred (ticket-059).
+- **Cloud providers:** mock-first cloud synthesis adapter on `research synthesize --packet` (ticket-059); live OpenAI opt-in only behind explicit gates.
 
 **Live staged network proofs** (operator opt-in; tickets 167–193): real OpenAlex HTTP
 pytest proofs on temp DB paths. **Not** run in CI or default `pytest` (`live_network`
