@@ -1,0 +1,35 @@
+{
+  "id": "ticket-390",
+  "title": "Principal audit post-ticket-389 launch hygiene checkpoint",
+  "problem": "Tickets 386–389 closed launch docs and operator checklists; cadence is overdue for a principal audit before further implementation.",
+  "evidence": [
+    "agent_reports/2026-06-23_phase-3_ticket-389_live-staged-orchestrator-checklist-v0.md",
+    "agent_reports/2026-06-23_phase-3_ticket-387_agents-researcher-product-proof-crosslink-v0.md",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "affected_modules": [
+    "agent_reports"
+  ],
+  "expected_files": [
+    "agent_reports/YYYY-MM-DD_principal-audit-post-ticket-389.md",
+    "tickets/ticket-390.json",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report with mock-only verification results.",
+    "Cadence reset and GO/NO-GO for next implementation ticket.",
+    "No feature implementation."
+  ],
+  "test_plan": [
+    "python -m pytest tests/golden -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "New research features.",
+    "Live network pytest in audit pass."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove audit report only.",
+  "status": "proposed",
+  "category": "Phase 3 / audit checkpoint"
+}
