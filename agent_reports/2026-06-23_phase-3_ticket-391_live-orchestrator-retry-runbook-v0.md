@@ -125,7 +125,7 @@ Safety audit not required (docs-only).
 
 ## Merge to main
 
-Placeholder — updated after merge.
+Merge commit: `8c4523c`.
 
 ## Recommended next ticket
 
