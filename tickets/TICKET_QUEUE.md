@@ -382,7 +382,7 @@ superseded
 | 392 | ticket-392 | done | AGENTS.md live orchestrator retry runbook cross-link v0 | `phase-3/ticket-392-agents-orchestrator-retry-crosslink` | `agent_reports/2026-06-23_phase-3_ticket-392_agents-orchestrator-retry-crosslink-v0.md` |
 | 388 | ticket-388 | done | Internal MVP launch checkpoint v0 | | `agent_reports/2026-06-23_phase-3_ticket-388_internal-mvp-launch-checkpoint-v0.md` |
 | 389 | ticket-389 | done | Operator one-time live staged orchestrator verification checklist v0 | `phase-3/ticket-389-live-staged-orchestrator-checklist` | `agent_reports/2026-06-23_phase-3_ticket-389_live-staged-orchestrator-checklist-v0.md` |
-| 393 | ticket-393 | proposed | Hydrate live OpenAI synthesis grounding input | | |
+| 393 | ticket-393 | done | Hydrate live OpenAI synthesis grounding input | `phase-3/ticket-393-live-openai-grounding-input` | `agent_reports/2026-06-24_phase-3_ticket-393_live-openai-grounding-input.md` |
 | 394 | ticket-394 | proposed | Add deterministic live OpenAI synthesis evaluator artifact | | |
 | 395 | ticket-395 | proposed | Bridge OpenAI synthesis evaluator suggestions to instruction-packet draft tickets | | |
 | 396 | ticket-396 | proposed | Surface OpenAI synthesis evaluator status in operator plan | | |
@@ -1145,7 +1145,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-393 (proposed) — Hydrate live OpenAI synthesis grounding input
+ticket-394 (proposed) — Deterministic live OpenAI synthesis evaluator artifact
 ```
 
 ## Queue Notes (2026-06-23, live OpenAI evaluator ticket sequence)
