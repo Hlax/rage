@@ -62,7 +62,7 @@ Not run — unit tests cover `bridge_evaluator_to_instruction_draft` and CLI `--
 
 ## Merge to main
 
-*(pending merge)*
+Merge commit: `cfaa8ca4a4e2e981cd73a6b14750ecfd733169b3`.
 
 ## Recommended next ticket
 
