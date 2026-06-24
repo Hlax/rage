@@ -45,6 +45,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert README, runtime config, escalation policy, and checkpoint report edits only. No DB migration or runtime rollback is required.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / documentation"
 }

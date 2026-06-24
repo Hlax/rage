@@ -1,0 +1,38 @@
+{
+  "id": "ticket-398",
+  "title": "Principal audit post OpenAI synthesis evaluator sequence (393-397)",
+  "problem": "Tickets 393-397 closed the live OpenAI synthesis evaluator spine (grounding hydration, evaluator artifact, instruction-packet bridge, operator plan status, and runbook docs). A principal audit checkpoint is due before further cloud-synthesis or operator-automation tickets broaden scope.",
+  "evidence": [
+    "agent_reports/2026-06-24_phase-3_ticket-393_live-openai-grounding-input.md",
+    "agent_reports/2026-06-24_phase-3_ticket-394_openai-synthesis-evaluator-artifact.md",
+    "agent_reports/2026-06-24_phase-3_ticket-395_openai-evaluator-instruction-bridge.md",
+    "agent_reports/2026-06-24_phase-3_ticket-396_openai-evaluator-operator-status.md",
+    "agent_reports/2026-06-24_phase-3_ticket-397_live-openai-evaluator-checkpoint.md",
+    "docs/agents/10_SAFETY_MODEL.md"
+  ],
+  "affected_modules": [
+    "agent_reports",
+    "docs/agents"
+  ],
+  "expected_files": [
+    "agent_reports/YYYY-MM-DD_principal-audit-post-ticket-397_openai-evaluator-sequence.md"
+  ],
+  "acceptance_criteria": [
+    "Audit report records GO/NO-GO for the 393-397 spine with explicit safety boundaries (no accepted graph writes, no CI live HTTP, no public-site operator env).",
+    "Audit confirms mock-first defaults remain intact in verify, golden tests, and execute-safe.",
+    "Audit lists any follow-on hardening tickets with risk classification before the next implementation ticket."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Do not implement new engine features during the audit.",
+    "Do not run live OpenAI HTTP as part of the audit.",
+    "Do not merge or push without documenting audit verdict."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Delete the audit report only; no code rollback required.",
+  "status": "proposed",
+  "category": "Phase 3 / audit checkpoint"
+}
