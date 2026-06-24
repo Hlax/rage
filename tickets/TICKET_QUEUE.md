@@ -379,9 +379,14 @@ superseded
 | 387 | ticket-387 | done | AGENTS.md operator loop researcher product proof cross-link v0 | `phase-3/ticket-387-agents-researcher-product-proof-crosslink` | `agent_reports/2026-06-23_phase-3_ticket-387_agents-researcher-product-proof-crosslink-v0.md` |
 | 390 | ticket-390 | done | Principal audit post-ticket-389 launch hygiene checkpoint | | `agent_reports/2026-06-23_principal-audit-post-ticket-389.md` |
 | 391 | ticket-391 | done | Operator live orchestrator verification retry runbook v0 | `phase-3/ticket-391-live-orchestrator-retry-runbook` | `agent_reports/2026-06-23_phase-3_ticket-391_live-orchestrator-retry-runbook-v0.md` |
-| 392 | ticket-392 | proposed | AGENTS.md live orchestrator retry runbook cross-link v0 | | |
+| 392 | ticket-392 | done | AGENTS.md live orchestrator retry runbook cross-link v0 | `phase-3/ticket-392-agents-orchestrator-retry-crosslink` | `agent_reports/2026-06-23_phase-3_ticket-392_agents-orchestrator-retry-crosslink-v0.md` |
 | 388 | ticket-388 | done | Internal MVP launch checkpoint v0 | | `agent_reports/2026-06-23_phase-3_ticket-388_internal-mvp-launch-checkpoint-v0.md` |
 | 389 | ticket-389 | done | Operator one-time live staged orchestrator verification checklist v0 | `phase-3/ticket-389-live-staged-orchestrator-checklist` | `agent_reports/2026-06-23_phase-3_ticket-389_live-staged-orchestrator-checklist-v0.md` |
+| 393 | ticket-393 | proposed | Hydrate live OpenAI synthesis grounding input | | |
+| 394 | ticket-394 | proposed | Add deterministic live OpenAI synthesis evaluator artifact | | |
+| 395 | ticket-395 | proposed | Bridge OpenAI synthesis evaluator suggestions to instruction-packet draft tickets | | |
+| 396 | ticket-396 | proposed | Surface OpenAI synthesis evaluator status in operator plan | | |
+| 397 | ticket-397 | proposed | Document live OpenAI evaluator canary runbook and checkpoint | | |
 | 366 | ticket-366 | done | Live staged orchestrator fetch fallback on candidate 403 | `phase-3/ticket-366-live-staged-orchestrator-fetch-fallback` | `agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md` |
 | 363 | ticket-363 | done | Autonomous loop improvement promotion golden proof | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md` |
 | 362 | ticket-362 | done | Default research run mock staged-spine path | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-362_default-research-run-staged-spine.md` |
@@ -1140,8 +1145,18 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-392 (proposed) — AGENTS.md live orchestrator retry runbook cross-link v0
+ticket-393 (proposed) — Hydrate live OpenAI synthesis grounding input
 ```
+
+## Queue Notes (2026-06-23, live OpenAI evaluator ticket sequence)
+
+- Seeded `ticket-393` through `ticket-397` as proposed follow-on tickets for the
+  live OpenAI evaluator path.
+- Sequence: grounded OpenAI request hydration → deterministic evaluator artifact
+  → evaluator-to-instruction-packet draft bridge → operator plan/autocycle status
+  → runbook/checkpoint.
+- Safety boundary: mock-first defaults remain unchanged; live OpenAI stays
+  operator-only behind explicit gates, cost caps, and `--confirm`.
 
 ## Queue Notes (2026-06-19, ticket-366 live staged orchestrator fetch fallback)
 
