@@ -1,0 +1,32 @@
+{
+  "id": "ticket-408",
+  "title": "AGENTS.md researcher product proof drift clearance quickstep cross-link v0",
+  "problem": "README now documents the product-risk drift clearance quickstep (ticket-407). AGENTS.md references Researcher product proof but does not point operators to the new quickstep subsection.",
+  "evidence": [
+    "agent_reports/2026-06-24_phase-3_ticket-407_readme-product-proof-drift-quickstep-v0.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "AGENTS.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-408_agents-product-proof-drift-quickstep-v0.md"
+  ],
+  "acceptance_criteria": [
+    "AGENTS.md cross-links README product-risk drift clearance quickstep.",
+    "No code changes."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Engine changes.",
+    "Live network or live LLM."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert AGENTS.md paragraph only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}

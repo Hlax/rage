@@ -550,6 +550,22 @@ safety audit → public atlas preview visibility. Clears principal-audit **produ
 when the gitignored artifact reports `product_verdict: GO` (or `PARTIAL` with documented
 gaps). No live OpenAlex network, no live Ollama, and no `export-public --publish`.
 
+**Product-risk drift clearance quickstep** (when plan JSON shows
+`product_proof_recommended: true` — typically after principal-audit drift warnings or a
+missing gitignored artifact):
+
+| Step | Action |
+| --- | --- |
+| 1. Inspect plan | `python -m rge.modules.operator_loop --mode plan` → read `researcher_product_proof_status` and `drift_warning` |
+| 2. Confirm trigger | `product_proof_recommended: true` and artifact missing or stale (`product_verdict` not `GO`) |
+| 3. Run mock proof | Commands below (`RGE_LLM_MODE=mock`; scratch `--work-dir` only) |
+| 4. Verify artifact | `product_verdict: GO` (or documented `PARTIAL`) in `data/reports/researcher_product_proof_latest.json` |
+| 5. Replan | `python -m rge.modules.operator_loop --mode plan` — expect `product_proof_recommended: false` when `GO` |
+
+Autocycle blocks with `operator_action_blocked_automation: run_researcher_product_proof`
+while drift is active and the artifact is unsatisfied — run the proof manually; execute-safe
+does **not** auto-run product proof.
+
 ```powershell
 $env:RGE_LLM_MODE = "mock"
 python -m rge.cli prove-researcher-product `
