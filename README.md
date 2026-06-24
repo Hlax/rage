@@ -424,6 +424,30 @@ action is recommended. Private `self_improvement_status` includes the same snaps
 synthesis CLI branches. See also `docs/agents/12_RUNTIME_CONFIG.md` and AGENTS.md
 Operator Loop (cloud synthesis maturity bullet).
 
+**Live OpenAI synthesis evaluator** (read-only; ticket-394): after an opt-in
+`synthesize --packet --provider openai --confirm` run, evaluate the generated synthesis
+output JSON without making additional network calls. Writes gitignored operator artifact
+`data/reports/openai_synthesis_evaluator_latest.json` with `evaluator_verdict`
+(`GO`, `PARTIAL`, or `NO-GO`), grounding/governor summaries, and remediation suggestions.
+
+```powershell
+# Optional live canary (explicit gates + --confirm required)
+python -m rge.cli synthesize `
+  --packet fixtures/synthesis/grounded_evidence_packet_dry_run.json `
+  --provider openai --confirm --load-operator-env `
+  --output-dir data/tmp/openai_synthesis_canary
+
+# Deterministic evaluator (no live HTTP)
+python scripts/run_openai_synthesis_evaluator.py `
+  --artifact data/tmp/openai_synthesis_canary/synthesis_output_syn_packet_grounded_dry_run_fixture.json
+```
+
+Pass criteria for operator canary + evaluator: `grounding_passed: true`,
+`governor_verdict: GO`, `no_accepted_graph_writes: true`, and `evaluator_verdict: GO`.
+The evaluator reuses `synthesis_grounding`, `synthesis_review_threshold_policy`, and
+`autonomous_synthesis_governor` checks; it does not auto-promote remediation suggestions
+into `tickets/`.
+
 **Researcher product proof** (mock LLM only; scratch work dir; tickets 381–384): end-to-end
 mock-first proof that chains arbitrary-source proof bundle → synthesis packet → benchmark →
 safety audit → public atlas preview visibility. Clears principal-audit **product-risk drift**
