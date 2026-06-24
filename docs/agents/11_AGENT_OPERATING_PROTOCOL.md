@@ -249,6 +249,17 @@ Default operator workflow:
 4. Resolve `blocked` states (dirty tree, branch mismatch, report drift) before
    continuing.
 
+**OpenAI synthesis evaluator execute-safe seed** (ticket-400; mock-only): when
+`openai_synthesis_evaluator_status.review_artifact_recommended` is `true` and plan
+recommends `run_openai_synthesis_evaluator` (`safe_autonomous`), successful
+execute-safe (after verification passes) may seed gitignored
+`data/reports/openai_synthesis_evaluator_latest.json` from canary JSON or
+**mock-cloud** synthesis only. Execute-safe payload:
+`openai_synthesis_evaluator_execute_safe_hook` with `live_http_used: false` —
+never live OpenAI HTTP or live canary. See README **Operator Quickstart**
+(*Live OpenAI synthesis evaluator canary runbook* — *Execute-safe evaluator seed
+hook*), `docs/agents/12_RUNTIME_CONFIG.md`, and `docs/agents/13_MODEL_ESCALATION_POLICY.md`.
+
 **Live probe scratch evidence workflow** (local Ollama opt-in; operator-only
 persist): after live probe sessions, follow the numbered checklist in
 `docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md` (**Scratch evidence workflow

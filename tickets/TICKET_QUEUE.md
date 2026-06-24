@@ -395,7 +395,8 @@ superseded
 | 403 | ticket-403 | done | Principal audit post OpenAI evaluator docs sequence (399-402) | `phase-3/ticket-403-principal-audit-post-402` | `agent_reports/2026-06-24_principal-audit-post-ticket-402_openai-evaluator-docs-sequence.md` |
 | 404 | ticket-404 | done | 12_RUNTIME_CONFIG execute-safe OpenAI evaluator seed hook cross-link v0 | `phase-3/ticket-404-runtime-config-execute-safe-evaluator-seed` | `agent_reports/2026-06-24_phase-3_ticket-404_runtime-config-execute-safe-evaluator-seed-v0.md` |
 | 405 | ticket-405 | done | 13_MODEL_ESCALATION_POLICY execute-safe OpenAI evaluator seed cross-link v0 | `phase-3/ticket-405-escalation-policy-execute-safe-evaluator-seed` | `agent_reports/2026-06-24_phase-3_ticket-405_escalation-policy-execute-safe-evaluator-seed-v0.md` |
-| 406 | ticket-406 | proposed | 11_AGENT_OPERATING_PROTOCOL execute-safe OpenAI evaluator seed cross-link v0 | | |
+| 406 | ticket-406 | done | 11_AGENT_OPERATING_PROTOCOL execute-safe OpenAI evaluator seed cross-link v0 | `phase-3/ticket-406-operating-protocol-execute-safe-evaluator-seed` | `agent_reports/2026-06-24_phase-3_ticket-406_operating-protocol-execute-safe-evaluator-seed-v0.md` |
+| 407 | ticket-407 | proposed | README researcher product proof drift clearance quickstep v0 | | |
 | 366 | ticket-366 | done | Live staged orchestrator fetch fallback on candidate 403 | `phase-3/ticket-366-live-staged-orchestrator-fetch-fallback` | `agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md` |
 | 363 | ticket-363 | done | Autonomous loop improvement promotion golden proof | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md` |
 | 362 | ticket-362 | done | Default research run mock staged-spine path | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-362_default-research-run-staged-spine.md` |
@@ -1154,8 +1155,15 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-406 (proposed) — 11_AGENT_OPERATING_PROTOCOL execute-safe OpenAI evaluator seed cross-link v0
+ticket-407 (proposed) — README researcher product proof drift clearance quickstep v0
 ```
+
+## Queue Notes (2026-06-24, ticket-406 operating protocol execute-safe seed)
+
+- `11_AGENT_OPERATING_PROTOCOL.md` documents execute-safe evaluator seed (ticket-400).
+- Execute-safe docs trilogy complete across README, AGENTS, runtime config, escalation policy, operating protocol.
+- Principal audit GO: `agent_reports/2026-06-24_principal-audit-post-ticket-405_execute-safe-docs-trilogy.md`.
+- Seeded ticket-407 for product-proof drift quickstep.
 
 ## Queue Notes (2026-06-24, ticket-405 escalation policy execute-safe seed)
 
