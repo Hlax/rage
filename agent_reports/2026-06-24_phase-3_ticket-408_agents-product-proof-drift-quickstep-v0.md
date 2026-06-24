@@ -50,7 +50,9 @@ None.
 
 ## Merge to main
 
-Merge commit: *(pending)*.
+Merge commit: `86eb058620643153f7d0d973271be92edf5a9c24`.
+
+Post-merge full pytest: **1381 passed**, 49 deselected.
 
 ## Recommended next ticket
 
