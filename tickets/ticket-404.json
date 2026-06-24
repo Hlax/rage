@@ -29,6 +29,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert 12_RUNTIME_CONFIG section only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / documentation"
 }

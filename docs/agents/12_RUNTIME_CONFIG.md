@@ -130,6 +130,16 @@ python scripts/run_openai_synthesis_evaluator.py `
 `live_http_gates_missing`, `live_http_review_gated`, and operator commands.
 Live canary is **review_gated**; autocycle and execute-safe never run it.
 
+**Execute-safe evaluator seed** (ticket-400): when
+`openai_synthesis_evaluator_status.review_artifact_recommended` is `true` and plan
+recommends `run_openai_synthesis_evaluator` (`safe_autonomous`), a successful
+`operator_loop --mode execute-safe` run (after verification passes) seeds
+`data/reports/openai_synthesis_evaluator_latest.json` from existing canary JSON or
+mock-cloud synthesis of the grounded fixture. Execute-safe payload key:
+`openai_synthesis_evaluator_execute_safe_hook` with `live_http_used: false` — never
+live OpenAI HTTP. See README **Operator Quickstart** (*Live OpenAI synthesis evaluator
+canary runbook* — *Execute-safe evaluator seed hook*).
+
 ### Synthesis packet CLI (ticket-059 bridge)
 
 ```powershell

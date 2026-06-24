@@ -1,0 +1,31 @@
+{
+  "id": "ticket-405",
+  "title": "13_MODEL_ESCALATION_POLICY execute-safe OpenAI evaluator seed cross-link v0",
+  "problem": "Tickets 401-404 documented execute-safe evaluator seeding in README, AGENTS.md, and 12_RUNTIME_CONFIG.md, but docs/agents/13_MODEL_ESCALATION_POLICY.md does not mention the ticket-400 execute-safe hook.",
+  "evidence": [
+    "agent_reports/2026-06-24_phase-3_ticket-404_runtime-config-execute-safe-evaluator-seed-v0.md",
+    "docs/agents/13_MODEL_ESCALATION_POLICY.md"
+  ],
+  "affected_modules": [
+    "docs/agents/13_MODEL_ESCALATION_POLICY.md"
+  ],
+  "expected_files": [
+    "docs/agents/13_MODEL_ESCALATION_POLICY.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-405_escalation-policy-execute-safe-evaluator-seed-v0.md"
+  ],
+  "acceptance_criteria": [
+    "13_MODEL_ESCALATION_POLICY documents execute-safe mock evaluator seed as operator-only mock-cloud path.",
+    "No code changes."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Engine changes.",
+    "Live OpenAI HTTP."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert escalation policy section only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}
