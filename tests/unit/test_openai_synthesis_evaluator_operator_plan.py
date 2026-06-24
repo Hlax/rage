@@ -110,17 +110,23 @@ def test_operator_plan_documents_live_canary_in_status(tmp_path: Path) -> None:
     assert plan["openai_synthesis_evaluator_status"]["live_http_review_gated"] is True
 
 
-def test_operator_plan_live_canary_review_gated_when_go_and_gates_satisfied(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    _seed_evaluator_plan_state(tmp_path)
+def _set_openai_live_gates(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Satisfy all live OpenAI HTTP gates without relying on host shell env."""
     monkeypatch.setenv("RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST", "openai")
     monkeypatch.setenv("RGE_CLOUD_MAX_USD_PER_RUN", "0.50")
     monkeypatch.setenv("RGE_CLOUD_MAX_TOKENS_PER_CALL", "4096")
     monkeypatch.setenv("RGE_ALLOW_OPENAI_SYNTHESIS", "1")
     monkeypatch.setenv("RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP", "1")
     monkeypatch.setenv("RGE_CLOUD_LLM_ENABLED", "1")
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-redacted")
+
+
+def test_operator_plan_live_canary_review_gated_when_go_and_gates_satisfied(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _seed_evaluator_plan_state(tmp_path)
+    _set_openai_live_gates(monkeypatch)
     write_evaluator_artifact(
         _minimal_evaluator_payload(),
         root=tmp_path,
@@ -143,12 +149,7 @@ def test_autocycle_blocks_live_canary_action(
     tmp_path: Path,
 ) -> None:
     _seed_evaluator_plan_state(tmp_path)
-    monkeypatch.setenv("RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST", "openai")
-    monkeypatch.setenv("RGE_CLOUD_MAX_USD_PER_RUN", "0.50")
-    monkeypatch.setenv("RGE_CLOUD_MAX_TOKENS_PER_CALL", "4096")
-    monkeypatch.setenv("RGE_ALLOW_OPENAI_SYNTHESIS", "1")
-    monkeypatch.setenv("RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP", "1")
-    monkeypatch.setenv("RGE_CLOUD_LLM_ENABLED", "1")
+    _set_openai_live_gates(monkeypatch)
     write_evaluator_artifact(
         _minimal_evaluator_payload(),
         root=tmp_path,
