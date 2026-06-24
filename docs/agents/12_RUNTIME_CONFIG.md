@@ -92,6 +92,44 @@ Load `.env.local` only through `operator_env_loader.load_operator_env()` or
 `load_config()` — never from public-site code. Key availability may be reported as
 `openai_key_available: true|false` only.
 
+**Env precedence:** defaults → optional repo `.env` → optional gitignored
+`.env.local` → **process environment (shell) wins**. Operator synthesis CLI may
+pass `--load-operator-env` to apply file overlays before a live canary. Public
+builds and `apps/public-site/**` must not call `load_operator_env` or read
+`OPENAI_*` / `RGE_ALLOW_OPENAI_*` variables; `safety_auditor` scans for forbidden
+import patterns.
+
+### OpenAI synthesis evaluator canary (tickets 394–397)
+
+Read-only operator path after optional live `synthesize --packet --provider openai`.
+Does **not** add network calls during evaluate; does **not** write accepted graph
+rows.
+
+| Artifact | Path |
+| -------- | ---- |
+| Canary synthesis output | `data/tmp/openai_synthesis_canary/synthesis_output_<packet_id>.json` |
+| Evaluator summary | `data/reports/openai_synthesis_evaluator_latest.json` |
+| Instruction packet (bridge) | `data/operator/instruction_packets/*.md` |
+| Draft ticket (bridge; gitignored) | `data/operator/draft_tickets/draft_*.json` |
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+python scripts/run_openai_synthesis_evaluator.py `
+  --artifact data/tmp/openai_synthesis_canary/synthesis_output_syn_packet_grounded_dry_run_fixture.json
+```
+
+Optional bridge (never promotes `tickets/`):
+
+```powershell
+python scripts/run_openai_synthesis_evaluator.py `
+  --bridge-instruction-draft `
+  --evaluator-artifact data/reports/openai_synthesis_evaluator_latest.json
+```
+
+`operator_loop --mode plan` includes `openai_synthesis_evaluator_status` with
+`live_http_gates_missing`, `live_http_review_gated`, and operator commands.
+Live canary is **review_gated**; autocycle and execute-safe never run it.
+
 ### Synthesis packet CLI (ticket-059 bridge)
 
 ```powershell

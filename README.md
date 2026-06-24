@@ -424,29 +424,101 @@ action is recommended. Private `self_improvement_status` includes the same snaps
 synthesis CLI branches. See also `docs/agents/12_RUNTIME_CONFIG.md` and AGENTS.md
 Operator Loop (cloud synthesis maturity bullet).
 
-**Live OpenAI synthesis evaluator** (read-only; ticket-394): after an opt-in
-`synthesize --packet --provider openai --confirm` run, evaluate the generated synthesis
-output JSON without making additional network calls. Writes gitignored operator artifact
-`data/reports/openai_synthesis_evaluator_latest.json` with `evaluator_verdict`
-(`GO`, `PARTIAL`, or `NO-GO`), grounding/governor summaries, and remediation suggestions.
+**Live OpenAI synthesis evaluator canary runbook** (read-only; tickets 393–397):
+opt-in live OpenAI synthesis produces **candidate JSON only** — Python grounding,
+governor, and evaluator checks gate downstream artifacts. **No accepted graph
+writes** from model output. Mock-first remains the default for CI, golden tests,
+`verify`, and `execute-safe`.
+
+| Maturity | What is proven |
+| --- | --- |
+| **MVP-Engine (mock)** | Injected-HTTP + fixture evaluator tests; `evaluator_verdict` without `OPENAI_API_KEY` |
+| **Operator live canary** | Explicit gates + `--confirm` + `--load-operator-env`; optional on operator machine only |
+| **Not in scope** | CI live HTTP, autocycle/execute-safe automation, public-site live calls, queue auto-promotion |
+
+**Operator env (`.env.local` vs shell):** copy `.env.example` → `.env.local`
+(gitignored). `load_config()` / `load_operator_env()` merge `.env` then
+`.env.local`; **process environment always wins** over file values. Use
+`--load-operator-env` on synthesis CLI only. Public-site code must **not** import
+`operator_env_loader` or read `OPENAI_*` / `RGE_ALLOW_OPENAI_*` vars (enforced by
+safety auditor patterns). Never commit `.env.local` or log API keys.
+
+**Required env gates for live OpenAI HTTP** (all must be set; cost caps required):
+
+| Variable | Purpose |
+| --- | --- |
+| `RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST` | Must include `openai` |
+| `RGE_CLOUD_LLM_ENABLED` | `1` |
+| `RGE_ALLOW_OPENAI_SYNTHESIS` | `1` |
+| `RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP` | `1` (never CI) |
+| `OPENAI_API_KEY` | Operator credential in `.env.local` only |
+| `RGE_CLOUD_MAX_USD_PER_RUN` | Per-run USD cap (`> 0`) |
+| `RGE_CLOUD_MAX_TOKENS_PER_CALL` | Per-call token cap (`> 0`) |
+| Autonomy circuit breaker | Must be `closed` |
+
+**Step 1 — Optional live canary** (operator machine; charges API usage):
 
 ```powershell
-# Optional live canary (explicit gates + --confirm required)
+# .env.local or explicit shell — see table above
 python -m rge.cli synthesize `
   --packet fixtures/synthesis/grounded_evidence_packet_dry_run.json `
   --provider openai --confirm --load-operator-env `
   --output-dir data/tmp/openai_synthesis_canary
+```
 
-# Deterministic evaluator (no live HTTP)
+Output: `data/tmp/openai_synthesis_canary/synthesis_output_syn_packet_grounded_dry_run_fixture.json`
+(candidate synthesis packet run JSON; gitignored scratch path).
+
+**Step 2 — Deterministic evaluator** (no additional live HTTP):
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
 python scripts/run_openai_synthesis_evaluator.py `
   --artifact data/tmp/openai_synthesis_canary/synthesis_output_syn_packet_grounded_dry_run_fixture.json
 ```
 
-Pass criteria for operator canary + evaluator: `grounding_passed: true`,
-`governor_verdict: GO`, `no_accepted_graph_writes: true`, and `evaluator_verdict: GO`.
+Writes gitignored `data/reports/openai_synthesis_evaluator_latest.json` with
+`live_synthesis_verdict` surfaced in operator plan as
+`openai_synthesis_evaluator_status` (`GO`, `PARTIAL`, or `NO-GO`), grounding/governor
+summaries, missing gate names, and remediation suggestions.
+
+**Pass criteria (operator canary + evaluator):**
+
+| Signal | Required for GO |
+| --- | --- |
+| `grounding_passed` | `true` |
+| `governor_verdict` | `GO` |
+| `no_accepted_graph_writes` | `true` |
+| `live_synthesis_verdict` / `evaluator_verdict` in artifact | `GO` |
+
+**Failure interpretation:**
+
+| Verdict | Meaning | Typical next step |
+| --- | --- | --- |
+| `PARTIAL` | Run completed but grounding or governor flagged review | Fix grounding/citations (ticket-393 pattern); rerun mock evaluate |
+| `NO-GO` | Safety boundary failed (e.g. graph-write gate) | Do not treat output as promotion-ready; inspect `governor_failure_reasons` |
+| Missing gates in plan JSON | Live HTTP blocked | Set operator env; do not bypass gates in code |
+
+**Step 3 — Instruction-packet / draft handoff** (ticket-395; never auto-promotes queue):
+
+```powershell
+python scripts/run_openai_synthesis_evaluator.py `
+  --bridge-instruction-draft `
+  --evaluator-artifact data/reports/openai_synthesis_evaluator_latest.json
+```
+
+Writes instruction packet under `data/operator/instruction_packets/`. Draft
+tickets land in `data/operator/draft_tickets/` only for `PARTIAL`/`NO-GO` by
+default; `GO` skips draft unless `--write-draft`. `operator_loop --mode plan`
+surfaces `openai_synthesis_evaluator_status`; live canary is `review_gated` and
+**never** runs from autocycle or execute-safe.
+
 The evaluator reuses `synthesis_grounding`, `synthesis_review_threshold_policy`, and
-`autonomous_synthesis_governor` checks; it does not auto-promote remediation suggestions
-into `tickets/`.
+`autonomous_synthesis_governor` checks; remediation suggestions do not auto-promote
+into `tickets/` or `TICKET_QUEUE.md`.
+
+See also `docs/agents/12_RUNTIME_CONFIG.md` (cloud synthesis env) and
+`docs/agents/13_MODEL_ESCALATION_POLICY.md` (mock-first escalation boundary).
 
 **Researcher product proof** (mock LLM only; scratch work dir; tickets 381–384): end-to-end
 mock-first proof that chains arbitrary-source proof bundle → synthesis packet → benchmark →

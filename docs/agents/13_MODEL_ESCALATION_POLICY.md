@@ -67,6 +67,14 @@ Expect `reachable: true`, `model_available: true`, `live_llm_enabled: true`,
   downstream artifacts. No direct writes to accepted graph tables.
 - Packet CLI: `python -m rge.cli synthesize --packet PATH` (default `mock_cloud`).
   Live OpenAI requires `--provider openai --confirm` and all env gates from ticket-059.
+- **Evaluator canary (tickets 394–397):** after optional live synthesis, run
+  `scripts/run_openai_synthesis_evaluator.py` on the canary JSON (mock read-only).
+  Output is operator artifact JSON with `live_synthesis_verdict` / grounding / governor
+  signals. Optional `--bridge-instruction-draft` writes instruction packets and
+  gitignored draft tickets only — never `tickets/` or `TICKET_QUEUE.md`.
+- Live OpenAI synthesis remains **candidate output only**; `no_accepted_graph_writes`
+  must stay true. Escalation to implementation uses governor instruction packets and
+  local draft tickets, not direct model writes.
 
 ## Safe verification env
 
@@ -162,7 +170,7 @@ documents an exception:
 | Output type | Storage | Accepted as fact? |
 | ----------- | ------- | ----------------- |
 | Local model candidates | Validated → accepted/rejected tables | Only after Python validation |
-| Cloud synthesis (future) | `data/reports/` as candidate/draft JSON | **Never** auto-accepted |
+| Cloud synthesis (ticket-059+) | `data/reports/`, `data/tmp/openai_synthesis_canary/` as candidate/draft JSON | **Never** auto-accepted |
 | Theories | `theory_candidates` as candidate status | Never without review |
 | Ontology/domain proposals | draft proposal rows | Never auto-activated |
 | Improvement tickets | `data/tickets/` drafts; queue promotion requires `--confirm` | Never implicit |
@@ -180,6 +188,19 @@ documents an exception:
 6. For live structured pipeline tasks, set both `RGE_LLM_MODE=ollama` and
    `RGE_ALLOW_LIVE_LLM=1`.
 7. After any export change, run `python -m rge.modules.safety_auditor --audit full`.
+
+### Live OpenAI synthesis evaluator canary (tickets 393–397)
+
+Mock-first internal MVP; live OpenAI is operator-only:
+
+1. Set cloud/live gates in `.env.local` (shell env overrides file values).
+2. Optional: `synthesize --packet … --provider openai --confirm --load-operator-env`.
+3. `scripts/run_openai_synthesis_evaluator.py --artifact …` (no extra HTTP).
+4. Optional: `--bridge-instruction-draft` for instruction packet / draft ticket handoff.
+
+Pass: `grounding_passed`, `governor_verdict: GO`, `no_accepted_graph_writes: true`,
+evaluator GO. Never run live canary from CI, golden tests, verify, or autocycle.
+Full runbook: README Operator Quickstart (*Live OpenAI synthesis evaluator canary runbook*).
 
 ### Live structured probe (ticket-060)
 
