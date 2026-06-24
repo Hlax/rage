@@ -1,0 +1,32 @@
+{
+  "id": "ticket-409",
+  "title": "Principal audit post product proof docs sequence (406-408)",
+  "problem": "Three consecutive documentation tickets (406 operating protocol execute-safe seed, 407 README product proof quickstep, 408 AGENTS cross-link) completed since the last principal audit (ticket-405). Cadence threshold requires a checkpoint before further implementation.",
+  "evidence": [
+    "agent_reports/2026-06-24_phase-3_ticket-406_operating-protocol-execute-safe-evaluator-seed-v0.md",
+    "agent_reports/2026-06-24_phase-3_ticket-407_readme-product-proof-drift-quickstep-v0.md",
+    "agent_reports/2026-06-24_phase-3_ticket-408_agents-product-proof-drift-quickstep-v0.md",
+    "agent_reports/2026-06-24_principal-audit-post-ticket-405_execute-safe-docs-trilogy.md"
+  ],
+  "affected_modules": [
+    "agent_reports/"
+  ],
+  "expected_files": [
+    "agent_reports/YYYY-MM-DD_principal-audit-post-ticket-408_product-proof-docs-sequence.md"
+  ],
+  "acceptance_criteria": [
+    "Principal audit report covers tickets 406-408 with GO/NO-GO verdict.",
+    "No implementation changes beyond audit runner/docs patches if needed."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m rge.modules.principal_audit_gate --next-ticket ticket-410"
+  ],
+  "non_goals": [
+    "Feature implementation.",
+    "Live network or live LLM."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert audit report only.",
+  "status": "proposed",
+  "category": "Phase 3 / principal audit"
+}
