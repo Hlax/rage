@@ -61,7 +61,7 @@ None.
 
 ## Merge to main
 
-Merge commit: _(record after merge)_.
+Merge commit: `51c5eebef777b0848ff9fb23f3e0aaa40aadb5cd`.
 
 ## Recommended next ticket
 
