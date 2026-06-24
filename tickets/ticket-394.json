@@ -1,0 +1,47 @@
+{
+  "id": "ticket-394",
+  "title": "Add deterministic live OpenAI synthesis evaluator artifact",
+  "problem": "Live OpenAI synthesis canary outputs currently require manual inspection of synthesis_packet_run JSON to determine whether the run was useful, safe, grounded, and ready for improvement handoff. The repo needs a deterministic evaluator artifact that summarizes live synthesis readiness without making live calls or exposing secrets.",
+  "evidence": [
+    "data/tmp/openai_synthesis_canary/synthesis_output_syn_packet_grounded_dry_run_fixture.json",
+    "rge/modules/synthesis_packet_runner.py",
+    "rge/modules/synthesis_grounding.py",
+    "rge/modules/autonomous_synthesis_governor.py",
+    "rge/modules/synthesis_review_threshold_policy.py"
+  ],
+  "affected_modules": [
+    "rge/modules/openai_synthesis_evaluator.py",
+    "scripts/run_openai_synthesis_evaluator.py",
+    "rge/modules/autonomous_synthesis_governor.py"
+  ],
+  "expected_files": [
+    "rge/modules/openai_synthesis_evaluator.py",
+    "scripts/run_openai_synthesis_evaluator.py",
+    "tests/unit/test_openai_synthesis_evaluator.py",
+    "README.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-394_openai-synthesis-evaluator-artifact.md"
+  ],
+  "acceptance_criteria": [
+    "A deterministic evaluator can read a synthesis output JSON artifact and emit a public-safe evaluator artifact without making network calls.",
+    "Evaluator output includes provider, model, packet_id, token usage, cost estimate availability, grounding_passed, flagged_sentence_count, review reasons, governor_verdict, no_accepted_graph_writes, and final evaluator_verdict GO/PARTIAL/NO-GO.",
+    "Evaluator output includes remediation suggestions that reference repo modules and expected next-ticket scope without raw prompts, secrets, private paths, or raw source text.",
+    "Evaluator blocks or redacts unsafe/private fields using existing public/private safety helpers where available.",
+    "Unit tests cover GO, PARTIAL, and NO-GO fixture artifacts and prove no OPENAI_API_KEY is required."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_openai_synthesis_evaluator.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_autonomous_synthesis_governor.py -q",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Do not make live OpenAI HTTP calls from the evaluator.",
+    "Do not replace synthesis_grounding, synthesis_review_threshold_policy, or autonomous_synthesis_governor.",
+    "Do not auto-promote evaluator suggestions into tickets/ or edit TICKET_QUEUE.md.",
+    "Do not write accepted graph rows or public-site data."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove the evaluator module, runner script, README section, and evaluator tests. Existing synthesize --packet behavior remains unchanged because the evaluator is read-only over generated artifacts.",
+  "status": "proposed",
+  "category": "Phase 3 / cloud synthesis"
+}

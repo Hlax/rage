@@ -1,0 +1,47 @@
+{
+  "id": "ticket-393",
+  "title": "Hydrate live OpenAI synthesis grounding input",
+  "problem": "The live OpenAI synthesis canary reaches the API and writes candidate output, but deterministic grounding fails because OpenAISynthesisClient sends mostly IDs and refs while synthesis_grounding validates overlap against grounded claim_text and atom canonical_text. The model cannot reliably satisfy the existing evaluator without seeing the grounded text that the evaluator uses.",
+  "evidence": [
+    "data/tmp/openai_synthesis_canary/synthesis_output_syn_packet_grounded_dry_run_fixture.json",
+    "rge/llm/openai_synthesis_client.py",
+    "rge/modules/synthesis_grounding.py",
+    "fixtures/synthesis/grounded_evidence_packet_dry_run.json",
+    "tickets/ticket-059.json"
+  ],
+  "affected_modules": [
+    "rge/llm/openai_synthesis_client.py",
+    "rge/modules/synthesis_packet_runner.py",
+    "rge/modules/synthesis_grounding.py"
+  ],
+  "expected_files": [
+    "rge/llm/openai_synthesis_client.py",
+    "tests/unit/test_openai_synthesis_adapter_contract.py",
+    "tests/unit/test_synthesis_packet_runner.py",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-393_live-openai-grounding-input.md"
+  ],
+  "acceptance_criteria": [
+    "OpenAISynthesisClient request body includes public-safe grounded claim_text, atom canonical_text, stance, scope, and source metadata from v0.2.0 synthesis packets.",
+    "OpenAI synthesis prompt requires each returned sentence to cite provided claim_ids, atom_ids, and source_refs and to reuse significant wording from cited claim and atom text.",
+    "Parsed OpenAI summary_sentences normalize source_refs to source_id strings when the provider returns source_ref objects, while rejecting unresolvable citations.",
+    "Injected-HTTP unit coverage proves the grounded fixture packet can produce candidate output with grounding_passed true, governor_verdict GO, and no_accepted_graph_writes true.",
+    "Default mock_cloud synthesis, pytest, golden tests, verify, and operator execute-safe remain mock-first and do not require OPENAI_API_KEY."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock RGE_ALLOW_LIVE_LLM=0 python -m pytest tests/unit/test_openai_synthesis_adapter_contract.py tests/unit/test_synthesis_packet_runner.py -q",
+    "RGE_LLM_MODE=mock RGE_ALLOW_LIVE_LLM=0 python -m pytest tests/golden -q",
+    "RGE_LLM_MODE=mock RGE_ALLOW_LIVE_LLM=0 python -m rge.cli verify --skip-site",
+    "Optional operator-only live canary after tests: python -m rge.cli synthesize --packet fixtures/synthesis/grounded_evidence_packet_dry_run.json --provider openai --confirm --load-operator-env --output-dir data/tmp/openai_synthesis_canary"
+  ],
+  "non_goals": [
+    "Do not loosen grounding min_overlap thresholds or bypass synthesis_grounding.",
+    "Do not make live OpenAI HTTP part of default pytest, golden tests, verify, fixture-mode runs, or execute-safe.",
+    "Do not write model output directly to accepted graph tables.",
+    "Do not publish public-site JSON or run export-public --publish.",
+    "Do not serialize API keys, raw prompts, local paths, private notes, or raw source text."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert the OpenAI request hydration, citation normalization, and tests. Leave RGE_CLOUD_LLM_ENABLED=0 or remove openai from RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST to disable live HTTP while retaining mock_cloud behavior.",
+  "status": "proposed",
+  "category": "Phase 3 / cloud synthesis"
+}

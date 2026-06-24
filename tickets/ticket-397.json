@@ -1,0 +1,50 @@
+{
+  "id": "ticket-397",
+  "title": "Document live OpenAI evaluator canary runbook and checkpoint",
+  "problem": "After the live OpenAI evaluator path is implemented, operators need a concise runbook that distinguishes mock-first internal MVP behavior from opt-in live OpenAI canary behavior, lists pass criteria, explains failure interpretation, and points to the evaluator-to-draft-ticket handoff commands.",
+  "evidence": [
+    "README.md",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "docs/agents/13_MODEL_ESCALATION_POLICY.md",
+    "tickets/ticket-393.json",
+    "tickets/ticket-394.json",
+    "tickets/ticket-395.json",
+    "tickets/ticket-396.json"
+  ],
+  "affected_modules": [
+    "README.md",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "docs/agents/13_MODEL_ESCALATION_POLICY.md",
+    "agent_reports"
+  ],
+  "expected_files": [
+    "README.md",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "docs/agents/13_MODEL_ESCALATION_POLICY.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-397_live-openai-evaluator-checkpoint.md"
+  ],
+  "acceptance_criteria": [
+    "README documents the opt-in live OpenAI evaluator canary command, required env gates, cost caps, output path, and pass criteria.",
+    "Runtime/config docs explicitly state that .env.local may hold operator-only OpenAI gates and secrets, while shell env overrides file env and public-site code must not read operator env.",
+    "Escalation policy docs preserve mock-first defaults and identify live OpenAI synthesis as operator-only candidate output, not accepted graph writes.",
+    "Agent report records the latest mock/injected test status, any optional live canary result, no_accepted_graph_writes boundary, and remaining maturity caveats.",
+    "Docs do not include API keys, raw prompts, private local source text, or public publish instructions."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site",
+    "Optional operator-only live canary: python -m rge.cli synthesize --packet fixtures/synthesis/grounded_evidence_packet_dry_run.json --provider openai --confirm --load-operator-env --output-dir data/tmp/openai_synthesis_canary"
+  ],
+  "non_goals": [
+    "Do not add new engine features.",
+    "Do not loosen safety gates.",
+    "Do not make live OpenAI part of CI, golden tests, verify, or execute-safe.",
+    "Do not alter public-site runtime behavior or connect it to live graph/API.",
+    "Do not commit .env.local or any secret-bearing artifact."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README, runtime config, escalation policy, and checkpoint report edits only. No DB migration or runtime rollback is required.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}

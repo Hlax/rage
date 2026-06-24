@@ -1,0 +1,51 @@
+{
+  "id": "ticket-395",
+  "title": "Bridge OpenAI synthesis evaluator suggestions to instruction-packet draft tickets",
+  "problem": "After the live OpenAI synthesis evaluator produces a public-safe verdict and remediation suggestions, there is no explicit bridge from that evaluator artifact into the existing autonomous synthesis governor instruction-packet and draft-ticket handoff. Without the bridge, a plan or implementation agent must manually translate evaluator findings into builder-ready scope.",
+  "evidence": [
+    "rge/modules/autonomous_synthesis_governor.py",
+    "rge/modules/instruction_packet_ticket_draft.py",
+    "rge/modules/self_improvement_status.py",
+    "rge/modules/openai_synthesis_evaluator.py",
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md"
+  ],
+  "affected_modules": [
+    "rge/modules/autonomous_synthesis_governor.py",
+    "rge/modules/instruction_packet_ticket_draft.py",
+    "rge/modules/openai_synthesis_evaluator.py",
+    "scripts/run_autonomous_synthesis_governor.py",
+    "scripts/run_instruction_packet_ticket_draft.py"
+  ],
+  "expected_files": [
+    "rge/modules/autonomous_synthesis_governor.py",
+    "rge/modules/instruction_packet_ticket_draft.py",
+    "rge/modules/openai_synthesis_evaluator.py",
+    "scripts/run_autonomous_synthesis_governor.py",
+    "tests/unit/test_autonomous_synthesis_governor.py",
+    "tests/unit/test_instruction_packet_ticket_draft_handoff.py",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-395_openai-evaluator-instruction-bridge.md"
+  ],
+  "acceptance_criteria": [
+    "Evaluator GO/PARTIAL/NO-GO artifacts can be converted into an instruction packet that names the problem, evidence artifact, affected modules, expected files, acceptance criteria, test plan, non-goals, risk level, and rollback plan.",
+    "Instruction-packet ticket drafts remain gitignored under data/operator/draft_tickets/ and are never auto-promoted to tickets/ or TICKET_QUEUE.md.",
+    "The bridge reuses existing instruction_packet_ticket_draft validation rules rather than creating a parallel ticket schema.",
+    "Generated draft tickets include forbidden_actions such as auto_merge, auto_push, auto_promote_ticket, and edit_TICKET_QUEUE.",
+    "Unit tests prove evaluator NO-GO creates a scoped draft improvement ticket and evaluator GO can either produce no draft or produce a documented follow-up without unsafe automation."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_openai_synthesis_evaluator.py tests/unit/test_autonomous_synthesis_governor.py tests/unit/test_instruction_packet_ticket_draft_handoff.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_self_improvement_status.py -q",
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Do not let OpenAI, evaluator output, or instruction packets directly edit source code, run shell commands, use Git, or write accepted graph rows.",
+    "Do not auto-promote generated drafts into canonical queue tickets.",
+    "Do not add public write routes, public source ingestion routes, or public agent execution routes.",
+    "Do not require live OpenAI for unit tests."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove the evaluator-to-instruction bridge and related tests while preserving the standalone evaluator artifact from ticket-394 and the existing governor/draft-ticket flow.",
+  "status": "proposed",
+  "category": "Phase 3 / self-improvement"
+}

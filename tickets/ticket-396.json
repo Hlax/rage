@@ -1,0 +1,53 @@
+{
+  "id": "ticket-396",
+  "title": "Surface OpenAI synthesis evaluator status in operator plan",
+  "problem": "Once the OpenAI synthesis evaluator and handoff bridge exist, operator_loop and autocycle need public-safe status fields so operators and agents can see the latest canary verdict, missing gates, artifact path, and recommended next action without running live HTTP automatically.",
+  "evidence": [
+    "rge/modules/operator_loop.py",
+    "rge/modules/operator_autocycle.py",
+    "rge/modules/self_improvement_status.py",
+    "rge/modules/synthesis_packet_benchmark.py",
+    "rge/modules/openai_synthesis_evaluator.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "rge/modules/operator_autocycle.py",
+    "rge/modules/self_improvement_status.py",
+    "rge/modules/openai_synthesis_evaluator.py"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "rge/modules/operator_autocycle.py",
+    "rge/modules/self_improvement_status.py",
+    "rge/modules/openai_synthesis_evaluator.py",
+    "tests/unit/test_operator_loop.py",
+    "tests/unit/test_operator_autocycle.py",
+    "tests/unit/test_self_improvement_status.py",
+    "tests/unit/test_openai_synthesis_evaluator.py",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-396_openai-evaluator-operator-status.md"
+  ],
+  "acceptance_criteria": [
+    "operator_loop plan JSON includes openai_synthesis_evaluator_status with latest evaluator artifact path, evaluator_verdict, live gates summary, missing gate names, recommended operator command, and whether live HTTP execution is review-gated.",
+    "operator_autocycle never runs live OpenAI HTTP automatically and blocks or reports review_gated recommendations for live canary execution.",
+    "self_improvement_status includes the OpenAI synthesis evaluator as part of the synthesis handoff spine without exposing secrets or .env.local contents.",
+    "When no evaluator artifact exists, plan output recommends the smallest safe mock/injected verification or documents the operator-only live canary command without executing it.",
+    "Unit tests mirror existing synthesis_packet_benchmark plan-status patterns and prove dirty-tree/live-gate safety behavior is unchanged."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_operator_loop.py tests/unit/test_operator_autocycle.py tests/unit/test_self_improvement_status.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_openai_synthesis_evaluator.py -q",
+    "RGE_LLM_MODE=mock python -m rge.modules.operator_loop --mode plan",
+    "RGE_LLM_MODE=mock python -m rge.modules.operator_autocycle --mode plan --max-cycles 1",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Do not run live OpenAI HTTP from operator_loop, operator_autocycle, execute-safe, or self_improvement_status.",
+    "Do not promote draft tickets automatically.",
+    "Do not change release governor merge, push, or publish policy.",
+    "Do not require OPENAI_API_KEY for default plan/autocycle tests."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove openai_synthesis_evaluator_status from operator_loop, operator_autocycle, and self_improvement_status and revert associated tests. Standalone synthesize --packet and evaluator artifacts remain usable.",
+  "status": "proposed",
+  "category": "Phase 3 / operator loop"
+}
