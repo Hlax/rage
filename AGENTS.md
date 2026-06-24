@@ -125,8 +125,10 @@ audit → public atlas preview visibility. Plan, verify, and autocycle JSON incl
 gitignored artifact is missing, plan mode recommends `run_researcher_product_proof`
 (`review_gated`) ahead of the narrower arbitrary-source proof bundle. When
 `product_verdict` is `GO`, `product_proof_recommended` is `false` and autocycle does not
-block on `run_researcher_product_proof`. Full mock-only command, artifact table, and replan
-steps: README **Operator Quickstart** (*Researcher product proof*). Post internal MVP launch
+block on `run_researcher_product_proof`. Full mock-only command, artifact table, replan
+steps, and **product-risk drift clearance quickstep** (ticket-407; when plan JSON shows
+`product_proof_recommended: true`): README **Operator Quickstart** (*Researcher product
+proof* — *Product-risk drift clearance quickstep*). Post internal MVP launch
 (ticket-388), advance live-research maturity with the one-time orchestrator checklist
 (ticket-389) after GO product proof.
 
