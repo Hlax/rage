@@ -49,7 +49,7 @@ None.
 
 ## Merge to main
 
-Merge commit: *(pending merge)*.
+Merge commit: `49eadfc79cd7374f2f808316af3d0717e0879d88`.
 
 ## Recommended next ticket
 
