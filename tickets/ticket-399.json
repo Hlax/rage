@@ -1,0 +1,35 @@
+{
+  "id": "ticket-399",
+  "title": "AGENTS.md OpenAI synthesis evaluator runbook cross-link v0",
+  "problem": "Tickets 393-397 and ticket-397 documented the live OpenAI synthesis evaluator canary runbook in README and agent docs, but AGENTS.md Operator Loop does not cross-link the evaluator spine, plan status fields, or mock-first safety boundaries.",
+  "evidence": [
+    "agent_reports/2026-06-24_principal-audit-post-ticket-397_openai-evaluator-sequence.md",
+    "agent_reports/2026-06-24_phase-3_ticket-397_live-openai-evaluator-checkpoint.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "AGENTS.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-399_agents-openai-evaluator-crosslink-v0.md"
+  ],
+  "acceptance_criteria": [
+    "AGENTS.md cross-links README Live OpenAI synthesis evaluator canary runbook and tickets 393-397 spine.",
+    "AGENTS.md documents openai_synthesis_evaluator_status plan field and mock-first vs operator live canary boundary.",
+    "No code changes."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "README edits.",
+    "Engine changes.",
+    "Live OpenAI HTTP in CI or tests."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert AGENTS.md section only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}

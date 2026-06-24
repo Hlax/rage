@@ -387,7 +387,8 @@ superseded
 | 395 | ticket-395 | done | Bridge OpenAI synthesis evaluator suggestions to instruction-packet draft tickets | `phase-3/ticket-395-openai-evaluator-instruction-bridge` | `agent_reports/2026-06-24_phase-3_ticket-395_openai-evaluator-instruction-bridge.md` |
 | 396 | ticket-396 | done | Surface OpenAI synthesis evaluator status in operator plan | `phase-3/ticket-396-openai-evaluator-operator-status` | `agent_reports/2026-06-24_phase-3_ticket-396_openai-evaluator-operator-status.md` |
 | 397 | ticket-397 | done | Document live OpenAI evaluator canary runbook and checkpoint | `phase-3/ticket-397-live-openai-evaluator-runbook` | `agent_reports/2026-06-24_phase-3_ticket-397_live-openai-evaluator-checkpoint.md` |
-| 398 | ticket-398 | proposed | Principal audit post OpenAI synthesis evaluator sequence (393-397) | | |
+| 398 | ticket-398 | done | Principal audit post OpenAI synthesis evaluator sequence (393-397) | `phase-3/ticket-398-principal-audit-post-397` | `agent_reports/2026-06-24_principal-audit-post-ticket-397_openai-evaluator-sequence.md` |
+| 399 | ticket-399 | proposed | AGENTS.md OpenAI synthesis evaluator runbook cross-link v0 | | |
 | 366 | ticket-366 | done | Live staged orchestrator fetch fallback on candidate 403 | `phase-3/ticket-366-live-staged-orchestrator-fetch-fallback` | `agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md` |
 | 363 | ticket-363 | done | Autonomous loop improvement promotion golden proof | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md` |
 | 362 | ticket-362 | done | Default research run mock staged-spine path | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-362_default-research-run-staged-spine.md` |
@@ -1146,8 +1147,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-398 (proposed) — Principal audit post OpenAI synthesis evaluator sequence (393-397)
+ticket-399 (proposed) — AGENTS.md OpenAI synthesis evaluator runbook cross-link v0
 ```
+
+## Queue Notes (2026-06-24, ticket-398 principal audit)
+
+- Principal audit **GO** for OpenAI synthesis evaluator sequence (393–397).
+- Report: `agent_reports/2026-06-24_principal-audit-post-ticket-397_openai-evaluator-sequence.md`.
+- Seeded ticket-399 for AGENTS.md cross-link hygiene (mirror ticket-392).
 
 ## Queue Notes (2026-06-24, ticket-397 runbook checkpoint)
 

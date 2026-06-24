@@ -33,6 +33,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Delete the audit report only; no code rollback required.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / audit checkpoint"
 }
