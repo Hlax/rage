@@ -1,0 +1,32 @@
+{
+  "id": "ticket-407",
+  "title": "README researcher product proof drift clearance quickstep v0",
+  "problem": "Principal audits flag product-risk drift when researcher product proof artifact is stale. README documents product proof but lacks a short drift-clearance quickstep when plan JSON shows product_proof_recommended.",
+  "evidence": [
+    "agent_reports/2026-06-24_principal-audit-post-ticket-405_execute-safe-docs-trilogy.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-407_readme-product-proof-drift-quickstep-v0.md"
+  ],
+  "acceptance_criteria": [
+    "README documents when product_proof_recommended appears and mock-only prove command.",
+    "No code changes."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Engine changes.",
+    "Live network or live LLM."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}
