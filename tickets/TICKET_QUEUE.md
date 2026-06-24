@@ -390,7 +390,8 @@ superseded
 | 398 | ticket-398 | done | Principal audit post OpenAI synthesis evaluator sequence (393-397) | `phase-3/ticket-398-principal-audit-post-397` | `agent_reports/2026-06-24_principal-audit-post-ticket-397_openai-evaluator-sequence.md` |
 | 399 | ticket-399 | done | AGENTS.md OpenAI synthesis evaluator runbook cross-link v0 | `phase-3/ticket-399-agents-openai-evaluator-crosslink` | `agent_reports/2026-06-24_phase-3_ticket-399_agents-openai-evaluator-crosslink-v0.md` |
 | 400 | ticket-400 | done | Execute-safe mock OpenAI synthesis evaluator seed hook | `phase-3/ticket-400-execute-safe-evaluator-seed` | `agent_reports/2026-06-24_phase-3_ticket-400_execute-safe-evaluator-seed.md` |
-| 401 | ticket-401 | proposed | README execute-safe OpenAI evaluator seed hook cross-link v0 | | |
+| 401 | ticket-401 | done | README execute-safe OpenAI evaluator seed hook cross-link v0 | `phase-3/ticket-401-readme-execute-safe-evaluator-seed` | `agent_reports/2026-06-24_phase-3_ticket-401_readme-execute-safe-evaluator-seed-v0.md` |
+| 402 | ticket-402 | proposed | AGENTS.md execute-safe OpenAI evaluator seed hook cross-link v0 | | |
 | 366 | ticket-366 | done | Live staged orchestrator fetch fallback on candidate 403 | `phase-3/ticket-366-live-staged-orchestrator-fetch-fallback` | `agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md` |
 | 363 | ticket-363 | done | Autonomous loop improvement promotion golden proof | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md` |
 | 362 | ticket-362 | done | Default research run mock staged-spine path | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-362_default-research-run-staged-spine.md` |
@@ -1149,8 +1150,13 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-401 (proposed) — README execute-safe OpenAI evaluator seed hook cross-link v0
+ticket-402 (proposed) — AGENTS.md execute-safe OpenAI evaluator seed hook cross-link v0
 ```
+
+## Queue Notes (2026-06-24, ticket-401 README execute-safe evaluator seed)
+
+- README documents execute-safe mock evaluator seed hook (ticket-400).
+- Seeded ticket-402 for AGENTS.md cross-link hygiene.
 
 ## Queue Notes (2026-06-24, ticket-400 execute-safe evaluator seed)
 

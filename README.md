@@ -482,6 +482,30 @@ Writes gitignored `data/reports/openai_synthesis_evaluator_latest.json` with
 `openai_synthesis_evaluator_status` (`GO`, `PARTIAL`, or `NO-GO`), grounding/governor
 summaries, missing gate names, and remediation suggestions.
 
+**Execute-safe evaluator seed hook** (ticket-400; mock-only): when
+`openai_synthesis_evaluator_status.review_artifact_recommended` is `true` and plan mode
+recommends `run_openai_synthesis_evaluator` (`safe_autonomous`), a **successful**
+`operator_loop --mode execute-safe` run seeds the gitignored evaluator artifact after
+verification passes (same pattern as synthesis packet benchmark execute-safe hook).
+
+| Trigger / input | Behavior |
+| --- | --- |
+| `review_artifact_recommended: true` | Hook runs only when mock evaluate is the recommended action |
+| Canary JSON at `data/tmp/openai_synthesis_canary/...` | Deterministic evaluate on existing file (no live HTTP) |
+| Canary missing | Mock-cloud `synthesize --packet` from grounded fixture, then evaluate |
+| `live_http_used` | Always `false` in hook payload — execute-safe never calls live OpenAI |
+
+Execute-safe JSON includes `openai_synthesis_evaluator_execute_safe_hook` with
+`status: completed`, `artifact_path`, and `live_synthesis_verdict`; replans
+`openai_synthesis_evaluator_status` and `next_recommended_action`. Failed or blocked
+execute-safe leaves the artifact unchanged. Live canary remains `review_gated` and is
+**not** invoked by execute-safe.
+
+```powershell
+$env:RGE_LLM_MODE = "mock"
+python -m rge.modules.operator_loop --mode execute-safe
+```
+
 **Pass criteria (operator canary + evaluator):**
 
 | Signal | Required for GO |

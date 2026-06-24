@@ -1,0 +1,32 @@
+{
+  "id": "ticket-402",
+  "title": "AGENTS.md execute-safe OpenAI evaluator seed hook cross-link v0",
+  "problem": "Ticket-401 documented execute-safe evaluator seeding in README, but AGENTS.md Operator Loop evaluator bullet does not mention the ticket-400 execute-safe hook.",
+  "evidence": [
+    "agent_reports/2026-06-24_phase-3_ticket-401_readme-execute-safe-evaluator-seed-v0.md",
+    "AGENTS.md",
+    "README.md"
+  ],
+  "affected_modules": [
+    "AGENTS.md"
+  ],
+  "expected_files": [
+    "AGENTS.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-402_agents-execute-safe-evaluator-seed-v0.md"
+  ],
+  "acceptance_criteria": [
+    "AGENTS.md cross-links README execute-safe evaluator seed hook (ticket-400).",
+    "No code changes."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "README edits.",
+    "Engine changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert AGENTS.md section only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}
