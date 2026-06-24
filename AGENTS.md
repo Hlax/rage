@@ -163,12 +163,20 @@ See README **Operator Quickstart** (**Live staged proof layers (tickets 233–23
 coherence (ticket-285)**) for per-step commands
 and **One-time live orchestrator verification (operator checklist)** for the recommended
 one-time orchestrator `pytest -m live_network` checklist (temp DB only; not CI-enforced).
+**Orchestrator retry runbook (ticket-391):** when the checklist does not yield **1 passed**
+because live OpenAlex returned catalogs without mock-spine marker phrases
+(`human-ai co-creativity`, `songwriting`), see README **Operator Quickstart**
+(**Interpreting `unsuitable_live_artifact`**, **Orchestrator retry runbook (ticket-391)**)
+and `agent_reports/2026-06-23_phase-3_ticket-391_live-orchestrator-retry-runbook-v0.md`
+for retry timing, topic tuning, and environmental NO-GO acceptance. Layer-2 mock proof
+remains `tests/unit/test_staged_fixture_mode_run_spine.py` — not an engine regression.
 
 **Live staged proof layers (tickets 233–234):** layer 1 = live OpenAlex discover + top-N
 fetch (pass independently of fixture phrases); layer 2 = network-free mock spine (default
 CI); layer 3 = combined live + mock spine — skips with `unsuitable_live_artifact` when
 fetchable but fixture-incompatible (not a fetch/reconcile/report regression). See README
-**Operator Quickstart** proof-layer table and skip JSON interpretation.
+**Operator Quickstart** proof-layer table, skip JSON interpretation, and the ticket-391
+retry runbook above when layer 3 skips for marker-phrase mismatch.
 
 **Live staged atlas snapshot coherence (ticket-285):** opt-in operator proof on the same
 `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1` gate as ticket-193 — staged orchestrator on temp
