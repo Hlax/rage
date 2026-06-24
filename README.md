@@ -20,18 +20,45 @@ Python validates, scores, stages, writes, reports, and audits.
 
 ## Current Status
 
-Honest two-tier maturity (see ticket-084 master alignment audit and the 2026-06-14
-third-party repo-direction audit):
+**Internal MVP launch candidate (2026-06-23; ticket-388):** the repo is cleared for
+**mock-first internal operator use** when `data/reports/researcher_product_proof_latest.json`
+reports `product_verdict: GO`. This is **not** a public launch, paid-cloud launch, or live
+arbitrary-source research product. Live OpenAI, unattended paid execution, and live OpenAlex
+orchestrator proofs remain opt-in operator work.
+
+Checkpoint report: `agent_reports/2026-06-23_phase-3_ticket-388_internal-mvp-launch-checkpoint-v0.md`
 
 | Tier | Status | What it means |
 |------|--------|---------------|
+| **Internal MVP** | **launch candidate (mock-first)** | Operator proof chain (`prove-researcher-product`), verify/operator_loop/autocycle status surfaces, safety audit, and static Atlas preview on localhost. Default research prompt; no runtime link from CLI to the dev server — preview reads committed JSON under `apps/public-site/public/data/`. |
 | **MVP-Engine** | **mock/fixture-proven** | Deterministic Python pipeline, validator gate, safety model, public export, golden tests (GT01–GT26), and fixture-mode orchestration are real and green. |
 | **MVP-Research** | **partial — NM-1 + NM-4 evidence DB** | NM-1: first live validated claim write via `extract-claims-live` on gitignored `data/db/live_research_evidence.sqlite`. NM-4: operator-proven live manual_text spine through reconcile on that same evidence DB (tickets 127–133). Default graph DB synthnote path remains checksum-mock — not arbitrary live inference. |
-| **Arbitrary-source pipeline** | **partial** | **Phase 3 staged spine (mock/fixture-proven):** discover → fetch → ingest-staged → extract → link → build → detect → reconcile → report for rank #1 and #2 OpenAlex candidates, dual-candidate idempotency, and `research run --fixture-mode --staged-spine` orchestration (tickets 144–164). Unit tests patch OpenAlex/fetcher I/O; operator runs require `RGE_ALLOW_SOURCE_NETWORK=1`. **Opt-in operator proofs (not CI):** per-step live OpenAlex proofs (tickets 167–190) and single-command orchestrator proof via `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1` (ticket-193) as `pytest -m live_network` — see Operator Quickstart. **Per-step live Ollama (rank-1 and rank-2; orchestrator still mock):** rank-1 extract/link/build/detect (204/208/212/217); rank-2 extract/link/build/detect (230/236/237/238) — each has a separate `RGE_ALLOW_LIVE_STAGED_*_LIVE_LLM` or `RGE_ALLOW_LIVE_STAGED_RANK2_*_LIVE_LLM` gate and CLI fallthrough flag; rank-2 surface **closed at detect** (ticket-240 checklist). **Detect seed operator doc triangle (245–247):** README **Domain seed**, AGENTS, and `docs/agents/12_RUNTIME_CONFIG.md` document GT7 `seed_domain_opposing_context` mock isolation for live detect (ticket-243). **Deterministic Python (no live LLM path):** `reconcile-scores` and `generate-run-report` on staged spine (tickets 184/187; pre-ticket audits 221/222). **`RGE_ALLOW_LIVE_STAGED_RECONCILE` / `_REPORT`** gate OpenAlex network spines only — not Ollama. **Not proven in CI/default pytest:** live OpenAlex (operator opt-in); live LLM on full staged orchestrator. **Evidence DB:** NM-4 live ingest → extract/link/relationship/contradiction fall-through + deterministic reconcile (`--evidence-db-reconcile`) on gitignored evidence DB. **Default graph DB:** committed synthnote files still use checksum-pinned mock fixtures. `research run` without `--fixture-mode` remains `not_implemented`. |
-| **Cloud providers** | **deferred** | OpenAI/OpenRouter/etc. are not wired (ticket-059 placeholder). |
+| **Arbitrary-source pipeline** | **partial** | **Phase 3 staged spine (mock/fixture-proven):** discover → fetch → ingest-staged → extract → link → build → detect → reconcile → report for rank #1 and #2 OpenAlex candidates, dual-candidate idempotency, and `research run --staged-spine` orchestration (tickets 144–164). Unit tests patch OpenAlex/fetcher I/O; operator runs require `RGE_ALLOW_SOURCE_NETWORK=1`. **Opt-in operator proofs (not CI):** per-step live OpenAlex proofs (tickets 167–190) and single-command orchestrator proof via `RGE_ALLOW_LIVE_STAGED_ORCHESTRATOR=1` (ticket-193) as `pytest -m live_network` — see Operator Quickstart. **Per-step live Ollama (rank-1 and rank-2; orchestrator still mock):** rank-1 extract/link/build/detect (204/208/212/217); rank-2 extract/link/build/detect (230/236/237/238) — each has a separate `RGE_ALLOW_LIVE_STAGED_*_LIVE_LLM` or `RGE_ALLOW_LIVE_STAGED_RANK2_*_LIVE_LLM` gate and CLI fallthrough flag; rank-2 surface **closed at detect** (ticket-240 checklist). **Detect seed operator doc triangle (245–247):** README **Domain seed**, AGENTS, and `docs/agents/12_RUNTIME_CONFIG.md` document GT7 `seed_domain_opposing_context` mock isolation for live detect (ticket-243). **Deterministic Python (no live LLM path):** `reconcile-scores` and `generate-run-report` on staged spine (tickets 184/187; pre-ticket audits 221/222). **`RGE_ALLOW_LIVE_STAGED_RECONCILE` / `_REPORT`** gate OpenAlex network spines only — not Ollama. **Not proven in CI/default pytest:** live OpenAlex (operator opt-in); live LLM on full staged orchestrator. **Evidence DB:** NM-4 live ingest → extract/link/relationship/contradiction fall-through + deterministic reconcile (`--evidence-db-reconcile`) on gitignored evidence DB. **Default graph DB:** committed synthnote files still use checksum-pinned mock fixtures. `research run` without `--fixture-mode` remains `not_implemented`. |
+| **Cloud synthesis** | **mock-first wired** | `synthesize --packet` defaults to `mock_cloud` (ticket-059). Live OpenAI HTTP is opt-in only behind explicit env gates — not CI/default pytest. |
 
-**Phase 1 MVP is complete** for the engine tier. The public site still serves **fixture
-cards** (`source_type: fixture`); do not treat it as live research output.
+**Phase 1 MVP is complete** for the engine tier. The public site serves **committed fixture
+snapshots** (`source_type: fixture` on cards; staged-spine Atlas preview JSON) — not a live
+connection to the private SQLite graph at browse time.
+
+### What is running today (internal MVP profile)
+
+| Surface | Command / URL | Runtime link |
+|---------|---------------|--------------|
+| **Research CLI** | `python -m rge.cli` (alias `research` when on PATH) | Private SQLite, gitignored reports |
+| **Verification gate** | `python -m rge.cli verify --skip-site` | Mock-only pytest + golden + safety |
+| **Product proof** | `python -m rge.cli prove-researcher-product` | Scratch work dir → gitignored GO artifact |
+| **Operator planning** | `python -m rge.modules.operator_loop --mode plan` | Read-only JSON recommendations |
+| **Atlas preview UI** | `cd apps/public-site && npm run dev` → http://localhost:3000/atlas-preview | Static JSON imports only — **no API on :8000** |
+
+### Non-launch blockers (explicit)
+
+| Blocker | Status |
+|---------|--------|
+| Live OpenAI / paid cloud | Gated — explicit env + cost caps |
+| Public site live graph | Fixture preview JSON only at browse time |
+| Unattended autocycle implementation | Blocked — review-gated tickets |
+| Bare `research run --topic --domain` | `not_implemented` without fixture/staged flags |
+| Live OpenAlex orchestrator pass | Operator opt-in; may skip with `unsuitable_live_artifact` |
 
 What is **real deterministic engine plumbing today**:
 
@@ -78,6 +105,63 @@ See `docs/agents/13_MODEL_ESCALATION_POLICY.md` for mode profiles and task tiers
 
 Phase 2 work (live Ollama, UI polish, deployment) is tracked in `agent_reports/2026-06-12_phase-2_ticket-roadmap.md`.
 
+## System functions
+
+All operator commands use `python -m rge.cli <subcommand>` (Windows: `research` may not be on
+PATH after editable install).
+
+### Research pipeline (private graph)
+
+| Function | CLI | Notes |
+|----------|-----|-------|
+| Ingest sources | `ingest`, `ingest-staged`, `ingest-webpage` | Writes private SQLite only |
+| Extract / link / build / detect | `extract-claims`, `link-concepts`, `build-relationships`, `detect-contradictions` | Mock default; live fallthrough flags opt-in |
+| Score history | `reconcile-scores` | Deterministic Python |
+| Queue / reports | `rank-research-queue`, `generate-cluster-report`, `generate-run-report`, `generate-theory`, … | Mock LLM where applicable |
+| Full fixture MVP | `run --fixture-mode` | Golden Test 26 shape |
+| Staged spine | `run --staged-spine` | Mock LLM; network env for discover/fetch |
+
+Default research question (creativity domain): *Does AI improve creative output while reducing diversity?*
+
+### Operator proof and verification
+
+| Function | CLI / module | Artifact |
+|----------|--------------|----------|
+| Mock verification suite | `verify`, `verify --skip-site` | Exit code + JSON report |
+| End-to-end product proof | `prove-researcher-product` | `data/reports/researcher_product_proof_latest.json` |
+| Arbitrary-source bundle | `prove-arbitrary-source-bundle` | `data/reports/operator_proof_bundle/operator_proof_bundle.json` |
+| Safety audit | `python -m rge.modules.safety_auditor --audit full` | stdout JSON |
+| Operator plan | `python -m rge.modules.operator_loop --mode plan` | Recommended actions + status mirrors |
+| Bounded autocycle | `python -m rge.modules.operator_autocycle --mode plan` | Cycle JSON; blocks risky automation |
+
+Plan/verify/autocycle JSON includes `researcher_product_proof_status` (`product_verdict`,
+`product_proof_recommended`, graph counts). See Operator Quickstart **Researcher product proof**.
+
+### Synthesis (mock-first cloud boundary)
+
+| Function | CLI / script | Notes |
+|----------|--------------|-------|
+| Packet synthesis | `synthesize --packet` | Default provider `mock_cloud` |
+| Benchmark throughput | `scripts/run_synthesis_packet_benchmark.py` | Gitignored benchmark JSON |
+| End-to-end synthesis loop | `scripts/run_end_to_end_synthesis_operator_loop.py` | Operator gates for live cloud |
+
+### Public export (reviewed snapshots)
+
+| Function | CLI | Output |
+|----------|-----|--------|
+| Public cards | `export-public` | `data/exports/` → copy to `apps/public-site/public/data/` |
+| Atlas snapshot (operator) | `export-atlas-snapshot` | Private atlas JSON |
+| Atlas preview refresh | `scripts/refresh_atlas_preview_from_staged_spine.py` | Updates committed `atlas_snapshot_preview.json` |
+
+### Live / opt-in (not internal MVP default)
+
+| Function | Gate | Notes |
+|----------|------|-------|
+| Live Ollama pipeline | `RGE_ALLOW_LIVE_LLM=1`, `RGE_LLM_MODE=ollama` | Four structured tasks; `model-health` first |
+| Live validated extract | `extract-claims-live` | NM-1 evidence DB only |
+| Live OpenAlex staged proofs | `RGE_ALLOW_SOURCE_NETWORK=1`, per-step `RGE_ALLOW_LIVE_STAGED_*` | `pytest -m live_network` — not CI |
+| Live OpenAI synthesis | `RGE_ALLOW_OPENAI_SYNTHESIS_LIVE_HTTP=1`, … | Fail-closed; cost caps |
+
 ## Install
 
 ```bash
@@ -89,6 +173,47 @@ On Windows, `research.exe` is often not on PATH after editable install. Use
 `python -m rge.cli <command>` (for example `python -m rge.cli verify`) instead
 of bare `research …`. A missing `research` command is a PATH issue, not a failed
 verification suite, when the module form succeeds.
+
+## Internal MVP launch (localhost)
+
+Mock-first profile for browsing the Atlas preview after product proof. **No live OpenAI, no
+live orchestrator, no paid cloud.**
+
+```powershell
+# 1. Repo root — mock-only env
+$env:RGE_LLM_MODE = "mock"
+$env:RGE_ALLOW_LIVE_LLM = "0"
+
+# 2. Refresh product proof (scratch paths only)
+python -m rge.cli prove-researcher-product `
+  --work-dir data/tmp/researcher_product_proof_work `
+  --artifact-out data/reports/researcher_product_proof_latest.json `
+  --benchmark-runs 25
+
+# 3. Confirm GO
+Get-Content data/reports/researcher_product_proof_latest.json | Select-String product_verdict
+
+# 4. Start read-only preview (separate terminal)
+cd apps/public-site
+npm install   # first time only
+npm run dev
+```
+
+Open **http://localhost:3000/atlas-preview** (Next.js default port; use the URL printed if
+3000 is busy).
+
+**Data boundary:** the dev server does **not** read the gitignored product-proof artifact at
+runtime. `/atlas-preview` renders committed JSON from `apps/public-site/public/data/`
+(primarily `atlas_snapshot_preview.json`, `atlas_coherence_preview.json`). Updating preview
+from a new pipeline run requires an export/refresh script (see **Public export** in System
+functions) — not automatic on `prove-researcher-product`.
+
+Optional verification before launch:
+
+```powershell
+python -m rge.cli verify --skip-site
+python -m rge.modules.safety_auditor --audit full
+```
 
 ## Operator Quickstart
 
@@ -1630,7 +1755,8 @@ operator persist): use the numbered checklist in
 | Command | Purpose |
 |---|---|
 | `python -m rge.cli verify` | **Preferred:** mock-only golden + pytest + safety audit + site build |
-| `python -m rge.cli verify --skip-site` | Same, without npm build (Python checks only) |
+| `python -m rge.cli verify --skip-site` | Mock-only golden + pytest + safety (no npm) |
+| `python -m rge.cli prove-researcher-product ...` | Internal MVP product proof → gitignored GO artifact |
 | `python -m pytest tests/golden` | Builder merge gate (mock LLM) |
 | `python -m pytest` | Full test suite |
 | `python -m rge.modules.safety_auditor --audit full` | Deterministic safety audit |
@@ -1704,14 +1830,25 @@ Copy `.env.example` to gitignored `.env.local` for daily settings. Full policy:
 
 ## Public Site
 
-The public site (`apps/public-site/`) is a read-only static export:
+The public site (`apps/public-site/`) is a **read-only** Next.js surface:
 
-- Renders committed JSON from `apps/public-site/public/data/` only
+- Renders committed JSON from `apps/public-site/public/data/` only (static imports at build/dev time)
 - No write routes, no source ingestion, no agent execution
-- Never connects to the private local engine or SQLite
-- Does not read `NEXT_PUBLIC_*` or other build-time secrets
+- Never connects to the private local engine, SQLite, or `python -m rge.cli` at runtime
+- Does not require port **8000** or any backend API server
+- Does not read `NEXT_PUBLIC_*` secrets for engine access
 
-After changing accepted claims or export policy, run `export-public`, pass the safety audit, review the snapshot diff, then rebuild the site. After changing atlas preview contract fields, follow **Research Atlas public preview fixture refresh** in Operator Quickstart (primary: `scripts/refresh_atlas_preview_from_staged_spine.py` auto-syncs public preview + `fixtures/atlas/`; tickets 320–325; legacy fixture-mode path tickets 300/308/312). Browse `/atlas-preview` after `npm run build`.
+**Internal MVP browse:** `npm run dev` → http://localhost:3000/atlas-preview  
+**Static production preview:** `npm run build` then `npm run preview:static` (serves `out/` on port 3000)
+
+Primary Atlas preview files:
+
+| File | Role |
+|------|------|
+| `apps/public-site/public/data/atlas_snapshot_preview.json` | Graph snapshot (`snapshot_id`, clusters, cards, runs) |
+| `apps/public-site/public/data/atlas_coherence_preview.json` | Coherence verdict for preview header |
+
+After changing accepted claims or export policy, run `export-public`, pass the safety audit, review the snapshot diff, then rebuild the site. After changing atlas preview contract fields, follow **Research Atlas public preview fixture refresh** in Operator Quickstart (primary: `scripts/refresh_atlas_preview_from_staged_spine.py` auto-syncs public preview + `fixtures/atlas/`; tickets 320–325; legacy fixture-mode path tickets 300/308/312). Browse `/atlas-preview` after `npm run build` or during `npm run dev`.
 
 Deployment guide (build, pre-deploy checklist, static hosting): `docs/deployment/public-site-static-hosting.md`
 
