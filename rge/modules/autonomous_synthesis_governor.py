@@ -1512,6 +1512,8 @@ def run_autonomous_governor_operator_command(
 def governor_operator_commands(*, root: Path | None = None) -> dict[str, str]:
     del root
     prefix = f"python {GOVERNOR_CLI_SCRIPT}"
+    from rge.modules.openai_synthesis_evaluator import EVALUATOR_OPERATOR_COMMAND
+
     return {
         "run_governor_latest": f"{prefix} --latest --write-instruction-packet --sync-public",
         "run_governor_dry_run": f"{prefix} --latest --dry-run",
@@ -1528,6 +1530,12 @@ def governor_operator_commands(*, root: Path | None = None) -> dict[str, str]:
         "instruction_packet_handoff": (
             "python scripts/run_instruction_packet_ticket_draft.py --latest"
         ),
+        "bridge_synthesis_review_instruction_draft": (
+            "python scripts/run_openai_synthesis_evaluator.py "
+            "--bridge-instruction-draft "
+            "--evaluator-artifact data/reports/openai_synthesis_evaluator_latest.json"
+        ),
+        "evaluate_openai_synthesis": EVALUATOR_OPERATOR_COMMAND,
         "local_implementation_handoff": (
             "Inspect the latest draft ticket under data/operator/draft_tickets/ "
             "and implement locally via CLI/IDE agent only."

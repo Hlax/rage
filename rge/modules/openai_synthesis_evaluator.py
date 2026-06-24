@@ -24,6 +24,7 @@ from rge.modules.synthesis_grounding import evaluate_synthesis_grounding
 from rge.modules.synthesis_review_threshold_policy import evaluate_synthesis_review_threshold
 
 COMMAND = "evaluate_openai_synthesis"
+BRIDGE_COMMAND = "bridge_evaluator_instruction_draft"
 EVALUATOR_SCHEMA_VERSION = "openai_synthesis_evaluator_v0.1.0"
 DEFAULT_ARTIFACT_REL = Path("data/reports/openai_synthesis_evaluator_latest.json")
 EVALUATOR_OPERATOR_COMMAND = (
@@ -385,6 +386,317 @@ def write_evaluator_artifact(
     return resolved
 
 
+def _instruction_packet_filename(packet_id: str) -> str:
+    import re
+    from datetime import datetime, timezone
+
+    safe_packet_id = re.sub(r"[^A-Za-z0-9_.-]+", "-", packet_id).strip("-") or "packet"
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    return f"{stamp}_{safe_packet_id}.md"
+
+
+def _extract_citation_refs(synthesis_artifact: dict[str, Any]) -> tuple[list[str], list[str], list[str]]:
+    claim_refs: set[str] = set()
+    atom_refs: set[str] = set()
+    source_refs: set[str] = set()
+    try:
+        resolved = resolve_synthesis_packet_run_artifact(synthesis_artifact)
+        output = resolved.get("output") or {}
+    except GovernorOperatorSurfaceError:
+        output = synthesis_artifact
+    for sentence in output.get("summary_sentences") or []:
+        if not isinstance(sentence, dict):
+            continue
+        claim_refs.update(str(item) for item in (sentence.get("claim_ids") or []) if item)
+        atom_refs.update(str(item) for item in (sentence.get("atom_ids") or []) if item)
+        source_refs.update(str(item) for item in (sentence.get("source_refs") or []) if item)
+    return sorted(claim_refs), sorted(atom_refs), sorted(source_refs)
+
+
+def _primary_remediation_suggestion(evaluator: dict[str, Any]) -> dict[str, Any]:
+    suggestions = [
+        row for row in (evaluator.get("remediation_suggestions") or []) if isinstance(row, dict)
+    ]
+    if not suggestions:
+        return {}
+    verdict = str(evaluator.get("evaluator_verdict") or "")
+    if verdict == "GO":
+        for row in suggestions:
+            if "improvement handoff" in str(row.get("problem") or "").casefold():
+                return row
+        return {}
+    if verdict in {"PARTIAL", "NO-GO"}:
+        for row in suggestions:
+            problem = str(row.get("problem") or "").casefold()
+            if "grounding" in problem or "governor" in problem or "gates" in problem:
+                return row
+        return suggestions[0]
+    return suggestions[0]
+
+
+def build_evaluator_instruction_packet_text(
+    evaluator: dict[str, Any],
+    *,
+    packet_id: str,
+    claim_refs: list[str],
+    atom_refs: list[str],
+    source_refs: list[str],
+    evaluator_artifact_ref: str,
+) -> str:
+    suggestion = _primary_remediation_suggestion(evaluator)
+    evaluator_verdict = str(evaluator.get("evaluator_verdict") or "UNKNOWN")
+    summary = suggestion.get("problem") or (
+        f"OpenAI synthesis evaluator recorded verdict {evaluator_verdict} for packet {packet_id}."
+    )
+    build_title = suggestion.get("recommended_ticket_scope") or (
+        f"Remediate live OpenAI synthesis finding for {packet_id}"
+    )
+    likely_files = list(suggestion.get("expected_files") or [])
+    if not likely_files:
+        likely_files = list(suggestion.get("affected_modules") or [])
+    acceptance = [
+        "Evaluator remediation preserves mock-first defaults and no accepted graph writes.",
+        "Grounding and governor checks pass on the grounded dry-run fixture.",
+        "Relevant unit tests and safety audit pass.",
+    ]
+    if evaluator_verdict in {"PARTIAL", "NO-GO"}:
+        acceptance.insert(
+            0,
+            "Address evaluator grounding/governor failure reasons before another live canary.",
+        )
+    tests = [
+        "python -m pytest tests/unit/test_openai_synthesis_evaluator.py",
+        "python -m pytest tests/unit/test_openai_synthesis_adapter_contract.py",
+        "python -m rge.modules.safety_auditor --audit full",
+    ]
+    non_goals = [
+        "Do not auto-merge, auto-push, auto-publish, or promote tickets.",
+        "Do not copy paid-model output directly into implementation files.",
+        "Do not edit TICKET_QUEUE.md or tickets/ from evaluator output.",
+    ]
+    rollback = (
+        "Delete the evaluator instruction packet and draft ticket; rerun synthesize --packet "
+        "and the evaluator bridge after remediation."
+    )
+    return "\n".join(
+        [
+            f"# Autonomous Synthesis Instruction Packet: {packet_id}",
+            "",
+            "## Summary",
+            str(summary),
+            "",
+            "## Evidence Artifact",
+            evaluator_artifact_ref,
+            "",
+            "## Citations",
+            f"- Claim refs: {', '.join(claim_refs) or 'none'}",
+            f"- Atom refs: {', '.join(atom_refs) or 'none'}",
+            f"- Source refs: {', '.join(source_refs) or 'none'}",
+            "",
+            "## Recommended Build Packet",
+            str(build_title),
+            "",
+            "## Files Likely Affected",
+            *[f"- `{item}`" for item in likely_files],
+            "",
+            "## Acceptance Criteria",
+            *[f"- {item}" for item in acceptance],
+            "",
+            "## Tests To Run",
+            *[f"- `{item}`" for item in tests],
+            "",
+            "## Explicit Non-Goals",
+            *[f"- {item}" for item in non_goals],
+            "",
+            "## Safety Notes",
+            "- This packet was generated from a public-safe OpenAI synthesis evaluator artifact.",
+            "- Paid-model output must not directly modify code, queues, Git, or public exports.",
+            f"- Evaluator verdict: {evaluator_verdict}.",
+            f"- Governor verdict: {evaluator.get('governor_verdict') or 'UNKNOWN'}.",
+            "",
+            "## Rollback Plan",
+            rollback,
+            "",
+        ]
+    )
+
+
+def write_evaluator_instruction_packet(
+    evaluator: dict[str, Any],
+    *,
+    synthesis_artifact: dict[str, Any],
+    evaluator_artifact_ref: str,
+    root: Path | None = None,
+) -> Path:
+    from rge.modules.autonomous_synthesis_governor import instruction_packet_dir
+
+    project_root = root or repo_root()
+    packet_id = str(evaluator.get("packet_id") or "unknown_packet")
+    claim_refs, atom_refs, source_refs = _extract_citation_refs(synthesis_artifact)
+    text = build_evaluator_instruction_packet_text(
+        evaluator,
+        packet_id=packet_id,
+        claim_refs=claim_refs,
+        atom_refs=atom_refs,
+        source_refs=source_refs,
+        evaluator_artifact_ref=evaluator_artifact_ref,
+    )
+    out_dir = instruction_packet_dir(root=project_root)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / _instruction_packet_filename(packet_id)
+    path.write_text(text, encoding="utf-8")
+    return path
+
+
+def bridge_evaluator_to_instruction_draft(
+    *,
+    evaluator_artifact: Path | dict[str, Any],
+    synthesis_artifact: Path | dict[str, Any] | None = None,
+    write_draft: bool | None = None,
+    dry_run: bool = False,
+    root: Path | None = None,
+) -> dict[str, Any]:
+    """Convert evaluator artifact to instruction packet and optional draft ticket."""
+    from rge.modules.atlas_snapshot_builder import assert_no_private_fields
+    from rge.modules.instruction_packet_ticket_draft import (
+        _draft_ticket_name,
+        build_draft_ticket_payload,
+        draft_ticket_dir,
+        parse_instruction_packet_text,
+        validate_instruction_packet_for_draft,
+        write_draft_status_report,
+    )
+
+    project_root = root or repo_root()
+    if isinstance(evaluator_artifact, dict):
+        evaluator = dict(evaluator_artifact)
+        evaluator_ref = str(
+            evaluator.get("artifact_path") or evaluator.get("input_artifact_path") or "evaluator.json"
+        )
+    else:
+        resolved_evaluator = (
+            evaluator_artifact
+            if evaluator_artifact.is_absolute()
+            else project_root / evaluator_artifact
+        )
+        evaluator = json.loads(resolved_evaluator.read_text(encoding="utf-8"))
+        evaluator_ref = _operator_safe_artifact_ref(resolved_evaluator, project_root)
+
+    if synthesis_artifact is None:
+        input_ref = str(evaluator.get("input_artifact_path") or "")
+        if input_ref:
+            candidate = project_root / input_ref
+            if not candidate.is_file():
+                candidate = project_root / "fixtures/synthesis/grounded_evidence_packet_dry_run.json"
+        else:
+            candidate = project_root / "fixtures/synthesis/grounded_evidence_packet_dry_run.json"
+        synthesis_payload = load_synthesis_artifact(candidate, root=project_root)
+    elif isinstance(synthesis_artifact, dict):
+        synthesis_payload = synthesis_artifact
+    else:
+        synthesis_payload = load_synthesis_artifact(synthesis_artifact, root=project_root)
+
+    evaluator_verdict = str(evaluator.get("evaluator_verdict") or "NO-GO")
+    should_write_draft = (
+        write_draft
+        if write_draft is not None
+        else evaluator_verdict in {"PARTIAL", "NO-GO"}
+    )
+
+    packet_path = write_evaluator_instruction_packet(
+        evaluator,
+        synthesis_artifact=synthesis_payload,
+        evaluator_artifact_ref=evaluator_ref,
+        root=project_root,
+    )
+    rel_packet_path = _operator_safe_artifact_ref(packet_path, project_root)
+    parsed = parse_instruction_packet_text(packet_path.read_text(encoding="utf-8"))
+    validation = validate_instruction_packet_for_draft(
+        packet_path=packet_path,
+        parsed=parsed,
+        root=project_root,
+        source="evaluator",
+    )
+
+    result: dict[str, Any] = {
+        "schema_version": EVALUATOR_SCHEMA_VERSION,
+        "status": "completed",
+        "command": BRIDGE_COMMAND,
+        "evaluator_verdict": evaluator_verdict,
+        "instruction_packet_path": rel_packet_path,
+        "draft_ticket_path": None,
+        "draft_written": False,
+        "validation_passed": bool(validation.get("passed")),
+        "validation_reasons": list(validation.get("reasons") or []),
+        "dry_run": dry_run,
+    }
+
+    if not validation.get("passed"):
+        result["status"] = "rejected"
+        write_draft_status_report(
+            {
+                "verdict": "NO-GO",
+                "status": "rejected",
+                "source_instruction_packet": rel_packet_path,
+                "validation_reasons": validation.get("reasons") or [],
+            },
+            root=project_root,
+        )
+        return result
+
+    if not should_write_draft:
+        result["follow_up"] = (
+            "Evaluator GO: instruction packet written; draft ticket skipped by default. "
+            "Pass write_draft=True to create a documented follow-up draft."
+        )
+        write_draft_status_report(
+            {
+                "verdict": "GO",
+                "status": "instruction_packet_only",
+                "source_instruction_packet": rel_packet_path,
+                "draft_ticket_path": None,
+            },
+            root=project_root,
+        )
+        return result
+
+    draft_payload = build_draft_ticket_payload(
+        parsed=parsed,
+        instruction_packet_path=rel_packet_path,
+        validation=validation,
+        root=project_root,
+        evaluator_artifact=evaluator,
+        draft_source="openai_synthesis_evaluator_bridge",
+    )
+    draft_dir = draft_ticket_dir(root=project_root)
+    draft_dir.mkdir(parents=True, exist_ok=True)
+    draft_path = draft_dir / _draft_ticket_name(str(parsed.get("packet_id") or "packet"))
+
+    if not dry_run:
+        violations = assert_no_private_fields({"draft_ticket": draft_payload})
+        if violations:
+            result["status"] = "rejected"
+            result["validation_reasons"] = violations[:5]
+            return result
+        draft_path.write_text(json.dumps(draft_payload, indent=2) + "\n", encoding="utf-8")
+        result["draft_ticket_path"] = _operator_safe_artifact_ref(draft_path, project_root)
+        result["draft_written"] = True
+
+    write_draft_status_report(
+        {
+            "verdict": "GO",
+            "status": "dry_run" if dry_run else "completed",
+            "source_instruction_packet": rel_packet_path,
+            "draft_ticket_path": result.get("draft_ticket_path"),
+            "recommended_files": draft_payload.get("expected_files") or [],
+            "acceptance_criteria_count": len(draft_payload.get("acceptance_criteria") or []),
+            "dry_run": dry_run,
+        },
+        root=project_root,
+    )
+    return result
+
+
 def run_openai_synthesis_evaluator(
     *,
     input_artifact: Path,
@@ -422,7 +734,6 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--artifact",
-        required=True,
         help="Path to synthesis_packet_run or candidate synthesis output JSON.",
     )
     parser.add_argument(
@@ -435,8 +746,65 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Skip writing gitignored evaluator artifact.",
     )
+    parser.add_argument(
+        "--bridge-instruction-draft",
+        action="store_true",
+        help="Convert evaluator artifact into instruction packet and optional draft ticket.",
+    )
+    parser.add_argument(
+        "--evaluator-artifact",
+        help="Evaluator JSON for --bridge-instruction-draft (defaults to --artifact-out).",
+    )
+    parser.add_argument(
+        "--synthesis-artifact",
+        help="Optional synthesis packet run JSON when bridging from evaluator artifact only.",
+    )
+    parser.add_argument(
+        "--write-draft",
+        action="store_true",
+        help="Force draft ticket write when bridging (default for PARTIAL/NO-GO only).",
+    )
+    parser.add_argument(
+        "--no-write-draft",
+        action="store_true",
+        help="Skip draft ticket write when bridging (default for GO).",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Validate bridge handoff without writing draft ticket JSON.",
+    )
+    parser.add_argument(
+        "--root",
+        help="Optional repository root override for bridge writes.",
+    )
     args = parser.parse_args(argv)
+    project_root = Path(args.root) if args.root else None
     try:
+        if args.bridge_instruction_draft:
+            evaluator_path = Path(
+                args.evaluator_artifact or args.artifact_out or DEFAULT_ARTIFACT_REL
+            )
+            synthesis_path = Path(args.synthesis_artifact) if args.synthesis_artifact else None
+            write_draft: bool | None = None
+            if args.write_draft:
+                write_draft = True
+            elif args.no_write_draft:
+                write_draft = False
+            result = bridge_evaluator_to_instruction_draft(
+                evaluator_artifact=evaluator_path,
+                synthesis_artifact=synthesis_path,
+                write_draft=write_draft,
+                dry_run=args.dry_run,
+                root=project_root,
+            )
+            print(json.dumps(result, indent=2))
+            if result.get("status") == "rejected":
+                return 1
+            return 0
+
+        if not args.artifact:
+            parser.error("--artifact is required unless --bridge-instruction-draft is set")
         result = run_openai_synthesis_evaluator(
             input_artifact=Path(args.artifact),
             write_artifact=not args.no_write_artifact,

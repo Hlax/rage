@@ -27,6 +27,11 @@ from rge.modules.instruction_packet_ticket_draft import (
     run_instruction_packet_ticket_draft_command,
     validate_instruction_packet_for_draft,
 )
+from rge.modules.openai_synthesis_evaluator import (
+    bridge_evaluator_to_instruction_draft,
+    evaluate_synthesis_artifact,
+    main as evaluator_main,
+)
 from rge.modules.openai_synthesis_adapter_spec import build_example_evidence_packet
 from rge.modules.operator_loop import build_operator_plan, execute_safe_checks
 from rge.modules.safety_auditor import run_safety_audit
@@ -435,3 +440,167 @@ def test_refresh_circuit_breaker_status_report_is_public_safe(tmp_path: Path) ->
     payload = refresh_circuit_breaker_status_report(root=tmp_path)
     assert assert_no_private_fields({"report": payload}) == []
     assert payload["status_report_path"]
+
+
+def _build_synthesis_packet_run(
+    *,
+    text: str = (
+        "AI-assisted brainstorming reduced semantic diversity in short-form writing tasks."
+    ),
+    no_accepted_graph_writes: bool = True,
+) -> dict:
+    return {
+        "schema_version": "synthesis_packet_run_v0.1.0",
+        "status": "completed",
+        "command": "synthesize",
+        "packet_id": "syn_packet_grounded_dry_run_fixture",
+        "provider": "openai",
+        "candidate_output": {
+            "schema_version": "synthesis_output_v0.1.0",
+            "packet_id": "syn_packet_grounded_dry_run_fixture",
+            "provider": "openai",
+            "no_paid_api_calls": False,
+            "review_mode": "live_candidate",
+            "summary_sentences": [
+                {
+                    "text": text,
+                    "claim_ids": ["claim_preview_a"],
+                    "atom_ids": ["atom_preview_001"],
+                    "source_refs": ["src_preview_a"],
+                }
+            ],
+            "usage": {"tokens": 30, "prompt_tokens": 10, "completion_tokens": 20},
+            "cost_estimate_usd": None,
+        },
+        "throughput": {
+            "provider": "openai",
+            "model": "gpt-4o-mini",
+            "cloud_call_made": True,
+            "reports_completed": 0,
+            "claim_count": 2,
+        },
+        "grounding": {
+            "needs_human_review": text
+            != "AI-assisted brainstorming reduced semantic diversity in short-form writing tasks.",
+            "grounding_passed": text
+            == "AI-assisted brainstorming reduced semantic diversity in short-form writing tasks.",
+            "flagged_sentence_count": 0
+            if text
+            == "AI-assisted brainstorming reduced semantic diversity in short-form writing tasks."
+            else 1,
+        },
+        "governor_verdict": "GO"
+        if text == "AI-assisted brainstorming reduced semantic diversity in short-form writing tasks."
+        else "NO-GO",
+        "no_accepted_graph_writes": no_accepted_graph_writes,
+    }
+
+
+def test_evaluator_no_go_bridge_creates_draft_ticket(tmp_path: Path) -> None:
+    synthesis = _build_synthesis_packet_run(no_accepted_graph_writes=False)
+    evaluator = evaluate_synthesis_artifact(synthesis, root=REPO_ROOT)
+    assert evaluator["evaluator_verdict"] == "NO-GO"
+    evaluator_path = tmp_path / "data/reports/evaluator_no_go.json"
+    evaluator_path.parent.mkdir(parents=True, exist_ok=True)
+    evaluator_path.write_text(json.dumps(evaluator), encoding="utf-8")
+    result = bridge_evaluator_to_instruction_draft(
+        evaluator_artifact=evaluator_path,
+        synthesis_artifact=synthesis,
+        root=tmp_path,
+    )
+    assert result["status"] == "completed"
+    assert result["draft_written"] is True
+    assert result["instruction_packet_path"]
+    draft_path = tmp_path / str(result["draft_ticket_path"])
+    draft = json.loads(draft_path.read_text(encoding="utf-8"))
+    assert draft["status"] == "draft"
+    assert draft["source"] == "openai_synthesis_evaluator_bridge"
+    assert "auto_merge" in draft["forbidden_actions"]
+    assert "edit_TICKET_QUEUE" in draft["forbidden_actions"]
+    assert draft["live_synthesis_verdict"] == "NO-GO"
+    assert not (tmp_path / "tickets" / "TICKET_QUEUE.md").exists()
+
+
+def test_evaluator_go_bridge_instruction_packet_only(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST", "openai")
+    monkeypatch.setenv("RGE_CLOUD_MAX_USD_PER_RUN", "0.50")
+    monkeypatch.setenv("RGE_CLOUD_MAX_TOKENS_PER_CALL", "4096")
+    synthesis = _build_synthesis_packet_run()
+    evaluator = evaluate_synthesis_artifact(synthesis, root=REPO_ROOT)
+    assert evaluator["evaluator_verdict"] == "GO"
+    result = bridge_evaluator_to_instruction_draft(
+        evaluator_artifact=evaluator,
+        synthesis_artifact=synthesis,
+        root=tmp_path,
+    )
+    assert result["status"] == "completed"
+    assert result["draft_written"] is False
+    assert result["instruction_packet_path"]
+    packet_path = tmp_path / result["instruction_packet_path"]
+    assert packet_path.is_file()
+    parsed = parse_instruction_packet_text(packet_path.read_text(encoding="utf-8"))
+    assert parsed["evaluator_verdict"] == "GO"
+    assert not list(draft_ticket_dir(root=tmp_path).glob("draft_*.json"))
+
+
+def test_evaluator_go_bridge_optional_follow_up_draft(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST", "openai")
+    monkeypatch.setenv("RGE_CLOUD_MAX_USD_PER_RUN", "0.50")
+    monkeypatch.setenv("RGE_CLOUD_MAX_TOKENS_PER_CALL", "4096")
+    synthesis = _build_synthesis_packet_run()
+    evaluator = evaluate_synthesis_artifact(synthesis, root=REPO_ROOT)
+    result = bridge_evaluator_to_instruction_draft(
+        evaluator_artifact=evaluator,
+        synthesis_artifact=synthesis,
+        write_draft=True,
+        root=tmp_path,
+    )
+    assert result["draft_written"] is True
+    draft = json.loads((tmp_path / str(result["draft_ticket_path"])).read_text(encoding="utf-8"))
+    assert draft["live_synthesis_verdict"] == "GO"
+    assert draft["source"] == "openai_synthesis_evaluator_bridge"
+    assert "improvement handoff" in str(draft.get("problem") or "").casefold()
+
+
+def test_evaluator_bridge_cli_wrapper(
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: Path,
+) -> None:
+    synthesis = _build_synthesis_packet_run(no_accepted_graph_writes=False)
+    evaluator = evaluate_synthesis_artifact(synthesis, root=REPO_ROOT)
+    evaluator_path = tmp_path / "evaluator.json"
+    evaluator_path.write_text(json.dumps(evaluator), encoding="utf-8")
+    synthesis_path = tmp_path / "synthesis.json"
+    synthesis_path.write_text(json.dumps(synthesis), encoding="utf-8")
+    exit_code = evaluator_main(
+        [
+            "--bridge-instruction-draft",
+            "--evaluator-artifact",
+            str(evaluator_path),
+            "--synthesis-artifact",
+            str(synthesis_path),
+            "--root",
+            str(tmp_path),
+        ]
+    )
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    payload = json.loads(captured.out)
+    assert payload["command"] == "bridge_evaluator_instruction_draft"
+    assert payload["draft_written"] is True
+
+
+def test_governor_operator_commands_include_evaluator_bridge() -> None:
+    from rge.modules.autonomous_synthesis_governor import governor_operator_commands
+
+    commands = governor_operator_commands()
+    assert "bridge_synthesis_review_instruction_draft" in commands
+    assert "run_openai_synthesis_evaluator.py" in commands[
+        "bridge_synthesis_review_instruction_draft"
+    ]
