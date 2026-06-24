@@ -1,0 +1,34 @@
+{
+  "id": "ticket-404",
+  "title": "12_RUNTIME_CONFIG execute-safe OpenAI evaluator seed hook cross-link v0",
+  "problem": "Tickets 401-402 documented execute-safe evaluator seeding in README and AGENTS.md, but docs/agents/12_RUNTIME_CONFIG.md OpenAI evaluator section does not mention the ticket-400 execute-safe hook.",
+  "evidence": [
+    "agent_reports/2026-06-24_principal-audit-post-ticket-402_openai-evaluator-docs-sequence.md",
+    "agent_reports/2026-06-24_phase-3_ticket-401_readme-execute-safe-evaluator-seed-v0.md",
+    "docs/agents/12_RUNTIME_CONFIG.md"
+  ],
+  "affected_modules": [
+    "docs/agents/12_RUNTIME_CONFIG.md"
+  ],
+  "expected_files": [
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-404_runtime-config-execute-safe-evaluator-seed-v0.md"
+  ],
+  "acceptance_criteria": [
+    "12_RUNTIME_CONFIG documents execute-safe evaluator seed trigger and mock-only boundary (ticket-400).",
+    "Cross-links README execute-safe evaluator seed hook subsection.",
+    "No code changes."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "README or AGENTS.md edits.",
+    "Engine changes.",
+    "Live OpenAI HTTP."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert 12_RUNTIME_CONFIG section only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}
