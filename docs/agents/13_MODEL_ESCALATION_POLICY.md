@@ -197,9 +197,16 @@ Mock-first internal MVP; live OpenAI is operator-only:
 2. Optional: `synthesize --packet … --provider openai --confirm --load-operator-env`.
 3. `scripts/run_openai_synthesis_evaluator.py --artifact …` (no extra HTTP).
 4. Optional: `--bridge-instruction-draft` for instruction packet / draft ticket handoff.
+5. **Execute-safe evaluator seed** (ticket-400): when
+   `review_artifact_recommended` and plan recommends mock evaluate, successful
+   `operator_loop --mode execute-safe` seeds `openai_synthesis_evaluator_latest.json`
+   from canary JSON or **mock-cloud** synthesis only (`live_http_used: false` in hook
+   payload — not live canary). See README *Execute-safe evaluator seed hook* and
+   `12_RUNTIME_CONFIG.md`.
 
 Pass: `grounding_passed`, `governor_verdict: GO`, `no_accepted_graph_writes: true`,
 evaluator GO. Never run live canary from CI, golden tests, verify, or autocycle.
+Execute-safe may run mock evaluator seed only; it never escalates to live OpenAI HTTP.
 Full runbook: README Operator Quickstart (*Live OpenAI synthesis evaluator canary runbook*).
 
 ### Live structured probe (ticket-060)

@@ -1,0 +1,31 @@
+{
+  "id": "ticket-406",
+  "title": "11_AGENT_OPERATING_PROTOCOL execute-safe OpenAI evaluator seed cross-link v0",
+  "problem": "Tickets 401-405 documented execute-safe evaluator seeding across README, AGENTS.md, 12_RUNTIME_CONFIG.md, and 13_MODEL_ESCALATION_POLICY.md, but docs/agents/11_AGENT_OPERATING_PROTOCOL.md does not mention the ticket-400 execute-safe hook.",
+  "evidence": [
+    "agent_reports/2026-06-24_phase-3_ticket-405_escalation-policy-execute-safe-evaluator-seed-v0.md",
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md"
+  ],
+  "affected_modules": [
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md"
+  ],
+  "expected_files": [
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-406_operating-protocol-execute-safe-evaluator-seed-v0.md"
+  ],
+  "acceptance_criteria": [
+    "11_AGENT_OPERATING_PROTOCOL documents execute-safe mock evaluator seed boundary.",
+    "No code changes."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Engine changes.",
+    "Live OpenAI HTTP."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert operating protocol section only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}
