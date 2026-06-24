@@ -42,6 +42,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert the OpenAI request hydration, citation normalization, and tests. Leave RGE_CLOUD_LLM_ENABLED=0 or remove openai from RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST to disable live HTTP while retaining mock_cloud behavior.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / cloud synthesis"
 }

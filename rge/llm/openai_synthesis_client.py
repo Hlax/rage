@@ -150,6 +150,109 @@ def _packet_sha256(packet: dict[str, Any]) -> str:
     ).hexdigest()
 
 
+def _public_source_metadata(ref: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "source_id": ref.get("source_id"),
+        "source_type": ref.get("source_type"),
+        "title": ref.get("title"),
+    }
+
+
+def _build_grounding_payload(packet: dict[str, Any]) -> dict[str, Any]:
+    """Public-safe grounded text and metadata for OpenAI synthesis prompts."""
+    claim_texts = claim_text_by_id(packet)
+    atom_texts = atom_text_by_id(packet)
+    claims_payload: list[dict[str, Any]] = []
+    for claim in packet.get("claims") or []:
+        if not isinstance(claim, dict):
+            continue
+        claim_id = str(claim.get("claim_id") or "")
+        claims_payload.append(
+            {
+                "claim_id": claim.get("claim_id"),
+                "source_id": claim.get("source_id"),
+                "claim_text": claim_texts.get(claim_id, ""),
+                "stance": claim.get("stance"),
+                "scope": claim.get("scope"),
+                "limitations": claim.get("limitations"),
+            }
+        )
+    atoms_payload: list[dict[str, Any]] = []
+    for atom in packet.get("atoms") or []:
+        if not isinstance(atom, dict):
+            continue
+        atom_id = str(atom.get("atom_id") or "")
+        atoms_payload.append(
+            {
+                "atom_id": atom.get("atom_id"),
+                "canonical_text": atom_texts.get(atom_id, ""),
+                "maturity": atom.get("maturity"),
+                "claim_ids": atom.get("claim_ids"),
+                "source_ids": atom.get("source_ids"),
+            }
+        )
+    source_metadata = [
+        _public_source_metadata(ref)
+        for ref in (packet.get("source_refs") or [])
+        if isinstance(ref, dict)
+    ]
+    return {
+        "research_question": packet.get("research_question"),
+        "purpose": packet.get("purpose"),
+        "claims": claims_payload,
+        "atoms": atoms_payload,
+        "source_refs": source_metadata,
+        "trace_refs": packet.get("trace_refs") or [],
+    }
+
+
+def _allowed_source_ids(packet: dict[str, Any]) -> set[str]:
+    return {
+        str(row.get("source_id"))
+        for row in (packet.get("source_refs") or [])
+        if isinstance(row, dict) and row.get("source_id")
+    }
+
+
+def _normalize_source_ref(value: Any, *, allowed_sources: set[str]) -> str | None:
+    if isinstance(value, dict):
+        source_id = str(value.get("source_id") or "").strip()
+    else:
+        source_id = str(value or "").strip()
+    if not source_id or source_id not in allowed_sources:
+        return None
+    return source_id
+
+
+def _normalize_summary_sentences(
+    sentences: list[Any],
+    *,
+    packet: dict[str, Any],
+) -> list[dict[str, Any]]:
+    allowed_sources = _allowed_source_ids(packet)
+    normalized: list[dict[str, Any]] = []
+    for index, sentence in enumerate(sentences):
+        if not isinstance(sentence, dict):
+            raise CloudSynthesisError(f"summary_sentences[{index}] must be an object")
+        source_refs: list[str] = []
+        for ref_index, ref in enumerate(sentence.get("source_refs") or []):
+            resolved = _normalize_source_ref(ref, allowed_sources=allowed_sources)
+            if resolved is None:
+                raise CloudSynthesisError(
+                    f"summary_sentences[{index}] source_refs[{ref_index}] cites unresolvable source_ref"
+                )
+            source_refs.append(resolved)
+        normalized.append(
+            {
+                "text": str(sentence.get("text") or "").strip(),
+                "claim_ids": [str(value) for value in (sentence.get("claim_ids") or []) if value],
+                "atom_ids": [str(value) for value in (sentence.get("atom_ids") or []) if value],
+                "source_refs": source_refs,
+            }
+        )
+    return normalized
+
+
 def _first_grounded_sentence(packet: dict[str, Any]) -> dict[str, Any]:
     claim_texts = claim_text_by_id(packet)
     atom_texts = atom_text_by_id(packet)
@@ -238,31 +341,7 @@ class OpenAISynthesisClient(CloudSynthesisClient):
         max_tokens = _positive_int(os.environ.get("RGE_CLOUD_MAX_TOKENS_PER_CALL", ""))
         if max_tokens is None:
             raise CloudSynthesisGateError("RGE_CLOUD_MAX_TOKENS_PER_CALL must be > 0")
-        atoms = packet.get("atoms") or []
-        claims = packet.get("claims") or []
-        grounding = {
-            "research_question": packet.get("research_question"),
-            "purpose": packet.get("purpose"),
-            "atoms": [
-                {
-                    "atom_id": atom.get("atom_id"),
-                    "claim_ids": atom.get("claim_ids"),
-                    "source_ids": atom.get("source_ids"),
-                }
-                for atom in atoms
-                if isinstance(atom, dict)
-            ],
-            "claims": [
-                {
-                    "claim_id": claim.get("claim_id"),
-                    "source_id": claim.get("source_id"),
-                }
-                for claim in claims
-                if isinstance(claim, dict)
-            ],
-            "source_refs": packet.get("source_refs") or [],
-            "trace_refs": packet.get("trace_refs") or [],
-        }
+        grounding = _build_grounding_payload(packet)
         return {
             "model": self.model,
             "temperature": 0,
@@ -272,9 +351,13 @@ class OpenAISynthesisClient(CloudSynthesisClient):
                 {
                     "role": "system",
                     "content": (
-                        "Return JSON with summary_sentences: an array of objects "
-                        "each containing text, claim_ids, atom_ids, and source_refs. "
-                        "Cite only provided refs; do not invent sources."
+                        "Return JSON with summary_sentences: an array of objects each "
+                        "containing text, claim_ids, atom_ids, and source_refs. "
+                        "source_refs must be source_id strings from the provided "
+                        "source_refs list. Cite only provided claim_ids, atom_ids, and "
+                        "source_refs; do not invent sources. Each sentence must reuse "
+                        "significant wording (words of four or more letters) from the "
+                        "claim_text and canonical_text of every cited claim_id and atom_id."
                     ),
                 },
                 {
@@ -327,6 +410,7 @@ class OpenAISynthesisClient(CloudSynthesisClient):
         sentences = parsed.get("summary_sentences")
         if not isinstance(sentences, list) or not sentences:
             raise CloudSynthesisError("OpenAI response missing summary_sentences")
+        normalized_sentences = _normalize_summary_sentences(sentences, packet=packet)
         usage = response.get("usage") if isinstance(response.get("usage"), dict) else {}
         prompt_tokens = int(usage.get("prompt_tokens") or 0)
         completion_tokens = int(usage.get("completion_tokens") or 0)
@@ -338,7 +422,7 @@ class OpenAISynthesisClient(CloudSynthesisClient):
             "provider": self.provider,
             "no_paid_api_calls": False,
             "review_mode": "live_candidate",
-            "summary_sentences": sentences,
+            "summary_sentences": normalized_sentences,
             "usage": {
                 "tokens": total_tokens,
                 "prompt_tokens": prompt_tokens,
