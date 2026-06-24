@@ -843,6 +843,73 @@ def run_openai_synthesis_evaluator(
     return result
 
 
+def run_openai_synthesis_evaluator_execute_safe_hook(
+    *,
+    root: Path | None = None,
+    branch: str | None = None,
+) -> dict[str, Any] | None:
+    """Seed gitignored evaluator artifact when plan recommends mock evaluate."""
+    from rge.modules.synthesis_packet_runner import (
+        GROUNDED_PACKET_FIXTURE_REL,
+        run_synthesis_packet,
+    )
+
+    project_root = root or repo_root()
+    status = inspect_openai_synthesis_evaluator_plan_status(
+        root=project_root,
+        branch=branch,
+    )
+    if not status.get("review_artifact_recommended"):
+        return None
+    if not status.get("cli_wired"):
+        return {"status": "skipped", "detail": "evaluator CLI not wired"}
+
+    input_path = project_root / SYNTHESIS_CANARY_OUTPUT_REL
+    mock_synthesized = False
+    if not input_path.is_file():
+        fixture = project_root / GROUNDED_PACKET_FIXTURE_REL
+        if not fixture.is_file():
+            return {
+                "status": "skipped",
+                "detail": f"fixture missing: {GROUNDED_PACKET_FIXTURE_REL.as_posix()}",
+            }
+        try:
+            output_dir = project_root / SYNTHESIS_CANARY_OUTPUT_REL.parent
+            run_result = run_synthesis_packet(
+                packet_path=fixture,
+                provider="mock_cloud",
+                output_dir=output_dir,
+                root=project_root,
+            )
+            output_rel = str(run_result.get("output_path") or "")
+            if not output_rel:
+                return {"status": "error", "detail": "mock synthesis missing output_path"}
+            input_path = Path(output_rel)
+            if not input_path.is_absolute():
+                input_path = project_root / input_path
+            mock_synthesized = True
+        except Exception as exc:
+            return {"status": "error", "detail": str(exc)}
+
+    try:
+        result = run_openai_synthesis_evaluator(
+            input_artifact=input_path,
+            root=project_root,
+            write_artifact=True,
+        )
+    except (OpenAISynthesisEvaluatorError, ValueError, RuntimeError) as exc:
+        return {"status": "error", "detail": str(exc)}
+
+    return {
+        "status": "completed",
+        "live_synthesis_verdict": result.get("evaluator_verdict"),
+        "artifact_path": result.get("artifact_path"),
+        "input_artifact_path": result.get("input_artifact_path"),
+        "mock_synthesized": mock_synthesized,
+        "live_http_used": False,
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     import argparse
 

@@ -34,6 +34,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert execute-safe hook and tests only.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / operator loop"
 }
