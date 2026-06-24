@@ -1,0 +1,35 @@
+{
+  "id": "ticket-403",
+  "title": "Principal audit post OpenAI evaluator docs sequence (399-402)",
+  "problem": "Tickets 399-402 closed documentation hygiene for the OpenAI synthesis evaluator spine (AGENTS cross-link, execute-safe seed hook, README cross-link). A principal audit checkpoint is due before further operator-automation or cloud-synthesis tickets.",
+  "evidence": [
+    "agent_reports/2026-06-24_phase-3_ticket-399_agents-openai-evaluator-crosslink-v0.md",
+    "agent_reports/2026-06-24_phase-3_ticket-400_execute-safe-evaluator-seed.md",
+    "agent_reports/2026-06-24_phase-3_ticket-401_readme-execute-safe-evaluator-seed-v0.md",
+    "agent_reports/2026-06-24_phase-3_ticket-402_agents-execute-safe-evaluator-seed-v0.md",
+    "docs/agents/10_SAFETY_MODEL.md"
+  ],
+  "affected_modules": [
+    "agent_reports"
+  ],
+  "expected_files": [
+    "agent_reports/YYYY-MM-DD_principal-audit-post-ticket-402_openai-evaluator-docs-sequence.md"
+  ],
+  "acceptance_criteria": [
+    "Audit report records GO/NO-GO for tickets 399-402 with mock-first and execute-safe safety boundaries intact.",
+    "Audit confirms execute-safe evaluator seed never invokes live HTTP.",
+    "Audit lists follow-on tickets before next implementation work."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m rge.modules.safety_auditor --audit full",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Do not implement new engine features during the audit.",
+    "Do not run live OpenAI HTTP."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Delete audit report only.",
+  "status": "proposed",
+  "category": "Phase 3 / audit checkpoint"
+}

@@ -106,9 +106,14 @@ gitignored artifact path (`data/reports/openai_synthesis_evaluator_latest.json`)
 `run_openai_synthesis_live_canary`. Private `self_improvement_status` includes
 `openai_synthesis_review_status` on the evaluator spine step. Evaluator GO may bridge to
 instruction-packet drafts via `bridge_synthesis_review_instruction_draft` (ticket-395;
-never auto-promotes queue rows). Full env-gate table, cost caps, pass/fail interpretation,
-and bridge commands: README **Operator Quickstart** (*Live OpenAI synthesis evaluator
-canary runbook*), `docs/agents/12_RUNTIME_CONFIG.md`, `docs/agents/13_MODEL_ESCALATION_POLICY.md`,
+never auto-promotes queue rows). **Execute-safe evaluator seed** (ticket-400): when
+`review_artifact_recommended` and plan recommends `run_openai_synthesis_evaluator`,
+successful `operator_loop --mode execute-safe` seeds gitignored
+`openai_synthesis_evaluator_latest.json` from existing canary JSON or mock-cloud
+synthesis of the grounded fixture (`openai_synthesis_evaluator_execute_safe_hook`;
+`live_http_used: false`; never live canary). Full env-gate table, cost caps, pass/fail
+interpretation, execute-safe seed table, and bridge commands: README **Operator Quickstart**
+(*Live OpenAI synthesis evaluator canary runbook* — *Execute-safe evaluator seed hook*), `docs/agents/12_RUNTIME_CONFIG.md`, `docs/agents/13_MODEL_ESCALATION_POLICY.md`,
 and principal audit `agent_reports/2026-06-24_principal-audit-post-ticket-397_openai-evaluator-sequence.md`.
 
 **Researcher product proof** (mock LLM only; scratch work dir; tickets 381–384): end-to-end
