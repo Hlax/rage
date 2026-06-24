@@ -46,6 +46,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove the evaluator-to-instruction bridge and related tests while preserving the standalone evaluator artifact from ticket-394 and the existing governor/draft-ticket flow.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / self-improvement"
 }

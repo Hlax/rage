@@ -39,6 +39,10 @@ GOVERNOR_VERDICT_RE = re.compile(
     r"Governor verdict:\s*(GO|PARTIAL|NO-GO)",
     re.IGNORECASE,
 )
+EVALUATOR_VERDICT_RE = re.compile(
+    r"Evaluator verdict:\s*(GO|PARTIAL|NO-GO)",
+    re.IGNORECASE,
+)
 CITATION_LINE_RE = re.compile(
     r"^\-\s*(Claim refs|Atom refs|Source refs):\s*(.+)$",
     re.IGNORECASE | re.MULTILINE,
@@ -151,16 +155,24 @@ def parse_instruction_packet_text(text: str) -> dict[str, Any]:
         if line.strip().startswith("-")
     ]
     governor_verdict = None
+    evaluator_verdict = None
     for note in safety_notes:
         verdict_match = GOVERNOR_VERDICT_RE.search(note)
         if verdict_match:
             governor_verdict = verdict_match.group(1).upper()
-            break
+        evaluator_match = EVALUATOR_VERDICT_RE.search(note)
+        if evaluator_match:
+            evaluator_verdict = evaluator_match.group(1).upper()
     if governor_verdict is None:
         for note in safety_notes:
             if "governor verdict" in note.casefold():
                 governor_verdict = "UNKNOWN"
+    if evaluator_verdict is None:
+        for note in safety_notes:
+            if "evaluator verdict" in note.casefold():
+                evaluator_verdict = "UNKNOWN"
 
+    evidence_section = sections.get("evidence artifact", "").strip()
     build_title = sections.get("recommended build packet", "").strip()
     summary = sections.get("summary", "").strip()
     likely_files = _bullets("files likely affected")
@@ -184,6 +196,8 @@ def parse_instruction_packet_text(text: str) -> dict[str, Any]:
         "non_goals": non_goals,
         "safety_notes": safety_notes,
         "governor_verdict": governor_verdict,
+        "evaluator_verdict": evaluator_verdict,
+        "evidence_artifact": evidence_section,
         "rollback_plan": sections.get("rollback plan", "").strip(),
     }
 
@@ -466,6 +480,7 @@ def validate_instruction_packet_for_draft(
     packet_path: Path,
     parsed: dict[str, Any],
     root: Path,
+    source: str = "governor",
 ) -> dict[str, Any]:
     """Apply deterministic validation gates before writing a draft ticket."""
     reasons: list[str] = []
@@ -476,11 +491,18 @@ def validate_instruction_packet_for_draft(
     text = packet_path.read_text(encoding="utf-8")
     reasons.extend(_content_policy_violations(text, label="instruction_packet"))
 
-    verdict = parsed.get("governor_verdict")
-    if verdict in {"PARTIAL", "NO-GO"}:
-        reasons.append(f"instruction packet governor verdict is {verdict}")
-    elif verdict != "GO":
-        reasons.append("instruction packet is not from a GO/auto-signed-off governor output")
+    if source == "evaluator":
+        verdict = parsed.get("evaluator_verdict") or parsed.get("governor_verdict")
+        if verdict not in {"GO", "PARTIAL", "NO-GO"}:
+            reasons.append("evaluator instruction packet missing evaluator verdict")
+        if not parsed.get("evidence_artifact"):
+            reasons.append("evaluator instruction packet missing evidence artifact reference")
+    else:
+        verdict = parsed.get("governor_verdict")
+        if verdict in {"PARTIAL", "NO-GO"}:
+            reasons.append(f"instruction packet governor verdict is {verdict}")
+        elif verdict != "GO":
+            reasons.append("instruction packet is not from a GO/auto-signed-off governor output")
 
     claim_refs = parsed.get("claim_refs") or []
     atom_refs = parsed.get("atom_refs") or []
@@ -490,17 +512,19 @@ def validate_instruction_packet_for_draft(
     if not source_refs:
         reasons.append("instruction packet missing source refs")
 
-    latest_go = _latest_go_instruction_packet_from_ledger(root=root)
-    rel_path = _safe_rel(packet_path, root)
-    if latest_go:
-        latest_packet = str(latest_go.get("latest_instruction_packet") or "")
-        if latest_packet and latest_packet != rel_path:
-            reasons.append(
-                "instruction packet is stale; a newer GO governor output exists at "
-                f"{latest_packet}"
-            )
-        if latest_go.get("governor_verdict") != "GO":
-            reasons.append("latest governor ledger review is not GO")
+    latest_go = None
+    if source == "governor":
+        latest_go = _latest_go_instruction_packet_from_ledger(root=root)
+        rel_path = _safe_rel(packet_path, root)
+        if latest_go:
+            latest_packet = str(latest_go.get("latest_instruction_packet") or "")
+            if latest_packet and latest_packet != rel_path:
+                reasons.append(
+                    "instruction packet is stale; a newer GO governor output exists at "
+                    f"{latest_packet}"
+                )
+            if latest_go.get("governor_verdict") != "GO":
+                reasons.append("latest governor ledger review is not GO")
 
     return {"passed": not reasons, "reasons": reasons, "latest_go_review": latest_go}
 
@@ -517,24 +541,50 @@ def build_draft_ticket_payload(
     instruction_packet_path: str,
     validation: dict[str, Any],
     root: Path | None = None,
+    evaluator_artifact: dict[str, Any] | None = None,
+    draft_source: str = "instruction_packet_ticket_draft",
 ) -> dict[str, Any]:
     project_root = root or repo_root()
     packet_id = str(parsed.get("packet_id") or "unknown_packet")
     draft_id = f"draft-from-{re.sub(r'[^A-Za-z0-9_.-]+', '-', packet_id).strip('-') or 'packet'}"
     expected_files = infer_expected_files(parsed, root=project_root)
+    if evaluator_artifact:
+        for suggestion in evaluator_artifact.get("remediation_suggestions") or []:
+            if not isinstance(suggestion, dict):
+                continue
+            for item in suggestion.get("expected_files") or []:
+                normalized = _normalize_inference_path(str(item))
+                if normalized and normalized not in expected_files:
+                    expected_files.append(normalized)
+        expected_files = sorted(set(expected_files))
     evidence = [
         *(f"claim:{item}" for item in parsed.get("claim_refs") or []),
         *(f"atom:{item}" for item in parsed.get("atom_refs") or []),
         *(f"source:{item}" for item in parsed.get("source_refs") or []),
     ]
-    return {
+    if parsed.get("evidence_artifact"):
+        evidence.append(f"evaluator_artifact:{parsed.get('evidence_artifact')}")
+    evaluator_verdict = parsed.get("evaluator_verdict")
+    governor_verdict = parsed.get("governor_verdict") or evaluator_verdict or "GO"
+    auto_signed_off = governor_verdict == "GO" and evaluator_verdict in {None, "GO"}
+    affected_modules: list[str] = []
+    if evaluator_artifact:
+        for suggestion in evaluator_artifact.get("remediation_suggestions") or []:
+            if isinstance(suggestion, dict):
+                affected_modules.extend(
+                    str(item) for item in (suggestion.get("affected_modules") or []) if item
+                )
+    affected_modules = sorted(set(affected_modules))
+    payload: dict[str, Any] = {
         "schema_version": DRAFT_SCHEMA_VERSION,
         "id": draft_id,
         "status": "draft",
-        "source": "instruction_packet_ticket_draft",
+        "source": draft_source,
         "source_instruction_packet": instruction_packet_path,
-        "governor_verdict": parsed.get("governor_verdict") or "GO",
-        "auto_signed_off": True,
+        "governor_verdict": governor_verdict,
+        "auto_signed_off": auto_signed_off,
+        "risk_level": "medium",
+        "affected_modules": affected_modules,
         "title": parsed.get("build_title") or f"Implement synthesis finding: {packet_id}",
         "problem": parsed.get("summary") or "Review the governor instruction packet summary.",
         "evidence": evidence,
@@ -545,7 +595,7 @@ def build_draft_ticket_payload(
         "non_goals": list(parsed.get("non_goals") or []),
         "safety_notes": list(parsed.get("safety_notes") or []),
         "rollback_plan": parsed.get("rollback_plan")
-        or "Delete the draft ticket and regenerate from a fresh GO instruction packet.",
+        or "Delete the draft ticket and regenerate from a fresh evaluator instruction packet.",
         "validation": {
             "passed": validation.get("passed"),
             "reasons": list(validation.get("reasons") or []),
@@ -559,6 +609,15 @@ def build_draft_ticket_payload(
         ],
         "created_at": utc_now_iso(),
     }
+    if evaluator_verdict is not None:
+        payload["live_synthesis_verdict"] = evaluator_verdict
+    if isinstance(evaluator_artifact, dict):
+        review_ref = evaluator_artifact.get("input_artifact_path") or evaluator_artifact.get(
+            "artifact_path"
+        )
+        if review_ref:
+            payload["source_review_artifact"] = review_ref
+    return payload
 
 
 def latest_draft_ticket(*, root: Path | None = None) -> dict[str, Any]:
