@@ -51,7 +51,11 @@ None.
 
 ## Merge to main
 
-Merge commit: *(pending)*.
+Merge commit: `292b47cdd8d7ae0dde6f16d38967a579c9911c66`.
+
+Post-merge full pytest: **1380 passed, 1 failed** — flaky
+`test_export_atlas_snapshot_fixture_mode_second_run_byte_identical` (passes in isolation;
+unrelated to README-only change).
 
 ## Recommended next ticket
 
