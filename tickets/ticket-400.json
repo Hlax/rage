@@ -1,0 +1,39 @@
+{
+  "id": "ticket-400",
+  "title": "Execute-safe mock OpenAI synthesis evaluator seed hook",
+  "problem": "When openai_synthesis_evaluator_status shows review_artifact_recommended, operators must manually run mock evaluate before plan JSON shows verdict. Execute-safe could optionally seed the gitignored evaluator artifact from fixture canary JSON after verify when gates are mock-only.",
+  "evidence": [
+    "agent_reports/2026-06-24_principal-audit-post-ticket-397_openai-evaluator-sequence.md",
+    "rge/modules/openai_synthesis_evaluator.py",
+    "rge/modules/operator_loop.py"
+  ],
+  "affected_modules": [
+    "rge/modules/operator_loop.py",
+    "rge/modules/openai_synthesis_evaluator.py",
+    "tests/unit"
+  ],
+  "expected_files": [
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_openai_synthesis_evaluator_operator_plan.py",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-400_execute-safe-evaluator-seed.md"
+  ],
+  "acceptance_criteria": [
+    "Execute-safe runs mock evaluate only when review_artifact_recommended and fixture canary JSON exists or can be synthesized mock-only.",
+    "Never runs live OpenAI HTTP; never writes accepted graph tables.",
+    "Autocycle and verify mock-first defaults unchanged when hook skipped.",
+    "Unit tests cover seed path and skip path without OPENAI_API_KEY."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_openai_synthesis_evaluator_operator_plan.py tests/unit/test_operator_loop.py -q",
+    "RGE_LLM_MODE=mock python -m rge.cli verify --skip-site"
+  ],
+  "non_goals": [
+    "Live OpenAI HTTP.",
+    "Public export or public-site changes.",
+    "Auto-promote draft tickets or edit TICKET_QUEUE."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert execute-safe hook and tests only.",
+  "status": "proposed",
+  "category": "Phase 3 / operator loop"
+}

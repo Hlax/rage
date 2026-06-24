@@ -94,6 +94,23 @@ mock-only benchmark command, gitignored artifact path
 (`data/reports/synthesis_packet_benchmark_latest.json`), single `synthesize --packet` run,
 and replan steps: README **Operator Quickstart** (*Synthesis packet benchmark dry-run*).
 
+**Live OpenAI synthesis evaluator canary** (tickets 393–397; mock-first cloud synthesis):
+opt-in live OpenAI synthesis produces **candidate JSON only** — Python grounding,
+governor, and evaluator checks gate downstream artifacts. **No accepted graph writes**
+from model output. Mock-first remains the default for CI, golden tests, `verify`, and
+`execute-safe`. Plan JSON includes `openai_synthesis_evaluator_status` with
+`live_synthesis_verdict` (`GO`, `PARTIAL`, `NO-GO`), `review_artifact_recommended`,
+gitignored artifact path (`data/reports/openai_synthesis_evaluator_latest.json`), and
+`operator_commands.evaluate_mock` / `live_canary`. Mock evaluate is
+`safe_autonomous`; live canary is `review_gated` and autocycle blocks
+`run_openai_synthesis_live_canary`. Private `self_improvement_status` includes
+`openai_synthesis_review_status` on the evaluator spine step. Evaluator GO may bridge to
+instruction-packet drafts via `bridge_synthesis_review_instruction_draft` (ticket-395;
+never auto-promotes queue rows). Full env-gate table, cost caps, pass/fail interpretation,
+and bridge commands: README **Operator Quickstart** (*Live OpenAI synthesis evaluator
+canary runbook*), `docs/agents/12_RUNTIME_CONFIG.md`, `docs/agents/13_MODEL_ESCALATION_POLICY.md`,
+and principal audit `agent_reports/2026-06-24_principal-audit-post-ticket-397_openai-evaluator-sequence.md`.
+
 **Researcher product proof** (mock LLM only; scratch work dir; tickets 381–384): end-to-end
 mock-first proof chaining arbitrary-source bundle → synthesis packet → benchmark → safety
 audit → public atlas preview visibility. Plan, verify, and autocycle JSON include
