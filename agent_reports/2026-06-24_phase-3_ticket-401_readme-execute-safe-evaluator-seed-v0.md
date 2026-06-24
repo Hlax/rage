@@ -51,7 +51,7 @@ None.
 
 ## Merge to main
 
-Merge commit: *(pending merge)*.
+Merge commit: `7238d3c61177b440c0e235a6ce5a43d8dd10825f`.
 
 ## Recommended next ticket
 
