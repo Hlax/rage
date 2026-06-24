@@ -385,7 +385,7 @@ superseded
 | 393 | ticket-393 | done | Hydrate live OpenAI synthesis grounding input | `phase-3/ticket-393-live-openai-grounding-input` | `agent_reports/2026-06-24_phase-3_ticket-393_live-openai-grounding-input.md` |
 | 394 | ticket-394 | done | Add deterministic live OpenAI synthesis evaluator artifact | `phase-3/ticket-394-openai-synthesis-evaluator` | `agent_reports/2026-06-24_phase-3_ticket-394_openai-synthesis-evaluator-artifact.md` |
 | 395 | ticket-395 | done | Bridge OpenAI synthesis evaluator suggestions to instruction-packet draft tickets | `phase-3/ticket-395-openai-evaluator-instruction-bridge` | `agent_reports/2026-06-24_phase-3_ticket-395_openai-evaluator-instruction-bridge.md` |
-| 396 | ticket-396 | proposed | Surface OpenAI synthesis evaluator status in operator plan | | |
+| 396 | ticket-396 | done | Surface OpenAI synthesis evaluator status in operator plan | `phase-3/ticket-396-openai-evaluator-operator-status` | `agent_reports/2026-06-24_phase-3_ticket-396_openai-evaluator-operator-status.md` |
 | 397 | ticket-397 | proposed | Document live OpenAI evaluator canary runbook and checkpoint | | |
 | 366 | ticket-366 | done | Live staged orchestrator fetch fallback on candidate 403 | `phase-3/ticket-366-live-staged-orchestrator-fetch-fallback` | `agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md` |
 | 363 | ticket-363 | done | Autonomous loop improvement promotion golden proof | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md` |
@@ -1145,7 +1145,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-396 (proposed) — Surface OpenAI synthesis evaluator status in operator plan
+ticket-397 (proposed) — Document live OpenAI evaluator canary runbook and checkpoint
 ```
 
 ## Queue Notes (2026-06-23, live OpenAI evaluator ticket sequence)

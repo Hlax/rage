@@ -32,6 +32,21 @@ EVALUATOR_OPERATOR_COMMAND = (
     "--artifact data/tmp/openai_synthesis_canary/"
     "synthesis_output_syn_packet_grounded_dry_run_fixture.json"
 )
+SYNTHESIS_CANARY_OUTPUT_REL = Path(
+    "data/tmp/openai_synthesis_canary/"
+    "synthesis_output_syn_packet_grounded_dry_run_fixture.json"
+)
+LIVE_CANARY_OPERATOR_COMMAND = (
+    "python -m rge.cli synthesize --packet "
+    "fixtures/synthesis/grounded_evidence_packet_dry_run.json "
+    "--provider openai --confirm --load-operator-env "
+    "--output-dir data/tmp/openai_synthesis_canary"
+)
+BRIDGE_INSTRUCTION_DRAFT_COMMAND = (
+    "python scripts/run_openai_synthesis_evaluator.py "
+    "--bridge-instruction-draft "
+    f"--evaluator-artifact {DEFAULT_ARTIFACT_REL.as_posix()}"
+)
 
 
 class OpenAISynthesisEvaluatorError(RuntimeError):
@@ -384,6 +399,109 @@ def write_evaluator_artifact(
     resolved.parent.mkdir(parents=True, exist_ok=True)
     resolved.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     return resolved
+
+
+def openai_synthesis_evaluator_cli_wired(*, root: Path | None = None) -> bool:
+    project_root = root or repo_root()
+    return (
+        (project_root / "scripts/run_openai_synthesis_evaluator.py").is_file()
+        and (project_root / "rge/modules/openai_synthesis_evaluator.py").is_file()
+    )
+
+
+def load_evaluator_artifact(
+    *,
+    root: Path | None = None,
+    artifact_path: Path | str | None = None,
+) -> dict[str, Any] | None:
+    project_root = root or repo_root()
+    resolved = (
+        Path(artifact_path) if artifact_path else default_evaluator_artifact_path(root=project_root)
+    )
+    if not resolved.is_absolute():
+        resolved = project_root / resolved
+    if not resolved.is_file():
+        return None
+    try:
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _evaluator_operator_commands() -> dict[str, str]:
+    return {
+        "evaluate_mock": EVALUATOR_OPERATOR_COMMAND,
+        "live_canary": LIVE_CANARY_OPERATOR_COMMAND,
+        "bridge_instruction_draft": BRIDGE_INSTRUCTION_DRAFT_COMMAND,
+    }
+
+
+def inspect_openai_synthesis_evaluator_plan_status(
+    *,
+    root: Path | None = None,
+    branch: str | None = None,
+) -> dict[str, Any]:
+    """Read evaluator artifact and live-gate summary for operator plan surfaces."""
+    del branch
+    project_root = root or repo_root()
+    cli_wired = openai_synthesis_evaluator_cli_wired(root=project_root)
+    artifact_path = default_evaluator_artifact_path(root=project_root)
+    rel_artifact = _operator_safe_artifact_ref(artifact_path, project_root)
+    missing_gates = _public_safe_missing_gates(
+        missing_live_openai_http_gates(root=project_root)
+    )
+    live_status = build_public_safe_live_status(root=project_root)
+    operator_commands = _evaluator_operator_commands()
+    base: dict[str, Any] = {
+        "status": "not_applicable",
+        "cli_wired": cli_wired,
+        "artifact_path": rel_artifact,
+        "live_synthesis_verdict": None,
+        "live_http_gates_summary": live_status,
+        "live_http_gates_missing": sorted(missing_gates.keys()),
+        "live_http_review_gated": True,
+        "review_artifact_recommended": False,
+        "live_canary_recommended": False,
+        "bridge_instruction_draft_recommended": False,
+        "operator_commands": operator_commands,
+        "env_setup": ['$env:RGE_LLM_MODE = "mock"'],
+    }
+    if not cli_wired:
+        return base
+
+    payload = load_evaluator_artifact(root=project_root, artifact_path=artifact_path)
+    if payload is None:
+        canary_exists = (project_root / SYNTHESIS_CANARY_OUTPUT_REL).is_file()
+        return {
+            **base,
+            "status": "missing",
+            "review_artifact_recommended": True,
+            "live_canary_recommended": canary_exists,
+            "operator_commands": operator_commands,
+        }
+
+    live_synthesis_verdict = str(payload.get("evaluator_verdict") or "UNKNOWN")
+    live_canary_recommended = (
+        live_synthesis_verdict == "GO"
+        and not missing_gates
+        and str(payload.get("provider") or "") == "openai"
+    )
+    return {
+        **base,
+        "status": "available",
+        "live_synthesis_verdict": live_synthesis_verdict,
+        "governor_verdict": payload.get("governor_verdict"),
+        "grounding_passed": payload.get("grounding_passed"),
+        "provider": payload.get("provider"),
+        "packet_id": payload.get("packet_id"),
+        "review_artifact_recommended": False,
+        "live_canary_recommended": live_canary_recommended,
+        "bridge_instruction_draft_recommended": live_synthesis_verdict in {"PARTIAL", "NO-GO"},
+        "artifact_written_at": payload.get("artifact_written_at"),
+        "input_artifact_path": payload.get("input_artifact_path"),
+        "operator_commands": operator_commands,
+    }
 
 
 def _instruction_packet_filename(packet_id: str) -> str:
