@@ -42,6 +42,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove the evaluator module, runner script, README section, and evaluator tests. Existing synthesize --packet behavior remains unchanged because the evaluator is read-only over generated artifacts.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / cloud synthesis"
 }

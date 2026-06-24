@@ -1230,6 +1230,73 @@ def discover_latest_synthesis_artifact(
     }
 
 
+def resolve_synthesis_packet_run_artifact(
+    payload: dict[str, Any],
+    *,
+    artifact_path: Path | None = None,
+    root: Path | None = None,
+) -> dict[str, Any]:
+    """Resolve packet, candidate output, and run envelope from synthesis artifacts."""
+    project_root = root or repo_root()
+    schema = str(payload.get("schema_version") or "")
+    if schema == "synthesis_packet_run_v0.1.0":
+        candidate_output = payload.get("candidate_output")
+        if not isinstance(candidate_output, dict):
+            raise GovernorOperatorSurfaceError(
+                "Synthesis packet run artifact missing candidate_output object."
+            )
+        resolved_path = None
+        if artifact_path is not None:
+            resolved_path = (
+                artifact_path if artifact_path.is_absolute() else project_root / artifact_path
+            )
+        packet = _resolve_packet_for_output(
+            candidate_output,
+            root=project_root,
+            output_path=resolved_path,
+        )
+        return {
+            "artifact_kind": "synthesis_packet_run",
+            "packet": packet,
+            "output": candidate_output,
+            "run_envelope": payload,
+            "throughput": dict(payload.get("throughput") or {}),
+            "embedded_grounding": dict(payload.get("grounding") or {}),
+            "embedded_governor_verdict": payload.get("governor_verdict"),
+            "embedded_review_threshold": dict(payload.get("review_threshold") or {}),
+            "no_accepted_graph_writes": bool(payload.get("no_accepted_graph_writes", True)),
+            "run_status": str(payload.get("status") or "unknown"),
+        }
+
+    if payload.get("summary_sentences"):
+        resolved_path = None
+        if artifact_path is not None:
+            resolved_path = (
+                artifact_path if artifact_path.is_absolute() else project_root / artifact_path
+            )
+        packet = _resolve_packet_for_output(
+            payload,
+            root=project_root,
+            output_path=resolved_path,
+        )
+        return {
+            "artifact_kind": "synthesis_output",
+            "packet": packet,
+            "output": payload,
+            "run_envelope": None,
+            "throughput": {},
+            "embedded_grounding": {},
+            "embedded_governor_verdict": None,
+            "embedded_review_threshold": {},
+            "no_accepted_graph_writes": True,
+            "run_status": "completed",
+        }
+
+    raise GovernorOperatorSurfaceError(
+        "Artifact is not a synthesis packet run or candidate synthesis output."
+    )
+
+
 def resolve_governor_inputs_from_artifact(
     discovery: dict[str, Any],
     *,
