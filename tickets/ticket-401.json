@@ -1,0 +1,32 @@
+{
+  "id": "ticket-401",
+  "title": "README execute-safe OpenAI evaluator seed hook cross-link v0",
+  "problem": "Ticket-400 added execute-safe mock evaluator seeding, but README Operator Quickstart does not document when execute-safe auto-seeds openai_synthesis_evaluator_latest.json.",
+  "evidence": [
+    "agent_reports/2026-06-24_phase-3_ticket-400_execute-safe-evaluator-seed.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [
+    "README.md"
+  ],
+  "expected_files": [
+    "README.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-401_readme-execute-safe-evaluator-seed-v0.md"
+  ],
+  "acceptance_criteria": [
+    "README documents execute-safe evaluator seed hook trigger (review_artifact_recommended + mock evaluate action).",
+    "No code changes."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Engine changes.",
+    "Live OpenAI HTTP."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert README section only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}

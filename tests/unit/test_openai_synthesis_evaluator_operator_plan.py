@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 import pytest
@@ -10,8 +11,10 @@ from rge.modules.atlas_snapshot_builder import assert_no_private_fields
 from rge.modules.openai_synthesis_evaluator import (
     DEFAULT_ARTIFACT_REL,
     EVALUATOR_SCHEMA_VERSION,
+    SYNTHESIS_CANARY_OUTPUT_REL,
     inspect_openai_synthesis_evaluator_plan_status,
     load_evaluator_artifact,
+    run_openai_synthesis_evaluator_execute_safe_hook,
     write_evaluator_artifact,
 )
 from rge.modules.operator_autocycle import evaluate_autocycle_cycle
@@ -162,6 +165,87 @@ def test_autocycle_blocks_live_canary_action(
     assert autocycle["status"] == "stopped"
     assert "run_openai_synthesis_live_canary" in str(autocycle.get("stop_reason") or "")
     assert autocycle.get("recommended_action", {}).get("gate") == "review_gated"
+
+
+def test_execute_safe_hook_skipped_when_evaluator_artifact_present(tmp_path: Path) -> None:
+    _seed_evaluator_plan_state(tmp_path)
+    write_evaluator_artifact(
+        _minimal_evaluator_payload(),
+        root=tmp_path,
+        artifact_path=tmp_path / DEFAULT_ARTIFACT_REL,
+    )
+    result = run_openai_synthesis_evaluator_execute_safe_hook(root=tmp_path, branch="main")
+    assert result is None
+
+
+def test_execute_safe_hook_skipped_when_fixture_missing(tmp_path: Path) -> None:
+    _seed_evaluator_plan_state(tmp_path)
+    result = run_openai_synthesis_evaluator_execute_safe_hook(root=tmp_path, branch="main")
+    assert result == {
+        "status": "skipped",
+        "detail": "fixture missing: fixtures/synthesis/grounded_evidence_packet_dry_run.json",
+    }
+
+
+def test_execute_safe_hook_mock_synthesizes_and_writes_evaluator(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    from tests.unit.test_openai_synthesis_evaluator import REPO_ROOT
+
+    _seed_evaluator_plan_state(tmp_path)
+    monkeypatch.setenv("RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST", "openai")
+    monkeypatch.setenv("RGE_CLOUD_MAX_USD_PER_RUN", "0.50")
+    monkeypatch.setenv("RGE_CLOUD_MAX_TOKENS_PER_CALL", "4096")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    fixture_src = REPO_ROOT / "fixtures/synthesis/grounded_evidence_packet_dry_run.json"
+    fixture_dest = tmp_path / "fixtures/synthesis/grounded_evidence_packet_dry_run.json"
+    fixture_dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy(fixture_src, fixture_dest)
+
+    result = run_openai_synthesis_evaluator_execute_safe_hook(root=tmp_path, branch="main")
+    assert result is not None
+    assert result["status"] == "completed"
+    assert result["live_http_used"] is False
+    assert result["mock_synthesized"] is True
+    assert (tmp_path / SYNTHESIS_CANARY_OUTPUT_REL).is_file()
+    assert load_evaluator_artifact(root=tmp_path) is not None
+
+
+def test_execute_safe_hook_uses_existing_canary_without_mock_synthesize(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    from tests.unit.test_openai_synthesis_evaluator import REPO_ROOT
+
+    _seed_evaluator_plan_state(tmp_path)
+    monkeypatch.setenv("RGE_CLOUD_SYNTHESIS_PROVIDER_ALLOWLIST", "openai")
+    monkeypatch.setenv("RGE_CLOUD_MAX_USD_PER_RUN", "0.50")
+    monkeypatch.setenv("RGE_CLOUD_MAX_TOKENS_PER_CALL", "4096")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    fixture_src = REPO_ROOT / "fixtures/synthesis/grounded_evidence_packet_dry_run.json"
+    fixture_dest = tmp_path / "fixtures/synthesis/grounded_evidence_packet_dry_run.json"
+    fixture_dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy(fixture_src, fixture_dest)
+    bootstrap = run_openai_synthesis_evaluator_execute_safe_hook(
+        root=tmp_path,
+        branch="main",
+    )
+    assert bootstrap is not None and bootstrap["status"] == "completed"
+    (tmp_path / DEFAULT_ARTIFACT_REL).unlink(missing_ok=True)
+
+    def fail_synthesize(**_kwargs: object) -> dict:
+        raise AssertionError("run_synthesis_packet should not run when canary exists")
+
+    monkeypatch.setattr(
+        "rge.modules.synthesis_packet_runner.run_synthesis_packet",
+        fail_synthesize,
+    )
+    result = run_openai_synthesis_evaluator_execute_safe_hook(root=tmp_path, branch="main")
+    assert result is not None
+    assert result["status"] == "completed"
+    assert result["mock_synthesized"] is False
+    assert load_evaluator_artifact(root=tmp_path) is not None
 
 
 def test_self_improvement_status_includes_review_status(tmp_path: Path) -> None:

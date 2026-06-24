@@ -2849,6 +2849,27 @@ def execute_safe_checks(
                 plan["next_recommended_action"] = refreshed_plan.get(
                     "next_recommended_action"
                 )
+        if action_id == "run_openai_synthesis_evaluator":
+            from rge.modules.openai_synthesis_evaluator import (
+                run_openai_synthesis_evaluator_execute_safe_hook,
+            )
+
+            hook = run_openai_synthesis_evaluator_execute_safe_hook(
+                root=project_root,
+                branch=(plan.get("working_tree") or {}).get("branch"),
+            )
+            plan["openai_synthesis_evaluator_execute_safe_hook"] = hook
+            if hook and hook.get("status") == "completed":
+                refreshed_plan = build_operator_plan(
+                    root=project_root,
+                    working_tree=working_tree,
+                )
+                plan["openai_synthesis_evaluator_status"] = refreshed_plan.get(
+                    "openai_synthesis_evaluator_status"
+                )
+                plan["next_recommended_action"] = refreshed_plan.get(
+                    "next_recommended_action"
+                )
     if all_passed and action_id == "run_autonomous_researcher_loop":
         scratch_status = inspect_autonomous_loop_scratch_artifact(root=project_root)
         improvement_status = inspect_autonomous_loop_improvement_artifact(
