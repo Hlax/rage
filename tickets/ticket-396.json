@@ -48,6 +48,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Remove openai_synthesis_evaluator_status from operator_loop, operator_autocycle, and self_improvement_status and revert associated tests. Standalone synthesize --packet and evaluator artifacts remain usable.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / operator loop"
 }

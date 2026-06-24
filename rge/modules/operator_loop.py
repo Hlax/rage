@@ -985,6 +985,7 @@ def _action_from_state(
     release_governor_status: dict[str, Any] | None = None,
     live_combined_source_health_smoke_status: dict[str, Any] | None = None,
     synthesis_packet_benchmark_status: dict[str, Any] | None = None,
+    openai_synthesis_evaluator_status: dict[str, Any] | None = None,
     researcher_product_proof_status: dict[str, Any] | None = None,
     root: Path | None = None,
 ) -> RecommendedAction:
@@ -2030,6 +2031,86 @@ def _action_from_state(
         )
 
     synthesis_packet_benchmark = synthesis_packet_benchmark_status or {}
+    openai_synthesis_evaluator = openai_synthesis_evaluator_status or {}
+    if (
+        openai_synthesis_evaluator.get("review_artifact_recommended")
+        and openai_synthesis_evaluator.get("cli_wired")
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        commands_map = openai_synthesis_evaluator.get("operator_commands") or {}
+        evaluator_commands: list[dict[str, str]] = [
+            {
+                "shell": command,
+                "purpose": "set mock LLM for OpenAI synthesis evaluator",
+            }
+            for command in (openai_synthesis_evaluator.get("env_setup") or [])
+        ]
+        evaluator_commands.extend(
+            [
+                {
+                    "shell": commands_map.get(
+                        "evaluate_mock",
+                        "python scripts/run_openai_synthesis_evaluator.py --help",
+                    ),
+                    "purpose": (
+                        "deterministic read-only evaluator over synthesis canary JSON "
+                        "(no live HTTP)"
+                    ),
+                },
+                {
+                    "shell": "python -m rge.modules.operator_loop --mode plan",
+                    "purpose": "re-check openai_synthesis_evaluator_status after evaluate",
+                },
+            ]
+        )
+        artifact_path = openai_synthesis_evaluator.get("artifact_path") or (
+            "data/reports/openai_synthesis_evaluator_latest.json"
+        )
+        return RecommendedAction(
+            action_id="run_openai_synthesis_evaluator",
+            label="Run OpenAI synthesis evaluator (mock read-only)",
+            gate="safe_autonomous",
+            reason=(
+                "OpenAI synthesis evaluator CLI is wired but "
+                f"{artifact_path} is missing; run mock/injected evaluate before "
+                "any operator-only live canary."
+            ),
+            commands=evaluator_commands,
+        )
+
+    if (
+        openai_synthesis_evaluator.get("live_canary_recommended")
+        and openai_synthesis_evaluator.get("status") == "available"
+        and openai_synthesis_evaluator.get("cli_wired")
+        and not (active_row and active_row.status in _OPEN_QUEUE_STATUSES | {"in_progress"})
+    ):
+        commands_map = openai_synthesis_evaluator.get("operator_commands") or {}
+        return RecommendedAction(
+            action_id="run_openai_synthesis_live_canary",
+            label="Operator-only live OpenAI synthesis canary (review-gated)",
+            gate="review_gated",
+            reason=(
+                "Evaluator artifact recorded GO with live HTTP gates satisfied; "
+                "operator may rerun live canary manually with --confirm (never automated)."
+            ),
+            commands=[
+                {
+                    "shell": commands_map.get(
+                        "live_canary",
+                        "python -m rge.cli synthesize --packet --help",
+                    ),
+                    "purpose": "operator-only live OpenAI synthesis canary",
+                },
+                {
+                    "shell": commands_map.get(
+                        "evaluate_mock",
+                        "python scripts/run_openai_synthesis_evaluator.py --help",
+                    ),
+                    "purpose": "refresh evaluator artifact after canary (mock read-only)",
+                },
+            ],
+        )
+
     if (
         synthesis_packet_benchmark.get("benchmark_recommended")
         and synthesis_packet_benchmark.get("active_branch_match")
@@ -2495,6 +2576,14 @@ def build_operator_plan(
         root=project_root,
         branch=tree.branch,
     )
+    from rge.modules.openai_synthesis_evaluator import (
+        inspect_openai_synthesis_evaluator_plan_status,
+    )
+
+    openai_synthesis_evaluator_status = inspect_openai_synthesis_evaluator_plan_status(
+        root=project_root,
+        branch=tree.branch,
+    )
     from rge.modules.researcher_product_proof import (
         inspect_researcher_product_proof_plan_status,
     )
@@ -2529,6 +2618,7 @@ def build_operator_plan(
         release_governor_status=release_governor_status,
         live_combined_source_health_smoke_status=live_combined_source_health_smoke_status,
         synthesis_packet_benchmark_status=synthesis_packet_benchmark_status,
+        openai_synthesis_evaluator_status=openai_synthesis_evaluator_status,
         researcher_product_proof_status=researcher_product_proof_status,
         root=project_root,
     )
@@ -2591,6 +2681,7 @@ def build_operator_plan(
         "instruction_packet_ticket_draft_status": instruction_packet_ticket_draft_status,
         "release_governor_status": release_governor_status,
         "synthesis_packet_benchmark_status": synthesis_packet_benchmark_status,
+        "openai_synthesis_evaluator_status": openai_synthesis_evaluator_status,
         "researcher_product_proof_status": researcher_product_proof_status,
         "live_combined_source_health_smoke_status": live_combined_source_health_smoke_status,
         "staged_rank2_scan_max": runtime_config.staged_rank2_scan_max,

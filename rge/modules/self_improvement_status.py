@@ -20,6 +20,9 @@ from rge.modules.instruction_packet_ticket_draft import (
 from rge.modules.operator_loop import inspect_working_tree
 from rge.modules.principal_audit_gate import repo_root
 from rge.modules.release_governor import inspect_release_governor_plan_status
+from rge.modules.openai_synthesis_evaluator import (
+    inspect_openai_synthesis_evaluator_plan_status,
+)
 from rge.modules.synthesis_packet_benchmark import (
     inspect_synthesis_packet_benchmark_plan_status,
 )
@@ -67,6 +70,31 @@ def self_improvement_spine_map() -> list[dict[str, Any]]:
             "llm_allowed": "OpenAI/OpenRouter/mock cloud may draft synthesis only; deterministic Python governs",
             "touches_db_or_graph": False,
             "touches_public_atlas": True,
+        },
+        {
+            "step": "openai_synthesis_review",
+            "source_of_truth": "rge/modules/openai_synthesis_evaluator.py",
+            "required_inputs": [
+                "synthesis packet run or canary JSON",
+                "live HTTP gate profile",
+                "grounding/governor signals",
+            ],
+            "outputs": [
+                "data/reports/openai_synthesis_evaluator_latest.json",
+                "operator plan openai_synthesis_evaluator_status",
+            ],
+            "blocking_gates": [
+                "missing live HTTP gates for operator canary",
+                "PARTIAL/NO-GO evaluator verdict",
+                "private-field scan on artifacts",
+            ],
+            "blocked_action": (
+                "run mock evaluate on canary JSON; remediate grounding/governor findings; "
+                "live HTTP only via explicit operator command"
+            ),
+            "llm_allowed": "live OpenAI synthesis is operator-only behind explicit gates; evaluator is deterministic Python",
+            "touches_db_or_graph": False,
+            "touches_public_atlas": False,
         },
         {
             "step": "draft_ticket",
@@ -176,6 +204,10 @@ def build_self_improvement_status(*, root: Path | None = None) -> dict[str, Any]
         root=project_root,
         branch=tree.branch,
     )
+    openai_synthesis_review_status = inspect_openai_synthesis_evaluator_plan_status(
+        root=project_root,
+        branch=tree.branch,
+    )
     current_state: dict[str, Any] = {
         "working_tree_clean": tree.clean,
         "dirty_path_count": len(tree.dirty_paths),
@@ -201,6 +233,8 @@ def build_self_improvement_status(*, root: Path | None = None) -> dict[str, Any]
         and synthesis_packet_benchmark_status.get("cli_wired")
     ):
         current_state["synthesis_packet_benchmark_status"] = synthesis_packet_benchmark_status
+    if openai_synthesis_review_status.get("cli_wired"):
+        current_state["openai_synthesis_review_status"] = openai_synthesis_review_status
     payload = {
         "schema_version": SCHEMA_VERSION,
         "recorded_at": utc_now_iso(),

@@ -385,6 +385,16 @@ def evaluate_autocycle_cycle(
             commands=commands,
         )
 
+    if action_id == "run_openai_synthesis_live_canary":
+        commands = [_shell_command(cmd) for cmd in action.get("commands", [])]
+        result["openai_synthesis_live_canary_recommended"] = True
+        result["recommended_action"] = action
+        return stop(
+            "operator_action_blocked_automation: run_openai_synthesis_live_canary",
+            next_cmd=commands[0] if commands else None,
+            commands=commands,
+        )
+
     proof_bundle_status = plan.get("arbitrary_source_proof_bundle_status") or {}
     if (
         proof_bundle_status.get("proof_bundle_recommended")
