@@ -63,7 +63,7 @@ Operator plan on working repo includes `openai_synthesis_evaluator_status` when 
 
 ## Merge to main
 
-*(pending merge)*
+Merge commit: `beb47ac2846a5d13fce37cd65a8b01dc3e3f6159`.
 
 ## Recommended next ticket
 
