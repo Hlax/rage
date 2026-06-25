@@ -1,0 +1,33 @@
+{
+  "id": "ticket-410",
+  "title": "11_AGENT_OPERATING_PROTOCOL product-proof drift clearance quickstep cross-link v0",
+  "problem": "Principal audit post ticket-408 identified a docs gap: operating protocol documents execute-safe evaluator seed (ticket-406) but not the product-risk drift clearance quickstep (ticket-407/408 in README and AGENTS.md).",
+  "evidence": [
+    "agent_reports/2026-06-24_principal-audit-post-ticket-408_product-proof-docs-sequence.md",
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "affected_modules": [
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md"
+  ],
+  "expected_files": [
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-410_operating-protocol-product-proof-drift-quickstep-v0.md"
+  ],
+  "acceptance_criteria": [
+    "11_AGENT_OPERATING_PROTOCOL.md cross-links README product-risk drift clearance quickstep when product_proof_recommended is true.",
+    "No code changes."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Engine changes.",
+    "Live network or live LLM."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert operating protocol paragraph only.",
+  "status": "proposed",
+  "category": "Phase 3 / documentation"
+}
