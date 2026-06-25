@@ -260,6 +260,16 @@ never live OpenAI HTTP or live canary. See README **Operator Quickstart**
 (*Live OpenAI synthesis evaluator canary runbook* — *Execute-safe evaluator seed
 hook*), `docs/agents/12_RUNTIME_CONFIG.md`, and `docs/agents/13_MODEL_ESCALATION_POLICY.md`.
 
+**Researcher product proof / product-risk drift clearance quickstep** (mock LLM only;
+tickets 381–384, 407–408): when plan JSON shows `product_proof_recommended: true`
+(typically after principal-audit product-risk drift or a missing gitignored artifact),
+follow README **Operator Quickstart** (*Researcher product proof* — *Product-risk
+drift clearance quickstep*). Plan mode recommends `run_researcher_product_proof`
+(`review_gated`); autocycle blocks with `operator_action_blocked_automation` while
+drift is active. Execute-safe does **not** auto-run product proof. When
+`product_verdict` is `GO`, `product_proof_recommended` clears on replan. See also
+`AGENTS.md` Operator Loop.
+
 **Live probe scratch evidence workflow** (local Ollama opt-in; operator-only
 persist): after live probe sessions, follow the numbered checklist in
 `docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md` (**Scratch evidence workflow
