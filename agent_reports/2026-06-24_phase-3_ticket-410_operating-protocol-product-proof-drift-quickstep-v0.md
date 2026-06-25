@@ -56,7 +56,11 @@ None.
 
 ## Merge to main
 
-_(recorded after merge)_
+Merge commit: `e9a40ca8ac0940935a58cfec5905457c85db9ad1`.
+
+Post-merge full pytest: **1380 passed**, 1 failed (flaky
+`test_build_atlas_snapshot_matches_committed_creativity_fixture` — passes in isolation),
+49 deselected.
 
 ## Recommended next ticket
 
