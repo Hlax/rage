@@ -399,7 +399,8 @@ superseded
 | 407 | ticket-407 | done | README researcher product proof drift clearance quickstep v0 | `phase-3/ticket-407-readme-product-proof-drift-quickstep` | `agent_reports/2026-06-24_phase-3_ticket-407_readme-product-proof-drift-quickstep-v0.md` |
 | 408 | ticket-408 | done | AGENTS.md researcher product proof drift clearance quickstep cross-link v0 | `phase-3/ticket-408-agents-product-proof-drift-quickstep` | `agent_reports/2026-06-24_phase-3_ticket-408_agents-product-proof-drift-quickstep-v0.md` |
 | 409 | ticket-409 | done | Principal audit post product proof docs sequence (406-408) | `phase-3/ticket-409-principal-audit-post-408` | `agent_reports/2026-06-24_principal-audit-post-ticket-408_product-proof-docs-sequence.md` |
-| 410 | ticket-410 | proposed | 11_AGENT_OPERATING_PROTOCOL product-proof drift clearance quickstep cross-link v0 | | |
+| 410 | ticket-410 | done | 11_AGENT_OPERATING_PROTOCOL product-proof drift clearance quickstep cross-link v0 | `phase-3/ticket-410-operating-protocol-product-proof-drift-quickstep` | `agent_reports/2026-06-24_phase-3_ticket-410_operating-protocol-product-proof-drift-quickstep-v0.md` |
+| 411 | ticket-411 | proposed | Internal MVP one-command launch script v0 | | |
 | 366 | ticket-366 | done | Live staged orchestrator fetch fallback on candidate 403 | `phase-3/ticket-366-live-staged-orchestrator-fetch-fallback` | `agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md` |
 | 363 | ticket-363 | done | Autonomous loop improvement promotion golden proof | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md` |
 | 362 | ticket-362 | done | Default research run mock staged-spine path | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-362_default-research-run-staged-spine.md` |
@@ -1158,8 +1159,14 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-410 (proposed) — 11_AGENT_OPERATING_PROTOCOL product-proof drift clearance quickstep cross-link v0
+ticket-411 (proposed) — Internal MVP one-command launch script v0
 ```
+
+## Queue Notes (2026-06-24, ticket-410 operating protocol product proof quickstep)
+
+- `11_AGENT_OPERATING_PROTOCOL.md` cross-links README product-risk drift clearance quickstep (ticket-407/408).
+- Completes operator-docs trilogy for product-proof drift (README, AGENTS, operating protocol).
+- Seeded ticket-411 for internal MVP one-command launch script.
 
 ## Queue Notes (2026-06-24, ticket-409 principal audit)
 

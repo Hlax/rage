@@ -1,0 +1,40 @@
+{
+  "id": "ticket-411",
+  "title": "Internal MVP one-command launch script v0",
+  "problem": "Operators must stitch README steps manually to refresh mock product proof and start the Atlas preview dev server. A single Windows launcher reduces friction for internal MVP demos.",
+  "evidence": [
+    "README.md Internal MVP launch (localhost)",
+    "agent_reports/2026-06-23_phase-3_ticket-388_internal-mvp-launch-checkpoint-v0.md",
+    "agent_reports/2026-06-24_phase-3_ticket-410_operating-protocol-product-proof-drift-quickstep-v0.md"
+  ],
+  "affected_modules": [
+    "scripts/launch_internal_mvp.ps1",
+    "README.md"
+  ],
+  "expected_files": [
+    "scripts/launch_internal_mvp.ps1",
+    "README.md",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-411_internal-mvp-launch-script-v0.md"
+  ],
+  "acceptance_criteria": [
+    "scripts/launch_internal_mvp.ps1 sets RGE_LLM_MODE=mock and RGE_ALLOW_LIVE_LLM=0.",
+    "Script runs prove-researcher-product with scratch work dir and prints product_verdict.",
+    "Script prints default research prompt and starts public-site dev server on localhost:3000.",
+    "Script prints http://localhost:3000/atlas-preview and does not start port 8000.",
+    "README includes One-command internal MVP launch section pointing to the script."
+  ],
+  "test_plan": [
+    "Run ./scripts/launch_internal_mvp.ps1 and confirm product_verdict GO or clear failure.",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Live OpenAI or OpenAlex.",
+    "Port 8000 FastAPI.",
+    "Topic/question input UI.",
+    "Engine or safety gate changes."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Delete launch script and revert README launch section.",
+  "status": "proposed",
+  "category": "Phase 3 / operator UX"
+}
