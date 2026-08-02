@@ -402,8 +402,8 @@ superseded
 | 410 | ticket-410 | done | 11_AGENT_OPERATING_PROTOCOL product-proof drift clearance quickstep cross-link v0 | `phase-3/ticket-410-operating-protocol-product-proof-drift-quickstep` | `agent_reports/2026-06-24_phase-3_ticket-410_operating-protocol-product-proof-drift-quickstep-v0.md` |
 | 411 | ticket-411 | done | Internal MVP one-command launch script v0 | `phase-3/ticket-411-internal-mvp-launch-script-v0` | `agent_reports/2026-08-02_phase-3_ticket-411_internal-mvp-launch-script-v0.md` |
 | 412 | ticket-412 | proposed | Internal MVP launcher contract tests v0 | | |
-| 413 | ticket-413 | ready | Research-quality benchmark contract and baseline evaluator v0 | | |
-| 414 | ticket-414 | blocked | Source-artifact contamination and extraction eligibility gate v0 | | |
+| 413 | ticket-413 | done | Research-quality benchmark contract and baseline evaluator v0 | `phase-4/ticket-413-research-quality-benchmark-baseline-v0` | `agent_reports/2026-08-02_phase-4_ticket-413_research-quality-benchmark-baseline-v0.md` |
+| 414 | ticket-414 | ready | Source-artifact contamination and extraction eligibility gate v0 | | |
 | 415 | ticket-415 | blocked | Section-aware scientific document segmentation and provenance v0 | | |
 | 416 | ticket-416 | blocked | Domain-neutral structured research claim schema v0 | | |
 | 417 | ticket-417 | blocked | Candidate claim lifecycle, quarantine, and graph-consumer isolation v0 | | |
@@ -1176,8 +1176,19 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-413 (ready) — Phase 4 research-quality benchmark contract and baseline evaluator v0
+ticket-414 (ready) — Phase 4 source-artifact contamination and extraction eligibility gate v0
 ```
+
+## Queue Notes (2026-08-02, ticket-413 research-quality benchmark baseline)
+
+- Added a versioned, domain-neutral benchmark with 40 annotated candidate decisions
+  across 10 checksum-pinned synthetic document fixtures.
+- The deterministic quote-presence baseline honestly reports `PARTIAL`: precision 0.30,
+  recall 1.00, F1 0.461538, and false-acceptance rate 1.00 (28/28 negatives).
+- All eight required negative slices reproduce false acceptance without a model,
+  network request, database write, or public export.
+- Focused tests: 8 passed; golden tests: 165 passed; full safety audit: pass.
+- Activated only ticket-414; tickets 415–428 remain blocked by the strict Phase 4 chain.
 
 ## Queue Notes (2026-08-02, Phase 4 research-quality and RAG program)
 

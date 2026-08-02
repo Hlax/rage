@@ -1,0 +1,526 @@
+{
+  "schema_version": "research_quality_benchmark_manifest_v1",
+  "benchmark_id": "research_quality_claim_admission_v1",
+  "benchmark_version": "1.0.0",
+  "title": "Synthetic multidisciplinary claim-admission benchmark",
+  "description": "A deterministic corpus for measuring whether candidate claims are legitimate scoped findings rather than merely quote-bearing text.",
+  "limitations": [
+    "All documents are compact synthetic fixtures and do not estimate arbitrary-domain performance.",
+    "The quote-presence baseline intentionally models a weak admission boundary and is expected to fail negative slices.",
+    "Human-reviewed live-source quality remains a later review-gated milestone."
+  ],
+  "required_slices": [
+    "valid_scoped_finding",
+    "bibliography_reference_text",
+    "navigation",
+    "access_challenge_bot_page",
+    "redirect_shell",
+    "methods_presented_as_findings",
+    "cited_background",
+    "unsupported_generalization",
+    "quote_claim_mismatch"
+  ],
+  "baseline": {
+    "predictor_id": "quote_presence_v0",
+    "description": "Accept a candidate when its non-empty quote occurs in the document and basic candidate text fields are present.",
+    "thresholds": {
+      "precision_min": 0.9,
+      "recall_min": 0.75,
+      "false_acceptance_rate_max": 0.05
+    }
+  },
+  "documents": [
+    {
+      "id": "doc-clinical-trial",
+      "path": "documents/clinical_trial.txt",
+      "synthetic": true,
+      "license": "synthetic_fixture",
+      "canonical_identifier": "synthetic:rge:clinical-trial",
+      "checksum_sha256": "de7d32e934274a7cf83970f11ccac8a7354fca2566c0178c17fa4540a0bc388f",
+      "excerpt_boundaries": {"start_char": 0, "end_char": 401}
+    },
+    {
+      "id": "doc-education-study",
+      "path": "documents/education_study.txt",
+      "synthetic": true,
+      "license": "synthetic_fixture",
+      "canonical_identifier": "synthetic:rge:education-study",
+      "checksum_sha256": "d17ed6752a9f03e5f65980efd1059c0bb6484a8105c46d260d03702f48354855",
+      "excerpt_boundaries": {"start_char": 0, "end_char": 468}
+    },
+    {
+      "id": "doc-ecology-survey",
+      "path": "documents/ecology_survey.txt",
+      "synthetic": true,
+      "license": "synthetic_fixture",
+      "canonical_identifier": "synthetic:rge:ecology-survey",
+      "checksum_sha256": "9ee237c0f7ffcb34c42ec70deda4f3bfa5d0d5d6ccc3792d8ca51385b5172607",
+      "excerpt_boundaries": {"start_char": 0, "end_char": 351}
+    },
+    {
+      "id": "doc-materials-experiment",
+      "path": "documents/materials_experiment.txt",
+      "synthetic": true,
+      "license": "synthetic_fixture",
+      "canonical_identifier": "synthetic:rge:materials-experiment",
+      "checksum_sha256": "f691346eb70566cb4549b5b2f6b635891d841af089892d996bb783a0298309dd",
+      "excerpt_boundaries": {"start_char": 0, "end_char": 347}
+    },
+    {
+      "id": "doc-attention-experiment",
+      "path": "documents/attention_experiment.txt",
+      "synthetic": true,
+      "license": "synthetic_fixture",
+      "canonical_identifier": "synthetic:rge:attention-experiment",
+      "checksum_sha256": "ac6138bedf4cb5ceb26257015fb5bfbf04306dc696af9152157423276d9a5a56",
+      "excerpt_boundaries": {"start_char": 0, "end_char": 487}
+    },
+    {
+      "id": "doc-bibliography-page",
+      "path": "documents/bibliography_page.txt",
+      "synthetic": true,
+      "license": "synthetic_fixture",
+      "canonical_identifier": "synthetic:rge:bibliography-page",
+      "checksum_sha256": "2f781cf3bd94ae630877532014c90c09effbac0be4d18a80ee2d4b81a6ff7f58",
+      "excerpt_boundaries": {"start_char": 0, "end_char": 416}
+    },
+    {
+      "id": "doc-navigation-shell",
+      "path": "documents/navigation_shell.txt",
+      "synthetic": true,
+      "license": "synthetic_fixture",
+      "canonical_identifier": "synthetic:rge:navigation-shell",
+      "checksum_sha256": "a070d1675d38cc47b5d2c8df051b99cca6cf17ee1e626b1668d33fad9c0c04d0",
+      "excerpt_boundaries": {"start_char": 0, "end_char": 166}
+    },
+    {
+      "id": "doc-access-challenge",
+      "path": "documents/access_challenge.txt",
+      "synthetic": true,
+      "license": "synthetic_fixture",
+      "canonical_identifier": "synthetic:rge:access-challenge",
+      "checksum_sha256": "c2957e3346ce6c244e680fd53f40716bb409c99ca605b2735bece0f46ef8dfbb",
+      "excerpt_boundaries": {"start_char": 0, "end_char": 228}
+    },
+    {
+      "id": "doc-redirect-shell",
+      "path": "documents/redirect_shell.txt",
+      "synthetic": true,
+      "license": "synthetic_fixture",
+      "canonical_identifier": "synthetic:rge:redirect-shell",
+      "checksum_sha256": "358a74491bc85ca247b0b7fea6370552e5919e6703a1940bf943268ec4df88a0",
+      "excerpt_boundaries": {"start_char": 0, "end_char": 182}
+    },
+    {
+      "id": "doc-river-model",
+      "path": "documents/river_model.txt",
+      "synthetic": true,
+      "license": "synthetic_fixture",
+      "canonical_identifier": "synthetic:rge:river-model",
+      "checksum_sha256": "5e022d3a9ecdd40c05a1b96b48b18f03e246fbc21801d2afba7dbf20a26052c9",
+      "excerpt_boundaries": {"start_char": 0, "end_char": 364}
+    }
+  ],
+  "candidates": [
+    {
+      "id": "rq-c001",
+      "document_id": "doc-clinical-trial",
+      "slice": "valid_scoped_finding",
+      "claim_text": "In this six-week trial of adults with chronic insomnia, evening light increased sleep duration by an average of 34 minutes relative to dim light.",
+      "quote_span": "Participants receiving the evening light intervention slept an average of 34 minutes longer than controls after six weeks.",
+      "scope": "adults with chronic insomnia in this six-week trial",
+      "expected_decision": "accepted",
+      "expected_reason_code": null
+    },
+    {
+      "id": "rq-c002",
+      "document_id": "doc-clinical-trial",
+      "slice": "valid_scoped_finding",
+      "claim_text": "Mild headache counts were similar between the intervention and control groups in this trial.",
+      "quote_span": "Mild headache was reported by 3 of 40 intervention participants and 2 of 40 control participants.",
+      "scope": "participants in this synthetic clinical trial",
+      "expected_decision": "accepted",
+      "expected_reason_code": null
+    },
+    {
+      "id": "rq-c003",
+      "document_id": "doc-clinical-trial",
+      "slice": "methods_presented_as_findings",
+      "claim_text": "Random assignment itself lengthened sleep by 34 minutes.",
+      "quote_span": "Eighty adults with chronic insomnia were randomly assigned to an evening light intervention or a dim-light control for six weeks.",
+      "scope": "all randomized insomnia trials",
+      "expected_decision": "rejected",
+      "expected_reason_code": "methods_presented_as_findings"
+    },
+    {
+      "id": "rq-c004",
+      "document_id": "doc-clinical-trial",
+      "slice": "unsupported_generalization",
+      "claim_text": "Evening light cures insomnia in all adults.",
+      "quote_span": "Participants receiving the evening light intervention slept an average of 34 minutes longer than controls after six weeks.",
+      "scope": "all adults",
+      "expected_decision": "rejected",
+      "expected_reason_code": "unsupported_generalization"
+    },
+    {
+      "id": "rq-c005",
+      "document_id": "doc-education-study",
+      "slice": "valid_scoped_finding",
+      "claim_text": "Among 120 ninth-grade students at two schools, weekly retrieval practice increased median vocabulary scores by 7 percentage points relative to rereading.",
+      "quote_span": "In this sample, weekly retrieval practice increased median vocabulary test scores by 7 percentage points relative to rereading.",
+      "scope": "120 ninth-grade students at two public schools",
+      "expected_decision": "accepted",
+      "expected_reason_code": null
+    },
+    {
+      "id": "rq-c006",
+      "document_id": "doc-education-study",
+      "slice": "valid_scoped_finding",
+      "claim_text": "Students completing at least five sessions improved the most, but the dose comparison in this study was not randomized.",
+      "quote_span": "Students who completed at least five sessions showed the largest improvement, although the dose comparison was not randomized.",
+      "scope": "students in this non-randomized dose comparison",
+      "expected_decision": "accepted",
+      "expected_reason_code": null
+    },
+    {
+      "id": "rq-c007",
+      "document_id": "doc-education-study",
+      "slice": "cited_background",
+      "claim_text": "This study found retrieval-practice benefits in university courses.",
+      "quote_span": "Prior work reported benefits of retrieval practice in university courses (Lopez, 2019).",
+      "scope": "university courses",
+      "expected_decision": "rejected",
+      "expected_reason_code": "cited_background"
+    },
+    {
+      "id": "rq-c008",
+      "document_id": "doc-education-study",
+      "slice": "quote_claim_mismatch",
+      "claim_text": "Weekly retrieval practice reduced student anxiety by 7 percentage points.",
+      "quote_span": "In this sample, weekly retrieval practice increased median vocabulary test scores by 7 percentage points relative to rereading.",
+      "scope": "students in this sample",
+      "expected_decision": "rejected",
+      "expected_reason_code": "quote_claim_mismatch"
+    },
+    {
+      "id": "rq-c009",
+      "document_id": "doc-ecology-survey",
+      "slice": "valid_scoped_finding",
+      "claim_text": "Within the surveyed region, wetlands with vegetated buffers contained 22 percent more amphibian species than unbuffered sites.",
+      "quote_span": "Wetlands with vegetated buffers contained 22 percent more amphibian species than unbuffered sites within the surveyed region.",
+      "scope": "18 wetlands in the surveyed region",
+      "expected_decision": "accepted",
+      "expected_reason_code": null
+    },
+    {
+      "id": "rq-c010",
+      "document_id": "doc-ecology-survey",
+      "slice": "valid_scoped_finding",
+      "claim_text": "Buffer width was associated with species richness in this survey, which did not measure pesticide exposure.",
+      "quote_span": "Buffer width was associated with species richness, but pesticide exposure was not measured.",
+      "scope": "this regional wetland survey",
+      "expected_decision": "accepted",
+      "expected_reason_code": null
+    },
+    {
+      "id": "rq-c011",
+      "document_id": "doc-ecology-survey",
+      "slice": "methods_presented_as_findings",
+      "claim_text": "Three evening visits increased amphibian diversity at wetlands.",
+      "quote_span": "Researchers surveyed amphibians at 18 wetlands during three evening visits in one region.",
+      "scope": "wetlands visited three times",
+      "expected_decision": "rejected",
+      "expected_reason_code": "methods_presented_as_findings"
+    },
+    {
+      "id": "rq-c012",
+      "document_id": "doc-ecology-survey",
+      "slice": "unsupported_generalization",
+      "claim_text": "Vegetated buffers restore biodiversity in every ecosystem.",
+      "quote_span": "Wetlands with vegetated buffers contained 22 percent more amphibian species than unbuffered sites within the surveyed region.",
+      "scope": "every ecosystem",
+      "expected_decision": "rejected",
+      "expected_reason_code": "unsupported_generalization"
+    },
+    {
+      "id": "rq-c013",
+      "document_id": "doc-materials-experiment",
+      "slice": "valid_scoped_finding",
+      "claim_text": "After 100 controlled moisture cycles, the recycled composite retained 91 percent of control tensile strength.",
+      "quote_span": "The recycled composite retained 91 percent of control tensile strength after 100 moisture cycles.",
+      "scope": "tested composite samples after 100 moisture cycles",
+      "expected_decision": "accepted",
+      "expected_reason_code": null
+    },
+    {
+      "id": "rq-c014",
+      "document_id": "doc-materials-experiment",
+      "slice": "valid_scoped_finding",
+      "claim_text": "Surface cracking increased after cycle 80, especially in tested samples containing 30 percent recycled filler.",
+      "quote_span": "Surface cracking increased after cycle 80, especially in samples with 30 percent recycled filler.",
+      "scope": "tested recycled-composite samples",
+      "expected_decision": "accepted",
+      "expected_reason_code": null
+    },
+    {
+      "id": "rq-c015",
+      "document_id": "doc-materials-experiment",
+      "slice": "quote_claim_mismatch",
+      "claim_text": "The recycled composite retained 91 percent of control fire resistance.",
+      "quote_span": "The recycled composite retained 91 percent of control tensile strength after 100 moisture cycles.",
+      "scope": "tested recycled-composite samples",
+      "expected_decision": "rejected",
+      "expected_reason_code": "quote_claim_mismatch"
+    },
+    {
+      "id": "rq-c016",
+      "document_id": "doc-materials-experiment",
+      "slice": "unsupported_generalization",
+      "claim_text": "All recycled composites fail after 80 moisture cycles.",
+      "quote_span": "Surface cracking increased after cycle 80, especially in samples with 30 percent recycled filler.",
+      "scope": "all recycled composites",
+      "expected_decision": "rejected",
+      "expected_reason_code": "unsupported_generalization"
+    },
+    {
+      "id": "rq-c017",
+      "document_id": "doc-attention-experiment",
+      "slice": "valid_scoped_finding",
+      "claim_text": "During the final task block, adults exposed to intermittent tones made 12 percent more omission errors than adults in quiet conditions.",
+      "quote_span": "Participants exposed to intermittent tones made 12 percent more omission errors than participants in the quiet condition during the final task block.",
+      "scope": "48 adults in the final block of this experiment",
+      "expected_decision": "accepted",
+      "expected_reason_code": null
+    },
+    {
+      "id": "rq-c018",
+      "document_id": "doc-attention-experiment",
+      "slice": "valid_scoped_finding",
+      "claim_text": "Response-time differences were not statistically distinguishable in this sample.",
+      "quote_span": "Response-time differences were not statistically distinguishable in this sample.",
+      "scope": "48 adults in this experiment",
+      "expected_decision": "accepted",
+      "expected_reason_code": null
+    },
+    {
+      "id": "rq-c019",
+      "document_id": "doc-attention-experiment",
+      "slice": "methods_presented_as_findings",
+      "claim_text": "Completing four attention blocks caused more omission errors.",
+      "quote_span": "Forty-eight adult volunteers completed four ten-minute attention blocks under quiet or intermittent-tone conditions.",
+      "scope": "all attention tasks",
+      "expected_decision": "rejected",
+      "expected_reason_code": "methods_presented_as_findings"
+    },
+    {
+      "id": "rq-c020",
+      "document_id": "doc-attention-experiment",
+      "slice": "cited_background",
+      "claim_text": "This experiment found that noise exposure causes fatigue.",
+      "quote_span": "Earlier laboratory studies linked noise exposure with fatigue (Nguyen, 2018).",
+      "scope": "all people exposed to noise",
+      "expected_decision": "rejected",
+      "expected_reason_code": "cited_background"
+    },
+    {
+      "id": "rq-c021",
+      "document_id": "doc-bibliography-page",
+      "slice": "bibliography_reference_text",
+      "claim_text": "Coastal vegetation caused habitat recovery.",
+      "quote_span": "Ahmed, L. (2020). Coastal vegetation and habitat recovery. Journal of Synthetic Ecology, 4, 10-18.",
+      "scope": "all coastal habitats",
+      "expected_decision": "rejected",
+      "expected_reason_code": "bibliography_reference_text"
+    },
+    {
+      "id": "rq-c022",
+      "document_id": "doc-bibliography-page",
+      "slice": "bibliography_reference_text",
+      "claim_text": "Memory practice improved secondary classrooms.",
+      "quote_span": "Baker, P. (2018). Memory practice in secondary classrooms. Fictional Education Review, 7, 33-47.",
+      "scope": "all secondary classrooms",
+      "expected_decision": "rejected",
+      "expected_reason_code": "bibliography_reference_text"
+    },
+    {
+      "id": "rq-c023",
+      "document_id": "doc-bibliography-page",
+      "slice": "bibliography_reference_text",
+      "claim_text": "Recycled polymers resisted moisture stress.",
+      "quote_span": "Chen, R. (2021). Recycled polymers under moisture stress. Imaginary Materials, 12, 55-63.",
+      "scope": "all recycled polymers",
+      "expected_decision": "rejected",
+      "expected_reason_code": "bibliography_reference_text"
+    },
+    {
+      "id": "rq-c024",
+      "document_id": "doc-bibliography-page",
+      "slice": "bibliography_reference_text",
+      "claim_text": "Intermittent sound reduced sustained attention.",
+      "quote_span": "Diaz, S. (2019). Intermittent sound and sustained attention. Example Cognition, 5, 71-80.",
+      "scope": "all listeners",
+      "expected_decision": "rejected",
+      "expected_reason_code": "bibliography_reference_text"
+    },
+    {
+      "id": "rq-c025",
+      "document_id": "doc-navigation-shell",
+      "slice": "navigation",
+      "claim_text": "The study compared research topics with sign-in behavior.",
+      "quote_span": "Home | Research | Topics | About | Sign in",
+      "scope": "site visitors",
+      "expected_decision": "rejected",
+      "expected_reason_code": "navigation"
+    },
+    {
+      "id": "rq-c026",
+      "document_id": "doc-navigation-shell",
+      "slice": "navigation",
+      "claim_text": "Browsing journals by subject improved discovery.",
+      "quote_span": "Browse journals by subject",
+      "scope": "journal users",
+      "expected_decision": "rejected",
+      "expected_reason_code": "navigation"
+    },
+    {
+      "id": "rq-c027",
+      "document_id": "doc-navigation-shell",
+      "slice": "navigation",
+      "claim_text": "Reading the previous article caused readers to open the next article.",
+      "quote_span": "Previous article | Next article",
+      "scope": "article readers",
+      "expected_decision": "rejected",
+      "expected_reason_code": "navigation"
+    },
+    {
+      "id": "rq-c028",
+      "document_id": "doc-navigation-shell",
+      "slice": "navigation",
+      "claim_text": "Downloading a PDF increased sharing and article metrics.",
+      "quote_span": "Download PDF | View metrics | Share",
+      "scope": "site users",
+      "expected_decision": "rejected",
+      "expected_reason_code": "navigation"
+    },
+    {
+      "id": "rq-c029",
+      "document_id": "doc-access-challenge",
+      "slice": "access_challenge_bot_page",
+      "claim_text": "Browser checking improved access to the article.",
+      "quote_span": "Checking your browser before accessing the article.",
+      "scope": "article visitors",
+      "expected_decision": "rejected",
+      "expected_reason_code": "access_challenge_bot_page"
+    },
+    {
+      "id": "rq-c030",
+      "document_id": "doc-access-challenge",
+      "slice": "access_challenge_bot_page",
+      "claim_text": "JavaScript and cookies caused readers to continue.",
+      "quote_span": "Enable JavaScript and cookies to continue.",
+      "scope": "web readers",
+      "expected_decision": "rejected",
+      "expected_reason_code": "access_challenge_bot_page"
+    },
+    {
+      "id": "rq-c031",
+      "document_id": "doc-access-challenge",
+      "slice": "access_challenge_bot_page",
+      "claim_text": "Automated traffic caused access denial.",
+      "quote_span": "Access denied because automated traffic was detected.",
+      "scope": "this challenge page",
+      "expected_decision": "rejected",
+      "expected_reason_code": "access_challenge_bot_page"
+    },
+    {
+      "id": "rq-c032",
+      "document_id": "doc-access-challenge",
+      "slice": "access_challenge_bot_page",
+      "claim_text": "The request identifier measured challenge severity.",
+      "quote_span": "Request identifier: SYNTHETIC-CHALLENGE-2048.",
+      "scope": "this challenge request",
+      "expected_decision": "rejected",
+      "expected_reason_code": "access_challenge_bot_page"
+    },
+    {
+      "id": "rq-c033",
+      "document_id": "doc-redirect-shell",
+      "slice": "redirect_shell",
+      "claim_text": "The document moved permanently because its findings changed.",
+      "quote_span": "Document moved permanently.",
+      "scope": "this document",
+      "expected_decision": "rejected",
+      "expected_reason_code": "redirect_shell"
+    },
+    {
+      "id": "rq-c034",
+      "document_id": "doc-redirect-shell",
+      "slice": "redirect_shell",
+      "claim_text": "Continuing to a new location improved the article.",
+      "quote_span": "Continue to the new article location.",
+      "scope": "article visitors",
+      "expected_decision": "rejected",
+      "expected_reason_code": "redirect_shell"
+    },
+    {
+      "id": "rq-c035",
+      "document_id": "doc-redirect-shell",
+      "slice": "redirect_shell",
+      "claim_text": "A five-second delay increased redirection success.",
+      "quote_span": "You will be redirected in five seconds.",
+      "scope": "redirected visitors",
+      "expected_decision": "rejected",
+      "expected_reason_code": "redirect_shell"
+    },
+    {
+      "id": "rq-c036",
+      "document_id": "doc-redirect-shell",
+      "slice": "redirect_shell",
+      "claim_text": "Selecting the link caused the redirect to begin.",
+      "quote_span": "If the redirect does not begin, select this link.",
+      "scope": "visitors on this redirect page",
+      "expected_decision": "rejected",
+      "expected_reason_code": "redirect_shell"
+    },
+    {
+      "id": "rq-c037",
+      "document_id": "doc-river-model",
+      "slice": "valid_scoped_finding",
+      "claim_text": "In the simulated river model, side-channel habitat reduced peak juvenile fish density by 18 percent at the main-channel site.",
+      "quote_span": "In a simulated river model, adding side-channel habitat reduced peak juvenile fish density by 18 percent at the main-channel site.",
+      "scope": "the simulated river model and main-channel site",
+      "expected_decision": "accepted",
+      "expected_reason_code": null
+    },
+    {
+      "id": "rq-c038",
+      "document_id": "doc-river-model",
+      "slice": "valid_scoped_finding",
+      "claim_text": "Total modeled juvenile abundance was unchanged across the two simulated habitat configurations.",
+      "quote_span": "Total modeled juvenile abundance remained unchanged across the two habitat configurations.",
+      "scope": "the two simulated habitat configurations",
+      "expected_decision": "accepted",
+      "expected_reason_code": null
+    },
+    {
+      "id": "rq-c039",
+      "document_id": "doc-river-model",
+      "slice": "cited_background",
+      "claim_text": "This river model found that side channels shelter juvenile fish during seasonal flows.",
+      "quote_span": "A 2017 review suggested that side channels can shelter juvenile fish during seasonal flows.",
+      "scope": "seasonal river flows",
+      "expected_decision": "rejected",
+      "expected_reason_code": "cited_background"
+    },
+    {
+      "id": "rq-c040",
+      "document_id": "doc-river-model",
+      "slice": "quote_claim_mismatch",
+      "claim_text": "Side-channel habitat increased total juvenile abundance by 18 percent.",
+      "quote_span": "In a simulated river model, adding side-channel habitat reduced peak juvenile fish density by 18 percent at the main-channel site.",
+      "scope": "the simulated river model",
+      "expected_decision": "rejected",
+      "expected_reason_code": "quote_claim_mismatch"
+    }
+  ]
+}
