@@ -4,6 +4,13 @@
   "benchmark_version": "1.0.0",
   "title": "Synthetic multidisciplinary claim-admission benchmark",
   "description": "A deterministic corpus for measuring whether candidate claims are legitimate scoped findings rather than merely quote-bearing text.",
+  "checksum_contract": {
+    "id": "sha256_utf8_lf_v1",
+    "algorithm": "sha256",
+    "encoding": "utf-8",
+    "newline_normalization": "lf",
+    "description": "Decode as UTF-8, normalize CRLF and bare CR to LF, then hash the bounded canonical text."
+  },
   "limitations": [
     "All documents are compact synthetic fixtures and do not estimate arbitrary-domain performance.",
     "The quote-presence baseline intentionally models a weak admission boundary and is expected to fail negative slices.",

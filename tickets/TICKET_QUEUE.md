@@ -403,7 +403,7 @@ superseded
 | 411 | ticket-411 | done | Internal MVP one-command launch script v0 | `phase-3/ticket-411-internal-mvp-launch-script-v0` | `agent_reports/2026-08-02_phase-3_ticket-411_internal-mvp-launch-script-v0.md` |
 | 412 | ticket-412 | proposed | Internal MVP launcher contract tests v0 | | |
 | 413 | ticket-413 | done | Research-quality benchmark contract and baseline evaluator v0 | `phase-4/ticket-413-research-quality-benchmark-baseline-v0` | `agent_reports/2026-08-02_phase-4_ticket-413_research-quality-benchmark-baseline-v0.md` |
-| 414 | ticket-414 | blocked | Source-artifact contamination and extraction eligibility gate v0 | | |
+| 414 | ticket-414 | ready | Source-artifact contamination and extraction eligibility gate v0 | | |
 | 415 | ticket-415 | blocked | Section-aware scientific document segmentation and provenance v0 | | |
 | 416 | ticket-416 | blocked | Domain-neutral structured research claim schema v0 | | |
 | 417 | ticket-417 | blocked | Candidate claim lifecycle, quarantine, and graph-consumer isolation v0 | | |
@@ -418,7 +418,7 @@ superseded
 | 426 | ticket-426 | blocked | RAG retrieval, citation, grounding, and abstention benchmark v0 | | |
 | 427 | ticket-427 | blocked | Research quality evaluator v2 with semantic and RAG metrics v0 | | |
 | 428 | ticket-428 | blocked | Benchmark-delta improvement ticket and builder regression gate v0 | | |
-| 429 | ticket-429 | ready | Research-quality fixture checksum newline portability v0 | | |
+| 429 | ticket-429 | done | Research-quality fixture checksum newline portability v0 | `phase-4/ticket-429-research-quality-checksum-portability-v0` | `agent_reports/2026-08-02_phase-4_ticket-429_research-quality-checksum-portability-v0.md` |
 | 366 | ticket-366 | done | Live staged orchestrator fetch fallback on candidate 403 | `phase-3/ticket-366-live-staged-orchestrator-fetch-fallback` | `agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md` |
 | 363 | ticket-363 | done | Autonomous loop improvement promotion golden proof | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md` |
 | 362 | ticket-362 | done | Default research run mock staged-spine path | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-362_default-research-run-staged-spine.md` |
@@ -1177,8 +1177,19 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-429 (ready) — Research-quality fixture checksum newline portability v0
+ticket-414 (ready) — Phase 4 source-artifact contamination and extraction eligibility gate v0
 ```
+
+## Queue Notes (2026-08-02, ticket-429 checksum newline portability)
+
+- Canonicalized fixture text as UTF-8 with LF newlines before checksum, boundary, and
+  quote validation; substantive text changes still fail closed.
+- Added regression coverage for LF, CRLF, and bare-CR fixtures plus changed-content
+  rejection. Focused benchmark tests: 12 passed.
+- Full mock-only `verify`: 165 golden passed; 1393 full pytest passed, 49 deselected;
+  safety audit pass; public-site build pass.
+- The second focused pre-ticket-414 audit is GO. Ticket-414 is `ready`; tickets 415–428
+  remain blocked.
 
 ## Queue Notes (2026-08-02, pre-ticket-414 readiness audit NO-GO)
 
