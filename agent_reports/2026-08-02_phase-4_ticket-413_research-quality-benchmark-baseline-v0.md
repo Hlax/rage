@@ -170,6 +170,8 @@ only ticket-415 after verification.
 
 ## Merge to Main
 
-Merge commit: pending.
+Implementation commit: `bd1145a`.
 
-Push status: pending.
+Merge commit: `076e9151c2ef90c83d836f4dd1a27c5f9b25ee83`.
+
+Push status: authorized; pending execution.
