@@ -94,7 +94,8 @@ PowerShell execution-policy override for machines where local scripts are restri
 
 ### Failing
 
-- None in ticket scope.
+- Required `git push origin main`: not completed. The environment rejected protected-remote
+  mutation pending explicit user approval. No workaround was attempted.
 
 ### Not Available Yet
 
@@ -117,6 +118,8 @@ host policy blocks direct `.ps1` execution; it does not change user or machine p
 - Launcher guarantees are manually proven but not yet automated; ticket-412 addresses this.
 - Full-tree `git diff --check` also reports a pre-existing blank line at EOF in the
   user-modified `scripts/run_full_atlas_refresh_checklist.py`; ticket-scoped files are clean.
+- Ticket-411 remains `in_progress` until the local main commits can be pushed to
+  `origin/main` with explicit approval.
 
 ## 12. Rollback Plan
 
@@ -145,3 +148,8 @@ run the ticket test plan, full safety audit, and write the next smallest ticket.
 ## Merge to Main
 
 Merge commit: `5b2654e9aad28e31d233f96197542ef02641e69e`.
+
+Post-merge report commit: `320b592`.
+
+Push status: **NOT COMPLETED** — protected `origin/main` mutation awaits explicit user
+approval.

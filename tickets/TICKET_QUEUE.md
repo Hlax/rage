@@ -400,7 +400,7 @@ superseded
 | 408 | ticket-408 | done | AGENTS.md researcher product proof drift clearance quickstep cross-link v0 | `phase-3/ticket-408-agents-product-proof-drift-quickstep` | `agent_reports/2026-06-24_phase-3_ticket-408_agents-product-proof-drift-quickstep-v0.md` |
 | 409 | ticket-409 | done | Principal audit post product proof docs sequence (406-408) | `phase-3/ticket-409-principal-audit-post-408` | `agent_reports/2026-06-24_principal-audit-post-ticket-408_product-proof-docs-sequence.md` |
 | 410 | ticket-410 | done | 11_AGENT_OPERATING_PROTOCOL product-proof drift clearance quickstep cross-link v0 | `phase-3/ticket-410-operating-protocol-product-proof-drift-quickstep` | `agent_reports/2026-06-24_phase-3_ticket-410_operating-protocol-product-proof-drift-quickstep-v0.md` |
-| 411 | ticket-411 | done | Internal MVP one-command launch script v0 | `phase-3/ticket-411-internal-mvp-launch-script-v0` | `agent_reports/2026-08-02_phase-3_ticket-411_internal-mvp-launch-script-v0.md` |
+| 411 | ticket-411 | in_progress | Internal MVP one-command launch script v0 | `phase-3/ticket-411-internal-mvp-launch-script-v0` | `agent_reports/2026-08-02_phase-3_ticket-411_internal-mvp-launch-script-v0.md` |
 | 412 | ticket-412 | proposed | Internal MVP launcher contract tests v0 | | |
 | 366 | ticket-366 | done | Live staged orchestrator fetch fallback on candidate 403 | `phase-3/ticket-366-live-staged-orchestrator-fetch-fallback` | `agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md` |
 | 363 | ticket-363 | done | Autonomous loop improvement promotion golden proof | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md` |
@@ -1160,7 +1160,7 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-412 (proposed) — Internal MVP launcher contract tests v0
+ticket-411 (in_progress) — Local merge complete; `origin/main` push awaits explicit approval
 ```
 
 ## Queue Notes (2026-08-02, ticket-411 internal MVP launcher)
@@ -1170,6 +1170,9 @@ ticket-412 (proposed) — Internal MVP launcher contract tests v0
 - End-to-end launcher proof reached `product_verdict: GO`; `/atlas-preview` became ready.
 - 165 golden tests; 1411 full pytest; full safety audit pass; public-site build pass.
 - Seeded ticket-412 for automated launcher contract coverage.
+- Local merge commit: `5b2654e9aad28e31d233f96197542ef02641e69e`. The required
+  `origin/main` push was not completed because remote mutation awaits explicit approval;
+  ticket-411 remains `in_progress` until that checkpoint succeeds.
 
 ## Queue Notes (2026-06-24, ticket-410 operating protocol product proof quickstep)
 
