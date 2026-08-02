@@ -1,0 +1,8 @@
+Synthetic materials experiment
+
+Methods
+Composite samples with 0, 15, or 30 percent recycled filler underwent 100 controlled moisture cycles.
+
+Results
+The recycled composite retained 91 percent of control tensile strength after 100 moisture cycles.
+Surface cracking increased after cycle 80, especially in samples with 30 percent recycled filler.

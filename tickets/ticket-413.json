@@ -46,6 +46,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Remove the benchmark module, fixtures, tests, and baseline artifact support; restore ticket-414 to blocked. No production data migration is involved.",
-  "status": "ready",
+  "status": "done",
   "category": "Phase 4 / research quality"
 }

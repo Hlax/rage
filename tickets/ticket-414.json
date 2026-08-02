@@ -1,7 +1,7 @@
 {
   "id": "ticket-414",
   "title": "Source-artifact contamination and extraction eligibility gate v0",
-  "problem": "Blocked by ticket-413. Fetchable content is currently treated as analyzable source text even when it is an access challenge, redirect shell, error page, navigation wrapper, or insufficient-content document. These artifacts have produced accepted claims and graph evidence.",
+  "problem": "Fetchable content is currently treated as analyzable source text even when it is an access challenge, redirect shell, error page, navigation wrapper, or insufficient-content document. These artifacts have produced accepted claims and graph evidence.",
   "evidence": [
     "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
     "fixtures/research_quality/manifest.json",
@@ -48,6 +48,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert the source-quality gate integration and tests. Preserve source records and treat the added eligibility fields as ignored if a migration was introduced.",
-  "status": "blocked",
+  "status": "ready",
   "category": "Phase 4 / source quality"
 }

@@ -1,0 +1,8 @@
+Synthetic river-model report
+
+Background
+A 2017 review suggested that side channels can shelter juvenile fish during seasonal flows.
+
+Results
+In a simulated river model, adding side-channel habitat reduced peak juvenile fish density by 18 percent at the main-channel site.
+Total modeled juvenile abundance remained unchanged across the two habitat configurations.

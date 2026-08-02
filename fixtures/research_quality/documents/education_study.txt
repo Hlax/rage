@@ -1,0 +1,11 @@
+Synthetic education study
+
+Background
+Prior work reported benefits of retrieval practice in university courses (Lopez, 2019).
+
+Methods
+The study enrolled 120 ninth-grade students from two public schools.
+
+Results
+In this sample, weekly retrieval practice increased median vocabulary test scores by 7 percentage points relative to rereading.
+Students who completed at least five sessions showed the largest improvement, although the dose comparison was not randomized.

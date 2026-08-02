@@ -1,0 +1,11 @@
+Synthetic attention experiment
+
+Background
+Earlier laboratory studies linked noise exposure with fatigue (Nguyen, 2018).
+
+Methods
+Forty-eight adult volunteers completed four ten-minute attention blocks under quiet or intermittent-tone conditions.
+
+Results
+Participants exposed to intermittent tones made 12 percent more omission errors than participants in the quiet condition during the final task block.
+Response-time differences were not statistically distinguishable in this sample.
