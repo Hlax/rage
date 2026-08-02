@@ -43,6 +43,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Revert canonical newline hashing and portability tests, restore ticket-429 to ready, and keep ticket-414 blocked. No data migration is involved.",
-  "status": "ready",
+  "status": "done",
   "category": "Phase 4 / benchmark correctness"
 }

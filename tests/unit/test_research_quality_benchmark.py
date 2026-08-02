@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import copy
-import hashlib
 import json
 from pathlib import Path
 
@@ -16,6 +15,8 @@ from rge.modules.research_quality_benchmark import (
     REQUIRED_SLICES,
     BenchmarkContractError,
     CandidateDecision,
+    canonical_text_sha256,
+    canonicalize_fixture_text,
     evaluate_benchmark,
     load_benchmark_corpus,
     main,
@@ -33,6 +34,16 @@ def test_manifest_is_versioned_domain_neutral_and_provenanced() -> None:
 
     assert manifest["schema_version"] == "research_quality_benchmark_manifest_v1"
     assert manifest["benchmark_version"] == "1.0.0"
+    assert manifest["checksum_contract"] == {
+        "id": "sha256_utf8_lf_v1",
+        "algorithm": "sha256",
+        "encoding": "utf-8",
+        "newline_normalization": "lf",
+        "description": (
+            "Decode as UTF-8, normalize CRLF and bare CR to LF, then hash the "
+            "bounded canonical text."
+        ),
+    }
     assert len(manifest["documents"]) == 10
     assert len(manifest["candidates"]) == 40
     assert set(manifest["required_slices"]) >= REQUIRED_SLICES
@@ -44,10 +55,45 @@ def test_manifest_is_versioned_domain_neutral_and_provenanced() -> None:
         assert document["canonical_identifier"].startswith("synthetic:rge:")
         fixture = MANIFEST_PATH.parent / document["path"]
         assert fixture.is_file()
-        assert hashlib.sha256(fixture.read_bytes()).hexdigest() == document["checksum_sha256"]
+        text = canonicalize_fixture_text(fixture.read_text(encoding="utf-8"))
+        assert canonical_text_sha256(text) == document["checksum_sha256"]
         boundaries = document["excerpt_boundaries"]
         assert boundaries["start_char"] == 0
         assert boundaries["end_char"] == len(fixture.read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize("newline", ["\n", "\r\n", "\r"])
+def test_manifest_checksums_are_portable_across_newline_styles(
+    tmp_path: Path,
+    newline: str,
+) -> None:
+    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    for document in manifest["documents"]:
+        source = MANIFEST_PATH.parent / document["path"]
+        canonical = canonicalize_fixture_text(source.read_text(encoding="utf-8"))
+        destination = tmp_path / document["path"]
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(canonical.replace("\n", newline).encode("utf-8"))
+
+    documents = validate_manifest(manifest, base_dir=tmp_path)
+
+    assert len(documents) == 10
+    assert all("\r" not in text for text in documents.values())
+
+
+def test_manifest_checksum_rejects_substantive_change_with_crlf(tmp_path: Path) -> None:
+    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    for document in manifest["documents"]:
+        source = MANIFEST_PATH.parent / document["path"]
+        canonical = canonicalize_fixture_text(source.read_text(encoding="utf-8"))
+        if document["id"] == "doc-clinical-trial":
+            canonical = canonical.replace("Eighty adults", "Ninety adults", 1)
+        destination = tmp_path / document["path"]
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(canonical.replace("\n", "\r\n").encode("utf-8"))
+
+    with pytest.raises(BenchmarkContractError, match="checksum mismatch"):
+        validate_manifest(manifest, base_dir=tmp_path)
 
 
 def test_quote_presence_baseline_reproduces_known_false_acceptances() -> None:

@@ -18,6 +18,7 @@ from typing import Any
 MANIFEST_SCHEMA_VERSION = "research_quality_benchmark_manifest_v1"
 RESULT_SCHEMA_VERSION = "research_quality_benchmark_result_v1"
 QUOTE_PRESENCE_BASELINE_ID = "quote_presence_v0"
+CHECKSUM_CONTRACT_ID = "sha256_utf8_lf_v1"
 DEFAULT_MANIFEST_REL = Path("fixtures/research_quality/manifest.json")
 MIN_DOCUMENT_COUNT = 10
 MIN_CANDIDATE_COUNT = 40
@@ -84,8 +85,19 @@ def _collapse_whitespace(value: str) -> str:
     return " ".join(value.split())
 
 
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+def canonicalize_fixture_text(value: str) -> str:
+    """Return the cross-platform text representation used by the corpus contract."""
+    return value.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def canonical_text_sha256(value: str) -> str:
+    """Hash canonical UTF-8/LF text, independent of Git checkout line endings."""
+    canonical = canonicalize_fixture_text(value)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _read_canonical_text(path: Path) -> str:
+    return canonicalize_fixture_text(path.read_text(encoding="utf-8"))
 
 
 def _require_string(value: object, *, label: str) -> str:
@@ -125,18 +137,18 @@ def _validate_document(
             f"document[{document_id}] fixture is missing: {document.get('path')!r}"
         )
 
+    text = _read_canonical_text(fixture_path)
     expected_checksum = _require_string(
         document.get("checksum_sha256"),
         label=f"document[{document_id}].checksum_sha256",
     ).casefold()
-    actual_checksum = _sha256(fixture_path)
+    actual_checksum = canonical_text_sha256(text)
     if expected_checksum != actual_checksum:
         raise BenchmarkContractError(
             f"document[{document_id}] checksum mismatch: "
             f"expected {expected_checksum}, got {actual_checksum}"
         )
 
-    text = fixture_path.read_text(encoding="utf-8")
     boundaries = document.get("excerpt_boundaries")
     if not isinstance(boundaries, Mapping):
         raise BenchmarkContractError(
@@ -191,6 +203,22 @@ def validate_manifest(
         )
     _require_string(manifest.get("benchmark_id"), label="benchmark_id")
     _require_string(manifest.get("benchmark_version"), label="benchmark_version")
+
+    checksum_contract = manifest.get("checksum_contract")
+    if not isinstance(checksum_contract, Mapping):
+        raise BenchmarkContractError("checksum_contract must be an object")
+    if checksum_contract.get("id") != CHECKSUM_CONTRACT_ID:
+        raise BenchmarkContractError(
+            f"checksum_contract.id must be {CHECKSUM_CONTRACT_ID!r}"
+        )
+    if checksum_contract.get("algorithm") != "sha256":
+        raise BenchmarkContractError("checksum_contract.algorithm must be 'sha256'")
+    if checksum_contract.get("encoding") != "utf-8":
+        raise BenchmarkContractError("checksum_contract.encoding must be 'utf-8'")
+    if checksum_contract.get("newline_normalization") != "lf":
+        raise BenchmarkContractError(
+            "checksum_contract.newline_normalization must be 'lf'"
+        )
 
     documents = manifest.get("documents")
     if not isinstance(documents, list) or len(documents) < MIN_DOCUMENT_COUNT:
