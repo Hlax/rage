@@ -47,7 +47,9 @@ more correct.
 
 - Resolve the existing `ticket-411` push checkpoint before opening a Phase 4 branch.
 - Execute only the first `ready` Phase 4 ticket. Later tickets are `blocked` by their
-  immediate predecessor.
+  immediate predecessor. The ticket-414 readiness audit inserted corrective ticket-429
+  between tickets 413 and 414 after Windows CRLF checkout exposed a checksum-portability
+  regression; ticket-414 stays blocked until ticket-429 records a follow-up GO audit.
 - Create one branch per ticket, using `phase-4/ticket-<id>-<slug>`.
 - A completed ticket must update its immediate successor from `blocked` to `ready` in
   both the ticket JSON and queue. Do not activate multiple successors.
@@ -75,6 +77,13 @@ methods presented as findings, background citations, unsupported generalizations
 and quote/claim mismatches. Record precision, recall, F1, false-acceptance rate, and
 reason-code confusion counts. This ticket measures the baseline; it does not weaken
 tests to make the baseline look good.
+
+#### ticket-429 — Research-quality fixture checksum newline portability
+
+Normalize fixture text newlines before checksum, boundary, and quote validation so the
+ticket-413 benchmark is identical under LF, CRLF, and CR checkout policies. Preserve
+fail-closed detection of substantive content changes. A second focused pre-ticket-414
+audit must be GO before ticket-414 is reactivated.
 
 #### ticket-414 — Source-artifact contamination and eligibility gate
 
@@ -209,7 +218,7 @@ before/after result.
 ## Dependency Chain
 
 ```text
-ticket-413 → 414 → 415 → 416 → 417 → 418 → 419 → 420 → 421 → 422
+ticket-413 → 429 → 414 → 415 → 416 → 417 → 418 → 419 → 420 → 421 → 422
                                                                   ↓
 ticket-428 ← 427 ← 426 ← 425 ← 424 ← 423 ←────────────────────────┘
 ```

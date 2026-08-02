@@ -1,0 +1,48 @@
+{
+  "id": "ticket-429",
+  "title": "Research-quality fixture checksum newline portability v0",
+  "problem": "The ticket-413 manifest stores canonical LF-text checksums, but the loader hashes raw working-tree bytes. After Git checks out fixtures with CRLF on Windows, six benchmark tests fail with checksum mismatches even though the text is unchanged. Ticket-414 must not depend on a benchmark whose provenance gate varies by checkout policy.",
+  "evidence": [
+    "agent_reports/2026-08-02_pre-ticket-414_source-artifact-quality-gate-readiness-audit-1.md",
+    "rge/modules/research_quality_benchmark.py",
+    "fixtures/research_quality/manifest.json",
+    "tests/unit/test_research_quality_benchmark.py",
+    "python -m rge.cli verify (6 benchmark failures after CRLF checkout)"
+  ],
+  "affected_modules": [
+    "rge/modules/research_quality_benchmark.py",
+    "tests/unit/test_research_quality_benchmark.py"
+  ],
+  "expected_files": [
+    "rge/modules/research_quality_benchmark.py",
+    "tests/unit/test_research_quality_benchmark.py",
+    "agent_reports/YYYY-MM-DD_pre-ticket-414_source-artifact-quality-gate-readiness-audit-2.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-429_research-quality-checksum-portability-v0.md",
+    "tickets/ticket-414.json",
+    "tickets/TICKET_QUEUE.md"
+  ],
+  "acceptance_criteria": [
+    "The checksum contract hashes canonical UTF-8 text with normalized LF newlines, and the manifest documents that canonicalization explicitly.",
+    "The same manifest checksum validates equivalent LF, CRLF, and CR fixture content while a substantive character change still fails closed.",
+    "Excerpt boundary validation uses the same canonical text representation as checksum and quote validation.",
+    "The focused benchmark suite and full mock-only pytest suite pass after a fresh Git checkout on Windows.",
+    "A follow-up pre-ticket-414 readiness audit records GO only after golden tests, full pytest, safety audit, and public-site build pass.",
+    "On completion, ticket-414 changes from blocked to ready; no later Phase 4 ticket is activated."
+  ],
+  "test_plan": [
+    "With mock-only env: python -m pytest tests/unit/test_research_quality_benchmark.py -q",
+    "With mock-only env: python -m pytest tests/golden -q",
+    "With mock-only env: python -m rge.cli verify",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not weaken checksum verification or remove fixture provenance checks.",
+    "Do not implement the ticket-414 source-artifact classifier.",
+    "Do not change claim admission, database, retrieval, or public export behavior.",
+    "Do not run live LLM, source network, or cloud actions."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Revert canonical newline hashing and portability tests, restore ticket-429 to ready, and keep ticket-414 blocked. No data migration is involved.",
+  "status": "ready",
+  "category": "Phase 4 / benchmark correctness"
+}
