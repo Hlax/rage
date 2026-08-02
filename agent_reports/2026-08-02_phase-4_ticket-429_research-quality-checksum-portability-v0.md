@@ -22,6 +22,7 @@ prove newline portability and retain fail-closed rejection of substantive change
 - Agent/model: Codex (GPT-5)
 - Date: 2026-08-02
 - Main tip before branch: `7db5bbe`
+- Implementation commit: `d738855`
 
 ## 3. Scope
 
@@ -150,6 +151,6 @@ after full mock-only verification.
 
 ## Merge to Main
 
-Merge commit: pending.
+Merge commit: `f77f21991fc26c3d0053915a8a84581fe195de4a`.
 
 Push status: pending.
