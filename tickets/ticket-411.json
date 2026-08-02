@@ -35,6 +35,6 @@
   ],
   "risk_level": "low",
   "rollback_plan": "Delete launch script and revert README launch section.",
-  "status": "proposed",
+  "status": "done",
   "category": "Phase 3 / operator UX"
 }

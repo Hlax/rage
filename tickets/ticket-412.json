@@ -1,0 +1,36 @@
+{
+  "id": "ticket-412",
+  "title": "Internal MVP launcher contract tests v0",
+  "problem": "Ticket-411 proves the Windows launcher manually, but its mock-only environment, GO gate, scratch paths, and localhost port boundary are not protected by an automated regression test.",
+  "evidence": [
+    "scripts/launch_internal_mvp.ps1",
+    "agent_reports/2026-08-02_phase-3_ticket-411_internal-mvp-launch-script-v0.md"
+  ],
+  "affected_modules": [
+    "scripts/launch_internal_mvp.ps1",
+    "tests/unit/test_internal_mvp_launcher.py"
+  ],
+  "expected_files": [
+    "tests/unit/test_internal_mvp_launcher.py",
+    "agent_reports/YYYY-MM-DD_phase-3_ticket-412_internal-mvp-launcher-contract-tests-v0.md"
+  ],
+  "acceptance_criteria": [
+    "A deterministic unit test verifies the launcher sets RGE_LLM_MODE=mock and RGE_ALLOW_LIVE_LLM=0 before invoking product proof.",
+    "The test verifies scratch work/artifact paths and an explicit product_verdict GO gate before npm starts.",
+    "The test verifies Next.js binds to 127.0.0.1:3000 and no command starts port 8000.",
+    "Tests inspect the script without starting product proof, Node, live network, or live LLM services."
+  ],
+  "test_plan": [
+    "RGE_LLM_MODE=mock python -m pytest tests/unit/test_internal_mvp_launcher.py -q",
+    "RGE_LLM_MODE=mock python -m pytest tests/golden -q"
+  ],
+  "non_goals": [
+    "Changing launcher behavior beyond fixes required by the contract test.",
+    "Pester adoption or broad PowerShell test infrastructure.",
+    "Live OpenAI, OpenAlex, Ollama, or port 8000 FastAPI."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Delete the launcher contract test and revert only any ticket-scoped launcher correction.",
+  "status": "proposed",
+  "category": "Phase 3 / testing"
+}

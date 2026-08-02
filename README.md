@@ -179,6 +179,26 @@ verification suite, when the module form succeeds.
 Mock-first profile for browsing the Atlas preview after product proof. **No live OpenAI, no
 live orchestrator, no paid cloud.**
 
+### One-command internal MVP launch
+
+From the repo root on Windows, run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\launch_internal_mvp.ps1
+```
+
+The process-scoped execution-policy override does not change the machine or user policy.
+
+The launcher sets `RGE_LLM_MODE=mock` and `RGE_ALLOW_LIVE_LLM=0`, runs the researcher
+product proof in a scratch work directory, prints its `product_verdict` and the default
+research prompt, then starts the read-only Atlas preview at
+**http://localhost:3000/atlas-preview**. It installs public-site dependencies only when
+`apps/public-site/node_modules/` is absent. The launcher fails closed unless the product
+verdict is `GO`; it does not start the private/API service on port 8000. Press `Ctrl+C` to
+stop the preview.
+
+### Manual equivalent
+
 ```powershell
 # 1. Repo root — mock-only env
 $env:RGE_LLM_MODE = "mock"
