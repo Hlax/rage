@@ -1,0 +1,56 @@
+{
+  "id": "ticket-425",
+  "title": "Citation-required research answer generation and grounding governor v0",
+  "problem": "Blocked by ticket-424. The repo has synthesis packet machinery but no question-to-retrieval-to-cited-answer path. Answer generation must be downstream of the accepted evidence packet and fail closed when sentences cannot be resolved to packet evidence.",
+  "evidence": [
+    "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
+    "rge/modules/synthesis_packet_runner.py",
+    "rge/modules/synthesis_grounding.py",
+    "rge/modules/autonomous_synthesis_governor.py",
+    "rge/contracts/synthesis_evidence_packet_v0.py"
+  ],
+  "affected_modules": [
+    "rge/modules/research_answer_runner.py",
+    "rge/modules/synthesis_grounding.py",
+    "rge/modules/autonomous_synthesis_governor.py",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/research_answer_runner.py",
+    "rge/modules/synthesis_grounding.py",
+    "rge/modules/autonomous_synthesis_governor.py",
+    "rge/contracts/research_answer_v0.py",
+    "rge/cli.py",
+    "fixtures/synthesis/research_answer_*.json",
+    "tests/unit/test_research_answer_runner.py",
+    "tests/unit/test_research_answer_grounding.py",
+    "tickets/ticket-426.json",
+    "tickets/TICKET_QUEUE.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-425_citation-required-research-answer-v0.md"
+  ],
+  "acceptance_criteria": [
+    "A private command executes question to hybrid retrieval to bounded evidence packet to candidate answer without changing accepted graph data.",
+    "Every factual answer sentence cites resolvable packet claim IDs and source IDs; citations outside the packet or to ineligible claims are rejected.",
+    "The grounding governor validates claim/quote overlap, section and scope compatibility, citation coverage, and answer-level evidence diversity before GO.",
+    "Unsupported factual sentences, fabricated citations, missing citations, or packet-empty questions produce NO-GO or an explicit abstention, never an uncited answer.",
+    "Default behavior uses deterministic mock synthesis; live local or cloud synthesis remains behind existing explicit gates, provider allowlists, and budgets.",
+    "Answer artifacts are private candidates, disclose runtime and grounding verdict, and contain no raw prompts, secrets, local paths, or unbounded source text.",
+    "On completion, ticket-426 changes from blocked to ready; no later Phase 4 ticket is activated."
+  ],
+  "test_plan": [
+    "With mock-only env: python -m pytest tests/unit/test_research_answer_runner.py tests/unit/test_research_answer_grounding.py tests/unit/test_synthesis_packet_runner.py -q",
+    "With mock-only env: python -m pytest tests/golden -q",
+    "With mock-only env: python -m rge.cli verify --skip-site",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not add a public chat endpoint or public write route.",
+    "Do not let answer generation modify accepted claims, relationships, scores, or tickets.",
+    "Do not bypass abstention when evidence is insufficient.",
+    "Do not make live OpenAI or Ollama part of default verification."
+  ],
+  "risk_level": "high",
+  "rollback_plan": "Remove the private answer command and contract while retaining ticket-423/424 evidence retrieval. Disable live synthesis providers; accepted graph data is unaffected.",
+  "status": "blocked",
+  "category": "Phase 4 / grounded answering"
+}

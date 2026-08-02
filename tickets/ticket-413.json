@@ -1,0 +1,51 @@
+{
+  "id": "ticket-413",
+  "title": "Research-quality benchmark contract and baseline evaluator v0",
+  "problem": "The current tests verify quote presence and pipeline contracts but do not measure whether accepted outputs are legitimate research claims. Live evidence contains bibliography titles, access-challenge text, and redirect text that passed admission. Phase 4 needs a deterministic benchmark and honest baseline before validators are changed.",
+  "evidence": [
+    "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
+    "agent_reports/2026-08-02_phase-4_research-quality-rag-planning-audit.md",
+    "docs/agents/00_GOLDEN_TESTS.md",
+    "rge/modules/claim_validator.py",
+    "rge/modules/research_quality_evaluator.py",
+    "data/db/live_research_evidence.sqlite"
+  ],
+  "affected_modules": [
+    "rge/modules/research_quality_benchmark.py",
+    "fixtures/research_quality",
+    "tests/unit/test_research_quality_benchmark.py"
+  ],
+  "expected_files": [
+    "rge/modules/research_quality_benchmark.py",
+    "fixtures/research_quality/manifest.json",
+    "fixtures/research_quality/documents/*.txt",
+    "tests/unit/test_research_quality_benchmark.py",
+    "tickets/ticket-414.json",
+    "tickets/TICKET_QUEUE.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-413_research-quality-benchmark-baseline-v0.md"
+  ],
+  "acceptance_criteria": [
+    "A versioned, domain-neutral manifest defines at least 40 annotated candidate decisions across at least 10 document fixtures, with raw counts reported for every metric.",
+    "The corpus contains valid scoped findings and explicit negative slices for bibliography/reference text, navigation, access challenge or bot page, redirect shell, methods presented as findings, cited background, unsupported generalization, and quote/claim mismatch.",
+    "Committed fixture text is synthetic or redistribution-compatible; every non-synthetic source records license, canonical URL or identifier, checksum, and excerpt boundaries.",
+    "The deterministic evaluator reports precision, recall, F1, false-acceptance rate, per-slice counts, and reason-code confusion without a live model or network.",
+    "A baseline artifact can honestly report failing metrics; tests validate calculations and known failure reproduction rather than requiring an artificially passing baseline.",
+    "No benchmark candidate writes to production accepted graph tables or public exports.",
+    "On completion, ticket-414 changes from blocked to ready; no later Phase 4 ticket is activated."
+  ],
+  "test_plan": [
+    "With RGE_LLM_MODE=mock and RGE_ALLOW_LIVE_LLM=0: python -m pytest tests/unit/test_research_quality_benchmark.py -q",
+    "With RGE_LLM_MODE=mock and RGE_ALLOW_LIVE_LLM=0: python -m pytest tests/golden -q",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not change claim acceptance behavior in this ticket.",
+    "Do not run live Ollama, paid APIs, or source network requests.",
+    "Do not claim the small benchmark represents arbitrary-domain performance.",
+    "Do not add retrieval or answer generation."
+  ],
+  "risk_level": "low",
+  "rollback_plan": "Remove the benchmark module, fixtures, tests, and baseline artifact support; restore ticket-414 to blocked. No production data migration is involved.",
+  "status": "ready",
+  "category": "Phase 4 / research quality"
+}

@@ -1,0 +1,55 @@
+{
+  "id": "ticket-418",
+  "title": "Semantic entailment and scientific-claim admission validator v0",
+  "problem": "Blocked by ticket-417. Quote-span validation proves that words occur in a chunk but not that the structured claim is entailed, authored as a finding, or correctly scoped. A second-pass admission validator must fail closed on bibliography, methods, cited background, speculation, and semantic mismatch.",
+  "evidence": [
+    "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
+    "fixtures/research_quality/manifest.json",
+    "rge/modules/claim_validator.py",
+    "rge/modules/claim_extractor.py",
+    "rge/llm/ollama_client.py"
+  ],
+  "affected_modules": [
+    "rge/modules/semantic_claim_validator.py",
+    "rge/modules/claim_validator.py",
+    "rge/modules/claim_extractor.py",
+    "rge/llm"
+  ],
+  "expected_files": [
+    "rge/modules/semantic_claim_validator.py",
+    "rge/modules/claim_validator.py",
+    "rge/modules/claim_extractor.py",
+    "rge/llm/semantic_claim_review_client.py",
+    "fixtures/llm_outputs/semantic_claim_review_*.json",
+    "tests/unit/test_semantic_claim_validator.py",
+    "tests/unit/test_semantic_claim_review_contract.py",
+    "tickets/ticket-419.json",
+    "tickets/TICKET_QUEUE.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-418_semantic-claim-admission-validator-v0.md"
+  ],
+  "acceptance_criteria": [
+    "The validator evaluates entailment against the exact quote plus bounded same-section context and returns accepted, rejected, or needs_review with stable reason codes.",
+    "Validation distinguishes author finding, cited background, method/procedure, hypothesis, speculation, bibliography/title, and non-content text using domain-neutral contracts.",
+    "A model reviewer can only propose a structured decision; Python validates the decision and applies lifecycle policy.",
+    "Default tests and golden tests use deterministic mock reviewer outputs and never require Ollama, network, or a paid provider.",
+    "Optional live local review requires existing live-LLM gates and records model identity and prompt-contract version privately.",
+    "All bibliography, challenge, redirect, navigation, and quote/claim mismatch benchmark candidates produce rejected or needs_review decisions, never accepted.",
+    "On completion, ticket-419 changes from blocked to ready; no later Phase 4 ticket is activated."
+  ],
+  "test_plan": [
+    "With mock-only env: python -m pytest tests/unit/test_semantic_claim_validator.py tests/unit/test_semantic_claim_review_contract.py tests/unit/test_research_quality_benchmark.py -q",
+    "With mock-only env: python -m pytest tests/golden -q",
+    "With mock-only env: python -m rge.cli verify --skip-site",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not use the semantic reviewer as the sole authority for acceptance.",
+    "Do not weaken exact quote, offset, scope, domain, or prompt-injection checks.",
+    "Do not make live model review a CI requirement.",
+    "Do not add retrieval or public answer generation."
+  ],
+  "risk_level": "high",
+  "rollback_plan": "Disable the semantic-review stage behind its runtime policy and route new uncertain candidates to needs_review. Retain decisions and do not bulk-promote candidates under rollback.",
+  "status": "blocked",
+  "category": "Phase 4 / semantic validation"
+}

@@ -400,8 +400,24 @@ superseded
 | 408 | ticket-408 | done | AGENTS.md researcher product proof drift clearance quickstep cross-link v0 | `phase-3/ticket-408-agents-product-proof-drift-quickstep` | `agent_reports/2026-06-24_phase-3_ticket-408_agents-product-proof-drift-quickstep-v0.md` |
 | 409 | ticket-409 | done | Principal audit post product proof docs sequence (406-408) | `phase-3/ticket-409-principal-audit-post-408` | `agent_reports/2026-06-24_principal-audit-post-ticket-408_product-proof-docs-sequence.md` |
 | 410 | ticket-410 | done | 11_AGENT_OPERATING_PROTOCOL product-proof drift clearance quickstep cross-link v0 | `phase-3/ticket-410-operating-protocol-product-proof-drift-quickstep` | `agent_reports/2026-06-24_phase-3_ticket-410_operating-protocol-product-proof-drift-quickstep-v0.md` |
-| 411 | ticket-411 | in_progress | Internal MVP one-command launch script v0 | `phase-3/ticket-411-internal-mvp-launch-script-v0` | `agent_reports/2026-08-02_phase-3_ticket-411_internal-mvp-launch-script-v0.md` |
+| 411 | ticket-411 | done | Internal MVP one-command launch script v0 | `phase-3/ticket-411-internal-mvp-launch-script-v0` | `agent_reports/2026-08-02_phase-3_ticket-411_internal-mvp-launch-script-v0.md` |
 | 412 | ticket-412 | proposed | Internal MVP launcher contract tests v0 | | |
+| 413 | ticket-413 | ready | Research-quality benchmark contract and baseline evaluator v0 | | |
+| 414 | ticket-414 | blocked | Source-artifact contamination and extraction eligibility gate v0 | | |
+| 415 | ticket-415 | blocked | Section-aware scientific document segmentation and provenance v0 | | |
+| 416 | ticket-416 | blocked | Domain-neutral structured research claim schema v0 | | |
+| 417 | ticket-417 | blocked | Candidate claim lifecycle, quarantine, and graph-consumer isolation v0 | | |
+| 418 | ticket-418 | blocked | Semantic entailment and scientific-claim admission validator v0 | | |
+| 419 | ticket-419 | blocked | Private human claim-review CLI and append-only audit history v0 | | |
+| 420 | ticket-420 | blocked | Cross-source claim deduplication and independent corroboration v0 | | |
+| 421 | ticket-421 | blocked | Evidence-derived graph completeness and honest product verdict v0 | | |
+| 422 | ticket-422 | blocked | Reviewed open-access arbitrary-source research quality proof v0 | | |
+| 423 | ticket-423 | blocked | Query-to-evidence packet contract with lexical and graph retrieval v0 | | |
+| 424 | ticket-424 | blocked | Local embedding index and hybrid lexical-semantic-graph ranker v0 | | |
+| 425 | ticket-425 | blocked | Citation-required research answer generation and grounding governor v0 | | |
+| 426 | ticket-426 | blocked | RAG retrieval, citation, grounding, and abstention benchmark v0 | | |
+| 427 | ticket-427 | blocked | Research quality evaluator v2 with semantic and RAG metrics v0 | | |
+| 428 | ticket-428 | blocked | Benchmark-delta improvement ticket and builder regression gate v0 | | |
 | 366 | ticket-366 | done | Live staged orchestrator fetch fallback on candidate 403 | `phase-3/ticket-366-live-staged-orchestrator-fetch-fallback` | `agent_reports/2026-06-19_phase-3_ticket-366_live-staged-orchestrator-fetch-fallback.md` |
 | 363 | ticket-363 | done | Autonomous loop improvement promotion golden proof | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-363_autonomous-loop-improvement-promotion-proof.md` |
 | 362 | ticket-362 | done | Default research run mock staged-spine path | `phase-3/ticket-362-default-research-run-staged-spine` | `agent_reports/2026-06-19_phase-3_ticket-362_default-research-run-staged-spine.md` |
@@ -1160,8 +1176,31 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-411 (in_progress) — Local merge complete; `origin/main` push awaits explicit approval
+ticket-413 (ready) — Phase 4 research-quality benchmark contract and baseline evaluator v0
 ```
+
+## Queue Notes (2026-08-02, Phase 4 research-quality and RAG program)
+
+- Added the implementation contract at
+  `docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md` and ticket contracts
+  413–428.
+- `ticket-411` is complete: its merge history was fast-forwarded to `origin/main` on
+  2026-08-02. Phase 4 work may start after the unrelated recovered worktree changes are
+  preserved outside `main`.
+- `ticket-413` is the only ready Phase 4 ticket. Tickets 414–428 are dependency-blocked
+  in a strict chain; each completed ticket activates only its immediate successor.
+- `ticket-412` intentionally remains proposed. Research correctness is the higher
+  product-risk priority, so ready ticket 413 should precede launcher contract coverage
+  once ticket 411 closes. This reprioritization is explicit and does not reject 412.
+- Program order: benchmark baseline → source eligibility → section parsing → structured
+  claims → admission lifecycle → semantic validation → human review → corroboration →
+  honest graph completeness → reviewed live proof → lexical/graph retrieval → embeddings
+  and hybrid ranking → cited answers → RAG benchmark → evaluator v2 → measured builder
+  regression gate.
+- The reviewed open-access proof in ticket 422 is review-gated. Ticket 423 must remain
+  blocked unless ticket 422 records a reviewed GO artifact at the plan thresholds.
+- Planning audit:
+  `agent_reports/2026-08-02_phase-4_research-quality-rag-planning-audit.md`.
 
 ## Queue Notes (2026-08-02, ticket-411 internal MVP launcher)
 
@@ -1170,9 +1209,9 @@ ticket-411 (in_progress) — Local merge complete; `origin/main` push awaits exp
 - End-to-end launcher proof reached `product_verdict: GO`; `/atlas-preview` became ready.
 - 165 golden tests; 1411 full pytest; full safety audit pass; public-site build pass.
 - Seeded ticket-412 for automated launcher contract coverage.
-- Local merge commit: `5b2654e9aad28e31d233f96197542ef02641e69e`. The required
-  `origin/main` push was not completed because remote mutation awaits explicit approval;
-  ticket-411 remains `in_progress` until that checkpoint succeeds.
+- Local merge commit: `5b2654e9aad28e31d233f96197542ef02641e69e`.
+- `origin/main` was fast-forwarded from `58b6d5e` to `e51b105` on 2026-08-02;
+  ticket-411 is complete.
 
 ## Queue Notes (2026-06-24, ticket-410 operating protocol product proof quickstep)
 

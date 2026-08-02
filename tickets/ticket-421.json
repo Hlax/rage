@@ -1,0 +1,53 @@
+{
+  "id": "ticket-421",
+  "title": "Evidence-derived graph completeness and honest product verdict v0",
+  "problem": "Blocked by ticket-420. Product proof can report graph completeness from fixture-shaped or hard-coded canonical relationship completion. Research completeness must instead reflect accepted claims, independent evidence, traceable relationships, and unresolved review risk.",
+  "evidence": [
+    "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
+    "rge/modules/researcher_product_proof.py",
+    "rge/modules/research_quality_evaluator.py",
+    "rge/modules/local_source_research_run.py",
+    "data/reports/researcher_product_proof_latest.json"
+  ],
+  "affected_modules": [
+    "rge/modules/researcher_product_proof.py",
+    "rge/modules/research_quality_evaluator.py",
+    "rge/modules/local_source_research_run.py"
+  ],
+  "expected_files": [
+    "rge/modules/researcher_product_proof.py",
+    "rge/modules/research_quality_evaluator.py",
+    "rge/modules/local_source_research_run.py",
+    "tests/unit/test_evidence_derived_graph_completeness.py",
+    "tests/unit/test_researcher_product_proof.py",
+    "./README.md",
+    "tickets/ticket-422.json",
+    "tickets/TICKET_QUEUE.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-421_evidence-derived-graph-completeness-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Research graph completeness is computed from accepted claims, valid concept links, evidence-bearing relationships, independent source families, contradiction or qualification coverage, and unresolved needs-review counts.",
+    "Hard-coded claim-text fragment to canonical-relationship mapping cannot make a research product proof complete or GO.",
+    "Fixture completeness and research completeness are separate named metrics; fixture-mode may remain GO only for engine-contract proof.",
+    "A research GO requires zero critical contaminated-source admissions, no unresolved critical review candidates, and minimum independent evidence thresholds defined in the evaluator contract.",
+    "Artifacts state mock/live mode, source types, claim-admission policy version, and whether any fixture or canonical completion helper was used.",
+    "Existing mock product proof remains useful but is relabeled so it cannot imply arbitrary-source research validity.",
+    "On completion, ticket-422 changes from blocked to ready; no later Phase 4 ticket is activated."
+  ],
+  "test_plan": [
+    "With mock-only env: python -m pytest tests/unit/test_evidence_derived_graph_completeness.py tests/unit/test_researcher_product_proof.py -q",
+    "With mock-only env: python -m pytest tests/golden -q",
+    "With mock-only env: python -m rge.cli verify --skip-site",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not delete fixture helpers needed for golden tests.",
+    "Do not fabricate independent evidence to satisfy thresholds.",
+    "Do not mark a product proof GO solely because graph row counts are nonzero.",
+    "Do not add retrieval or answer generation."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Restore prior product-proof display while retaining the new metrics as diagnostics. Do not restore hard-coded completion as evidence of research validity.",
+  "status": "blocked",
+  "category": "Phase 4 / graph integrity"
+}

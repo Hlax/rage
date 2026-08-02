@@ -1,0 +1,53 @@
+{
+  "id": "ticket-414",
+  "title": "Source-artifact contamination and extraction eligibility gate v0",
+  "problem": "Blocked by ticket-413. Fetchable content is currently treated as analyzable source text even when it is an access challenge, redirect shell, error page, navigation wrapper, or insufficient-content document. These artifacts have produced accepted claims and graph evidence.",
+  "evidence": [
+    "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
+    "fixtures/research_quality/manifest.json",
+    "rge/modules/document_parser.py",
+    "rge/modules/fetcher.py",
+    "rge/modules/source_ingestor.py",
+    "data/db/live_research_evidence.sqlite"
+  ],
+  "affected_modules": [
+    "rge/modules/source_quality_gate.py",
+    "rge/modules/document_parser.py",
+    "rge/modules/source_ingestor.py"
+  ],
+  "expected_files": [
+    "rge/modules/source_quality_gate.py",
+    "rge/modules/document_parser.py",
+    "rge/modules/source_ingestor.py",
+    "tests/unit/test_source_quality_gate.py",
+    "tests/unit/test_document_parser.py",
+    "tickets/ticket-415.json",
+    "tickets/TICKET_QUEUE.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-414_source-artifact-quality-gate-v0.md"
+  ],
+  "acceptance_criteria": [
+    "A deterministic pre-extraction gate classifies source artifacts as eligible, quarantined, or needs_review and persists stable reason codes and gate version.",
+    "Known challenge, redirect, navigation, error-page, empty, and insufficient-content benchmark slices produce zero extraction-eligible chunks and zero accepted claims.",
+    "Eligibility uses content and metadata signals rather than domain-specific keywords; legitimate short abstracts remain distinguishable from contaminated shells.",
+    "Quarantined sources and gate diagnostics remain private and never enter public exports.",
+    "Existing fixture-mode and valid manual-source ingestion behavior remains deterministic.",
+    "Benchmark output reports contaminated-source false admissions separately from claim-level false acceptances.",
+    "On completion, ticket-415 changes from blocked to ready; no later Phase 4 ticket is activated."
+  ],
+  "test_plan": [
+    "With mock-only env: python -m pytest tests/unit/test_source_quality_gate.py tests/unit/test_document_parser.py tests/unit/test_research_quality_benchmark.py -q",
+    "With mock-only env: python -m pytest tests/golden -q",
+    "With mock-only env: python -m rge.cli verify --skip-site",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not implement semantic claim entailment.",
+    "Do not delete quarantined source files or historical database rows.",
+    "Do not make live network calls part of tests.",
+    "Do not add public ingestion or review routes."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert the source-quality gate integration and tests. Preserve source records and treat the added eligibility fields as ignored if a migration was introduced.",
+  "status": "blocked",
+  "category": "Phase 4 / source quality"
+}

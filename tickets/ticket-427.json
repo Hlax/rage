@@ -1,0 +1,55 @@
+{
+  "id": "ticket-427",
+  "title": "Research quality evaluator v2 with semantic and RAG metrics v0",
+  "problem": "Blocked by ticket-426. The current evaluator can reward accepted-row ratios and graph counts even when accepted claims are poor. Product and self-improvement verdicts must be based on research-quality, admission, corroboration, reviewed-live-proof, retrieval, citation, and abstention metrics.",
+  "evidence": [
+    "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
+    "rge/modules/research_quality_evaluator.py",
+    "rge/modules/self_improvement_status.py",
+    "rge/modules/autonomous_researcher_loop.py",
+    "rge/modules/rag_quality_benchmark.py"
+  ],
+  "affected_modules": [
+    "rge/modules/research_quality_evaluator.py",
+    "rge/modules/self_improvement_status.py",
+    "rge/modules/autonomous_researcher_loop.py",
+    "rge/modules/operator_loop.py"
+  ],
+  "expected_files": [
+    "rge/modules/research_quality_evaluator.py",
+    "rge/modules/self_improvement_status.py",
+    "rge/modules/autonomous_researcher_loop.py",
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_research_quality_evaluator_v2.py",
+    "tests/unit/test_operator_research_quality_status.py",
+    "docs/agents/08_REPORTING_SPEC.md",
+    "tickets/ticket-428.json",
+    "tickets/TICKET_QUEUE.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-427_research-quality-evaluator-v2.md"
+  ],
+  "acceptance_criteria": [
+    "Evaluator v2 consumes source contamination, claim precision/recall, false acceptance, provenance completeness, unresolved review, independent corroboration, graph integrity, retrieval, citation, unsupported-sentence, and abstention metrics.",
+    "Legacy row counts and acceptance ratios remain diagnostic but cannot independently produce a research or RAG GO verdict.",
+    "Missing, stale, mock-only, or unreviewed live artifacts are explicit and prevent claims of live arbitrary-source GO.",
+    "Operator plan and self-improvement status explain the exact failing metric, threshold, observed value, artifact path, and safe next action.",
+    "A seeded fixture with many accepted junk claims receives NO-GO even when graph counts and acceptance ratio are high.",
+    "Engine-contract, research-quality, and RAG-quality verdicts are separate fields and cannot be conflated in README or artifacts.",
+    "On completion, ticket-428 changes from blocked to ready."
+  ],
+  "test_plan": [
+    "With mock-only env: python -m pytest tests/unit/test_research_quality_evaluator_v2.py tests/unit/test_operator_research_quality_status.py tests/unit/test_autonomous_researcher_loop_proof.py -q",
+    "With mock-only env: python -m pytest tests/golden -q",
+    "With mock-only env: python -m rge.cli verify --skip-site",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not remove useful operational count metrics.",
+    "Do not average a critical safety or false-acceptance failure into a passing composite score.",
+    "Do not auto-run live proofs or paid providers.",
+    "Do not generate or promote implementation tickets in this ticket."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Restore evaluator v1 as a legacy diagnostic while labeling its verdict non-authoritative. Retain v2 artifacts and do not relabel failed research runs as GO.",
+  "status": "blocked",
+  "category": "Phase 4 / quality evaluation"
+}

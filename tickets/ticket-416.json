@@ -1,0 +1,56 @@
+{
+  "id": "ticket-416",
+  "title": "Domain-neutral structured research claim schema v0",
+  "problem": "Blocked by ticket-415. Current claim fields capture a proposition and quote but not enough scientific context to distinguish an observed result from a method, cited background statement, or speculation. Structured metadata is required for semantic validation and useful retrieval.",
+  "evidence": [
+    "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
+    "docs/agents/05_DATA_MODEL.md",
+    "docs/agents/06_DOMAIN_PACK_SPEC.md",
+    "rge/models/schemas.py",
+    "rge/modules/claim_validator.py",
+    "domain_packs/creativity/claim_schema.yaml"
+  ],
+  "affected_modules": [
+    "rge/models/schemas.py",
+    "rge/modules/claim_validator.py",
+    "rge/modules/claim_extractor.py",
+    "rge/db/migrations"
+  ],
+  "expected_files": [
+    "rge/models/schemas.py",
+    "rge/modules/claim_validator.py",
+    "rge/modules/claim_extractor.py",
+    "rge/db/migrations/*.sql",
+    "docs/agents/05_DATA_MODEL.md",
+    "tests/unit/test_structured_research_claim.py",
+    "tests/unit/test_claim_validator_domain_pack.py",
+    "tickets/ticket-417.json",
+    "tickets/TICKET_QUEUE.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-416_structured-research-claim-schema-v0.md"
+  ],
+  "acceptance_criteria": [
+    "The core claim contract can represent claim_kind, study_design, population_or_sample, intervention_or_exposure, comparator, outcome, effect_direction, statistical_context, limitations, and section provenance without creativity-specific fields.",
+    "Requiredness is conditional and deterministic: empirical-result claims require outcome and section provenance; non-empirical claims are not forced into an empirical schema.",
+    "Unknown or absent fields are explicit and never fabricated from defaults.",
+    "Candidate JSON validation rejects invalid enum values, contradictory field combinations, and section provenance that does not match the source chunk.",
+    "Existing mock fixtures either migrate explicitly or remain supported through a versioned backward-compatibility path; no silent field invention is allowed.",
+    "Database migration and serialization tests prove private structured metadata does not widen public exports.",
+    "On completion, ticket-417 changes from blocked to ready; no later Phase 4 ticket is activated."
+  ],
+  "test_plan": [
+    "With mock-only env: python -m pytest tests/unit/test_structured_research_claim.py tests/unit/test_claim_validator_domain_pack.py tests/unit/test_manual_claim_extraction.py -q",
+    "With mock-only env: python -m pytest tests/golden -q",
+    "With mock-only env: python -m rge.cli verify --skip-site",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not require all claim types to contain statistical fields.",
+    "Do not encode creativity ontology fields in the core schema.",
+    "Do not add semantic model review or human review UI.",
+    "Do not expose private scientific metadata through public cards without a later explicit ticket."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert structured-field consumers and retain backward-readable nullable migration columns if applied. Restore the prior claim schema version without deleting existing claim data.",
+  "status": "blocked",
+  "category": "Phase 4 / claim contract"
+}

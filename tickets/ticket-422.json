@@ -1,0 +1,54 @@
+{
+  "id": "ticket-422",
+  "title": "Reviewed open-access arbitrary-source research quality proof v0",
+  "problem": "Blocked by ticket-421. Mock and crafted-note proofs do not establish that the quality-gated pipeline can analyze real scientific documents. A small licensed open-access proof must be run, manually reviewed, and reported with raw quality counts before retrieval work begins.",
+  "evidence": [
+    "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "rge/modules/operator_proof_bundle.py",
+    "rge/modules/researcher_product_proof.py",
+    "data/db/live_research_evidence.sqlite"
+  ],
+  "affected_modules": [
+    "rge/modules/arbitrary_source_quality_proof.py",
+    "rge/cli.py",
+    "scripts/run_arbitrary_source_quality_proof.py"
+  ],
+  "expected_files": [
+    "rge/modules/arbitrary_source_quality_proof.py",
+    "rge/cli.py",
+    "scripts/run_arbitrary_source_quality_proof.py",
+    "tests/unit/test_arbitrary_source_quality_proof.py",
+    "docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md",
+    "./README.md",
+    "tickets/ticket-423.json",
+    "tickets/TICKET_QUEUE.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-422_open-access-arbitrary-source-quality-proof-v0.md"
+  ],
+  "acceptance_criteria": [
+    "A mock-safe proof harness can process a manifest of licensed open-access documents through eligibility, section parsing, candidate extraction, admission, review, corroboration, and graph reporting on temp or gitignored paths.",
+    "The operator-only live run uses at least three open-access scientific documents from at least two independent source families and records license, identifier, checksum, retrieval date, parser version, model identity, and prompt-contract version.",
+    "A human-reviewed private artifact records claim-level gold decisions, automated decisions, review decisions, precision, recall, F1, false-acceptance rate, per-slice counts, graph counts, and independent-source support.",
+    "GO requires contaminated-source false admissions 0, precision at least 0.90, recall at least 0.75, false-acceptance rate at most 0.05, complete claim provenance, and zero accepted bibliography/challenge/redirect/navigation claims.",
+    "The artifact reports raw numerators and denominators and returns PARTIAL or NO-GO when any threshold is missed; mock proof cannot satisfy the live reviewed gate.",
+    "Default pytest, golden tests, verify, and execute-safe do not use source network or live LLM.",
+    "Only after a reviewed GO artifact exists may ticket-423 change from blocked to ready; otherwise ticket-422 remains in_progress or blocked with the failure documented."
+  ],
+  "test_plan": [
+    "With mock-only env: python -m pytest tests/unit/test_arbitrary_source_quality_proof.py tests/unit/test_research_quality_benchmark.py -q",
+    "With mock-only env: python -m pytest tests/golden -q",
+    "With mock-only env: python -m rge.cli verify --skip-site",
+    "python -m rge.modules.safety_auditor --audit full",
+    "Review-gated operator run only: execute the documented open-access quality proof with explicit source-network and live-LLM gates, then review the private artifact before setting GO"
+  ],
+  "non_goals": [
+    "Do not commit copyrighted full text without verified redistribution permission.",
+    "Do not accept mock results as live research proof.",
+    "Do not publish raw source text, review notes, prompts, local paths, or model responses.",
+    "Do not lower thresholds after observing results without a separate principal-audit ticket."
+  ],
+  "risk_level": "high",
+  "rollback_plan": "Remove the proof harness and CLI surface while retaining private audit artifacts according to operator policy. Leave ticket-423 blocked if a reviewed GO was not achieved.",
+  "status": "blocked",
+  "category": "Phase 4 / live research proof"
+}

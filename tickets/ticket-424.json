@@ -1,0 +1,58 @@
+{
+  "id": "ticket-424",
+  "title": "Local embedding index and hybrid lexical-semantic-graph ranker v0",
+  "problem": "Blocked by ticket-423. Lexical and graph retrieval cannot reliably match semantically related wording. Add a local-first, versioned embedding layer and deterministic rank fusion without making model downloads, cloud calls, or new services part of default verification.",
+  "evidence": [
+    "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
+    "docs/agents/03_MODEL_RUNTIME_SPEC.md",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "rge/modules/research_retriever.py",
+    "rge/config.py"
+  ],
+  "affected_modules": [
+    "rge/embeddings",
+    "rge/modules/hybrid_retriever.py",
+    "rge/db/migrations",
+    "rge/config.py"
+  ],
+  "expected_files": [
+    "rge/embeddings/base.py",
+    "rge/embeddings/mock.py",
+    "rge/embeddings/local.py",
+    "rge/modules/hybrid_retriever.py",
+    "rge/db/migrations/*.sql",
+    "rge/config.py",
+    "./pyproject.toml",
+    "tests/unit/test_embedding_index.py",
+    "tests/unit/test_hybrid_retriever.py",
+    "docs/agents/12_RUNTIME_CONFIG.md",
+    "tickets/ticket-425.json",
+    "tickets/TICKET_QUEUE.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-424_local-embedding-hybrid-retrieval-v0.md"
+  ],
+  "acceptance_criteria": [
+    "A provider-neutral embedding contract records provider, model, dimensions, normalization, content checksum, created_at, and index version for accepted-claim representations.",
+    "Default tests use a deterministic mock embedding provider and require no network, Ollama, GPU, model download, or cloud key.",
+    "An explicitly enabled local provider can incrementally embed new or changed accepted claims and invalidates stale vectors when model or content checksum changes.",
+    "Hybrid ranking fuses lexical, semantic, and graph signals with deterministic configured weights or reciprocal-rank fusion and records component scores and ranking reasons.",
+    "Lifecycle or source-eligibility changes remove or suppress ineligible items before retrieval; rejected and needs-review claims are never embedded for the accepted index.",
+    "Local embedding dependencies are optional and fail closed with a clear operator message when unavailable.",
+    "On completion, ticket-425 changes from blocked to ready; no later Phase 4 ticket is activated."
+  ],
+  "test_plan": [
+    "With mock-only env and mock embeddings: python -m pytest tests/unit/test_embedding_index.py tests/unit/test_hybrid_retriever.py tests/unit/test_research_retriever.py -q",
+    "With mock-only env: python -m pytest tests/golden -q",
+    "With mock-only env: python -m rge.cli verify --skip-site",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not require an external vector database or hosted embedding API.",
+    "Do not download a model during default tests, verify, or execute-safe.",
+    "Do not embed raw prompts, secrets, private notes, or rejected claim text in the accepted retrieval index.",
+    "Do not generate answers."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Disable the semantic component and fall back to ticket-423 lexical-plus-graph retrieval. Vector rows may be discarded and rebuilt because they are derived from accepted data.",
+  "status": "blocked",
+  "category": "Phase 4 / hybrid retrieval"
+}

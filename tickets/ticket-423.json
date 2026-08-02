@@ -1,0 +1,55 @@
+{
+  "id": "ticket-423",
+  "title": "Query-to-evidence packet contract with lexical and graph retrieval v0",
+  "problem": "Blocked by reviewed GO on ticket-422. The engine has graph and synthesis components but no operational user-query retrieval path. The first RAG ticket must retrieve only accepted, scope-compatible evidence into a bounded citation-ready packet before adding embeddings or answer generation.",
+  "evidence": [
+    "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
+    "docs/agents/09_RESEARCH_RUN_CONTRACT.md",
+    "rge/modules/field_map.py",
+    "rge/modules/evidence_atoms.py",
+    "rge/contracts/synthesis_evidence_packet_v0.py"
+  ],
+  "affected_modules": [
+    "rge/modules/research_retriever.py",
+    "rge/contracts/evidence_packet.py",
+    "rge/db/migrations",
+    "rge/cli.py"
+  ],
+  "expected_files": [
+    "rge/modules/research_retriever.py",
+    "rge/contracts/evidence_packet.py",
+    "rge/db/migrations/*.sql",
+    "rge/cli.py",
+    "tests/unit/test_research_retriever.py",
+    "tests/unit/test_evidence_packet_contract.py",
+    "docs/agents/09_RESEARCH_RUN_CONTRACT.md",
+    "tickets/ticket-424.json",
+    "tickets/TICKET_QUEUE.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-423_query-evidence-packet-retrieval-v0.md"
+  ],
+  "acceptance_criteria": [
+    "A private CLI accepts a question plus research contract/domain and returns a bounded evidence packet without generating an answer.",
+    "Deterministic lexical retrieval uses SQLite FTS5 or an equivalent local index over accepted claim text and public-safe metadata, then expands through valid graph evidence.",
+    "Scope, domain, section eligibility, lifecycle state, source quality, and source-family filters are applied before ranking.",
+    "Every packet item includes stable claim, quote, source, section, relationship or atom identifiers sufficient for citation resolution; raw private text outside bounded evidence is excluded.",
+    "Rejected and needs-review claims cannot appear even when their text is a stronger lexical match.",
+    "Retrieval is deterministic, idempotent, bounded by explicit top-k and token or character budgets, and records ranking reasons.",
+    "On completion, ticket-424 changes from blocked to ready; no later Phase 4 ticket is activated."
+  ],
+  "test_plan": [
+    "With mock-only env: python -m pytest tests/unit/test_research_retriever.py tests/unit/test_evidence_packet_contract.py tests/unit/test_claim_graph_consumer_isolation.py -q",
+    "With mock-only env: python -m pytest tests/golden -q",
+    "With mock-only env: python -m rge.cli verify --skip-site",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not generate answers in this ticket.",
+    "Do not add embeddings or external vector databases.",
+    "Do not expose a public query or write route.",
+    "Do not retrieve rejected, staged, or private review notes."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove the private retrieval command and stop maintaining the lexical index. Accepted graph data and existing synthesis contracts remain unchanged.",
+  "status": "blocked",
+  "category": "Phase 4 / retrieval"
+}

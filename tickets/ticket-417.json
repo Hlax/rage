@@ -1,0 +1,56 @@
+{
+  "id": "ticket-417",
+  "title": "Candidate claim lifecycle, quarantine, and graph-consumer isolation v0",
+  "problem": "Blocked by ticket-416. Python validation currently resolves candidates largely into accepted or rejected records. Semantically uncertain outputs need an explicit private lifecycle so they cannot reach graph, scoring, reporting, synthesis, retrieval, or export consumers before review.",
+  "evidence": [
+    "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
+    "docs/agents/05_DATA_MODEL.md",
+    "docs/agents/10_SAFETY_MODEL.md",
+    "rge/modules/claim_extractor.py",
+    "rge/modules/claim_validator.py",
+    "rge/db/repositories.py"
+  ],
+  "affected_modules": [
+    "rge/db/migrations",
+    "rge/db/repositories.py",
+    "rge/modules/claim_extractor.py",
+    "rge/modules/claim_validator.py"
+  ],
+  "expected_files": [
+    "rge/db/migrations/*.sql",
+    "rge/db/repositories.py",
+    "rge/modules/claim_extractor.py",
+    "rge/modules/claim_validator.py",
+    "tests/unit/test_claim_admission_lifecycle.py",
+    "tests/unit/test_claim_graph_consumer_isolation.py",
+    "docs/agents/05_DATA_MODEL.md",
+    "tickets/ticket-418.json",
+    "tickets/TICKET_QUEUE.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-417_claim-admission-lifecycle-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Candidate claims have explicit proposed, needs_review, rejected, and accepted states with allowed transitions enforced by Python.",
+    "Every transition records actor type, reason code, validator or policy version, timestamp, and prior state in append-only private decision history.",
+    "Model output can create only proposed candidate data; only Python admission code can transition a claim to accepted.",
+    "Only accepted claims are visible to concept linking, relationship building, score reconciliation, reports, synthesis packets, retrieval, atlas snapshots, and public export.",
+    "Needs-review and rejected candidates remain inspectable privately and reruns are idempotent without erasing decision history.",
+    "Migration tests cover existing accepted/rejected rows without reclassifying or deleting historical claims.",
+    "On completion, ticket-418 changes from blocked to ready; no later Phase 4 ticket is activated."
+  ],
+  "test_plan": [
+    "With mock-only env: python -m pytest tests/unit/test_claim_admission_lifecycle.py tests/unit/test_claim_graph_consumer_isolation.py -q",
+    "With mock-only env: python -m pytest tests/golden -q",
+    "With mock-only env: python -m rge.cli verify --skip-site",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not add a human review interface in this ticket.",
+    "Do not auto-accept uncertain model output.",
+    "Do not delete historical accepted or rejected records.",
+    "Do not add public claim-review or write routes."
+  ],
+  "risk_level": "high",
+  "rollback_plan": "Disable new admission transitions and restore prior readers while retaining append-only lifecycle tables for auditability. Never drop historical decision or claim rows during rollback.",
+  "status": "blocked",
+  "category": "Phase 4 / graph admission"
+}

@@ -27,7 +27,8 @@ Read sources in this order:
 13. `docs/agents/12_RUNTIME_CONFIG.md`
 14. `docs/agents/13_MODEL_ESCALATION_POLICY.md` — local-first modes and escalation policy
 15. `docs/agents/14_LIVE_PROBE_OPERATOR_RUNBOOK.md` — live probe operator runbook
-16. `docs/agents/000_init.md` only as historical seed context
+16. `docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md` — Phase 4 research-quality, graph-admission, retrieval, and measured-improvement plan
+17. `docs/agents/000_init.md` only as historical seed context
 
 If documents conflict, follow the higher-priority document.
 

@@ -1,0 +1,58 @@
+{
+  "id": "ticket-420",
+  "title": "Cross-source claim deduplication and independent corroboration v0",
+  "problem": "Blocked by ticket-419. Duplicate pages, versions, or repeated statements from one study can inflate support counts and graph confidence. The engine needs domain-neutral proposition normalization and source-family independence before graph completeness or retrieval quality can be trusted.",
+  "evidence": [
+    "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
+    "docs/agents/05_DATA_MODEL.md",
+    "rge/modules/evidence_atoms.py",
+    "rge/modules/multi_claim_atom_clustering.py",
+    "rge/modules/relationship_builder.py",
+    "rge/modules/score_reconciler.py"
+  ],
+  "affected_modules": [
+    "rge/modules/claim_deduplicator.py",
+    "rge/modules/evidence_atoms.py",
+    "rge/modules/relationship_builder.py",
+    "rge/modules/score_reconciler.py",
+    "rge/db/migrations"
+  ],
+  "expected_files": [
+    "rge/modules/claim_deduplicator.py",
+    "rge/modules/evidence_atoms.py",
+    "rge/modules/relationship_builder.py",
+    "rge/modules/score_reconciler.py",
+    "rge/db/migrations/*.sql",
+    "tests/unit/test_claim_deduplication.py",
+    "tests/unit/test_independent_corroboration.py",
+    "docs/agents/05_DATA_MODEL.md",
+    "tickets/ticket-421.json",
+    "tickets/TICKET_QUEUE.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-420_cross-source-corroboration-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Accepted claims receive a versioned normalized proposition key that preserves scope, population, outcome, direction, and material qualifiers.",
+    "Exact and near-duplicate claims are linked without deleting provenance or collapsing contradictory scopes.",
+    "Source-family identity distinguishes mirrors, preprint/published versions, and repeated pages of one study from genuinely independent sources using deterministic metadata when available.",
+    "Relationship support and score reconciliation count independent source families separately from raw claim count and cannot gain confidence solely from duplicates.",
+    "Rejected and needs-review candidates never contribute to deduplication clusters used by graph confidence.",
+    "Tests cover equivalent wording, conflicting direction, different populations, duplicate URLs, preprint/version pairs, and two genuinely independent studies.",
+    "On completion, ticket-421 changes from blocked to ready; no later Phase 4 ticket is activated."
+  ],
+  "test_plan": [
+    "With mock-only env: python -m pytest tests/unit/test_claim_deduplication.py tests/unit/test_independent_corroboration.py -q",
+    "With mock-only env: python -m pytest tests/golden -q",
+    "With mock-only env: python -m rge.cli verify --skip-site",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not auto-merge claim rows or discard source-specific quotes.",
+    "Do not use embeddings until the retrieval embedding ticket.",
+    "Do not treat citation count as independent corroboration.",
+    "Do not rewrite historical score events destructively."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Stop using proposition and source-family fields in scoring while retaining non-destructive linkage tables. Historical claims, quotes, relationships, and score events remain intact.",
+  "status": "blocked",
+  "category": "Phase 4 / evidence corroboration"
+}

@@ -1,0 +1,52 @@
+{
+  "id": "ticket-426",
+  "title": "RAG retrieval, citation, grounding, and abstention benchmark v0",
+  "problem": "Blocked by ticket-425. A working command is not evidence of retrieval quality. The repository needs a deterministic question benchmark that measures evidence recall, ranking, citation correctness, unsupported statements, source diversity, and abstention.",
+  "evidence": [
+    "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
+    "rge/modules/research_retriever.py",
+    "rge/modules/hybrid_retriever.py",
+    "rge/modules/research_answer_runner.py",
+    "fixtures/research_quality/manifest.json"
+  ],
+  "affected_modules": [
+    "rge/modules/rag_quality_benchmark.py",
+    "fixtures/rag_quality",
+    "tests/unit/test_rag_quality_benchmark.py"
+  ],
+  "expected_files": [
+    "rge/modules/rag_quality_benchmark.py",
+    "fixtures/rag_quality/manifest.json",
+    "fixtures/rag_quality/questions/*.json",
+    "tests/unit/test_rag_quality_benchmark.py",
+    "tests/golden/test_rag_quality_gate.py",
+    "tickets/ticket-427.json",
+    "tickets/TICKET_QUEUE.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-426_rag-quality-benchmark-v0.md"
+  ],
+  "acceptance_criteria": [
+    "A versioned deterministic benchmark contains answerable, multi-source, contradictory, scope-sensitive, and unanswerable questions with gold evidence IDs and citation expectations.",
+    "The evaluator reports recall@k, MRR or nDCG, citation precision, citation coverage, source-family diversity, unsupported factual sentence rate, and abstention accuracy with raw numerators and denominators.",
+    "The golden RAG gate requires evidence recall@5 at least 0.85, citation precision at least 0.95, unsupported factual sentence rate 0, unanswerable-question abstention 1.0, and zero rejected or needs-review claims in packets.",
+    "Metric calculations are independent of provider wording and can evaluate deterministic candidate outputs without a live model.",
+    "A failed metric produces a nonzero CLI exit or explicit NO-GO artifact; tests do not silently update gold labels.",
+    "Benchmark artifacts identify corpus, retrieval configuration, embedding provider/version, synthesis provider/version, and policy versions without exposing secrets or private paths.",
+    "On completion, ticket-427 changes from blocked to ready; no later Phase 4 ticket is activated."
+  ],
+  "test_plan": [
+    "With mock-only env and mock embeddings: python -m pytest tests/unit/test_rag_quality_benchmark.py tests/golden/test_rag_quality_gate.py -q",
+    "With mock-only env: python -m pytest tests/golden -q",
+    "With mock-only env: python -m rge.cli verify --skip-site",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not claim benchmark thresholds generalize to every research domain.",
+    "Do not use subjective answer-style scoring as a substitute for evidence and citation metrics.",
+    "Do not call live providers in default benchmark execution.",
+    "Do not permit rejected or needs-review evidence to improve recall."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Remove the RAG benchmark gate and fixtures while retaining retrieval and candidate-answer features as experimental. Maturity wording must revert to experimental RAG until a replacement gate exists.",
+  "status": "blocked",
+  "category": "Phase 4 / RAG evaluation"
+}

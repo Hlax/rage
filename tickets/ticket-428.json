@@ -1,0 +1,57 @@
+{
+  "id": "ticket-428",
+  "title": "Benchmark-delta improvement ticket and builder regression gate v0",
+  "problem": "Blocked by ticket-427. The improvement loop currently turns coarse failure counts into drafts but does not require a measurable research-quality baseline, target, or before/after proof. A recursive improvement claim is not justified until ticket generation and builder completion are tied to protected benchmark deltas.",
+  "evidence": [
+    "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
+    "docs/agents/04_CURSOR_BUILD_LOOP.md",
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md",
+    "rge/modules/ticket_writer.py",
+    "rge/modules/tier2_local_implementation.py",
+    "rge/modules/research_quality_evaluator.py"
+  ],
+  "affected_modules": [
+    "rge/modules/ticket_writer.py",
+    "rge/modules/tier2_local_implementation.py",
+    "rge/modules/research_quality_evaluator.py",
+    "rge/modules/operator_loop.py"
+  ],
+  "expected_files": [
+    "rge/modules/ticket_writer.py",
+    "rge/modules/tier2_local_implementation.py",
+    "rge/modules/operator_loop.py",
+    "tests/unit/test_quality_metric_improvement_ticket.py",
+    "tests/unit/test_builder_quality_regression_gate.py",
+    "tests/golden/test_quality_improvement_loop.py",
+    "docs/agents/04_CURSOR_BUILD_LOOP.md",
+    "docs/agents/11_AGENT_OPERATING_PROTOCOL.md",
+    "./README.md",
+    "tickets/TICKET_QUEUE.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-428_benchmark-delta-improvement-gate-v0.md"
+  ],
+  "acceptance_criteria": [
+    "An evaluator failure can generate a draft ticket only when it names the failing metric, baseline value, threshold or target, affected benchmark slice, reproduction command, evidence artifact, scoped modules, and safety constraints.",
+    "Ticket validation rejects vague quality tickets that lack raw counts, a reproducible benchmark, or a measurable acceptance target.",
+    "The builder gate records before and after results for the targeted metric plus all protected research, RAG, golden, and safety metrics.",
+    "A change cannot be marked successful when the target does not improve, a protected floor regresses, false acceptance increases, or required evidence is missing.",
+    "A deterministic golden scenario links run ID to metric failure to draft ticket to bounded patch/report to before/after artifact while using mock models only.",
+    "Model output cannot promote queue rows, create branches, commit, push, merge, publish, or change thresholds; existing human and autonomy-tier gates remain authoritative.",
+    "README and program report describe the result as a measured, governed improvement loop rather than autonomous recursive self-modification."
+  ],
+  "test_plan": [
+    "With mock-only env: python -m pytest tests/unit/test_quality_metric_improvement_ticket.py tests/unit/test_builder_quality_regression_gate.py tests/golden/test_quality_improvement_loop.py -q",
+    "With mock-only env: python -m pytest tests/golden -q",
+    "With mock-only env: python -m rge.cli verify",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not implement autonomous code generation or self-modification.",
+    "Do not permit model-authored queue promotion, merge, push, or publication.",
+    "Do not change quality thresholds from evaluator or ticket output.",
+    "Do not bypass one-ticket-per-branch or human review gates."
+  ],
+  "risk_level": "high",
+  "rollback_plan": "Disable metric-driven ticket drafting and builder delta enforcement while retaining generated artifacts for audit. Restore prior governed draft flow without claiming recursive improvement.",
+  "status": "blocked",
+  "category": "Phase 4 / measured improvement"
+}

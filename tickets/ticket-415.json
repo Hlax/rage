@@ -1,0 +1,55 @@
+{
+  "id": "ticket-415",
+  "title": "Section-aware scientific document segmentation and provenance v0",
+  "problem": "Blocked by ticket-414. Fixed-size character chunking loses scientific section identity and allows references, acknowledgements, and navigation text to be treated like findings. The engine needs structural chunks with exact provenance before claim semantics can be validated.",
+  "evidence": [
+    "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
+    "docs/agents/05_DATA_MODEL.md",
+    "rge/modules/parser.py",
+    "rge/modules/document_parser.py",
+    "rge/db/migrations"
+  ],
+  "affected_modules": [
+    "rge/modules/parser.py",
+    "rge/modules/document_parser.py",
+    "rge/db/migrations",
+    "rge/db/repositories.py"
+  ],
+  "expected_files": [
+    "rge/modules/parser.py",
+    "rge/modules/document_parser.py",
+    "rge/db/migrations/*.sql",
+    "rge/db/repositories.py",
+    "tests/unit/test_scientific_section_parser.py",
+    "tests/unit/test_document_parser.py",
+    "docs/agents/05_DATA_MODEL.md",
+    "tickets/ticket-416.json",
+    "tickets/TICKET_QUEUE.md",
+    "agent_reports/YYYY-MM-DD_phase-4_ticket-415_section-aware-scientific-segmentation-v0.md"
+  ],
+  "acceptance_criteria": [
+    "Source chunks persist normalized section_type, original section_title, exact document char_start and char_end, and page number when available.",
+    "The parser distinguishes at least title/metadata, abstract, introduction/background, methods, results, discussion, limitations, references, acknowledgements, and unknown without requiring creativity-specific logic.",
+    "Reference, acknowledgement, navigation, and boilerplate chunks are not extraction-eligible by default; unknown chunks route through explicit conservative policy.",
+    "Chunk text reconstructs the original source span at stored offsets after whitespace normalization rules documented in code.",
+    "HTML, PDF-derived text, Markdown, and plain-text fixtures have deterministic fallback behavior and do not require GROBID or network access.",
+    "Migration and repository compatibility tests cover existing databases and fixture-mode runs.",
+    "On completion, ticket-416 changes from blocked to ready; no later Phase 4 ticket is activated."
+  ],
+  "test_plan": [
+    "With mock-only env: python -m pytest tests/unit/test_scientific_section_parser.py tests/unit/test_document_parser.py tests/unit/test_text_quality_gate.py -q",
+    "With mock-only env: python -m pytest tests/golden -q",
+    "With mock-only env: python -m rge.cli verify --skip-site",
+    "python -m rge.modules.safety_auditor --audit full"
+  ],
+  "non_goals": [
+    "Do not add a hosted parsing service requirement.",
+    "Do not extract claims or decide entailment in the parser.",
+    "Do not break exact quote offsets to improve visual chunk boundaries.",
+    "Do not add domain-specific section names to core tables."
+  ],
+  "risk_level": "medium",
+  "rollback_plan": "Revert parser and repository use of structural fields while retaining a backward-compatible migration if already applied. Existing chunk text and offsets must remain readable.",
+  "status": "blocked",
+  "category": "Phase 4 / scientific parsing"
+}

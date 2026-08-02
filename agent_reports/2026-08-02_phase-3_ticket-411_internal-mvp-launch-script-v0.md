@@ -81,6 +81,7 @@ PowerShell execution-policy override for machines where local scripts are restri
 | `.venv-ci-test\Scripts\python.exe -m pytest -q` | PASS | 1411 passed, 50 deselected |
 | `python -m rge.modules.safety_auditor --audit full` | PASS | No blocked reasons |
 | `npm.cmd run build` | PASS | Static `/atlas-preview` exported |
+| `git push origin main` | PASS | Fast-forwarded `origin/main` from `58b6d5e` to `e51b105` |
 
 ## 8. Test Results
 
@@ -94,8 +95,7 @@ PowerShell execution-policy override for machines where local scripts are restri
 
 ### Failing
 
-- Required `git push origin main`: not completed. The environment rejected protected-remote
-  mutation pending explicit user approval. No workaround was attempted.
+- None.
 
 ### Not Available Yet
 
@@ -118,8 +118,7 @@ host policy blocks direct `.ps1` execution; it does not change user or machine p
 - Launcher guarantees are manually proven but not yet automated; ticket-412 addresses this.
 - Full-tree `git diff --check` also reports a pre-existing blank line at EOF in the
   user-modified `scripts/run_full_atlas_refresh_checklist.py`; ticket-scoped files are clean.
-- Ticket-411 remains `in_progress` until the local main commits can be pushed to
-  `origin/main` with explicit approval.
+- Launcher contract coverage remains proposed as ticket-412.
 
 ## 12. Rollback Plan
 
@@ -151,5 +150,5 @@ Merge commit: `5b2654e9aad28e31d233f96197542ef02641e69e`.
 
 Post-merge report commit: `320b592`.
 
-Push status: **NOT COMPLETED** — protected `origin/main` mutation awaits explicit user
-approval.
+Push status: **COMPLETED** — `origin/main` was fast-forwarded from `58b6d5e` to
+`e51b105` on 2026-08-02 after explicit user authorization.
