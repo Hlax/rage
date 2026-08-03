@@ -1,7 +1,7 @@
 {
   "id": "ticket-415",
   "title": "Section-aware scientific document segmentation and provenance v0",
-  "problem": "Blocked by ticket-414. Fixed-size character chunking loses scientific section identity and allows references, acknowledgements, and navigation text to be treated like findings. The engine needs structural chunks with exact provenance before claim semantics can be validated.",
+  "problem": "Fixed-size character chunking loses scientific section identity and allows references, acknowledgements, and navigation text to be treated like findings. The engine needs structural chunks with exact provenance before claim semantics can be validated.",
   "evidence": [
     "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
     "docs/agents/05_DATA_MODEL.md",
@@ -50,6 +50,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert parser and repository use of structural fields while retaining a backward-compatible migration if already applied. Existing chunk text and offsets must remain readable.",
-  "status": "blocked",
+  "status": "ready",
   "category": "Phase 4 / scientific parsing"
 }

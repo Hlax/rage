@@ -1,7 +1,7 @@
 {
   "schema_version": "research_quality_benchmark_manifest_v1",
   "benchmark_id": "research_quality_claim_admission_v1",
-  "benchmark_version": "1.0.0",
+  "benchmark_version": "1.1.0",
   "title": "Synthetic multidisciplinary claim-admission benchmark",
   "description": "A deterministic corpus for measuring whether candidate claims are legitimate scoped findings rather than merely quote-bearing text.",
   "checksum_contract": {
@@ -27,6 +27,16 @@
     "unsupported_generalization",
     "quote_claim_mismatch"
   ],
+  "required_source_artifact_slices": [
+    "eligible_research_text",
+    "eligible_reference_document",
+    "navigation_shell",
+    "access_challenge",
+    "redirect_shell",
+    "error_page",
+    "empty_content",
+    "insufficient_content"
+  ],
   "baseline": {
     "predictor_id": "quote_presence_v0",
     "description": "Accept a candidate when its non-empty quote occurs in the document and basic candidate text fields are present.",
@@ -43,6 +53,9 @@
       "synthetic": true,
       "license": "synthetic_fixture",
       "canonical_identifier": "synthetic:rge:clinical-trial",
+      "source_artifact_slice": "eligible_research_text",
+      "expected_source_eligibility": "eligible",
+      "expected_source_reason_code": null,
       "checksum_sha256": "de7d32e934274a7cf83970f11ccac8a7354fca2566c0178c17fa4540a0bc388f",
       "excerpt_boundaries": {"start_char": 0, "end_char": 401}
     },
@@ -52,6 +65,9 @@
       "synthetic": true,
       "license": "synthetic_fixture",
       "canonical_identifier": "synthetic:rge:education-study",
+      "source_artifact_slice": "eligible_research_text",
+      "expected_source_eligibility": "eligible",
+      "expected_source_reason_code": null,
       "checksum_sha256": "d17ed6752a9f03e5f65980efd1059c0bb6484a8105c46d260d03702f48354855",
       "excerpt_boundaries": {"start_char": 0, "end_char": 468}
     },
@@ -61,6 +77,9 @@
       "synthetic": true,
       "license": "synthetic_fixture",
       "canonical_identifier": "synthetic:rge:ecology-survey",
+      "source_artifact_slice": "eligible_research_text",
+      "expected_source_eligibility": "eligible",
+      "expected_source_reason_code": null,
       "checksum_sha256": "9ee237c0f7ffcb34c42ec70deda4f3bfa5d0d5d6ccc3792d8ca51385b5172607",
       "excerpt_boundaries": {"start_char": 0, "end_char": 351}
     },
@@ -70,6 +89,9 @@
       "synthetic": true,
       "license": "synthetic_fixture",
       "canonical_identifier": "synthetic:rge:materials-experiment",
+      "source_artifact_slice": "eligible_research_text",
+      "expected_source_eligibility": "eligible",
+      "expected_source_reason_code": null,
       "checksum_sha256": "f691346eb70566cb4549b5b2f6b635891d841af089892d996bb783a0298309dd",
       "excerpt_boundaries": {"start_char": 0, "end_char": 347}
     },
@@ -79,6 +101,9 @@
       "synthetic": true,
       "license": "synthetic_fixture",
       "canonical_identifier": "synthetic:rge:attention-experiment",
+      "source_artifact_slice": "eligible_research_text",
+      "expected_source_eligibility": "eligible",
+      "expected_source_reason_code": null,
       "checksum_sha256": "ac6138bedf4cb5ceb26257015fb5bfbf04306dc696af9152157423276d9a5a56",
       "excerpt_boundaries": {"start_char": 0, "end_char": 487}
     },
@@ -88,6 +113,9 @@
       "synthetic": true,
       "license": "synthetic_fixture",
       "canonical_identifier": "synthetic:rge:bibliography-page",
+      "source_artifact_slice": "eligible_reference_document",
+      "expected_source_eligibility": "eligible",
+      "expected_source_reason_code": null,
       "checksum_sha256": "2f781cf3bd94ae630877532014c90c09effbac0be4d18a80ee2d4b81a6ff7f58",
       "excerpt_boundaries": {"start_char": 0, "end_char": 416}
     },
@@ -97,6 +125,9 @@
       "synthetic": true,
       "license": "synthetic_fixture",
       "canonical_identifier": "synthetic:rge:navigation-shell",
+      "source_artifact_slice": "navigation_shell",
+      "expected_source_eligibility": "quarantined",
+      "expected_source_reason_code": "navigation_shell",
       "checksum_sha256": "a070d1675d38cc47b5d2c8df051b99cca6cf17ee1e626b1668d33fad9c0c04d0",
       "excerpt_boundaries": {"start_char": 0, "end_char": 166}
     },
@@ -106,6 +137,9 @@
       "synthetic": true,
       "license": "synthetic_fixture",
       "canonical_identifier": "synthetic:rge:access-challenge",
+      "source_artifact_slice": "access_challenge",
+      "expected_source_eligibility": "quarantined",
+      "expected_source_reason_code": "access_challenge",
       "checksum_sha256": "c2957e3346ce6c244e680fd53f40716bb409c99ca605b2735bece0f46ef8dfbb",
       "excerpt_boundaries": {"start_char": 0, "end_char": 228}
     },
@@ -115,8 +149,47 @@
       "synthetic": true,
       "license": "synthetic_fixture",
       "canonical_identifier": "synthetic:rge:redirect-shell",
+      "source_artifact_slice": "redirect_shell",
+      "expected_source_eligibility": "quarantined",
+      "expected_source_reason_code": "redirect_shell",
       "checksum_sha256": "358a74491bc85ca247b0b7fea6370552e5919e6703a1940bf943268ec4df88a0",
       "excerpt_boundaries": {"start_char": 0, "end_char": 182}
+    },
+    {
+      "id": "doc-error-page",
+      "path": "documents/error_page.txt",
+      "synthetic": true,
+      "license": "synthetic_fixture",
+      "canonical_identifier": "synthetic:rge:error-page",
+      "source_artifact_slice": "error_page",
+      "expected_source_eligibility": "quarantined",
+      "expected_source_reason_code": "error_page",
+      "checksum_sha256": "0cecc3c366329d8109368ec09e474d81d0e9a30719741edf7091cae322184115",
+      "excerpt_boundaries": {"start_char": 0, "end_char": 125}
+    },
+    {
+      "id": "doc-empty-content",
+      "path": "documents/empty_content.txt",
+      "synthetic": true,
+      "license": "synthetic_fixture",
+      "canonical_identifier": "synthetic:rge:empty-content",
+      "source_artifact_slice": "empty_content",
+      "expected_source_eligibility": "quarantined",
+      "expected_source_reason_code": "empty_content",
+      "checksum_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "excerpt_boundaries": {"start_char": 0, "end_char": 1}
+    },
+    {
+      "id": "doc-insufficient-content",
+      "path": "documents/insufficient_content.txt",
+      "synthetic": true,
+      "license": "synthetic_fixture",
+      "canonical_identifier": "synthetic:rge:insufficient-content",
+      "source_artifact_slice": "insufficient_content",
+      "expected_source_eligibility": "quarantined",
+      "expected_source_reason_code": "insufficient_content",
+      "checksum_sha256": "4157540c50a21d8eccdd85cc071e37f2b23dd35525473b1b671044125dd44f42",
+      "excerpt_boundaries": {"start_char": 0, "end_char": 16}
     },
     {
       "id": "doc-river-model",
@@ -124,6 +197,9 @@
       "synthetic": true,
       "license": "synthetic_fixture",
       "canonical_identifier": "synthetic:rge:river-model",
+      "source_artifact_slice": "eligible_research_text",
+      "expected_source_eligibility": "eligible",
+      "expected_source_reason_code": null,
       "checksum_sha256": "5e022d3a9ecdd40c05a1b96b48b18f03e246fbc21801d2afba7dbf20a26052c9",
       "excerpt_boundaries": {"start_char": 0, "end_char": 364}
     }

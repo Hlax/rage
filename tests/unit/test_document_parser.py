@@ -17,6 +17,10 @@ from rge.modules.document_parser import (
     parse_tei_xml,
 )
 from rge.modules.fetcher import FetchError, artifact_bytes_to_text
+from rge.modules.source_quality_gate import (
+    NEEDS_REVIEW,
+    QUARANTINED,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DOC_FIXTURES = REPO_ROOT / "fixtures" / "source_documents"
@@ -41,6 +45,40 @@ def test_parse_document_file_clean_fulltext_fixture() -> None:
 
     assert result.source_status == CLEAN_TEXT_READY
     assert result.quoteable_span_count >= 1
+
+
+@pytest.mark.parametrize(
+    "fixture_name",
+    [
+        "access_challenge.txt",
+        "navigation_shell.txt",
+        "redirect_shell.txt",
+        "error_page.txt",
+        "empty_content.txt",
+        "insufficient_content.txt",
+    ],
+)
+def test_parse_document_file_quarantines_source_artifacts(fixture_name: str) -> None:
+    fixture = REPO_ROOT / "fixtures" / "research_quality" / "documents" / fixture_name
+
+    result = parse_document_file(fixture)
+
+    assert result.source_status == DIRTY_TEXT
+    assert result.eligibility_status == QUARANTINED
+    assert result.eligibility_reason_codes
+    assert result.as_dict()["extraction_eligible"] is False
+
+
+def test_short_abstract_is_reviewable_not_quarantined() -> None:
+    text = (
+        "A pilot survey found lower fatigue after the schedule change in this "
+        "small workplace sample."
+    )
+
+    result = parse_document_bytes(text.encode("utf-8"), content_type="text/plain")
+
+    assert result.source_status == DIRTY_TEXT
+    assert result.eligibility_status == NEEDS_REVIEW
 
 
 def test_pdf_bytes_are_not_utf8_decoded_as_text() -> None:

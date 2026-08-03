@@ -15,6 +15,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from rge.modules.source_quality_gate import (
+    ELIGIBLE as SOURCE_ELIGIBLE,
+    GATE_VERSION as SOURCE_GATE_VERSION,
+    NEEDS_REVIEW as SOURCE_NEEDS_REVIEW,
+    QUARANTINED as SOURCE_QUARANTINED,
+    assess_source_eligibility,
+)
+
 MANIFEST_SCHEMA_VERSION = "research_quality_benchmark_manifest_v1"
 RESULT_SCHEMA_VERSION = "research_quality_benchmark_result_v1"
 QUOTE_PRESENCE_BASELINE_ID = "quote_presence_v0"
@@ -40,6 +48,18 @@ REQUIRED_NEGATIVE_SLICES = frozenset(
     }
 )
 REQUIRED_SLICES = frozenset({VALID_SCOPED_FINDING_SLICE, *REQUIRED_NEGATIVE_SLICES})
+REQUIRED_SOURCE_ARTIFACT_SLICES = frozenset(
+    {
+        "eligible_research_text",
+        "eligible_reference_document",
+        "navigation_shell",
+        "access_challenge",
+        "redirect_shell",
+        "error_page",
+        "empty_content",
+        "insufficient_content",
+    }
+)
 
 Predictor = Callable[[Mapping[str, Any], str], "CandidateDecision"]
 
@@ -178,6 +198,33 @@ def _validate_document(
     identifier = document.get("canonical_url") or document.get("canonical_identifier")
     _require_string(identifier, label=f"document[{document_id}].canonical_identifier")
 
+    _require_string(
+        document.get("source_artifact_slice"),
+        label=f"document[{document_id}].source_artifact_slice",
+    )
+    expected_source = document.get("expected_source_eligibility")
+    if expected_source not in {
+        SOURCE_ELIGIBLE,
+        SOURCE_QUARANTINED,
+        SOURCE_NEEDS_REVIEW,
+    }:
+        raise BenchmarkContractError(
+            f"document[{document_id}].expected_source_eligibility is invalid"
+        )
+    source_reason = document.get("expected_source_reason_code")
+    if expected_source == SOURCE_ELIGIBLE and source_reason not in {
+        None,
+        SOURCE_ELIGIBLE,
+    }:
+        raise BenchmarkContractError(
+            f"document[{document_id}] eligible source cannot have a blocking reason"
+        )
+    if expected_source != SOURCE_ELIGIBLE:
+        _require_string(
+            source_reason,
+            label=f"document[{document_id}].expected_source_reason_code",
+        )
+
     if not synthetic:
         _require_string(
             document.get("license"),
@@ -227,6 +274,7 @@ def validate_manifest(
         )
 
     document_text: dict[str, str] = {}
+    observed_source_slices: set[str] = set()
     for document in documents:
         if not isinstance(document, Mapping):
             raise BenchmarkContractError("each document entry must be an object")
@@ -234,6 +282,25 @@ def validate_manifest(
         if document_id in document_text:
             raise BenchmarkContractError(f"duplicate document id: {document_id}")
         document_text[document_id] = text
+        observed_source_slices.add(str(document["source_artifact_slice"]))
+
+    missing_source_slices = REQUIRED_SOURCE_ARTIFACT_SLICES - observed_source_slices
+    if missing_source_slices:
+        raise BenchmarkContractError(
+            "manifest is missing required source-artifact slices: "
+            + ", ".join(sorted(missing_source_slices))
+        )
+    declared_source_slices = manifest.get("required_source_artifact_slices")
+    if not isinstance(declared_source_slices, list):
+        raise BenchmarkContractError("required_source_artifact_slices must be a list")
+    missing_source_declarations = REQUIRED_SOURCE_ARTIFACT_SLICES - {
+        str(value) for value in declared_source_slices if isinstance(value, str)
+    }
+    if missing_source_declarations:
+        raise BenchmarkContractError(
+            "required_source_artifact_slices omits contract slices: "
+            + ", ".join(sorted(missing_source_declarations))
+        )
 
     candidates = manifest.get("candidates")
     if not isinstance(candidates, list) or len(candidates) < MIN_CANDIDATE_COUNT:
@@ -534,6 +601,96 @@ def _evaluate_thresholds(
     }
 
 
+def summarize_source_artifact_admission(
+    documents: Sequence[Mapping[str, Any]],
+    document_text: Mapping[str, str],
+) -> dict[str, Any]:
+    """Report source-level false admissions separately from claim decisions."""
+    counts = {
+        "total": 0,
+        "expected_eligible": 0,
+        "expected_blocked": 0,
+        "predicted_eligible": 0,
+        "predicted_quarantined": 0,
+        "predicted_needs_review": 0,
+        "false_admission": 0,
+        "false_rejection": 0,
+    }
+    per_slice: dict[str, dict[str, int]] = {}
+    status_confusion: dict[str, dict[str, int]] = {}
+    records: list[dict[str, Any]] = []
+
+    for document in documents:
+        document_id = str(document["id"])
+        expected = str(document["expected_source_eligibility"])
+        expected_reason = str(
+            document.get("expected_source_reason_code") or SOURCE_ELIGIBLE
+        )
+        decision = assess_source_eligibility(document_text[document_id])
+        predicted = decision.status
+        slice_id = str(document["source_artifact_slice"])
+        expected_blocked = expected != SOURCE_ELIGIBLE
+        predicted_admitted = predicted == SOURCE_ELIGIBLE
+        false_admission = expected_blocked and predicted_admitted
+        false_rejection = not expected_blocked and not predicted_admitted
+
+        counts["total"] += 1
+        counts["expected_blocked" if expected_blocked else "expected_eligible"] += 1
+        counts[f"predicted_{predicted}"] += 1
+        counts["false_admission"] += int(false_admission)
+        counts["false_rejection"] += int(false_rejection)
+
+        slice_counts = per_slice.setdefault(
+            slice_id,
+            {
+                "total": 0,
+                "expected_blocked": 0,
+                "predicted_admitted": 0,
+                "false_admission": 0,
+                "false_rejection": 0,
+            },
+        )
+        slice_counts["total"] += 1
+        slice_counts["expected_blocked"] += int(expected_blocked)
+        slice_counts["predicted_admitted"] += int(predicted_admitted)
+        slice_counts["false_admission"] += int(false_admission)
+        slice_counts["false_rejection"] += int(false_rejection)
+
+        predicted_reason = decision.reason_codes[0]
+        confusion = status_confusion.setdefault(expected_reason, {})
+        confusion[predicted_reason] = confusion.get(predicted_reason, 0) + 1
+        records.append(
+            {
+                "document_id": document_id,
+                "slice": slice_id,
+                "expected_status": expected,
+                "predicted_status": predicted,
+                "expected_reason_code": expected_reason,
+                "predicted_reason_codes": list(decision.reason_codes),
+                "extraction_eligible": decision.extraction_eligible,
+                "false_admission": false_admission,
+                "false_rejection": false_rejection,
+            }
+        )
+
+    return {
+        "gate_version": SOURCE_GATE_VERSION,
+        "counts": counts,
+        "false_admission_rate": _metric(
+            counts["false_admission"], counts["expected_blocked"]
+        ),
+        "false_rejection_rate": _metric(
+            counts["false_rejection"], counts["expected_eligible"]
+        ),
+        "per_slice": dict(sorted(per_slice.items())),
+        "reason_code_confusion": {
+            expected: dict(sorted(predicted.items()))
+            for expected, predicted in sorted(status_confusion.items())
+        },
+        "document_results": records,
+    }
+
+
 def evaluate_benchmark(
     manifest_path: Path | str | None = None,
     *,
@@ -574,6 +731,10 @@ def evaluate_benchmark(
         baseline["thresholds"],
     )
     documents = corpus.manifest["documents"]
+    source_artifact_admission = summarize_source_artifact_admission(
+        documents,
+        corpus.documents,
+    )
     false_acceptance_slices = sorted(
         slice_id
         for slice_id, slice_result in summary["per_slice"].items()
@@ -602,6 +763,7 @@ def evaluate_benchmark(
         "metrics": summary["metrics"],
         "per_slice": summary["per_slice"],
         "reason_code_confusion": summary["reason_code_confusion"],
+        "source_artifact_admission": source_artifact_admission,
         "threshold_evaluation": threshold_evaluation,
         "false_acceptance_slices": false_acceptance_slices,
         "candidate_results": records,

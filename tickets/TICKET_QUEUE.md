@@ -403,8 +403,8 @@ superseded
 | 411 | ticket-411 | done | Internal MVP one-command launch script v0 | `phase-3/ticket-411-internal-mvp-launch-script-v0` | `agent_reports/2026-08-02_phase-3_ticket-411_internal-mvp-launch-script-v0.md` |
 | 412 | ticket-412 | proposed | Internal MVP launcher contract tests v0 | | |
 | 413 | ticket-413 | done | Research-quality benchmark contract and baseline evaluator v0 | `phase-4/ticket-413-research-quality-benchmark-baseline-v0` | `agent_reports/2026-08-02_phase-4_ticket-413_research-quality-benchmark-baseline-v0.md` |
-| 414 | ticket-414 | ready | Source-artifact contamination and extraction eligibility gate v0 | | |
-| 415 | ticket-415 | blocked | Section-aware scientific document segmentation and provenance v0 | | |
+| 414 | ticket-414 | done | Source-artifact contamination and extraction eligibility gate v0 | `phase-4/ticket-414-source-artifact-quality-gate-v0` | `agent_reports/2026-08-02_phase-4_ticket-414_source-artifact-quality-gate-v0.md` |
+| 415 | ticket-415 | ready | Section-aware scientific document segmentation and provenance v0 | | |
 | 416 | ticket-416 | blocked | Domain-neutral structured research claim schema v0 | | |
 | 417 | ticket-417 | blocked | Candidate claim lifecycle, quarantine, and graph-consumer isolation v0 | | |
 | 418 | ticket-418 | blocked | Semantic entailment and scientific-claim admission validator v0 | | |
@@ -1177,8 +1177,21 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-414 (ready) — Phase 4 source-artifact contamination and extraction eligibility gate v0
+ticket-415 (ready) — Phase 4 section-aware scientific document segmentation and provenance v0
 ```
+
+## Queue Notes (2026-08-02, ticket-414 source-artifact eligibility gate)
+
+- Added deterministic `eligible`, `quarantined`, and `needs_review` source decisions
+  with stable reason codes and `source_eligibility_v0.1.0` private metadata.
+- Access challenges, navigation/redirect shells, error pages, empty content, and
+  insufficient content persist zero extraction-eligible chunks and cannot produce
+  accepted claims, including under pinned mock extraction.
+- Expanded the benchmark to 13 source fixtures while retaining 40 claim candidates;
+  source-artifact false admissions are reported separately and are 0/6.
+- Full mock-only `verify`: 165 golden passed; 1418 full pytest passed, 49 deselected;
+  safety audit pass; public-site build pass.
+- Ticket-415 is `ready`; tickets 416–428 remain blocked.
 
 ## Queue Notes (2026-08-02, ticket-429 checksum newline portability)
 
