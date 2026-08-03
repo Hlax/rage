@@ -183,4 +183,4 @@ ticket-416 after full mock-only verification.
 
 Merge commit: `fbe97ca0d45aae19ab59d34b429047cbfdd1c2f8`.
 
-Push status: pending.
+Push status: completed to `origin/main` with a normal non-force push.
