@@ -28,6 +28,7 @@ from rge.modules.manual_source_fixtures import (
     extract_fixture_for_manual_source,
     manual_text_lacks_extract_fixture,
 )
+from rge.modules.source_quality_gate import NEEDS_REVIEW, QUARANTINED
 from rge.modules.text_quality_gate import assess_chunk_extractability, gate_source_for_extraction
 from rge.safety.prompt_injection import source_text_has_prompt_injection_fixture
 
@@ -238,8 +239,6 @@ def extract_claims_for_source(
         raise ValueError(f"Source not found: {source_id}")
 
     chunks = ChunkRepository(conn).list_for_source(source_id)
-    if not chunks:
-        raise ValueError(f"Source has no chunks: {source_id}")
 
     claim_repo = ClaimRepository(conn)
     cfg = config if config is not None else load_config()
@@ -260,40 +259,53 @@ def extract_claims_for_source(
         or live_staged_ingest_fallthrough
     )
     quality_gate = gate_source_for_extraction(source, chunks)
+    eligibility_status = quality_gate.get("eligibility_status")
+    source_artifact_blocked = eligibility_status == QUARANTINED or (
+        eligibility_status == NEEDS_REVIEW and not using_mock_fixture
+    )
     if (
-        not using_mock_fixture
-        and not using_live_fallthrough
-        and not quality_gate["allowed"]
-    ):
-        rejected = claim_repo.insert_rejected(
-            {
-                "source_id": source_id,
-                "chunk_id": chunks[0].id,
-                "claim_text": "",
-                "quote_span": "",
-                "subject": "",
-                "predicate": "",
-                "object": "",
-                "scope": "",
-                "evidence_type": "blocked",
-                "confidence": 0.0,
-                "limitations": [],
-                "domain": source.domain,
-            },
-            rejection_reason=str(quality_gate["reason"]),
-            extractor_provider="quality_gate",
-            extractor_model="text_quality_gate",
-            llm_schema_version=cfg.llm_schema_version,
+        source_artifact_blocked
+        or (
+            not using_mock_fixture
+            and not using_live_fallthrough
+            and not quality_gate["allowed"]
         )
+    ):
+        rejected_ids: list[str] = []
+        if chunks:
+            rejected = claim_repo.insert_rejected(
+                {
+                    "source_id": source_id,
+                    "chunk_id": chunks[0].id,
+                    "claim_text": "",
+                    "quote_span": "",
+                    "subject": "",
+                    "predicate": "",
+                    "object": "",
+                    "scope": "",
+                    "evidence_type": "blocked",
+                    "confidence": 0.0,
+                    "limitations": [],
+                    "domain": source.domain,
+                },
+                rejection_reason=str(quality_gate["reason"]),
+                extractor_provider="quality_gate",
+                extractor_model="source_quality_gate",
+                llm_schema_version=cfg.llm_schema_version,
+            )
+            rejected_ids.append(rejected.id)
         return {
             "status": "blocked_by_quality_gate",
             "source_id": source_id,
             "quality_gate": quality_gate,
             "accepted_count": 0,
-            "rejected_count": 1,
+            "rejected_count": len(rejected_ids),
             "accepted_claim_ids": [],
-            "rejected_claim_ids": [rejected.id],
+            "rejected_claim_ids": rejected_ids,
         }
+
+    if not chunks:
+        raise ValueError(f"Source has no chunks: {source_id}")
 
     if claim_repo.count_for_source(source_id) > 0:
         accepted = claim_repo.list_for_source(source_id, status="accepted")

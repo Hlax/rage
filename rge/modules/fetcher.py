@@ -746,6 +746,7 @@ def ingest_staged_artifact(
         raw_text=raw_text,
         title=effective_title,
         source_type=effective_source_type,
+        eligibility_metadata={"artifact_validated": True},
     )
     from rge.modules.acquisition_quality import (
         merge_source_acquisition_metadata,

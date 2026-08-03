@@ -13,6 +13,7 @@ from rge.modules.research_quality_benchmark import (
     REJECTED,
     REQUIRED_NEGATIVE_SLICES,
     REQUIRED_SLICES,
+    REQUIRED_SOURCE_ARTIFACT_SLICES,
     BenchmarkContractError,
     CandidateDecision,
     canonical_text_sha256,
@@ -33,7 +34,7 @@ def test_manifest_is_versioned_domain_neutral_and_provenanced() -> None:
     manifest = corpus.manifest
 
     assert manifest["schema_version"] == "research_quality_benchmark_manifest_v1"
-    assert manifest["benchmark_version"] == "1.0.0"
+    assert manifest["benchmark_version"] == "1.1.0"
     assert manifest["checksum_contract"] == {
         "id": "sha256_utf8_lf_v1",
         "algorithm": "sha256",
@@ -44,15 +45,25 @@ def test_manifest_is_versioned_domain_neutral_and_provenanced() -> None:
             "bounded canonical text."
         ),
     }
-    assert len(manifest["documents"]) == 10
+    assert len(manifest["documents"]) == 13
     assert len(manifest["candidates"]) == 40
     assert set(manifest["required_slices"]) >= REQUIRED_SLICES
+    assert (
+        set(manifest["required_source_artifact_slices"])
+        >= REQUIRED_SOURCE_ARTIFACT_SLICES
+    )
     assert {candidate["slice"] for candidate in manifest["candidates"]} >= REQUIRED_SLICES
 
     for document in manifest["documents"]:
         assert document["synthetic"] is True
         assert document["license"] == "synthetic_fixture"
         assert document["canonical_identifier"].startswith("synthetic:rge:")
+        assert document["source_artifact_slice"] in REQUIRED_SOURCE_ARTIFACT_SLICES
+        assert document["expected_source_eligibility"] in {
+            "eligible",
+            "quarantined",
+            "needs_review",
+        }
         fixture = MANIFEST_PATH.parent / document["path"]
         assert fixture.is_file()
         text = canonicalize_fixture_text(fixture.read_text(encoding="utf-8"))
@@ -77,7 +88,7 @@ def test_manifest_checksums_are_portable_across_newline_styles(
 
     documents = validate_manifest(manifest, base_dir=tmp_path)
 
-    assert len(documents) == 10
+    assert len(documents) == 13
     assert all("\r" not in text for text in documents.values())
 
 
@@ -102,9 +113,9 @@ def test_quote_presence_baseline_reproduces_known_false_acceptances() -> None:
     assert artifact["status"] == "completed"
     assert artifact["quality_verdict"] == "PARTIAL"
     assert artifact["corpus"] == {
-        "document_count": 10,
+        "document_count": 13,
         "candidate_count": 40,
-        "synthetic_document_count": 10,
+        "synthetic_document_count": 13,
         "non_synthetic_document_count": 0,
         "slice_count": 9,
     }
@@ -143,6 +154,44 @@ def test_quote_presence_baseline_reproduces_known_false_acceptances() -> None:
     assert checks["precision"]["passed"] is False
     assert checks["recall"]["passed"] is True
     assert checks["false_acceptance_rate"]["passed"] is False
+
+
+def test_source_artifact_metrics_are_separate_and_fail_closed() -> None:
+    artifact = evaluate_benchmark(MANIFEST_PATH)
+    source_gate = artifact["source_artifact_admission"]
+
+    assert source_gate["gate_version"] == "source_eligibility_v0.1.0"
+    assert source_gate["counts"] == {
+        "total": 13,
+        "expected_eligible": 7,
+        "expected_blocked": 6,
+        "predicted_eligible": 7,
+        "predicted_quarantined": 6,
+        "predicted_needs_review": 0,
+        "false_admission": 0,
+        "false_rejection": 0,
+    }
+    assert source_gate["false_admission_rate"] == {
+        "value": 0.0,
+        "numerator": 0,
+        "denominator": 6,
+    }
+    assert source_gate["false_rejection_rate"] == {
+        "value": 0.0,
+        "numerator": 0,
+        "denominator": 7,
+    }
+    for slice_id in {
+        "navigation_shell",
+        "access_challenge",
+        "redirect_shell",
+        "error_page",
+        "empty_content",
+        "insufficient_content",
+    }:
+        assert source_gate["per_slice"][slice_id]["expected_blocked"] == 1
+        assert source_gate["per_slice"][slice_id]["predicted_admitted"] == 0
+        assert source_gate["per_slice"][slice_id]["false_admission"] == 0
 
 
 def test_metric_math_and_reason_confusion_use_raw_counts() -> None:

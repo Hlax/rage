@@ -48,6 +48,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert the source-quality gate integration and tests. Preserve source records and treat the added eligibility fields as ignored if a migration was introduced.",
-  "status": "ready",
+  "status": "done",
   "category": "Phase 4 / source quality"
 }

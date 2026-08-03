@@ -12,6 +12,13 @@ from dataclasses import dataclass
 from typing import Any
 
 from rge.modules.fetcher import html_to_text
+from rge.modules.source_quality_gate import (
+    ELIGIBLE,
+    GATE_VERSION,
+    NEEDS_REVIEW,
+    QUARANTINED,
+    assess_source_eligibility,
+)
 
 _READABLE_CHAR_PATTERN = re.compile(r"[A-Za-z0-9\s.,;:'\"()\-]")
 _SENTENCE_PATTERN = re.compile(r"[.!?]+")
@@ -36,6 +43,9 @@ class DocumentParseResult:
     extracted_char_count: int
     detail: str
     page_count: int | None = None
+    eligibility_status: str = QUARANTINED
+    eligibility_reason_codes: tuple[str, ...] = (PARSE_FAILED,)
+    eligibility_gate_version: str = GATE_VERSION
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -48,6 +58,10 @@ class DocumentParseResult:
             "extracted_char_count": self.extracted_char_count,
             "detail": self.detail,
             "page_count": self.page_count,
+            "eligibility_status": self.eligibility_status,
+            "eligibility_reason_codes": list(self.eligibility_reason_codes),
+            "eligibility_gate_version": self.eligibility_gate_version,
+            "extraction_eligible": self.eligibility_status == ELIGIBLE,
         }
 
 
@@ -87,12 +101,25 @@ def score_text_quality(text: str) -> dict[str, Any]:
 
 def classify_text_quality(text: str, *, parser_backend: str) -> DocumentParseResult:
     scores = score_text_quality(text)
-    status = CLEAN_TEXT_READY if scores["is_clean"] else DIRTY_TEXT
-    detail = (
-        "Clean text ready for quote-first extraction."
-        if status == CLEAN_TEXT_READY
-        else "Text failed readability/quoteability quality gates."
+    eligibility = assess_source_eligibility(text)
+    status = (
+        CLEAN_TEXT_READY
+        if scores["is_clean"] and eligibility.status == ELIGIBLE
+        else DIRTY_TEXT
     )
+    if eligibility.status == QUARANTINED:
+        detail = (
+            "Source artifact quarantined before extraction: "
+            + ", ".join(eligibility.reason_codes)
+        )
+    elif eligibility.status == NEEDS_REVIEW:
+        detail = "Source requires review before extraction: " + ", ".join(
+            eligibility.reason_codes
+        )
+    elif status == CLEAN_TEXT_READY:
+        detail = "Clean text ready for quote-first extraction."
+    else:
+        detail = "Text failed readability/quoteability quality gates."
     return DocumentParseResult(
         clean_text=text.strip(),
         source_status=status,
@@ -102,6 +129,9 @@ def classify_text_quality(text: str, *, parser_backend: str) -> DocumentParseRes
         quoteable_span_count=int(scores["quoteable_span_count"]),
         extracted_char_count=int(scores["extracted_char_count"]),
         detail=detail,
+        eligibility_status=eligibility.status,
+        eligibility_reason_codes=eligibility.reason_codes,
+        eligibility_gate_version=eligibility.gate_version,
     )
 
 
@@ -240,6 +270,9 @@ def _parse_pdf_grobid(body: bytes, grobid_url: str) -> DocumentParseResult | Non
             extracted_char_count=parsed.extracted_char_count,
             detail=parsed.detail,
             page_count=parsed.page_count,
+            eligibility_status=parsed.eligibility_status,
+            eligibility_reason_codes=parsed.eligibility_reason_codes,
+            eligibility_gate_version=parsed.eligibility_gate_version,
         )
     return None
 
@@ -277,6 +310,9 @@ def parse_pdf_bytes(body: bytes, *, grobid_url: str = "") -> DocumentParseResult
                 extracted_char_count=parsed.extracted_char_count,
                 detail=parsed.detail,
                 page_count=page_count,
+                eligibility_status=parsed.eligibility_status,
+                eligibility_reason_codes=parsed.eligibility_reason_codes,
+                eligibility_gate_version=parsed.eligibility_gate_version,
             )
         )
 
@@ -295,6 +331,9 @@ def parse_pdf_bytes(body: bytes, *, grobid_url: str = "") -> DocumentParseResult
                 extracted_char_count=parsed.extracted_char_count,
                 detail=parsed.detail,
                 page_count=page_count,
+                eligibility_status=parsed.eligibility_status,
+                eligibility_reason_codes=parsed.eligibility_reason_codes,
+                eligibility_gate_version=parsed.eligibility_gate_version,
             )
         )
 

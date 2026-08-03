@@ -12,6 +12,14 @@ from rge.modules.document_parser import (
     PARSE_FAILED,
     score_text_quality,
 )
+from rge.modules.source_quality_gate import (
+    ELIGIBLE,
+    GATE_VERSION,
+    NEEDS_REVIEW,
+    QUARANTINED,
+    assess_source_eligibility,
+    source_eligibility_from_metadata,
+)
 
 MIN_QUOTEABLE_SPAN_CHARS = 24
 _BLOCKED_ACQUISITION_STATUSES = frozenset(
@@ -90,6 +98,31 @@ def gate_source_for_extraction(source: Any, chunks: list[Any]) -> dict[str, Any]
             "reason": acquisition_status,
             "detail": f"Source blocked by acquisition status: {acquisition_status}",
             "chunk_assessments": [],
+            "extractable_chunk_count": 0,
+            "eligibility_status": QUARANTINED,
+            "eligibility_reason_codes": [acquisition_status],
+            "eligibility_gate_version": GATE_VERSION,
+        }
+
+    eligibility = source_eligibility_from_metadata(metadata)
+    if eligibility is None:
+        combined_text = "\n\n".join(
+            str(getattr(chunk, "chunk_text", "") or "") for chunk in chunks
+        )
+        eligibility = assess_source_eligibility(combined_text, metadata=metadata)
+    if eligibility.status != ELIGIBLE:
+        return {
+            "allowed": False,
+            "reason": eligibility.reason_codes[0],
+            "detail": (
+                f"Source {eligibility.status} by deterministic eligibility gate: "
+                + ", ".join(eligibility.reason_codes)
+            ),
+            "chunk_assessments": [],
+            "extractable_chunk_count": 0,
+            "eligibility_status": eligibility.status,
+            "eligibility_reason_codes": list(eligibility.reason_codes),
+            "eligibility_gate_version": eligibility.gate_version,
         }
 
     assessments: list[dict[str, Any]] = []
@@ -108,6 +141,10 @@ def gate_source_for_extraction(source: Any, chunks: list[Any]) -> dict[str, Any]
             "reason": "no_chunks",
             "detail": "Source has no chunks to extract from.",
             "chunk_assessments": [],
+            "extractable_chunk_count": 0,
+            "eligibility_status": NEEDS_REVIEW,
+            "eligibility_reason_codes": ["no_chunks"],
+            "eligibility_gate_version": GATE_VERSION,
         }
     if extractable_chunks == 0:
         return {
@@ -115,6 +152,10 @@ def gate_source_for_extraction(source: Any, chunks: list[Any]) -> dict[str, Any]
             "reason": DIRTY_TEXT,
             "detail": "No chunk passed text quality or quoteability gates.",
             "chunk_assessments": assessments,
+            "extractable_chunk_count": 0,
+            "eligibility_status": ELIGIBLE,
+            "eligibility_reason_codes": [ELIGIBLE],
+            "eligibility_gate_version": GATE_VERSION,
         }
     return {
         "allowed": True,
@@ -122,4 +163,7 @@ def gate_source_for_extraction(source: Any, chunks: list[Any]) -> dict[str, Any]
         "detail": "At least one chunk is extractable.",
         "chunk_assessments": assessments,
         "extractable_chunk_count": extractable_chunks,
+        "eligibility_status": ELIGIBLE,
+        "eligibility_reason_codes": [ELIGIBLE],
+        "eligibility_gate_version": GATE_VERSION,
     }

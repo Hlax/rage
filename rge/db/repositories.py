@@ -170,20 +170,47 @@ def ingest_local_source(
     raw_text: str,
     title: str,
     source_type: str = "fixture",
+    eligibility_metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Fetch-parse-persist a local text source. Idempotent by content checksum."""
     from rge.modules.parser import parse_source_text
+    from rge.modules.source_quality_gate import QUARANTINED, assess_source_eligibility
 
+    eligibility = assess_source_eligibility(
+        raw_text,
+        metadata={
+            "title": title,
+            "source_type": source_type,
+            **(eligibility_metadata or {}),
+        },
+    )
     checksum = sha256_hex(raw_text)
     source_repo = SourceRepository(conn)
     existing = source_repo.get_by_checksum(checksum)
     if existing is not None:
+        try:
+            metadata = json.loads(existing.domain_metadata_json or "{}")
+        except json.JSONDecodeError:
+            metadata = {}
+        if not isinstance(metadata, dict):
+            metadata = {}
+        metadata["source_eligibility"] = eligibility.as_dict()
+        conn.execute(
+            """
+            UPDATE sources
+            SET domain_metadata_json = ?, updated_at = ?
+            WHERE id = ?
+            """,
+            (json.dumps(metadata, sort_keys=True), utc_now_iso(), existing.id),
+        )
+        conn.commit()
         chunk_repo = ChunkRepository(conn)
         return {
             "status": "already_ingested",
             "source_id": existing.id,
             "chunk_count": len(chunk_repo.list_for_source(existing.id)),
             "raw_text_checksum": existing.raw_text_checksum,
+            "source_eligibility": eligibility.as_dict(),
         }
 
     now = utc_now_iso()
@@ -198,10 +225,18 @@ def ingest_local_source(
         status="ingested",
         created_at=now,
         updated_at=now,
+        domain_metadata_json=json.dumps(
+            {"source_eligibility": eligibility.as_dict()},
+            sort_keys=True,
+        ),
     )
     source_repo.insert(source)
 
-    chunk_dicts = parse_source_text(raw_text, source_id=source_id)
+    chunk_dicts = (
+        parse_source_text(raw_text, source_id=source_id)
+        if eligibility.status != QUARANTINED
+        else []
+    )
     chunk_records = [
         ChunkRecord(
             id=chunk["id"],
@@ -224,6 +259,7 @@ def ingest_local_source(
         "domain": domain,
         "source_type": source_type,
         "created_at": now,
+        "source_eligibility": eligibility.as_dict(),
     }
 
 
