@@ -29,6 +29,7 @@ source artifacts.
 - Agent/model: Codex (GPT-5)
 - Date: 2026-08-02
 - Main tip before branch: `9172b37`
+- Implementation commit: `26abde5`
 
 ## 3. Scope
 
@@ -180,6 +181,6 @@ ticket-416 after full mock-only verification.
 
 ## Merge to Main
 
-Merge commit: pending.
+Merge commit: `fbe97ca0d45aae19ab59d34b429047cbfdd1c2f8`.
 
 Push status: pending.
