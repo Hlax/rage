@@ -111,6 +111,7 @@ def ingest_acquisition_to_db(
         raw_text=clean_text,
         title=str(record.get("title") or source_id),
         source_type="selective_fulltext",
+        page_spans=list((acquisition.get("parse") or {}).get("page_spans") or []),
     )
     db_source_id = str(ingest_result["source_id"])
     metadata["resolver_source"] = source_id

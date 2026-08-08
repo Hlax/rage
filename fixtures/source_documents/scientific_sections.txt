@@ -1,0 +1,26 @@
+Synthetic Cross-Domain Trial
+Authors: A. Researcher and B. Analyst
+
+Abstract
+This synthetic study evaluated a scheduling intervention across several workplaces. The intervention group reported lower fatigue than the comparison group.
+
+Introduction
+Prior studies disagree about whether schedule changes improve sustained performance. This study tests the question in a bounded sample.
+
+Methods
+One hundred participants were assigned to intervention and comparison schedules. Outcomes were measured weekly for six weeks.
+
+Results
+The intervention group reported lower fatigue and completed more scheduled tasks. The comparison group showed no material change.
+
+Discussion
+The findings suggest that schedule design may affect fatigue in similar workplace settings. Causal interpretation remains limited to this design.
+
+Limitations
+The sample was synthetic, follow-up was short, and the study did not measure long-term retention.
+
+Acknowledgements
+The authors thank the synthetic data review team for administrative support.
+
+References
+Example, A. (2020). Scheduling and fatigue. Journal of Synthetic Work, 1, 1-10.

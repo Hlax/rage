@@ -1,7 +1,7 @@
 {
   "id": "ticket-416",
   "title": "Domain-neutral structured research claim schema v0",
-  "problem": "Blocked by ticket-415. Current claim fields capture a proposition and quote but not enough scientific context to distinguish an observed result from a method, cited background statement, or speculation. Structured metadata is required for semantic validation and useful retrieval.",
+  "problem": "Current claim fields capture a proposition and quote but not enough scientific context to distinguish an observed result from a method, cited background statement, or speculation. Structured metadata is required for semantic validation and useful retrieval.",
   "evidence": [
     "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
     "docs/agents/05_DATA_MODEL.md",
@@ -51,6 +51,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert structured-field consumers and retain backward-readable nullable migration columns if applied. Restore the prior claim schema version without deleting existing claim data.",
-  "status": "blocked",
+  "status": "ready",
   "category": "Phase 4 / claim contract"
 }

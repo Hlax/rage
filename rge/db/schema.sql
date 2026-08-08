@@ -38,6 +38,11 @@ CREATE TABLE IF NOT EXISTS chunks (
     chunk_text TEXT,                    -- PRIVATE raw chunk text
     page TEXT,
     section TEXT,
+    section_type TEXT NOT NULL DEFAULT 'unknown',
+    section_title TEXT,
+    char_start INTEGER,
+    char_end INTEGER,
+    extraction_eligible INTEGER NOT NULL DEFAULT 1,
     token_count INTEGER,
     embedding_id TEXT,
     embedding_model TEXT,

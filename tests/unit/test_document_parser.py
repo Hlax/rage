@@ -10,6 +10,7 @@ from rge.modules.document_parser import (
     CLEAN_TEXT_READY,
     DIRTY_TEXT,
     PARSE_FAILED,
+    _join_page_text,
     is_pdf_bytes,
     parse_document_bytes,
     parse_document_file,
@@ -89,6 +90,21 @@ def test_pdf_bytes_are_not_utf8_decoded_as_text() -> None:
     if result.source_status == CLEAN_TEXT_READY:
         assert "Human-AI" in result.clean_text
     assert "\x00" not in result.clean_text
+    if result.clean_text and result.parser_backend in {"pymupdf", "pypdf"}:
+        assert result.page_spans
+        assert all(span.char_start < span.char_end for span in result.page_spans)
+
+
+def test_page_text_join_records_deterministic_offsets() -> None:
+    text, spans = _join_page_text([" Page one. ", "", "Page three."])
+
+    assert text == "Page one. Page three."
+    assert [span.as_dict() for span in spans] == [
+        {"page": "1", "char_start": 0, "char_end": 9},
+        {"page": "3", "char_start": 10, "char_end": 21},
+    ]
+    for span in spans:
+        assert text[span.char_start : span.char_end]
 
 
 def test_artifact_bytes_to_text_rejects_unparseable_pdf(tmp_path: Path) -> None:

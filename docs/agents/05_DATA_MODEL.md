@@ -108,7 +108,12 @@ Stores parsed source text chunks.
 | `chunk_index` | INTEGER | Ordered within source |
 | `chunk_text` | TEXT | Private raw chunk text |
 | `page` | TEXT | PDF page or range |
-| `section` | TEXT | Section label |
+| `section` | TEXT | Legacy section label; retained for compatibility |
+| `section_type` | TEXT | Domain-neutral normalized structural type; defaults to `unknown` |
+| `section_title` | TEXT | Original parsed heading, when present |
+| `char_start` | INTEGER | Half-open start offset into the exact parser input text |
+| `char_end` | INTEGER | Half-open end offset into the exact parser input text |
+| `extraction_eligible` | INTEGER | `1` only when source and structural policies permit extraction |
 | `token_count` | INTEGER | Approximate |
 | `embedding_id` | TEXT | Optional reference |
 | `embedding_model` | TEXT | Nullable |
@@ -119,6 +124,13 @@ Indexes:
 
 - `idx_chunks_source(source_id)`
 - `idx_chunks_checksum(text_checksum)`
+
+For chunks written by the structural parser, `chunk_text` must equal
+`source_text[char_start:char_end]`. The parser may omit whitespace between chunks when
+choosing paragraph boundaries, but it does not normalize or rewrite text inside a stored
+span. Page is nullable when no deterministic page map is available. Reference,
+acknowledgement, navigation, boilerplate, and title/metadata sections default to
+`extraction_eligible = 0`; unknown sections inherit the validated source-level policy.
 
 ### 4.3 `claims`
 

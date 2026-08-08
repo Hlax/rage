@@ -723,7 +723,24 @@ def ingest_staged_artifact(
             source_type = source_type or str(candidate.get("source_type") or "")
             title = title or str(candidate.get("title") or "")
 
-    raw_text = artifact_bytes_to_text(data, path)
+    page_spans: list[dict[str, Any]] | None = None
+    if data.startswith(b"%PDF") or path.suffix.casefold() == ".pdf":
+        from rge.modules.document_parser import CLEAN_TEXT_READY, parse_document_bytes
+
+        parsed_document = parse_document_bytes(
+            data,
+            content_type="application/pdf",
+            suffix=path.suffix,
+        )
+        if parsed_document.source_status != CLEAN_TEXT_READY:
+            raise FetchError(
+                parsed_document.detail or "PDF parse failed.",
+                reason=parsed_document.source_status,
+            )
+        raw_text = parsed_document.clean_text
+        page_spans = [span.as_dict() for span in parsed_document.page_spans]
+    else:
+        raw_text = artifact_bytes_to_text(data, path)
     if not raw_text.strip():
         raise FetchError(f"Staged artifact produced empty text: {path}")
     if len(raw_text.strip()) < MIN_STAGED_INGEST_TEXT_CHARS and not _html_has_mock_spine_fixture_markers(
@@ -747,6 +764,7 @@ def ingest_staged_artifact(
         title=effective_title,
         source_type=effective_source_type,
         eligibility_metadata={"artifact_validated": True},
+        page_spans=page_spans,
     )
     from rge.modules.acquisition_quality import (
         merge_source_acquisition_metadata,
