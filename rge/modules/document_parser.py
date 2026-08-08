@@ -33,6 +33,20 @@ CLEAN_TEXT_READY = "clean_text_ready"
 
 
 @dataclass(frozen=True)
+class DocumentPageSpan:
+    page: str
+    char_start: int
+    char_end: int
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "page": self.page,
+            "char_start": self.char_start,
+            "char_end": self.char_end,
+        }
+
+
+@dataclass(frozen=True)
 class DocumentParseResult:
     clean_text: str
     source_status: str
@@ -46,6 +60,7 @@ class DocumentParseResult:
     eligibility_status: str = QUARANTINED
     eligibility_reason_codes: tuple[str, ...] = (PARSE_FAILED,)
     eligibility_gate_version: str = GATE_VERSION
+    page_spans: tuple[DocumentPageSpan, ...] = ()
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -62,6 +77,7 @@ class DocumentParseResult:
             "eligibility_reason_codes": list(self.eligibility_reason_codes),
             "eligibility_gate_version": self.eligibility_gate_version,
             "extraction_eligible": self.eligibility_status == ELIGIBLE,
+            "page_spans": [span.as_dict() for span in self.page_spans],
         }
 
 
@@ -199,7 +215,29 @@ def _pick_best_parse(candidates: list[DocumentParseResult]) -> DocumentParseResu
     )
 
 
-def _extract_pdf_text_pymupdf(body: bytes) -> tuple[str, int] | None:
+def _join_page_text(
+    pages: list[str],
+) -> tuple[str, tuple[DocumentPageSpan, ...]]:
+    parts: list[str] = []
+    spans: list[DocumentPageSpan] = []
+    cursor = 0
+    for page_number, raw_page in enumerate(pages, start=1):
+        page_text = raw_page.strip()
+        if not page_text:
+            continue
+        if parts:
+            parts.append(" ")
+            cursor += 1
+        char_start = cursor
+        parts.append(page_text)
+        cursor += len(page_text)
+        spans.append(DocumentPageSpan(str(page_number), char_start, cursor))
+    return "".join(parts), tuple(spans)
+
+
+def _extract_pdf_text_pymupdf(
+    body: bytes,
+) -> tuple[str, int, tuple[DocumentPageSpan, ...]] | None:
     try:
         import fitz  # PyMuPDF
     except ImportError:
@@ -211,13 +249,15 @@ def _extract_pdf_text_pymupdf(body: bytes) -> tuple[str, int] | None:
         document.close()
     except Exception:  # noqa: BLE001
         return None
-    clean = " ".join(part.strip() for part in pages if part.strip())
+    clean, page_spans = _join_page_text(pages)
     if not clean:
         return None
-    return clean, page_count
+    return clean, page_count, page_spans
 
 
-def _extract_pdf_text_pypdf(body: bytes) -> tuple[str, int] | None:
+def _extract_pdf_text_pypdf(
+    body: bytes,
+) -> tuple[str, int, tuple[DocumentPageSpan, ...]] | None:
     try:
         from pypdf import PdfReader
     except ImportError:
@@ -229,10 +269,10 @@ def _extract_pdf_text_pypdf(body: bytes) -> tuple[str, int] | None:
         pages = [page.extract_text() or "" for page in reader.pages]
     except Exception:  # noqa: BLE001
         return None
-    clean = " ".join(part.strip() for part in pages if part.strip())
+    clean, page_spans = _join_page_text(pages)
     if not clean:
         return None
-    return clean, len(pages)
+    return clean, len(pages), page_spans
 
 
 def _parse_pdf_grobid(body: bytes, grobid_url: str) -> DocumentParseResult | None:
@@ -297,7 +337,7 @@ def parse_pdf_bytes(body: bytes, *, grobid_url: str = "") -> DocumentParseResult
 
     pymupdf_payload = _extract_pdf_text_pymupdf(body)
     if pymupdf_payload is not None:
-        text, page_count = pymupdf_payload
+        text, page_count, page_spans = pymupdf_payload
         parsed = classify_text_quality(text, parser_backend="pymupdf")
         candidates.append(
             DocumentParseResult(
@@ -313,12 +353,13 @@ def parse_pdf_bytes(body: bytes, *, grobid_url: str = "") -> DocumentParseResult
                 eligibility_status=parsed.eligibility_status,
                 eligibility_reason_codes=parsed.eligibility_reason_codes,
                 eligibility_gate_version=parsed.eligibility_gate_version,
+                page_spans=page_spans,
             )
         )
 
     pypdf_payload = _extract_pdf_text_pypdf(body)
     if pypdf_payload is not None:
-        text, page_count = pypdf_payload
+        text, page_count, page_spans = pypdf_payload
         parsed = classify_text_quality(text, parser_backend="pypdf")
         candidates.append(
             DocumentParseResult(
@@ -334,6 +375,7 @@ def parse_pdf_bytes(body: bytes, *, grobid_url: str = "") -> DocumentParseResult
                 eligibility_status=parsed.eligibility_status,
                 eligibility_reason_codes=parsed.eligibility_reason_codes,
                 eligibility_gate_version=parsed.eligibility_gate_version,
+                page_spans=page_spans,
             )
         )
 

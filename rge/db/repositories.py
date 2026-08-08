@@ -58,6 +58,13 @@ class ChunkRecord:
     text_checksum: str
     created_at: str
     token_count: int | None = None
+    page: str | None = None
+    section: str | None = None
+    section_type: str = "unknown"
+    section_title: str | None = None
+    char_start: int | None = None
+    char_end: int | None = None
+    extraction_eligible: bool = True
 
 
 class SourceRepository:
@@ -128,7 +135,8 @@ class ChunkRepository:
         rows = self._conn.execute(
             """
             SELECT id, source_id, chunk_index, chunk_text, text_checksum,
-                   created_at, token_count
+                   created_at, token_count, page, section, section_type,
+                   section_title, char_start, char_end, extraction_eligible
             FROM chunks
             WHERE source_id = ?
             ORDER BY chunk_index
@@ -142,8 +150,10 @@ class ChunkRepository:
             """
             INSERT INTO chunks (
                 id, source_id, chunk_index, chunk_text, page, section,
-                token_count, embedding_id, embedding_model, text_checksum, created_at
-            ) VALUES (?, ?, ?, ?, NULL, NULL, ?, NULL, NULL, ?, ?)
+                section_type, section_title, char_start, char_end,
+                extraction_eligible, token_count, embedding_id, embedding_model,
+                text_checksum, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?)
             """,
             [
                 (
@@ -151,6 +161,13 @@ class ChunkRepository:
                     chunk.source_id,
                     chunk.chunk_index,
                     chunk.chunk_text,
+                    chunk.page,
+                    chunk.section,
+                    chunk.section_type,
+                    chunk.section_title,
+                    chunk.char_start,
+                    chunk.char_end,
+                    int(chunk.extraction_eligible),
                     chunk.token_count,
                     chunk.text_checksum,
                     chunk.created_at,
@@ -171,6 +188,7 @@ def ingest_local_source(
     title: str,
     source_type: str = "fixture",
     eligibility_metadata: dict[str, Any] | None = None,
+    page_spans: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Fetch-parse-persist a local text source. Idempotent by content checksum."""
     from rge.modules.parser import parse_source_text
@@ -233,7 +251,12 @@ def ingest_local_source(
     source_repo.insert(source)
 
     chunk_dicts = (
-        parse_source_text(raw_text, source_id=source_id)
+        parse_source_text(
+            raw_text,
+            source_id=source_id,
+            source_extraction_eligible=eligibility.extraction_eligible,
+            page_spans=page_spans,
+        )
         if eligibility.status != QUARANTINED
         else []
     )
@@ -246,6 +269,13 @@ def ingest_local_source(
             text_checksum=chunk["text_checksum"],
             created_at=now,
             token_count=chunk.get("token_count"),
+            page=chunk.get("page"),
+            section=chunk.get("section"),
+            section_type=str(chunk.get("section_type") or "unknown"),
+            section_title=chunk.get("section_title"),
+            char_start=chunk.get("char_start"),
+            char_end=chunk.get("char_end"),
+            extraction_eligible=bool(chunk.get("extraction_eligible", True)),
         )
         for chunk in chunk_dicts
     ]
@@ -288,6 +318,13 @@ def _row_to_chunk(row: sqlite3.Row) -> ChunkRecord:
         text_checksum=row["text_checksum"],
         created_at=row["created_at"],
         token_count=row["token_count"],
+        page=row["page"],
+        section=row["section"],
+        section_type=row["section_type"] or "unknown",
+        section_title=row["section_title"],
+        char_start=row["char_start"],
+        char_end=row["char_end"],
+        extraction_eligible=bool(row["extraction_eligible"]),
     )
 
 

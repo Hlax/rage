@@ -404,8 +404,8 @@ superseded
 | 412 | ticket-412 | proposed | Internal MVP launcher contract tests v0 | | |
 | 413 | ticket-413 | done | Research-quality benchmark contract and baseline evaluator v0 | `phase-4/ticket-413-research-quality-benchmark-baseline-v0` | `agent_reports/2026-08-02_phase-4_ticket-413_research-quality-benchmark-baseline-v0.md` |
 | 414 | ticket-414 | done | Source-artifact contamination and extraction eligibility gate v0 | `phase-4/ticket-414-source-artifact-quality-gate-v0` | `agent_reports/2026-08-02_phase-4_ticket-414_source-artifact-quality-gate-v0.md` |
-| 415 | ticket-415 | ready | Section-aware scientific document segmentation and provenance v0 | | |
-| 416 | ticket-416 | blocked | Domain-neutral structured research claim schema v0 | | |
+| 415 | ticket-415 | done | Section-aware scientific document segmentation and provenance v0 | `phase-4/ticket-415-section-aware-scientific-segmentation-v0` | `agent_reports/2026-08-08_phase-4_ticket-415_section-aware-scientific-segmentation-v0.md` |
+| 416 | ticket-416 | ready | Domain-neutral structured research claim schema v0 | | |
 | 417 | ticket-417 | blocked | Candidate claim lifecycle, quarantine, and graph-consumer isolation v0 | | |
 | 418 | ticket-418 | blocked | Semantic entailment and scientific-claim admission validator v0 | | |
 | 419 | ticket-419 | blocked | Private human claim-review CLI and append-only audit history v0 | | |
@@ -1177,8 +1177,22 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-415 (ready) — Phase 4 section-aware scientific document segmentation and provenance v0
+ticket-416 (ready) — Phase 4 domain-neutral structured research claim schema v0
 ```
+
+## Queue Notes (2026-08-08, ticket-415 section-aware segmentation)
+
+- Added deterministic, domain-neutral scientific section spans with original headings,
+  exact half-open character offsets, optional page provenance, and explicit extraction
+  eligibility persisted through additive migration `0010`.
+- References, acknowledgements, navigation, boilerplate, and title/metadata are
+  non-extractable by default; unknown sections inherit the explicit source policy.
+- Preserved checksum-pinned manual fixture behavior across structural chunks by routing
+  each candidate once to its quote-bearing chunk while retaining source-wide legacy
+  validation context.
+- Full mock-only `verify`: 165 golden passed; 1427 full pytest passed, 49 deselected;
+  safety audit pass; public-site build pass.
+- Ticket-416 is `ready`; tickets 417–428 remain blocked.
 
 ## Queue Notes (2026-08-02, ticket-414 source-artifact eligibility gate)
 

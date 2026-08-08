@@ -33,6 +33,7 @@ def test_migration_harness_creates_schema(temp_db: Path) -> None:
             "0007_domain_proposals",
             "0008_candidate_sources_url_candidates",
             "0009_purpose_evidence_atoms",
+            "0010_structural_chunk_provenance",
         ]
         tables = {
             row[0]
@@ -52,6 +53,16 @@ def test_migration_harness_creates_schema(temp_db: Path) -> None:
             row[1] for row in conn.execute("PRAGMA table_info(research_contracts)")
         }
         assert "purpose_metadata_json" in contract_columns
+        chunk_columns = {
+            row[1] for row in conn.execute("PRAGMA table_info(chunks)")
+        }
+        assert {
+            "section_type",
+            "section_title",
+            "char_start",
+            "char_end",
+            "extraction_eligible",
+        } <= chunk_columns
         assert "claims_staged" not in tables
         assert "claims_accepted" not in tables
         assert "claim_rejections" not in tables

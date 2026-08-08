@@ -147,6 +147,76 @@ def source_has_staged_fetch_spine(chunks: list[Any]) -> bool:
     return any(_is_staged_fetch_spine_chunk(c.chunk_text) for c in chunks)
 
 
+def _chunk_record_to_dict(chunk: Any) -> dict[str, Any]:
+    return {
+        "id": chunk.id,
+        "source_id": chunk.source_id,
+        "chunk_index": chunk.chunk_index,
+        "chunk_text": chunk.chunk_text,
+    }
+
+
+def _validate_source_scoped_mock_fixture(
+    chunks: list[Any],
+    *,
+    source: Any,
+    domain_pack: str,
+    fixture_name: str,
+    client: MockModelClient,
+) -> list[tuple[dict[str, Any], dict[str, list[dict[str, Any]]]]]:
+    """Validate a checksum-pinned source fixture once across structural chunks.
+
+    Manual-source fixtures predate structural segmentation and describe the whole
+    source. Replaying one fixture for every section creates duplicate candidates.
+    Route each candidate to the first chunk containing its quote span; candidates
+    without a matching quote stay on the first eligible chunk so the validator
+    preserves the established ``missing_quote_span`` rejection.
+    """
+    chunk_dicts = [_chunk_record_to_dict(chunk) for chunk in chunks]
+    candidates = extract_candidate_claims(
+        chunk_dicts[0],
+        {"domain_pack": domain_pack},
+        domain_pack,
+        fixture_name=fixture_name,
+        client=client,
+        source=source,
+    )
+    for candidate in candidates:
+        target = chunk_dicts[0]
+        quote_span = candidate.get("quote_span")
+        if isinstance(quote_span, str) and quote_span:
+            for chunk in chunk_dicts:
+                char_start, _ = locate_quote_offsets(quote_span, chunk["chunk_text"])
+                if char_start is not None:
+                    target = chunk
+                    break
+        candidate["source_id"] = target["source_id"]
+        candidate["chunk_id"] = target["id"]
+
+    # These fixtures were validated against the pre-segmentation source chunk.
+    # Preserve that source-wide scope context while retaining the routed chunk ID
+    # as exact quote provenance for every accepted candidate.
+    validated = validate_candidate_claims(
+        candidates,
+        chunk_text="\n\n".join(chunk["chunk_text"] for chunk in chunk_dicts),
+        domain_pack=domain_pack,
+    )
+    results_by_chunk: dict[str, dict[str, list[dict[str, Any]]]] = {
+        chunk["id"]: {"accepted": [], "rejected": []} for chunk in chunk_dicts
+    }
+    for disposition in ("accepted", "rejected"):
+        for candidate in validated[disposition]:
+            results_by_chunk[str(candidate["chunk_id"])][disposition].append(candidate)
+
+    results: list[tuple[dict[str, Any], dict[str, list[dict[str, Any]]]]] = []
+    for chunk in chunk_dicts:
+        routed = results_by_chunk[chunk["id"]]
+        if not routed["accepted"] and not routed["rejected"]:
+            continue
+        results.append((chunk, routed))
+    return results
+
+
 def extract_and_validate_for_chunk(
     chunk: dict[str, Any],
     *,
@@ -307,6 +377,29 @@ def extract_claims_for_source(
     if not chunks:
         raise ValueError(f"Source has no chunks: {source_id}")
 
+    eligible_chunks = [chunk for chunk in chunks if chunk.extraction_eligible]
+    if not eligible_chunks:
+        section_counts: dict[str, int] = {}
+        for chunk in chunks:
+            section_counts[chunk.section_type] = (
+                section_counts.get(chunk.section_type, 0) + 1
+            )
+        return {
+            "status": "blocked_by_section_gate",
+            "source_id": source_id,
+            "section_gate": {
+                "eligible_chunk_count": 0,
+                "blocked_chunk_count": len(chunks),
+                "section_type_counts": dict(sorted(section_counts.items())),
+                "reason": "no_extraction_eligible_sections",
+            },
+            "accepted_count": 0,
+            "rejected_count": 0,
+            "accepted_claim_ids": [],
+            "rejected_claim_ids": [],
+        }
+    chunks = eligible_chunks
+
     if claim_repo.count_for_source(source_id) > 0:
         accepted = claim_repo.list_for_source(source_id, status="accepted")
         rejected = claim_repo.list_for_source(source_id, status="rejected")
@@ -401,24 +494,41 @@ def extract_claims_for_source(
     extractor_provider = model_client.provider
     extractor_model = getattr(model_client, "model", "unknown")
 
-    for chunk in chunks:
-        chunk_dict = {
-            "id": chunk.id,
-            "source_id": chunk.source_id,
-            "chunk_index": chunk.chunk_index,
-            "chunk_text": chunk.chunk_text,
-        }
-        result = extract_and_validate_for_chunk(
-            chunk_dict,
-            domain_pack=source.domain,
-            fixture_name=fixture_name,
-            client=model_client,
+    mapped_source_fixture = extract_fixture_for_manual_source(source)
+    if (
+        mapped_source_fixture
+        and isinstance(model_client, MockModelClient)
+        and not using_live_fallthrough
+    ):
+        extraction_results = _validate_source_scoped_mock_fixture(
+            chunks,
             source=source,
-            live_manual_fallthrough=live_manual_fallthrough,
-            live_staged_fallthrough=live_staged_fallthrough,
-            live_staged_rank2_fallthrough=live_staged_rank2_fallthrough,
-            live_staged_ingest_fallthrough=live_staged_ingest_fallthrough,
+            domain_pack=source.domain,
+            fixture_name=fixture_name or mapped_source_fixture,
+            client=model_client,
         )
+    else:
+        extraction_results = []
+        for chunk in chunks:
+            chunk_dict = _chunk_record_to_dict(chunk)
+            extraction_results.append(
+                (
+                    chunk_dict,
+                    extract_and_validate_for_chunk(
+                        chunk_dict,
+                        domain_pack=source.domain,
+                        fixture_name=fixture_name,
+                        client=model_client,
+                        source=source,
+                        live_manual_fallthrough=live_manual_fallthrough,
+                        live_staged_fallthrough=live_staged_fallthrough,
+                        live_staged_rank2_fallthrough=live_staged_rank2_fallthrough,
+                        live_staged_ingest_fallthrough=live_staged_ingest_fallthrough,
+                    ),
+                )
+            )
+
+    for chunk_dict, result in extraction_results:
         for claim in result["accepted"]:
             char_start, char_end = locate_quote_offsets(
                 str(claim["quote_span"]), chunk_dict["chunk_text"]

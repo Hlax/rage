@@ -50,6 +50,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert parser and repository use of structural fields while retaining a backward-compatible migration if already applied. Existing chunk text and offsets must remain readable.",
-  "status": "ready",
+  "status": "done",
   "category": "Phase 4 / scientific parsing"
 }
