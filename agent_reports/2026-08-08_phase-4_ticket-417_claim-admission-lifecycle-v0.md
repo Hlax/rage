@@ -89,9 +89,9 @@ green on the final code state; the transient failure is retained here rather tha
 ## Merge checkpoint
 
 - Ticket branch: `phase-4/ticket-417-claim-admission-lifecycle-v0`
-- Implementation commit: pending
-- Merge commit on `main`: pending
-- Ordinary non-force push to `origin/main`: pending
+- Implementation commit: `cf5e8be`
+- Merge commit on `main`: `c35a1ae`
+- Ordinary non-force push to `origin/main`: completed (`c35a1ae` included)
 
 ## Next smallest ticket
 
