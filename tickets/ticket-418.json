@@ -50,6 +50,6 @@
   ],
   "risk_level": "high",
   "rollback_plan": "Disable the semantic-review stage behind its runtime policy and route new uncertain candidates to needs_review. Retain decisions and do not bulk-promote candidates under rollback.",
-  "status": "blocked",
+  "status": "ready",
   "category": "Phase 4 / semantic validation"
 }

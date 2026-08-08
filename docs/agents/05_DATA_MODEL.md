@@ -134,7 +134,9 @@ acknowledgement, navigation, boilerplate, and title/metadata sections default to
 
 ### 4.3 `claims`
 
-Stores atomic claims in draft, staged, accepted, or rejected state.
+Stores atomic claims in proposed, needs-review, accepted, or rejected state. Legacy
+`draft`/`staged` labels may remain in historical databases, but new model candidates use
+the Python-enforced admission lifecycle below.
 
 Required columns:
 
@@ -164,7 +166,7 @@ Required columns:
 | `effect_direction` | TEXT | `increase`, `decrease`, `no_effect`, `mixed`, `association`, or NULL |
 | `statistical_context` | TEXT | Bounded reported statistical context, explicitly NULL when absent |
 | `section_provenance_json` | TEXT | Private exact chunk provenance (chunk, type/title, page, document offsets) |
-| `status` | TEXT | `draft`, `staged`, `accepted`, `rejected` |
+| `status` | TEXT | `proposed`, `needs_review`, `accepted`, `rejected` |
 | `rejection_reason` | TEXT | Required when rejected |
 | `rejection_details_json` | TEXT | Optional structured details |
 | `extractor_model` | TEXT | Model/version that proposed it |
@@ -188,11 +190,26 @@ hypothesis
 Claim statuses:
 
 ```txt
-draft
-staged
+proposed
+needs_review
 accepted
 rejected
 ```
+
+Lifecycle transitions are enforced by Python rather than model output:
+
+```txt
+model candidate -> proposed
+proposed -> needs_review | rejected | accepted
+needs_review -> rejected | accepted
+accepted | rejected -> terminal
+```
+
+Model-backed extraction always records `proposed` before deterministic Python admission.
+Deterministic fixture, quality-gate, and other Python-owned compatibility writers may
+create a terminal claim directly, but must record a genesis decision identifying the
+Python actor and reason. Exact repeated transitions are idempotent. Existing accepted or
+rejected rows are never reclassified or assigned invented historical decisions.
 
 Common rejection reasons:
 
@@ -224,9 +241,32 @@ Indexes:
 - `idx_claims_statement_type(statement_type)`
 - `idx_claims_kind(claim_kind)`
 
+### 4.3a `claim_decisions`
+
+Private append-only history for claim admission. It is never projected into public cards,
+atlas-safe previews, or public exports.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | TEXT PK | Deterministic decision ID |
+| `claim_id` | TEXT FK | `claims.id` |
+| `prior_status` | TEXT nullable | NULL only for genesis decisions |
+| `new_status` | TEXT | Resulting lifecycle state |
+| `actor_type` | TEXT | Model-candidate, Python validator/gate, or private reviewer actor |
+| `reason_code` | TEXT | Stable machine-readable decision reason |
+| `validator_version` | TEXT nullable | Deterministic validator version |
+| `policy_version` | TEXT nullable | Admission policy version |
+| `created_at` | TEXT | Required transition timestamp |
+
+Every new decision has an actor, reason, timestamp, prior state, and at least one validator
+or policy version. The migration does not backfill pre-existing terminal claims because
+doing so would invent provenance.
+
 ### 4.4 `claim_quotes`
 
-Stores quote spans/provenance for accepted or staged source-backed claims.
+Stores private quote spans/provenance for proposed, needs-review, and accepted
+source-backed claims. Non-accepted quotes remain inaccessible to graph and public
+consumers.
 
 | Column | Type | Notes |
 |---|---|---|

@@ -409,13 +409,328 @@ class ClaimRecord:
     section_provenance_json: str | None = None
 
 
+@dataclass(frozen=True)
+class ClaimDecisionRecord:
+    """One private, append-only claim lifecycle decision."""
+
+    id: str
+    claim_id: str
+    prior_status: str | None
+    new_status: str
+    actor_type: str
+    reason_code: str
+    validator_version: str | None
+    policy_version: str | None
+    created_at: str
+
+
+def make_claim_decision_id(
+    claim_id: str,
+    prior_status: str | None,
+    new_status: str,
+    actor_type: str,
+    reason_code: str,
+    validator_version: str | None,
+    policy_version: str | None,
+) -> str:
+    digest = sha256_hex(
+        ":".join(
+            (
+                claim_id,
+                prior_status or "genesis",
+                new_status,
+                actor_type,
+                reason_code,
+                validator_version or "",
+                policy_version or "",
+            )
+        )
+    )
+    return f"cld_{digest[:16]}"
+
+
 class ClaimRepository:
     """Persist and read ``claims`` and ``claim_quotes`` rows."""
 
     VALIDATOR_VERSION = "0.2.0"
+    ADMISSION_POLICY_VERSION = "claim_admission_v0.1.0"
+    LIFECYCLE_STATES = frozenset(
+        {"proposed", "needs_review", "rejected", "accepted"}
+    )
+    ALLOWED_TRANSITIONS = {
+        "proposed": frozenset({"needs_review", "rejected", "accepted"}),
+        "needs_review": frozenset({"rejected", "accepted"}),
+        "rejected": frozenset(),
+        "accepted": frozenset(),
+    }
 
     def __init__(self, conn: sqlite3.Connection) -> None:
         self._conn = conn
+
+    def _append_decision(
+        self,
+        *,
+        claim_id: str,
+        prior_status: str | None,
+        new_status: str,
+        actor_type: str,
+        reason_code: str,
+        validator_version: str | None,
+        policy_version: str | None,
+        created_at: str,
+    ) -> ClaimDecisionRecord:
+        decision_id = make_claim_decision_id(
+            claim_id,
+            prior_status,
+            new_status,
+            actor_type,
+            reason_code,
+            validator_version,
+            policy_version,
+        )
+        self._conn.execute(
+            """
+            INSERT INTO claim_decisions (
+                id, claim_id, prior_status, new_status, actor_type, reason_code,
+                validator_version, policy_version, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO NOTHING
+            """,
+            (
+                decision_id,
+                claim_id,
+                prior_status,
+                new_status,
+                actor_type,
+                reason_code,
+                validator_version,
+                policy_version,
+                created_at,
+            ),
+        )
+        return ClaimDecisionRecord(
+            id=decision_id,
+            claim_id=claim_id,
+            prior_status=prior_status,
+            new_status=new_status,
+            actor_type=actor_type,
+            reason_code=reason_code,
+            validator_version=validator_version,
+            policy_version=policy_version,
+            created_at=created_at,
+        )
+
+    def list_decisions(self, claim_id: str) -> list[ClaimDecisionRecord]:
+        """Return private lifecycle history without exposing it to public serializers."""
+        rows = self._conn.execute(
+            """
+            SELECT id, claim_id, prior_status, new_status, actor_type, reason_code,
+                   validator_version, policy_version, created_at
+            FROM claim_decisions
+            WHERE claim_id = ?
+            ORDER BY rowid
+            """,
+            (claim_id,),
+        ).fetchall()
+        return [ClaimDecisionRecord(**dict(row)) for row in rows]
+
+    def insert_proposed(
+        self,
+        claim: dict[str, Any],
+        *,
+        extractor_provider: str,
+        extractor_model: str,
+        llm_schema_version: str,
+        actor_type: str = "model_candidate",
+        reason_code: str = "candidate_proposed",
+        policy_version: str | None = None,
+    ) -> ClaimRecord:
+        """Persist model candidate data in the only model-creatable lifecycle state."""
+        now = utc_now_iso()
+        claim_text = claim.get("claim_text") or "(invalid claim)"
+        source_id = claim.get("source_id") or "src_unknown"
+        chunk_id = claim.get("chunk_id") or "chk_unknown"
+        claim_id = make_claim_id(source_id, chunk_id, claim_text)
+        limitations = claim.get("limitations") or []
+        domain_metadata = claim.get("domain_metadata") or {}
+        resolved_policy = policy_version or self.ADMISSION_POLICY_VERSION
+
+        with self._conn:
+            cursor = self._conn.execute(
+                """
+                INSERT INTO claims (
+                    id, source_id, chunk_id, claim_text, statement_type, subject,
+                    predicate, object, scope, evidence_type, confidence,
+                    limitations_json, domain, domain_metadata_json, status,
+                    rejection_reason, rejection_details_json, extractor_model,
+                    extractor_provider, llm_schema_version, prompt_template_version,
+                    validator_version, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'proposed',
+                          NULL, NULL, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO NOTHING
+                """,
+                (
+                    claim_id,
+                    source_id,
+                    chunk_id,
+                    claim_text,
+                    "source_claim",
+                    claim.get("subject"),
+                    claim.get("predicate"),
+                    claim.get("object"),
+                    claim.get("scope"),
+                    claim.get("evidence_type"),
+                    claim.get("confidence"),
+                    json.dumps(limitations),
+                    claim.get("domain"),
+                    json.dumps(domain_metadata),
+                    extractor_model,
+                    extractor_provider,
+                    llm_schema_version,
+                    "0.1.0",
+                    self.VALIDATOR_VERSION,
+                    now,
+                    now,
+                ),
+            )
+            if cursor.rowcount:
+                _persist_structured_claim_fields(self._conn, claim_id, claim)
+                quote_text = str(claim.get("quote_span") or "").strip()
+                if quote_text:
+                    self._conn.execute(
+                        """
+                        INSERT INTO claim_quotes (
+                            id, claim_id, source_id, chunk_id, quote_text, char_start,
+                            char_end, page, is_primary, created_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, 1, ?)
+                        ON CONFLICT(id) DO NOTHING
+                        """,
+                        (
+                            make_quote_id(claim_id, quote_text),
+                            claim_id,
+                            source_id,
+                            chunk_id,
+                            quote_text,
+                            claim.get("quote_char_start"),
+                            claim.get("quote_char_end"),
+                            now,
+                        ),
+                    )
+                self._append_decision(
+                    claim_id=claim_id,
+                    prior_status=None,
+                    new_status="proposed",
+                    actor_type=actor_type,
+                    reason_code=reason_code,
+                    validator_version=self.VALIDATOR_VERSION,
+                    policy_version=resolved_policy,
+                    created_at=now,
+                )
+
+        record = self.get_by_id(claim_id)
+        assert record is not None
+        return record
+
+    def transition_status(
+        self,
+        claim_id: str,
+        new_status: str,
+        *,
+        actor_type: str,
+        reason_code: str,
+        validator_version: str | None = None,
+        policy_version: str | None = None,
+        claim: dict[str, Any] | None = None,
+        rejection_reason: str | None = None,
+    ) -> ClaimRecord:
+        """Apply one Python-owned lifecycle transition and append its private decision."""
+        if new_status not in self.LIFECYCLE_STATES or new_status == "proposed":
+            raise ValueError(f"Invalid claim transition target: {new_status}")
+        if not actor_type.strip() or not reason_code.strip():
+            raise ValueError("Claim transitions require actor_type and reason_code.")
+
+        current = self.get_by_id(claim_id)
+        if current is None:
+            raise ValueError(f"Claim not found: {claim_id}")
+        if current.status == new_status:
+            return current
+        allowed = self.ALLOWED_TRANSITIONS.get(current.status, frozenset())
+        if new_status not in allowed:
+            raise ValueError(
+                f"Claim transition not allowed: {current.status} -> {new_status}"
+            )
+        if new_status == "accepted" and (
+            claim is None or not str(claim.get("quote_span") or "").strip()
+        ):
+            raise ValueError("Accepted claim transition requires a primary quote span.")
+        if new_status == "rejected" and not str(rejection_reason or "").strip():
+            raise ValueError("Rejected claim transition requires a rejection reason.")
+
+        now = utc_now_iso()
+        resolved_validator = validator_version or self.VALIDATOR_VERSION
+        resolved_policy = policy_version or self.ADMISSION_POLICY_VERSION
+        with self._conn:
+            if new_status == "accepted":
+                assert claim is not None
+                self._conn.execute(
+                    """
+                    UPDATE claims
+                    SET status = 'accepted', rejection_reason = NULL,
+                        rejection_details_json = NULL, updated_at = ?
+                    WHERE id = ? AND status = ?
+                    """,
+                    (now, claim_id, current.status),
+                )
+                _persist_structured_claim_fields(self._conn, claim_id, claim)
+                quote_text = str(claim["quote_span"])
+                self._conn.execute(
+                    """
+                    INSERT INTO claim_quotes (
+                        id, claim_id, source_id, chunk_id, quote_text, char_start,
+                        char_end, page, is_primary, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, 1, ?)
+                    ON CONFLICT(id) DO NOTHING
+                    """,
+                    (
+                        make_quote_id(claim_id, quote_text),
+                        claim_id,
+                        current.source_id,
+                        current.chunk_id,
+                        quote_text,
+                        claim.get("quote_char_start"),
+                        claim.get("quote_char_end"),
+                        now,
+                    ),
+                )
+            else:
+                self._conn.execute(
+                    """
+                    UPDATE claims
+                    SET status = ?, rejection_reason = ?, updated_at = ?
+                    WHERE id = ? AND status = ?
+                    """,
+                    (
+                        new_status,
+                        rejection_reason if new_status == "rejected" else None,
+                        now,
+                        claim_id,
+                        current.status,
+                    ),
+                )
+            self._append_decision(
+                claim_id=claim_id,
+                prior_status=current.status,
+                new_status=new_status,
+                actor_type=actor_type,
+                reason_code=reason_code,
+                validator_version=resolved_validator,
+                policy_version=resolved_policy,
+                created_at=now,
+            )
+
+        updated = self.get_by_id(claim_id)
+        assert updated is not None
+        return updated
 
     def get_by_id(self, claim_id: str) -> ClaimRecord | None:
         row = self._conn.execute(
@@ -519,6 +834,9 @@ class ClaimRepository:
         extractor_provider: str,
         extractor_model: str,
         llm_schema_version: str,
+        actor_type: str = "python_admission",
+        reason_code: str = "deterministic_accept",
+        policy_version: str | None = None,
     ) -> ClaimRecord:
         now = utc_now_iso()
         claim_id = make_claim_id(
@@ -567,6 +885,16 @@ class ClaimRepository:
 
         if cursor.rowcount:
             _persist_structured_claim_fields(self._conn, claim_id, claim)
+            self._append_decision(
+                claim_id=claim_id,
+                prior_status=None,
+                new_status="accepted",
+                actor_type=actor_type,
+                reason_code=reason_code,
+                validator_version=self.VALIDATOR_VERSION,
+                policy_version=policy_version or self.ADMISSION_POLICY_VERSION,
+                created_at=now,
+            )
 
         quote_text = str(claim["quote_span"])
         quote_id = make_quote_id(claim_id, quote_text)
@@ -604,6 +932,9 @@ class ClaimRepository:
         extractor_provider: str,
         extractor_model: str,
         llm_schema_version: str,
+        actor_type: str = "python_admission",
+        reason_code: str = "deterministic_reject",
+        policy_version: str | None = None,
     ) -> ClaimRecord:
         now = utc_now_iso()
         claim_text = claim.get("claim_text") or "(invalid claim)"
@@ -653,6 +984,16 @@ class ClaimRepository:
         )
         if cursor.rowcount:
             _persist_structured_claim_fields(self._conn, claim_id, claim)
+            self._append_decision(
+                claim_id=claim_id,
+                prior_status=None,
+                new_status="rejected",
+                actor_type=actor_type,
+                reason_code=reason_code,
+                validator_version=self.VALIDATOR_VERSION,
+                policy_version=policy_version or self.ADMISSION_POLICY_VERSION,
+                created_at=now,
+            )
         self._conn.commit()
         record = self.get_by_id(claim_id)
         assert record is not None
@@ -763,7 +1104,7 @@ class ClaimConceptRepository:
             SELECT COUNT(*)
             FROM claim_concepts cc
             JOIN claims c ON c.id = cc.claim_id
-            WHERE c.source_id = ?
+            WHERE c.source_id = ? AND c.status = 'accepted'
             """,
             (source_id,),
         ).fetchone()
@@ -777,7 +1118,7 @@ class ClaimConceptRepository:
             FROM claim_concepts cc
             JOIN claims c ON c.id = cc.claim_id
             JOIN concepts ON concepts.id = cc.concept_id
-            WHERE c.source_id = ?
+            WHERE c.source_id = ? AND c.status = 'accepted'
             ORDER BY cc.created_at
             """,
             (source_id,),
@@ -805,6 +1146,11 @@ class ClaimConceptRepository:
         confidence: float,
         domain_metadata: dict[str, Any],
     ) -> dict[str, Any]:
+        claim = self._conn.execute(
+            "SELECT status FROM claims WHERE id = ?", (claim_id,)
+        ).fetchone()
+        if claim is None or claim["status"] != "accepted":
+            raise ValueError("Concept links require an accepted claim.")
         now = utc_now_iso()
         link_id = make_claim_concept_link_id(claim_id, concept_id, role)
         self._conn.execute(
@@ -865,7 +1211,7 @@ class RelationshipRepository:
             SELECT COUNT(DISTINCT re.relationship_id)
             FROM relationship_evidence re
             JOIN claims c ON c.id = re.claim_id
-            WHERE c.source_id = ?
+            WHERE c.source_id = ? AND c.status = 'accepted'
             """,
             (source_id,),
         ).fetchone()
@@ -884,7 +1230,7 @@ class RelationshipRepository:
             JOIN claims c ON c.id = re.claim_id
             JOIN concepts sub ON sub.id = r.subject_concept_id
             JOIN concepts obj ON obj.id = r.object_concept_id
-            WHERE c.source_id = ?
+            WHERE c.source_id = ? AND c.status = 'accepted'
             ORDER BY r.created_at
             """,
             (source_id,),
@@ -1022,10 +1368,12 @@ class RelationshipEvidenceRepository:
     def list_for_relationship(self, relationship_id: str) -> list[dict[str, Any]]:
         rows = self._conn.execute(
             """
-            SELECT id, relationship_id, claim_id, stance, relevance_score, created_at
-            FROM relationship_evidence
-            WHERE relationship_id = ?
-            ORDER BY created_at
+            SELECT re.id, re.relationship_id, re.claim_id, re.stance,
+                   re.relevance_score, re.created_at
+            FROM relationship_evidence re
+            JOIN claims c ON c.id = re.claim_id
+            WHERE re.relationship_id = ? AND c.status = 'accepted'
+            ORDER BY re.created_at
             """,
             (relationship_id,),
         ).fetchall()
@@ -1038,7 +1386,7 @@ class RelationshipEvidenceRepository:
                    re.relevance_score, re.created_at
             FROM relationship_evidence re
             JOIN claims c ON c.id = re.claim_id
-            WHERE c.source_id = ?
+            WHERE c.source_id = ? AND c.status = 'accepted'
             ORDER BY re.created_at
             """,
             (source_id,),
@@ -1053,6 +1401,11 @@ class RelationshipEvidenceRepository:
         stance: str,
         relevance_score: float | None = None,
     ) -> dict[str, Any]:
+        claim = self._conn.execute(
+            "SELECT status FROM claims WHERE id = ?", (claim_id,)
+        ).fetchone()
+        if claim is None or claim["status"] != "accepted":
+            raise ValueError("Relationship evidence requires an accepted claim.")
         now = utc_now_iso()
         evidence_id = make_relationship_evidence_id(relationship_id, claim_id, stance)
         self._conn.execute(

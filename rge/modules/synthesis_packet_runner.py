@@ -64,7 +64,9 @@ def _scalar_count(conn: sqlite3.Connection, query: str, params: tuple[Any, ...] 
 
 def collect_db_throughput_snapshot(conn: Any) -> dict[str, int]:
     """Collect graph counters for synthesis throughput reporting."""
-    claim_count = _scalar_count(conn, "SELECT COUNT(*) FROM claims")
+    claim_count = _scalar_count(
+        conn, "SELECT COUNT(*) FROM claims WHERE status = 'accepted'"
+    )
     return {
         "sources_processed": _scalar_count(
             conn,
@@ -72,16 +74,32 @@ def collect_db_throughput_snapshot(conn: Any) -> dict[str, int]:
         ),
         "reports_completed": _scalar_count(conn, "SELECT COUNT(*) FROM run_reports"),
         "claim_count": claim_count,
-        "concept_link_count": _scalar_count(conn, "SELECT COUNT(*) FROM claim_concepts"),
+        "concept_link_count": _scalar_count(
+            conn,
+            """
+            SELECT COUNT(*) FROM claim_concepts cc
+            JOIN claims c ON c.id = cc.claim_id
+            WHERE c.status = 'accepted'
+            """,
+        ),
         "relationship_count": _scalar_count(
             conn,
-            "SELECT COUNT(*) FROM relationships WHERE status = 'active'",
+            """
+            SELECT COUNT(*) FROM relationships r
+            WHERE r.status = 'active'
+              AND EXISTS (
+                  SELECT 1 FROM relationship_evidence re
+                  JOIN claims c ON c.id = re.claim_id
+                  WHERE re.relationship_id = r.id AND c.status = 'accepted'
+              )
+            """,
         ),
         "qualification_count": _scalar_count(
             conn,
             """
-            SELECT COUNT(*) FROM relationship_evidence
-            WHERE stance = 'qualifies'
+            SELECT COUNT(*) FROM relationship_evidence re
+            JOIN claims c ON c.id = re.claim_id
+            WHERE re.stance = 'qualifies' AND c.status = 'accepted'
             """,
         ),
         "card_count": _scalar_count(

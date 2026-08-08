@@ -368,6 +368,8 @@ def extract_claims_for_source(
                 extractor_provider="quality_gate",
                 extractor_model="source_quality_gate",
                 llm_schema_version=cfg.llm_schema_version,
+                actor_type="python_quality_gate",
+                reason_code=str(quality_gate["reason"]),
             )
             rejected_ids.append(rejected.id)
         return {
@@ -406,7 +408,9 @@ def extract_claims_for_source(
         }
     chunks = eligible_chunks
 
-    if claim_repo.count_for_source(source_id) > 0:
+    proposed = claim_repo.list_for_source(source_id, status="proposed")
+    needs_review = claim_repo.list_for_source(source_id, status="needs_review")
+    if claim_repo.count_for_source(source_id) > 0 and not proposed:
         accepted = claim_repo.list_for_source(source_id, status="accepted")
         rejected = claim_repo.list_for_source(source_id, status="rejected")
         return {
@@ -414,8 +418,10 @@ def extract_claims_for_source(
             "source_id": source_id,
             "accepted_count": len(accepted),
             "rejected_count": len(rejected),
+            "needs_review_count": len(needs_review),
             "accepted_claim_ids": [claim.id for claim in accepted],
             "rejected_claim_ids": [claim.id for claim in rejected],
+            "needs_review_claim_ids": [claim.id for claim in needs_review],
         }
 
     if live_manual_fallthrough and (
@@ -543,20 +549,33 @@ def extract_claims_for_source(
                 claim["quote_char_start"] = char_start
                 claim["quote_char_end"] = char_end
         for claim in result["accepted"]:
-            record = claim_repo.insert_accepted(
+            candidate = claim_repo.insert_proposed(
                 claim,
                 extractor_provider=extractor_provider,
                 extractor_model=extractor_model,
                 llm_schema_version=cfg.llm_schema_version,
             )
+            record = claim_repo.transition_status(
+                candidate.id,
+                "accepted",
+                actor_type="python_validator",
+                reason_code="deterministic_validation_passed",
+                claim=claim,
+            )
             accepted_ids.append(record.id)
         for claim in result["rejected"]:
-            record = claim_repo.insert_rejected(
+            candidate = claim_repo.insert_proposed(
                 claim,
-                rejection_reason=claim["rejection_reason"],
                 extractor_provider=extractor_provider,
                 extractor_model=extractor_model,
                 llm_schema_version=cfg.llm_schema_version,
+            )
+            record = claim_repo.transition_status(
+                candidate.id,
+                "rejected",
+                actor_type="python_validator",
+                reason_code=str(claim["rejection_reason"]),
+                rejection_reason=str(claim["rejection_reason"]),
             )
             rejected_ids.append(record.id)
 

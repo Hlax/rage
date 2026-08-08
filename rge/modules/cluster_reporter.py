@@ -108,13 +108,17 @@ def assess_cluster_readiness(conn: sqlite3.Connection, *, domain: str) -> dict[s
     ]
     support_count = conn.execute(
         """
-        SELECT COUNT(*) FROM relationship_evidence WHERE stance = 'supports'
+        SELECT COUNT(*) FROM relationship_evidence re
+        JOIN claims c ON c.id = re.claim_id
+        WHERE re.stance = 'supports' AND c.status = 'accepted'
         """
     ).fetchone()[0]
     qualify_or_contradict_count = conn.execute(
         """
-        SELECT COUNT(*) FROM relationship_evidence
-        WHERE stance IN ('qualifies', 'contradicts')
+        SELECT COUNT(*) FROM relationship_evidence re
+        JOIN claims c ON c.id = re.claim_id
+        WHERE re.stance IN ('qualifies', 'contradicts')
+          AND c.status = 'accepted'
         """
     ).fetchone()[0]
     thresholds_met = (

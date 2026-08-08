@@ -406,8 +406,8 @@ superseded
 | 414 | ticket-414 | done | Source-artifact contamination and extraction eligibility gate v0 | `phase-4/ticket-414-source-artifact-quality-gate-v0` | `agent_reports/2026-08-02_phase-4_ticket-414_source-artifact-quality-gate-v0.md` |
 | 415 | ticket-415 | done | Section-aware scientific document segmentation and provenance v0 | `phase-4/ticket-415-section-aware-scientific-segmentation-v0` | `agent_reports/2026-08-08_phase-4_ticket-415_section-aware-scientific-segmentation-v0.md` |
 | 416 | ticket-416 | done | Domain-neutral structured research claim schema v0 | `phase-4/ticket-416-structured-research-claim-schema-v0` | `agent_reports/2026-08-08_phase-4_ticket-416_structured-research-claim-schema-v0.md` |
-| 417 | ticket-417 | ready | Candidate claim lifecycle, quarantine, and graph-consumer isolation v0 | | |
-| 418 | ticket-418 | blocked | Semantic entailment and scientific-claim admission validator v0 | | |
+| 417 | ticket-417 | done | Candidate claim lifecycle, quarantine, and graph-consumer isolation v0 | `phase-4/ticket-417-claim-admission-lifecycle-v0` | `agent_reports/2026-08-08_phase-4_ticket-417_claim-admission-lifecycle-v0.md` |
+| 418 | ticket-418 | ready | Semantic entailment and scientific-claim admission validator v0 | | |
 | 419 | ticket-419 | blocked | Private human claim-review CLI and append-only audit history v0 | | |
 | 420 | ticket-420 | blocked | Cross-source claim deduplication and independent corroboration v0 | | |
 | 421 | ticket-421 | blocked | Evidence-derived graph completeness and honest product verdict v0 | | |
@@ -1177,8 +1177,23 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-417 (ready) — Phase 4 candidate claim lifecycle and graph-consumer isolation v0
+ticket-418 (ready) — Phase 4 semantic entailment and scientific-claim admission validator v0
 ```
+
+## Queue Notes (2026-08-08, ticket-417 claim admission lifecycle)
+
+- Added private proposed/needs-review/rejected/accepted lifecycle decisions with
+  Python-enforced transitions, terminal accepted/rejected states, and append-only actor,
+  reason, version, prior-state, and timestamp provenance.
+- Model-backed candidates now persist only as proposed before deterministic Python
+  admission; historical accepted/rejected rows remain unchanged without invented history.
+- Shared graph repositories reject new non-accepted links and hide stale non-accepted
+  claim-concept and relationship-evidence rows from graph consumers.
+- Reports, synthesis throughput, evidence atoms, atlas edges, and public-card generation
+  remain accepted-only while private rejection/review diagnostics remain inspectable.
+- Final component gates: 165 golden passed; 1448 full pytest passed, 49 deselected;
+  safety audit passed; public-site build passed.
+- Ticket-418 is `ready`; tickets 419–428 remain blocked.
 
 ## Queue Notes (2026-08-08, ticket-416 structured research claim schema)
 

@@ -51,6 +51,6 @@
   ],
   "risk_level": "high",
   "rollback_plan": "Disable new admission transitions and restore prior readers while retaining append-only lifecycle tables for auditability. Never drop historical decision or claim rows during rollback.",
-  "status": "ready",
+  "status": "done",
   "category": "Phase 4 / graph admission"
 }

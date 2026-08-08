@@ -5,9 +5,10 @@
 -- ``docs/agents/05_DATA_MODEL.md`` for reviewers and golden tests.
 --
 -- Claim lifecycle is reconciled: a single ``claims`` table with a ``status``
--- column (draft, staged, accepted, rejected) plus ``claim_quotes`` for
--- provenance. Rejection reasons live on ``claims.rejection_reason`` and
--- ``claims.rejection_details_json``; rejected rows are never discarded.
+-- column (proposed, needs_review, accepted, rejected), ``claim_quotes`` for
+-- provenance, and append-only private ``claim_decisions``. Rejection reasons
+-- live on ``claims.rejection_reason`` and ``claims.rejection_details_json``;
+-- rejected rows and historical decisions are never discarded.
 
 -- Source library -------------------------------------------------------------
 
@@ -102,7 +103,7 @@ CREATE TABLE IF NOT EXISTS claims (
     effect_direction TEXT,
     statistical_context TEXT,
     section_provenance_json TEXT,
-    status TEXT,                        -- draft, staged, accepted, rejected
+    status TEXT,                        -- proposed, needs_review, accepted, rejected
     rejection_reason TEXT,              -- required when status = rejected
     rejection_details_json TEXT,
     extractor_model TEXT,
@@ -115,6 +116,18 @@ CREATE TABLE IF NOT EXISTS claims (
 );
 
 CREATE INDEX IF NOT EXISTS idx_claims_kind ON claims(claim_kind);
+
+CREATE TABLE IF NOT EXISTS claim_decisions (
+    id TEXT PRIMARY KEY,
+    claim_id TEXT NOT NULL REFERENCES claims(id),
+    prior_status TEXT,
+    new_status TEXT NOT NULL,
+    actor_type TEXT NOT NULL,
+    reason_code TEXT NOT NULL,
+    validator_version TEXT,
+    policy_version TEXT,
+    created_at TEXT NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS claim_quotes (
     id TEXT PRIMARY KEY,
