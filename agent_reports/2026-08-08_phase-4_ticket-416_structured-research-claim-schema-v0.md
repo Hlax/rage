@@ -86,7 +86,7 @@ application of `0010` followed by `0011`; the focused retry and complete final g
 - Ticket branch: `phase-4/ticket-416-structured-research-claim-schema-v0`
 - Implementation commit: `567248d`
 - Merge commit on `main`: `86dd30d`
-- Ordinary non-force push to `origin/main`: pending
+- Ordinary non-force push to `origin/main`: completed (`355db74` included)
 
 ## Next smallest ticket
 
