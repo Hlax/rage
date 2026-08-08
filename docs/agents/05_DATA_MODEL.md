@@ -154,6 +154,16 @@ Required columns:
 | `limitations_json` | TEXT | JSON array |
 | `domain` | TEXT | Primary domain |
 | `domain_metadata_json` | TEXT | Domain overlay data |
+| `claim_contract_version` | TEXT | Private nested structured-claim contract version; NULL identifies a legacy candidate/row |
+| `claim_kind` | TEXT | Domain-neutral kind: `empirical_result`, `method`, `background`, `hypothesis`, `interpretation`, or `speculation` |
+| `study_design` | TEXT | Closed domain-neutral study-design value, explicitly NULL when absent |
+| `population_or_sample` | TEXT | Population/sample context, explicitly NULL when absent |
+| `intervention_or_exposure` | TEXT | Intervention or exposure, explicitly NULL when absent |
+| `comparator` | TEXT | Comparator, explicitly NULL when absent |
+| `outcome` | TEXT | Outcome; required for structured empirical-result claims |
+| `effect_direction` | TEXT | `increase`, `decrease`, `no_effect`, `mixed`, `association`, or NULL |
+| `statistical_context` | TEXT | Bounded reported statistical context, explicitly NULL when absent |
+| `section_provenance_json` | TEXT | Private exact chunk provenance (chunk, type/title, page, document offsets) |
 | `status` | TEXT | `draft`, `staged`, `accepted`, `rejected` |
 | `rejection_reason` | TEXT | Required when rejected |
 | `rejection_details_json` | TEXT | Optional structured details |
@@ -194,7 +204,17 @@ invalid_json
 weak_concept_mapping
 missing_source_id
 unsafe_or_injected_content
+invalid_structured_claim
 ```
+
+Structured research fields are proposed inside an explicitly versioned nested candidate
+contract. Every nested key is required even when its value is nullable; Python never
+invents missing values. Existing `0.1.0` fixtures omit the nested contract and remain on
+the observable legacy path with NULL structured columns. Deterministic validation requires
+structured empirical-result claims to provide an outcome and exact section provenance,
+rejects contradictory field combinations, and compares provenance to the persisted source
+chunk before a claim can be accepted. These fields remain private and are not added to
+public cards or atlas-safe previews.
 
 Indexes:
 
@@ -202,6 +222,7 @@ Indexes:
 - `idx_claims_source(source_id)`
 - `idx_claims_chunk(chunk_id)`
 - `idx_claims_statement_type(statement_type)`
+- `idx_claims_kind(claim_kind)`
 
 ### 4.4 `claim_quotes`
 

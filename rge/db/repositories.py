@@ -338,6 +338,45 @@ def make_quote_id(claim_id: str, quote_text: str) -> str:
     return f"qt_{digest[:16]}"
 
 
+def _persist_structured_claim_fields(
+    conn: sqlite3.Connection,
+    claim_id: str,
+    claim: dict[str, Any],
+) -> None:
+    """Persist an explicit nested structured contract without inventing values."""
+    structured = claim.get("structured_claim")
+    if structured is None:
+        return
+    if hasattr(structured, "model_dump"):
+        structured = structured.model_dump(mode="json")
+    if not isinstance(structured, dict):
+        return
+    provenance = structured.get("section_provenance")
+    conn.execute(
+        """
+        UPDATE claims
+        SET claim_contract_version = ?, claim_kind = ?, study_design = ?,
+            population_or_sample = ?, intervention_or_exposure = ?, comparator = ?,
+            outcome = ?, effect_direction = ?, statistical_context = ?,
+            section_provenance_json = ?
+        WHERE id = ?
+        """,
+        (
+            structured.get("contract_version"),
+            structured.get("claim_kind"),
+            structured.get("study_design"),
+            structured.get("population_or_sample"),
+            structured.get("intervention_or_exposure"),
+            structured.get("comparator"),
+            structured.get("outcome"),
+            structured.get("effect_direction"),
+            structured.get("statistical_context"),
+            json.dumps(provenance) if provenance is not None else None,
+            claim_id,
+        ),
+    )
+
+
 @dataclass(frozen=True)
 class ClaimRecord:
     id: str
@@ -358,12 +397,22 @@ class ClaimRecord:
     updated_at: str
     rejection_reason: str | None = None
     domain_metadata_json: str = "{}"
+    claim_contract_version: str | None = None
+    claim_kind: str | None = None
+    study_design: str | None = None
+    population_or_sample: str | None = None
+    intervention_or_exposure: str | None = None
+    comparator: str | None = None
+    outcome: str | None = None
+    effect_direction: str | None = None
+    statistical_context: str | None = None
+    section_provenance_json: str | None = None
 
 
 class ClaimRepository:
     """Persist and read ``claims`` and ``claim_quotes`` rows."""
 
-    VALIDATOR_VERSION = "0.1.0"
+    VALIDATOR_VERSION = "0.2.0"
 
     def __init__(self, conn: sqlite3.Connection) -> None:
         self._conn = conn
@@ -373,7 +422,11 @@ class ClaimRepository:
             """
             SELECT id, source_id, chunk_id, claim_text, statement_type, subject,
                    predicate, object, scope, evidence_type, confidence,
-                   limitations_json, domain, domain_metadata_json, status,
+                   limitations_json, domain, domain_metadata_json,
+                   claim_contract_version, claim_kind, study_design,
+                   population_or_sample, intervention_or_exposure, comparator,
+                   outcome, effect_direction, statistical_context,
+                   section_provenance_json, status,
                    rejection_reason, created_at, updated_at
             FROM claims
             WHERE id = ?
@@ -390,7 +443,11 @@ class ClaimRepository:
                 """
                 SELECT id, source_id, chunk_id, claim_text, statement_type, subject,
                        predicate, object, scope, evidence_type, confidence,
-                       limitations_json, domain, domain_metadata_json, status,
+                       limitations_json, domain, domain_metadata_json,
+                       claim_contract_version, claim_kind, study_design,
+                       population_or_sample, intervention_or_exposure, comparator,
+                       outcome, effect_direction, statistical_context,
+                       section_provenance_json, status,
                        rejection_reason, created_at, updated_at
                 FROM claims
                 WHERE source_id = ?
@@ -403,7 +460,11 @@ class ClaimRepository:
                 """
                 SELECT id, source_id, chunk_id, claim_text, statement_type, subject,
                        predicate, object, scope, evidence_type, confidence,
-                       limitations_json, domain, domain_metadata_json, status,
+                       limitations_json, domain, domain_metadata_json,
+                       claim_contract_version, claim_kind, study_design,
+                       population_or_sample, intervention_or_exposure, comparator,
+                       outcome, effect_direction, statistical_context,
+                       section_provenance_json, status,
                        rejection_reason, created_at, updated_at
                 FROM claims
                 WHERE source_id = ? AND status = ?
@@ -418,7 +479,11 @@ class ClaimRepository:
             """
             SELECT id, source_id, chunk_id, claim_text, statement_type, subject,
                    predicate, object, scope, evidence_type, confidence,
-                   limitations_json, domain, domain_metadata_json, status,
+                   limitations_json, domain, domain_metadata_json,
+                   claim_contract_version, claim_kind, study_design,
+                   population_or_sample, intervention_or_exposure, comparator,
+                   outcome, effect_direction, statistical_context,
+                   section_provenance_json, status,
                    rejection_reason, created_at, updated_at
             FROM claims
             WHERE domain = ? AND status = 'accepted'
@@ -462,7 +527,7 @@ class ClaimRepository:
         limitations = claim.get("limitations") or []
         domain_metadata = claim.get("domain_metadata") or {}
 
-        self._conn.execute(
+        cursor = self._conn.execute(
             """
             INSERT INTO claims (
                 id, source_id, chunk_id, claim_text, statement_type, subject,
@@ -499,6 +564,9 @@ class ClaimRepository:
                 now,
             ),
         )
+
+        if cursor.rowcount:
+            _persist_structured_claim_fields(self._conn, claim_id, claim)
 
         quote_text = str(claim["quote_span"])
         quote_id = make_quote_id(claim_id, quote_text)
@@ -545,7 +613,7 @@ class ClaimRepository:
         limitations = claim.get("limitations") or []
         domain_metadata = claim.get("domain_metadata") or {}
 
-        self._conn.execute(
+        cursor = self._conn.execute(
             """
             INSERT INTO claims (
                 id, source_id, chunk_id, claim_text, statement_type, subject,
@@ -583,6 +651,8 @@ class ClaimRepository:
                 now,
             ),
         )
+        if cursor.rowcount:
+            _persist_structured_claim_fields(self._conn, claim_id, claim)
         self._conn.commit()
         record = self.get_by_id(claim_id)
         assert record is not None
@@ -2093,6 +2163,16 @@ def _row_to_claim(row: sqlite3.Row) -> ClaimRecord:
         limitations_json=row["limitations_json"] or "[]",
         domain=row["domain"] or "",
         domain_metadata_json=row["domain_metadata_json"] or "{}",
+        claim_contract_version=row["claim_contract_version"],
+        claim_kind=row["claim_kind"],
+        study_design=row["study_design"],
+        population_or_sample=row["population_or_sample"],
+        intervention_or_exposure=row["intervention_or_exposure"],
+        comparator=row["comparator"],
+        outcome=row["outcome"],
+        effect_direction=row["effect_direction"],
+        statistical_context=row["statistical_context"],
+        section_provenance_json=row["section_provenance_json"],
         status=row["status"],
         rejection_reason=row["rejection_reason"],
         created_at=row["created_at"],

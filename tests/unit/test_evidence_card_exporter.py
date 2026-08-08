@@ -157,6 +157,20 @@ def test_export_evidence_cards_writes_operator_private_bundle(tmp_path: Path) ->
         assert bundle["evidence_cards"][0]["schema_version"] == "evidence_card_v0.1.0"
         assert bundle["atlas_safe_previews"][0]["summary"]
         assert "quote" not in bundle["atlas_safe_previews"][0]
+        private_structured_fields = {
+            "claim_contract_version",
+            "claim_kind",
+            "study_design",
+            "population_or_sample",
+            "intervention_or_exposure",
+            "comparator",
+            "outcome",
+            "effect_direction",
+            "statistical_context",
+            "section_provenance",
+        }
+        assert private_structured_fields.isdisjoint(bundle["evidence_cards"][0])
+        assert private_structured_fields.isdisjoint(bundle["atlas_safe_previews"][0])
     finally:
         conn.close()
 

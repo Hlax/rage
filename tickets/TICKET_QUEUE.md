@@ -405,8 +405,8 @@ superseded
 | 413 | ticket-413 | done | Research-quality benchmark contract and baseline evaluator v0 | `phase-4/ticket-413-research-quality-benchmark-baseline-v0` | `agent_reports/2026-08-02_phase-4_ticket-413_research-quality-benchmark-baseline-v0.md` |
 | 414 | ticket-414 | done | Source-artifact contamination and extraction eligibility gate v0 | `phase-4/ticket-414-source-artifact-quality-gate-v0` | `agent_reports/2026-08-02_phase-4_ticket-414_source-artifact-quality-gate-v0.md` |
 | 415 | ticket-415 | done | Section-aware scientific document segmentation and provenance v0 | `phase-4/ticket-415-section-aware-scientific-segmentation-v0` | `agent_reports/2026-08-08_phase-4_ticket-415_section-aware-scientific-segmentation-v0.md` |
-| 416 | ticket-416 | ready | Domain-neutral structured research claim schema v0 | | |
-| 417 | ticket-417 | blocked | Candidate claim lifecycle, quarantine, and graph-consumer isolation v0 | | |
+| 416 | ticket-416 | done | Domain-neutral structured research claim schema v0 | `phase-4/ticket-416-structured-research-claim-schema-v0` | `agent_reports/2026-08-08_phase-4_ticket-416_structured-research-claim-schema-v0.md` |
+| 417 | ticket-417 | ready | Candidate claim lifecycle, quarantine, and graph-consumer isolation v0 | | |
 | 418 | ticket-418 | blocked | Semantic entailment and scientific-claim admission validator v0 | | |
 | 419 | ticket-419 | blocked | Private human claim-review CLI and append-only audit history v0 | | |
 | 420 | ticket-420 | blocked | Cross-source claim deduplication and independent corroboration v0 | | |
@@ -1177,8 +1177,24 @@ superseded
 ## Current Active Ticket
 
 ```txt
-ticket-416 (ready) — Phase 4 domain-neutral structured research claim schema v0
+ticket-417 (ready) — Phase 4 candidate claim lifecycle and graph-consumer isolation v0
 ```
+
+## Queue Notes (2026-08-08, ticket-416 structured research claim schema)
+
+- Added an explicitly versioned, domain-neutral nested structured-claim contract for
+  claim kind, study design, population/sample, intervention/exposure, comparator,
+  outcome, effect direction, statistical context, limitations, and exact section
+  provenance. Every nullable field must still be present; no value is inferred.
+- Added deterministic conditional validation and exact source-chunk provenance matching,
+  with stable `invalid_structured_claim` rejection and private diagnostics.
+- Migration `0011` persists structured fields privately and leaves all legacy rows and
+  existing `0.1.0` fixtures on an observable NULL/legacy compatibility path.
+- Public claim views, evidence cards, and atlas-safe previews retain fixed payloads and do
+  not expose the new structured fields.
+- Full mock-only `verify`: 165 golden passed; 1442 full pytest passed, 49 deselected;
+  safety audit pass; public-site build pass.
+- Ticket-417 is `ready`; tickets 418–428 remain blocked.
 
 ## Queue Notes (2026-08-08, ticket-415 section-aware segmentation)
 

@@ -1,7 +1,7 @@
 {
   "id": "ticket-417",
   "title": "Candidate claim lifecycle, quarantine, and graph-consumer isolation v0",
-  "problem": "Blocked by ticket-416. Python validation currently resolves candidates largely into accepted or rejected records. Semantically uncertain outputs need an explicit private lifecycle so they cannot reach graph, scoring, reporting, synthesis, retrieval, or export consumers before review.",
+  "problem": "Python validation currently resolves candidates largely into accepted or rejected records. Semantically uncertain outputs need an explicit private lifecycle so they cannot reach graph, scoring, reporting, synthesis, retrieval, or export consumers before review.",
   "evidence": [
     "docs/agents/15_RESEARCH_QUALITY_RAG_IMPLEMENTATION_PLAN.md",
     "docs/agents/05_DATA_MODEL.md",
@@ -51,6 +51,6 @@
   ],
   "risk_level": "high",
   "rollback_plan": "Disable new admission transitions and restore prior readers while retaining append-only lifecycle tables for auditability. Never drop historical decision or claim rows during rollback.",
-  "status": "blocked",
+  "status": "ready",
   "category": "Phase 4 / graph admission"
 }

@@ -290,7 +290,10 @@ def test_additive_migration_preserves_pre_ticket_chunk(tmp_path: Path) -> None:
             "SELECT * FROM chunks WHERE id = 'chk_legacy'"
         ).fetchone()
 
-        assert applied[-1] == "0010_structural_chunk_provenance"
+        assert applied[-2:] == [
+            "0010_structural_chunk_provenance",
+            "0011_structured_research_claim",
+        ]
         assert row["chunk_text"] == "Legacy chunk."
         assert row["section_type"] == SECTION_UNKNOWN
         assert row["section_title"] is None

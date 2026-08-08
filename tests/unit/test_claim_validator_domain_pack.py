@@ -12,6 +12,7 @@ from rge.modules.claim_validator import (
     validate_candidate_claim,
 )
 from rge.modules.domain_pack_loader import allowed_domains_for_pack, load_domain_pack
+from rge.models.schemas import StructuredResearchClaim_v0_1
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -37,6 +38,25 @@ _CHUNK_TEXT = (
     "In a controlled study of short-form writing tasks, we found that "
     "AI-assisted brainstorming increased average idea quality across submitted ideas."
 )
+
+
+def test_structured_core_claim_contract_remains_domain_neutral() -> None:
+    fields = set(StructuredResearchClaim_v0_1.model_fields)
+    creativity_overlay_fields = {"track", "creative_phase", "measured_dimension"}
+
+    assert creativity_overlay_fields.isdisjoint(fields)
+    assert {
+        "claim_kind",
+        "study_design",
+        "population_or_sample",
+        "intervention_or_exposure",
+        "comparator",
+        "outcome",
+        "effect_direction",
+        "statistical_context",
+        "limitations",
+        "section_provenance",
+    } <= fields
 
 
 def test_creativity_pack_allows_primary_and_overlap_domains() -> None:

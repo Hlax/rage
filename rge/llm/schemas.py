@@ -14,6 +14,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from rge.models.schemas import StructuredResearchClaim_v0_1
+
 SCHEMA_VERSION_0_1_0 = "0.1.0"
 
 
@@ -31,7 +33,12 @@ def validate_schema_version(declared: str, expected: str) -> None:
 
 
 class CandidateClaim_v0_1(BaseModel):
-    """One candidate claim proposed by a model. Untrusted until validated."""
+    """One candidate claim proposed by a model. Untrusted until validated.
+
+    ``structured_claim`` is an explicitly versioned nested contract. Its
+    absence identifies a legacy 0.1 candidate; no structured values are
+    inferred for existing fixtures.
+    """
 
     claim_text: str
     source_id: str | None = None
@@ -46,6 +53,7 @@ class CandidateClaim_v0_1(BaseModel):
     limitations: list[str] = Field(default_factory=list)
     domain: str | None = None
     domain_metadata: dict[str, str] = Field(default_factory=dict)
+    structured_claim: StructuredResearchClaim_v0_1 | None = None
 
 
 class CandidateClaimBatch_v0_1(BaseModel):
