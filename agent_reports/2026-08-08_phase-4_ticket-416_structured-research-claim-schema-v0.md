@@ -84,8 +84,8 @@ application of `0010` followed by `0011`; the focused retry and complete final g
 ## Merge checkpoint
 
 - Ticket branch: `phase-4/ticket-416-structured-research-claim-schema-v0`
-- Implementation commit: pending
-- Merge commit on `main`: pending
+- Implementation commit: `567248d`
+- Merge commit on `main`: `86dd30d`
 - Ordinary non-force push to `origin/main`: pending
 
 ## Next smallest ticket
