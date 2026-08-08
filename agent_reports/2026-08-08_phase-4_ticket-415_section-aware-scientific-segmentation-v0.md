@@ -81,7 +81,7 @@ legacy fixtures; all focused and full gates then passed.
 - Ticket branch: `phase-4/ticket-415-section-aware-scientific-segmentation-v0`
 - Implementation commit: `c88c3ec`
 - Merge commit on `main`: `4acbfb7`
-- Ordinary non-force push to `origin/main`: pending
+- Ordinary non-force push to `origin/main`: completed (`e9077cb` included)
 
 ## Next smallest ticket
 
