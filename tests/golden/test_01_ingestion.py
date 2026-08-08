@@ -35,6 +35,7 @@ def test_migration_harness_creates_schema(temp_db: Path) -> None:
             "0009_purpose_evidence_atoms",
             "0010_structural_chunk_provenance",
             "0011_structured_research_claim",
+            "0012_claim_admission_lifecycle",
         ]
         tables = {
             row[0]
@@ -46,6 +47,7 @@ def test_migration_harness_creates_schema(temp_db: Path) -> None:
         assert "chunks" in tables
         assert "claims" in tables
         assert "claim_quotes" in tables
+        assert "claim_decisions" in tables
         assert "relationship_evidence" in tables
         assert "evidence_atoms" in tables
         assert "candidate_sources" in tables

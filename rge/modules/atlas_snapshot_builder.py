@@ -183,6 +183,12 @@ def _build_relationship_edges(conn: sqlite3.Connection, domain_pack: str) -> lis
         JOIN concepts sub ON sub.id = r.subject_concept_id
         JOIN concepts obj ON obj.id = r.object_concept_id
         WHERE r.status = 'active' AND r.domain = ?
+          AND EXISTS (
+              SELECT 1
+              FROM relationship_evidence re
+              JOIN claims c ON c.id = re.claim_id
+              WHERE re.relationship_id = r.id AND c.status = 'accepted'
+          )
         ORDER BY r.id
         """,
         (domain_pack,),

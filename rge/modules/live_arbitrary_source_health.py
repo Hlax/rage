@@ -339,20 +339,40 @@ def persist_abstract_evidence_outcomes(
             "live_abstract_quote" if live_abstract_mode else "abstract_fixture"
         )
         for claim in card.get("accepted_claims") or []:
-            stored = claim_repo.insert_accepted(
+            candidate = claim_repo.insert_proposed(
                 claim,
                 extractor_provider=extractor_provider,
                 extractor_model=extractor_model,
                 llm_schema_version="0.1.0",
+                actor_type="deterministic_candidate"
+                if live_abstract_mode
+                else "model_candidate",
+            )
+            stored = claim_repo.transition_status(
+                candidate.id,
+                "accepted",
+                actor_type="python_validator",
+                reason_code="deterministic_validation_passed",
+                claim=claim,
             )
             accepted_ids.append(stored.id)
         for claim in card.get("rejected_claims") or []:
-            stored = claim_repo.insert_rejected(
+            candidate = claim_repo.insert_proposed(
                 claim,
-                rejection_reason=str(claim.get("rejection_reason") or "invalid_claim"),
                 extractor_provider=extractor_provider,
                 extractor_model=extractor_model,
                 llm_schema_version="0.1.0",
+                actor_type="deterministic_candidate"
+                if live_abstract_mode
+                else "model_candidate",
+            )
+            reason = str(claim.get("rejection_reason") or "invalid_claim")
+            stored = claim_repo.transition_status(
+                candidate.id,
+                "rejected",
+                actor_type="python_validator",
+                reason_code=reason,
+                rejection_reason=reason,
             )
             rejected_ids.append(stored.id)
 

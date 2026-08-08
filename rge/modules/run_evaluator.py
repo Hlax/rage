@@ -75,7 +75,16 @@ def aggregate_run_metrics(conn: sqlite3.Connection) -> dict[str, int]:
         "claims_accepted": claims_accepted,
         "claims_rejected": claims_rejected,
         "relationships_updated": _scalar_count(
-            conn, "SELECT COUNT(*) FROM relationships WHERE status = 'active'"
+            conn,
+            """
+            SELECT COUNT(*) FROM relationships r
+            WHERE r.status = 'active'
+              AND EXISTS (
+                  SELECT 1 FROM relationship_evidence re
+                  JOIN claims c ON c.id = re.claim_id
+                  WHERE re.relationship_id = r.id AND c.status = 'accepted'
+              )
+            """,
         ),
         "score_events_created": _scalar_count(conn, "SELECT COUNT(*) FROM score_events"),
         "cards_exported": _scalar_count(

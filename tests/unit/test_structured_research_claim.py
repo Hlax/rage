@@ -455,7 +455,10 @@ def test_additive_migration_preserves_legacy_claim_as_explicit_nulls(
         )
         conn.commit()
 
-        assert apply_migrations(conn) == ["0011_structured_research_claim"]
+        assert apply_migrations(conn) == [
+            "0011_structured_research_claim",
+            "0012_claim_admission_lifecycle",
+        ]
         row = conn.execute(
             """
             SELECT claim_contract_version, claim_kind, outcome,
