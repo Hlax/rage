@@ -43,7 +43,7 @@ _MANUAL_TEXT_NO_FIXTURE_ERROR = (
 
 
 def _candidate_to_dict(item: Any) -> dict[str, Any]:
-    return item.model_dump()
+    return item.model_dump(mode="json")
 
 
 def _is_creativity_diversity_chunk(chunk_text: str) -> bool:
@@ -153,6 +153,11 @@ def _chunk_record_to_dict(chunk: Any) -> dict[str, Any]:
         "source_id": chunk.source_id,
         "chunk_index": chunk.chunk_index,
         "chunk_text": chunk.chunk_text,
+        "section_type": chunk.section_type,
+        "section_title": chunk.section_title,
+        "page": chunk.page,
+        "char_start": chunk.char_start,
+        "char_end": chunk.char_end,
     }
 
 
@@ -286,6 +291,7 @@ def extract_and_validate_for_chunk(
         candidates,
         chunk_text=chunk["chunk_text"],
         domain_pack=domain_pack,
+        chunk_provenance=chunk,
     )
 
 

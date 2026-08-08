@@ -51,6 +51,6 @@
   ],
   "risk_level": "medium",
   "rollback_plan": "Revert structured-field consumers and retain backward-readable nullable migration columns if applied. Restore the prior claim schema version without deleting existing claim data.",
-  "status": "ready",
+  "status": "done",
   "category": "Phase 4 / claim contract"
 }

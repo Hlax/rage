@@ -11,6 +11,9 @@ from __future__ import annotations
 
 from typing import Any
 
+from pydantic import ValidationError
+
+from rge.models.schemas import ClaimKind, StructuredResearchClaim_v0_1
 from rge.safety.prompt_injection import (
     REJECTION_REASON_INJECTED_CONTENT,
     candidate_has_prompt_injection,
@@ -22,6 +25,7 @@ REJECTION_MISSING_SOURCE = "missing_source_id"
 REJECTION_UNSUPPORTED = "unsupported_claim"
 REJECTION_ZERO_QUOTEABLE = "zero_quoteable_spans"
 REJECTION_INJECTED_CONTENT = REJECTION_REASON_INJECTED_CONTENT
+REJECTION_INVALID_STRUCTURED_CLAIM = "invalid_structured_claim"
 
 _OVERGENERALIZED_CLAIM_PATTERNS = (
     "ai reduces creativity",
@@ -185,11 +189,93 @@ def _scope_supported_by_quote(
     return False
 
 
+def _present_text(value: object) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _structured_claim_validation_message(
+    candidate: dict[str, Any],
+    *,
+    chunk_provenance: dict[str, Any] | None,
+) -> str | None:
+    """Return a deterministic structured-contract error, or ``None``.
+
+    A missing nested contract is the explicit legacy candidate path. When the
+    contract is present, every nullable field must still be supplied because
+    ``StructuredResearchClaim_v0_1`` declares all keys as required.
+    """
+    raw = candidate.get("structured_claim")
+    if raw is None:
+        return None
+    if hasattr(raw, "model_dump"):
+        raw = raw.model_dump(mode="json")
+    try:
+        structured = StructuredResearchClaim_v0_1.model_validate(raw)
+    except ValidationError as exc:
+        error = exc.errors(include_url=False)[0]
+        location = ".".join(str(part) for part in error.get("loc") or ())
+        return f"structured claim schema error at {location or 'root'}: {error['msg']}"
+
+    data = structured.model_dump(mode="json")
+    if data["limitations"] != list(candidate.get("limitations") or []):
+        return "structured limitations must exactly match candidate limitations"
+
+    claim_kind = data["claim_kind"]
+    outcome = data["outcome"]
+    intervention = data["intervention_or_exposure"]
+    if claim_kind == ClaimKind.EMPIRICAL_RESULT.value:
+        if not _present_text(outcome):
+            return "empirical_result requires a non-empty outcome"
+        if data["section_provenance"] is None:
+            return "empirical_result requires section_provenance"
+    if data["effect_direction"] is not None and not _present_text(outcome):
+        return "effect_direction requires a non-empty outcome"
+    if _present_text(data["comparator"]) and not _present_text(intervention):
+        return "comparator requires intervention_or_exposure"
+    if (
+        _present_text(data["statistical_context"])
+        and claim_kind != ClaimKind.EMPIRICAL_RESULT.value
+    ):
+        return "statistical_context is only valid for empirical_result claims"
+
+    provenance = data["section_provenance"]
+    if provenance is None:
+        return None
+    if chunk_provenance is None:
+        return "section_provenance cannot be verified without source chunk metadata"
+
+    expected = {
+        "chunk_id": chunk_provenance.get("id")
+        or chunk_provenance.get("chunk_id"),
+        "section_type": chunk_provenance.get("section_type"),
+        "section_title": chunk_provenance.get("section_title"),
+        "page": (
+            None
+            if chunk_provenance.get("page") is None
+            else str(chunk_provenance.get("page"))
+        ),
+        "char_start": chunk_provenance.get("char_start"),
+        "char_end": chunk_provenance.get("char_end"),
+    }
+    for field, expected_value in expected.items():
+        if provenance[field] != expected_value:
+            return (
+                f"section_provenance.{field} does not match source chunk: "
+                f"{provenance[field]!r} != {expected_value!r}"
+            )
+    if provenance["chunk_id"] != candidate.get("chunk_id"):
+        return "section_provenance.chunk_id does not match candidate chunk_id"
+    if provenance["char_start"] < 0 or provenance["char_end"] <= provenance["char_start"]:
+        return "section_provenance offsets must form a positive half-open span"
+    return None
+
+
 def validate_candidate_claim(
     candidate: dict[str, Any],
     *,
     chunk_text: str,
     domain_pack: str | None = None,
+    chunk_provenance: dict[str, Any] | None = None,
 ) -> tuple[str, dict[str, Any] | None, str | None]:
     """Validate one candidate claim.
 
@@ -265,6 +351,13 @@ def validate_candidate_claim(
     if limitations is None:
         return "rejected", None, REJECTION_UNSUPPORTED
 
+    structured_message = _structured_claim_validation_message(
+        candidate,
+        chunk_provenance=chunk_provenance,
+    )
+    if structured_message is not None:
+        return "rejected", None, REJECTION_INVALID_STRUCTURED_CLAIM
+
     return "accepted", dict(candidate), None
 
 
@@ -273,6 +366,7 @@ def validate_candidate_claims(
     *,
     chunk_text: str,
     domain_pack: str | None = None,
+    chunk_provenance: dict[str, Any] | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
     """Split candidates into accepted and rejected buckets with reasons."""
     accepted: list[dict[str, Any]] = []
@@ -283,6 +377,7 @@ def validate_candidate_claims(
             candidate,
             chunk_text=chunk_text,
             domain_pack=domain_pack,
+            chunk_provenance=chunk_provenance,
         )
         if status == "accepted" and claim_dict is not None:
             accepted.append(claim_dict)
@@ -303,6 +398,7 @@ def rejection_diagnostic(
     chunk_text: str,
     rejection_reason: str | None = None,
     domain_pack: str | None = None,
+    chunk_provenance: dict[str, Any] | None = None,
 ) -> str:
     """Human-readable note for a rejected candidate (probe reporting only)."""
     reason = rejection_reason or REJECTION_UNSUPPORTED
@@ -350,4 +446,9 @@ def rejection_diagnostic(
         return "source_id or chunk_id is missing"
     if reason == REJECTION_INJECTED_CONTENT:
         return "candidate matched prompt-injection rejection rules"
+    if reason == REJECTION_INVALID_STRUCTURED_CLAIM:
+        return _structured_claim_validation_message(
+            candidate,
+            chunk_provenance=chunk_provenance,
+        ) or "claim failed structured contract checks"
     return reason

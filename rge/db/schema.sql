@@ -92,6 +92,16 @@ CREATE TABLE IF NOT EXISTS claims (
     limitations_json TEXT,
     domain TEXT,
     domain_metadata_json TEXT,
+    claim_contract_version TEXT,
+    claim_kind TEXT,
+    study_design TEXT,
+    population_or_sample TEXT,
+    intervention_or_exposure TEXT,
+    comparator TEXT,
+    outcome TEXT,
+    effect_direction TEXT,
+    statistical_context TEXT,
+    section_provenance_json TEXT,
     status TEXT,                        -- draft, staged, accepted, rejected
     rejection_reason TEXT,              -- required when status = rejected
     rejection_details_json TEXT,
@@ -103,6 +113,8 @@ CREATE TABLE IF NOT EXISTS claims (
     created_at TEXT,
     updated_at TEXT
 );
+
+CREATE INDEX IF NOT EXISTS idx_claims_kind ON claims(claim_kind);
 
 CREATE TABLE IF NOT EXISTS claim_quotes (
     id TEXT PRIMARY KEY,
