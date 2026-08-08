@@ -79,8 +79,8 @@ legacy fixtures; all focused and full gates then passed.
 ## Merge checkpoint
 
 - Ticket branch: `phase-4/ticket-415-section-aware-scientific-segmentation-v0`
-- Implementation commit: pending
-- Merge commit on `main`: pending
+- Implementation commit: `c88c3ec`
+- Merge commit on `main`: `4acbfb7`
 - Ordinary non-force push to `origin/main`: pending
 
 ## Next smallest ticket
